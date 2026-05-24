@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>يوسف بركات</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+    <div class="bg-effects"></div>
+
+    <header class="navbar glass-panel" style="background: rgba(13, 13, 13, 0.9); border-bottom-color: var(--royal-gold);">
+        <a href="index.html" class="nav-brand">
+            <div class="logo-circle" style="color: #fff; background: var(--royal-gold);">ي</div>
+            <span class="nav-brand-text text-gold">لوحة الإدارة - يوسف بركات</span>
+        </a>
+        <div class="nav-actions">
+            <a href="admin-compass.html" id="ownerCompassBtn" class="btn btn-outline" style="position: relative; border-radius: 20px; padding: 8px 15px; display: inline-flex; align-items: center; gap: 8px;">
+                <i class="fas fa-compass"></i>
+                البوصلة
+                <span id="ownerCompassBadge" class="notify-badge" style="display:none; position:absolute; top:-6px; right:-6px; min-width:18px; height:18px; border-radius:50%; background:#e74c3c; color:#fff; font-size:0.75rem; display:flex; align-items:center; justify-content:center; padding:0 5px;">0</span>
+            </a>
+            <a href="#" id="logoutBtn" class="btn btn-outline" style="border-color: #e74c3c; color: #e74c3c; padding: 8px 15px; border-radius: 20px;">خروج <i class="fas fa-sign-out-alt"></i></a>
+            <div class="mobile-menu-btn"><i class="fas fa-bars"></i></div>
+        </div>
+    </header>
+
+    <div class="dashboard-layout">
+        <!-- Admin Sidebar -->
+        <aside class="sidebar" id="sidebar" style="background: rgba(7, 19, 38, 0.95); border-left-color: var(--royal-gold);">
+            <ul class="sidebar-nav" style="margin-top: 20px;">
+                <li><a href="admin-dashboard.html" class="active"><i class="fas fa-chart-line"></i> الإحصائيات العامة</a></li>
+                <li><a href="admin-students.html"><i class="fas fa-users"></i> إدارة الطلاب</a></li>
+                <li><a href="admin-courses.html"><i class="fas fa-book-open"></i> إدارة الكورسات</a></li>
+                <li><a href="admin-upload.html"><i class="fas fa-bolt"></i> الرفع السريع</a></li>
+                <li><a href="admin-payments.html"><i class="fas fa-money-check-alt"></i> مراجعة المدفوعات</a></li>
+                <li><a href="admin-compass.html"><i class="fas fa-compass"></i> بوت البوصلة</a></li>
+                <li><a href="admin-notifications.html"><i class="fas fa-bell"></i> إرسال الإشعارات</a></li>
+                <li><a href="admin-settings.html"><i class="fas fa-cog"></i> إعدادات المنصة</a></li>
+            </ul>
+        </aside>
+
+        <!-- Admin Main Content -->
+        <main class="main-content">
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">نظرة عامة على المنصة</h1>
+                </div>
+                <button class="btn btn-gold"><i class="fas fa-plus mr-2"></i> إضافة كورس جديد</button>
+            </div>
+
+            <div id="ownerWelcomeBanner" class="glass-panel owner-welcome-banner" style="display:none; background: linear-gradient(135deg, rgba(13,13,13,0.95), rgba(212,166,79,0.12)); border: 2px solid var(--royal-gold); border-radius: 16px; padding: 20px 25px; margin-bottom: 25px; position: relative; box-shadow: 0 12px 30px rgba(212,166,79,0.18);">
+                <div style="display:flex; align-items:center; justify-content:space-between; gap:15px; flex-wrap:wrap;">
+                    <div style="flex:1; min-width:220px;">
+                        <h3 style="color: var(--royal-gold); margin:0 0 8px; font-size:1.15rem;"><i class="fas fa-crown" style="margin-left:10px;"></i> مرحباً بك يا قائدنا!</h3>
+                        <p id="ownerWelcomeMsg" style="color: rgba(255,255,255,0.85); margin:0; line-height:1.5;">تشرفنا بإدارتك الذكية للمنصة. نأمل لك وقتاً ناجحاً ومكافآت متعددة.</p>
+                    </div>
+                    <button id="closeOwnerWelcome" class="btn btn-outline" style="min-width: 50px; border-color: rgba(212,166,79,0.8); color: var(--royal-gold); background: rgba(0,0,0,0.18);" title="إغلاق"><i class="fas fa-times"></i></button>
+                </div>
+            </div>
+
+            <div class="glass-panel owner-compass-summary" style="margin-bottom: 25px; padding: 22px 24px; display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; background: rgba(18,24,42,0.92); border: 1px solid rgba(212,166,79,0.18);">
+                <div>
+                    <h3 style="color: var(--royal-gold); margin: 0 0 8px;">بوت البوصلة</h3>
+                    <p style="color: rgba(255,255,255,0.8); margin: 0; line-height: 1.6;">استكشف طلبات الدعم المفتوحة وابدأ حلها من لوحة البوصلة المهنية في خطوة واحدة.</p>
+                </div>
+                <a href="admin-compass.html" class="btn btn-gold" style="border-radius: 24px;">افتح البوصلة <i class="fas fa-compass mr-2"></i></a>
+            </div>
+
+            <!-- Admin Stats Cards -->
+            <div class="dash-cards">
+                <div class="glass-panel dash-card" style="border-color: var(--accent-cyan);">
+                    <div class="dash-card-info">
+                        <h3>إجمالي الطلاب</h3>
+                        <span class="value" id="adminTotalStudents">0</span>
+                    </div>
+                    <div class="dash-card-icon" style="color: var(--accent-cyan); background: rgba(88, 196, 221, 0.1);"><i class="fas fa-users"></i></div>
+                </div>
+                <div class="glass-panel dash-card" style="border-color: #2ecc71;">
+                    <div class="dash-card-info">
+                        <h3>الاشتراكات النشطة</h3>
+                        <span class="value" id="adminActiveSubs">0</span>
+                    </div>
+                    <div class="dash-card-icon" style="color: #2ecc71; background: rgba(46, 204, 113, 0.1);"><i class="fas fa-check-circle"></i></div>
+                </div>
+                <div class="glass-panel dash-card" style="border-color: #f1c40f;">
+                    <div class="dash-card-info">
+                        <h3>طلبات دفع معلقة</h3>
+                        <span class="value" id="adminPendingPays">0</span>
+                    </div>
+                    <div class="dash-card-icon" style="color: #f1c40f; background: rgba(241, 196, 15, 0.1);"><i class="fas fa-clock"></i></div>
+                </div>
+                <div class="glass-panel dash-card" style="border-color: var(--royal-gold);">
+                    <div class="dash-card-info">
+                        <h3>الإيرادات (الكلية)</h3>
+                        <span class="value text-gold" id="adminRevenue">0 ج.م</span>
+                    </div>
+                    <div class="dash-card-icon"><i class="fas fa-wallet"></i></div>
+                </div>
+            </div>
+
+            <!-- Pending Payments Table -->
+            <div class="glass-panel dash-panel" id="paymentRequestsPanel">
+                <div class="panel-header">
+                    <h2 class="panel-title"><i class="fas fa-money-bill-wave mr-2"></i> طلبات الدفع</h2>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn btn-outline" id="btnRefreshPayments" style="padding: 5px 15px; font-size: 0.9rem;"><i class="fas fa-sync-alt"></i> تحديث</button>
+                    </div>
+                </div>
+                
+                <div style="overflow-x: auto;">
+                    <table class="admin-table" id="paymentsTable">
+                        <thead>
+                            <tr>
+                                <th>اسم الطالب</th>
+                                <th>رقم الموبايل</th>
+                                <th>الكورس</th>
+                                <th>المبلغ</th>
+                                <th>التاريخ</th>
+                                <th>صورة التحويل</th>
+                                <th>الحالة</th>
+                                <th>إجراء</th>
+                            </tr>
+                        </thead>
+                        <tbody id="paymentsTableBody">
+                            <!-- Dynamic Payment Requests go here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Payment Settings Section -->
+            <div class="glass-panel dash-panel" style="margin-top: 30px;">
+                <div class="panel-header">
+                    <h2 class="panel-title"><i class="fas fa-cog mr-2"></i> إعدادات الدفع</h2>
+                    <button class="btn btn-gold" id="btnSavePaymentSettings" style="padding: 5px 15px; font-size: 0.9rem;"><i class="fas fa-save mr-2"></i> حفظ الإعدادات</button>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
+                    <div class="form-group">
+                        <label style="color: var(--text-primary); margin-bottom: 5px; display: block;">رقم فودافون كاش</label>
+                        <input type="text" id="adminVCashNum" class="form-control" value="01023675235">
+                    </div>
+                    <div class="form-group">
+                        <label style="color: var(--text-primary); margin-bottom: 5px; display: block;">تعليمات الدفع</label>
+                        <input type="text" id="adminPaymentInstructions" class="form-control" value="قم بتحويل المبلغ على الرقم التالي عبر فودافون كاش">
+                    </div>
+                    <div class="form-group" style="display: flex; align-items: center; gap: 10px;">
+                        <input type="checkbox" id="adminEnableFawry" style="width: auto;">
+                        <label for="adminEnableFawry" style="color: var(--text-primary); margin: 0;">تفعيل الدفع عبر فوري</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Course Management Section -->
+            <div class="glass-panel dash-panel" style="margin-top: 30px;">
+                <div class="panel-header">
+                    <h2 class="panel-title"><i class="fas fa-book-open mr-2"></i> الكورسات المتاحة على المنصة</h2>
+                    <div style="display: flex; gap: 10px;">
+                        <select id="adminGradeFilter" class="form-control" style="background: rgba(0,0,0,0.5); padding: 5px 15px; width: auto; border-color: var(--royal-gold);">
+                            <option value="all">كل الصفوف</option>
+                            <option value="prep1">أولى إعدادي</option>
+                            <option value="prep2">تانية إعدادي</option>
+                            <option value="prep3">تالتة إعدادي</option>
+                            <option value="sec1">أولى ثانوي</option>
+                        </select>
+                        <button class="btn btn-outline" id="btnRefreshCourses" style="padding: 5px 15px; font-size: 0.9rem;"><i class="fas fa-sync-alt"></i> تحديث</button>
+                    </div>
+                </div>
+                <div id="adminCoursesContainer" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-top: 20px;">
+                    <!-- Courses will be rendered here dynamically -->
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Course Editor Modal -->
+    <div id="courseEditorModal" class="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; justify-content: center; align-items: center;">
+        <div class="glass-panel" style="width: 90%; max-width: 600px; padding: 30px; position: relative; max-height: 90vh; overflow-y: auto;">
+            <button id="closeCourseEditor" style="position: absolute; top: 15px; right: 15px; background: transparent; border: none; color: var(--text-secondary); font-size: 1.5rem; cursor: pointer;"><i class="fas fa-times"></i></button>
+            <h2 class="text-gold mb-2" id="courseEditorTitle"><i class="fas fa-plus-circle mr-2"></i> إضافة كورس جديد</h2>
+            
+            <input type="hidden" id="editCourseId" value="">
+            
+            <div class="form-group">
+                <label style="color: var(--text-primary); margin-bottom: 5px; display: block;">عنوان الكورس</label>
+                <input type="text" id="editCourseName" class="form-control" placeholder="مثال: الجغرافيا للثانوية العامة" required>
+            </div>
+            
+            <div class="form-group">
+                <label style="color: var(--text-primary); margin-bottom: 5px; display: block;">وصف الكورس</label>
+                <textarea id="editCourseDesc" class="form-control" placeholder="اكتب وصفاً جذاباً للكورس..." rows="3" required></textarea>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div class="form-group">
+                    <label style="color: var(--text-primary); margin-bottom: 5px; display: block;">السعر (ج.م)</label>
+                    <input type="number" id="editCoursePrice" class="form-control" placeholder="مثال: 150" required>
+                </div>
+                
+                <div class="form-group">
+                    <label style="color: var(--text-primary); margin-bottom: 5px; display: block;">الصف الدراسي</label>
+                    <select id="editCourseGrade" class="form-control" required>
+                        <option value="prep1">أولى إعدادي</option>
+                        <option value="prep2">تانية إعدادي</option>
+                        <option value="prep3">تالتة إعدادي</option>
+                        <option value="sec1">أولى ثانوي</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label style="color: var(--text-primary); margin-bottom: 5px; display: block;">صورة الكورس</label>
+                <input type="file" id="editCourseImageFile" accept="image/*" class="form-control" style="background: rgba(255,255,255,0.05); cursor: pointer;">
+                <input type="hidden" id="editCourseImage" value="https://via.placeholder.com/400x250/071326/D4A64F?text=Course">
+                <img id="editCourseImagePreview" src="https://via.placeholder.com/400x250/071326/D4A64F?text=Course" style="width: 100%; height: 150px; object-fit: cover; border-radius: 10px; margin-top: 10px; border: 1px solid var(--border-color);">
+            </div>
+
+            <div style="margin-top: 25px; text-align: left; display: flex; gap: 15px;">
+                <button class="btn btn-outline" id="btnCancelCourse" style="flex: 1;">إلغاء</button>
+                <button class="btn btn-gold" id="btnSaveCourse" style="flex: 2;">حفظ الكورس</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Seed Default Courses
+            let adminCourses = JSON.parse(localStorage.getItem('adminCourses'));
+            if (!adminCourses) {
+                adminCourses = [
+                    { id: 'c1', title: 'منهج الجغرافيا كاملاً - الترم الأول', desc: 'شرح تفصيلي لمنهج الجغرافيا مع خرائط ذهنية وامتحانات أسبوعية وتدريب على النظام الجديد.', price: '150', grade: 'prep3', image: 'https://via.placeholder.com/400x250/071326/D4A64F?text=Geography' },
+                    { id: 'c2', title: 'تاريخ مصر القديمة والحضارات', desc: 'فهم عميق للتاريخ بأسلوب قصصي ممتع يجعلك تعيش الأحداث وتستنتج الأسئلة.', price: '200', grade: 'sec1', image: 'https://via.placeholder.com/400x250/071326/58C4DD?text=History' },
+                    { id: 'c3', title: 'الدراسات الاجتماعية - تأسيس', desc: 'كورس التأسيس الشامل لطلاب الصف الأول الإعدادي، مدخلك لفهم المادة ببساطة.', price: '100', grade: 'prep1', image: 'https://via.placeholder.com/400x250/0A1E3A/D4A64F?text=Social+Studies' }
+                ];
+                localStorage.setItem('adminCourses', JSON.stringify(adminCourses));
+            }
+
+            // Real Stats Calculation
+            function calculateStats() {
+                const users = JSON.parse(localStorage.getItem('strictUsers') || '[]');
+                let totalSubs = 0;
+                let totalRev = 0;
+                
+                users.forEach(u => {
+                    const db = JSON.parse(localStorage.getItem(`db_${u.phone}`) || '{}');
+                    if (db && db.courses) {
+                        totalSubs += db.courses.length;
+                    }
+                });
+                
+                const paymentRequests = JSON.parse(localStorage.getItem('paymentRequests') || '[]');
+                const pendingPays = paymentRequests.filter(req => req.status === 'pending');
+                const approvedPays = paymentRequests.filter(req => req.status === 'approved');
+                
+                approvedPays.forEach(req => {
+                    const course = adminCourses.find(c => c.id === req.courseId);
+                    if (course) totalRev += parseInt(course.price || 0);
+                });
+                
+                document.getElementById('adminTotalStudents').textContent = users.length;
+                document.getElementById('adminActiveSubs').textContent = totalSubs;
+                document.getElementById('adminPendingPays').textContent = pendingPays.length;
+                document.getElementById('adminRevenue').textContent = totalRev.toLocaleString() + ' ج.م';
+            }
+
+            calculateStats();
+
+            // Render Payments Table
+            function renderPayments() {
+                // async render to support fetching proof images from IndexedDB
+                async function fetchProofImage(req) {
+                    if (req.proofImage) return req.proofImage;
+                    if (req.proofImageKey) {
+                        return new Promise((resolve) => {
+                            const request = indexedDB.open('platformPaymentDB', 1);
+                            request.onsuccess = function() {
+                                const db = request.result;
+                                const tx = db.transaction('paymentProofs', 'readonly');
+                                const store = tx.objectStore('paymentProofs');
+                                const getReq = store.get(req.proofImageKey);
+                                getReq.onsuccess = function() { resolve(getReq.result ? getReq.result.dataUrl : null); };
+                                getReq.onerror = function() { resolve(null); };
+                            };
+                            request.onerror = function() { resolve(null); };
+                        });
+                    }
+                    return null;
+                }
+
+                const tbody = document.getElementById('paymentsTableBody');
+                if(!tbody) return;
+                
+                const paymentRequests = JSON.parse(localStorage.getItem('paymentRequests') || '[]');
+                if(paymentRequests.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: var(--text-muted);">لا توجد طلبات دفع حالياً</td></tr>';
+                    return;
+                }
+                
+                // Sort to show pending first, then by date descending
+                paymentRequests.sort((a, b) => {
+                    if (a.status === 'pending' && b.status !== 'pending') return -1;
+                    if (a.status !== 'pending' && b.status === 'pending') return 1;
+                    return new Date(b.timestamp || b.date) - new Date(a.timestamp || a.date);
+                });
+
+                tbody.innerHTML = '';
+                (async function loop() {
+                    for (const req of paymentRequests) {
+                        const course = adminCourses.find(c => c.id === req.courseId);
+                        const courseName = course ? course.title : 'كورس محذوف';
+                        const price = course ? course.price : '0';
+                        const date = new Date(req.timestamp || req.date).toLocaleDateString('ar-EG', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+                        let statusBadge = '';
+                        let actionButtons = '';
+                        if (req.status === 'pending') {
+                            statusBadge = '<span class="badge badge-pending">قيد المراجعة</span>';
+                            actionButtons = `
+                                <button class="btn btn-green" style="padding: 5px 10px; font-size: 0.8rem; margin-bottom: 5px;" onclick="window.approvePayment('${req.id}')"><i class="fas fa-check"></i> قبول</button>
+                                <button class="btn" style="background: #e74c3c; color: white; padding: 5px 10px; font-size: 0.8rem;" onclick="window.rejectPayment('${req.id}')"><i class="fas fa-times"></i> رفض</button>
+                            `;
+                        } else if (req.status === 'approved') {
+                            statusBadge = '<span class="badge" style="background: rgba(46, 204, 113, 0.2); color: #2ecc71;">مقبول</span>';
+                        } else if (req.status === 'rejected') {
+                            statusBadge = '<span class="badge" style="background: rgba(231, 76, 60, 0.2); color: #e74c3c;">مرفوض</span>';
+                        }
+
+                        const imgSrc = await fetchProofImage(req);
+
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${req.userName || 'طالب'}</td>
+                            <td dir="ltr" style="text-align: right;">${req.userId || 'غير معروف'}</td>
+                            <td>${courseName}</td>
+                            <td>${price} ج.م</td>
+                            <td>${date}</td>
+                            <td>${imgSrc ? `<div style="display:flex;flex-direction:column;align-items:center;gap:6px;"><a href="${imgSrc}" target="_blank"><img src="${imgSrc}" style="width:50px;height:50px;object-fit:cover;border-radius:5px;cursor:pointer;"></a><button class="btn btn-outline" style="padding:4px 6px;font-size:0.75rem; margin-top:4px;" onclick='window.downloadProof(${JSON.stringify(imgSrc)}, "proof_${req.id}.png")'><i class='fas fa-download'></i> تحميل</button></div>` : 'لا يوجد'}</td>
+                            <td>${statusBadge}</td>
+                            <td style="display: flex; flex-direction: column; gap: 5px;">${actionButtons}</td>
+                        `;
+                        tbody.appendChild(row);
+                    }
+                })();
+            }
+
+            renderPayments();
+
+            // Helper to download proof images (supports dataURLs and remote URLs)
+            window.downloadProof = function(src, filename) {
+                if (!src) return alert('لا توجد صورة للتحميل');
+                try {
+                    const a = document.createElement('a');
+                    a.href = src;
+                    a.download = filename || 'proof.png';
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    return;
+                } catch (e) {
+                    // fallback to fetch blob then download
+                }
+
+                fetch(src).then(r => r.blob()).then(blob => {
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = filename || 'proof.png';
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    setTimeout(() => URL.revokeObjectURL(url), 5000);
+                }).catch(err => {
+                    console.warn('downloadProof failed', err);
+                    alert('تعذر تنزيل الصورة');
+                });
+            };
+
+            const btnRefreshPayments = document.getElementById('btnRefreshPayments');
+            if (btnRefreshPayments) {
+                btnRefreshPayments.addEventListener('click', () => {
+                    renderPayments();
+                    calculateStats();
+                });
+            }
+
+            window.approvePayment = async function(id) {
+                if(confirm('هل أنت متأكد من قبول هذا الطلب؟ سيتم تفعيل الكورس للطالب.')) {
+                    let paymentRequests = JSON.parse(localStorage.getItem('paymentRequests') || '[]');
+                    const reqIndex = paymentRequests.findIndex(r => r.id === id);
+                    if(reqIndex > -1) {
+                        const userId = paymentRequests[reqIndex].userId;
+                        const courseId = paymentRequests[reqIndex].courseId;
+                        const courseName = (adminCourses.find(c => c.id === courseId) || {}).title || courseId;
+
+                        if (window.FirebaseService && window.FirebaseService.isReady()) {
+                            await window.FirebaseService.updatePaymentStatus(id, 'approved');
+                            await window.FirebaseService.addCourseToStudent(userId, courseId);
+                            await window.FirebaseService.addNotificationToStudent(userId, {
+                                title: 'تم قبول اشتراكك بنجاح 🎉',
+                                message: `تهانينا! تم تفعيل كورس "${courseName}" بنجاح. يمكنك الآن بدء المذاكرة.`,
+                                courseId: courseId
+                            });
+                        } else {
+                            paymentRequests[reqIndex].status = 'approved';
+                            let dbUser = JSON.parse(localStorage.getItem(`db_${userId}`)) || { courses: [], notifications: [] };
+                            if(!dbUser.courses) dbUser.courses = [];
+                            if(!dbUser.courses.includes(courseId)) dbUser.courses.push(courseId);
+                            if(!dbUser.notifications) dbUser.notifications = [];
+                            dbUser.notifications.push({
+                                title: 'تم قبول اشتراكك بنجاح 🎉',
+                                message: `تهانينا! تم تفعيل كورس "${courseName}" بنجاح.`,
+                                timestamp: new Date().toISOString(),
+                                read: false,
+                                courseId: courseId
+                            });
+                            localStorage.setItem(`db_${userId}`, JSON.stringify(dbUser));
+                            localStorage.setItem('paymentRequests', JSON.stringify(paymentRequests));
+                        }
+
+                        renderPayments();
+                        calculateStats();
+                        if(window.showToast) window.showToast('تم قبول الطلب وتفعيل الكورس للطالب ✅', 'success');
+                    }
+                }
+            };
+
+            window.rejectPayment = async function(id) {
+                if(confirm('هل أنت متأكد من رفض هذا الطلب؟')) {
+                    let paymentRequests = JSON.parse(localStorage.getItem('paymentRequests') || '[]');
+                    const reqIndex = paymentRequests.findIndex(r => r.id === id);
+                    if(reqIndex > -1) {
+                        const userId = paymentRequests[reqIndex].userId;
+                        paymentRequests[reqIndex].status = 'rejected';
+                        
+                        let dbUser = JSON.parse(localStorage.getItem(`db_${userId}`)) || { notifications: [] };
+                        if(!dbUser.notifications) dbUser.notifications = [];
+                        dbUser.notifications.push({
+                            title: 'مراجعة الدفع',
+                            message: 'حدثت مشكلة في تأكيد دفعك، يرجى التواصل مع الدعم أو إعادة رفع صورة التحويل صحيحة.',
+                            timestamp: new Date().toISOString(),
+                            read: false,
+                            courseId: paymentRequests[reqIndex].courseId
+                        });
+                        localStorage.setItem(`db_${userId}`, JSON.stringify(dbUser));
+                        localStorage.setItem('paymentRequests', JSON.stringify(paymentRequests));
+                        
+                        renderPayments();
+                        calculateStats();
+                        if(window.showToast) window.showToast('تم رفض الطلب', 'error');
+                    }
+                }
+            };
+
+            // Payment Settings
+            const btnSavePaymentSettings = document.getElementById('btnSavePaymentSettings');
+            if (btnSavePaymentSettings) {
+                btnSavePaymentSettings.addEventListener('click', () => {
+                    const settings = {
+                        vCashNum: document.getElementById('adminVCashNum').value,
+                        paymentInstructions: document.getElementById('adminPaymentInstructions').value,
+                        enableFawry: document.getElementById('adminEnableFawry').checked
+                    };
+                    localStorage.setItem('paymentSettings', JSON.stringify(settings));
+                    if(window.showToast) window.showToast('تم حفظ إعدادات الدفع بنجاح', 'success');
+                });
+                
+                const savedSettings = JSON.parse(localStorage.getItem('paymentSettings'));
+                if (savedSettings) {
+                    if(document.getElementById('adminVCashNum')) document.getElementById('adminVCashNum').value = savedSettings.vCashNum || '';
+                    if(document.getElementById('adminPaymentInstructions')) document.getElementById('adminPaymentInstructions').value = savedSettings.paymentInstructions || '';
+                    if(document.getElementById('adminEnableFawry')) document.getElementById('adminEnableFawry').checked = savedSettings.enableFawry || false;
+                }
+            }
+
+            // Course Management
+            const courseEditorModal = document.getElementById('courseEditorModal');
+            const closeCourseEditor = document.getElementById('closeCourseEditor');
+            const btnCancelCourse = document.getElementById('btnCancelCourse');
+            const addCourseBtn = document.querySelector('.page-header .btn-gold');
+            
+            function openEditor(courseId = null) {
+                if (courseId) {
+                    const course = adminCourses.find(c => c.id === courseId);
+                    if (course) {
+                        document.getElementById('courseEditorTitle').innerHTML = '<i class="fas fa-edit mr-2"></i> تعديل الكورس';
+                        document.getElementById('editCourseId').value = course.id;
+                        document.getElementById('editCourseName').value = course.title;
+                        document.getElementById('editCourseDesc').value = course.desc;
+                        document.getElementById('editCoursePrice').value = course.price;
+                        document.getElementById('editCourseGrade').value = course.grade;
+                        document.getElementById('editCourseImage').value = course.image;
+                        document.getElementById('editCourseImagePreview').src = course.image;
+                    }
+                } else {
+                    document.getElementById('courseEditorTitle').innerHTML = '<i class="fas fa-plus-circle mr-2"></i> إضافة كورس جديد';
+                    document.getElementById('editCourseId').value = '';
+                    document.getElementById('editCourseName').value = '';
+                    document.getElementById('editCourseDesc').value = '';
+                    document.getElementById('editCoursePrice').value = '';
+                    document.getElementById('editCourseGrade').value = 'prep1';
+                    document.getElementById('editCourseImage').value = 'https://via.placeholder.com/400x250/071326/D4A64F?text=Course';
+                    document.getElementById('editCourseImagePreview').src = 'https://via.placeholder.com/400x250/071326/D4A64F?text=Course';
+                }
+                courseEditorModal.style.display = 'flex';
+            }
+
+            function closeEditor() {
+                courseEditorModal.style.display = 'none';
+            }
+
+            if (addCourseBtn) addCourseBtn.addEventListener('click', () => openEditor(null));
+            if (closeCourseEditor) closeCourseEditor.addEventListener('click', closeEditor);
+            if (btnCancelCourse) btnCancelCourse.addEventListener('click', closeEditor);
+
+            function renderCourses() {
+                const container = document.getElementById('adminCoursesContainer');
+                adminCourses = JSON.parse(localStorage.getItem('adminCourses') || '[]');
+                
+                const filterGrade = document.getElementById('adminGradeFilter').value;
+                let filteredCourses = adminCourses;
+                if (filterGrade !== 'all') {
+                    filteredCourses = adminCourses.filter(c => c.grade === filterGrade);
+                }
+                
+                if (filteredCourses.length === 0) {
+                    container.innerHTML = '<p style="color: var(--text-muted); grid-column: 1/-1;">لا يوجد كورسات حالياً لهذا الصف.</p>';
+                    return;
+                }
+                
+                container.innerHTML = '';
+                filteredCourses.forEach((course) => {
+                    const card = document.createElement('div');
+                    card.className = 'glass-panel';
+                    card.style.padding = '15px';
+                    card.style.borderRadius = '10px';
+                    card.innerHTML = `
+                        <img src="${course.image}" alt="Course" style="width: 100%; height: 120px; object-fit: cover; border-radius: 8px; margin-bottom: 15px;">
+                        <span class="badge" style="background: rgba(212, 166, 79, 0.2); color: var(--royal-gold); padding: 5px 10px; border-radius: 5px; font-size: 0.8rem;">${course.grade}</span>
+                        <h4 style="color: var(--text-primary); margin: 10px 0;">${course.title}</h4>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; border-top: 1px solid var(--border-color); padding-top: 10px;">
+                            <span style="font-size: 1rem; color: var(--royal-gold); font-weight: bold;">${course.price} ج.م</span>
+                            <div style="display: flex; gap: 10px;">
+                                <button class="btn btn-outline" style="padding: 5px 10px; font-size: 0.8rem;" onclick="window.editCourse('${course.id}')"><i class="fas fa-edit"></i></button>
+                                <button class="btn btn-outline" style="padding: 5px 10px; font-size: 0.8rem; color: #e74c3c; border-color: #e74c3c;" onclick="window.deleteCourse('${course.id}')"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+            }
+
+            document.getElementById('adminGradeFilter').addEventListener('change', renderCourses);
+
+            // Handle Course Image Upload
+            const editCourseImageFile = document.getElementById('editCourseImageFile');
+            if (editCourseImageFile) {
+                editCourseImageFile.addEventListener('change', (ev) => {
+                    const file = ev.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = (event) => {
+                            const img = new Image();
+                            img.onload = () => {
+                                const canvas = document.createElement('canvas');
+                                let width = img.width;
+                                let height = img.height;
+                                const MAX_SIZE = 800;
+                                if (width > height) {
+                                    if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; }
+                                } else {
+                                    if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; }
+                                }
+                                canvas.width = width;
+                                canvas.height = height;
+                                const ctx = canvas.getContext('2d');
+                                ctx.drawImage(img, 0, 0, width, height);
+                                let base64 = canvas.toDataURL('image/webp', 0.85);
+                                if(base64.indexOf('data:image/webp') === -1) {
+                                    base64 = canvas.toDataURL('image/jpeg', 0.85);
+                                }
+                                document.getElementById('editCourseImagePreview').src = base64;
+                                document.getElementById('editCourseImage').value = base64;
+                            };
+                            img.src = event.target.result;
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+            }
+
+            window.editCourse = function(id) {
+                openEditor(id);
+            };
+
+            window.deleteCourse = function(id) {
+                if(confirm('هل أنت متأكد من حذف هذا الكورس نهائياً؟')) {
+                    adminCourses = adminCourses.filter(c => c.id !== id);
+                    localStorage.setItem('adminCourses', JSON.stringify(adminCourses));
+                    renderCourses();
+                    if(window.showToast) window.showToast('تم الحذف بنجاح', 'success');
+                }
+            };
+
+            // Handle Save Course from dashboard modal
+            const btnSaveCourse = document.getElementById('btnSaveCourse');
+            if(btnSaveCourse) {
+                btnSaveCourse.addEventListener('click', () => {
+                    const id = document.getElementById('editCourseId').value;
+                    const title = document.getElementById('editCourseName').value.trim();
+                    const desc = document.getElementById('editCourseDesc').value.trim();
+                    const price = document.getElementById('editCoursePrice').value.trim();
+                    const grade = document.getElementById('editCourseGrade').value;
+                    const image = document.getElementById('editCourseImage').value || 'https://via.placeholder.com/400x250/071326/D4A64F?text=Course';
+                    
+                    if(!title || !price) {
+                        alert('الرجاء إدخال اسم الكورس والسعر');
+                        return;
+                    }
+                    
+                    if(id) {
+                        const idx = adminCourses.findIndex(c => c.id === id);
+                        if(idx !== -1) {
+                            adminCourses[idx] = { ...adminCourses[idx], title, desc, price, grade, image };
+                            if (window.FirebaseService && window.FirebaseService.isReady()) {
+                                window.FirebaseService.saveCourse(adminCourses[idx]);
+                            }
+                        }
+                    } else {
+                        const newCourse = {
+                            id: 'c' + Date.now(),
+                            title, desc, price, grade, image,
+                            hidden: false, finished: false,
+                            contents: { lectures: [], homeworks: [], exams: [], trainings: [], customSections: [] }
+                        };
+                        adminCourses.push(newCourse);
+                        if (window.FirebaseService && window.FirebaseService.isReady()) {
+                            window.FirebaseService.saveCourse(newCourse);
+                        }
+                    }
+                    
+                    localStorage.setItem('adminCourses', JSON.stringify(adminCourses));
+                    closeEditor();
+                    renderCourses();
+                    calculateStats();
+                    if(window.showToast) window.showToast('تم حفظ الكورس بنجاح ✅', 'success');
+                    else alert('تم حفظ الكورس بنجاح!');
+                });
+            }
+
+            const btnRefreshCourses = document.getElementById('btnRefreshCourses');
+            if (btnRefreshCourses) {
+                btnRefreshCourses.addEventListener('click', renderCourses);
+            }
+
+            renderCourses();
+        });
+    </script>
+
+    <script src="js/admin-auth.js"></script>
+    <script src="js/storage-service.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/support-chat.js"></script>
+    <script src="js/dashboard.js"></script>
+    <script>
+        const mobileBtn = document.querySelector('.mobile-menu-btn');
+        const sidebar = document.getElementById('sidebar');
+        if(mobileBtn) {
+            mobileBtn.addEventListener('click', () => {
+                sidebar.classList.toggle('active');
+            });
+        }
+
+        (function() {
+            const welcomeBanner = document.getElementById('ownerWelcomeBanner');
+            const closeBtn = document.getElementById('closeOwnerWelcome');
+            const welcomeMsg = document.getElementById('ownerWelcomeMsg');
+            const authStr = sessionStorage.getItem('currentAdmin');
+            if(!authStr || !welcomeBanner) return;
+
+            const admin = JSON.parse(authStr);
+            const hideKey = `hideOwnerWelcome_${admin.phone}`;
+            const shouldHide = localStorage.getItem(hideKey) === 'true';
+            const customMessage = (typeof PlatformStorage !== 'undefined' ? PlatformStorage.get('setWelcomeMsg') : null) || localStorage.getItem('setWelcomeMsg');
+            const defaultWelcome = admin.name ? `أهلاً بك يا ${admin.name}! بوابة الإدارة الخاصة بك جاهزة الآن.` : 'أهلاً بك في لوحة التحكم الخاصة بك. استخدم البوصلة للدعم المهني.';
+            if(welcomeMsg) {
+                welcomeMsg.textContent = customMessage || defaultWelcome;
+            }
+
+            const compassBadge = document.getElementById('ownerCompassBadge');
+            if (compassBadge) {
+                const unseenCount = parseInt(localStorage.getItem('pf_unseen_support_tickets') || '0', 10) || 0;
+                compassBadge.textContent = unseenCount > 0 ? unseenCount : '';
+                compassBadge.style.display = unseenCount > 0 ? 'inline-flex' : 'none';
+            }
+
+            if(!shouldHide) {
+                setTimeout(() => {
+                    welcomeBanner.style.display = 'block';
+                    if(window.audioManager && typeof window.audioManager.playAdminWelcome === 'function') {
+                        window.audioManager.playAdminWelcome();
+                    }
+                }, 250);
+            }
+
+            if(closeBtn) {
+                closeBtn.addEventListener('click', () => {
+                    welcomeBanner.style.display = 'none';
+                    localStorage.setItem(hideKey, 'true');
+                });
+            }
+        })();
+    </script>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/firebase-service.js"></script>
+</body>
+</html>
+

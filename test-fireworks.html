@@ -1,0 +1,49 @@
+﻿<!doctype html>
+<html lang="ar">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Test Fireworks</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 40px; background: #0b1220; color: #fff; }
+    .card { background: rgba(255,255,255,0.03); padding: 24px; border-radius: 12px; max-width:600px; margin:auto; text-align:center; }
+    button { padding: 12px 20px; font-size:16px; border-radius:8px; cursor:pointer; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>اختبار الألعاب النارية (Fireworks)</h1>
+    <p>اضغط على الاختبار لتشغيل الألعاب النارية صوتياً وبصرياً.</p>
+    <button id="run">تشغيل الألعاب النارية</button>
+    <p id="status" style="margin-top:12px; color:#ffd166"></p>
+  </div>
+  <script src="js/main.js"></script>
+  <script>
+    document.getElementById('run').addEventListener('click', async function(){
+      try {
+        if (window.triggerFireworks) {
+          window.triggerFireworks(3500);
+          document.getElementById('status').textContent = 'تم إطلاق الألعاب النارية — تحقق من الشاشة والصوت.';
+        } else {
+          document.getElementById('status').textContent = 'دالة triggerFireworks غير معرّفة.';
+        }
+      } catch (e) {
+        document.getElementById('status').textContent = 'خطأ عند التشغيل: ' + e.message;
+      }
+    });
+
+    // Auto-trigger shortly after load to help automated tests
+    setTimeout(() => {
+      const btn = document.getElementById('run');
+      if (btn) btn.click();
+    }, 800);
+  </script>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/firebase-service.js"></script>
+</body>
+</html>

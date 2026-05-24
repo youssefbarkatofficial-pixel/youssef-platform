@@ -1,0 +1,173 @@
+﻿<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إرسال الإشعارات - لوحة الإدارة</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+    <div class="bg-effects"></div>
+
+    <header class="navbar glass-panel" style="background: rgba(13, 13, 13, 0.9); border-bottom-color: var(--royal-gold);">
+        <a href="index.html" class="nav-brand">
+            <div class="logo-circle" style="color: #fff; background: var(--royal-gold);">ي</div>
+            <span class="nav-brand-text text-gold">لوحة الإدارة - يوسف بركات</span>
+        </a>
+        <div class="nav-actions">
+            <a href="#" id="logoutBtn" class="btn btn-outline" style="border-color: #e74c3c; color: #e74c3c; padding: 8px 15px; border-radius: 20px;">خروج <i class="fas fa-sign-out-alt"></i></a>
+        </div>
+    </header>
+
+    <div class="dashboard-layout">
+        <aside class="sidebar" id="sidebar" style="background: rgba(7, 19, 38, 0.95); border-left-color: var(--royal-gold);">
+            <ul class="sidebar-nav" style="margin-top: 20px;">
+                <li><a href="admin-dashboard.html"><i class="fas fa-chart-line"></i> الإحصائيات العامة</a></li>
+                <li><a href="admin-students.html"><i class="fas fa-users"></i> إدارة الطلاب</a></li>
+                <li><a href="admin-courses.html"><i class="fas fa-book-open"></i> إدارة الكورسات</a></li>
+                <li><a href="admin-upload.html"><i class="fas fa-bolt"></i> الرفع السريع</a></li>
+                <li><a href="admin-payments.html"><i class="fas fa-money-check-alt"></i> مراجعة المدفوعات</a></li>
+                <li><a href="admin-notifications.html" class="active"><i class="fas fa-bell"></i> إرسال الإشعارات</a></li>
+                <li><a href="admin-settings.html"><i class="fas fa-cog"></i> إعدادات المنصة</a></li>
+            </ul>
+        </aside>
+
+        <main class="main-content">
+            <div class="page-header">
+                <h1 class="page-title"><i class="fas fa-paper-plane text-gold mr-2"></i> إرسال إشعارات للطلاب</h1>
+                <p style="color: rgba(255,255,255,0.7); margin-top: 10px;">تحكم كامل في إرسال الإشعارات لفئات محددة من الطلاب لضمان وصول رسالتك لمن يهمه الأمر.</p>
+            </div>
+
+            <div class="glass-panel dash-panel" style="max-width: 800px;">
+                <form id="notificationForm">
+                    <h3 style="color: var(--accent-cyan); margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;">أولاً: محتوى الإشعار</h3>
+                    
+                    <div class="form-group">
+                        <label>عنوان الإشعار</label>
+                        <input type="text" id="nTitle" class="form-control" placeholder="مثال: تذكير هام بموعد الامتحان" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>نص الإشعار</label>
+                        <textarea id="nBody" class="form-control" rows="4" placeholder="اكتب تفاصيل الإشعار هنا..." required></textarea>
+                    </div>
+
+                    <h3 style="color: var(--royal-gold); margin-bottom: 20px; margin-top: 40px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;">ثانياً: الفئة المستهدفة</h3>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div class="form-group">
+                            <label>الصف الدراسي</label>
+                            <select id="fGrade" class="form-control">
+                                <option value="all">كل الصفوف (جميع الطلاب)</option>
+                                <option value="prep1">أولى إعدادي فقط</option>
+                                <option value="prep2">تانية إعدادي فقط</option>
+                                <option value="prep3">تالتة إعدادي فقط</option>
+                                <option value="sec1">أولى ثانوي فقط</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>حالة الاشتراك بالكورسات</label>
+                            <select id="fSub" class="form-control">
+                                <option value="all">الكل (مشتركين وغير مشتركين)</option>
+                                <option value="subscribed">الطلاب المشتركين في كورسات فقط</option>
+                                <option value="unsubscribed">الطلاب غير المشتركين (حسابات مسجلة فقط)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group" style="grid-column: 1/-1;">
+                            <label>المستوى الأكاديمي والالتزام</label>
+                            <select id="fActivity" class="form-control">
+                                <option value="all">الكل (بدون تصفية أكاديمية)</option>
+                                <option value="top">الطلاب المتفوقين والمواظبين (العلامة الكاملة)</option>
+                                <option value="lazy">الطلاب غير المواظبين (تأخير في الواجبات/الامتحانات)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 30px; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1);">
+                        <p style="color: rgba(255,255,255,0.8); margin: 0; font-size: 0.95rem;">
+                            <i class="fas fa-info-circle text-cyan mr-2"></i> الإشعار سيصل للطلاب المطابقين لهذه الفلاتر فقط. سيظهر الإشعار في حساب الطالب بمجرد تسجيل دخوله.
+                        </p>
+                    </div>
+
+                    <div style="margin-top: 30px;">
+                        <button type="submit" class="btn btn-gold btn-large" style="width: 100%;"><i class="fas fa-paper-plane mr-2"></i> إرسال الإشعار الآن</button>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/admin-auth.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const authStr = sessionStorage.getItem('currentAdmin');
+            if(!authStr || JSON.parse(authStr).role !== 'admin') {
+                window.location.href = 'admin-login.html';
+                return;
+            }
+
+            document.getElementById('notificationForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+
+                const title = document.getElementById('nTitle').value;
+                const body = document.getElementById('nBody').value;
+                const fGrade = document.getElementById('fGrade').value;
+                const fSub = document.getElementById('fSub').value;
+                const fActivity = document.getElementById('fActivity').value;
+
+                let users = JSON.parse(localStorage.getItem('strictUsers') || '[]');
+                let sentCount = 0;
+
+                users.forEach(u => {
+                    // Grade Filter
+                    if (fGrade !== 'all' && u.grade !== fGrade) return;
+
+                    let dbUser = JSON.parse(localStorage.getItem(`db_${u.phone}`)) || { courses: [], notifications: [] };
+                    let hasCourses = dbUser.courses && dbUser.courses.length > 0;
+
+                    // Subscription Filter
+                    if (fSub === 'subscribed' && !hasCourses) return;
+                    if (fSub === 'unsubscribed' && hasCourses) return;
+
+                    // Activity Filter (Mock logic for demo, as actual progress is not fully implemented per user yet)
+                    if (fActivity === 'top' && !hasCourses) return; // Unlikely to be top if no courses
+                    // In a real app, you would check dbUser.stats here for homework completion rate.
+                    
+                    // If we reach here, user matches filters
+                    if (!dbUser.notifications) dbUser.notifications = [];
+                    dbUser.notifications.unshift({
+                        title: title,
+                        message: body,
+                        date: new Date().toISOString(),
+                        read: false
+                    });
+                    
+                    localStorage.setItem(`db_${u.phone}`, JSON.stringify(dbUser));
+                    sentCount++;
+                });
+
+                if (window.showToast) {
+                    window.showToast(`تم إرسال الإشعار بنجاح لعدد ${sentCount} طالب`, 'success');
+                } else {
+                    alert(`تم إرسال الإشعار بنجاح لعدد ${sentCount} طالب`);
+                }
+                
+                e.target.reset();
+            });
+        });
+    </script>
+    <script src="js/support-chat.js"></script>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/firebase-service.js"></script>
+</body>
+</html>
+

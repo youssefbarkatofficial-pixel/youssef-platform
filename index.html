@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="الدراسات مع يوسف بركات - منصتك الأولى لتعلم وفهم الجغرافيا والتاريخ بأسلوب بسيط وممتع">
+    <title>يوسف بركات - Youssef Barakat</title>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/home.css">
+    <link rel="stylesheet" href="css/auth.css">
+</head>
+
+<body>
+    <!-- Background Effects -->
+    <div class="bg-effects">
+        <!-- Educational Floating Icons (Fixed behind everything) -->
+        <i class="fas fa-compass edu-icon icon-1"></i>
+        <i class="fas fa-globe-africa edu-icon icon-2"></i>
+        <i class="fas fa-book-open edu-icon icon-3"></i>
+        <i class="fas fa-landmark edu-icon icon-4"></i>
+        <i class="fas fa-pencil-alt edu-icon icon-5"></i>
+        <i class="fas fa-microscope edu-icon icon-6"></i>
+        <i class="fas fa-hourglass-half edu-icon icon-7"></i>
+    </div>
+    <div class="particles"></div>
+
+    <!-- Header / Navbar -->
+    <header class="navbar glass-panel">
+        <a href="index.html" class="nav-brand" id="navBrandLogoBtn">
+            <div class="logo-circle" id="navLogoContainer" style="position: relative; overflow: hidden;">
+                <span id="navLogoText">ي</span>
+                <img id="navLogoImg" src=""
+                    style="display:none; position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; image-rendering:high-quality;">
+            </div>
+            <span class="nav-brand-text"> منصة يوسف بركات</span>
+        </a>
+
+            <ul class="nav-links">
+            <li><a href="index.html" class="active">الرئيسية</a></li>
+            <li><a href="courses.html">الكورسات</a></li>
+            <li><a href="#about">عن المُعلم</a></li>
+            <li><a href="#features">المميزات</a></li>
+            <li><a href="support.html">المساعدة</a></li>
+        </ul>
+
+        <div class="nav-actions">
+            <a href="#" id="themeToggle" class="btn btn-outline"
+                style="padding: 10px; border-radius: 50%; width: 45px; height: 45px; display: flex; justify-content: center; border: none; font-size: 1.2rem;"><i
+                    class="fas fa-moon"></i></a>
+            <a href="#" class="btn btn-outline open-login">تسجيل الدخول</a>
+            <a href="register.html" class="btn btn-gold">حساب جديد</a>
+            <div class="mobile-menu-btn"><i class="fas fa-bars"></i></div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-container">
+            <div class="hero-content">
+                <h1 class="heading-luxury mb-1">الدراسات مع يوسف بركات</h1>
+                <h2 class="hero-subtitle font-serif">منصتــك الأولى لتعلــم وفهــم الجغرافيــا والتاريــخ بأسلـــوب
+                    بسيــــط
+                    وممتــــع</h2>
+                <p class="hero-desc">أهلاً بيك في بيتك التاني! سواء كنت في أولى، تانية، أو تالتة إعدادي، أو حتى أولى
+                    ثانوي هنا هتلاقي كل اللي تحتاجه عشان تتفوق وتفهم صح.</p>
+
+                <div class="hero-btns">
+                    <a href="register.html" id="heroSubscribeBtn" class="btn btn-gold btn-large">اشترك الآن <i
+                            class="fas fa-arrow-left mr-2" style="margin-right: 10px;"></i></a>
+                    <a href="#latest-courses" id="heroExploreBtn" class="btn btn-outline btn-large">استكشف الكورسات</a>
+                </div>
+            </div>
+
+            <div class="hero-image-wrapper">
+                <!-- Removed icons from here, moved to bg-effects -->
+
+                <div class="teacher-frame" id="editableTeacherFrame">
+                    <!-- Background image and clipped foreground (inside the circle) -->
+                    <div class="frame-circle">
+                        <img id="teacherBgImg" src="https://via.placeholder.com/600x600/0A1E3A/d4a64f?text=Background"
+                            alt="خلفية الدائرة" class="teacher-bg-img">
+
+                        <img id="teacherFgImgClipped"
+                            src="https://via.placeholder.com/500x700/transparent/d4a64f?text=Teacher+Image"
+                            alt="أ. يوسف بركات" class="teacher-fg-img clipped" style="pointer-events: none;">
+                    </div>
+                    <!-- Foreground image (pops out of the circle, top half only) -->
+                    <div class="pop-out-wrapper">
+                        <img id="teacherHeroImg"
+                            src="https://via.placeholder.com/500x700/transparent/d4a64f?text=Teacher+Image"
+                            alt="أ. يوسف بركات" class="teacher-fg-img pop-out">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Social Proof Stats -->
+    <section class="stats-section">
+        <div class="glass-panel stats-grid">
+            <div class="stat-card">
+                <span class="stat-number">+30K</span>
+                <span class="stat-label">مشاهدة على يوتيوب</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number">+3K</span>
+                <span class="stat-label">طالب تم التدريس له</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number">100%</span>
+                <span class="stat-label">نسبة نجاح للطلاب</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="features-section">
+        <div class="container">
+            <h2 class="heading-luxury features-heading">ليه تختار منصتنا؟</h2>
+
+            <div class="features-circle-container">
+                <div class="center-logo open-login" id="featuresCenterLogoContainer"
+                    style="overflow: hidden; cursor: pointer;">
+                    <span id="featuresCenterText">يوسف<br>بركات</span>
+                    <img id="featuresCenterImg" src=""
+                        style="display:none; position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; image-rendering:high-quality;">
+                </div>
+
+                <div class="feature-node"><i class="fas fa-brain mb-1"
+                        style="font-size:1.5rem;color:var(--accent-cyan)"></i>
+                    <h4>شرح بسيط ومفهوم</h4>
+                </div>
+                <div class="feature-node"><i class="fas fa-video mb-1"
+                        style="font-size:1.5rem;color:var(--accent-cyan)"></i>
+                    <h4>فيديوهات برسومات توضيحية</h4>
+                </div>
+                <div class="feature-node"><i class="fas fa-tasks mb-1"
+                        style="font-size:1.5rem;color:var(--accent-cyan)"></i>
+                    <h4>تمارين على الدروس</h4>
+                </div>
+                <div class="feature-node"><i class="fas fa-bullseye mb-1"
+                        style="font-size:1.5rem;color:var(--accent-cyan)"></i>
+                    <h4>تركيز تام فى المذاكرة</h4>
+                </div>
+                <div class="feature-node"><i class="fas fa-file-alt mb-1"
+                        style="font-size:1.5rem;color:var(--accent-cyan)"></i>
+                    <h4>امتحان قبل كل حصة</h4>
+                </div>
+                <div class="feature-node"><i class="fas fa-users mb-1"
+                        style="font-size:1.5rem;color:var(--accent-cyan)"></i>
+                    <h4>تواصل دوري مع أولياء الأمور</h4>
+                </div>
+                <div class="feature-node"><i class="fas fa-book mb-1"
+                        style="font-size:1.5rem;color:var(--accent-cyan)"></i>
+                    <h4>أقوى الملازم والتلاخيص</h4>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Latest Courses & Offers (Dynamic) -->
+    <section id="latest-courses" class="features-section" style="padding-top: 50px; background: transparent;">
+        <div class="container">
+            <h2 class="heading-luxury features-heading">أحدث الكورسات</h2>
+            <div class="courses-carousel-wrapper" style="position: relative; margin-top: 40px;">
+                <button id="scrollRightBtn" style="position: absolute; right: -20px; top: 50%; transform: translateY(-50%); z-index: 10; background: var(--card-bg); border: 1px solid var(--border-color); color: var(--royal-gold); width: 40px; height: 40px; border-radius: 50%; cursor: pointer; opacity: 0.5; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-color); transition: opacity 0.3s;"><i class="fas fa-chevron-right"></i></button>
+                <div id="homeCoursesContainer" style="display: flex; gap: 30px; overflow-x: auto; scroll-behavior: smooth; padding: 20px 0; scrollbar-width: none;">
+                    <!-- Courses will be loaded dynamically by JS -->
+                </div>
+                <button id="scrollLeftBtn" style="position: absolute; left: -20px; top: 50%; transform: translateY(-50%); z-index: 10; background: var(--card-bg); border: 1px solid var(--border-color); color: var(--royal-gold); width: 40px; height: 40px; border-radius: 50%; cursor: pointer; opacity: 0.5; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-color); transition: opacity 0.3s;"><i class="fas fa-chevron-left"></i></button>
+            </div>
+            <div style="text-align: center; margin-top: 40px;">
+                <a href="courses.html" class="btn btn-gold btn-large">عرض كل الكورسات <i
+                        class="fas fa-arrow-left mr-2"></i></a>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Teacher -->
+    <section id="about" class="about-section">
+        <div class="container about-grid">
+            <div class="about-quotes">
+                <h2 class="heading-luxury mb-2">أ. يوسف بركات</h2>
+                <p class="quote-primary font-serif">"اعتنوا بأبناءكم فالعلم وضع لأمثالهم"</p>
+                <p class="quote-secondary font-serif">"هدفنا ليس الوصول إلى المجد.. بل أن نصنع المجد بأنفسنا ووضع بصمة
+                    عريقة ذات أصالة فى أبنائنا فـ بالعلم تضاء حياتنا فالعلم نور، ونور الله لا يُهدى إلا للمتقين.. فاتقِ
+                    الله"</p>
+            </div>
+
+            <div class="about-features">
+                <div class="glass-panel about-feature-card">
+                    <i class="fas fa-chalkboard-teacher"></i>
+                    <div>
+                        <h3 class="text-gold mb-1">شروحات فيديو تفصيلية</h3>
+                        <p>فهم عميق لكل جزئية بطريقة ممتعة وبسيطة.</p>
+                    </div>
+                </div>
+                <div class="glass-panel about-feature-card">
+                    <i class="fas fa-map-marked-alt"></i>
+                    <div>
+                        <h3 class="text-gold mb-1">خرائط وتجارب تفاعلية</h3>
+                        <p>تطبيق عملي للمعلومات لثبات أقوى في الذاكرة.</p>
+                    </div>
+                </div>
+                <div class="glass-panel about-feature-card">
+                    <i class="fas fa-clipboard-check"></i>
+                    <div>
+                        <h3 class="text-gold mb-1">اختبارات ومراجعات دورية</h3>
+                        <p>حل مستمر ونماذج امتحانات للتدريب المتواصل.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-col">
+                    <a href="index.html" class="nav-brand mb-2" id="footerBrandLogoBtn">
+                        <div class="logo-circle" id="footerLogoContainer" style="position: relative; overflow: hidden;">
+                            <span id="footerLogoText">ي</span>
+                            <img id="footerLogoImg" src=""
+                                style="display:none; position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; image-rendering:high-quality;">
+                        </div>
+                        <span class="nav-brand-text">منصة يوسف بركات</span>
+                    </a>
+                    <p style="color: rgba(255,255,255,0.7); line-height: 1.6; margin-bottom: 20px;">
+                        منصتك الأولى لتعلم وفهم الجغرافيا والتاريخ بأسلوب بسيط وممتع.
+                    </p>
+                    <div class="social-icons">
+                        <a href="https://wa.me/201023675235" target="_blank" rel="noopener noreferrer"><i class="fab fa-whatsapp"></i></a>
+                        <a href="https://www.facebook.com/youssefbarakatofficial?locale=ar_AR" target="_blank" rel="noopener noreferrer"><i class="fab fa-facebook-f"></i></a>
+                        <a href="https://www.tiktok.com/@youssefbarakatofficial" target="_blank" rel="noopener noreferrer"><i class="fab fa-tiktok"></i></a>
+                        <a href="https://www.youtube.com/@youssefstudies" target="_blank" rel="noopener noreferrer"><i class="fab fa-youtube"></i></a>
+                        <a href="https://www.instagram.com/youssefbarakatofficial/" target="_blank" rel="noopener noreferrer"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+
+                <div class="footer-col">
+                    <h3>روابط هامة</h3>
+                    <ul>
+                        <li><a href="index.html">الرئيسية</a></li>
+                        <li><a href="courses.html">الكورسات</a></li>
+                        <li><a href="#about">عن المعلم</a></li>
+                        <li><a href="support.html">المساعدة</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-col">
+                    <h3>حسابي</h3>
+                    <ul>
+                        <li><a href="#" class="open-login">تسجيل الدخول</a></li>
+                        <li><a href="register.html">إنشاء حساب جديد</a></li>
+                        <li><a href="dashboard.html">لوحة المعلومات</a></li>
+                        <li><a href="homeworks.html">متابعة الواجبات</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-bottom font-serif">
+                <p>جميع الحقوق محفوظة © 2026 | منصة يوسف بركات</p>
+                <p style="margin-top: 10px; font-size: 0.9rem;">تمت برمجة المنصة والذكاء الاصطناعي المساعد للطلبة (البوصلة) بواسطة الأستاذ يوسف بركات.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Login Modal -->
+    <div class="modal-overlay" id="loginModal">
+        <div class="glass-panel modal-content auth-container">
+            <button class="close-modal"><i class="fas fa-times"></i></button>
+            <div class="auth-header">
+                <div class="auth-logo"><i class="fas fa-user-graduate"></i></div>
+                <h2>تسجيل الدخول</h2>
+                <p>مرحباً بك مجدداً في منصتك</p>
+            </div>
+
+            <form id="loginForm">
+                <div class="form-group">
+                    <label>رقم الموبايل</label>
+                    <input type="text" id="loginPhone" class="form-control" placeholder="أدخل رقم الموبايل"
+                        autocomplete="username" required>
+                </div>
+                <div class="form-group">
+                    <label>كلمة المرور</label>
+                    <input type="password" id="loginPassword" class="form-control" placeholder="أدخل كلمة المرور"
+                        autocomplete="current-password" required>
+                </div>
+
+                <div class="form-group" style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
+                    <input type="checkbox" id="rememberMe" style="width: auto; cursor: pointer;">
+                    <label for="rememberMe" style="margin: 0; cursor: pointer; color: var(--text-secondary);">تذكرني في
+                        المرة القادمة</label>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <a href="#" id="forgotPasswordLink" style="color: var(--accent-cyan); font-weight: 700;">نسيت كلمة المرور؟</a>
+                    <span style="color: rgba(255,255,255,0.6); font-size: 0.92rem;">تسجيل الدخول الآمن</span>
+                </div>
+
+                <button type="submit" class="btn btn-green btn-block">تسجيل الدخول</button>
+            </form>
+
+            <div id="forgotPasswordModal" class="modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 10000; justify-content: center; align-items: center; padding: 20px;">
+                <div class="glass-panel" style="max-width: 520px; width: 100%; padding: 30px; position: relative; border-radius: 20px;">
+                    <button onclick="document.getElementById('forgotPasswordModal').style.display='none'" style="position: absolute; top: 18px; right: 18px; background: transparent; border: none; color: var(--text-primary); font-size: 1.4rem; cursor: pointer;"><i class="fas fa-times"></i></button>
+                    <h2 style="margin-bottom: 20px; color: var(--royal-gold);">استعادة كلمة المرور</h2>
+                    <p style="margin-bottom: 20px; color: var(--text-secondary);">اكتب رقم ولي الأمر المرتبط بحسابك وهيتم إرسال كود تأكيد لتغيير كلمة السر.</p>
+                    <div id="fpStatusText" style="display:none; margin-bottom: 20px; padding: 12px 14px; border-radius: 16px; font-size: 0.95rem; line-height:1.5;"></div>
+                    <form id="forgotPasswordForm">
+                        <div class="form-group">
+                            <label>رقم الطالب</label>
+                            <input type="tel" id="fpStudentPhone" class="form-control" placeholder="رقم الطالب" required>
+                        </div>
+                        <div class="form-group">
+                            <label>رقم ولي الأمر</label>
+                            <input type="tel" id="fpParentPhone" class="form-control" placeholder="رقم ولي الأمر" required>
+                            <span id="fpParentError" class="error-message" style="display:none;">الرقم غير مطابق لولي الأمر المسجل.</span>
+                        <div id="fpStep2" style="display:none;">
+                            <div class="form-group">
+                                <label>أدخل كود التحقق</label>
+                                <input type="text" id="fpOtpCode" class="form-control" placeholder="xxxxx" maxlength="5">
+                            </div>
+                            <div class="form-group" style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
+                                <button type="button" id="fpResendBtn" class="btn btn-outline" style="display:none; padding: 10px 14px; min-width:150px;">إعادة إرسال الكود</button>
+                                <span id="fpOtpHelp" style="flex:1 1 100%; color: rgba(255,255,255,0.72); font-size: 0.92rem;">الكود صالح لمدة 10 دقائق ولا يتم مشاركته مع أي شخص.</span>
+                            </div>
+                            <div class="form-group">
+                                <label>كلمة المرور الجديدة</label>
+                                <input type="password" id="fpNewPassword" class="form-control" placeholder="كلمة المرور الجديدة">
+                            </div>
+                            <div class="form-group">
+                                <label>تأكيد كلمة المرور الجديدة</label>
+                                <input type="password" id="fpConfirmPassword" class="form-control" placeholder="تأكيد كلمة المرور الجديدة">
+                                <span id="fpPasswordError" class="error-message" style="display:none;">يجب أن تتطابق كلمات المرور وأن تكون قوية.</span>
+                            </div>
+                        </div>
+                        </div>
+                        <div style="display:flex; justify-content: space-between; gap: 10px; margin-top: 20px;">
+                            <button type="button" class="btn btn-outline" onclick="document.getElementById('forgotPasswordModal').style.display='none'">إلغاء</button>
+                            <button type="submit" id="fpSubmitBtn" class="btn btn-green">إرسال الكود عبر واتساب</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="auth-footer">
+                <p>ليس لديك حساب؟ <a href="register.html">إنشاء حساب جديد</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
+
+    <script src="js/firebase-config.js"></script>
+    <script src="js/firebase-service.js"></script>
+    <script src="js/storage-service.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/support-chat.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/owner-editor.js"></script>
+    <script src="js/courses-renderer.js"></script>
+    <script>
+        // Setup Carousel Scrolling
+        document.addEventListener('DOMContentLoaded', () => {
+            const container = document.getElementById('homeCoursesContainer');
+            const rightBtn = document.getElementById('scrollRightBtn');
+            const leftBtn = document.getElementById('scrollLeftBtn');
+            
+            if(container && rightBtn && leftBtn) {
+                // Hide scrollbar hack for webkit
+                container.style.cssText += '::-webkit-scrollbar { display: none; }';
+                
+                // Opacity hover effect
+                [rightBtn, leftBtn].forEach(btn => {
+                    btn.addEventListener('mouseenter', () => btn.style.opacity = '1');
+                    btn.addEventListener('mouseleave', () => btn.style.opacity = '0.5');
+                });
+                
+                rightBtn.addEventListener('click', () => {
+                    container.scrollBy({ left: 350, behavior: 'smooth' }); // RTL means right is positive left? Actually in RTL, scrolling right is positive scrollLeft or negative depending on browser. Let's use left: 350 for LTR, for RTL it might be left: -350 or 350. Let's just use scrollBy({left: 350}).
+                });
+                leftBtn.addEventListener('click', () => {
+                    container.scrollBy({ left: -350, behavior: 'smooth' });
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,135 @@
+﻿<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>يوسف بركات</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/auth.css">
+</head>
+<body class="auth-page">
+    <div class="bg-effects"></div>
+    
+    <div class="glass-panel auth-container">
+        <div class="auth-header">
+            <a href="index.html" class="auth-logo" style="text-decoration: none;">ي</a>
+            <h2>إنشاء حساب جديد</h2>
+            <p>انضم الآن لأقوى منصة دراسات في مصر</p>
+        </div>
+
+        <div class="step-indicator">
+            <div class="step active">1</div>
+            <div class="step">2</div>
+            <div class="step">3</div>
+        </div>
+        <div id="registerError" class="error-message" style="text-align:center; display:none;"></div>
+        <form id="registerForm">
+            <!-- Step 1: Personal Info -->
+            <div class="form-step active" id="step1">
+                <h3 class="text-gold mb-1 text-center">البيانات الشخصية</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="form-group">
+                        <label>الاسم الأول</label>
+                        <input type="text" id="firstName" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>الاسم الثاني</label>
+                        <input type="text" id="lastName" class="form-control" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>الاسم الثالث</label>
+                    <input type="text" id="middleName" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>الاسم الرابع</label>
+                    <input type="text" id="familyName" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>رقم الموبايل (للطالب)</label>
+                    <input type="tel" id="studentPhone" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>رقم ولي الأمر</label>
+                    <input type="tel" id="parentPhone" class="form-control" required>
+                    <span id="phoneError" class="error-message" style="display:none;">مينفعش رقمك هو نفس رقم ولي الأمر</span>
+                </div>
+                
+                <button type="button" class="btn btn-gold btn-block next-step">التالي</button>
+            </div>
+
+            <!-- Step 2: Academic Info -->
+            <div class="form-step" id="step2">
+                <h3 class="text-gold mb-1 text-center">البيانات الدراسية</h3>
+                <div class="form-group">
+                    <label>الصف الدراسي</label>
+                    <select id="grade" class="form-control" required>
+                        <option value="" disabled selected>اختر الصف الدراسي</option>
+                        <option value="prep1">أولى إعدادي</option>
+                        <option value="prep2">تانية إعدادي</option>
+                        <option value="prep3">تالتة إعدادي</option>
+                        <option value="sec1">أولى ثانوي</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>المحافظة</label>
+                    <select id="governorate" class="form-control" required>
+                        <option value="" disabled selected>اختر المحافظة</option>
+                        <option value="outside">خارج مصر</option>
+                        <!-- Populated via JS -->
+                    </select>
+                </div>
+                <div class="form-group slide-group" id="foreignCountryGroup">
+                    <label>اسم الدولة</label>
+                    <input type="text" id="foreignCountry" class="form-control" placeholder="اكتب اسم الدولة" />
+                </div>
+                
+                <div style="display: flex; gap: 15px;">
+                    <button type="button" class="btn btn-outline btn-block prev-step" style="flex: 1;">السابق</button>
+                    <button type="button" class="btn btn-gold btn-block next-step" style="flex: 2;">التالي</button>
+                </div>
+            </div>
+
+            <!-- Step 3: Password Setup -->
+            <div class="form-step" id="step3">
+                <h3 class="text-gold mb-1 text-center">إعداد المرور</h3>
+                <div class="form-group text-center">
+                    <span class="helper-text"><i class="fas fa-info-circle"></i> اسم المستخدم الخاص بك سيكون رقم الموبايل</span>
+                </div>
+                <div class="form-group">
+                    <label>كلمة المرور</label>
+                    <input type="password" id="password" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>تأكيد كلمة المرور</label>
+                    <input type="password" id="confirmPassword" class="form-control" required>
+                </div>
+                
+                <div style="display: flex; gap: 15px;">
+                    <button type="button" class="btn btn-outline btn-block prev-step" style="flex: 1;">السابق</button>
+                    <button type="submit" class="btn btn-green btn-block" style="flex: 2;">إنشاء الحساب</button>
+                </div>
+            </div>
+        </form>
+
+        <div class="auth-footer">
+            <p>لديك حساب بالفعل؟ <a href="index.html">تسجيل الدخول</a></p>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
+    
+    <script src="js/firebase-config.js"></script>
+    <script src="js/firebase-service.js"></script>
+    <script src="js/storage-service.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/support-chat.js"></script>
+    <script src="js/auth.js"></script>
+</body>
+</html>
+

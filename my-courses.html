@@ -1,0 +1,128 @@
+﻿<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>كورساتي - يوسف بركات</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+    <div class="bg-effects"></div>
+
+    <header class="navbar glass-panel" style="background: var(--primary-navy);">
+        <a href="index.html" class="nav-brand">
+            <div class="logo-circle" style="width: 40px; height: 40px; font-size: 1.2rem;">ي</div>
+            <span class="nav-brand-text">منصة يوسف بركات</span>
+        </a>
+        <div class="nav-actions">
+            <a href="#" class="btn btn-outline" style="padding: 8px 15px; border-radius: 20px;"><i class="fas fa-bell"></i></a>
+            <a href="#" id="logoutBtn" class="btn btn-outline" style="border-color: #e74c3c; color: #e74c3c; padding: 8px 15px; border-radius: 20px;">خروج <i class="fas fa-sign-out-alt"></i></a>
+            <div class="mobile-menu-btn"><i class="fas fa-bars"></i></div>
+        </div>
+    </header>
+
+    <div class="dashboard-layout">
+        <aside class="sidebar" id="sidebar">
+            <div class="user-profile-mini">
+                <div class="avatar" style="overflow: hidden;">
+                    <img id="userAvatarImg" src="https://via.placeholder.com/80/071326/D4A64F?text=%D8%B7%D8%A7%D9%84%D8%A8" style="width: 100%; height: 100%; object-fit: cover;">
+                </div>
+                <h4 id="userNameDisplay">طالب</h4>
+                <p id="userGradeDisplay">الصف الدراسي</p>
+            </div>
+            <ul class="sidebar-nav">
+                <li><a href="dashboard.html"><i class="fas fa-home"></i> لوحة التحكم</a></li>
+                <li><a href="profile.html"><i class="fas fa-user"></i> حسابي</a></li>
+                <li><a href="courses.html"><i class="fas fa-plus-circle"></i> اشتراك في كورسات</a></li>
+                <li><a href="my-courses.html" class="active"><i class="fas fa-video"></i> كورساتي</a></li>
+                <li><a href="homeworks.html"><i class="fas fa-tasks"></i> الواجبات</a></li>
+                <li><a href="exams.html"><i class="fas fa-clipboard-list"></i> الامتحانات</a></li>
+                <li><a href="stats.html"><i class="fas fa-chart-line"></i> الإحصائيات</a></li>
+                <li><a href="settings.html"><i class="fas fa-cog"></i> الإعدادات</a></li>
+            </ul>
+        </aside>
+
+        <main class="main-content">
+            <div class="page-header">
+                <h1 class="page-title"><i class="fas fa-video mr-2 text-gold"></i> الكورسات المشترك بها</h1>
+            </div>
+
+            <div class="glass-panel dash-panel" style="min-height: 400px;">
+                <div id="myCoursesList" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
+                    <!-- Courses will be rendered here -->
+                </div>
+
+                <div id="noCoursesState" style="display: none; text-align: center; padding: 50px 20px;">
+                    <i class="fas fa-book-reader text-gold" style="font-size: 4rem; margin-bottom: 20px; opacity: 0.5;"></i>
+                    <h2 style="color: var(--soft-white); margin-bottom: 10px;">لا يوجد كورسات مشترك فيها بعد</h2>
+                    <p style="color: rgba(255,255,255,0.7); margin-bottom: 20px;">ابدأ رحلتك التعليمية واشترك في أقوى الكورسات الآن</p>
+                    <a href="courses.html" class="btn btn-gold btn-large">استكشف الكورسات</a>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/storage-service.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/support-chat.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            let userStr = sessionStorage.getItem('currentStudent');
+            if(!userStr) {
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            let user = JSON.parse(userStr);
+            document.getElementById('userNameDisplay').textContent = user.name;
+            const grades = {'prep1':'أولى إعدادي', 'prep2':'تانية إعدادي', 'prep3':'تالتة إعدادي', 'sec1':'أولى ثانوي'};
+            document.getElementById('userGradeDisplay').textContent = grades[user.grade] || 'طالب';
+            
+            let dbUser = JSON.parse(localStorage.getItem(`db_${user.phone}`)) || { courses: [] };
+            const container = document.getElementById('myCoursesList');
+            const emptyState = document.getElementById('noCoursesState');
+            
+            if(dbUser.courses && dbUser.courses.length > 0) {
+                container.style.display = 'grid';
+                emptyState.style.display = 'none';
+                
+                let adminCourses = JSON.parse(localStorage.getItem('adminCourses')) || [];
+                
+                dbUser.courses.forEach(cId => {
+                    const c = adminCourses.find(course => course.id === cId);
+                    if(c) {
+                        const card = document.createElement('div');
+                        card.style.cssText = 'background: rgba(255,255,255,0.05); border-radius: 15px; border: 1px solid var(--border-color); overflow: hidden; display: flex; flex-direction: column; transition: transform 0.3s;';
+                        card.onmouseenter = () => card.style.transform = 'translateY(-5px)';
+                        card.onmouseleave = () => card.style.transform = 'translateY(0)';
+                        
+                        card.innerHTML = `
+                            <img src="${c.image}" style="width: 100%; height: 150px; object-fit: cover;">
+                            <div style="padding: 20px; flex: 1; display: flex; flex-direction: column;">
+                                <h3 style="color: var(--text-primary); margin-bottom: 10px;">${c.title}</h3>
+                                <p style="color: rgba(255,255,255,0.6); font-size: 0.9rem; margin-bottom: 15px; flex: 1;">${c.desc.substring(0, 60)}...</p>
+                                <a href="course-details.html?id=${c.id}" class="btn btn-green" style="width: 100%; justify-content: center;"><i class="fas fa-play-circle mr-2"></i> دخول الكورس</a>
+                            </div>
+                        `;
+                        container.appendChild(card);
+                    }
+                });
+            } else {
+                container.style.display = 'none';
+                emptyState.style.display = 'block';
+            }
+        });
+    </script>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/firebase-service.js"></script>
+</body>
+</html>
+
+

@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إعدادات المنصة - لوحة الإدارة</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+    <div class="bg-effects"></div>
+
+    <header class="navbar glass-panel" style="background: rgba(13, 13, 13, 0.9); border-bottom-color: var(--royal-gold);">
+        <a href="index.html" class="nav-brand">
+            <div class="logo-circle" style="color: #fff; background: var(--royal-gold);">ي</div>
+            <span class="nav-brand-text text-gold">لوحة الإدارة - يوسف بركات</span>
+        </a>
+        <div class="nav-actions">
+            <a href="#" id="logoutBtn" class="btn btn-outline" style="border-color: #e74c3c; color: #e74c3c; padding: 8px 15px; border-radius: 20px;">خروج <i class="fas fa-sign-out-alt"></i></a>
+        </div>
+    </header>
+
+    <div class="dashboard-layout">
+        <aside class="sidebar" id="sidebar" style="background: rgba(7, 19, 38, 0.95); border-left-color: var(--royal-gold);">
+            <ul class="sidebar-nav" style="margin-top: 20px;">
+                <li><a href="admin-dashboard.html"><i class="fas fa-chart-line"></i> الإحصائيات العامة</a></li>
+                <li><a href="admin-students.html"><i class="fas fa-users"></i> إدارة الطلاب</a></li>
+                <li><a href="admin-courses.html"><i class="fas fa-book-open"></i> إدارة الكورسات</a></li>
+                <li><a href="admin-upload.html"><i class="fas fa-bolt"></i> الرفع السريع</a></li>
+                <li><a href="admin-payments.html"><i class="fas fa-money-check-alt"></i> مراجعة المدفوعات</a></li>
+                <li><a href="admin-notifications.html"><i class="fas fa-bell"></i> إرسال الإشعارات</a></li>
+                <li><a href="admin-settings.html" class="active"><i class="fas fa-cog"></i> إعدادات المنصة</a></li>
+            </ul>
+        </aside>
+
+        <main class="main-content">
+            <div class="page-header">
+                <h1 class="page-title"><i class="fas fa-cog text-gold mr-2"></i> إعدادات المنصة</h1>
+                <button class="btn btn-gold" id="btnSaveAllSettings"><i class="fas fa-save mr-2"></i> حفظ جميع الإعدادات</button>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr; gap: 30px; max-width: 800px;">
+                
+                <!-- Payment Settings -->
+                <div class="glass-panel dash-panel">
+                    <h2 style="color: var(--accent-cyan); border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; margin-bottom: 20px;"><i class="fas fa-wallet mr-2"></i> إعدادات الدفع المالي</h2>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div class="form-group">
+                            <label>رقم فودافون كاش (لاستقبال التحويلات)</label>
+                            <input type="text" id="setVCash" class="form-control" placeholder="مثال: 01023675235">
+                        </div>
+                        <div class="form-group" style="display: flex; align-items: flex-end; padding-bottom: 10px;">
+                            <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; color: var(--text-primary);">
+                                <input type="checkbox" id="setFawry" style="width: 20px; height: 20px;">
+                                تفعيل الدفع عبر فوري (Fawry)
+                            </label>
+                        </div>
+                        <div class="form-group" style="grid-column: 1/-1;">
+                            <label>تعليمات الدفع (تظهر للطالب عند الاشتراك)</label>
+                            <input type="text" id="setInstructions" class="form-control" placeholder="مثال: قم بتحويل المبلغ على الرقم التالي عبر فودافون كاش">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- General Platform Settings -->
+                <div class="glass-panel dash-panel">
+                    <h2 style="color: var(--royal-gold); border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; margin-bottom: 20px;"><i class="fas fa-globe mr-2"></i> الإعدادات العامة</h2>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr; gap: 20px;">
+                        <div class="form-group">
+                            <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; color: var(--text-primary);">
+                                <input type="checkbox" id="setRegistration" style="width: 20px; height: 20px;">
+                                السماح بإنشاء حسابات جديدة للطلاب
+                            </label>
+                            <p style="font-size: 0.85rem; color: rgba(255,255,255,0.5); margin-top: 5px;">عند إيقاف هذا الخيار، لن يتمكن أي طالب جديد من التسجيل في المنصة.</p>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>رسالة الترحيب في لوحة تحكم الطالب</label>
+                            <input type="text" id="setWelcomeMsg" class="form-control" placeholder="مثال: استمر في التقدم، النجاح في انتظارك.">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>حالة توفر الكورسات (تظهر أسفل الكورس)</label>
+                            <input type="text" id="setCourseStatus" class="form-control" placeholder="مثال: يبدأ فوراً أو قريباً">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Backup and Security Settings -->
+                <div class="glass-panel dash-panel" style="grid-column: 1/-1;">
+                    <h2 style="color: var(--accent-cyan); border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; margin-bottom: 20px;"><i class="fas fa-shield-alt mr-2"></i> نظام النسخ الاحتياطي والأمان (Future Firebase Ready)</h2>
+                    <p style="color: rgba(255,255,255,0.7); margin-bottom: 20px;">حماية بيانات المنصة من الفقدان (الطلاب، الكورسات، المبيعات) عن طريق تصدير نسخة احتياطية أو استعادتها. هذه الواجهة مصممة لدعم النقل المستقبلي إلى Firebase.</p>
+                    
+                    <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                        <button id="btnExportBackup" class="btn btn-green" style="flex: 1; padding: 15px; font-size: 1.1rem;"><i class="fas fa-download mr-2"></i> استخراج نسخة (Export)</button>
+                        
+                        <div style="flex: 1; position: relative;">
+                            <input type="file" id="importBackupFile" accept=".json" style="display: none;">
+                            <button id="btnImportBackup" class="btn btn-outline" style="width: 100%; padding: 15px; font-size: 1.1rem; border-color: #e74c3c; color: #e74c3c;"><i class="fas fa-upload mr-2"></i> استعادة نسخة (Import)</button>
+                        </div>
+
+                        <button id="btnSyncFirebase" class="btn btn-gold" style="flex: 1; padding: 15px; font-size: 1.1rem;"><i class="fas fa-cloud-upload-alt mr-2"></i> رفع الداتا لـ Firebase</button>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <script src="js/admin-auth.js"></script>
+    <script src="js/db-service.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const authStr = sessionStorage.getItem('currentAdmin');
+            if(!authStr || JSON.parse(authStr).role !== 'admin') {
+                window.location.href = 'admin-login.html';
+                return;
+            }
+
+            // Load existing settings
+            const paySettings = JSON.parse(localStorage.getItem('paymentSettings') || '{}');
+            document.getElementById('setVCash').value = paySettings.vCashNum || '01023675235';
+            document.getElementById('setInstructions').value = paySettings.paymentInstructions || 'قم بتحويل المبلغ على الرقم التالي عبر فودافون كاش:';
+            document.getElementById('setFawry').checked = paySettings.enableFawry === true;
+
+            const genSettings = JSON.parse(localStorage.getItem('generalSettings') || '{}');
+            document.getElementById('setRegistration').checked = genSettings.allowRegistration !== false; // default true
+            document.getElementById('setWelcomeMsg').value = genSettings.welcomeMessage || 'استمر في التقدم، النجاح في انتظارك.';
+            document.getElementById('setCourseStatus').value = genSettings.courseStatus || 'يبدأ فوراً';
+
+            // Save Settings
+            document.getElementById('btnSaveAllSettings').addEventListener('click', () => {
+                const newPaySettings = {
+                    vCashNum: document.getElementById('setVCash').value,
+                    paymentInstructions: document.getElementById('setInstructions').value,
+                    enableFawry: document.getElementById('setFawry').checked
+                };
+                localStorage.setItem('paymentSettings', JSON.stringify(newPaySettings));
+
+                const newGenSettings = {
+                    allowRegistration: document.getElementById('setRegistration').checked,
+                    welcomeMessage: document.getElementById('setWelcomeMsg').value,
+                    courseStatus: document.getElementById('setCourseStatus').value
+                };
+                localStorage.setItem('generalSettings', JSON.stringify(newGenSettings));
+
+                if(window.showToast) {
+                    window.showToast('تم حفظ جميع الإعدادات بنجاح، وهي الآن مطبقة على المنصة فوراً.', 'success');
+                } else {
+                    alert('تم حفظ الإعدادات بنجاح');
+                }
+            });
+
+            // Backup & Restore Logic
+            document.getElementById('importBackupFile').addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file && window.PlatformDB && window.PlatformDB.backup.importData(file)) {
+                    if (window.showToast) window.showToast('تم استعادة النسخة الاحتياطية بنجاح!', 'success');
+                } else if (file) {
+                    if (window.showToast) window.showToast('فشل استعادة النسخة الاحتياطية. يرجى التأكد من الملف.', 'error');
+                }
+                e.target.value = '';
+            });
+
+            // Firebase Sync Logic
+            const btnSync = document.getElementById('btnSyncFirebase');
+            if (btnSync) {
+                btnSync.addEventListener('click', async () => {
+                    if (!confirm('سيتم الآن نقل كل بيانات المنصة (الطلاب، الكورسات، المبيعات) إلى Firebase. هل تريد الاستمرار؟')) return;
+                    
+                    const originalText = btnSync.innerHTML;
+                    btnSync.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> جاري الرفع لـ Firebase...';
+                    btnSync.disabled = true;
+
+                    try {
+                        if (window.FirebaseService && window.FirebaseService.isReady()) {
+                            await window.FirebaseService.syncLocalToFirestore();
+                            if (window.showToast) window.showToast('تم مزامنة كل البيانات مع Firebase بنجاح! 🚀', 'success');
+                        } else {
+                            throw new Error('Firebase is not properly initialized.');
+                        }
+                    } catch (err) {
+                        console.error("Sync error:", err);
+                        if (window.showToast) window.showToast('حدث خطأ أثناء المزامنة: ' + err.message, 'error');
+                        else alert('خطأ في المزامنة: ' + err.message);
+                    } finally {
+                        btnSync.innerHTML = originalText;
+                        btnSync.disabled = false;
+                    }
+                });
+            } const importInput = document.getElementById('importBackupFile');
+            document.getElementById('btnImportBackup').addEventListener('click', () => {
+                if (confirm('تنبيه: استعادة نسخة احتياطية سيؤدي إلى مسح البيانات الحالية بالكامل واستبدالها بالنسخة المرفوعة. هل أنت متأكد؟')) {
+                    importInput.click();
+                }
+            });
+
+            document.getElementById('btnExportBackup').addEventListener('click', () => {
+                if (window.PlatformDB && window.PlatformDB.backup.exportData()) {
+                    if (window.showToast) window.showToast('تم تصدير النسخة الاحتياطية بنجاح!', 'success');
+                } else {
+                    alert('حدث خطأ أثناء تصدير النسخة الاحتياطية.');
+                }
+            });
+            importInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    if (window.PlatformDB && window.PlatformDB.backup.importData(evt.target.result)) {
+                        alert('تم استعادة النسخة الاحتياطية بنجاح. سيتم إعادة تحميل المنصة.');
+                        window.location.reload();
+                    } else {
+                        alert('ملف النسخة الاحتياطية غير صالح أو تالف.');
+                    }
+                };
+                reader.readAsText(file);
+            });
+        });
+    </script>
+    <script src="js/support-chat.js"></script>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/firebase-service.js"></script>
+</body>
+</html>
+

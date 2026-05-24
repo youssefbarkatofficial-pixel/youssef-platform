@@ -1,0 +1,221 @@
+﻿<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إحصائياتي - يوسف بركات</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .stat-box {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+        .stat-box:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent-cyan);
+        }
+        .stat-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            color: var(--royal-gold);
+        }
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--text-primary);
+            margin-bottom: 5px;
+        }
+        .stat-label {
+            color: rgba(255,255,255,0.7);
+            font-size: 1rem;
+        }
+        .chart-container {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 15px;
+            padding: 20px;
+            height: 350px;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-effects"></div>
+
+    <header class="navbar glass-panel" style="background: var(--primary-navy);">
+        <a href="index.html" class="nav-brand">
+            <div class="logo-circle" style="width: 40px; height: 40px; font-size: 1.2rem;">ي</div>
+            <span class="nav-brand-text">منصة يوسف بركات</span>
+        </a>
+        <div class="nav-actions">
+            <a href="#" class="btn btn-outline" style="padding: 8px 15px; border-radius: 20px;"><i class="fas fa-bell"></i></a>
+            <a href="#" id="logoutBtn" class="btn btn-outline" style="border-color: #e74c3c; color: #e74c3c; padding: 8px 15px; border-radius: 20px;">خروج <i class="fas fa-sign-out-alt"></i></a>
+            <div class="mobile-menu-btn"><i class="fas fa-bars"></i></div>
+        </div>
+    </header>
+
+    <div class="dashboard-layout">
+        <aside class="sidebar" id="sidebar">
+            <div class="user-profile-mini">
+                <div class="avatar" style="overflow: hidden;">
+                    <img id="userAvatarImg" src="https://via.placeholder.com/80/071326/D4A64F?text=%D8%B7%D8%A7%D9%84%D8%A8" style="width: 100%; height: 100%; object-fit: cover;">
+                </div>
+                <h4 id="userNameDisplay">طالب</h4>
+                <p id="userGradeDisplay">الصف الدراسي</p>
+            </div>
+            <ul class="sidebar-nav">
+                <li><a href="dashboard.html"><i class="fas fa-home"></i> لوحة التحكم</a></li>
+                <li><a href="profile.html"><i class="fas fa-user"></i> حسابي</a></li>
+                <li><a href="courses.html"><i class="fas fa-plus-circle"></i> اشتراك في كورسات</a></li>
+                <li><a href="my-courses.html"><i class="fas fa-video"></i> كورساتي</a></li>
+                <li><a href="homeworks.html"><i class="fas fa-tasks"></i> الواجبات</a></li>
+                <li><a href="exams.html"><i class="fas fa-clipboard-list"></i> الامتحانات</a></li>
+                <li><a href="stats.html" class="active"><i class="fas fa-chart-line"></i> الإحصائيات</a></li>
+                <li><a href="settings.html"><i class="fas fa-cog"></i> الإعدادات</a></li>
+            </ul>
+        </aside>
+
+        <main class="main-content">
+            <div class="page-header">
+                <h1 class="page-title"><i class="fas fa-chart-pie mr-2 text-gold"></i> إحصائياتي العامة</h1>
+                <p style="color: rgba(255,255,255,0.6); margin-top: 5px;">تابع مستوى تقدمك وأدائك في الكورسات.</p>
+            </div>
+
+            <div id="statsContent">
+                <!-- Stats Grid -->
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <i class="fas fa-tasks stat-icon text-cyan"></i>
+                        <div class="stat-value" id="sHwCount">0</div>
+                        <div class="stat-label">واجبات مكتملة</div>
+                    </div>
+                    <div class="stat-box">
+                        <i class="fas fa-star stat-icon text-gold"></i>
+                        <div class="stat-value" id="sExamAvg">0%</div>
+                        <div class="stat-label">متوسط درجات الامتحانات</div>
+                    </div>
+                    <div class="stat-box">
+                        <i class="fas fa-video stat-icon" style="color: #2ecc71;"></i>
+                        <div class="stat-value" id="sVideosCount">0</div>
+                        <div class="stat-label">محاضرات تمت مشاهدتها</div>
+                    </div>
+                </div>
+
+                <div class="glass-panel dash-panel">
+                    <h3 style="margin-bottom: 20px; color: var(--text-primary); border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px;">مستوى التفاعل الأسبوعي</h3>
+                    <div class="chart-container">
+                        <canvas id="progressChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div id="noStatsState" style="display: none; text-align: center; padding: 50px 20px;" class="glass-panel dash-panel">
+                <i class="fas fa-chart-bar text-gold" style="font-size: 4rem; margin-bottom: 20px; opacity: 0.5;"></i>
+                <h2 style="color: var(--soft-white); margin-bottom: 10px;">لا توجد إحصائيات متاحة حالياً</h2>
+                <p style="color: rgba(255,255,255,0.7); margin-bottom: 20px;">اشترك في الكورسات وابدأ التعلم لتظهر إحصائياتك هنا.</p>
+                <a href="courses.html" class="btn btn-gold btn-large">تصفح الكورسات المتاحة</a>
+            </div>
+
+        </main>
+    </div>
+
+    <script src="js/storage-service.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/support-chat.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            let userStr = sessionStorage.getItem('currentStudent');
+            if(!userStr) {
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            let user = JSON.parse(userStr);
+            document.getElementById('userNameDisplay').textContent = user.name;
+            const grades = {'prep1':'أولى إعدادي', 'prep2':'تانية إعدادي', 'prep3':'تالتة إعدادي', 'sec1':'أولى ثانوي'};
+            document.getElementById('userGradeDisplay').textContent = grades[user.grade] || 'طالب';
+            
+            let dbUser = JSON.parse(localStorage.getItem(`db_${user.phone}`)) || { courses: [] };
+            
+            if(!dbUser.courses || dbUser.courses.length === 0) {
+                document.getElementById('statsContent').style.display = 'none';
+                document.getElementById('noStatsState').style.display = 'block';
+                return;
+            }
+
+            // Read strictly from DB without making up fake data
+            const stats = dbUser.stats || { homeworkCompleted: 0, examAverage: 0, videosWatched: 0, watchData: [0,0,0,0,0,0] };
+
+            document.getElementById('sHwCount').textContent = stats.homeworkCompleted || 0;
+            document.getElementById('sExamAvg').textContent = (stats.examAverage || 0) + '%';
+            document.getElementById('sVideosCount').textContent = stats.videosWatched || 0;
+
+            // Chart.js initialization
+            const ctx = document.getElementById('progressChart').getContext('2d');
+            
+            // Gradient for line
+            let gradient = ctx.createLinearGradient(0, 0, 0, 400);
+            gradient.addColorStop(0, 'rgba(212, 166, 79, 0.5)'); // gold semi-transparent
+            gradient.addColorStop(1, 'rgba(212, 166, 79, 0)');
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['الأسبوع 1', 'الأسبوع 2', 'الأسبوع 3', 'الأسبوع 4', 'الأسبوع 5', 'الأسبوع 6'],
+                    datasets: [{
+                        label: 'معدل المشاهدة (ساعات)',
+                        data: stats.watchData && stats.watchData.length === 6 ? stats.watchData : [0, 0, 0, 0, 0, 0],
+                        borderColor: '#D4A64F',
+                        backgroundColor: gradient,
+                        borderWidth: 2,
+                        pointBackgroundColor: '#fff',
+                        pointBorderColor: '#D4A64F',
+                        pointRadius: 4,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { color: 'rgba(255,255,255,0.5)' }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: 'rgba(255,255,255,0.5)' }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/firebase-service.js"></script>
+</body>
+</html>
+
+

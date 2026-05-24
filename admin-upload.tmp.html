@@ -1,0 +1,621 @@
+﻿<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الرفع السريع - لوحة الإدارة</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+    <div class="bg-effects"></div>
+
+    <header class="navbar glass-panel" style="background: rgba(13, 13, 13, 0.9); border-bottom-color: var(--royal-gold);">
+        <a href="index.html" class="nav-brand">
+            <div class="logo-circle" style="color: #fff; background: var(--royal-gold);">ي</div>
+            <span class="nav-brand-text text-gold">لوحة الإدارة - يوسف بركات</span>
+        </a>
+        <div class="nav-actions">
+            <a href="#" id="logoutBtn" class="btn btn-outline" style="border-color: #e74c3c; color: #e74c3c; padding: 8px 15px; border-radius: 20px;">خروج <i class="fas fa-sign-out-alt"></i></a>
+        </div>
+    </header>
+
+    <div class="dashboard-layout">
+        <aside class="sidebar" id="sidebar" style="background: rgba(7, 19, 38, 0.95); border-left-color: var(--royal-gold);">
+            <ul class="sidebar-nav" style="margin-top: 20px;">
+                <li><a href="admin-dashboard.html"><i class="fas fa-chart-line"></i> الإحصائيات العامة</a></li>
+                <li><a href="admin-students.html"><i class="fas fa-users"></i> إدارة الطلاب</a></li>
+                <li><a href="admin-courses.html"><i class="fas fa-book-open"></i> إدارة الكورسات</a></li>
+                <li><a href="admin-upload.html" class="active"><i class="fas fa-bolt"></i> الرفع السريع</a></li>
+                <li><a href="admin-payments.html"><i class="fas fa-money-check-alt"></i> مراجعة المدفوعات</a></li>
+                <li><a href="admin-notifications.html"><i class="fas fa-bell"></i> إرسال الإشعارات</a></li>
+                <li><a href="admin-settings.html"><i class="fas fa-cog"></i> إعدادات المنصة</a></li>
+            </ul>
+        </aside>
+
+        <main class="main-content">
+            <div class="page-header">
+                <h1 class="page-title"><i class="fas fa-bolt text-gold mr-2"></i> الرفع السريع</h1>
+                <p style="color: rgba(255,255,255,0.7); margin-top: 10px;">أضف محتوى للكورسات مباشرة دون الحاجة للدخول لصفحة تعديل الكورس بالكامل.</p>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+                <!-- Video Upload Panel -->
+                <div class="glass-panel dash-panel">
+                    <h2 style="color: var(--accent-cyan); margin-bottom: 20px;"><i class="fas fa-video mr-2"></i> إضافة محاضرة فيديو</h2>
+                    <form id="fastUploadVideoForm">
+                        <div class="form-group">
+                            <label>عنوان المحاضرة / الفيديو</label>
+                            <input type="text" id="vTitle" class="form-control" placeholder="مثال: الدرس الأول" required>
+                        </div>
+                        <div class="form-group">
+                            <label>اختر الكورس</label>
+                            <select id="vCourseSelect" class="form-control" required></select>
+                        </div>
+                        <div class="form-group">
+                            <label>القسم</label>
+                            <select id="vSectionSelect" class="form-control">
+                                <option value="lectures">المحاضرات</option>
+                                <option value="homeworks">الواجبات (كفيديو حل)</option>
+                                <option value="exams">الامتحانات (كفيديو مراجعة)</option>
+                            </select>
+                        </div>
+                        <div class="form-group" id="vLectureAttachGroup" style="display:none;">
+                            <label>اربط الفيديو بمحاضرة موجودة</label>
+                            <select id="vAttachLectureSelect" class="form-control">
+                                <option value="">-- اختر محاضرة --</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>طريقة إضافة الفيديو</label>
+                            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                                <label style="display:flex; align-items:center; gap: 6px;"><input type="radio" name="videoSource" value="upload" checked> رفع ملف</label>
+                                <label style="display:flex; align-items:center; gap: 6px;"><input type="radio" name="videoSource" value="youtube"> رابط فيديو</label>
+                            </div>
+                        </div>
+                        <div class="form-group" id="videoFileGroup">
+                            <label>ملف الفيديو</label>
+                            <input type="file" id="vFileInput" accept="video/*" class="form-control" style="padding: 10px;">
+                        </div>
+                        <div class="form-group" id="videoUrlGroup" style="display:none;">
+                            <label>رابط فيديو يوتيوب</label>
+                            <input type="url" id="vYoutubeUrl" class="form-control" placeholder="https://www.youtube.com/watch?v=...">
+                        </div>
+                        <button type="submit" class="btn btn-gold btn-block"><i class="fas fa-upload mr-2"></i> حفظ الفيديو بالكورس</button>
+                    </form>
+                </div>
+
+                <!-- PDF Upload Panel -->
+                <div class="glass-panel dash-panel">
+                    <h2 style="color: #2ecc71; margin-bottom: 20px;"><i class="fas fa-file-pdf mr-2"></i> إضافة مذكرة (PDF)</h2>
+                    <form id="fastUploadPdfForm">
+                        <div class="form-group">
+                            <label>عنوان المذكرة</label>
+                            <input type="text" id="pTitle" class="form-control" placeholder="مثال: مذكرة الوحدة الأولى" required>
+                        </div>
+                        <div class="form-group">
+                            <label>اختر الكورس</label>
+                            <select id="pCourseSelect" class="form-control" required></select>
+                        </div>
+                        <div class="form-group">
+                            <label>القسم</label>
+                            <select id="pSectionSelect" class="form-control">
+                                <option value="lectures">المحاضرات (كمذكرة شرح)</option>
+                                <option value="homeworks">الواجبات (كملف واجب)</option>
+                                <option value="exams">الامتحانات</option>
+                            </select>
+                        </div>
+                        <div class="form-group" id="pLectureAttachGroup" style="display:none;">
+                            <label>اربط المذكرة بمحاضرة موجودة</label>
+                            <select id="pAttachLectureSelect" class="form-control">
+                                <option value="">-- اختر محاضرة --</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>طريقة إضافة المذكرة</label>
+                            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                                <label style="display:flex; align-items:center; gap: 6px;"><input type="radio" name="pdfSource" value="upload" checked> رفع ملف</label>
+                                <label style="display:flex; align-items:center; gap: 6px;"><input type="radio" name="pdfSource" value="link"> رابط مذكرة</label>
+                            </div>
+                        </div>
+                        <div class="form-group" id="pdfFileGroup">
+                            <label>ملف الـ PDF</label>
+                            <input type="file" id="pFileInput" accept=".pdf" class="form-control" style="padding: 10px;">
+                        </div>
+                        <div class="form-group" id="pdfUrlGroup" style="display:none;">
+                            <label>رابط المذكرة</label>
+                            <input type="url" id="pLinkUrl" class="form-control" placeholder="https://drive.google.com/...">
+                        </div>
+                        <button type="submit" class="btn btn-green btn-block" style="background-color: #2ecc71; border-color: #2ecc71; color: #fff;"><i class="fas fa-upload mr-2"></i> حفظ المذكرة بالكورس</button>
+                    </form>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 30px;">
+                <!-- Exam Builder Panel -->
+                <div class="glass-panel dash-panel" style="grid-column: 1 / -1;">
+                    <h2 style="color: #f39c12; margin-bottom: 20px;"><i class="fas fa-clipboard-list mr-2"></i> إضافة امتحان بصري</h2>
+                    <form id="fastUploadExamForm">
+                        <div class="form-group">
+                            <label>عنوان الامتحان</label>
+                            <input type="text" id="eTitle" class="form-control" placeholder="مثال: امتحان الوحدة الأولى" required>
+                        </div>
+                        <div class="form-group">
+                            <label>اختر الكورس</label>
+                            <select id="eCourseSelect" class="form-control" required></select>
+                        </div>
+                        <div class="form-group">
+                            <label>عرض الامتحان باسم</label>
+                            <select id="eDisplayName" class="form-control">
+                                <option value="exam">امتحان</option>
+                                <option value="training">تدريب</option>
+                                <option value="homework">واجب</option>
+                            </select>
+                        </div>
+                        <div class="form-group" id="trainingAttachGroup" style="display:none;">
+                            <label>اربط التدريب بمحضرة (اختياري)</label>
+                            <select id="attachLectureSelect" class="form-control">
+                                <option value="">-- اختر محاضرة --</option>
+                            </select>
+                        </div>
+                        <div class="form-group" id="homeworkLinkGroup" style="display:none;">
+                            <label>اربط الواجب بتدريب (اختياري)</label>
+                            <select id="linkTrainingSelect" class="form-control">
+                                <option value="">-- بدون ربط --</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>نوع السؤال</label>
+                            <select id="questionType" class="form-control">
+                                <option value="choose">اختر</option>
+                                <option value="fill">أكمل</option>
+                                <option value="tf">صح وغلط</option>
+                                <option value="explain">بم تفسر</option>
+                                <option value="result">ما النتائج</option>
+                                <option value="prove">دلل</option>
+                                <option value="relation">ما العلاقة</option>
+                                <option value="whatif">ماذا يحدث إذا</option>
+                                <option value="meaning">ما المقصود</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>السؤال</label>
+                            <textarea id="questionText" class="form-control" rows="3" placeholder="اكتب نص السؤال هنا" required></textarea>
+                        </div>
+                        <div class="form-group" id="chooseOptionsGroup" style="display: none;">
+                            <label>الخيارات الأربعة</label>
+                            <input type="text" id="optA" class="form-control" placeholder="أ" style="margin-bottom: 10px;">
+                            <input type="text" id="optB" class="form-control" placeholder="ب" style="margin-bottom: 10px;">
+                            <input type="text" id="optC" class="form-control" placeholder="ج" style="margin-bottom: 10px;">
+                            <input type="text" id="optD" class="form-control" placeholder="د">
+                        </div>
+                        <div class="form-group">
+                            <label>الإجابة الصحيحة أو التوضيح</label>
+                            <input type="text" id="correctAnswer" class="form-control" placeholder="مثال: أ" required>
+                        </div>
+                        <button type="button" id="btnAddExamQuestion" class="btn btn-outline" style="margin-bottom: 15px;"><i class="fas fa-plus mr-2"></i> إضافة سؤال للامتحان</button>
+                        <div id="examQuestionsList" style="display: grid; gap: 10px; margin-bottom: 20px;"></div>
+                        <button type="submit" class="btn btn-gold btn-block"><i class="fas fa-upload mr-2"></i> حفظ الامتحان بالكورس</button>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/grader.js"></script>
+    <script src="js/admin-auth.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const authStr = sessionStorage.getItem('currentAdmin');
+            if(!authStr || JSON.parse(authStr).role !== 'admin') {
+                window.location.href = 'admin-login.html';
+                return;
+            }
+
+            let adminCourses = JSON.parse(localStorage.getItem('adminCourses') || '[]');
+            let examQuestions = [];
+
+            const vSelect = document.getElementById('vCourseSelect');
+            const pSelect = document.getElementById('pCourseSelect');
+            const eSelect = document.getElementById('eCourseSelect');
+
+            let optionsHtml = '<option value="">-- اختر كورس --</option>';
+            adminCourses.forEach(c => {
+                optionsHtml += `<option value="${c.id}">${c.title}</option>`;
+            });
+
+            vSelect.innerHTML = optionsHtml;
+            pSelect.innerHTML = optionsHtml;
+            if(eSelect) eSelect.innerHTML = optionsHtml;
+
+            // Video source toggle
+            document.querySelectorAll('input[name="videoSource"]').forEach(radio => {
+                radio.addEventListener('change', (e) => {
+                    if(e.target.value === 'upload') {
+                        document.getElementById('videoFileGroup').style.display = 'block';
+                        document.getElementById('videoUrlGroup').style.display = 'none';
+                    } else {
+                        document.getElementById('videoFileGroup').style.display = 'none';
+                        document.getElementById('videoUrlGroup').style.display = 'block';
+                    }
+                });
+            });
+
+            // PDF source toggle
+            document.querySelectorAll('input[name="pdfSource"]').forEach(radio => {
+                radio.addEventListener('change', (e) => {
+                    if(e.target.value === 'upload') {
+                        document.getElementById('pdfFileGroup').style.display = 'block';
+                        document.getElementById('pdfUrlGroup').style.display = 'none';
+                    } else {
+                        document.getElementById('pdfFileGroup').style.display = 'none';
+                        document.getElementById('pdfUrlGroup').style.display = 'block';
+                    }
+                });
+            });
+
+            // Lecture attach visibility for video/pdf forms
+            const vSection = document.getElementById('vSectionSelect');
+            const pSection = document.getElementById('pSectionSelect');
+            const vLectureAttachGroup = document.getElementById('vLectureAttachGroup');
+            const pLectureAttachGroup = document.getElementById('pLectureAttachGroup');
+
+            function updateLectureAttachVisibility(selectEl, groupEl) {
+                if (!selectEl || !groupEl) return;
+                groupEl.style.display = selectEl.value === 'lectures' ? 'block' : 'none';
+            }
+
+            if (vSection) {
+                vSection.addEventListener('change', () => updateLectureAttachVisibility(vSection, vLectureAttachGroup));
+            }
+            if (pSection) {
+                pSection.addEventListener('change', () => updateLectureAttachVisibility(pSection, pLectureAttachGroup));
+            }
+
+            // Question type toggle
+            const questionTypeSelect = document.getElementById('questionType');
+            if(questionTypeSelect) {
+                questionTypeSelect.addEventListener('change', (e) => {
+                    if(e.target.value === 'choose') {
+                        document.getElementById('chooseOptionsGroup').style.display = 'block';
+                    } else {
+                        document.getElementById('chooseOptionsGroup').style.display = 'none';
+                    }
+                });
+            }
+
+            // Exam display type logic (exam / training / homework)
+            const eDisplay = document.getElementById('eDisplayName');
+            const trainingAttachGroup = document.getElementById('trainingAttachGroup');
+            const homeworkLinkGroup = document.getElementById('homeworkLinkGroup');
+            const attachLectureSelect = document.getElementById('attachLectureSelect');
+            const linkTrainingSelect = document.getElementById('linkTrainingSelect');
+
+            function populateLectureAndTrainingSelectors(courseId){
+                // clear
+                attachLectureSelect.innerHTML = '<option value="">-- اختر محاضرة --</option>';
+                linkTrainingSelect.innerHTML = '<option value="">-- بدون ربط --</option>';
+                document.getElementById('vAttachLectureSelect').innerHTML = '<option value="">-- اختر محاضرة --</option>';
+                document.getElementById('pAttachLectureSelect').innerHTML = '<option value="">-- اختر محاضرة --</option>';
+                if(!courseId) return;
+                const course = adminCourses.find(c=>c.id === courseId);
+                if(!course) return;
+                const contents = course.contents || {};
+                const lectures = contents.lectures || [];
+                lectures.forEach((lec, idx)=>{
+                    const val = lec.id || lec.title || ('lec_'+idx);
+                    const opt = document.createElement('option'); opt.value = val; opt.textContent = lec.title || ('محاضرة ' + (idx+1));
+                    attachLectureSelect.appendChild(opt);
+                    document.getElementById('vAttachLectureSelect').appendChild(opt.cloneNode(true));
+                    document.getElementById('pAttachLectureSelect').appendChild(opt.cloneNode(true));
+                });
+
+                const trainings = contents.trainings || [];
+                trainings.forEach((t, idx)=>{
+                    const val = t.createdAt || ('t_'+idx);
+                    const opt = document.createElement('option'); opt.value = val; opt.textContent = t.title || ('تدريب ' + (idx+1));
+                    linkTrainingSelect.appendChild(opt);
+                });
+            }
+
+            // show/hide attach/link groups based on display type
+            if(eDisplay){
+                eDisplay.addEventListener('change', (ev)=>{
+                    const v = ev.target.value;
+                    trainingAttachGroup.style.display = v === 'training' ? 'block' : 'none';
+                    homeworkLinkGroup.style.display = v === 'homework' ? 'block' : 'none';
+                });
+            }
+
+            // when course selection changes for exams or video/pdf forms, refresh lecture/training lists
+            const eCourse = document.getElementById('eCourseSelect');
+            const vCourse = document.getElementById('vCourseSelect');
+            const pCourse = document.getElementById('pCourseSelect');
+            if(eCourse){
+                eCourse.addEventListener('change', (ev)=>{
+                    populateLectureAndTrainingSelectors(ev.target.value);
+                });
+            }
+            if(vCourse){
+                vCourse.addEventListener('change', (ev)=>{
+                    updateLectureAttachVisibility(vSection, vLectureAttachGroup);
+                    populateLectureAndTrainingSelectors(ev.target.value);
+                });
+            }
+            if(pCourse){
+                pCourse.addEventListener('change', (ev)=>{
+                    updateLectureAttachVisibility(pSection, pLectureAttachGroup);
+                    populateLectureAndTrainingSelectors(ev.target.value);
+                });
+            }
+
+            // initialize lecture attach visibility from default section selection
+            updateLectureAttachVisibility(vSection, vLectureAttachGroup);
+            updateLectureAttachVisibility(pSection, pLectureAttachGroup);
+
+            // Add exam question
+            const btnAddQuestion = document.getElementById('btnAddExamQuestion');
+            if(btnAddQuestion) {
+                btnAddQuestion.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const qType = document.getElementById('questionType').value;
+                    const qText = document.getElementById('questionText').value;
+                    const qAnswer = document.getElementById('correctAnswer').value;
+
+                    if(!qText || !qAnswer) {
+                        alert('يرجى إدخال السؤال والإجابة');
+                        return;
+                    }
+
+                    let qObj = { type: qType, text: qText, answer: qAnswer, id: 'q_' + Date.now() };
+
+                    if(qType === 'choose') {
+                        qObj.options = {
+                            a: document.getElementById('optA').value || 'أ',
+                            b: document.getElementById('optB').value || 'ب',
+                            c: document.getElementById('optC').value || 'ج',
+                            d: document.getElementById('optD').value || 'د'
+                        };
+                    }
+
+                    // Enrich question with lightweight metadata for local grading (non-destructive)
+                    try {
+                        if(window.PF_Grader && typeof window.PF_Grader.enrichQuestion === 'function') {
+                            qObj = window.PF_Grader.enrichQuestion(qObj);
+                        }
+                    } catch (err) { /* fail-safe: keep qObj as-is */ }
+
+                    examQuestions.push(qObj);
+                    renderQuestionsList();
+                    document.getElementById('questionText').value = '';
+                    document.getElementById('correctAnswer').value = '';
+                    if(qType === 'choose') {
+                        document.getElementById('optA').value = '';
+                        document.getElementById('optB').value = '';
+                        document.getElementById('optC').value = '';
+                        document.getElementById('optD').value = '';
+                    }
+                });
+            }
+
+            function renderQuestionsList() {
+                const container = document.getElementById('examQuestionsList');
+                container.innerHTML = '';
+                examQuestions.forEach((q, idx) => {
+                    const qDiv = document.createElement('div');
+                    qDiv.style.cssText = 'background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);';
+                    qDiv.innerHTML = `
+                        <div style="display:flex; justify-content:space-between; align-items:start;">
+                            <div style="flex:1;">
+                                <p style="margin:0 0 5px 0; color:var(--text-primary);"><strong>السؤال ${idx+1}</strong></p>
+                                <p style="margin:0 0 5px 0; color:rgba(255,255,255,0.8);">${q.text.substring(0, 50)}...</p>
+                                <p style="margin:0; color:var(--accent-cyan); font-size:0.9rem;">الإجابة: ${q.answer}</p>
+                            </div>
+                            <button type="button" onclick="examQuestions.splice(${idx}, 1); renderQuestionsList();" class="btn btn-outline" style="padding:5px 10px; border-color:#e74c3c; color:#e74c3c;"><i class="fas fa-trash"></i></button>
+                        </div>
+                    `;
+                    container.appendChild(qDiv);
+                });
+            }
+
+            window.renderQuestionsList = renderQuestionsList;
+            window.examQuestions = examQuestions;
+
+            function findLecture(course, lectureId) {
+                if(!course || !course.contents) return null;
+                const contents = Array.isArray(course.contents) ? course.contents : course.contents;
+                const lectures = contents.lectures || [];
+                return lectures.find(l => l.id === lectureId || l.title === lectureId);
+            }
+
+            function attachToLecture(course, lectureId, itemObj) {
+                const lecture = findLecture(course, lectureId);
+                if(!lecture) return false;
+                lecture.children = lecture.children || [];
+                lecture.children.push(itemObj);
+                return true;
+            }
+
+            function fastUpload(courseId, section, itemObj) {
+                let courses = JSON.parse(localStorage.getItem('adminCourses') || '[]');
+                const idx = courses.findIndex(c => c.id === courseId);
+                if (idx > -1) {
+                    if (!courses[idx].contents) courses[idx].contents = { lectures: [], homeworks: [], exams: [], trainings: [] };
+                    if (Array.isArray(courses[idx].contents)) {
+                        let old = courses[idx].contents;
+                        courses[idx].contents = { lectures: old, homeworks: [], exams: [], trainings: [] };
+                    }
+                    if (!courses[idx].contents[section]) courses[idx].contents[section] = [];
+
+                    itemObj.id = itemObj.id || 'res_' + Date.now();
+                    itemObj.createdAt = Date.now();
+
+                    if(section === 'lectures') {
+                        const attachLectureId = itemObj.attachLectureId;
+                        if(attachLectureId && attachToLecture(courses[idx], attachLectureId, itemObj)) {
+                            delete itemObj.attachLectureId;
+                            localStorage.setItem('adminCourses', JSON.stringify(courses));
+                            if(window.showToast) window.showToast('تم ربط المحتوى بمحاضرة موجودة بنجاح!', 'success');
+                            else alert('تم ربط المحتوى بمحاضرة موجودة بنجاح!');
+                            return;
+                        }
+
+                        const lectureContainer = {
+                            id: 'lec_' + Date.now(),
+                            title: itemObj.title,
+                            type: 'lecture',
+                            createdAt: Date.now(),
+                            children: [itemObj]
+                        };
+                        delete itemObj.attachLectureId;
+                        courses[idx].contents.lectures.push(lectureContainer);
+                    } else {
+                        delete itemObj.attachLectureId;
+                        courses[idx].contents[section].push(itemObj);
+                    }
+
+                    localStorage.setItem('adminCourses', JSON.stringify(courses));
+                    if(window.showToast) window.showToast('تم إضافة المحتوى للكورس بنجاح!', 'success');
+                    else alert('تم إضافة المحتوى للكورس بنجاح!');
+                }
+            }
+
+            document.getElementById('fastUploadVideoForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const cId = document.getElementById('vCourseSelect').value;
+                const title = document.getElementById('vTitle').value;
+                const section = document.getElementById('vSectionSelect').value;
+                const source = document.querySelector('input[name="videoSource"]:checked').value;
+                
+                if(!cId) { alert('يجب اختيار كورس'); return; }
+
+                let itemObj = { title: title, type: 'video', source: source, attachLectureId: document.getElementById('vAttachLectureSelect').value };
+                if(source === 'youtube') {
+                    itemObj.youtubeUrl = document.getElementById('vYoutubeUrl').value;
+                    if(!itemObj.youtubeUrl) { alert('يرجى وضع رابط يوتيوب'); return; } itemObj.availableFrom = document.getElementById('vAvailableFrom').value; itemObj.availableUntil = document.getElementById('vAvailableUntil').value;
+                } else if(source === 'upload') {
+                    const fileInput = document.getElementById('vFileInput');
+                    if (!fileInput.files.length) { alert('يرجى اختيار ملف فيديو'); return; }
+                    const file = fileInput.files[0];
+                    const storageRef = window.firebaseStorage.ref('videos/' + Date.now() + '_' + file.name);
+                    const submitBtn = e.target.querySelector('button[type="submit"]');
+                    const originalBtnText = submitBtn.innerHTML;
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الرفع...';
+                    submitBtn.disabled = true;
+                    try {
+                        const snapshot = await storageRef.put(file);
+                        const downloadURL = await snapshot.ref.getDownloadURL();
+                        itemObj.videoUrl = downloadURL;
+                        itemObj.fileName = file.name; itemObj.availableFrom = document.getElementById('vAvailableFrom').value; itemObj.availableUntil = document.getElementById('vAvailableUntil').value;
+                    } catch(err) {
+                        console.error('Upload failed', err);
+                        alert('حدث خطأ أثناء رفع الفيديو: ' + err.message);
+                        submitBtn.innerHTML = originalBtnText;
+                        submitBtn.disabled = false;
+                        return;
+                    }
+                    submitBtn.innerHTML = originalBtnText;
+                    submitBtn.disabled = false;
+                }
+
+                fastUpload(cId, section, itemObj);
+                e.target.reset();
+            });
+
+            document.getElementById('fastUploadPdfForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const cId = document.getElementById('pCourseSelect').value;
+                const title = document.getElementById('pTitle').value;
+                const section = document.getElementById('pSectionSelect').value;
+                const source = document.querySelector('input[name="pdfSource"]:checked').value;
+                
+                if(!cId) { alert('يجب اختيار كورس'); return; }
+
+                let itemObj = { title: title, type: 'pdf', source: source, attachLectureId: document.getElementById('pAttachLectureSelect').value };
+                if(source === 'link') {
+                    itemObj.pdfUrl = document.getElementById('pLinkUrl').value;
+                    if(!itemObj.pdfUrl) { alert('يرجى وضع رابط خارجي للملف'); return; } itemObj.availableFrom = document.getElementById('pAvailableFrom').value; itemObj.availableUntil = document.getElementById('pAvailableUntil').value;
+                } else if(source === 'upload') {
+                    const fileInput = document.getElementById('pFileInput');
+                    if (!fileInput.files.length) { alert('يرجى اختيار ملف PDF'); return; }
+                    const file = fileInput.files[0];
+                    const storageRef = window.firebaseStorage.ref('pdfs/' + Date.now() + '_' + file.name);
+                    const submitBtn = e.target.querySelector('button[type="submit"]');
+                    const originalBtnText = submitBtn.innerHTML;
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الرفع...';
+                    submitBtn.disabled = true;
+                    try {
+                        const snapshot = await storageRef.put(file);
+                        const downloadURL = await snapshot.ref.getDownloadURL();
+                        itemObj.pdfUrl = downloadURL;
+                        itemObj.fileName = file.name; itemObj.availableFrom = document.getElementById('vAvailableFrom').value; itemObj.availableUntil = document.getElementById('vAvailableUntil').value;
+                    } catch(err) {
+                        console.error('Upload failed', err);
+                        alert('حدث خطأ أثناء رفع الملف: ' + err.message);
+                        submitBtn.innerHTML = originalBtnText;
+                        submitBtn.disabled = false;
+                        return;
+                    }
+                    submitBtn.innerHTML = originalBtnText;
+                    submitBtn.disabled = false;
+                }
+
+                fastUpload(cId, section, itemObj);
+                e.target.reset();
+            });
+
+            const examForm = document.getElementById('fastUploadExamForm');
+            if(examForm) {
+                examForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const cId = document.getElementById('eCourseSelect').value;
+                    const eTitle = document.getElementById('eTitle').value;
+                    const displayName = document.getElementById('eDisplayName').value;
+                    
+                    if(!cId) { alert('يجب اختيار كورس'); return; }
+                    if(examQuestions.length === 0) { alert('يرجى إضافة أسئلة للامتحان'); return; }
+
+                    const examObj = { availableFrom: document.getElementById('eAvailableFrom').value, availableUntil: document.getElementById('eAvailableUntil').value, duration: document.getElementById('eDuration').value,
+                        title: eTitle,
+                        type: displayName,
+                        questions: JSON.parse(JSON.stringify(examQuestions)),
+                        createdAt: Date.now()
+                    };
+
+                    // Decide target section and attach/link metadata
+                    let section = 'exams';
+                    if(displayName === 'training'){
+                        section = 'trainings';
+                        const attachVal = (attachLectureSelect && attachLectureSelect.value) ? attachLectureSelect.value : '';
+                        if(attachVal) examObj.attachedToLectureId = attachVal;
+                        // mark training to be shown after lecture is watched when attached
+                        if(attachVal) examObj.showOnlyAfterWatch = true;
+                    } else if(displayName === 'homework'){
+                        section = 'homeworks';
+                        const linkVal = (linkTrainingSelect && linkTrainingSelect.value) ? linkTrainingSelect.value : '';
+                        if(linkVal) examObj.lockedUntilTrainingId = linkVal; // homework locked until linked training done
+                    }
+
+                    fastUpload(cId, section, examObj);
+                    examQuestions = [];
+                    renderQuestionsList();
+                    e.target.reset();
+                    window.examQuestions = [];
+                });
+            }
+        });
+    </script>
+    <script src="js/support-chat.js"></script>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/firebase-service.js"></script>
+</body>
+</html>
+
+
+

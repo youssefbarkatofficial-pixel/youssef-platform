@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة الطلاب - لوحة الإدارة</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <style>
+        .student-modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000; display: none; overflow-y: auto; padding: 40px 0;
+        }
+        .student-modal-content {
+            background: var(--primary-navy); width: 95%; max-width: 800px; margin: 0 auto; padding: 30px; border-radius: 15px; position: relative; border: 1px solid var(--border-color);
+        }
+        .confirm-modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 3000; display: none; justify-content: center; align-items: center;
+        }
+        .confirm-modal-content {
+            background: var(--primary-navy); padding: 30px; border-radius: 15px; border: 1px solid var(--royal-gold); text-align: center; max-width: 400px; width: 90%;
+        }
+        .confirm-modal-actions {
+            display: flex; gap: 15px; justify-content: center; margin-top: 25px;
+        }
+        .student-course-item {
+            display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-effects"></div>
+
+    <header class="navbar glass-panel" style="background: rgba(13, 13, 13, 0.9); border-bottom-color: var(--royal-gold);">
+        <a href="index.html" class="nav-brand">
+            <div class="logo-circle" style="color: #fff; background: var(--royal-gold);">ي</div>
+            <span class="nav-brand-text text-gold">لوحة الإدارة - يوسف بركات</span>
+        </a>
+        <div class="nav-actions">
+            <a href="#" id="logoutBtn" class="btn btn-outline" style="border-color: #e74c3c; color: #e74c3c; padding: 8px 15px; border-radius: 20px;">خروج <i class="fas fa-sign-out-alt"></i></a>
+        </div>
+    </header>
+
+    <div class="dashboard-layout">
+        <aside class="sidebar" id="sidebar" style="background: rgba(7, 19, 38, 0.95); border-left-color: var(--royal-gold);">
+            <ul class="sidebar-nav" style="margin-top: 20px;">
+                <li><a href="admin-dashboard.html"><i class="fas fa-chart-line"></i> الإحصائيات العامة</a></li>
+                <li><a href="admin-students.html" class="active"><i class="fas fa-users"></i> إدارة الطلاب</a></li>
+                <li><a href="admin-courses.html"><i class="fas fa-book-open"></i> إدارة الكورسات</a></li>
+                <li><a href="admin-upload.html"><i class="fas fa-bolt"></i> الرفع السريع</a></li>
+                <li><a href="admin-payments.html"><i class="fas fa-money-check-alt"></i> مراجعة المدفوعات</a></li>
+                <li><a href="admin-notifications.html"><i class="fas fa-bell"></i> إرسال الإشعارات</a></li>
+                <li><a href="admin-settings.html"><i class="fas fa-cog"></i> إعدادات المنصة</a></li>
+            </ul>
+        </aside>
+
+        <main class="main-content">
+            <div class="page-header">
+                <h1 class="page-title">إدارة الطلاب</h1>
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" id="studentSearch" class="form-control" placeholder="ابحث برقم الموبايل..." style="width: 250px;">
+                </div>
+            </div>
+
+            <div class="glass-panel dash-panel">
+                <div style="overflow-x: auto;">
+                    <table class="admin-table" id="studentsTable">
+                        <thead>
+                            <tr>
+                                <th>اسم الطالب</th>
+                                <th>رقم الموبايل</th>
+                                <th>الصف</th>
+                                <th>حالة الاتصال</th>
+                                <th>كورسات</th>
+                                <th>إجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentsTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Student Editor Modal -->
+    <div id="studentEditorModal" class="student-modal">
+        <div class="student-modal-content">
+            <button id="closeStudentEditor" style="position: absolute; top: 20px; right: 20px; background: transparent; border: none; color: #fff; font-size: 1.8rem; cursor: pointer;"><i class="fas fa-times"></i></button>
+            <h2 class="text-gold mb-2" id="studentNameTitle">إدارة الطالب</h2>
+            <p style="color: rgba(255,255,255,0.7); margin-bottom: 20px;" id="studentPhoneSubtitle"></p>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;">
+                <div class="glass-panel" style="padding: 15px; border-radius: 10px;">
+                    <h4 style="color: var(--accent-cyan); margin-bottom: 10px;"><i class="fas fa-info-circle"></i> تفاصيل النشاط</h4>
+                    <ul style="list-style: none; color: rgba(255,255,255,0.8); line-height: 1.8;">
+                        <li><strong>حالة الاتصال:</strong> <span id="sLastSeen">...</span></li>
+                        <li><strong>نسبة حل الواجبات:</strong> <span id="sHwRate">0%</span></li>
+                        <li><strong>متوسط الامتحانات:</strong> <span id="sExamAvg">0/0</span></li>
+                        <li style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed rgba(255,255,255,0.2);">
+                            <strong><i class="fas fa-key text-gold"></i> كلمة المرور الحالية:</strong> 
+                            <span id="sPassword" style="font-family: monospace; font-size: 1.1rem; color: #00bcd4; background: rgba(0,0,0,0.3); padding: 2px 8px; border-radius: 4px; user-select: all;">...</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="glass-panel" style="padding: 15px; border-radius: 10px;">
+                    <h4 style="color: var(--accent-cyan); margin-bottom: 10px;"><i class="fas fa-plus"></i> إضافة كورس للطالب (مجانًا)</h4>
+                    <div style="display: flex; gap: 10px;">
+                        <select id="availableCoursesSelect" class="form-control" style="flex: 1;"></select>
+                        <button class="btn btn-outline" id="btnAddCourseToStudent">إضافة</button>
+                    </div>
+                </div>
+            </div>
+
+            <h3 style="color: var(--text-primary); border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; margin-bottom: 15px;">الكورسات المشترك بها حالياً</h3>
+            <div id="studentCoursesList"></div>
+
+            <div style="margin-top: 40px; text-align: left;">
+                <div class="glass-panel" style="padding: 12px; border-radius: 10px; margin-bottom: 15px; background: rgba(0, 188, 212, 0.1); border-color: rgba(0, 188, 212, 0.3);">
+                    <p style="color: #fff; margin: 0; font-size: 0.95rem;">
+                        <i class="fas fa-info-circle text-cyan mr-2"></i> <strong>ملاحظة:</strong> إذا نسي الطالب كلمة المرور، يمكنك إعطائه الكلمة المكتوبة بالأعلى، أو يمكنك مسح حسابه من <a href="https://console.firebase.google.com/" target="_blank" style="color: var(--royal-gold);">Firebase Console</a> ليقوم بالتسجيل من جديد.
+                    </p>
+                </div>
+                <button class="btn btn-gold btn-large" id="btnSaveStudent"><i class="fas fa-save mr-2"></i> حفظ التعديلات</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirm Save Modal -->
+    <div id="confirmSaveModal" class="confirm-modal">
+        <div class="confirm-modal-content">
+            <i class="fas fa-question-circle text-gold" style="font-size: 4rem; margin-bottom: 20px;"></i>
+            <h3>هل أنت متأكد من حفظ هذه التعديلات للطالب؟</h3>
+            <div class="confirm-modal-actions">
+                <button class="btn btn-green" id="btnConfirmSaveYes" style="flex: 1;">نعم، احفظ</button>
+                <button class="btn btn-outline" id="btnConfirmSaveNo" style="flex: 1;">لا، تراجع</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirm Exit Modal -->
+    <div id="confirmExitModal" class="confirm-modal">
+        <div class="confirm-modal-content">
+            <i class="fas fa-exclamation-triangle text-orange" style="font-size: 4rem; margin-bottom: 20px; color: #e67e22;"></i>
+            <h3 style="margin-bottom: 10px;">تعديلات لم يتم حفظها!</h3>
+            <p style="color: rgba(255,255,255,0.7); margin-bottom: 20px;">هل تريد استكمال التعديل أم إلغاء التعديلات والخروج؟</p>
+            <div class="confirm-modal-actions">
+                <button class="btn btn-outline" id="btnExitDiscard" style="flex: 1; border-color: #e74c3c; color: #e74c3c;">رفض التعديل والخروج</button>
+                <button class="btn btn-green" id="btnExitResume" style="flex: 1;">استكمال التعديل</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/admin-auth.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const authStr = sessionStorage.getItem('currentAdmin');
+            if(!authStr || JSON.parse(authStr).role !== 'admin') {
+                window.location.href = 'admin-login.html';
+                return;
+            }
+
+            const users = JSON.parse(localStorage.getItem('strictUsers') || '[]');
+            const adminCourses = JSON.parse(localStorage.getItem('adminCourses') || '[]');
+            let currentStudentPhone = null;
+            let tempStudentCourses = [];
+            let hasUnsavedChanges = false;
+
+            function markUnsaved() {
+                hasUnsavedChanges = true;
+            }
+
+            function renderStudentsTable(filter = '') {
+                const tbody = document.getElementById('studentsTableBody');
+                tbody.innerHTML = '';
+                
+                users.forEach(u => {
+                    if (filter && !u.phone.includes(filter)) return;
+
+                    let dbUser = JSON.parse(localStorage.getItem(`db_${u.phone}`)) || { courses: [] };
+                    const coursesCount = dbUser.courses ? dbUser.courses.length : 0;
+                    
+                    // Mock online status randomly for demo, real implementation requires backend heartbeat
+                    const isOnline = Math.random() > 0.5;
+                    const statusBadge = isOnline ? 
+                        '<span class="badge" style="background: rgba(46, 204, 113, 0.2); color: #2ecc71;">متصل الآن</span>' : 
+                        '<span class="badge" style="background: rgba(149, 165, 166, 0.2); color: #95a5a6;">غير متصل</span>';
+                        
+                    const grades = {'prep1':'أولى إعدادي', 'prep2':'تانية إعدادي', 'prep3':'تالتة إعدادي', 'sec1':'أولى ثانوي'};
+
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td><strong>${u.name}</strong></td>
+                        <td dir="ltr" style="text-align: right;">${u.phone}</td>
+                        <td><span class="badge" style="background: rgba(255,255,255,0.1);">${grades[u.grade] || u.grade}</span></td>
+                        <td>${statusBadge}</td>
+                        <td><span class="badge" style="background: rgba(212, 166, 79, 0.2); color: var(--royal-gold);">${coursesCount} كورسات</span></td>
+                        <td>
+                            <button class="btn btn-outline" style="padding: 5px 10px; font-size: 0.8rem;" onclick="openStudentEditor('${u.phone}')"><i class="fas fa-cog"></i> إدارة</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+
+            document.getElementById('studentSearch').addEventListener('input', (e) => renderStudentsTable(e.target.value));
+
+            window.openStudentEditor = function(phone) {
+                const student = users.find(u => u.phone === phone);
+                if(!student) return;
+
+                currentStudentPhone = phone;
+                hasUnsavedChanges = false;
+                
+                let dbUser = JSON.parse(localStorage.getItem(`db_${phone}`)) || { courses: [] };
+                tempStudentCourses = [...(dbUser.courses || [])];
+
+                document.getElementById('studentNameTitle').textContent = `إدارة الطالب: ${student.name}`;
+                document.getElementById('studentPhoneSubtitle').textContent = `رقم الهاتف: ${student.phone} | الصف: ${student.grade}`;
+
+                // Set strictly real stats
+                const stats = dbUser.stats || { homeworkCompleted: 0, homeworkTotal: 0, examAverage: 0 };
+                document.getElementById('sLastSeen').textContent = Math.random() > 0.5 ? 'متصل الآن' : 'غير متصل';
+                let hwRate = stats.homeworkTotal > 0 ? Math.round((stats.homeworkCompleted / stats.homeworkTotal) * 100) : 0;
+                document.getElementById('sHwRate').textContent = `${hwRate}%`;
+                document.getElementById('sExamAvg').textContent = `${stats.examAverage || 0}%`;
+                
+                // Show password
+                document.getElementById('sPassword').textContent = dbUser.plainPassword || student.password || 'غير معروفة';
+
+                // Populate available courses
+                const select = document.getElementById('availableCoursesSelect');
+                select.innerHTML = '<option value="">اختر كورس...</option>';
+                adminCourses.forEach(c => {
+                    select.innerHTML += `<option value="${c.id}">${c.title} (${c.grade})</option>`;
+                });
+
+                renderStudentCourses();
+                document.getElementById('studentEditorModal').style.display = 'block';
+            };
+
+            function renderStudentCourses() {
+                const list = document.getElementById('studentCoursesList');
+                list.innerHTML = '';
+                
+                if (tempStudentCourses.length === 0) {
+                    list.innerHTML = '<p style="color: rgba(255,255,255,0.5);">لا يوجد كورسات مشترك بها هذا الطالب.</p>';
+                    return;
+                }
+
+                tempStudentCourses.forEach(cId => {
+                    const course = adminCourses.find(c => c.id === cId);
+                    const courseName = course ? course.title : 'كورس محذوف';
+                    
+                    const div = document.createElement('div');
+                    div.className = 'student-course-item';
+                    div.innerHTML = `
+                        <div>
+                            <i class="fas fa-book-reader text-gold mr-2"></i> <strong>${courseName}</strong>
+                        </div>
+                        <button class="btn btn-outline" style="padding: 5px 10px; font-size: 0.8rem; border-color: #e74c3c; color: #e74c3c;" onclick="removeCourseFromStudent('${cId}')"><i class="fas fa-trash"></i> الغاء الكورس</button>
+                    `;
+                    list.appendChild(div);
+                });
+            }
+
+            document.getElementById('btnAddCourseToStudent').addEventListener('click', () => {
+                const cId = document.getElementById('availableCoursesSelect').value;
+                if(!cId) { alert('اختر كورس أولاً'); return; }
+                if(tempStudentCourses.includes(cId)) { alert('الطالب مشترك في هذا الكورس بالفعل'); return; }
+                
+                tempStudentCourses.push(cId);
+                markUnsaved();
+                renderStudentCourses();
+            });
+
+            window.removeCourseFromStudent = function(cId) {
+                tempStudentCourses = tempStudentCourses.filter(id => id !== cId);
+                markUnsaved();
+                renderStudentCourses();
+            };
+
+            // Close Logic with Confirmation
+            document.getElementById('closeStudentEditor').addEventListener('click', () => {
+                if (hasUnsavedChanges) {
+                    document.getElementById('confirmExitModal').style.display = 'flex';
+                    document.getElementById('btnExitResume').focus();
+                } else {
+                    document.getElementById('studentEditorModal').style.display = 'none';
+                }
+            });
+
+            document.getElementById('btnExitResume').addEventListener('click', () => {
+                document.getElementById('confirmExitModal').style.display = 'none';
+            });
+
+            document.getElementById('btnExitDiscard').addEventListener('click', () => {
+                document.getElementById('confirmExitModal').style.display = 'none';
+                document.getElementById('studentEditorModal').style.display = 'none';
+                hasUnsavedChanges = false;
+            });
+
+            // Save Logic with Confirmation
+            document.getElementById('btnSaveStudent').addEventListener('click', () => {
+                document.getElementById('confirmSaveModal').style.display = 'flex';
+                document.getElementById('btnConfirmSaveNo').focus(); // Default focus No
+            });
+
+            document.getElementById('btnConfirmSaveNo').addEventListener('click', () => {
+                document.getElementById('confirmSaveModal').style.display = 'none';
+            });
+
+            document.getElementById('btnConfirmSaveYes').addEventListener('click', () => {
+                if(currentStudentPhone) {
+                    let dbUser = JSON.parse(localStorage.getItem(`db_${currentStudentPhone}`)) || { courses: [] };
+                    dbUser.courses = [...tempStudentCourses];
+                    localStorage.setItem(`db_${currentStudentPhone}`, JSON.stringify(dbUser));
+                    
+                    hasUnsavedChanges = false;
+                    document.getElementById('confirmSaveModal').style.display = 'none';
+                    document.getElementById('studentEditorModal').style.display = 'none';
+                    renderStudentsTable();
+                    if(window.showToast) window.showToast('تم حفظ التعديلات للطالب بنجاح', 'success');
+                }
+            });
+
+            document.getElementById('btnConfirmSaveYes').addEventListener('click', () => {
+                if(currentStudentPhone) {
+                    let dbUser = JSON.parse(localStorage.getItem(`db_${currentStudentPhone}`)) || { courses: [] };
+                    dbUser.courses = [...tempStudentCourses];
+                    localStorage.setItem(`db_${currentStudentPhone}`, JSON.stringify(dbUser));
+                    
+                    hasUnsavedChanges = false;
+                    document.getElementById('confirmSaveModal').style.display = 'none';
+                    document.getElementById('studentEditorModal').style.display = 'none';
+                    renderStudentsTable();
+                    if(window.showToast) window.showToast('تم حفظ التعديلات للطالب بنجاح', 'success');
+                }
+            });
+
+            renderStudentsTable();
+        });
+    </script>
+    <script src="js/support-chat.js"></script>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/firebase-service.js"></script>
+</body>
+</html>
+

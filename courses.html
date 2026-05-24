@@ -1,0 +1,112 @@
+﻿<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>يوسف بركات</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/courses.css">
+    <link rel="stylesheet" href="css/auth.css">
+</head>
+<body>
+    <div class="bg-effects"></div>
+
+    <!-- Header -->
+    <header class="navbar glass-panel">
+        <a href="index.html" class="nav-brand">
+            <div class="logo-circle">ي</div>
+            <span class="nav-brand-text">منصة يوسف بركات</span>
+        </a>
+        <ul class="nav-links">
+            <li><a href="index.html">الرئيسية</a></li>
+            <li><a href="courses.html" class="active">الكورسات</a></li>
+            <li><a href="dashboard.html">لوحة التحكم</a></li>
+        </ul>
+        <div class="nav-actions">
+            <div class="mobile-menu-btn"><i class="fas fa-bars"></i></div>
+        </div>
+    </header>
+
+    <div class="courses-header">
+        <h1 class="heading-luxury mb-1">استكشف الكورسات المتاحة</h1>
+        <p style="color: rgba(255,255,255,0.8); max-width: 600px; margin: 0 auto;">اختر صفك الدراسي وابدأ رحلة التفوق مع أقوى شرح وأحدث طرق التقويم.</p>
+        
+        <div class="filter-tabs">
+            <button class="filter-btn active" data-filter="all">الكل</button>
+            <button class="filter-btn" data-filter="prep1">أولى إعدادي</button>
+            <button class="filter-btn" data-filter="prep2">تانية إعدادي</button>
+            <button class="filter-btn" data-filter="prep3">تالتة إعدادي</button>
+            <button class="filter-btn" data-filter="sec1">أولى ثانوي</button>
+        </div>
+    </div>
+
+    <div class="courses-grid" id="coursesGrid">
+        <!-- Courses will be loaded dynamically by js/courses-renderer.js -->
+    </div>
+
+    <!-- Payment Modal -->
+    <div class="modal-overlay" id="paymentModal">
+        <div class="glass-panel modal-content" style="padding: 30px; max-width: 500px;">
+            <button class="close-modal" onclick="document.getElementById('paymentModal').classList.remove('active')"><i class="fas fa-times"></i></button>
+            <h2 class="text-gold mb-2 text-center">تأكيد الاشتراك والدفع</h2>
+            
+            <p style="margin-bottom: 20px; text-align: center;">اختر طريقة الدفع المناسبة لك:</p>
+            
+            <div class="payment-methods">
+                <div class="pay-method active" data-type="vodafone">
+                    <i class="fas fa-mobile-alt" style="font-size: 2rem; color: #e60000; margin-bottom: 10px;"></i>
+                    <h4>فودافون كاش</h4>
+                </div>
+                <div class="pay-method" data-type="fawry" style="opacity: 0.5; pointer-events: none; filter: grayscale(100%); position: relative;">
+                    <span style="position: absolute; top: 5px; left: 5px; background: rgba(0,0,0,0.5); font-size: 0.7rem; padding: 2px 5px; border-radius: 3px;">قريباً</span>
+                    <i class="fas fa-store" style="font-size: 2rem; color: #f1c40f; margin-bottom: 10px;"></i>
+                    <h4>فوري</h4>
+                </div>
+            </div>
+
+            <div class="payment-details" id="vodafoneDetails">
+                <p>قم بتحويل المبلغ على الرقم التالي عبر فودافون كاش:</p>
+                <div class="copy-box">
+                    <span id="vCashNum" style="font-size: 1.2rem; font-weight: bold; letter-spacing: 2px;">01023675235</span>
+                    <button class="copy-btn" data-target="vCashNum"><i class="fas fa-copy"></i></button>
+                </div>
+                <p style="font-size: 0.85rem; margin-top: 10px; color: var(--accent-cyan);">* برجاء الاحتفاظ بصورة التحويل (الاسكرين شوت) لرفعها بعد الدفع.</p>
+            </div>
+
+            <div class="payment-details" id="fawryDetails" style="display: none;">
+                <p>توجه لأقرب ماكينة فوري واستخدم كود الدفع التالي:</p>
+                <div class="copy-box">
+                    <span id="fawryCode" style="font-size: 1.2rem; font-weight: bold; letter-spacing: 2px;">784512</span>
+                    <button class="copy-btn" data-target="fawryCode"><i class="fas fa-copy"></i></button>
+                </div>
+                <p style="font-size: 0.85rem; margin-top: 10px; color: var(--accent-cyan);">* الكود صالح لمدة 24 ساعة فقط.</p>
+            </div>
+
+            <!-- Fake File Upload for Proof -->
+            <div class="form-group" style="margin-top: 20px;">
+                <label>ارفع صورة التحويل</label>
+                <input type="file" id="paymentProofImage" class="form-control" style="padding: 10px;" accept="image/*">
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button class="btn btn-outline" style="flex: 1;" onclick="document.getElementById('paymentModal').classList.remove('active')">تراجع</button>
+                <button type="button" class="btn btn-green" style="flex: 1;" id="confirmPayment" onclick="submitPaymentRequest()">استمرار</button>
+            </div>
+        </div>
+    </div>
+    <script src="js/storage-service.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/dashboard.js"></script>
+    <script src="js/courses-renderer.js"></script>
+    <script src="js/support-chat.js"></script>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/firebase-service.js"></script>
+</body>
+</html>
+

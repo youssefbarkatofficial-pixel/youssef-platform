@@ -1,0 +1,301 @@
+﻿<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>يوسف بركات</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <style>
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            margin-bottom: 40px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .profile-avatar-container {
+            position: relative;
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            border: 4px solid var(--royal-gold);
+            background: var(--bg-main);
+            box-shadow: 0 0 20px rgba(212, 166, 79, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .profile-avatar-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* This makes any dimension image fit perfectly in the circle */
+        }
+
+        .upload-btn {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--royal-gold);
+            color: var(--bg-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: 2px solid var(--card-bg);
+            transition: var(--transition-smooth);
+            z-index: 10;
+        }
+
+        .upload-btn:hover {
+            transform: scale(1.1);
+            background: var(--soft-gold);
+        }
+
+        .profile-info h2 {
+            color: var(--text-primary);
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .profile-info p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .info-card {
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 15px;
+            border: 1px solid var(--border-color);
+        }
+
+        .info-card label {
+            display: block;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+
+        .info-card .data {
+            color: var(--text-primary);
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+
+        .courses-list {
+            list-style: none;
+        }
+
+        .courses-list li {
+            padding: 15px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .courses-list li:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-effects"></div>
+
+    <!-- Header -->
+    <header class="navbar glass-panel" style="background: var(--bg-main);">
+        <a href="index.html" class="nav-brand">
+            <div class="logo-circle" style="width: 40px; height: 40px; font-size: 1.2rem;">ي</div>
+            <span class="nav-brand-text">منصة يوسف بركات</span>
+        </a>
+        <div class="nav-actions">
+            <a href="#" class="btn btn-outline" style="padding: 8px 15px; border-radius: 20px;"><i class="fas fa-bell"></i></a>
+            <a href="#" id="logoutBtn" class="btn btn-outline" style="border-color: #e74c3c; color: #e74c3c; padding: 8px 15px; border-radius: 20px;">خروج <i class="fas fa-sign-out-alt"></i></a>
+            <div class="mobile-menu-btn"><i class="fas fa-bars"></i></div>
+        </div>
+    </header>
+
+    <div class="dashboard-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="user-profile-mini">
+                <div class="avatar" style="overflow: hidden;">
+                    <img id="userAvatarImg" src="https://via.placeholder.com/80/071326/D4A64F?text=%D8%B7%D8%A7%D9%84%D8%A8" alt="صورة الطالب" style="width: 100%; height: 100%; object-fit: cover; display: block;">
+                </div>
+                <h4 id="userNameDisplay">طالب</h4>
+                <p id="userGradeDisplay">الصف الدراسي</p>
+                <div class="badge badge-active" style="display: inline-block; margin-top: 10px;">عضو نشط</div>
+            </div>
+            
+            <ul class="sidebar-nav">
+                <li><a href="dashboard.html"><i class="fas fa-home"></i> لوحة التحكم</a></li>
+                <li><a href="profile.html" class="active"><i class="fas fa-user"></i> حسابي</a></li>
+                <li><a href="courses.html"><i class="fas fa-plus-circle"></i> اشتراك في كورسات</a></li>
+                <li><a href="#"><i class="fas fa-video"></i> كورساتي</a></li>
+                <li><a href="#"><i class="fas fa-tasks"></i> الواجبات</a></li>
+                <li><a href="#"><i class="fas fa-clipboard-list"></i> الامتحانات</a></li>
+                <li><a href="#"><i class="fas fa-chart-line"></i> الإحصائيات</a></li>
+                <li><a href="#"><i class="fas fa-cog"></i> الإعدادات</a></li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">الملف الشخصي</h1>
+                    <p style="color: var(--accent-cyan);">إدارة حسابك وبياناتك الشخصية</p>
+                </div>
+            </div>
+
+            <div class="glass-panel dash-panel">
+                <div class="profile-header">
+                    <div style="position: relative;">
+                        <div class="profile-avatar-container">
+                            <img id="mainProfilePic" src="https://via.placeholder.com/150/071326/D4A64F?text=%D8%B5%D9%88%D8%B1%D8%A9" alt="صورة الملف الشخصي">
+                        </div>
+                        <label for="profilePicUpload" class="upload-btn" title="تغيير الصورة">
+                            <i class="fas fa-camera"></i>
+                        </label>
+                        <input type="file" id="profilePicUpload" accept="image/*" style="display: none;">
+                    </div>
+                    
+                    <div class="profile-info">
+                        <h2 id="profileName">طالب تجريبي</h2>
+                        <p id="profileRole"><i class="fas fa-user-graduate mr-2"></i> طالب بالمنصة</p>
+                        <div class="badge badge-active" style="margin-top: 10px;"><i class="fas fa-check-circle mr-2"></i> حساب موثق</div>
+                    </div>
+                </div>
+
+                <h3 class="text-gold mb-2"><i class="fas fa-info-circle mr-2"></i> المعلومات الأساسية</h3>
+                
+                <div class="info-grid">
+                    <div class="info-card">
+                        <label>رقم الموبايل (اسم المستخدم)</label>
+                        <div class="data" id="profilePhone">01XXXXXXXXX</div>
+                    </div>
+                    <div class="info-card">
+                        <label>الصف الدراسي</label>
+                        <div class="data" id="profileGrade">الصف الدراسي</div>
+                    </div>
+                    <div class="info-card">
+                        <label>المحافظة</label>
+                        <div class="data" id="profileGov">المحافظة</div>
+                    </div>
+                    <div class="info-card">
+                        <label>رقم هاتف ولي الأمر</label>
+                        <div class="data" id="profileParentPhone">01XXXXXXXXX</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-panel dash-panel">
+                <h3 class="text-gold mb-2"><i class="fas fa-book-reader mr-2"></i> الكورسات المشترك بها</h3>
+                <ul class="courses-list">
+                    <li>
+                        <i class="fas fa-play-circle text-cyan" style="font-size: 1.5rem;"></i>
+                        <div>
+                            <h4 style="color: var(--text-primary);">كورس الجغرافيا الطبيعية - الوحدة الأولى</h4>
+                            <p style="color: var(--text-muted); font-size: 0.85rem;">تاريخ الاشتراك: 15 أكتوبر 2026</p>
+                        </div>
+                        <div class="badge badge-active" style="margin-right: auto;">نشط</div>
+                    </li>
+                    <li>
+                        <i class="fas fa-play-circle text-cyan" style="font-size: 1.5rem;"></i>
+                        <div>
+                            <h4 style="color: var(--text-primary);">كورس التاريخ الفرعوني - الوحدة الثانية</h4>
+                            <p style="color: var(--text-muted); font-size: 0.85rem;">تاريخ الاشتراك: 20 أكتوبر 2026</p>
+                        </div>
+                        <div class="badge badge-active" style="margin-right: auto;">نشط</div>
+                    </li>
+                </ul>
+            </div>
+        </main>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
+    
+    <script src="js/firebase-config.js"></script>
+    <script src="js/firebase-service.js"></script>
+    <script src="js/storage-service.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/support-chat.js"></script>
+    <script src="js/dashboard.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const userStr = sessionStorage.getItem('currentStudent');
+            if (userStr) {
+                const user = JSON.parse(userStr);
+                
+                // Set Profile Information
+                document.getElementById('profileName').textContent = user.name;
+                document.getElementById('profilePhone').textContent = user.phone;
+                document.getElementById('profileParentPhone').textContent = user.parentPhone || 'غير متوفر';
+                document.getElementById('profileGov').textContent = user.gov || 'غير متوفر';
+                
+                const grades = {
+                    'prep1': 'الصف الأول الإعدادي',
+                    'prep2': 'الصف الثاني الإعدادي',
+                    'prep3': 'الصف الثالث الإعدادي',
+                    'sec1': 'الصف الأول الثانوي'
+                };
+                document.getElementById('profileGrade').textContent = grades[user.grade] || user.grade;
+
+                // Load Profile Picture
+                const profilePic = localStorage.getItem(`profilePic_${user.phone}`);
+                const mainPic = document.getElementById('mainProfilePic');
+                if (profilePic && mainPic) {
+                    mainPic.src = profilePic;
+                }
+
+                // Handle Picture Upload
+                const uploadInput = document.getElementById('profilePicUpload');
+                uploadInput.addEventListener('change', function(e) {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = function(event) {
+                            const base64Data = event.target.result;
+                            
+                            // Update Images
+                            mainPic.src = base64Data;
+                            const sidebarPic = document.getElementById('userAvatarImg');
+                            if (sidebarPic) sidebarPic.src = base64Data;
+
+                            // Save to LocalStorage
+                            localStorage.setItem(`profilePic_${user.phone}`, base64Data);
+                            
+                            if (window.showToast) {
+                                window.showToast('تم تحديث الصورة الشخصية بنجاح!', 'success');
+                            }
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
+

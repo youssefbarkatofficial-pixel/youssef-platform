@@ -1,0 +1,970 @@
+﻿<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>محتويات الكورس - يوسف بركات</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/courses.css">
+    <link rel="stylesheet" href="css/auth.css">
+</head>
+<body>
+    <div class="bg-effects"></div>
+
+    <!-- Header -->
+    <header class="navbar glass-panel">
+        <a href="index.html" class="nav-brand">
+            <div class="logo-circle">ي</div>
+            <span class="nav-brand-text">منصة يوسف بركات</span>
+        </a>
+        <ul class="nav-links">
+            <li><a href="index.html">الرئيسية</a></li>
+            <li><a href="courses.html">الكورسات</a></li>
+            <li><a href="dashboard.html">لوحة التحكم</a></li>
+        </ul>
+        <div class="nav-actions">
+            <div class="mobile-menu-btn"><i class="fas fa-bars"></i></div>
+        </div>
+    </header>
+
+    <div class="container" style="padding-top: 150px; padding-bottom: 50px; min-height: 80vh;">
+        <div class="glass-panel" style="padding: 40px; border-radius: 20px; max-width: 800px; margin: 0 auto;">
+            
+            <a href="courses.html" style="color: var(--accent-cyan); text-decoration: none; font-size: 0.9rem; margin-bottom: 20px; display: inline-block;">
+                <i class="fas fa-arrow-right mr-2"></i> العودة للكورسات
+            </a>
+
+            <div style="display: flex; flex-wrap: wrap; gap: 30px; margin-bottom: 40px; align-items: flex-start;">
+                <img id="cdImage" src="" style="width: 100%; max-width: 300px; height: 200px; object-fit: cover; border-radius: 15px; border: 1px solid var(--border-color);" alt="Course">
+                <div style="flex: 1; min-width: 250px;">
+                    <span id="cdGrade" class="badge" style="background: rgba(212, 166, 79, 0.2); color: var(--royal-gold); padding: 5px 15px; border-radius: 20px; font-size: 0.9rem; margin-bottom: 15px; display: inline-block;"></span>
+                    <h1 id="cdTitle" class="heading-luxury mb-1" style="font-size: 2rem;">جاري تحميل الكورس...</h1>
+                    <p id="cdDesc" style="color: rgba(255,255,255,0.8); line-height: 1.6; margin-bottom: 20px;"></p>
+                    <div style="display: flex; align-items: center; gap: 20px;">
+                        <div style="font-size: 1.5rem; font-weight: bold; color: var(--royal-gold);" id="cdPrice"></div>
+                        <div id="cdActionBtnContainer"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="cdLecturesSection">
+                <h3 style="color: var(--text-primary); border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; margin-bottom: 20px; margin-top: 40px; display: flex; align-items: baseline; gap: 10px;">
+                    <div><i class="fas fa-play-circle mr-2 text-gold"></i> المحاضرات</div>
+                    <span style="font-size: 0.8rem; color: rgba(255,255,255,0.5); font-weight: normal;">(3 محاضرات - 4 ساعات حتى الآن)</span>
+                </h3>
+                <div id="cdLecturesList" style="display: flex; flex-direction: column; gap: 15px;"></div>
+            </div>
+
+            <div id="cdHomeworksSection">
+                <h3 style="color: var(--text-primary); border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; margin-bottom: 20px; margin-top: 40px;">
+                    <i class="fas fa-tasks mr-2 text-gold"></i> الواجبات
+                </h3>
+                <div id="cdHomeworksList" style="display: flex; flex-direction: column; gap: 15px;"></div>
+            </div>
+
+            <div id="cdExamsSection">
+                <h3 style="color: var(--text-primary); border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; margin-bottom: 20px; margin-top: 40px;">
+                    <i class="fas fa-clipboard-list mr-2 text-gold"></i> الامتحانات
+                </h3>
+                <div id="cdExamsList" style="display: flex; flex-direction: column; gap: 15px;"></div>
+            </div>
+            
+        </div>
+    </div>
+
+    <!-- Payment Modal (Duplicated for standalone use) -->
+    <div class="modal-overlay" id="paymentModal">
+        <div class="glass-panel modal-content" style="padding: 30px; max-width: 500px;">
+            <button class="close-modal" onclick="document.getElementById('paymentModal').classList.remove('active')"><i class="fas fa-times"></i></button>
+            <h2 class="text-gold mb-2 text-center">تأكيد الاشتراك والدفع</h2>
+            
+            <p style="margin-bottom: 20px; text-align: center;">اختر طريقة الدفع المناسبة لك:</p>
+            
+            <div class="payment-methods">
+                <div class="pay-method active" data-type="vodafone">
+                    <i class="fas fa-mobile-alt" style="font-size: 2rem; color: #e60000; margin-bottom: 10px;"></i>
+                    <h4>فودافون كاش</h4>
+                </div>
+                <div class="pay-method" data-type="fawry" style="opacity: 0.5; pointer-events: none; filter: grayscale(100%); position: relative;">
+                    <span style="position: absolute; top: 5px; left: 5px; background: rgba(0,0,0,0.5); font-size: 0.7rem; padding: 2px 5px; border-radius: 3px;">قريباً</span>
+                    <i class="fas fa-store" style="font-size: 2rem; color: #f1c40f; margin-bottom: 10px;"></i>
+                    <h4>فوري</h4>
+                </div>
+            </div>
+
+            <div class="payment-details" id="vodafoneDetails">
+                <p>قم بتحويل المبلغ على الرقم التالي عبر فودافون كاش:</p>
+                <div class="copy-box">
+                    <span id="vCashNum" style="font-size: 1.2rem; font-weight: bold; letter-spacing: 2px;">01023675235</span>
+                    <button class="copy-btn" data-target="vCashNum"><i class="fas fa-copy"></i></button>
+                </div>
+                <p style="font-size: 0.85rem; margin-top: 10px; color: var(--accent-cyan);">* برجاء الاحتفاظ بصورة التحويل (الاسكرين شوت) لرفعها بعد الدفع.</p>
+            </div>
+
+            <div class="payment-details" id="fawryDetails" style="display: none;">
+                <p>توجه لأقرب ماكينة فوري واستخدم كود الدفع التالي:</p>
+                <div class="copy-box">
+                    <span id="fawryCode" style="font-size: 1.2rem; font-weight: bold; letter-spacing: 2px;">784512</span>
+                    <button class="copy-btn" data-target="fawryCode"><i class="fas fa-copy"></i></button>
+                </div>
+                <p style="font-size: 0.85rem; margin-top: 10px; color: var(--accent-cyan);">* الكود صالح لمدة 24 ساعة فقط.</p>
+            </div>
+
+            <div class="form-group" style="margin-top: 20px;">
+                <label>ارفع صورة التحويل</label>
+                <input type="file" id="paymentProofImage" class="form-control" style="padding: 10px;" accept="image/*">
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button class="btn btn-outline" style="flex: 1;" onclick="document.getElementById('paymentModal').classList.remove('active')">تراجع</button>
+                <button type="button" class="btn btn-green" style="flex: 1;" id="confirmPayment" onclick="submitPaymentRequest()">استمرار</button>
+            </div>
+        </div>
+    </div>
+
+        <!-- Video Modal -->
+    <div class="modal-overlay" id="videoModal">
+        <div class="glass-panel modal-content" style="padding: 20px; max-width: 900px; width: 95%;">
+            <button class="close-modal" onclick="document.getElementById('videoModal').classList.remove('active'); document.getElementById('videoPlayerContainer').innerHTML='';"><i class="fas fa-times"></i></button>
+            <h2 id="videoModalTitle" style="margin-bottom: 20px; color: var(--royal-gold);"></h2>
+            <div id="videoPlayerContainer" style="width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 12px; overflow: hidden;">
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div class="modal-overlay" id="loginModal">
+        <div class="glass-panel modal-content auth-container">
+            <button class="close-modal" onclick="document.getElementById('loginModal').classList.remove('active')"><i class="fas fa-times"></i></button>
+            <div class="auth-header">
+                <div class="auth-logo"><i class="fas fa-user-graduate"></i></div>
+                <h2>تسجيل الدخول</h2>
+                <p>مرحباً بك مجدداً في منصتك</p>
+            </div>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label>رقم الموبايل</label>
+                    <input type="text" id="loginPhone" class="form-control" placeholder="أدخل رقم الموبايل" required>
+                </div>
+                <div class="form-group">
+                    <label>كلمة المرور</label>
+                    <input type="password" id="loginPassword" class="form-control" placeholder="أدخل كلمة المرور" required>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <a href="#" id="forgotPasswordLink" style="color: var(--accent-cyan); font-weight: 700;">نسيت كلمة المرور؟</a>
+                    <span style="color: rgba(0,0,0,0.6); font-size: 0.92rem;">تسجيل الدخول الآمن</span>
+                </div>
+                <button type="submit" class="btn btn-green btn-block">تسجيل الدخول</button>
+            </form>
+            <div id="forgotPasswordModal" class="modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 10000; justify-content: center; align-items: center; padding: 20px;">
+                <div class="glass-panel" style="max-width: 520px; width: 100%; padding: 30px; position: relative; border-radius: 20px;">
+                    <button onclick="document.getElementById('forgotPasswordModal').style.display='none'" style="position: absolute; top: 18px; right: 18px; background: transparent; border: none; color: var(--text-primary); font-size: 1.4rem; cursor: pointer;"><i class="fas fa-times"></i></button>
+                    <h2 style="margin-bottom: 20px; color: var(--royal-gold);">استعادة كلمة المرور</h2>
+                    <p style="margin-bottom: 20px; color: var(--text-secondary);">اكتب رقم ولي الأمر المرتبط بحسابك وهيتم إرسال كود تأكيد لتغيير كلمة السر.</p>
+                    <div id="fpStatusText" style="display:none; margin-bottom: 20px; padding: 12px 14px; border-radius: 16px; font-size: 0.95rem; line-height:1.5;"></div>
+                    <form id="forgotPasswordForm">
+                        <div class="form-group">
+                            <label>رقم الطالب</label>
+                            <input type="tel" id="fpStudentPhone" class="form-control" placeholder="رقم الطالب" required>
+                        </div>
+                        <div class="form-group">
+                            <label>رقم ولي الأمر</label>
+                            <input type="tel" id="fpParentPhone" class="form-control" placeholder="رقم ولي الأمر" required>
+                            <span id="fpParentError" class="error-message" style="display:none;">الرقم غير مطابق لولي الأمر المسجل.</span>
+                        <div id="fpStep2" style="display:none;">
+                            <div class="form-group">
+                                <label>أدخل كود التحقق</label>
+                                <input type="text" id="fpOtpCode" class="form-control" placeholder="xxxxx" maxlength="5">
+                            </div>
+                            <div class="form-group" style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
+                                <button type="button" id="fpResendBtn" class="btn btn-outline" style="display:none; padding: 10px 14px; min-width:150px;">إعادة إرسال الكود</button>
+                                <span id="fpOtpHelp" style="flex:1 1 100%; color: rgba(0,0,0,0.72); font-size: 0.92rem;">الكود صالح لمدة 10 دقائق ولا يتم مشاركته مع أي شخص.</span>
+                            </div>
+                            <div class="form-group">
+                                <label>كلمة المرور الجديدة</label>
+                                <input type="password" id="fpNewPassword" class="form-control" placeholder="كلمة المرور الجديدة">
+                            </div>
+                            <div class="form-group">
+                                <label>تأكيد كلمة المرور الجديدة</label>
+                                <input type="password" id="fpConfirmPassword" class="form-control" placeholder="تأكيد كلمة المرور الجديدة">
+                                <span id="fpPasswordError" class="error-message" style="display:none;">يجب أن تتطابق كلمات المرور وأن تكون قوية.</span>
+                            </div>
+                        </div>
+                        </div>
+                        <div style="display:flex; justify-content: space-between; gap: 10px; margin-top: 20px;">
+                            <button type="button" class="btn btn-outline" onclick="document.getElementById('forgotPasswordModal').style.display='none'">إلغاء</button>
+                            <button type="submit" id="fpSubmitBtn" class="btn btn-green">إرسال الكود عبر واتساب</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="auth-footer">
+                <p>ليس لديك حساب؟ <a href="register.html">إنشاء حساب جديد</a></p>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/storage-service.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/support-chat.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/grader.js"></script>
+    <script src="js/dashboard.js"></script>
+    <script src="js/owner-editor.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const courseId = urlParams.get('id');
+            
+            if(!courseId) {
+                window.location.href = 'courses.html';
+                return;
+            }
+
+            let adminCourses = JSON.parse(localStorage.getItem('adminCourses')) || [];
+            let course = adminCourses.find(c => c.id === courseId);
+            
+            if(!course) {
+                alert('هذا الكورس غير موجود');
+                window.location.href = 'courses.html';
+                return;
+            }
+
+            const grades = {
+                'prep1': 'أولى إعدادي',
+                'prep2': 'تانية إعدادي',
+                'prep3': 'تالتة إعدادي',
+                'sec1': 'أولى ثانوي'
+            };
+
+            document.getElementById('cdImage').src = course.image;
+            document.getElementById('cdTitle').textContent = course.title;
+            document.getElementById('cdDesc').textContent = course.desc;
+            document.getElementById('cdPrice').textContent = course.price + ' ج.م';
+            document.getElementById('cdGrade').textContent = grades[course.grade] || course.grade;
+
+            let userStr = sessionStorage.getItem('currentStudent');
+            let isOwned = false;
+            let isPending = false;
+            
+            if (userStr) {
+                let user = JSON.parse(userStr);
+                let dbUser = JSON.parse(localStorage.getItem(`db_${user.phone}`)) || { courses: [] };
+                isOwned = dbUser.courses && dbUser.courses.includes(courseId);
+                
+                let paymentRequests = JSON.parse(localStorage.getItem('paymentRequests')) || [];
+                let existingReq = paymentRequests.find(req => req.courseId === courseId && req.userId === user.phone);
+                if (existingReq && existingReq.status === 'pending') {
+                    isPending = true;
+                }
+            }
+
+                        const actionContainer = document.getElementById('cdActionBtnContainer');
+            
+            // Check for admin
+            const adminStr = sessionStorage.getItem('currentAdmin');
+            let isAdmin = false;
+            if (adminStr) {
+                const adminUser = JSON.parse(adminStr);
+                if (adminUser.role === 'admin') isAdmin = true;
+            }
+
+            if (isAdmin) {
+                actionContainer.innerHTML = 
+                    <button class="btn btn-outline" style="border-color: var(--accent-cyan); color: var(--accent-cyan); margin-left: 10px;" onclick="openAdminCourseEdit()">
+                        <i class="fas fa-edit mr-2"></i> تعديل بيانات الكورس
+                    </button>
+                    <button class="btn btn-outline" style="border-color: var(--royal-gold); color: var(--royal-gold);" onclick="window.location.href='admin-courses.html?edit='+'+course.id+'">
+                        <i class="fas fa-layer-group mr-2"></i> تعديل المحتوى
+                    </button>
+                ;
+                
+                // Add modal for editing course details
+                const editModalHTML = 
+                <div class="modal-overlay" id="adminEditCourseModal">
+                    <div class="glass-panel modal-content" style="padding: 30px; max-width: 500px;">
+                        <button class="close-modal" onclick="document.getElementById('adminEditCourseModal').classList.remove('active')"><i class="fas fa-times"></i></button>
+                        <h2 class="text-gold mb-2 text-center">تعديل بيانات الكورس</h2>
+                        <div class="form-group mt-2">
+                            <label>اسم الكورس</label>
+                            <input type="text" id="adminEditCourseTitle" class="form-control" value="+course.title+">
+                        </div>
+                        <div class="form-group">
+                            <label>رابط الصورة</label>
+                            <input type="text" id="adminEditCourseImage" class="form-control" value="+course.image+">
+                        </div>
+                        <div class="form-group">
+                            <label>الوصف</label>
+                            <textarea id="adminEditCourseDesc" class="form-control" rows="3">+course.desc+</textarea>
+                        </div>
+                        <button class="btn btn-green btn-block mt-2" onclick="saveAdminCourseEdit()">حفظ التعديلات</button>
+                    </div>
+                </div>;
+                const div = document.createElement('div');
+                div.innerHTML = editModalHTML;
+                document.body.appendChild(div);
+                
+                window.openAdminCourseEdit = function() {
+                    document.getElementById('adminEditCourseModal').classList.add('active');
+                };
+                
+                window.saveAdminCourseEdit = function() {
+                    const newTitle = document.getElementById('adminEditCourseTitle').value;
+                    const newImage = document.getElementById('adminEditCourseImage').value;
+                    const newDesc = document.getElementById('adminEditCourseDesc').value;
+                    
+                    course.title = newTitle;
+                    course.image = newImage;
+                    course.desc = newDesc;
+                    
+                    const idx = adminCourses.findIndex(c => c.id === course.id);
+                    if(idx > -1) {
+                        adminCourses[idx] = course;
+                        localStorage.setItem('adminCourses', JSON.stringify(adminCourses));
+                        if(window.FirebaseService && window.FirebaseService.syncLocalToFirestore) {
+                            window.FirebaseService.syncLocalToFirestore();
+                        }
+                    }
+                    
+                    document.getElementById('cdTitle').textContent = newTitle;
+                    document.getElementById('cdImage').src = newImage;
+                    document.getElementById('cdDesc').textContent = newDesc;
+                    document.getElementById('adminEditCourseModal').classList.remove('active');
+                };
+            }
+            else if (isOwned) {
+                actionContainer.innerHTML = `<button class="btn btn-green"><i class="fas fa-check-circle mr-2"></i> المحتوى مفتوح لك</button>`;
+            } else if (isPending) {
+                actionContainer.innerHTML = `<button class="btn btn-outline" style="color:var(--accent-orange); border-color:var(--accent-orange);" onclick="showPendingMessageDetails()"><i class="fas fa-clock mr-2"></i> طلبك قيد المراجعة</button>`;
+            } else {
+                actionContainer.innerHTML = `<button class="btn btn-gold" onclick="openPaymentModalDetails('${course.id}')"><i class="fas fa-lock-open mr-2"></i> الاشتراك لفتح المحتوى</button>`;
+            }
+
+            const rawContents = course.contents || {};
+                        const normalizedContents = Array.isArray(rawContents) ? {
+                lectures: rawContents,
+                homeworks: [],
+                exams: [],
+                trainings: [],
+                customSections: []
+            } : {
+                lectures: Array.isArray(rawContents.lectures) ? rawContents.lectures : [],
+                homeworks: Array.isArray(rawContents.homeworks) ? rawContents.homeworks : [],
+                exams: Array.isArray(rawContents.exams) ? rawContents.exams : [],
+                trainings: Array.isArray(rawContents.trainings) ? rawContents.trainings : [],
+                customSections: Array.isArray(rawContents.customSections) ? rawContents.customSections : []
+            };
+
+            function createLectureContainer(item, index) {
+                if(item && item.type === 'lecture') {
+                    item.children = item.children || [];
+                    item.id = item.id || 'lec_' + Date.now() + '_' + index;
+                    return item;
+                }
+                return {
+                    id: item.id || 'lec_' + Date.now() + '_' + index,
+                    title: item.title || ('محاضرة ' + (index + 1)),
+                    type: 'lecture',
+                    createdAt: item.createdAt || Date.now(),
+                    children: [ item ]
+                };
+            }
+
+            const lectures = normalizedContents.lectures.map(createLectureContainer);
+            const homeworks = normalizedContents.homeworks;
+            const exams = normalizedContents.exams;
+            const trainings = normalizedContents.trainings;
+
+            function getLectureTrainings(lectureId) {
+                return trainings.filter(t => t.attachedToLectureId === lectureId);
+            }
+
+            function toItemIcon(item) {
+                if(item.type === 'video') return 'fa-play-circle';
+                if(item.type === 'pdf') return 'fa-file-pdf';
+                if(item.type === 'training') return 'fa-flask';
+                if(item.type === 'task' || item.type === 'homework') return 'fa-edit';
+                if(item.type === 'quiz' || item.type === 'exam') return 'fa-star';
+                return 'fa-file';
+            }
+
+                        function isItemCompleted(itemId) {
+                return dbUser.completedItems && dbUser.completedItems.includes(itemId);
+            }
+
+            function markItemCompleted(itemId) {
+                if(!dbUser.completedItems) dbUser.completedItems = [];
+                if(!dbUser.completedItems.includes(itemId)) {
+                    dbUser.completedItems.push(itemId);
+                    if(userStr) {
+                        let user = JSON.parse(userStr);
+                        localStorage.setItem('db_' + user.phone, JSON.stringify(dbUser));
+                    }
+                }
+            }
+
+            function openCourseResource(item, isLocked, lockReason) {
+                if(!isOwned) {
+                    if(window.showToast) window.showToast('هذا المحتوى غير متاح حتى تشترك بالكورس','error');
+                    else alert('هذا المحتوى غير متاح حتى تشترك بالكورس');
+                    return;
+                }
+                if(isLocked) {
+                    if(window.showToast) window.showToast(lockReason || 'هذا المحتوى مقفول حالياً', 'error');
+                    else alert(lockReason || 'هذا المحتوى مقفول حالياً');
+                    return;
+                }
+                
+                if(item.youtubeUrl || item.videoUrl) {
+                    const modal = document.getElementById('videoModal');
+                    if(modal) {
+                        document.getElementById('videoModalTitle').textContent = item.title;
+                        const container = document.getElementById('videoPlayerContainer');
+                        if(item.youtubeUrl) {
+                            let videoId = '';
+                            try {
+                                const urlObj = new URL(item.youtubeUrl);
+                                if(urlObj.hostname.includes('youtube.com')) {
+                                    videoId = urlObj.searchParams.get('v');
+                                } else if(urlObj.hostname.includes('youtu.be')) {
+                                    videoId = urlObj.pathname.slice(1);
+                                }
+                            } catch(e) {}
+                            if(videoId) {
+                                container.innerHTML = <iframe width="100%" height="100%" src="https://www.youtube.com/embed/ + videoId + ?autoplay=1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>;
+                            } else {
+                                window.open(item.youtubeUrl, '_blank');
+                            }
+                        } else if (item.videoUrl) {
+                            container.innerHTML = <video width="100%" height="100%" controls controlsList="nodownload" autoplay><source src=" + item.videoUrl + " type="video/mp4">متصفحك لا يدعم تشغيل الفيديو.</video>;
+                            
+                            // Auto-complete video on end
+                            const vidEl = container.querySelector('video');
+                            if(vidEl) {
+                                vidEl.onended = () => {
+                                    markItemCompleted(item.id);
+                                    if(window.showToast) window.showToast('تم اكتمال مشاهدة الدرس بنجاح!', 'success');
+                                    setTimeout(() => window.location.reload(), 1500);
+                                };
+                            }
+                        }
+                        
+                        // For YouTube, we can't easily track ended event without API, so we mark it completed when they close the modal or after a timeout
+                        if(item.youtubeUrl) {
+                            markItemCompleted(item.id);
+                        }
+                        
+                        modal.classList.add('active');
+                    } else {
+                        window.open(item.youtubeUrl || item.videoUrl, '_blank');
+                    }
+                    return;
+                }
+                
+                // If it's training or PDF, just open/run
+                if(item.type === 'training' || item.type === 'task' || item.type === 'homework' || item.type === 'exam' || item.type === 'quiz') {
+                    // find exam index
+                    const examList = course.contents.exams || [];
+                    const trList = course.contents.trainings || [];
+                    const hwList = course.contents.homeworks || [];
+                    
+                    let targetList = null;
+                    if(item.type === 'exam' || item.type === 'quiz') targetList = examList;
+                    else if(item.type === 'training') targetList = trList;
+                    else targetList = hwList;
+                    
+                    const idx = targetList.findIndex(x => x.id === item.id || x.title === item.title);
+                    if(idx > -1 && window.openExamModal) {
+                        window.openExamModal(course.id, idx, item.type);
+                        return;
+                    }
+                }
+                
+                if(item.pdfUrl) {
+                    window.open(item.pdfUrl, '_blank');
+                    return;
+                }
+                
+                if(window.showToast) window.showToast('افتح المحتوى: ' + item.title, 'success');
+                else alert('افتح المحتوى: ' + item.title);
+            }
+
+                        let prevHomeworkId = null;
+
+            function createResourceRow(item, forceLock = false, lockMsg = '') {
+                const row = document.createElement('div');
+                let rowStyle = 'display:flex; align-items:center; justify-content:space-between; gap:12px; padding:14px 16px; border-radius:14px; background: rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08);';
+                
+                let isLocked = forceLock;
+                let lockedReason = lockMsg;
+                
+                // If it's a training, check if attached lecture is completed
+                if (item.type === 'training' && item.attachedToLectureId) {
+                    if (!isItemCompleted(item.attachedToLectureId)) {
+                        isLocked = true;
+                        lockedReason = 'شاهد الدرس المرتبط أولاً لفتح التدريب';
+                    }
+                }
+                
+                // If it's homework, check if linked training is completed
+                if ((item.type === 'task' || item.type === 'homework') && item.lockedUntilTrainingId) {
+                    if (!isItemCompleted(item.lockedUntilTrainingId)) {
+                        isLocked = true;
+                        lockedReason = 'قم بحل التدريب المرتبط أولاً لفتح الواجب';
+                    }
+                }
+                
+                if (isLocked) {
+                    rowStyle += ' opacity: 0.5; filter: grayscale(1); cursor: not-allowed;';
+                }
+
+                row.style.cssText = rowStyle;
+
+                const meta = document.createElement('div');
+                meta.style.cssText = 'display:flex; align-items:center; gap:12px; flex:1;';
+                
+                const isCompleted = isItemCompleted(item.id);
+                const iconColor = isLocked ? 'rgba(255,255,255,0.5)' : (isCompleted ? '#2ecc71' : 'var(--accent-cyan)');
+                const statusBadge = isCompleted ? <span style="background:#2ecc71; color:#000; font-size:0.7rem; padding:2px 6px; border-radius:4px; margin-right:8px;">مكتمل</span> : '';
+
+                meta.innerHTML = 
+                    <i class="fas  + toItemIcon(item) + " style="color:  + iconColor + ; font-size: 1.2rem;"></i>
+                    <div style="min-width:0;">
+                        <div style="color: var(--text-primary); font-weight: 700; white-space: normal;"> + item.title +   + statusBadge + </div>
+                        <div style="font-size:0.85rem; color: rgba(255,255,255,0.65);"> + (item.source === 'youtube' ? 'يوتيوب' : item.source === 'link' ? 'رابط خارجي' : item.source === 'upload' ? 'محتوى مرفوع' : 'مورد') + (item.type === 'training' ? ' • تدريب مرتبط' : '') + </div>
+                    </div>
+                ;
+                row.appendChild(meta);
+
+                const actionBtn = document.createElement('button');
+                actionBtn.type = 'button';
+                actionBtn.className = 'btn btn-outline';
+                actionBtn.style.cssText = 'padding: 9px 14px; white-space: nowrap;';
+                
+                if (isLocked) {
+                    actionBtn.innerHTML = '<i class="fas fa-lock"></i> مقفول';
+                    actionBtn.style.borderColor = 'rgba(255,255,255,0.2)';
+                    actionBtn.style.color = 'rgba(255,255,255,0.5)';
+                } else {
+                    actionBtn.textContent = isOwned ? (isCompleted ? 'مراجعة' : 'فتح') : 'اشتراك لفتح';
+                    if (isCompleted) {
+                        actionBtn.style.borderColor = '#2ecc71';
+                        actionBtn.style.color = '#2ecc71';
+                    }
+                }
+                
+                actionBtn.addEventListener('click', () => openCourseResource(item, isLocked, lockedReason));
+                row.appendChild(actionBtn);
+
+                return row;
+            }
+
+            function createLectureCard(lecture, index) {
+                const wrapper = document.createElement('div');
+                wrapper.style.cssText = 'border:1px solid var(--border-color); border-radius: 18px; overflow: hidden; background: rgba(255,255,255,0.03); margin-bottom: 15px;';
+
+                let isLocked = false;
+                let lockMsg = '';
+                
+                // Next lecture is locked if previous homework exists and is not completed
+                if (index > 0 && prevHomeworkId && !isItemCompleted(prevHomeworkId)) {
+                    isLocked = true;
+                    lockMsg = 'يجب حل واجب الدرس السابق لتتمكن من مشاهدة هذه المحاضرة';
+                }
+
+                const header = document.createElement('button');
+                header.type = 'button';
+                header.style.cssText = 'width:100%; text-align:right; padding: 22px 24px; display:flex; align-items:center; justify-content:space-between; gap:15px; background: transparent; border:none; color: var(--text-primary); cursor: pointer;';
+                
+                let iconColor = isLocked ? 'rgba(255,255,255,0.5)' : 'var(--royal-gold)';
+                
+                header.innerHTML = 
+                    <div style="display:flex; align-items:center; gap:16px; flex:1;">
+                        <i class="fas  + (isLocked ? 'fa-lock' : 'fa-play-circle') + " style="font-size:1.4rem; color: + iconColor + ;"></i>
+                        <div style="text-align:right; min-width:0;  + (isLocked ? 'opacity:0.5;' : '') + ">
+                            <div style="font-size:1.05rem; font-weight:700; white-space:normal;"> + (index + 1) + .  + lecture.title + </div>
+                            <div style="color: rgba(255,255,255,0.65); font-size:0.9rem; margin-top:6px;"> + (lecture.children || []).length +  موارد مرتبطة</div>
+                        </div>
+                    </div>
+                    <span class="badge" style="background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.8);"> + (isOwned ? (isLocked ? 'مقفول' : 'متاح') : 'غير متاح') + </span>
+                ;
+
+                const details = document.createElement('div');
+                details.style.cssText = 'max-height: 0; overflow: hidden; transition: max-height 260ms ease, padding 260ms ease;';
+
+                const detailsInner = document.createElement('div');
+                detailsInner.style.cssText = 'display:grid; gap:12px; padding:0 24px 18px;';
+
+                if((lecture.children || []).length === 0) {
+                    const emptyNode = document.createElement('p');
+                    emptyNode.style.cssText = 'color: rgba(255,255,255,0.55); margin: 0;';
+                    emptyNode.textContent = 'لا توجد موارد مصاحبة لهذه المحاضرة بعد.';
+                    detailsInner.appendChild(emptyNode);
+                } else {
+                    lecture.children.forEach(child => {
+                        // If it's a video child, attach lecture lock logic to it as well
+                        let childForceLock = false;
+                        let childLockMsg = '';
+                        if (child.type === 'video' && isLocked) {
+                            childForceLock = true;
+                            childLockMsg = lockMsg;
+                        }
+                        detailsInner.appendChild(createResourceRow(child, childForceLock, childLockMsg));
+                    });
+                }
+
+                const attachedTrainings = getLectureTrainings(lecture.id);
+                if(attachedTrainings.length) {
+                    const trainingsHeader = document.createElement('div');
+                    trainingsHeader.style.cssText = 'padding-top: 10px; color: var(--accent-cyan); font-weight: 700;';
+                    trainingsHeader.textContent = 'تدريبات مرتبطة بالمحاضرة:';
+                    detailsInner.appendChild(trainingsHeader);
+                    attachedTrainings.forEach(training => detailsInner.appendChild(createResourceRow(training)));
+                }
+                
+                // Track if there's a homework for this lecture to lock the NEXT lecture
+                // Look in global homeworks list
+                const lectureHomework = homeworks.find(hw => hw.lockedUntilTrainingId && attachedTrainings.find(t => t.id === hw.lockedUntilTrainingId));
+                if (lectureHomework) {
+                    prevHomeworkId = lectureHomework.id;
+                } else {
+                    // Reset if no homework
+                    prevHomeworkId = null; 
+                }
+
+                details.appendChild(detailsInner);
+
+                const toggleDetails = () => {
+                    if (isLocked) {
+                        if(window.showToast) window.showToast(lockMsg, 'error');
+                        else alert(lockMsg);
+                        return;
+                    }
+                    if(details.style.maxHeight && details.style.maxHeight !== '0px') {
+                        details.style.maxHeight = '0';
+                        details.style.padding = '0 24px 0';
+                    } else {
+                        details.style.maxHeight = detailsInner.scrollHeight + 30 + 'px';
+                        details.style.padding = '0 24px 18px';
+                    }
+                };
+
+                if(isOwned) {
+                    header.addEventListener('click', toggleDetails);
+                } else {
+                    header.style.cursor = 'not-allowed';
+                }
+
+                wrapper.appendChild(header);
+                wrapper.appendChild(details);
+                return wrapper;
+            }
+
+            function renderLectures(items) {
+                const container = document.getElementById('cdLecturesList');
+                const countNode = document.querySelector('#cdLecturesSection h3 span');
+                if(countNode) countNode.textContent = `(${items.length} محاضرات)`;
+                container.innerHTML = '';
+                if(!items.length) {
+                    container.innerHTML = `<p style="color: rgba(255,255,255,0.5);">لم تُدرَج أي محاضرات بعد. ستظهر المحاضرات هنا بعد الإضافة.</p>`;
+                    return;
+                }
+                items.forEach((lecture, idx) => container.appendChild(createLectureCard(lecture, idx)));
+            }
+
+                        renderLectures(lectures);
+            renderList('cdHomeworksList', homeworks, 'واجبات');
+            renderList('cdExamsList', exams, 'امتحانات');
+
+            // Render Custom Sections
+            if(normalizedContents.customSections.length > 0) {
+                const parent = document.getElementById('cdExamsSection').parentElement;
+                normalizedContents.customSections.forEach((sec, sIdx) => {
+                    const secDiv = document.createElement('div');
+                    secDiv.id = 'cdCustomSection_' + sIdx;
+                    secDiv.innerHTML = 
+                        <h3 style="color: var(--text-primary); border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; margin-bottom: 20px; margin-top: 40px;">
+                            <i class="fas fa-folder-open mr-2 text-gold"></i>  + sec.name + 
+                        </h3>
+                        <div id="cdCustomList_+sIdx+" style="display: flex; flex-direction: column; gap: 15px;"></div>
+                    ;
+                    parent.appendChild(secDiv);
+                    renderList('cdCustomList_'+sIdx, sec.items, sec.name);
+                });
+            }
+
+            function renderList(containerId, items, sectionName) {
+                const container = document.getElementById(containerId);
+                container.innerHTML = '';
+                if(!items || items.length === 0) {
+                    container.innerHTML = `<p style="color: rgba(255,255,255,0.5);">لا يوجد ${sectionName} حالياً.</p>`;
+                    return;
+                }
+                items.forEach((item, index) => {
+                    const div = document.createElement('div');
+                    let itemStyle = isOwned ? "background: rgba(255,255,255,0.05); cursor: pointer;" : "background: rgba(255,255,255,0.02); opacity: 0.6; cursor: not-allowed;";
+                    let itemIcon = isOwned ? `<i class="fas ${toItemIcon(item)}" style="color: var(--accent-cyan); font-size: 1.2rem;"></i>` : `<i class="fas fa-lock" style="color: rgba(255,255,255,0.5); font-size: 1.2rem;"></i>`;
+                    div.style.cssText = `display: flex; align-items: center; justify-content: space-between; padding: 20px; border-radius: 12px; border: 1px solid var(--border-color); transition: var(--transition-smooth); ${itemStyle}`;
+                    div.innerHTML = `
+                        <div style="display: flex; align-items: center; gap: 20px;">
+                            ${itemIcon}
+                            <span style="color: var(--text-primary); font-weight: bold; font-size: 1.1rem;">${index + 1}. ${item.title}</span>
+                        </div>
+                        ${isOwned ? `<span class="badge" style="background: rgba(46, 204, 113, 0.1); color: #2ecc71;">متاح</span>` : ``}
+                    `;
+                    if (isOwned) {
+                        div.addEventListener('click', () => openCourseResource(item));
+                        div.addEventListener('mouseenter', () => {
+                            div.style.background = 'rgba(255,255,255,0.1)';
+                            div.style.transform = 'translateY(-2px)';
+                        });
+                        div.addEventListener('mouseleave', () => {
+                            div.style.background = 'rgba(255,255,255,0.05)';
+                            div.style.transform = 'translateY(0)';
+                        });
+                    }
+                    container.appendChild(div);
+                });
+            }
+
+            // Add exam modal UI (additive, non-destructive)
+            (function(){
+                const examModalHtml = `
+                <div class="modal-overlay" id="examModal">
+                  <div class="glass-panel modal-content" style="padding: 20px; max-width: 800px;">
+                    <button class="close-modal" onclick="document.getElementById('examModal').classList.remove('active')"><i class="fas fa-times"></i></button>
+                    <h2 id="examModalTitle" style="margin-bottom:10px;">امتحان</h2>
+                    <div id="examQuestionsContainer" style="display:block; max-height:50vh; overflow:auto; gap:10px; margin-bottom:12px;"></div>
+                    <div style="display:flex; gap:10px; justify-content:flex-end;">
+                      <button class="btn btn-outline" onclick="document.getElementById('examModal').classList.remove('active')">إلغاء</button>
+                      <button class="btn btn-green" id="submitExamBtn">تسليم الإجابات</button>
+                    </div>
+                    <div id="examResultContainer" style="margin-top:12px; display:none;"></div>
+                  </div>
+                </div>`;
+                const wrapper = document.createElement('div'); wrapper.innerHTML = examModalHtml;
+                document.body.appendChild(wrapper);
+
+                window.openExamModal = function(courseId, examIndex) {
+                    const adminCourses = JSON.parse(localStorage.getItem('adminCourses')||'[]');
+                    const course = adminCourses.find(c=>c.id===courseId);
+                    let exam = null;
+                    if(course && course.contents && Array.isArray(course.contents.exams)) exam = course.contents.exams[examIndex];
+                    if(!exam) { if(window.showToast) window.showToast('لا يوجد امتحان قابل للتشغيل','error'); else alert('لا يوجد امتحان.'); return; }
+                    const modal = document.getElementById('examModal');
+                    document.getElementById('examModalTitle').textContent = exam.title || 'امتحان';
+
+                    const container = document.getElementById('examQuestionsContainer'); container.innerHTML = '';
+                    const questions = exam.questions || [];
+                    questions.forEach((q, idx)=>{
+                        const qDiv = document.createElement('div');
+                        qDiv.style.cssText = 'background: rgba(0,0,0,0.05); padding:12px; margin-bottom:8px; border-radius:8px; border:1px solid rgba(255,255,255,0.04);';
+                        let inputHtml = '';
+                        if(q.type === 'choose'){
+                            inputHtml = `<div>` + ['a','b','c','d'].map(k=>`<label style="display:block;margin-bottom:6px;"><input type=radio name=qa_${idx} value='${k}'/> ${q.options && q.options[k] ? q.options[k] : k}</label>`).join('') + `</div>`;
+                        } else if(q.type === 'tf'){
+                            inputHtml = `<label><input type=radio name=qa_${idx} value='صح'/> صح</label><label style='margin-right:10px;'><input type=radio name=qa_${idx} value='خطأ'/> خطأ</label>`;
+                        } else {
+                            inputHtml = `<textarea name=qa_${idx} rows=3 style="width:100%;" placeholder="اكتب إجابتك هنا"></textarea>`;
+                        }
+                        qDiv.innerHTML = `<p style="margin:0 0 8px 0;"><strong>س${idx+1}:</strong> ${q.text}</p>` + inputHtml;
+                        container.appendChild(qDiv);
+                    });
+
+                    // submit handler
+                    const submitBtn = document.getElementById('submitExamBtn');
+                    const resultBox = document.getElementById('examResultContainer'); resultBox.style.display='none'; resultBox.innerHTML='';
+                    submitBtn.onclick = function(){
+                        const studentStr = sessionStorage.getItem('currentStudent');
+                        if(!studentStr){ alert('يجب تسجيل الدخول لتسليم الإجابة'); return; }
+                        const student = JSON.parse(studentStr);
+                        const answers = [];
+                        questions.forEach((q, idx)=>{
+                            const name = 'qa_'+idx;
+                            const els = document.getElementsByName(name);
+                            let val = '';
+                            if(els && els.length){
+                                if(els[0].tagName === 'TEXTAREA' || els[0].tagName === 'INPUT' && els[0].type === 'text') {
+                                    val = els[0].value || '';
+                                } else {
+                                    for(const el of els) if(el.checked){ val = el.value; break; }
+                                    if(!val && els[0].tagName === 'TEXTAREA') val = els[0].value || '';
+                                }
+                            }
+                            answers.push({ q, answer: val });
+                        });
+
+                        // Score each answer using PF_Grader if available
+                        const results = answers.map(item => {
+                            try{
+                                if(window.PF_Grader && typeof window.PF_Grader.scoreAnswer === 'function'){
+                                    const res = window.PF_Grader.scoreAnswer(item.answer, item.q.answer, item.q.type || 'explain');
+                                    return { question: item.q.text, rawAnswer: item.answer, score: res.score || 0, feedback: res.feedback || (res.score===1? 'جيد':'راجع الإجابة') };
+                                }
+                            }catch(e){}
+                            // fallback simple exact match
+                            const correct = (item.q.answer||'').toString().trim();
+                            const ok = String((item.answer||'')).trim() === correct;
+                            return { question: item.q.text, rawAnswer: item.answer, score: ok?1:0, feedback: ok? 'إجابة صحيحة':'إجابة غير صحيحة' };
+                        });
+
+                        // aggregate score
+                        const total = results.reduce((s,r)=>s+(r.score||0),0);
+                        const percent = Math.round((total / (results.length||1)) * 100);
+
+                        // show result
+                        resultBox.style.display = 'block';
+                        resultBox.innerHTML = `<div style="background:rgba(0,0,0,0.06); padding:12px; border-radius:8px;"><strong>الدرجة: ${percent}%</strong><div style="margin-top:8px;"></div></div>`;
+                        const details = document.createElement('div'); details.style.marginTop='8px';
+                        results.forEach((r, i)=>{
+                            const p = document.createElement('div'); p.style.padding='8px 0'; p.style.borderBottom='1px solid rgba(255,255,255,0.03)';
+                            p.innerHTML = `<strong>س${i+1}:</strong> ${r.question}<br/><em>إجابتك:</em> ${r.rawAnswer || '-'}<br/><em>التعليق:</em> ${r.feedback} <span style='margin-left:12px;'>(${Math.round(r.score*100)}%)</span>`;
+                            details.appendChild(p);
+                        });
+                        resultBox.appendChild(details);
+
+                        // persist result in student record (non-destructive)
+                        try{
+                            const dbKey = `db_${student.phone}`;
+                            const dbUser = JSON.parse(localStorage.getItem(dbKey) || '{}') || {};
+                            dbUser.examResults = dbUser.examResults || [];
+                            dbUser.examResults.push({ courseId: courseId, examTitle: exam.title || '', percent, ts: Date.now(), details: results });
+                            localStorage.setItem(dbKey, JSON.stringify(dbUser));
+                        }catch(e){ console.error('save exam result failed', e); }
+
+                        // close modal optionally after short delay
+                        setTimeout(()=>{
+                            // keep modal open so student can read feedback; do not auto-close
+                        }, 500);
+                    };
+
+                    modal.classList.add('active');
+                };
+            })();
+
+            // Make sure these functions are defined locally if courses-renderer is not loaded or for specific use
+            window.openPaymentModalDetails = function(courseId) {
+                let userStr = sessionStorage.getItem('currentStudent');
+                if(!userStr) {
+                    const loginModal = document.getElementById('loginModal');
+                    if(loginModal) loginModal.classList.add('active');
+                    return;
+                }
+                const modal = document.getElementById('paymentModal');
+                if(modal) {
+                    let paymentSettings = JSON.parse(localStorage.getItem('paymentSettings'));
+                    if(paymentSettings) {
+                        const vCashNumEl = document.getElementById('vCashNum');
+                        if(vCashNumEl) vCashNumEl.textContent = paymentSettings.vCashNum || '01023675235';
+                        const vodafoneDetails = document.getElementById('vodafoneDetails');
+                        if(vodafoneDetails) {
+                            const p = vodafoneDetails.querySelector('p');
+                            if(p) p.textContent = paymentSettings.paymentInstructions || 'قم بتحويل المبلغ على الرقم التالي عبر فودافون كاش:';
+                        }
+                        const fawryMethodBtn = document.querySelector('.pay-method[data-type="fawry"]');
+                        if(fawryMethodBtn) {
+                            if(paymentSettings.enableFawry) {
+                                fawryMethodBtn.style.opacity = '1';
+                                fawryMethodBtn.style.pointerEvents = 'auto';
+                                fawryMethodBtn.style.filter = 'none';
+                                const badge = fawryMethodBtn.querySelector('span');
+                                if (badge) badge.style.display = 'none';
+                            } else {
+                                fawryMethodBtn.style.opacity = '0.5';
+                                fawryMethodBtn.style.pointerEvents = 'none';
+                                fawryMethodBtn.style.filter = 'grayscale(100%)';
+                                const badge = fawryMethodBtn.querySelector('span');
+                                if (badge) badge.style.display = 'block';
+                                if(fawryMethodBtn.classList.contains('active')) {
+                                    fawryMethodBtn.classList.remove('active');
+                                    document.querySelector('.pay-method[data-type="vodafone"]').classList.add('active');
+                                    document.getElementById('fawryDetails').style.display = 'none';
+                                    document.getElementById('vodafoneDetails').style.display = 'block';
+                                }
+                            }
+                        }
+                    }
+                    modal.classList.add('active');
+                    modal.setAttribute('data-course-id', courseId);
+                }
+            };
+
+            window.showPendingMessageDetails = function() {
+                let msgHTML = `
+                    <div style="text-align: center;">
+                        <i class="fas fa-clock" style="font-size: 3rem; color: var(--accent-orange); margin-bottom: 15px;"></i>
+                        <h3 style="color: var(--text-primary); margin-bottom: 10px;">طلب الدفع تحت المراجعة</h3>
+                        <p style="color: rgba(255,255,255,0.8); margin-bottom: 20px;">سيتم تفعيل الكورس فور التأكد من التحويل</p>
+                        <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+                            <p style="font-size: 0.9rem; margin-bottom: 10px;">إذا قمت بالتحويل بالفعل ولم يتم التفعيل بعد، تواصل عبر الرقم:<br><strong style="font-size: 1.2rem; color: var(--accent-cyan);">01023675235</strong></p>
+                        </div>
+                        <div style="display: flex; gap: 10px; justify-content: center;">
+                            <a href="https://wa.me/201023675235" target="_blank" class="btn btn-green" style="background-color: #25D366; border-color: #25D366;"><i class="fab fa-whatsapp"></i> واتساب</a>
+                            <a href="tel:01023675235" class="btn btn-outline"><i class="fas fa-phone"></i> اتصال</a>
+                        </div>
+                    </div>
+                `;
+                
+                let pendingModal = document.getElementById('pendingMsgModal');
+                if (!pendingModal) {
+                    pendingModal = document.createElement('div');
+                    pendingModal.id = 'pendingMsgModal';
+                    pendingModal.className = 'modal-overlay';
+                    pendingModal.innerHTML = `
+                        <div class="glass-panel modal-content" style="padding: 30px; max-width: 400px; position: relative;">
+                            <button class="close-modal" onclick="document.getElementById('pendingMsgModal').classList.remove('active')"><i class="fas fa-times"></i></button>
+                            ${msgHTML}
+                        </div>
+                    `;
+                    document.body.appendChild(pendingModal);
+                }
+                pendingModal.classList.add('active');
+            };
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const forgotLink = document.getElementById('forgotPasswordLink');
+            const loginPhone = document.getElementById('loginPhone');
+            const fpStudent = document.getElementById('fpStudentPhone');
+            const fpParent = document.getElementById('fpParentPhone');
+            const fpOtp = document.getElementById('fpOtpCode');
+            const OTP_LEN = 5;
+            if (fpOtp) fpOtp.maxLength = OTP_LEN;
+            if (forgotLink) {
+                forgotLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const forgotModal = document.getElementById('forgotPasswordModal');
+                    if (loginPhone && loginPhone.value && fpStudent) fpStudent.value = loginPhone.value.trim();
+                    if (forgotModal) forgotModal.style.display = 'flex';
+                    setTimeout(() => { if (fpParent) fpParent.focus(); }, 150);
+                    const status = document.getElementById('fpStatusText');
+                    if (status) {
+                        status.style.display = 'block';
+                        status.textContent = `سيتم إرسال كود مكون من ${OTP_LEN} أرقام لرقم ولي الأمر عبر واتساب. لا تشاركه مع أي شخص.`;
+                        status.style.color = '#f8f1d4';
+                        status.style.background = 'rgba(212, 166, 79, 0.12)';
+                        status.style.border = '1px solid rgba(212, 166, 79, 0.24)';
+                    }
+                });
+            }
+        });
+    </script>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/firebase-service.js"></script>
+</body>
+</html>
+
+
+
+
+
+
+
+
