@@ -705,45 +705,68 @@
                 openCourseEditor();
             });
 
-            // Image upload handler
+            // Image upload handler — uploads to Firebase Storage
             const fcImageFile = document.getElementById('fcImageFile');
             if (fcImageFile) {
-                fcImageFile.addEventListener('change', (ev) => {
+                fcImageFile.addEventListener('change', async (ev) => {
                     const file = ev.target.files[0];
-                    if (file) {
+                    if (!file) return;
+                    const preview = document.getElementById('fcImagePreview');
+                    preview.style.opacity = '0.4';
+                    window.showToast('⏳ جاري رفع الصورة...', 'warning');
+
+                    // Compress image
+                    const compressedBase64 = await new Promise((resolve) => {
                         const reader = new FileReader();
                         reader.onload = (event) => {
                             const img = new Image();
                             img.onload = () => {
                                 const canvas = document.createElement('canvas');
-                                let width = img.width;
-                                let height = img.height;
+                                let width = img.width, height = img.height;
                                 const MAX_SIZE = 800;
-
                                 if (width > height) {
                                     if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; }
                                 } else {
                                     if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; }
                                 }
-
-                                canvas.width = width;
-                                canvas.height = height;
-                                const ctx = canvas.getContext('2d');
-                                ctx.drawImage(img, 0, 0, width, height);
-
-                                let base64 = canvas.toDataURL('image/webp', 0.85);
-                                if (base64.indexOf('data:image/webp') === -1) {
-                                    base64 = canvas.toDataURL('image/jpeg', 0.85);
-                                }
-
-                                document.getElementById('fcImagePreview').src = base64;
-                                document.getElementById('fcImage').value = base64;
-                                markUnsaved();
+                                canvas.width = width; canvas.height = height;
+                                canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+                                let b64 = canvas.toDataURL('image/webp', 0.82);
+                                if (!b64.startsWith('data:image/webp')) b64 = canvas.toDataURL('image/jpeg', 0.82);
+                                resolve(b64);
                             };
                             img.src = event.target.result;
                         };
                         reader.readAsDataURL(file);
+                    });
+
+                    // Upload to Firebase Storage
+                    const fbStorage = window.firebaseStorage;
+                    if (fbStorage && window.firebaseAuth && window.firebaseAuth.currentUser) {
+                        try {
+                            const courseId = document.getElementById('fcId').value || ('c' + Date.now());
+                            const storageRef = fbStorage.ref('course-images/' + courseId + '_' + Date.now() + '.jpg');
+                            const res = await fetch(compressedBase64);
+                            const blob = await res.blob();
+                            const snapshot = await storageRef.put(blob);
+                            const downloadURL = await snapshot.ref.getDownloadURL();
+                            preview.src = downloadURL;
+                            preview.style.opacity = '1';
+                            document.getElementById('fcImage').value = downloadURL;
+                            window.showToast('✅ تم رفع الصورة على السحابة!', 'success');
+                            markUnsaved();
+                            return;
+                        } catch (storageErr) {
+                            console.warn('Firebase Storage upload failed:', storageErr);
+                        }
                     }
+
+                    // Fallback: base64
+                    preview.src = compressedBase64;
+                    preview.style.opacity = '1';
+                    document.getElementById('fcImage').value = compressedBase64;
+                    window.showToast('⚠️ Firebase Storage غير متاح دلوقتي', 'warning');
+                    markUnsaved();
                 });
             }
         });
