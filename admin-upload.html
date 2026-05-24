@@ -79,8 +79,8 @@
                             <input type="file" id="vFileInput" accept="video/*" class="form-control" style="padding: 10px;">
                         </div>
                         <div class="form-group" id="videoUrlGroup" style="display:none;">
-                            <label>رابط فيديو يوتيوب</label>
-                            <input type="url" id="vYoutubeUrl" class="form-control" placeholder="https://www.youtube.com/watch?v=...">
+                            <label>رابط الفيديو (يوتيوب أو رابط مباشر من السحابة)</label>
+                            <input type="url" id="vYoutubeUrl" class="form-control" placeholder="مثال: https://.../video.mp4">
                         </div>
                         <div class="form-group" style="display:flex; gap:10px;">
                             <div style="flex:1;">
@@ -257,42 +257,48 @@
                 return;
             }
 
+            // 1. UI Initialization First (Non-blocking)
             let adminCourses = JSON.parse(localStorage.getItem('adminCourses') || '[]');
             let examQuestions = [];
-
-            // Sync with Firebase to ensure we don't overwrite with old local cache
-            try {
-                if (window.FirebaseService) {
-                    if (!window.FirebaseService.isReady()) {
-                        await new Promise(resolve => {
-                            window.addEventListener('firebaseReady', resolve, { once: true });
-                            setTimeout(resolve, 3000);
-                        });
-                    }
-                    if (typeof window.FirebaseService.getCourses === 'function') {
-                        const sc = await window.FirebaseService.getCourses();
-                        if(sc && sc.length) {
-                            adminCourses = sc;
-                            localStorage.setItem('adminCourses', JSON.stringify(adminCourses));
-                        }
-                    }
-                }
-            } catch (e) {
-                console.warn('Could not sync from server in admin-upload', e);
-            }
 
             const vSelect = document.getElementById('vCourseSelect');
             const pSelect = document.getElementById('pCourseSelect');
             const eSelect = document.getElementById('eCourseSelect');
 
-            let optionsHtml = '<option value="">-- اختر كورس --</option>';
-            adminCourses.forEach(c => {
-                optionsHtml += `<option value="${c.id}">${c.title}</option>`;
-            });
+            function populateCourseSelects(coursesList) {
+                let optionsHtml = '<option value="">-- اختر كورس --</option>';
+                coursesList.forEach(c => {
+                    optionsHtml += `<option value="${c.id}">${c.title}</option>`;
+                });
+                vSelect.innerHTML = optionsHtml;
+                pSelect.innerHTML = optionsHtml;
+                if(eSelect) eSelect.innerHTML = optionsHtml;
+            }
+            populateCourseSelects(adminCourses);
 
-            vSelect.innerHTML = optionsHtml;
-            pSelect.innerHTML = optionsHtml;
-            if(eSelect) eSelect.innerHTML = optionsHtml;
+            // Sync with Firebase in background to refresh lists
+            (async function syncCourses() {
+                try {
+                    if (window.FirebaseService) {
+                        if (!window.FirebaseService.isReady()) {
+                            await new Promise(resolve => {
+                                window.addEventListener('firebaseReady', resolve, { once: true });
+                                setTimeout(resolve, 3000);
+                            });
+                        }
+                        if (typeof window.FirebaseService.getCourses === 'function') {
+                            const sc = await window.FirebaseService.getCourses();
+                            if(sc && sc.length) {
+                                adminCourses = sc;
+                                localStorage.setItem('adminCourses', JSON.stringify(adminCourses));
+                                populateCourseSelects(adminCourses); // Re-populate with fresh data
+                            }
+                        }
+                    }
+                } catch (e) {
+                    console.warn('Could not sync from server in admin-upload', e);
+                }
+            })();
 
             // Video source toggle
             document.querySelectorAll('input[name="videoSource"]').forEach(radio => {
@@ -526,39 +532,30 @@
 
                     if(section === 'lectures') {
                         const attachLectureId = itemObj.attachLectureId;
-                        if(attachLectureId && attachToLecture(courses[idx], attachLectureId, itemObj)) {
-                            delete itemObj.attachLectureId;
-                            if(window.FirebaseService && typeof window.FirebaseService.saveCourse === 'function') {
-                                window.FirebaseService.saveCourse(courses[idx]);
-                            } else {
-                                localStorage.setItem('adminCourses', JSON.stringify(courses));
-                            }
-                            if(window.showToast) window.showToast('تم ربط المحتوى بمحاضرة موجودة بنجاح!', 'success');
-                            else alert('تم ربط المحتوى بمحاضرة موجودة بنجاح!');
-                            return;
-                        }
-
-                        const lectureContainer = {
-                            id: 'lec_' + Date.now(),
-                            title: itemObj.title,
-                            type: 'lecture',
-                            createdAt: Date.now(),
-                            children: [itemObj]
-                        };
                         delete itemObj.attachLectureId;
-                        courses[idx].contents.lectures.push(lectureContainer);
+                        if(attachLectureId && attachToLecture(courses[idx], attachLectureId, itemObj)) {
+                            // attached successfully
+                        } else {
+                            // Add as an independent item in lectures
+                            courses[idx].contents.lectures.push(itemObj);
+                        }
                     } else {
                         delete itemObj.attachLectureId;
                         courses[idx].contents[section].push(itemObj);
                     }
 
-                    if(window.FirebaseService && typeof window.FirebaseService.saveCourse === 'function') {
-                        window.FirebaseService.saveCourse(courses[idx]);
-                    } else {
-                        localStorage.setItem('adminCourses', JSON.stringify(courses));
+                    try {
+                        if(window.FirebaseService && typeof window.FirebaseService.saveCourse === 'function') {
+                            await window.FirebaseService.saveCourse(courses[idx]);
+                        } else {
+                            localStorage.setItem('adminCourses', JSON.stringify(courses));
+                        }
+                        if(window.showToast) window.showToast('✅ تم الحفظ بنجاح!', 'success');
+                        else alert('تم الحفظ بنجاح!');
+                    } catch(err) {
+                        if(window.showToast) window.showToast('❌ خطأ في الحفظ: ' + err.message, 'error');
+                        else alert('خطأ في الحفظ: ' + err.message);
                     }
-                    if(window.showToast) window.showToast('تم إضافة المحتوى للكورس بنجاح!', 'success');
-                    else alert('تم إضافة المحتوى للكورس بنجاح!');
                 }
             }
 
@@ -573,8 +570,15 @@
 
                 let itemObj = { title: title, type: 'video', source: source, attachLectureId: document.getElementById('vAttachLectureSelect').value };
                 if(source === 'youtube') {
-                    itemObj.youtubeUrl = document.getElementById('vYoutubeUrl').value;
-                    if(!itemObj.youtubeUrl) { alert('يرجى وضع رابط يوتيوب'); return; } itemObj.availableFrom = document.getElementById('vAvailableFrom').value; itemObj.availableUntil = document.getElementById('vAvailableUntil').value;
+                    let urlVal = document.getElementById('vYoutubeUrl').value;
+                    if(!urlVal) { alert('يرجى وضع رابط الفيديو'); return; }
+                    if(urlVal.includes('youtube') || urlVal.includes('youtu.be')) {
+                        itemObj.youtubeUrl = urlVal;
+                    } else {
+                        itemObj.videoUrl = urlVal; // direct link
+                    }
+                    itemObj.availableFrom = document.getElementById('vAvailableFrom').value; 
+                    itemObj.availableUntil = document.getElementById('vAvailableUntil').value;
                 } else if(source === 'upload') {
                     const fileInput = document.getElementById('vFileInput');
                     if (!fileInput.files.length) { alert('يرجى اختيار ملف فيديو'); return; }
