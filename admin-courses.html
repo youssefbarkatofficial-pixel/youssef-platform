@@ -459,7 +459,18 @@
                         childrenHtml = `<div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.08); color: rgba(255,255,255,0.75); font-size: 0.95rem;">` +
                             item.children.map((child, cIdx) => {
                                 const childIcon = child.type === 'video' ? 'fa-play-circle' : child.type === 'pdf' ? 'fa-file-pdf' : child.type === 'training' ? 'fa-flask' : 'fa-file';
-                                return '<div style="display:flex; align-items:center; gap: 10px; margin-bottom: 8px;"><i class="fas ' + childIcon + '" style="width: 16px;"></i> <input type="text" value="' + child.title + '" class="form-control" style="padding:2px 5px; background: transparent; border: 1px solid rgba(255,255,255,0.1); color:#fff; flex:1;" onchange="updateChildTitle('+index+','+cIdx+',this.value)"> <button onclick="removeChildItem('+index+','+cIdx+')" style="background:transparent; border:none; color:#e74c3c;"><i class="fas fa-trash"></i></button></div>';
+                                let urlInput = '';
+                                if(child.type === 'video') {
+                                    urlInput = `<input type="text" value="${child.videoUrl || child.youtubeUrl || ''}" class="form-control" style="padding:2px 5px; font-size:0.8rem; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); color:#fff; flex:1;" placeholder="رابط الفيديو (أو يوتيوب)" onchange="updateChildUrl(${index}, ${cIdx}, this.value)">`;
+                                } else if(child.type === 'pdf') {
+                                    urlInput = `<input type="text" value="${child.pdfUrl || ''}" class="form-control" style="padding:2px 5px; font-size:0.8rem; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); color:#fff; flex:1;" placeholder="رابط المذكرة (PDF)" onchange="updateChildUrl(${index}, ${cIdx}, this.value)">`;
+                                }
+                                return '<div style="display:flex; flex-direction: column; gap: 5px; margin-bottom: 12px; background: rgba(0,0,0,0.15); padding: 8px; border-radius: 5px;">' +
+                                       '<div style="display:flex; align-items:center; gap: 10px;">' +
+                                       '<i class="fas ' + childIcon + '" style="width: 16px;"></i> <input type="text" value="' + child.title + '" class="form-control" style="padding:2px 5px; font-size:0.9rem; background: transparent; border: 1px solid rgba(255,255,255,0.1); color:#fff; flex:1;" placeholder="العنوان" onchange="updateChildTitle('+index+','+cIdx+',this.value)"> <button onclick="removeChildItem('+index+','+cIdx+')" style="background:transparent; border:none; color:#e74c3c;"><i class="fas fa-trash"></i></button>' +
+                                       '</div>' +
+                                       (urlInput ? '<div style="display:flex; padding-left:26px;">' + urlInput + '</div>' : '') +
+                                       '</div>';
                             }).join('') +
                         `</div>`;
                     }
@@ -469,7 +480,9 @@
                         extraFields = `
                         <div style="margin-top:10px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
                             <input type="text" class="form-control" placeholder="رابط الصورة المصغرة (اختياري)" style="padding: 5px; font-size:0.85rem; flex:1; min-width: 200px;" value="${item.thumbnail || ''}" onchange="updateLectureThumbnail(${index}, this.value)">
-                            <button class="btn btn-outline" style="padding: 5px 10px; font-size: 0.8rem; color: var(--accent-cyan); border-color: var(--accent-cyan);" onclick="addTrainingToLecture(${index})"><i class="fas fa-flask mr-1"></i> إضافة تدريب</button>
+                            <button class="btn btn-outline" style="padding: 5px 10px; font-size: 0.8rem; color: #3498db; border-color: #3498db;" onclick="addChildToLecture(${index}, 'video')"><i class="fas fa-video mr-1"></i> إضافة فيديو</button>
+                            <button class="btn btn-outline" style="padding: 5px 10px; font-size: 0.8rem; color: #2ecc71; border-color: #2ecc71;" onclick="addChildToLecture(${index}, 'pdf')"><i class="fas fa-file-pdf mr-1"></i> إضافة مذكرة</button>
+                            <button class="btn btn-outline" style="padding: 5px 10px; font-size: 0.8rem; color: var(--accent-cyan); border-color: var(--accent-cyan);" onclick="addChildToLecture(${index}, 'training')"><i class="fas fa-flask mr-1"></i> إضافة تدريب</button>
                         </div>
                         `;
                     }
@@ -499,8 +512,21 @@
             }
         };
 
+        window.updateChildUrl = function(lecIdx, childIdx, value) {
+            if(tempContents.lectures[lecIdx].children) {
+                const child = tempContents.lectures[lecIdx].children[childIdx];
+                if (child.type === 'video') {
+                    if(value.includes('youtube') || value.includes('youtu.be')) child.youtubeUrl = value;
+                    else child.videoUrl = value;
+                } else if (child.type === 'pdf') {
+                    child.pdfUrl = value;
+                }
+                markUnsaved();
+            }
+        };
+
         window.removeChildItem = function(lecIdx, childIdx) {
-            if(confirm('هل أنت متأكد من حذف هذا التدريب؟')) {
+            if(confirm('هل أنت متأكد من حذف هذا العنصر من المحاضرة؟')) {
                 tempContents.lectures[lecIdx].children.splice(childIdx, 1);
                 markUnsaved();
                 renderContentLists();
@@ -512,9 +538,11 @@
             markUnsaved();
         };
 
-        window.addTrainingToLecture = function(lecIdx) {
+        window.addChildToLecture = function(lecIdx, type) {
             if(!tempContents.lectures[lecIdx].children) tempContents.lectures[lecIdx].children = [];
-            tempContents.lectures[lecIdx].children.push({ title: 'تدريب جديد', type: 'training', id: 'tr_' + Date.now() });
+            let title = type === 'video' ? 'فيديو جديد' : (type === 'pdf' ? 'مذكرة جديدة' : 'تدريب جديد');
+            let childId = type.charAt(0) + '_' + Date.now();
+            tempContents.lectures[lecIdx].children.push({ title: title, type: type, id: childId });
             markUnsaved();
             renderContentLists();
         };
@@ -579,7 +607,7 @@
             document.getElementById('fullCourseEditor').style.display = 'block';
         };
 
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             // Ensure auth
             const authStr = sessionStorage.getItem('currentAdmin');
             if(!authStr || JSON.parse(authStr).role !== 'admin') {
@@ -587,6 +615,31 @@
                 return;
             }
             
+            // Sync courses from Firebase on load to prevent overwriting with old local cache
+            try {
+                window.showToast('⏳ جاري تحديث بيانات الكورسات...', 'warning');
+                if (window.FirebaseService) {
+                    if (!window.FirebaseService.isReady()) {
+                        await new Promise(resolve => {
+                            window.addEventListener('firebaseReady', resolve, { once: true });
+                            setTimeout(resolve, 3000); // fallback
+                        });
+                    }
+                    if (typeof window.FirebaseService.getCourses === 'function') {
+                        const serverCourses = await window.FirebaseService.getCourses();
+                        if(serverCourses && serverCourses.length > 0) {
+                            adminCourses = serverCourses;
+                            safeLocalStorageSave(adminCourses); // refresh cache
+                        }
+                    }
+                }
+            } catch(e) {
+                console.warn('Could not sync from server, using local cache', e);
+            }
+
+            renderCoursesTable();
+            window.showToast('✅ الكورسات جاهزة', 'success');
+
             // Allow URL param to open editor immediately from dashboard
             const urlParams = new URLSearchParams(window.location.search);
             const editId = urlParams.get('id');
@@ -595,8 +648,7 @@
                 // Clean URL
                 window.history.replaceState({}, document.title, "admin-courses.html");
             }
-            
-            renderCoursesTable();
+
 
             // Close Editor Logic (with Confirm)
             document.getElementById('closeFullEditor').addEventListener('click', () => {
@@ -669,8 +721,8 @@
                                 contents: JSON.parse(JSON.stringify(tempContents))
                             };
                         }
-                        // Save to Firebase
-                        if (window.FirebaseService && window.FirebaseService.saveCourse) {
+                        // Save to Firebase if available
+                        if (window.FirebaseService && window.FirebaseService.isReady()) {
                             window.FirebaseService.saveCourse(adminCourses[idx !== -1 ? idx : adminCourses.length - 1]).catch(e => console.warn('Firebase save failed:', e));
                         }
                     } else {
@@ -683,8 +735,8 @@
                             contents: JSON.parse(JSON.stringify(tempContents))
                         };
                         adminCourses.push(newCourse);
-                        // Save to Firebase
-                        if (window.FirebaseService && window.FirebaseService.saveCourse) {
+                        // Save to Firebase if available
+                        if (window.FirebaseService && window.FirebaseService.isReady()) {
                             window.FirebaseService.saveCourse(newCourse).catch(e => console.warn('Firebase save failed:', e));
                         }
                     }
@@ -705,70 +757,45 @@
                 openCourseEditor();
             });
 
-            // Image upload handler — uploads to Firebase Storage
+            // Image upload handler
             const fcImageFile = document.getElementById('fcImageFile');
             if (fcImageFile) {
-                fcImageFile.addEventListener('change', async (ev) => {
+                fcImageFile.addEventListener('change', (ev) => {
                     const file = ev.target.files[0];
-                    if (!file) return;
-                    const preview = document.getElementById('fcImagePreview');
-                    preview.style.opacity = '0.4';
-                    window.showToast('⏳ جاري رفع الصورة...', 'warning');
-
-                    // Compress image
-                    const compressedBase64 = await new Promise((resolve) => {
+                    if (file) {
                         const reader = new FileReader();
                         reader.onload = (event) => {
                             const img = new Image();
                             img.onload = () => {
                                 const canvas = document.createElement('canvas');
-                                let width = img.width, height = img.height;
+                                let width = img.width;
+                                let height = img.height;
                                 const MAX_SIZE = 800;
+
                                 if (width > height) {
                                     if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; }
                                 } else {
                                     if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; }
                                 }
-                                canvas.width = width; canvas.height = height;
-                                canvas.getContext('2d').drawImage(img, 0, 0, width, height);
-                                let b64 = canvas.toDataURL('image/webp', 0.82);
-                                if (!b64.startsWith('data:image/webp')) b64 = canvas.toDataURL('image/jpeg', 0.82);
-                                resolve(b64);
+
+                                canvas.width = width;
+                                canvas.height = height;
+                                const ctx = canvas.getContext('2d');
+                                ctx.drawImage(img, 0, 0, width, height);
+
+                                let base64 = canvas.toDataURL('image/webp', 0.85);
+                                if (base64.indexOf('data:image/webp') === -1) {
+                                    base64 = canvas.toDataURL('image/jpeg', 0.85);
+                                }
+
+                                document.getElementById('fcImagePreview').src = base64;
+                                document.getElementById('fcImage').value = base64;
+                                markUnsaved();
                             };
                             img.src = event.target.result;
                         };
                         reader.readAsDataURL(file);
-                    });
-
-                    // Upload to Firestore (free - no Storage plan needed)
-                    const fbDb = window.firebaseDb;
-                    if (fbDb && window.firebaseAuth && window.firebaseAuth.currentUser) {
-                        try {
-                            const courseId = document.getElementById('fcId').value || ('c' + Date.now());
-                            await fbDb.collection('course_images').doc(courseId).set({
-                                imageData: compressedBase64,
-                                updatedAt: new Date().toISOString()
-                            });
-                            const imageRef = '__firestore__' + courseId;
-                            preview.src = compressedBase64;
-                            preview.style.opacity = '1';
-                            document.getElementById('fcImage').value = imageRef;
-                            // also cache locally
-                            try { localStorage.setItem('img_' + courseId, compressedBase64); } catch(e) {}
-                            window.showToast('✅ تم رفع الصورة على السحابة!', 'success');
-                            markUnsaved();
-                            return;
-                        } catch (dbErr) {
-                            console.warn('Firestore image upload failed:', dbErr);
-                        }
                     }
-
-                    // Fallback: base64 locally
-                    preview.src = compressedBase64;
-                    preview.style.opacity = '1';
-                    document.getElementById('fcImage').value = compressedBase64;
-                    window.showToast('⚠️ تم حفظ الصورة محلياً فقط', 'warning');
-                    markUnsaved();
                 });
             }
         });
@@ -781,20 +808,6 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
     <script src="js/firebase-config.js"></script>
     <script src="js/firebase-service.js"></script>
-    <script>
-    // Retry Firebase save for any courses saved before Firebase was ready
-    document.addEventListener('DOMContentLoaded', function() {
-        setTimeout(function() {
-            if (window.FirebaseService && window.FirebaseService.saveCourse) {
-                var courses = window.getCoursesFromStorage ? window.getCoursesFromStorage() : JSON.parse(localStorage.getItem('adminCourses') || '[]');
-                courses.forEach(function(c) {
-                    window.FirebaseService.saveCourse(c).catch(function(e) { console.warn('Sync failed for', c.id, e); });
-                });
-                console.log('✅ Synced', courses.length, 'courses to Firebase');
-            }
-        }, 2000);
-    });
-    </script>
 </body>
 </html>
 

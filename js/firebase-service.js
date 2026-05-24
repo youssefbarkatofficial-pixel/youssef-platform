@@ -151,7 +151,7 @@ window.FirebaseService = (function () {
     // ============================================================
 
     /**
-     * جلب كل الكورسات مع تحميل الصور من Firestore
+     * جلب كل الكورسات
      */
     async function getCourses() {
         if (!isFirebaseReady()) {
@@ -160,23 +160,6 @@ window.FirebaseService = (function () {
         try {
             const snap = await getDb().collection('courses').get();
             const courses = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-
-            // Resolve __firestore__ image references
-            await Promise.all(courses.map(async (course) => {
-                if (course.image && course.image.startsWith('__firestore__')) {
-                    const courseId = course.image.replace('__firestore__', '');
-                    const cached = localStorage.getItem('img_' + courseId);
-                    if (cached) { course.image = cached; return; }
-                    try {
-                        const imgDoc = await getDb().collection('course_images').doc(courseId).get();
-                        if (imgDoc.exists) {
-                            course.image = imgDoc.data().imageData;
-                            try { localStorage.setItem('img_' + courseId, course.image); } catch(e) {}
-                        }
-                    } catch(e) { console.warn('Failed to load image for', courseId); }
-                }
-            }));
-
             safeStorageSaveCourses(courses);
             return courses;
         } catch (e) {

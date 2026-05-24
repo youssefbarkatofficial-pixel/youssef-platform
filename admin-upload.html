@@ -260,6 +260,27 @@
             let adminCourses = JSON.parse(localStorage.getItem('adminCourses') || '[]');
             let examQuestions = [];
 
+            // Sync with Firebase to ensure we don't overwrite with old local cache
+            try {
+                if (window.FirebaseService) {
+                    if (!window.FirebaseService.isReady()) {
+                        await new Promise(resolve => {
+                            window.addEventListener('firebaseReady', resolve, { once: true });
+                            setTimeout(resolve, 3000);
+                        });
+                    }
+                    if (typeof window.FirebaseService.getCourses === 'function') {
+                        const sc = await window.FirebaseService.getCourses();
+                        if(sc && sc.length) {
+                            adminCourses = sc;
+                            localStorage.setItem('adminCourses', JSON.stringify(adminCourses));
+                        }
+                    }
+                }
+            } catch (e) {
+                console.warn('Could not sync from server in admin-upload', e);
+            }
+
             const vSelect = document.getElementById('vCourseSelect');
             const pSelect = document.getElementById('pCourseSelect');
             const eSelect = document.getElementById('eCourseSelect');
@@ -481,8 +502,16 @@
                 return true;
             }
 
-            function fastUpload(courseId, section, itemObj) {
+            async function fastUpload(courseId, section, itemObj) {
+                // Ensure latest courses before saving
                 let courses = JSON.parse(localStorage.getItem('adminCourses') || '[]');
+                if (window.FirebaseService && typeof window.FirebaseService.getCourses === 'function') {
+                    try {
+                        const sc = await window.FirebaseService.getCourses();
+                        if(sc && sc.length) courses = sc;
+                    } catch(e) {}
+                }
+
                 const idx = courses.findIndex(c => c.id === courseId);
                 if (idx > -1) {
                     if (!courses[idx].contents) courses[idx].contents = { lectures: [], homeworks: [], exams: [], trainings: [] };
