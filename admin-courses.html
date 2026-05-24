@@ -740,32 +740,34 @@
                         reader.readAsDataURL(file);
                     });
 
-                    // Upload to Firebase Storage
-                    const fbStorage = window.firebaseStorage;
-                    if (fbStorage && window.firebaseAuth && window.firebaseAuth.currentUser) {
+                    // Upload to Firestore (free - no Storage plan needed)
+                    const fbDb = window.firebaseDb;
+                    if (fbDb && window.firebaseAuth && window.firebaseAuth.currentUser) {
                         try {
                             const courseId = document.getElementById('fcId').value || ('c' + Date.now());
-                            const storageRef = fbStorage.ref('course-images/' + courseId + '_' + Date.now() + '.jpg');
-                            const res = await fetch(compressedBase64);
-                            const blob = await res.blob();
-                            const snapshot = await storageRef.put(blob);
-                            const downloadURL = await snapshot.ref.getDownloadURL();
-                            preview.src = downloadURL;
+                            await fbDb.collection('course_images').doc(courseId).set({
+                                imageData: compressedBase64,
+                                updatedAt: new Date().toISOString()
+                            });
+                            const imageRef = '__firestore__' + courseId;
+                            preview.src = compressedBase64;
                             preview.style.opacity = '1';
-                            document.getElementById('fcImage').value = downloadURL;
+                            document.getElementById('fcImage').value = imageRef;
+                            // also cache locally
+                            try { localStorage.setItem('img_' + courseId, compressedBase64); } catch(e) {}
                             window.showToast('✅ تم رفع الصورة على السحابة!', 'success');
                             markUnsaved();
                             return;
-                        } catch (storageErr) {
-                            console.warn('Firebase Storage upload failed:', storageErr);
+                        } catch (dbErr) {
+                            console.warn('Firestore image upload failed:', dbErr);
                         }
                     }
 
-                    // Fallback: base64
+                    // Fallback: base64 locally
                     preview.src = compressedBase64;
                     preview.style.opacity = '1';
                     document.getElementById('fcImage').value = compressedBase64;
-                    window.showToast('⚠️ Firebase Storage غير متاح دلوقتي', 'warning');
+                    window.showToast('⚠️ تم حفظ الصورة محلياً فقط', 'warning');
                     markUnsaved();
                 });
             }
