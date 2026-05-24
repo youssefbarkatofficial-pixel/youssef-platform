@@ -669,8 +669,8 @@
                                 contents: JSON.parse(JSON.stringify(tempContents))
                             };
                         }
-                        // Save to Firebase if available
-                        if (window.FirebaseService && window.FirebaseService.isReady()) {
+                        // Save to Firebase
+                        if (window.FirebaseService && window.FirebaseService.saveCourse) {
                             window.FirebaseService.saveCourse(adminCourses[idx !== -1 ? idx : adminCourses.length - 1]).catch(e => console.warn('Firebase save failed:', e));
                         }
                     } else {
@@ -683,8 +683,8 @@
                             contents: JSON.parse(JSON.stringify(tempContents))
                         };
                         adminCourses.push(newCourse);
-                        // Save to Firebase if available
-                        if (window.FirebaseService && window.FirebaseService.isReady()) {
+                        // Save to Firebase
+                        if (window.FirebaseService && window.FirebaseService.saveCourse) {
                             window.FirebaseService.saveCourse(newCourse).catch(e => console.warn('Firebase save failed:', e));
                         }
                     }
@@ -756,6 +756,20 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
     <script src="js/firebase-config.js"></script>
     <script src="js/firebase-service.js"></script>
+    <script>
+    // Retry Firebase save for any courses saved before Firebase was ready
+    document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(function() {
+            if (window.FirebaseService && window.FirebaseService.saveCourse) {
+                var courses = window.getCoursesFromStorage ? window.getCoursesFromStorage() : JSON.parse(localStorage.getItem('adminCourses') || '[]');
+                courses.forEach(function(c) {
+                    window.FirebaseService.saveCourse(c).catch(function(e) { console.warn('Sync failed for', c.id, e); });
+                });
+                console.log('✅ Synced', courses.length, 'courses to Firebase');
+            }
+        }, 2000);
+    });
+    </script>
 </body>
 </html>
 
