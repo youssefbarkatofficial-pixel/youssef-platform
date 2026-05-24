@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -64,45 +64,77 @@
         </main>
     </div>
 
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/firebase-service.js"></script>
     <script src="js/storage-service.js"></script>
     <script src="js/main.js"></script>
     <script src="js/support-chat.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             let userStr = sessionStorage.getItem('currentStudent');
-            if(!userStr) {
+            if (!userStr) {
                 window.location.href = 'index.html';
                 return;
             }
-            
+
             let user = JSON.parse(userStr);
             document.getElementById('userNameDisplay').textContent = user.name;
-            const grades = {'prep1':'أولى إعدادي', 'prep2':'تانية إعدادي', 'prep3':'تالتة إعدادي', 'sec1':'أولى ثانوي'};
+            const grades = {
+                'prep1': 'أولى إعدادي',
+                'prep2': 'تانية إعدادي',
+                'prep3': 'تالتة إعدادي',
+                'sec1': 'أولى ثانوي'
+            };
             document.getElementById('userGradeDisplay').textContent = grades[user.grade] || 'طالب';
-            
-            let dbUser = JSON.parse(localStorage.getItem(`db_${user.phone}`)) || { courses: [] };
+
             const container = document.getElementById('myCoursesList');
             const emptyState = document.getElementById('noCoursesState');
-            
-            if(dbUser.courses && dbUser.courses.length > 0) {
+
+            // 1. Sync user data from Firebase
+            let dbUser = JSON.parse(localStorage.getItem(`db_${user.phone}`)) || { courses: [] };
+            try {
+                if (window.FirebaseService && typeof window.FirebaseService.getUser === 'function') {
+                    const onlineUser = await window.FirebaseService.getUser(user.phone);
+                    if (onlineUser) {
+                        dbUser = onlineUser;
+                        localStorage.setItem(`db_${user.phone}`, JSON.stringify(dbUser));
+                    }
+                }
+            } catch (e) { console.warn('Firebase user sync failed:', e); }
+
+            // 2. Sync courses list from Firebase
+            try {
+                if (window.FirebaseService && typeof window.FirebaseService.getCourses === 'function') {
+                    const onlineCourses = await window.FirebaseService.getCourses();
+                    if (onlineCourses && onlineCourses.length > 0) {
+                        localStorage.setItem('adminCourses', JSON.stringify(onlineCourses));
+                    }
+                }
+            } catch (e) { console.warn('Firebase courses sync failed:', e); }
+
+            let adminCourses = JSON.parse(localStorage.getItem('adminCourses')) || [];
+
+            if (dbUser.courses && dbUser.courses.length > 0) {
                 container.style.display = 'grid';
                 emptyState.style.display = 'none';
-                
-                let adminCourses = JSON.parse(localStorage.getItem('adminCourses')) || [];
-                
+
                 dbUser.courses.forEach(cId => {
                     const c = adminCourses.find(course => course.id === cId);
-                    if(c) {
+                    if (c) {
                         const card = document.createElement('div');
                         card.style.cssText = 'background: rgba(255,255,255,0.05); border-radius: 15px; border: 1px solid var(--border-color); overflow: hidden; display: flex; flex-direction: column; transition: transform 0.3s;';
                         card.onmouseenter = () => card.style.transform = 'translateY(-5px)';
                         card.onmouseleave = () => card.style.transform = 'translateY(0)';
-                        
                         card.innerHTML = `
-                            <img src="${c.image}" style="width: 100%; height: 150px; object-fit: cover;">
+                            <img src="${c.image || ''}" style="width: 100%; height: 150px; object-fit: cover;" onerror="this.style.display='none'">
                             <div style="padding: 20px; flex: 1; display: flex; flex-direction: column;">
-                                <h3 style="color: var(--text-primary); margin-bottom: 10px;">${c.title}</h3>
-                                <p style="color: rgba(255,255,255,0.6); font-size: 0.9rem; margin-bottom: 15px; flex: 1;">${c.desc.substring(0, 60)}...</p>
+                                <h3 style="color: var(--text-primary); margin-bottom: 10px;">${c.title || 'كورس'}</h3>
+                                <p style="color: rgba(255,255,255,0.6); font-size: 0.9rem; margin-bottom: 15px; flex: 1;">${(c.desc || '').substring(0, 80)}...</p>
                                 <a href="course-details.html?id=${c.id}" class="btn btn-green" style="width: 100%; justify-content: center;"><i class="fas fa-play-circle mr-2"></i> دخول الكورس</a>
                             </div>
                         `;
@@ -113,16 +145,18 @@
                 container.style.display = 'none';
                 emptyState.style.display = 'block';
             }
+
+            // Logout
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    sessionStorage.removeItem('currentStudent');
+                    localStorage.removeItem('currentStudent');
+                    window.location.href = 'index.html';
+                });
+            }
         });
     </script>
-    <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
-    <script src="js/firebase-config.js"></script>
-    <script src="js/firebase-service.js"></script>
 </body>
 </html>
-
-
