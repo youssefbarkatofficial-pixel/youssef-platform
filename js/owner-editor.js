@@ -3,46 +3,67 @@
 document.addEventListener('DOMContentLoaded', () => {
     
     // 1. Always load dynamic content (so students can see it too)
-    const savedHeroImage = localStorage.getItem('ownerHeroImage');
-    const heroImgEl = document.getElementById('teacherHeroImg');
-    const heroClippedImgEl = document.getElementById('teacherFgImgClipped');
-    if (savedHeroImage) {
-        if(heroImgEl) heroImgEl.src = savedHeroImage;
-        if(heroClippedImgEl) heroClippedImgEl.src = savedHeroImage;
+    function applyImageSetting(key, val) {
+        if (!val) return;
+        if (key === 'ownerHeroImage') {
+            const heroImgEl = document.getElementById('teacherHeroImg');
+            const heroClippedImgEl = document.getElementById('teacherFgImgClipped');
+            if(heroImgEl) heroImgEl.src = val;
+            if(heroClippedImgEl) heroClippedImgEl.src = val;
+        } else if (key === 'ownerBgImage') {
+            const bgImgEl = document.getElementById('teacherBgImg');
+            if (bgImgEl) bgImgEl.src = val;
+        } else if (key === 'ownerNavLogoImage') {
+            const navLogoImg = document.getElementById('navLogoImg');
+            const navLogoText = document.getElementById('navLogoText');
+            if (navLogoImg && navLogoText) {
+                navLogoImg.src = val;
+                navLogoImg.style.display = 'block';
+                navLogoText.style.display = 'none';
+            }
+        } else if (key === 'ownerFeaturesLogoImage') {
+            const featuresCenterImg = document.getElementById('featuresCenterImg');
+            const featuresCenterText = document.getElementById('featuresCenterText');
+            if (featuresCenterImg && featuresCenterText) {
+                featuresCenterImg.src = val;
+                featuresCenterImg.style.display = 'block';
+                featuresCenterText.style.display = 'none';
+            }
+        } else if (key === 'ownerFooterLogoImage') {
+            const footerLogoImg = document.getElementById('footerLogoImg');
+            const footerLogoText = document.getElementById('footerLogoText');
+            if (footerLogoImg && footerLogoText) {
+                footerLogoImg.src = val;
+                footerLogoImg.style.display = 'block';
+                footerLogoText.style.display = 'none';
+            }
+        }
     }
 
-    const savedBgImage = localStorage.getItem('ownerBgImage');
-    const bgImgEl = document.getElementById('teacherBgImg');
-    if (savedBgImage && bgImgEl) {
-        bgImgEl.src = savedBgImage;
-    }
+    const keysToLoad = ['ownerHeroImage', 'ownerBgImage', 'ownerNavLogoImage', 'ownerFeaturesLogoImage', 'ownerFooterLogoImage'];
+    keysToLoad.forEach(key => {
+        applyImageSetting(key, localStorage.getItem(key));
+    });
 
-    const savedNavLogo = localStorage.getItem('ownerNavLogoImage');
-    const navLogoImg = document.getElementById('navLogoImg');
-    const navLogoText = document.getElementById('navLogoText');
-    if (savedNavLogo && navLogoImg && navLogoText) {
-        navLogoImg.src = savedNavLogo;
-        navLogoImg.style.display = 'block';
-        navLogoText.style.display = 'none';
-    }
-
-    const savedFeaturesLogo = localStorage.getItem('ownerFeaturesLogoImage');
-    const featuresCenterImg = document.getElementById('featuresCenterImg');
-    const featuresCenterText = document.getElementById('featuresCenterText');
-    if (savedFeaturesLogo && featuresCenterImg && featuresCenterText) {
-        featuresCenterImg.src = savedFeaturesLogo;
-        featuresCenterImg.style.display = 'block';
-        featuresCenterText.style.display = 'none';
-    }
-
-    const savedFooterLogo = localStorage.getItem('ownerFooterLogoImage');
-    const footerLogoImg = document.getElementById('footerLogoImg');
-    const footerLogoText = document.getElementById('footerLogoText');
-    if (savedFooterLogo && footerLogoImg && footerLogoText) {
-        footerLogoImg.src = savedFooterLogo;
-        footerLogoImg.style.display = 'block';
-        footerLogoText.style.display = 'none';
-    }
+    // Sync from Firebase in background
+    setTimeout(async () => {
+        if (window.firebaseFirestore) {
+            try {
+                for (const key of keysToLoad) {
+                    const docSnap = await window.firebaseFirestore.collection('platform_settings').doc(key).get();
+                    if (docSnap.exists) {
+                        const val = docSnap.data().value;
+                        if (val && val !== localStorage.getItem(key)) {
+                            localStorage.setItem(key, val);
+                            applyImageSetting(key, val);
+                        }
+                    }
+                }
+            } catch (e) {
+                console.warn("Could not sync platform images from Firebase", e);
+            }
+        }
+    }, 1500);
 
     // Load dynamic courses onto homepage if we have a courses container
     // We can do this later, for now we ensure the image works.
@@ -129,20 +150,36 @@ document.addEventListener('DOMContentLoaded', () => {
                 saveBtnContainer.style.display = 'block';
             }
 
-            function saveAllChanges() {
+            async function saveAllChanges() {
                 if (!hasUnsavedChanges) return;
                 
                 try {
+                    const originalText = btnGlobalSave.innerHTML;
+                    btnGlobalSave.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> جاري الحفظ في السحابة...';
+                    btnGlobalSave.disabled = true;
+
                     Object.keys(unsavedEdits).forEach(key => {
                         localStorage.setItem(key, unsavedEdits[key]);
                     });
+
+                    // Save to Firebase
+                    if (window.firebaseFirestore) {
+                        for (const key of Object.keys(unsavedEdits)) {
+                            await window.firebaseFirestore.collection('platform_settings').doc(key).set({ value: unsavedEdits[key] });
+                        }
+                    }
+
                     unsavedEdits = {};
                     hasUnsavedChanges = false;
                     saveBtnContainer.style.display = 'none';
-                    if(window.showToast) window.showToast('تم حفظ جميع التعديلات بنجاح!', 'success');
+                    if(window.showToast) window.showToast('تم حفظ جميع التعديلات بنجاح ورفعها للسحابة!', 'success');
+                    
+                    btnGlobalSave.innerHTML = originalText;
+                    btnGlobalSave.disabled = false;
                 } catch(e) {
                     console.error("Storage error:", e);
-                    if(window.showToast) window.showToast('خطأ: حجم الصور كبير جداً ومساحة التخزين لا تكفي. يرجى اختيار صور أصغر.', 'error');
+                    if(window.showToast) window.showToast('خطأ أثناء رفع الصور. يرجى المحاولة مرة أخرى.', 'error');
+                    btnGlobalSave.disabled = false;
                 }
             }
 
