@@ -132,10 +132,26 @@ document.addEventListener('DOMContentLoaded', async () => {
               item.addEventListener('click', (e) => {
                 e.preventDefault();
                 try { if (window.audioManager) window.audioManager.play('whatsapp'); } catch(e){}
+                
+                if (!n.read) {
+                    n.read = true;
+                    let u = JSON.parse(localStorage.getItem(`db_${user.phone}`)) || dbUser;
+                    u.notifications = dbUser.notifications;
+                    localStorage.setItem(`db_${user.phone}`, JSON.stringify(u));
+                    if (window.FirebaseService && window.FirebaseService.updateStudentData) {
+                        window.FirebaseService.updateStudentData(user.phone, { notifications: dbUser.notifications }).catch(e=>console.error(e));
+                    }
+                }
+
                 if (n.courseId) {
                   try { if (window.triggerConfetti) window.triggerConfetti(); } catch(e){}
                   try { if (window.showToast) window.showToast('تهانينا! تم تفعيل كورسك. توجه الآن لمحتوى الكورس.', 'majestic', { title: '🎉 مبروك!', duration: 4500, isMajestic: true, playSound: 'celebration' }); } catch(e){}
-                  try { sessionStorage.setItem('celebrate_course_' + n.courseId, '1'); } catch(e){}
+                  try { 
+                      if (!localStorage.getItem('has_celebrated_' + n.courseId)) {
+                          sessionStorage.setItem('celebrate_course_' + n.courseId, '1'); 
+                          localStorage.setItem('has_celebrated_' + n.courseId, '1');
+                      }
+                  } catch(e){}
                   window.location.href = `courses.html?highlight=${encodeURIComponent(n.courseId)}`;
                 } else {
                   try { if (window.showToast) window.showToast(n.message || 'تم استلام الإشعار', 'success', { playSound: 'notifArrive' }); } catch(e){}

@@ -951,7 +951,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   window.openApprovedCourseNotification = function(courseId) {
       if (!courseId) return;
-      try { sessionStorage.setItem('celebrate_course_' + courseId, '1'); } catch(e){}
+      try { 
+          if (!localStorage.getItem('has_celebrated_' + courseId)) {
+              sessionStorage.setItem('celebrate_course_' + courseId, '1'); 
+              localStorage.setItem('has_celebrated_' + courseId, '1');
+          }
+      } catch(e){}
       const url = `courses.html?highlight=${encodeURIComponent(courseId)}`;
       window.location.href = url;
   };
@@ -1076,6 +1081,10 @@ document.addEventListener('DOMContentLoaded', () => {
           let dbUser = JSON.parse(localStorage.getItem(`db_${phone}`)) || {};
           dbUser.notifications = notifications;
           localStorage.setItem(`db_${phone}`, JSON.stringify(dbUser));
+          
+          if (window.FirebaseService && window.FirebaseService.updateStudentData) {
+              window.FirebaseService.updateStudentData(phone, { notifications: notifications }).catch(e => console.error(e));
+          }
           
           // Remove red badges globally
           const badges = document.querySelectorAll('#notifBadge');
