@@ -68,37 +68,31 @@ window.FirebaseService = (function () {
     /**
      * تسجيل طالب جديد — Firebase Auth + Firestore
      */
-    async function registerStudent(userData, password) {
-        if (!isFirebaseReady()) throw new Error('Firebase not ready');
-        const email = `${userData.phone}@student.youssefbarakat.com`;
-        const userCredential = await getAuth().createUserWithEmailAndPassword(email, password);
-        const uid = userCredential.user.uid;
-
-        const fullData = {
-            ...userData,
-            uid,
-            email,
-            role: 'student',
-            plainPassword: password, // Store plain password for admin lookup
-            courses: [],
-            notifications: [],
-            createdAt: new Date().toISOString()
-        };
-
-        // Use phone as the Document ID so Admin lookup by doc(userId) works instantly
-        await getDb().collection('users').doc(userData.phone).set(fullData);
-
-        // cache locally too
+    async function registerStudent(userData) {
+        if (!isFirebaseReady()) throw new Error("Firebase is not ready");
         try {
-            let users = JSON.parse(localStorage.getItem('strictUsers') || '[]');
-            if (!users.find(u => u.phone === userData.phone)) {
-                users.push({ ...fullData, password });
-                localStorage.setItem('strictUsers', JSON.stringify(users));
-            }
+            const userCredential = await getAuth().createUserWithEmailAndPassword(userData.email, userData.password);
+            const fullData = {
+                uid: userCredential.user.uid,
+                name: userData.name,
+                email: userData.email,
+                phone: userData.phone,
+                grade: userData.grade,
+                role: 'student',
+                courses: [],
+                notifications: [],
+                createdAt: new Date().toISOString()
+            };
+            
+            // Save using phone as document ID for instant Admin lookup
+            await getDb().collection('users').doc(userData.phone).set(fullData);
             localStorage.setItem(`db_${userData.phone}`, JSON.stringify(fullData));
-        } catch (e) {}
-
-        return { uid, ...fullData };
+            
+            return fullData;
+        } catch (error) {
+            console.error('Registration error:', error);
+            throw error;
+        }
     }
 
     /**
@@ -281,22 +275,23 @@ window.FirebaseService = (function () {
      * إضافة طلب دفع جديد
      */
     async function addPaymentRequest(reqData) {
-        if (!isFirebaseReady()) throw new Error("لا يوجد اتصال بخوادم المنصة (Firestore غير متوفر). يرجى التأكد من اتصال الإنترنت.");
-
-        const data = { ...reqData, status: 'pending', timestamp: new Date().toISOString() };
-
-        // 1. Upload strictly to Firestore first
-        const docRef = await getDb().collection('paymentRequests').add(data);
-        const newRequest = { id: docRef.id, ...data };
-
-        // 2. Local cache safely
+        if (!isFirebaseReady()) throw new Error("لا يوجد اتصال بخوادم المنصة. يرجى التأكد من الإنترنت.");
         try {
+            const data = { ...reqData, status: 'pending', timestamp: new Date().toISOString() };
+            // Upload to Firestore
+            const docRef = await getDb().collection('paymentRequests').add(data);
+            const newRequest = { id: docRef.id, ...data };
+            
+            // Cache locally
             let reqs = JSON.parse(localStorage.getItem('paymentRequests') || '[]');
             reqs.push(newRequest);
             localStorage.setItem('paymentRequests', JSON.stringify(reqs));
-        } catch(e) {}
-
-        return newRequest;
+            
+            return newRequest;
+        } catch (error) {
+            console.error('Firestore Error in addPaymentRequest:', error);
+            throw error;
+        }
     }
 
     /**

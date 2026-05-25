@@ -374,9 +374,18 @@ document.addEventListener('DOMContentLoaded', async () => {
       };
 
       if (window.FirebaseService && typeof window.FirebaseService.addPaymentRequest === 'function') {
-        await window.FirebaseService.addPaymentRequest(requestData);
+          try {
+              await window.FirebaseService.addPaymentRequest(requestData);
+              if (window.showToast) window.showToast('تم إرسال طلب الاشتراك بنجاح، بانتظار موافقة الأدمن', 'success');
+              
+              const modal = document.getElementById('paymentModal');
+              if (modal) modal.classList.remove('active');
+          } catch (err) {
+              console.error(err);
+              if (window.showToast) window.showToast('تعذر الاتصال بالسحابة. تأكد من الإنترنت.', 'error');
+          }
       } else {
-        throw new Error("خدمة الاتصال بالسحابة غير متوفرة حالياً. تأكد من اتصالك بالإنترنت.");
+          if (window.showToast) window.showToast('خدمة قاعدة البيانات غير متوفرة حالياً.', 'error');
       }
 
       // Only mark request as successful. Do NOT play sounds, show global toasts,
