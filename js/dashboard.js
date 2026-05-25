@@ -366,31 +366,30 @@ document.addEventListener('DOMContentLoaded', async () => {
       const proofImageKey = 'proof_' + Date.now() + '_' + encodeURIComponent(user.phone);
       await savePaymentProofImage(proofImageKey, proofImageBase64);
 
-      const newRequest = {
+      const requestData = {
         courseId: courseId,
         userId: user.phone,
         userName: user.name,
-        proofImageKey: proofImageKey
+        proofImageKey: proofImageKey,
+        status: 'pending',
+        timestamp: new Date().toISOString()
       };
 
-      if (window.FirebaseService && window.FirebaseService.isReady()) {
-        await window.FirebaseService.addPaymentRequest(newRequest);
-      } else {
-        const fallbackRequest = {
-          ...newRequest,
-          id: 'req_' + Date.now(),
-          status: 'pending',
-          timestamp: new Date().toISOString()
-        };
+      if (!window.firebaseDb) {
+        throw new Error("لا يوجد اتصال بخوادم المنصة حالياً، يرجى المحاولة لاحقاً أو التأكد من اتصال الإنترنت.");
+      }
+
+      // 1. Upload strictly to Firestore first
+      const docRef = await window.firebaseDb.collection('paymentRequests').add(requestData);
+      const newRequest = { id: docRef.id, ...requestData };
+
+      // 2. Cache in localStorage only after successful cloud save
+      try {
         let paymentRequests = JSON.parse(localStorage.getItem('paymentRequests')) || [];
-        paymentRequests.push(fallbackRequest);
-        try {
-          localStorage.setItem('paymentRequests', JSON.stringify(paymentRequests));
-        } catch (err) {
-          if(window.showToast) window.showToast('تعذر حفظ الطلب، حاول رفع صورة أصغر أو استخدام متصفح آخر.', 'error');
-          else alert('تعذر حفظ الطلب، حاول رفع صورة أصغر أو استخدام متصفح آخر.');
-          return;
-        }
+        paymentRequests.push(newRequest);
+        localStorage.setItem('paymentRequests', JSON.stringify(paymentRequests));
+      } catch (err) {
+        console.warn('تعذر حفظ نسخة محلية من الطلب', err);
       }
 
       // Only mark request as successful. Do NOT play sounds, show global toasts,
