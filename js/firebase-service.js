@@ -283,23 +283,50 @@ window.FirebaseService = (function () {
     /**
      * إضافة طلب دفع جديد
      */
-    async function addPaymentRequest(reqData) {
-        if (!isFirebaseReady()) throw new Error("لا يوجد اتصال بخوادم المنصة. يرجى التأكد من الإنترنت.");
+    async function addPaymentRequest(data) {
+        const payload = {
+            ...data,
+            status: 'pending',
+            createdAt: new Date().toISOString()
+        };
+
+        if (!isFirebaseReady()) {
+            let reqs = JSON.parse(localStorage.getItem('paymentRequests') || '[]');
+            reqs.push({ id: 'local_' + Date.now(), ...payload });
+            localStorage.setItem('paymentRequests', JSON.stringify(reqs));
+            return { success: false, error: new Error("لا يوجد اتصال بخوادم المنصة. تم الحفظ محليا.") };
+        }
+
         try {
-            const data = { ...reqData, status: 'pending', timestamp: new Date().toISOString() };
-            // Upload to Firestore
-            const docRef = await getDb().collection('paymentRequests').add(data);
-            const newRequest = { id: docRef.id, ...data };
-            
+            const docRef = await getDb()
+                .collection('paymentRequests')
+                .add(payload);
+
+            console.log('[PAYMENT REQUEST SAVED]', docRef.id);
+
             // Cache locally
             let reqs = JSON.parse(localStorage.getItem('paymentRequests') || '[]');
-            reqs.push(newRequest);
+            reqs.push({ id: docRef.id, ...payload });
             localStorage.setItem('paymentRequests', JSON.stringify(reqs));
-            
-            return newRequest;
-        } catch (error) {
-            console.error('Firestore Error in addPaymentRequest:', error);
-            throw error;
+
+            return {
+                success: true,
+                id: docRef.id
+            };
+        } catch(error) {
+            console.error(
+                '[PAYMENT REQUEST ERROR]',
+                error
+            );
+
+            let reqs = JSON.parse(localStorage.getItem('paymentRequests') || '[]');
+            reqs.push({ id: 'local_' + Date.now(), ...payload });
+            localStorage.setItem('paymentRequests', JSON.stringify(reqs));
+
+            return {
+                success: false,
+                error
+            };
         }
     }
 

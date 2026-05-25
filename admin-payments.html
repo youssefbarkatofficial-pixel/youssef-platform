@@ -130,20 +130,32 @@
 
             let adminCourses = JSON.parse(localStorage.getItem('adminCourses') || '[]');
 
-            async function calculatePaymentStats() {
-                let paymentRequests = [];
-                if (window.firebaseDb) {
-                    try {
-                        const snap = await window.firebaseDb.collection('paymentRequests').get();
-                        paymentRequests = snap.docs.map(doc => ({id: doc.id, ...doc.data()}));
-                    } catch(e) {
-                        console.warn("Failed fetching payments", e);
-                        paymentRequests = JSON.parse(localStorage.getItem('paymentRequests') || '[]');
-                    }
-                } else {
-                    paymentRequests = JSON.parse(localStorage.getItem('paymentRequests') || '[]');
-                }
-                
+            let paymentRequests = JSON.parse(localStorage.getItem('cached_payment_requests') || localStorage.getItem('paymentRequests') || '[]');
+
+            if (window.firebaseDb) {
+                window.firebaseDb.collection('paymentRequests')
+                .onSnapshot(snapshot => {
+                    const requests = [];
+                    snapshot.forEach(doc => {
+                        requests.push({
+                            id: doc.id,
+                            ...doc.data()
+                        });
+                    });
+                    
+                    console.log('[ADMIN PAYMENT REQUESTS]', requests.length);
+                    paymentRequests = requests;
+                    
+                    localStorage.setItem('cached_payment_requests', JSON.stringify(requests));
+                    
+                    calculatePaymentStats();
+                    renderPayments();
+                }, err => {
+                    console.error('[ADMIN PAYMENT SYNC ERROR]', err);
+                });
+            }
+
+            function calculatePaymentStats() {
                 const pending = paymentRequests.filter(req => req.status === 'pending');
                 const approved = paymentRequests.filter(req => req.status === 'approved');
                 
@@ -159,7 +171,6 @@
             }
 
             async function renderPayments() {
-                // support async image loading from IndexedDB
                 async function fetchProofImage(req) {
                     if (req.proofImage) return req.proofImage;
                     if (req.proofImageKey) {
@@ -181,18 +192,7 @@
                     return null;
                 }
                 const tbody = document.getElementById('paymentsTableBody');
-                let paymentRequests = [];
-                if (window.firebaseDb) {
-                    try {
-                        const snap = await window.firebaseDb.collection('paymentRequests').get();
-                        paymentRequests = snap.docs.map(doc => ({id: doc.id, ...doc.data()}));
-                        localStorage.setItem('paymentRequests', JSON.stringify(paymentRequests));
-                    } catch(e) {
-                        paymentRequests = JSON.parse(localStorage.getItem('paymentRequests') || '[]');
-                    }
-                } else {
-                    paymentRequests = JSON.parse(localStorage.getItem('paymentRequests') || '[]');
-                }
+                
                 const filter = document.getElementById('pStatusFilter').value;
                 
                 let filteredReqs = paymentRequests;
@@ -204,9 +204,9 @@
                     tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: var(--text-muted); padding: 30px;">لا توجد طلبات دفع بهذه الحالة حالياً</td></tr>';
                     return;
                 }
-                
+
                 // Sort by date descending
-                filteredReqs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                filteredReqs.sort((a, b) => new Date(b.createdAt || b.timestamp) - new Date(a.createdAt || a.timestamp));
 
                 tbody.innerHTML = '';
                 (async function renderLoop() {

@@ -336,7 +336,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   async function submitPaymentRequest() {
     const { modal, proofInput, confirmBtn } = getPaymentModalElements();
-    if (window._submittingPayment) return; // prevent duplicate calls
+    if (window._submittingPayment) return;
     window._submittingPayment = true;
     
     if (!proofInput || !proofInput.files || proofInput.files.length === 0) {
@@ -358,8 +358,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const originalText = confirmBtn ? confirmBtn.innerHTML : 'استمرار';
     if (confirmBtn) confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري إرسال الطلب...';
 
-    let requestSuccess = false;
     try {
+      console.log('[PAYMENT SUBMIT START]');
       const file = proofInput.files[0];
       const proofImageBase64 = await readImageFileAsDataUrl(file);
 
@@ -369,24 +369,43 @@ document.addEventListener('DOMContentLoaded', async () => {
       const proofImageKey = 'proof_' + Date.now() + '_' + encodeURIComponent(user.phone);
       await savePaymentProofImage(proofImageKey, proofImageBase64);
 
+      let courseName = 'غير معروف';
+      const cTitleEl = document.querySelector(`.course-card[data-course-id="${courseId}"] .course-title`);
+      if (cTitleEl) courseName = cTitleEl.innerText;
+
       const requestData = {
         courseId: courseId,
+        courseName: courseName,
         userId: user.phone,
         userName: user.name,
+        userPhone: user.phone,
+        userEmail: user.email || `${user.phone}@student.youssefbarakat.com`,
         proofImageKey: proofImageKey
       };
 
+      console.log('[PAYMENT DATA]', requestData);
+
       if (window.FirebaseService && typeof window.FirebaseService.addPaymentRequest === 'function') {
-          try {
-              await window.FirebaseService.addPaymentRequest(requestData);
+          const result = await window.FirebaseService.addPaymentRequest(requestData);
+          if (result && result.success) {
+              console.log('[FIRESTORE WRITE SUCCESS]');
               if (window.showToast) window.showToast('تم إرسال طلب الاشتراك بنجاح، بانتظار موافقة الأدمن', 'success');
               
               const pModal = document.getElementById('paymentModal');
-              if (pModal) pModal.classList.remove('active');
-              requestSuccess = true;
-          } catch (err) {
-              console.error(err);
-              if (window.showToast) window.showToast('تعذر الاتصال بالسحابة. تأكد من الإنترنت.', 'error');
+              if (pModal) pModal.style.display = 'none';
+
+              const courseCardBtn = document.querySelector(`.course-card[data-course-id="${courseId}"] .btn-subscribe`) || document.querySelector(`.btn-subscribe[onclick*="${courseId}"]`);
+              if (courseCardBtn) {
+                  courseCardBtn.innerText = 'قيد مراجعة الطلب';
+                  courseCardBtn.disabled = true;
+                  courseCardBtn.style.backgroundColor = '#64748b';
+                  courseCardBtn.style.color = '#fff';
+                  courseCardBtn.style.cursor = 'not-allowed';
+                  courseCardBtn.style.pointerEvents = 'none';
+              }
+          } else {
+              console.error(result ? result.error : 'Unknown error');
+              if (window.showToast) window.showToast('تعذر الاتصال بالسحابة. تم حفظ طلبك محلياً مؤقتاً.', 'error');
           }
       } else {
           if (window.showToast) window.showToast('خدمة قاعدة البيانات غير متوفرة حالياً.', 'error');
@@ -398,37 +417,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       else alert(message);
     } finally {
       if (confirmBtn) {
-        if (requestSuccess) {
-          confirmBtn.innerText = 'قيد مراجعة الطلب';
-          confirmBtn.disabled = true;
-          confirmBtn.classList.add('btn-pending');
-          try {
-            confirmBtn.style.background = '#bdbdbd';
-            confirmBtn.style.color = '#444';
-            confirmBtn.style.borderColor = '#bdbdbd';
-            confirmBtn.style.cursor = 'not-allowed';
-          } catch(e) {}
-
-          setTimeout(() => {
-            const paymentModal = document.getElementById('paymentModal');
-            if (paymentModal) {
-              paymentModal.style.display = 'none';
-            }
-
-            const courseCardBtn = document.querySelector(`.course-card[data-course-id="${courseId}"] .btn-subscribe`) || document.querySelector(`.btn-subscribe[onclick*="${courseId}"]`);
-            if (courseCardBtn) {
-              courseCardBtn.innerText = 'قيد مراجعة الطلب';
-              courseCardBtn.disabled = true;
-              courseCardBtn.style.backgroundColor = '#64748b';
-              courseCardBtn.style.color = '#fff';
-              courseCardBtn.style.cursor = 'not-allowed';
-              courseCardBtn.style.pointerEvents = 'none';
-            }
-          }, 1000);
-        } else {
-          confirmBtn.innerHTML = originalText;
           confirmBtn.disabled = false;
-        }
+          confirmBtn.innerHTML = originalText;
       }
       window._submittingPayment = false;
     }
