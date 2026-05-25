@@ -159,7 +159,7 @@
                 return;
             }
 
-            const users = JSON.parse(localStorage.getItem('strictUsers') || '[]');
+            let users = JSON.parse(localStorage.getItem('cached_students') || localStorage.getItem('strictUsers') || '[]');
             const adminCourses = JSON.parse(localStorage.getItem('adminCourses') || '[]');
             let currentStudentPhone = null;
             let tempStudentCourses = [];
@@ -169,8 +169,26 @@
                 hasUnsavedChanges = true;
             }
 
+            if (window.firebaseDb) {
+                console.log('[ADMIN] fetching students');
+                window.firebaseDb.collection('users').where('role', '==', 'student').onSnapshot(snapshot => {
+                    const newUsers = [];
+                    snapshot.forEach(doc => {
+                        newUsers.push({ id: doc.id, ...doc.data() });
+                    });
+                    newUsers.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+                    users = newUsers;
+                    console.log('[SYNC] current student count:', users.length);
+                    localStorage.setItem('cached_students', JSON.stringify(users));
+                    renderStudentsTable(document.getElementById('studentSearch')?.value || '');
+                }, err => {
+                    console.error('[ADMIN] Firestore sync error:', err);
+                });
+            }
+
             function renderStudentsTable(filter = '') {
                 const tbody = document.getElementById('studentsTableBody');
+                if (!tbody) return;
                 tbody.innerHTML = '';
                 
                 users.forEach(u => {

@@ -71,7 +71,9 @@ window.FirebaseService = (function () {
     async function registerStudent(userData) {
         if (!isFirebaseReady()) throw new Error("Firebase is not ready");
         try {
+            await getAuth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
             const userCredential = await getAuth().createUserWithEmailAndPassword(userData.email, userData.password);
+            console.log('[AUTH] account created');
             const fullData = {
                 uid: userCredential.user.uid,
                 name: userData.name,
@@ -85,7 +87,10 @@ window.FirebaseService = (function () {
             };
             
             // Save using phone as document ID for instant Admin lookup
-            await getDb().collection('users').doc(userData.phone).set(fullData);
+            await getDb().collection('users').doc(userData.phone).set(fullData, { merge: true });
+            console.log('[FIRESTORE] student profile saved');
+            console.log('[FIRESTORE] Student saved successfully');
+            
             localStorage.setItem(`db_${userData.phone}`, JSON.stringify(fullData));
             
             return fullData;
@@ -100,12 +105,16 @@ window.FirebaseService = (function () {
      */
     async function loginStudent(phone, password) {
         if (!isFirebaseReady()) throw new Error('Firebase not ready');
+        await getAuth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
         const email = `${phone}@student.youssefbarakat.com`;
         const userCredential = await getAuth().signInWithEmailAndPassword(email, password);
         const uid = userCredential.user.uid;
 
-        const doc = await getDb().collection('users').doc(uid).get();
-        if (!doc.exists) throw new Error('User document not found');
+        let doc = await getDb().collection('users').doc(phone).get();
+        if (!doc.exists) {
+            doc = await getDb().collection('users').doc(uid).get();
+            if (!doc.exists) throw new Error('User document not found');
+        }
 
         const userData = doc.data();
 
