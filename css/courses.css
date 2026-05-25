@@ -150,7 +150,9 @@
   flex-direction: column;
   gap: 12px;
   width: 100%;
-  margin-top: 0; /* Removed auto so meta's auto margin pushes both */
+  margin-top: 0;
+  min-height: 108px; /* Space for 2 buttons (48px each) + 12px gap */
+  justify-content: center; /* Centers the single button vertically if there's only one */
 }
 
 .course-actions .btn {
