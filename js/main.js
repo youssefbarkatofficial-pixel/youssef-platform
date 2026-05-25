@@ -1109,4 +1109,41 @@ document.addEventListener('DOMContentLoaded', () => {
       });
   });
 
+  // 3. Scroll Reveal Animations (Intersection Observer)
+  const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+          if (entry.isIntersecting) {
+              entry.target.classList.add('is-revealed');
+          }
+      });
+  }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+  // Dynamically add reveal classes to core elements without touching HTML files
+  document.querySelectorAll('.course-card, .glass-panel, .stat-card, footer .footer-col').forEach(el => {
+      el.classList.add('reveal-on-scroll');
+      revealObserver.observe(el);
+  });
+
+  // 4. Ripple Effect on Action Buttons
+  document.querySelectorAll('.btn-gold, .btn-outline, .btn-subscribe').forEach(btn => {
+      btn.classList.add('ripple-btn');
+      btn.addEventListener('click', function(e) {
+          const rect = btn.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const y = e.clientY - rect.top;
+          
+          const circle = document.createElement('span');
+          circle.classList.add('ripple-circle');
+          circle.style.left = x + 'px';
+          circle.style.top = y + 'px';
+          
+          const size = Math.max(rect.width, rect.height);
+          circle.style.width = circle.style.height = size + 'px';
+          circle.style.marginLeft = circle.style.marginTop = -(size / 2) + 'px';
+          
+          btn.appendChild(circle);
+          setTimeout(() => circle.remove(), 600);
+      });
+  });
+
 });
