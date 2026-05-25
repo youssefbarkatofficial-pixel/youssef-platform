@@ -37,28 +37,28 @@
 
 /* Light Mode Overrides */
 body.light-mode {
-  --bg-main: #FBF8F1; /* Soft Premium Papyrus Cream */
+  --bg-main: #F4F6F9; /* Clean, modern off-white/gray */
   --bg-secondary: #FFFFFF;
-  --text-primary: #1A2639; /* Deep Royal Navy for high contrast & luxury */
-  --text-secondary: #3A4F6C; /* Elegant Slate Blue */
-  --text-muted: #788B9E;
+  --text-primary: #0F172A; /* Deep slate for maximum legibility */
+  --text-secondary: #475569; /* Balanced slate gray */
+  --text-muted: #94A3B8;
   --card-bg: #FFFFFF;
-  --border-color: #E6DFD3;
-  --shadow-color: 0 8px 30px rgba(26, 38, 57, 0.08);
+  --border-color: #E2E8F0;
+  --shadow-color: 0 10px 40px rgba(15, 23, 42, 0.08);
 
-  /* Antique Gold for Light Mode (More legible than bright gold) */
-  --royal-gold: #A67C00;
-  --soft-gold: #C59B27;
-  --accent-cyan: #2A9D8F; /* Premium earthy teal */
+  /* Richer Gold for Light Mode to ensure contrast */
+  --royal-gold: #B4841A;
+  --soft-gold: #C99A2E;
+  --accent-cyan: #0E7490; /* Deep elegant cyan/teal */
 
   /* Legacy variable mappings for Light Mode */
   --primary-navy: var(--bg-main);
   --secondary-navy: var(--bg-secondary);
-  --soft-white: var(--text-primary);
+  --soft-white: var(--text-primary); /* Ensures soft-white maps to dark text */
   --glass-bg: var(--card-bg);
   --glass-border: var(--border-color);
   --glass-glow: var(--shadow-color);
-  --luxury-black: var(--text-primary);
+  --luxury-black: #FFFFFF; /* Invert luxury black to white for buttons */
 }
 
 * {
@@ -207,12 +207,13 @@ h6 {
 
 .btn-outline {
   background: transparent;
-  color: var(--soft-white);
+  color: var(--text-primary);
   border: 1px solid var(--royal-gold);
 }
 
 .btn-outline:hover {
-  background: rgba(212, 166, 79, 0.1);
+  background: var(--royal-gold);
+  color: var(--luxury-black);
   box-shadow: 0 0 15px rgba(212, 166, 79, 0.3);
 }
 
