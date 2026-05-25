@@ -68,30 +68,53 @@ window.FirebaseService = (function () {
     /**
      * تسجيل طالب جديد — Firebase Auth + Firestore
      */
+    async function saveStudentProfile(user, extraData) {
+        try {
+            await getDb().collection('students').doc(user.uid).set({
+                uid: user.uid,
+                email: user.email,
+                ...extraData,
+                role: 'student',
+                createdAt: new Date().toISOString()
+            }, { merge: true });
+            console.log('[FIRESTORE SAVE SUCCESS]');
+            return true;
+        } catch(error) {
+            console.error('[FIRESTORE SAVE ERROR]', error);
+            return false;
+        }
+    }
+
     async function registerStudent(userData) {
         if (!isFirebaseReady()) throw new Error("Firebase is not ready");
         try {
+            console.log('[REGISTER START]');
             await getAuth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
             const userCredential = await getAuth().createUserWithEmailAndPassword(userData.email, userData.password);
-            console.log('[AUTH] account created');
-            const fullData = {
-                uid: userCredential.user.uid,
+            const user = userCredential.user;
+            console.log('[AUTH SUCCESS]', user.uid);
+            
+            console.log('[FIRESTORE SAVE START]');
+            const extraData = {
                 name: userData.name,
-                email: userData.email,
                 phone: userData.phone,
                 grade: userData.grade,
-                role: 'student',
                 courses: [],
-                notifications: [],
+                notifications: []
+            };
+            
+            await saveStudentProfile(user, extraData);
+            
+            const fullData = {
+                uid: user.uid,
+                email: user.email,
+                ...extraData,
+                role: 'student',
                 createdAt: new Date().toISOString()
             };
             
-            // Save using phone as document ID for instant Admin lookup
-            await getDb().collection('users').doc(userData.phone).set(fullData, { merge: true });
-            console.log('[FIRESTORE] student profile saved');
-            console.log('[FIRESTORE] Student saved successfully');
-            
             localStorage.setItem(`db_${userData.phone}`, JSON.stringify(fullData));
+            console.log('[SESSION SAVED]');
             
             return fullData;
         } catch (error) {
@@ -110,10 +133,14 @@ window.FirebaseService = (function () {
         const userCredential = await getAuth().signInWithEmailAndPassword(email, password);
         const uid = userCredential.user.uid;
 
-        let doc = await getDb().collection('users').doc(phone).get();
+        let doc = await getDb().collection('students').doc(uid).get();
         if (!doc.exists) {
-            doc = await getDb().collection('users').doc(uid).get();
-            if (!doc.exists) throw new Error('User document not found');
+            // fallback to older 'users' collection
+            doc = await getDb().collection('users').doc(phone).get();
+            if (!doc.exists) {
+                doc = await getDb().collection('users').doc(uid).get();
+                if (!doc.exists) throw new Error('User document not found');
+            }
         }
 
         const userData = doc.data();

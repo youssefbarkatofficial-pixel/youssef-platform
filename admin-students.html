@@ -171,7 +171,7 @@
 
             if (window.firebaseDb) {
                 console.log('[ADMIN] fetching students');
-                window.firebaseDb.collection('users').where('role', '==', 'student').onSnapshot(snapshot => {
+                window.firebaseDb.collection('students').onSnapshot(snapshot => {
                     const newUsers = [];
                     snapshot.forEach(doc => {
                         newUsers.push({ id: doc.id, ...doc.data() });
