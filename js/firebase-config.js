@@ -15,6 +15,15 @@ try {
     auth = firebase.auth();
     db = firebase.firestore();
     storage = firebase.storage();
+    
+    // Enable offline persistence natively to seamlessly cache data without overloading localStorage
+    try {
+        db.enablePersistence({ synchronizeTabs: true })
+          .catch(function(err) {
+              console.warn("Firebase persistence error:", err.code);
+          });
+    } catch(e) {}
+
     console.log("Firebase initialized successfully");
 } catch (error) {
     console.error("Firebase initialization error:", error);

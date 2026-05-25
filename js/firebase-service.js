@@ -8,6 +8,11 @@
 
 window.FirebaseService = (function () {
 
+    // --- Realtime Listeners ---
+    let coursesListenerUnsubscribe = null;
+    let paymentRequestsListenerUnsubscribe = null;
+    let studentListeners = {};
+
     // --- Helpers ---
     function getDb() { return window.firebaseDb || null; }
     function getAuth() { return window.firebaseAuth || null; }
@@ -228,6 +233,13 @@ window.FirebaseService = (function () {
             return getCoursesFromStorage();
         }
         try {
+            if (!coursesListenerUnsubscribe) {
+                coursesListenerUnsubscribe = getDb().collection('courses').onSnapshot(snap => {
+                    const courses = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                    safeStorageSaveCourses(courses);
+                }, err => console.warn('Courses listener error', err));
+            }
+
             const snap = await getDb().collection('courses').get();
             const courses = snap.docs.map(d => ({ id: d.id, ...d.data() }));
             safeStorageSaveCourses(courses);
@@ -283,6 +295,17 @@ window.FirebaseService = (function () {
         const cached = JSON.parse(localStorage.getItem(`db_${phone}`) || 'null');
         if (!isFirebaseReady()) return cached || { courses: [], notifications: [] };
         try {
+            if (!studentListeners[phone]) {
+                studentListeners[phone] = getDb().collection('students')
+                    .where('phone', '==', phone).limit(1)
+                    .onSnapshot(snap => {
+                        if (!snap.empty) {
+                            const data = snap.docs[0].data();
+                            cacheStudentData(phone, data);
+                        }
+                    }, err => console.warn('Student listener error', err));
+            }
+
             const snap = await getDb().collection('students')
                 .where('phone', '==', phone).limit(1).get();
             if (snap.empty) return cached || { courses: [], notifications: [] };
@@ -398,18 +421,31 @@ window.FirebaseService = (function () {
      */
     async function getPaymentRequests() {
         let reqs = JSON.parse(localStorage.getItem('paymentRequests') || '[]');
-        if (!isFirebaseReady()) {
-            return reqs;
-        }
+        if (!isFirebaseReady()) return reqs;
+
         try {
-            const snap = await getDb().collection('paymentRequests').get();
-            if (!snap.empty) {
-                reqs = snap.docs.map(d => ({ ...d.data(), id: d.id }));
-                reqs.sort((a, b) => new Date(b.createdAt || b.timestamp || 0) - new Date(a.createdAt || a.timestamp || 0));
-                localStorage.setItem('paymentRequests', JSON.stringify(reqs));
+            if (!paymentRequestsListenerUnsubscribe) {
+                paymentRequestsListenerUnsubscribe = getDb().collection('paymentRequests')
+                    .orderBy('createdAt', 'desc')
+                    .onSnapshot(snap => {
+                        let latestReqs = [];
+                        snap.forEach(doc => {
+                            latestReqs.push({ id: doc.id, ...doc.data() });
+                        });
+                        localStorage.setItem('paymentRequests', JSON.stringify(latestReqs));
+                    }, err => console.warn('Payment reqs listener error', err));
             }
+
+            const snap = await getDb().collection('paymentRequests')
+                .orderBy('createdAt', 'desc')
+                .get();
+            reqs = [];
+            snap.forEach(doc => {
+                reqs.push({ id: doc.id, ...doc.data() });
+            });
+            localStorage.setItem('paymentRequests', JSON.stringify(reqs));
             return reqs;
-        } catch (e) {
+        } catch(e) {
             console.warn('getPaymentRequests failed', e);
             return reqs;
         }
