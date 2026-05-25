@@ -602,3 +602,45 @@ img, video {
     padding: 20px 15px;
   }
 }
+
+/* ==========================================================================
+   SAFE UI POLISH (Animations & Aesthetics)
+   ========================================================================== */
+.course-card {
+  transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s ease !important;
+}
+
+.course-card:hover {
+  transform: translateY(-6px) !important;
+  box-shadow: 0 15px 35px rgba(212, 166, 79, 0.15) !important;
+}
+
+.btn-subscribe, .btn-gold {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.btn-subscribe:hover:not(:disabled) {
+  animation: safePulse 1.5s infinite;
+}
+
+@keyframes safePulse {
+  0% { box-shadow: 0 0 0 0 rgba(212, 166, 79, 0.5); }
+  70% { box-shadow: 0 0 0 12px rgba(212, 166, 79, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(212, 166, 79, 0); }
+}
+
+/* Glassmorphism Toast Overrides */
+#toast-container .toast {
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  background: rgba(10, 30, 58, 0.85) !important;
+  border: 1px solid rgba(212, 166, 79, 0.4) !important;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.6) !important;
+  border-radius: 16px !important;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+}
+body.light-mode #toast-container .toast {
+  background: rgba(255, 255, 255, 0.92) !important;
+  border: 1px solid rgba(166, 124, 0, 0.3) !important;
+  color: #1A2639 !important;
+}

@@ -1082,5 +1082,31 @@ document.addEventListener('DOMContentLoaded', () => {
           badges.forEach(b => b.remove());
       }
   };
+  // --- SAFE UI PERFORMANCE & UX POLISH ---
+  // 1. Lazy load all images
+  document.querySelectorAll('img').forEach(img => {
+      if (!img.hasAttribute('loading')) img.setAttribute('loading', 'lazy');
+      if (!img.hasAttribute('decoding')) img.setAttribute('decoding', 'async');
+  });
+
+  // 2. Prevent Double-Clicks on generic forms
+  document.querySelectorAll('form').forEach(form => {
+      form.addEventListener('submit', (e) => {
+          const submitBtn = form.querySelector('button[type="submit"]');
+          if (submitBtn) {
+              if (submitBtn.disabled) {
+                  e.preventDefault();
+                  return;
+              }
+              submitBtn.dataset.originalText = submitBtn.innerHTML;
+              submitBtn.disabled = true;
+              submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-left: 8px;"></i> جاري المعالجة...';
+              setTimeout(() => {
+                  submitBtn.disabled = false;
+                  submitBtn.innerHTML = submitBtn.dataset.originalText;
+              }, 4000);
+          }
+      });
+  });
 
 });
