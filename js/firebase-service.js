@@ -92,7 +92,12 @@ window.FirebaseService = (function () {
             }, { merge: true });
             return true;
         } catch(error) {
-            console.error('[FIRESTORE SAVE ERROR]', error);
+            console.error(
+                '[FIRESTORE SAVE ERROR]',
+                error.code,
+                error.message,
+                error
+            );
             return false;
         }
     }
@@ -112,7 +117,27 @@ window.FirebaseService = (function () {
                 notifications: []
             };
             
-            await saveStudentProfile(user, extraData);
+            const saved = await saveStudentProfile(user, extraData);
+
+            if (!saved) {
+                try {
+                    await user.delete();
+                } catch(e) {}
+                throw new Error('فشل حفظ بيانات الطالب على السحابة');
+            }
+
+            // Verify document exists
+            const verifyDoc = await getDb()
+                .collection('students')
+                .doc(user.uid)
+                .get();
+
+            if (!verifyDoc.exists) {
+                try {
+                    await user.delete();
+                } catch(e) {}
+                throw new Error('Student profile verification failed');
+            }
             
             const fullData = {
                 uid: user.uid,
