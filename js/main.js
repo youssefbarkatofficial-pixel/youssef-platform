@@ -10,6 +10,22 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  // Dynamic Dashboard Link Visibility
+  const dashboardLinks = document.querySelectorAll('.nav-links a[href="dashboard.html"]');
+  dashboardLinks.forEach(link => {
+      if (sessionStorage.getItem('currentAdmin')) {
+          link.href = 'admin-dashboard.html';
+      } else if (sessionStorage.getItem('currentStudent')) {
+          link.href = 'dashboard.html';
+      } else {
+          if (link.parentElement && link.parentElement.tagName.toLowerCase() === 'li') {
+              link.parentElement.style.display = 'none';
+          } else {
+              link.style.display = 'none';
+          }
+      }
+  });
+
   // Mobile Menu & Sidebar Toggle with Click-Outside
   document.body.addEventListener('click', (e) => {
     const mobileBtn = e.target.closest('.mobile-menu-btn');

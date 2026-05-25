@@ -205,6 +205,10 @@ document.addEventListener('DOMContentLoaded', () => {
             // B. Hero Image Control Panel
             const teacherFrame = document.getElementById('editableTeacherFrame');
             if (teacherFrame) {
+                const heroImgEl = document.getElementById('teacherHeroImg');
+                const bgImgEl = document.getElementById('teacherBgImg');
+                const heroClippedImgEl = document.getElementById('teacherFgImgClipped');
+
                 // Disable direct clicks on images to avoid confusion
                 if(heroImgEl) { heroImgEl.style.pointerEvents = 'none'; heroImgEl.removeAttribute('title'); }
                 if(bgImgEl) { bgImgEl.style.pointerEvents = 'none'; bgImgEl.removeAttribute('title'); }
@@ -478,6 +482,7 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
         // Not an Admin (Visitor or Student)
         // Clicking the hero image should act as a login shortcut or go to dashboard
+        const heroImgEl = document.getElementById('teacherHeroImg');
         if (heroImgEl) {
             heroImgEl.style.cursor = 'pointer';
             heroImgEl.title = 'اضغط لتسجيل الدخول أو الذهاب لدروسك';
