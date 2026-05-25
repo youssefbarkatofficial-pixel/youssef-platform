@@ -380,7 +380,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         userName: user.name,
         userPhone: user.phone,
         userEmail: user.email || `${user.phone}@student.youssefbarakat.com`,
-        proofImageKey: proofImageKey
+        proofImageKey: proofImageKey,
+        proofImage: proofImageBase64
       };
 
       console.log('[PAYMENT DATA]', requestData);
