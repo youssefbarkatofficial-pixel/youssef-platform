@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -130,8 +130,13 @@
 
             let adminCourses = JSON.parse(localStorage.getItem('adminCourses') || '[]');
 
-            function calculatePaymentStats() {
-                const paymentRequests = JSON.parse(localStorage.getItem('paymentRequests') || '[]');
+            async function calculatePaymentStats() {
+                let paymentRequests = [];
+                if (window.FirebaseService && typeof window.FirebaseService.getPaymentRequests === 'function') {
+                    paymentRequests = await window.FirebaseService.getPaymentRequests();
+                } else {
+                    paymentRequests = JSON.parse(localStorage.getItem('paymentRequests') || '[]');
+                }
                 
                 const pending = paymentRequests.filter(req => req.status === 'pending');
                 const approved = paymentRequests.filter(req => req.status === 'approved');
@@ -147,7 +152,7 @@
                 document.getElementById('pPendingCount').textContent = pending.length;
             }
 
-            function renderPayments() {
+            async function renderPayments() {
                 // support async image loading from IndexedDB
                 async function fetchProofImage(req) {
                     if (req.proofImage) return req.proofImage;
@@ -170,7 +175,12 @@
                     return null;
                 }
                 const tbody = document.getElementById('paymentsTableBody');
-                const paymentRequests = JSON.parse(localStorage.getItem('paymentRequests') || '[]');
+                let paymentRequests = [];
+                if (window.FirebaseService && typeof window.FirebaseService.getPaymentRequests === 'function') {
+                    paymentRequests = await window.FirebaseService.getPaymentRequests();
+                } else {
+                    paymentRequests = JSON.parse(localStorage.getItem('paymentRequests') || '[]');
+                }
                 const filter = document.getElementById('pStatusFilter').value;
                 
                 let filteredReqs = paymentRequests;
@@ -255,51 +265,65 @@
                 zoomBtn.innerHTML = isZoomed ? '<i class="fas fa-search-plus"></i> تكبير' : '<i class="fas fa-search-minus"></i> تصغير';
             };
 
-            document.getElementById('btnRefreshPayments').addEventListener('click', () => {
-                renderPayments().then(() => calculatePaymentStats());
+            document.getElementById('btnRefreshPayments').addEventListener('click', async () => {
+                await renderPayments();
+                await calculatePaymentStats();
             });
 
             document.getElementById('pStatusFilter').addEventListener('change', () => renderPayments());
 
-            window.approvePayment = function(id) {
+            window.approvePayment = async function(id) {
                 if(confirm('هل أنت متأكد من قبول هذا الطلب؟ سيتم تفعيل الكورس للطالب وفتح محتوياته فوراً.')) {
-                    let paymentRequests = JSON.parse(localStorage.getItem('paymentRequests') || '[]');
+                    let paymentRequests = [];
+                    if (window.FirebaseService && typeof window.FirebaseService.getPaymentRequests === 'function') {
+                        paymentRequests = await window.FirebaseService.getPaymentRequests();
+                    } else {
+                        paymentRequests = JSON.parse(localStorage.getItem('paymentRequests') || '[]');
+                    }
+
                     const reqIndex = paymentRequests.findIndex(r => r.id === id);
                     if(reqIndex > -1) {
-                        paymentRequests[reqIndex].status = 'approved';
-                        
-                        // Add course to user's db
                         const userId = paymentRequests[reqIndex].userId;
                         const courseId = paymentRequests[reqIndex].courseId;
                         
-                        let dbUser = JSON.parse(localStorage.getItem(`db_${userId}`)) || { courses: [], notifications: [] };
-                        if(!dbUser.courses) dbUser.courses = [];
-                        if(!dbUser.courses.includes(courseId)) {
-                            dbUser.courses.push(courseId);
+                        if (window.FirebaseService) {
+                            await window.FirebaseService.updatePaymentStatus(id, 'approved');
+                            await window.FirebaseService.addCourseToStudent(userId, courseId);
+                            
+                            const course = adminCourses.find(c => c.id === courseId);
+                            const courseName = course ? course.title : 'الكورس';
+                            
+                            await window.FirebaseService.addNotificationToStudent(userId, {
+                                title: 'تم قبول اشتراكك بنجاح 🎉',
+                                message: `تم تفعيل ${courseName} لك بنجاح. نتمنى لك التوفيق، يمكنك الآن بدء المذاكرة من قسم كورساتي.`,
+                                courseId: courseId,
+                                proofImageKey: paymentRequests[reqIndex].proofImageKey || null
+                            });
+                        } else {
+                            paymentRequests[reqIndex].status = 'approved';
+                            let dbUser = JSON.parse(localStorage.getItem(`db_${userId}`)) || { courses: [], notifications: [] };
+                            if(!dbUser.courses) dbUser.courses = [];
+                            if(!dbUser.courses.includes(courseId)) dbUser.courses.push(courseId);
+                            if(!dbUser.notifications) dbUser.notifications = [];
+                            
+                            const course = adminCourses.find(c => c.id === courseId);
+                            const courseName = course ? course.title : 'الكورس';
+                            dbUser.celebrateCourse = courseName;
+    
+                            dbUser.notifications.push({
+                                title: 'تم قبول اشتراكك بنجاح 🎉',
+                                message: `تم تفعيل ${courseName} لك بنجاح. نتمنى لك التوفيق، يمكنك الآن بدء المذاكرة من قسم كورساتي.`,
+                                timestamp: new Date().toISOString(),
+                                read: false,
+                                courseId: courseId,
+                                proofImageKey: paymentRequests[reqIndex].proofImageKey || null
+                            });
+                            localStorage.setItem(`db_${userId}`, JSON.stringify(dbUser));
+                            localStorage.setItem('paymentRequests', JSON.stringify(paymentRequests));
                         }
-                        
-                        if(!dbUser.notifications) dbUser.notifications = [];
-                        
-                        // Find course name for the celebration
-                        const course = adminCourses.find(c => c.id === courseId);
-                        const courseName = course ? course.title : 'الكورس';
-                        
-                        dbUser.celebrateCourse = courseName;
 
-                        dbUser.notifications.push({
-                            title: 'تم قبول اشتراكك بنجاح 🎉',
-                            message: `تم تفعيل ${courseName} لك بنجاح. نتمنى لك التوفيق، يمكنك الآن بدء المذاكرة من قسم كورساتي.`,
-                            timestamp: new Date().toISOString(),
-                            read: false,
-                            courseId: courseId,
-                            proofImageKey: paymentRequests[reqIndex].proofImageKey || null
-                        });
-                        
-                        localStorage.setItem(`db_${userId}`, JSON.stringify(dbUser));
-                        localStorage.setItem('paymentRequests', JSON.stringify(paymentRequests));
-                        
-                        renderPayments();
-                        calculatePaymentStats();
+                        await renderPayments();
+                        await calculatePaymentStats();
                         if(window.audioManager && typeof window.audioManager.play === 'function') {
                             window.audioManager.play('celebration');
                         }
@@ -311,31 +335,44 @@
                 }
             };
 
-            window.rejectPayment = function(id) {
+            window.rejectPayment = async function(id) {
                 if(confirm('هل أنت متأكد من رفض هذا الطلب؟ لن يتم تفعيل الكورس.')) {
-                    let paymentRequests = JSON.parse(localStorage.getItem('paymentRequests') || '[]');
+                    let paymentRequests = [];
+                    if (window.FirebaseService && typeof window.FirebaseService.getPaymentRequests === 'function') {
+                        paymentRequests = await window.FirebaseService.getPaymentRequests();
+                    } else {
+                        paymentRequests = JSON.parse(localStorage.getItem('paymentRequests') || '[]');
+                    }
+
                     const reqIndex = paymentRequests.findIndex(r => r.id === id);
                     if(reqIndex > -1) {
-                        paymentRequests[reqIndex].status = 'rejected';
-                        
-                        // Notify user
                         const userId = paymentRequests[reqIndex].userId;
-                        let dbUser = JSON.parse(localStorage.getItem(`db_${userId}`)) || { courses: [], notifications: [] };
-                        if(!dbUser.notifications) dbUser.notifications = [];
                         const courseId = paymentRequests[reqIndex].courseId;
-                        dbUser.notifications.push({
-                            title: 'مشكلة في تأكيد الدفع ⚠️',
-                            message: 'حدثت مشكلة في تأكيد الدفع أو صورة التحويل غير واضحة. يرجى مراجعة الدعم الفني.',
-                            timestamp: new Date().toISOString(),
-                            read: false,
-                            courseId: courseId
-                        });
-                        localStorage.setItem(`db_${userId}`, JSON.stringify(dbUser));
-                        
-                        localStorage.setItem('paymentRequests', JSON.stringify(paymentRequests));
-                        
-                        renderPayments();
-                        calculatePaymentStats();
+
+                        if (window.FirebaseService) {
+                            await window.FirebaseService.updatePaymentStatus(id, 'rejected');
+                            await window.FirebaseService.addNotificationToStudent(userId, {
+                                title: 'مشكلة في تأكيد الدفع ⚠️',
+                                message: 'حدثت مشكلة في تأكيد الدفع أو صورة التحويل غير واضحة. يرجى مراجعة الدعم الفني.',
+                                courseId: courseId
+                            });
+                        } else {
+                            paymentRequests[reqIndex].status = 'rejected';
+                            let dbUser = JSON.parse(localStorage.getItem(`db_${userId}`)) || { courses: [], notifications: [] };
+                            if(!dbUser.notifications) dbUser.notifications = [];
+                            dbUser.notifications.push({
+                                title: 'مشكلة في تأكيد الدفع ⚠️',
+                                message: 'حدثت مشكلة في تأكيد الدفع أو صورة التحويل غير واضحة. يرجى مراجعة الدعم الفني.',
+                                timestamp: new Date().toISOString(),
+                                read: false,
+                                courseId: courseId
+                            });
+                            localStorage.setItem(`db_${userId}`, JSON.stringify(dbUser));
+                            localStorage.setItem('paymentRequests', JSON.stringify(paymentRequests));
+                        }
+
+                        await renderPayments();
+                        await calculatePaymentStats();
                         if(window.showToast) window.showToast('تم رفض الطلب', 'error');
                     }
                 }
