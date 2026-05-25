@@ -132,8 +132,15 @@
 
             async function calculatePaymentStats() {
                 let paymentRequests = [];
-                if (window.FirebaseService && typeof window.FirebaseService.getPaymentRequests === 'function') {
-                    paymentRequests = await window.FirebaseService.getPaymentRequests();
+                if (window.firebaseDb) {
+                    try {
+                        const snap = await window.firebaseDb.collection('paymentRequests').get();
+                        paymentRequests = snap.docs.map(doc => ({id: doc.id, ...doc.data()}));
+                        localStorage.setItem('paymentRequests', JSON.stringify(paymentRequests));
+                    } catch(e) {
+                        console.warn("Failed fetching payments from Firestore", e);
+                        paymentRequests = JSON.parse(localStorage.getItem('paymentRequests') || '[]');
+                    }
                 } else {
                     paymentRequests = JSON.parse(localStorage.getItem('paymentRequests') || '[]');
                 }
@@ -176,8 +183,14 @@
                 }
                 const tbody = document.getElementById('paymentsTableBody');
                 let paymentRequests = [];
-                if (window.FirebaseService && typeof window.FirebaseService.getPaymentRequests === 'function') {
-                    paymentRequests = await window.FirebaseService.getPaymentRequests();
+                if (window.firebaseDb) {
+                    try {
+                        const snap = await window.firebaseDb.collection('paymentRequests').get();
+                        paymentRequests = snap.docs.map(doc => ({id: doc.id, ...doc.data()}));
+                        localStorage.setItem('paymentRequests', JSON.stringify(paymentRequests));
+                    } catch(e) {
+                        paymentRequests = JSON.parse(localStorage.getItem('paymentRequests') || '[]');
+                    }
                 } else {
                     paymentRequests = JSON.parse(localStorage.getItem('paymentRequests') || '[]');
                 }
@@ -274,11 +287,12 @@
 
             window.approvePayment = async function(id) {
                 if(confirm('هل أنت متأكد من قبول هذا الطلب؟ سيتم تفعيل الكورس للطالب وفتح محتوياته فوراً.')) {
-                    let paymentRequests = [];
-                    if (window.FirebaseService && typeof window.FirebaseService.getPaymentRequests === 'function') {
-                        paymentRequests = await window.FirebaseService.getPaymentRequests();
-                    } else {
-                        paymentRequests = JSON.parse(localStorage.getItem('paymentRequests') || '[]');
+                    let paymentRequests = JSON.parse(localStorage.getItem('paymentRequests') || '[]');
+                    if (window.firebaseDb) {
+                        try {
+                            const snap = await window.firebaseDb.collection('paymentRequests').get();
+                            paymentRequests = snap.docs.map(doc => ({id: doc.id, ...doc.data()}));
+                        } catch(e) {}
                     }
 
                     const reqIndex = paymentRequests.findIndex(r => r.id === id);
@@ -286,19 +300,43 @@
                         const userId = paymentRequests[reqIndex].userId;
                         const courseId = paymentRequests[reqIndex].courseId;
                         
-                        if (window.FirebaseService) {
-                            await window.FirebaseService.updatePaymentStatus(id, 'approved');
-                            await window.FirebaseService.addCourseToStudent(userId, courseId);
+                        if (window.firebaseDb) {
+                            // 1. Update Payment Status in Firestore
+                            await window.firebaseDb.collection('paymentRequests').doc(id).update({ status: 'approved' });
                             
-                            const course = adminCourses.find(c => c.id === courseId);
-                            const courseName = course ? course.title : 'الكورس';
+                            // 2. Update Student's courses and notifications
+                            const snap = await window.firebaseDb.collection('users').where('phone', '==', userId).limit(1).get();
+                            if (!snap.empty) {
+                                const userDoc = snap.docs[0];
+                                const userData = userDoc.data();
+                                
+                                const courses = userData.courses || [];
+                                if (!courses.includes(courseId)) courses.push(courseId);
+                                
+                                const notifications = userData.notifications || [];
+                                const course = adminCourses.find(c => c.id === courseId);
+                                const courseName = course ? course.title : 'الكورس';
+                                
+                                notifications.push({
+                                    id: 'n' + Date.now(),
+                                    title: 'تم قبول اشتراكك بنجاح 🎉',
+                                    message: `تم تفعيل ${courseName} لك بنجاح. نتمنى لك التوفيق، يمكنك الآن بدء المذاكرة من قسم كورساتي.`,
+                                    timestamp: new Date().toISOString(),
+                                    read: false,
+                                    courseId: courseId,
+                                    proofImageKey: paymentRequests[reqIndex].proofImageKey || null
+                                });
+                                
+                                await userDoc.ref.update({ courses, notifications });
+                                
+                                // Cache locally
+                                localStorage.setItem(`db_${userId}`, JSON.stringify({...userData, courses, notifications}));
+                            }
                             
-                            await window.FirebaseService.addNotificationToStudent(userId, {
-                                title: 'تم قبول اشتراكك بنجاح 🎉',
-                                message: `تم تفعيل ${courseName} لك بنجاح. نتمنى لك التوفيق، يمكنك الآن بدء المذاكرة من قسم كورساتي.`,
-                                courseId: courseId,
-                                proofImageKey: paymentRequests[reqIndex].proofImageKey || null
-                            });
+                            // Update local requests cache
+                            paymentRequests[reqIndex].status = 'approved';
+                            localStorage.setItem('paymentRequests', JSON.stringify(paymentRequests));
+                            
                         } else {
                             paymentRequests[reqIndex].status = 'approved';
                             let dbUser = JSON.parse(localStorage.getItem(`db_${userId}`)) || { courses: [], notifications: [] };
@@ -337,11 +375,12 @@
 
             window.rejectPayment = async function(id) {
                 if(confirm('هل أنت متأكد من رفض هذا الطلب؟ لن يتم تفعيل الكورس.')) {
-                    let paymentRequests = [];
-                    if (window.FirebaseService && typeof window.FirebaseService.getPaymentRequests === 'function') {
-                        paymentRequests = await window.FirebaseService.getPaymentRequests();
-                    } else {
-                        paymentRequests = JSON.parse(localStorage.getItem('paymentRequests') || '[]');
+                    let paymentRequests = JSON.parse(localStorage.getItem('paymentRequests') || '[]');
+                    if (window.firebaseDb) {
+                        try {
+                            const snap = await window.firebaseDb.collection('paymentRequests').get();
+                            paymentRequests = snap.docs.map(doc => ({id: doc.id, ...doc.data()}));
+                        } catch(e) {}
                     }
 
                     const reqIndex = paymentRequests.findIndex(r => r.id === id);
@@ -349,13 +388,28 @@
                         const userId = paymentRequests[reqIndex].userId;
                         const courseId = paymentRequests[reqIndex].courseId;
 
-                        if (window.FirebaseService) {
-                            await window.FirebaseService.updatePaymentStatus(id, 'rejected');
-                            await window.FirebaseService.addNotificationToStudent(userId, {
-                                title: 'مشكلة في تأكيد الدفع ⚠️',
-                                message: 'حدثت مشكلة في تأكيد الدفع أو صورة التحويل غير واضحة. يرجى مراجعة الدعم الفني.',
-                                courseId: courseId
-                            });
+                        if (window.firebaseDb) {
+                            await window.firebaseDb.collection('paymentRequests').doc(id).update({ status: 'rejected' });
+                            
+                            const snap = await window.firebaseDb.collection('users').where('phone', '==', userId).limit(1).get();
+                            if (!snap.empty) {
+                                const userDoc = snap.docs[0];
+                                const userData = userDoc.data();
+                                const notifications = userData.notifications || [];
+                                notifications.push({
+                                    id: 'n' + Date.now(),
+                                    title: 'مشكلة في تأكيد الدفع ⚠️',
+                                    message: 'حدثت مشكلة في تأكيد الدفع أو صورة التحويل غير واضحة. يرجى مراجعة الدعم الفني.',
+                                    timestamp: new Date().toISOString(),
+                                    read: false,
+                                    courseId: courseId
+                                });
+                                await userDoc.ref.update({ notifications });
+                                localStorage.setItem(`db_${userId}`, JSON.stringify({...userData, notifications}));
+                            }
+                            
+                            paymentRequests[reqIndex].status = 'rejected';
+                            localStorage.setItem('paymentRequests', JSON.stringify(paymentRequests));
                         } else {
                             paymentRequests[reqIndex].status = 'rejected';
                             let dbUser = JSON.parse(localStorage.getItem(`db_${userId}`)) || { courses: [], notifications: [] };
