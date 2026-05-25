@@ -136,9 +136,8 @@
                     try {
                         const snap = await window.firebaseDb.collection('paymentRequests').get();
                         paymentRequests = snap.docs.map(doc => ({id: doc.id, ...doc.data()}));
-                        localStorage.setItem('paymentRequests', JSON.stringify(paymentRequests));
                     } catch(e) {
-                        console.warn("Failed fetching payments from Firestore", e);
+                        console.warn("Failed fetching payments", e);
                         paymentRequests = JSON.parse(localStorage.getItem('paymentRequests') || '[]');
                     }
                 } else {
@@ -286,149 +285,159 @@
             document.getElementById('pStatusFilter').addEventListener('change', () => renderPayments());
 
             window.approvePayment = async function(id) {
-                if(confirm('هل أنت متأكد من قبول هذا الطلب؟ سيتم تفعيل الكورس للطالب وفتح محتوياته فوراً.')) {
-                    let paymentRequests = JSON.parse(localStorage.getItem('paymentRequests') || '[]');
-                    if (window.firebaseDb) {
-                        try {
-                            const snap = await window.firebaseDb.collection('paymentRequests').get();
-                            paymentRequests = snap.docs.map(doc => ({id: doc.id, ...doc.data()}));
-                        } catch(e) {}
+                if(!confirm('هل أنت متأكد من قبول هذا الطلب؟ سيتم تفعيل الكورس للطالب وفتح محتوياته فوراً.')) return;
+                
+                if (!window.firebaseDb) {
+                    if(window.showToast) window.showToast('فشل الاتصال السحابي، تأكد من اتصال الإنترنت.', 'error');
+                    return;
+                }
+
+                try {
+                    // 1. Get payment request from Firestore directly
+                    const payDocRef = window.firebaseDb.collection('paymentRequests').doc(id);
+                    const payDoc = await payDocRef.get();
+                    if (!payDoc.exists) {
+                        alert('طلب الدفع غير موجود.');
+                        return;
+                    }
+                    
+                    const payData = payDoc.data();
+                    const userId = payData.userId;
+                    const courseId = payData.courseId;
+
+                    // 2. Update Payment Status in Firestore
+                    await payDocRef.update({ status: 'approved' });
+                    
+                    // 3. Find User Document (Try ID first, then Phone)
+                    let userDocRef = window.firebaseDb.collection('users').doc(userId);
+                    let userDoc = await userDocRef.get();
+                    let userData = null;
+
+                    if (userDoc.exists) {
+                        userData = userDoc.data();
+                    } else {
+                        // Fallback to phone search
+                        const snap = await window.firebaseDb.collection('users').where('phone', '==', userId).limit(1).get();
+                        if (!snap.empty) {
+                            userDoc = snap.docs[0];
+                            userDocRef = userDoc.ref;
+                            userData = userDoc.data();
+                        }
                     }
 
-                    const reqIndex = paymentRequests.findIndex(r => r.id === id);
-                    if(reqIndex > -1) {
-                        const userId = paymentRequests[reqIndex].userId;
-                        const courseId = paymentRequests[reqIndex].courseId;
+                    if (userData) {
+                        const courses = userData.courses || [];
+                        if (!courses.includes(courseId)) courses.push(courseId);
                         
-                        if (window.firebaseDb) {
-                            // 1. Update Payment Status in Firestore
-                            await window.firebaseDb.collection('paymentRequests').doc(id).update({ status: 'approved' });
-                            
-                            // 2. Update Student's courses and notifications
-                            const snap = await window.firebaseDb.collection('users').where('phone', '==', userId).limit(1).get();
-                            if (!snap.empty) {
-                                const userDoc = snap.docs[0];
-                                const userData = userDoc.data();
-                                
-                                const courses = userData.courses || [];
-                                if (!courses.includes(courseId)) courses.push(courseId);
-                                
-                                const notifications = userData.notifications || [];
-                                const course = adminCourses.find(c => c.id === courseId);
-                                const courseName = course ? course.title : 'الكورس';
-                                
-                                notifications.push({
-                                    id: 'n' + Date.now(),
-                                    title: 'تم قبول اشتراكك بنجاح 🎉',
-                                    message: `تم تفعيل ${courseName} لك بنجاح. نتمنى لك التوفيق، يمكنك الآن بدء المذاكرة من قسم كورساتي.`,
-                                    timestamp: new Date().toISOString(),
-                                    read: false,
-                                    courseId: courseId,
-                                    proofImageKey: paymentRequests[reqIndex].proofImageKey || null
-                                });
-                                
-                                await userDoc.ref.update({ courses, notifications });
-                                
-                                // Cache locally
-                                localStorage.setItem(`db_${userId}`, JSON.stringify({...userData, courses, notifications}));
-                            }
-                            
-                            // Update local requests cache
-                            paymentRequests[reqIndex].status = 'approved';
-                            localStorage.setItem('paymentRequests', JSON.stringify(paymentRequests));
-                            
-                        } else {
-                            paymentRequests[reqIndex].status = 'approved';
-                            let dbUser = JSON.parse(localStorage.getItem(`db_${userId}`)) || { courses: [], notifications: [] };
-                            if(!dbUser.courses) dbUser.courses = [];
-                            if(!dbUser.courses.includes(courseId)) dbUser.courses.push(courseId);
-                            if(!dbUser.notifications) dbUser.notifications = [];
-                            
-                            const course = adminCourses.find(c => c.id === courseId);
-                            const courseName = course ? course.title : 'الكورس';
-                            dbUser.celebrateCourse = courseName;
-    
-                            dbUser.notifications.push({
-                                title: 'تم قبول اشتراكك بنجاح 🎉',
-                                message: `تم تفعيل ${courseName} لك بنجاح. نتمنى لك التوفيق، يمكنك الآن بدء المذاكرة من قسم كورساتي.`,
-                                timestamp: new Date().toISOString(),
-                                read: false,
-                                courseId: courseId,
-                                proofImageKey: paymentRequests[reqIndex].proofImageKey || null
-                            });
-                            localStorage.setItem(`db_${userId}`, JSON.stringify(dbUser));
-                            localStorage.setItem('paymentRequests', JSON.stringify(paymentRequests));
-                        }
-
-                        await renderPayments();
-                        await calculatePaymentStats();
-                        if(window.audioManager && typeof window.audioManager.play === 'function') {
-                            window.audioManager.play('celebration');
-                        }
-                        if(window.triggerConfetti) {
-                            window.triggerConfetti();
-                        }
-                        if(window.showToast) window.showToast('تم قبول الطلب وتفعيل الكورس', 'majestic', { duration: 4500 });
+                        const notifications = userData.notifications || [];
+                        const course = adminCourses.find(c => c.id === courseId);
+                        const courseName = course ? course.title : 'الكورس';
+                        
+                        notifications.push({
+                            id: 'n' + Date.now(),
+                            title: 'تم قبول اشتراكك بنجاح 🎉',
+                            message: `تم تفعيل ${courseName} لك بنجاح. نتمنى لك التوفيق، يمكنك الآن بدء المذاكرة من قسم كورساتي.`,
+                            timestamp: new Date().toISOString(),
+                            read: false,
+                            courseId: courseId,
+                            proofImageKey: payData.proofImageKey || null
+                        });
+                        
+                        // Update in Firestore
+                        await userDocRef.update({ courses, notifications });
+                        
+                        // Cache locally
+                        localStorage.setItem(`db_${userId}`, JSON.stringify({...userData, courses, notifications}));
+                    } else {
+                        console.warn("User not found for payment approval.");
                     }
+
+                    // Refresh global cache and UI
+                    const snapReqs = await window.firebaseDb.collection('paymentRequests').get();
+                    const updatedReqs = snapReqs.docs.map(doc => ({id: doc.id, ...doc.data()}));
+                    localStorage.setItem('paymentRequests', JSON.stringify(updatedReqs));
+
+                    await renderPayments();
+                    await calculatePaymentStats();
+
+                    if(window.audioManager && typeof window.audioManager.play === 'function') {
+                        window.audioManager.play('celebration');
+                    }
+                    if(window.triggerConfetti) window.triggerConfetti();
+                    if(window.showToast) window.showToast('تم قبول الطلب وتفعيل الكورس', 'majestic', { duration: 4500 });
+
+                } catch (e) {
+                    console.error("Error approving payment:", e);
+                    if(window.showToast) window.showToast('حدث خطأ أثناء معالجة الطلب', 'error');
                 }
             };
 
             window.rejectPayment = async function(id) {
-                if(confirm('هل أنت متأكد من رفض هذا الطلب؟ لن يتم تفعيل الكورس.')) {
-                    let paymentRequests = JSON.parse(localStorage.getItem('paymentRequests') || '[]');
-                    if (window.firebaseDb) {
-                        try {
-                            const snap = await window.firebaseDb.collection('paymentRequests').get();
-                            paymentRequests = snap.docs.map(doc => ({id: doc.id, ...doc.data()}));
-                        } catch(e) {}
+                if(!confirm('هل أنت متأكد من رفض هذا الطلب؟ لن يتم تفعيل الكورس.')) return;
+                
+                if (!window.firebaseDb) {
+                    if(window.showToast) window.showToast('فشل الاتصال السحابي، تأكد من اتصال الإنترنت.', 'error');
+                    return;
+                }
+
+                try {
+                    // 1. Get payment request from Firestore directly
+                    const payDocRef = window.firebaseDb.collection('paymentRequests').doc(id);
+                    const payDoc = await payDocRef.get();
+                    if (!payDoc.exists) {
+                        alert('طلب الدفع غير موجود.');
+                        return;
                     }
+                    
+                    const payData = payDoc.data();
+                    const userId = payData.userId;
+                    const courseId = payData.courseId;
 
-                    const reqIndex = paymentRequests.findIndex(r => r.id === id);
-                    if(reqIndex > -1) {
-                        const userId = paymentRequests[reqIndex].userId;
-                        const courseId = paymentRequests[reqIndex].courseId;
+                    // 2. Update Payment Status in Firestore
+                    await payDocRef.update({ status: 'rejected' });
+                    
+                    // 3. Find User Document (Try ID first, then Phone)
+                    let userDocRef = window.firebaseDb.collection('users').doc(userId);
+                    let userDoc = await userDocRef.get();
+                    let userData = null;
 
-                        if (window.firebaseDb) {
-                            await window.firebaseDb.collection('paymentRequests').doc(id).update({ status: 'rejected' });
-                            
-                            const snap = await window.firebaseDb.collection('users').where('phone', '==', userId).limit(1).get();
-                            if (!snap.empty) {
-                                const userDoc = snap.docs[0];
-                                const userData = userDoc.data();
-                                const notifications = userData.notifications || [];
-                                notifications.push({
-                                    id: 'n' + Date.now(),
-                                    title: 'مشكلة في تأكيد الدفع ⚠️',
-                                    message: 'حدثت مشكلة في تأكيد الدفع أو صورة التحويل غير واضحة. يرجى مراجعة الدعم الفني.',
-                                    timestamp: new Date().toISOString(),
-                                    read: false,
-                                    courseId: courseId
-                                });
-                                await userDoc.ref.update({ notifications });
-                                localStorage.setItem(`db_${userId}`, JSON.stringify({...userData, notifications}));
-                            }
-                            
-                            paymentRequests[reqIndex].status = 'rejected';
-                            localStorage.setItem('paymentRequests', JSON.stringify(paymentRequests));
-                        } else {
-                            paymentRequests[reqIndex].status = 'rejected';
-                            let dbUser = JSON.parse(localStorage.getItem(`db_${userId}`)) || { courses: [], notifications: [] };
-                            if(!dbUser.notifications) dbUser.notifications = [];
-                            dbUser.notifications.push({
-                                title: 'مشكلة في تأكيد الدفع ⚠️',
-                                message: 'حدثت مشكلة في تأكيد الدفع أو صورة التحويل غير واضحة. يرجى مراجعة الدعم الفني.',
-                                timestamp: new Date().toISOString(),
-                                read: false,
-                                courseId: courseId
-                            });
-                            localStorage.setItem(`db_${userId}`, JSON.stringify(dbUser));
-                            localStorage.setItem('paymentRequests', JSON.stringify(paymentRequests));
+                    if (userDoc.exists) {
+                        userData = userDoc.data();
+                    } else {
+                        const snap = await window.firebaseDb.collection('users').where('phone', '==', userId).limit(1).get();
+                        if (!snap.empty) {
+                            userDoc = snap.docs[0];
+                            userDocRef = userDoc.ref;
+                            userData = userDoc.data();
                         }
-
-                        await renderPayments();
-                        await calculatePaymentStats();
-                        if(window.showToast) window.showToast('تم رفض الطلب', 'error');
                     }
+
+                    if (userData) {
+                        const notifications = userData.notifications || [];
+                        notifications.push({
+                            id: 'n' + Date.now(),
+                            title: 'مشكلة في تأكيد الدفع ⚠️',
+                            message: 'حدثت مشكلة في تأكيد الدفع أو صورة التحويل غير واضحة. يرجى مراجعة الدعم الفني.',
+                            timestamp: new Date().toISOString(),
+                            read: false,
+                            courseId: courseId
+                        });
+                        
+                        await userDocRef.update({ notifications });
+                        localStorage.setItem(`db_${userId}`, JSON.stringify({...userData, notifications}));
+                    }
+
+                    // Refresh global cache and UI
+                    const snapReqs = await window.firebaseDb.collection('paymentRequests').get();
+                    const updatedReqs = snapReqs.docs.map(doc => ({id: doc.id, ...doc.data()}));
+                    localStorage.setItem('paymentRequests', JSON.stringify(updatedReqs));
+
+                    await renderPayments();
+                    await calculatePaymentStats();
+                    if(window.showToast) window.showToast('تم رفض الطلب', 'error');
+                } catch (e) {
+                    console.error("Error rejecting payment:", e);
+                    if(window.showToast) window.showToast('حدث خطأ أثناء معالجة الطلب', 'error');
                 }
             };
 
