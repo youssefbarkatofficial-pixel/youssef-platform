@@ -370,26 +370,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         courseId: courseId,
         userId: user.phone,
         userName: user.name,
-        proofImageKey: proofImageKey,
-        status: 'pending',
-        timestamp: new Date().toISOString()
+        proofImageKey: proofImageKey
       };
 
-      if (!window.firebaseDb) {
-        throw new Error("لا يوجد اتصال بخوادم المنصة حالياً، يرجى المحاولة لاحقاً أو التأكد من اتصال الإنترنت.");
-      }
-
-      // 1. Upload strictly to Firestore first
-      const docRef = await window.firebaseDb.collection('paymentRequests').add(requestData);
-      const newRequest = { id: docRef.id, ...requestData };
-
-      // 2. Cache in localStorage only after successful cloud save
-      try {
-        let paymentRequests = JSON.parse(localStorage.getItem('paymentRequests')) || [];
-        paymentRequests.push(newRequest);
-        localStorage.setItem('paymentRequests', JSON.stringify(paymentRequests));
-      } catch (err) {
-        console.warn('تعذر حفظ نسخة محلية من الطلب', err);
+      if (window.FirebaseService && typeof window.FirebaseService.addPaymentRequest === 'function') {
+        await window.FirebaseService.addPaymentRequest(requestData);
+      } else {
+        throw new Error("خدمة الاتصال بالسحابة غير متوفرة حالياً. تأكد من اتصالك بالإنترنت.");
       }
 
       // Only mark request as successful. Do NOT play sounds, show global toasts,

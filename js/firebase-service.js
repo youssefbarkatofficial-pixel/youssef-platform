@@ -85,7 +85,8 @@ window.FirebaseService = (function () {
             createdAt: new Date().toISOString()
         };
 
-        await getDb().collection('users').doc(uid).set(fullData);
+        // Use phone as the Document ID so Admin lookup by doc(userId) works instantly
+        await getDb().collection('users').doc(userData.phone).set(fullData);
 
         // cache locally too
         try {
@@ -280,19 +281,22 @@ window.FirebaseService = (function () {
      * إضافة طلب دفع جديد
      */
     async function addPaymentRequest(reqData) {
-        const id = 'pay_' + Date.now();
-        const data = { ...reqData, id, status: 'pending', timestamp: new Date().toISOString() };
+        if (!isFirebaseReady()) throw new Error("لا يوجد اتصال بخوادم المنصة (Firestore غير متوفر). يرجى التأكد من اتصال الإنترنت.");
 
-        // local cache
-        let reqs = JSON.parse(localStorage.getItem('paymentRequests') || '[]');
-        reqs.push(data);
-        localStorage.setItem('paymentRequests', JSON.stringify(reqs));
+        const data = { ...reqData, status: 'pending', timestamp: new Date().toISOString() };
 
-        if (!isFirebaseReady()) return data;
+        // 1. Upload strictly to Firestore first
+        const docRef = await getDb().collection('paymentRequests').add(data);
+        const newRequest = { id: docRef.id, ...data };
+
+        // 2. Local cache safely
         try {
-            await getDb().collection('paymentRequests').doc(id).set(data);
-        } catch (e) { console.warn('addPaymentRequest Firestore failed', e); }
-        return data;
+            let reqs = JSON.parse(localStorage.getItem('paymentRequests') || '[]');
+            reqs.push(newRequest);
+            localStorage.setItem('paymentRequests', JSON.stringify(reqs));
+        } catch(e) {}
+
+        return newRequest;
     }
 
     /**
