@@ -47,10 +47,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Sync from Firebase in background
     setTimeout(async () => {
-        if (window.firebaseFirestore) {
+        if (window.firebaseDb) {
             try {
                 for (const key of keysToLoad) {
-                    const docSnap = await window.firebaseFirestore.collection('platform_settings').doc(key).get();
+                    const docSnap = await window.firebaseDb.collection('platform_settings').doc(key).get();
                     if (docSnap.exists) {
                         const val = docSnap.data().value;
                         if (val && val !== localStorage.getItem(key)) {
@@ -163,9 +163,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
 
                     // Save to Firebase
-                    if (window.firebaseFirestore) {
+                    if (window.firebaseDb) {
                         for (const key of Object.keys(unsavedEdits)) {
-                            await window.firebaseFirestore.collection('platform_settings').doc(key).set({ value: unsavedEdits[key] });
+                            await window.firebaseDb.collection('platform_settings').doc(key).set({ value: unsavedEdits[key] });
                         }
                     }
 
