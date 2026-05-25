@@ -343,8 +343,7 @@ img.teacher-fg-img.pop-out {
 
 /* Latest Courses Button Alignment (homepage only) */
 #latest-courses .course-actions {
-  justify-items: center;
-  justify-content: center;
+  width: 100%;
 }
 
 /* Responsive */

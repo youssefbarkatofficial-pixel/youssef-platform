@@ -145,10 +145,18 @@
 }
 
 .course-actions {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
   margin-top: auto; /* Push buttons to bottom consistently */
+}
+
+.course-actions .btn {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 /* Payment Modal Specifics */
