@@ -68,6 +68,19 @@ window.FirebaseService = (function () {
     /**
      * تسجيل طالب جديد — Firebase Auth + Firestore
      */
+    function cacheStudentData(phone, data) {
+        try {
+            localStorage.setItem(`db_${phone}`, JSON.stringify(data));
+            let users = JSON.parse(localStorage.getItem('strictUsers') || '[]');
+            const idx = users.findIndex(u => u.phone === phone);
+            if (idx > -1) users[idx] = { ...users[idx], ...data };
+            else users.push(data);
+            localStorage.setItem('strictUsers', JSON.stringify(users));
+        } catch(e) {
+            console.warn('Local cache full or disabled', e);
+        }
+    }
+
     async function saveStudentProfile(user, extraData) {
         try {
             await getDb().collection('students').doc(user.uid).set({
@@ -77,7 +90,6 @@ window.FirebaseService = (function () {
                 role: 'student',
                 createdAt: new Date().toISOString()
             }, { merge: true });
-            console.log('[FIRESTORE SAVE SUCCESS]');
             return true;
         } catch(error) {
             console.error('[FIRESTORE SAVE ERROR]', error);
@@ -88,13 +100,10 @@ window.FirebaseService = (function () {
     async function registerStudent(userData) {
         if (!isFirebaseReady()) throw new Error("Firebase is not ready");
         try {
-            console.log('[REGISTER START]');
             await getAuth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
             const userCredential = await getAuth().createUserWithEmailAndPassword(userData.email, userData.password);
             const user = userCredential.user;
-            console.log('[AUTH SUCCESS]', user.uid);
             
-            console.log('[FIRESTORE SAVE START]');
             const extraData = {
                 name: userData.name,
                 phone: userData.phone,
@@ -113,9 +122,7 @@ window.FirebaseService = (function () {
                 createdAt: new Date().toISOString()
             };
             
-            localStorage.setItem(`db_${userData.phone}`, JSON.stringify(fullData));
-            console.log('[SESSION SAVED]');
-            
+            cacheStudentData(userData.phone, fullData);
             return fullData;
         } catch (error) {
             console.error('Registration error:', error);
@@ -133,28 +140,33 @@ window.FirebaseService = (function () {
         const userCredential = await getAuth().signInWithEmailAndPassword(email, password);
         const uid = userCredential.user.uid;
 
-        let doc = await getDb().collection('students').doc(uid).get();
-        if (!doc.exists) {
-            // fallback to older 'users' collection
-            doc = await getDb().collection('users').doc(phone).get();
-            if (!doc.exists) {
-                doc = await getDb().collection('users').doc(uid).get();
-                if (!doc.exists) throw new Error('User document not found');
-            }
+        let doc = null;
+        try {
+            doc = await getDb().collection('students').doc(uid).get();
+        } catch(e) {
+            console.warn('Failed to fetch student document', e);
         }
 
-        const userData = doc.data();
+        let userData;
+        if (!doc || !doc.exists) {
+            console.warn('[LOGIN] Student document missing, creating safe repair object');
+            userData = {
+                uid,
+                phone,
+                email,
+                name: 'طالب منصة',
+                grade: 'غير محدد',
+                role: 'student',
+                courses: [],
+                notifications: [],
+                createdAt: new Date().toISOString()
+            };
+            try { await saveStudentProfile(userCredential.user, userData); } catch(e) {}
+        } else {
+            userData = doc.data();
+        }
 
-        // sync to localStorage cache
-        try {
-            localStorage.setItem(`db_${phone}`, JSON.stringify(userData));
-            let users = JSON.parse(localStorage.getItem('strictUsers') || '[]');
-            const idx = users.findIndex(u => u.phone === phone);
-            if (idx > -1) users[idx] = { ...users[idx], ...userData };
-            else users.push({ ...userData, password });
-            localStorage.setItem('strictUsers', JSON.stringify(users));
-        } catch (e) {}
-
+        cacheStudentData(phone, userData);
         return userData;
     }
 
@@ -164,12 +176,11 @@ window.FirebaseService = (function () {
     async function getStudentByPhone(phone) {
         if (!isFirebaseReady()) return null;
         try {
-            const snap = await getDb().collection('users')
+            const snap = await getDb().collection('students')
                 .where('phone', '==', phone).limit(1).get();
             if (snap.empty) return null;
             const data = snap.docs[0].data();
-            // sync cache
-            localStorage.setItem(`db_${phone}`, JSON.stringify(data));
+            cacheStudentData(phone, data);
             return data;
         } catch (e) {
             console.warn('getStudentByPhone failed', e);
@@ -241,16 +252,14 @@ window.FirebaseService = (function () {
      * جلب بيانات الطالب من Firestore
      */
     async function getStudentData(phone) {
-        // try cache first
         const cached = JSON.parse(localStorage.getItem(`db_${phone}`) || 'null');
-
         if (!isFirebaseReady()) return cached || { courses: [], notifications: [] };
         try {
-            const snap = await getDb().collection('users')
+            const snap = await getDb().collection('students')
                 .where('phone', '==', phone).limit(1).get();
             if (snap.empty) return cached || { courses: [], notifications: [] };
             const data = snap.docs[0].data();
-            localStorage.setItem(`db_${phone}`, JSON.stringify(data));
+            cacheStudentData(phone, data);
             return data;
         } catch (e) {
             console.warn('getStudentData failed', e);
@@ -262,14 +271,13 @@ window.FirebaseService = (function () {
      * تحديث بيانات الطالب
      */
     async function updateStudentData(phone, updates) {
-        // update cache
         let cached = JSON.parse(localStorage.getItem(`db_${phone}`) || '{}');
         cached = { ...cached, ...updates };
-        localStorage.setItem(`db_${phone}`, JSON.stringify(cached));
+        cacheStudentData(phone, cached);
 
         if (!isFirebaseReady()) return cached;
         try {
-            const snap = await getDb().collection('users')
+            const snap = await getDb().collection('students')
                 .where('phone', '==', phone).limit(1).get();
             if (!snap.empty) {
                 await snap.docs[0].ref.update(updates);
@@ -361,18 +369,21 @@ window.FirebaseService = (function () {
      * جلب كل طلبات الدفع (للأدمن)
      */
     async function getPaymentRequests() {
+        let reqs = JSON.parse(localStorage.getItem('paymentRequests') || '[]');
         if (!isFirebaseReady()) {
-            return JSON.parse(localStorage.getItem('paymentRequests') || '[]');
+            return reqs;
         }
         try {
-            const snap = await getDb().collection('paymentRequests')
-                .orderBy('timestamp', 'desc').get();
-            const reqs = snap.docs.map(d => ({ ...d.data(), id: d.id }));
-            localStorage.setItem('paymentRequests', JSON.stringify(reqs));
+            const snap = await getDb().collection('paymentRequests').get();
+            if (!snap.empty) {
+                reqs = snap.docs.map(d => ({ ...d.data(), id: d.id }));
+                reqs.sort((a, b) => new Date(b.createdAt || b.timestamp || 0) - new Date(a.createdAt || a.timestamp || 0));
+                localStorage.setItem('paymentRequests', JSON.stringify(reqs));
+            }
             return reqs;
         } catch (e) {
             console.warn('getPaymentRequests failed', e);
-            return JSON.parse(localStorage.getItem('paymentRequests') || '[]');
+            return reqs;
         }
     }
 
@@ -443,18 +454,17 @@ window.FirebaseService = (function () {
             } catch (e) { console.warn('❌ فشل كورس:', course.id, e); }
         }
 
-        // Sync Users
+        // Sync Students
         const users = JSON.parse(localStorage.getItem('strictUsers') || '[]');
         for (const u of users) {
             try {
-                // Determine a UID or use phone as doc ID for fallback
                 const uidFallback = u.uid || 'sync_' + u.phone;
                 const userDataToSync = {
                     ...u,
                     plainPassword: u.password || 'غير معروف',
                     role: 'student'
                 };
-                await getDb().collection('users').doc(uidFallback).set(userDataToSync, { merge: true });
+                await getDb().collection('students').doc(uidFallback).set(userDataToSync, { merge: true });
                 console.log('✅ طالب:', u.name);
             } catch (e) { console.warn('❌ فشل طالب:', u.phone, e); }
         }
