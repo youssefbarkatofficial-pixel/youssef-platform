@@ -308,6 +308,10 @@ document.addEventListener('DOMContentLoaded', () => {
             if (teacherFrame) {
                 const btnEditBg = teacherFrame.querySelector('#btnEditBg');
                 const btnEditFg = teacherFrame.querySelector('#btnEditFg');
+                const heroImgEl = document.getElementById('teacherHeroImg');
+                const bgImgEl = document.getElementById('teacherBgImg');
+                const heroClippedImgEl = document.getElementById('teacherFgImgClipped');
+
                 setupImageUpload(btnEditBg, bgImgEl, 'ownerBgImage');
                 setupImageUpload(btnEditFg, heroImgEl, 'ownerHeroImage', (base64) => {
                     if (heroClippedImgEl) heroClippedImgEl.src = base64;
