@@ -54,8 +54,9 @@
 
 /* For carousel usage in homepage */
 .courses-carousel-wrapper .course-card {
-  min-width: 320px;
-  max-width: 350px;
+  min-width: 340px;
+  width: 340px;
+  max-width: 100%;
   flex: 0 0 auto;
 }
 
