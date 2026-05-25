@@ -102,11 +102,11 @@ window.FirebaseService = (function () {
         }
     }
 
-    async function registerStudent(userData) {
+    async function registerStudent(userData, password) {
         if (!isFirebaseReady()) throw new Error("Firebase is not ready");
         try {
             await getAuth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-            const userCredential = await getAuth().createUserWithEmailAndPassword(userData.email, userData.password);
+            const userCredential = await getAuth().createUserWithEmailAndPassword(userData.email, password || userData.password);
             const user = userCredential.user;
             
             const extraData = {
