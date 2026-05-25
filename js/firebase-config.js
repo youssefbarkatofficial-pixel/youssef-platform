@@ -24,3 +24,28 @@ try {
 window.firebaseAuth = auth;
 window.firebaseDb = db;
 window.firebaseStorage = storage;
+
+// STEP 1 — VERIFY FIRESTORE INITIALIZATION
+console.log('Firebase App:', firebase.app().name);
+console.log('Firestore Exists:', !!window.firebaseDb);
+console.log('Auth Exists:', !!window.firebaseAuth);
+console.log('Firebase Ready:', !!window.firebase);
+
+// STEP 3 — FORCE TEST WRITE
+(async () => {
+    if (window.firebaseDb) {
+        try {
+            const testRef = await window.firebaseDb
+                .collection('debug_test')
+                .add({
+                    test: true,
+                    timestamp: new Date().toISOString()
+                });
+
+            console.log('TEST WRITE SUCCESS:', testRef.id);
+
+        } catch (err) {
+            console.error('TEST WRITE FAILED:', err);
+        }
+    }
+})();

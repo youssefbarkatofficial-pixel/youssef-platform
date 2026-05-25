@@ -118,6 +118,7 @@ window.FirebaseService = (function () {
             };
             
             const saved = await saveStudentProfile(user, extraData);
+            console.log('SAVE RESULT:', saved);
 
             if (!saved) {
                 try {
@@ -131,6 +132,8 @@ window.FirebaseService = (function () {
                 .collection('students')
                 .doc(user.uid)
                 .get();
+
+            console.log('VERIFY EXISTS:', verifyDoc.exists);
 
             if (!verifyDoc.exists) {
                 try {
