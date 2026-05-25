@@ -338,9 +338,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     const { modal, proofInput, confirmBtn } = getPaymentModalElements();
     if (window._submittingPayment) return; // prevent duplicate calls
     window._submittingPayment = true;
+    
     if (!proofInput || !proofInput.files || proofInput.files.length === 0) {
       if(window.showToast) window.showToast('رجاءاً قم برفع صورة التحويل أولاً', 'error');
       else alert('رجاءاً قم برفع صورة التحويل أولاً');
+      window._submittingPayment = false;
       return;
     }
 
@@ -348,6 +350,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!courseId) {
       if(window.showToast) window.showToast('حدث خطأ في تحديد الكورس. أعد فتح النافذة وحاول مرة أخرى.', 'error');
       else alert('حدث خطأ في تحديد الكورس. أعد فتح النافذة وحاول مرة أخرى.');
+      window._submittingPayment = false;
       return;
     }
 
@@ -378,8 +381,9 @@ document.addEventListener('DOMContentLoaded', async () => {
               await window.FirebaseService.addPaymentRequest(requestData);
               if (window.showToast) window.showToast('تم إرسال طلب الاشتراك بنجاح، بانتظار موافقة الأدمن', 'success');
               
-              const modal = document.getElementById('paymentModal');
-              if (modal) modal.classList.remove('active');
+              const pModal = document.getElementById('paymentModal');
+              if (pModal) pModal.classList.remove('active');
+              requestSuccess = true;
           } catch (err) {
               console.error(err);
               if (window.showToast) window.showToast('تعذر الاتصال بالسحابة. تأكد من الإنترنت.', 'error');
@@ -388,22 +392,16 @@ document.addEventListener('DOMContentLoaded', async () => {
           if (window.showToast) window.showToast('خدمة قاعدة البيانات غير متوفرة حالياً.', 'error');
       }
 
-      // Only mark request as successful. Do NOT play sounds, show global toasts,
-      // close the modal, or trigger a page reload/render here — keep UI changes
-      // limited to the subscribe button state handled below.
-      requestSuccess = true;
     } catch (error) {
       const message = typeof error === 'string' ? error : (error?.message || 'حدث خطأ أثناء رفع الصورة.');
       if(window.showToast) window.showToast(message, 'error');
       else alert(message);
     } finally {
-      // If submission succeeded, keep the button in 'under review' state.
       if (confirmBtn) {
         if (requestSuccess) {
           confirmBtn.innerText = 'قيد مراجعة الطلب';
           confirmBtn.disabled = true;
           confirmBtn.classList.add('btn-pending');
-          // apply explicit disabled styling in case CSS isn't present
           try {
             confirmBtn.style.background = '#bdbdbd';
             confirmBtn.style.color = '#444';
@@ -434,9 +432,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
       window._submittingPayment = false;
     }
-
-    // Intentionally do not call renderCourses or reload; leave UI updates
-    // to the subscribe button state change above.
   }
 
   window.submitPaymentRequest = submitPaymentRequest;
