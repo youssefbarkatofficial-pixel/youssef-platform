@@ -688,7 +688,7 @@
             const admin = JSON.parse(authStr);
             const hideKey = `hideOwnerWelcome_${admin.phone}`;
             const shouldHide = localStorage.getItem(hideKey) === 'true';
-            const customMessage = (typeof PlatformStorage !== 'undefined' ? PlatformStorage.get('setWelcomeMsg') : null) || localStorage.getItem('setWelcomeMsg');
+            const customMessage = localStorage.getItem('setWelcomeMsg');
             const defaultWelcome = admin.name ? `أهلاً بك يا ${admin.name}! بوابة الإدارة الخاصة بك جاهزة الآن.` : 'أهلاً بك في لوحة التحكم الخاصة بك. استخدم البوصلة للدعم المهني.';
             if(welcomeMsg) {
                 welcomeMsg.textContent = customMessage || defaultWelcome;
