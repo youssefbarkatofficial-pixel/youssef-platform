@@ -127,7 +127,7 @@
   padding-top: 15px;
   border-top: 1px solid rgba(255,255,255,0.1);
   margin-bottom: 20px;
-  margin-top: auto;
+  margin-top: auto; /* Push meta and actions to the bottom */
 }
 
 .course-price {
@@ -149,7 +149,7 @@
   flex-direction: column;
   gap: 12px;
   width: 100%;
-  margin-top: auto; /* Push buttons to bottom consistently */
+  margin-top: 0; /* Removed auto so meta's auto margin pushes both */
 }
 
 .course-actions .btn {
