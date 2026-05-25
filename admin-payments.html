@@ -214,7 +214,7 @@
                         const course = adminCourses.find(c => c.id === req.courseId);
                         const courseName = course ? course.title : 'كورس محذوف';
                         const price = course ? course.price : '0';
-                        const date = new Date(req.timestamp).toLocaleDateString('ar-EG', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+                        const date = new Date(req.createdAt || req.timestamp).toLocaleDateString('ar-EG', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 
                         // fetch proof image (if any)
                         const imgSrc = await fetchProofImage(req);
@@ -309,7 +309,7 @@
                     await payDocRef.update({ status: 'approved' });
                     
                     // 3. Find User Document (Try ID first, then Phone)
-                    let userDocRef = window.firebaseDb.collection('users').doc(userId);
+                    let userDocRef = window.firebaseDb.collection('students').doc(userId);
                     let userDoc = await userDocRef.get();
                     let userData = null;
 
@@ -317,7 +317,7 @@
                         userData = userDoc.data();
                     } else {
                         // Fallback to phone search
-                        const snap = await window.firebaseDb.collection('users').where('phone', '==', userId).limit(1).get();
+                        const snap = await window.firebaseDb.collection('students').where('phone', '==', userId).limit(1).get();
                         if (!snap.empty) {
                             userDoc = snap.docs[0];
                             userDocRef = userDoc.ref;
@@ -397,14 +397,14 @@
                     await payDocRef.update({ status: 'rejected' });
                     
                     // 3. Find User Document (Try ID first, then Phone)
-                    let userDocRef = window.firebaseDb.collection('users').doc(userId);
+                    let userDocRef = window.firebaseDb.collection('students').doc(userId);
                     let userDoc = await userDocRef.get();
                     let userData = null;
 
                     if (userDoc.exists) {
                         userData = userDoc.data();
                     } else {
-                        const snap = await window.firebaseDb.collection('users').where('phone', '==', userId).limit(1).get();
+                        const snap = await window.firebaseDb.collection('students').where('phone', '==', userId).limit(1).get();
                         if (!snap.empty) {
                             userDoc = snap.docs[0];
                             userDocRef = userDoc.ref;
