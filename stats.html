@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -131,43 +131,56 @@
         </main>
     </div>
 
+    <!-- Firebase SDKs (load first so service is ready) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/firebase-service.js"></script>
     <script src="js/storage-service.js"></script>
     <script src="js/main.js"></script>
     <script src="js/support-chat.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             let userStr = sessionStorage.getItem('currentStudent');
             if(!userStr) {
                 window.location.href = 'index.html';
                 return;
             }
-            
+
             let user = JSON.parse(userStr);
             document.getElementById('userNameDisplay').textContent = user.name;
             const grades = {'prep1':'أولى إعدادي', 'prep2':'تانية إعدادي', 'prep3':'تالتة إعدادي', 'sec1':'أولى ثانوي'};
             document.getElementById('userGradeDisplay').textContent = grades[user.grade] || 'طالب';
-            
-            let dbUser = JSON.parse(localStorage.getItem(`db_${user.phone}`)) || { courses: [] };
-            
+
+            // Sync user data from Firebase
+            let dbUser = JSON.parse(localStorage.getItem(`db_${user.phone}`)) || { courses: [], stats: {} };
+            try {
+                if (window.FirebaseService && typeof window.FirebaseService.getUser === 'function') {
+                    const onlineUser = await window.FirebaseService.getUser(user.phone);
+                    if (onlineUser) {
+                        dbUser = onlineUser;
+                        localStorage.setItem(`db_${user.phone}`, JSON.stringify(dbUser));
+                    }
+                }
+            } catch(e) { console.warn('Firebase sync error:', e); }
+
             if(!dbUser.courses || dbUser.courses.length === 0) {
                 document.getElementById('statsContent').style.display = 'none';
                 document.getElementById('noStatsState').style.display = 'block';
                 return;
             }
 
-            // Read strictly from DB without making up fake data
             const stats = dbUser.stats || { homeworkCompleted: 0, examAverage: 0, videosWatched: 0, watchData: [0,0,0,0,0,0] };
 
             document.getElementById('sHwCount').textContent = stats.homeworkCompleted || 0;
             document.getElementById('sExamAvg').textContent = (stats.examAverage || 0) + '%';
             document.getElementById('sVideosCount').textContent = stats.videosWatched || 0;
 
-            // Chart.js initialization
             const ctx = document.getElementById('progressChart').getContext('2d');
-            
-            // Gradient for line
             let gradient = ctx.createLinearGradient(0, 0, 0, 400);
-            gradient.addColorStop(0, 'rgba(212, 166, 79, 0.5)'); // gold semi-transparent
+            gradient.addColorStop(0, 'rgba(212, 166, 79, 0.5)');
             gradient.addColorStop(1, 'rgba(212, 166, 79, 0)');
 
             new Chart(ctx, {
@@ -176,7 +189,7 @@
                     labels: ['الأسبوع 1', 'الأسبوع 2', 'الأسبوع 3', 'الأسبوع 4', 'الأسبوع 5', 'الأسبوع 6'],
                     datasets: [{
                         label: 'معدل المشاهدة (ساعات)',
-                        data: stats.watchData && stats.watchData.length === 6 ? stats.watchData : [0, 0, 0, 0, 0, 0],
+                        data: stats.watchData && stats.watchData.length === 6 ? stats.watchData : [0,0,0,0,0,0],
                         borderColor: '#D4A64F',
                         backgroundColor: gradient,
                         borderWidth: 2,
@@ -190,31 +203,19 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false }
-                    },
+                    plugins: { legend: { display: false } },
                     scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: { color: 'rgba(255,255,255,0.05)' },
-                            ticks: { color: 'rgba(255,255,255,0.5)' }
-                        },
-                        x: {
-                            grid: { display: false },
-                            ticks: { color: 'rgba(255,255,255,0.5)' }
-                        }
+                        y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: 'rgba(255,255,255,0.5)' } },
+                        x: { grid: { display: false }, ticks: { color: 'rgba(255,255,255,0.5)' } }
                     }
                 }
             });
+
+            // Logout
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) logoutBtn.addEventListener('click', (e) => { e.preventDefault(); sessionStorage.removeItem('currentStudent'); window.location.href = 'index.html'; });
         });
     </script>
-    <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
-    <script src="js/firebase-config.js"></script>
-    <script src="js/firebase-service.js"></script>
 </body>
 </html>
 

@@ -395,29 +395,33 @@
                         const courseId = paymentRequests[reqIndex].courseId;
                         const courseName = (adminCourses.find(c => c.id === courseId) || {}).title || courseId;
 
-                        if (window.FirebaseService && window.FirebaseService.isReady()) {
-                            await window.FirebaseService.updatePaymentStatus(id, 'approved');
-                            await window.FirebaseService.addCourseToStudent(userId, courseId);
-                            await window.FirebaseService.addNotificationToStudent(userId, {
-                                title: 'تم قبول اشتراكك بنجاح 🎉',
-                                message: `تهانينا! تم تفعيل كورس "${courseName}" بنجاح. يمكنك الآن بدء المذاكرة.`,
-                                courseId: courseId
-                            });
-                        } else {
-                            paymentRequests[reqIndex].status = 'approved';
-                            let dbUser = JSON.parse(localStorage.getItem(`db_${userId}`)) || { courses: [], notifications: [] };
-                            if(!dbUser.courses) dbUser.courses = [];
-                            if(!dbUser.courses.includes(courseId)) dbUser.courses.push(courseId);
-                            if(!dbUser.notifications) dbUser.notifications = [];
-                            dbUser.notifications.push({
-                                title: 'تم قبول اشتراكك بنجاح 🎉',
-                                message: `تهانينا! تم تفعيل كورس "${courseName}" بنجاح.`,
-                                timestamp: new Date().toISOString(),
-                                read: false,
-                                courseId: courseId
-                            });
-                            localStorage.setItem(`db_${userId}`, JSON.stringify(dbUser));
-                            localStorage.setItem('paymentRequests', JSON.stringify(paymentRequests));
+                        // ALWAYS update local cache
+                        paymentRequests[reqIndex].status = 'approved';
+                        let dbUser = JSON.parse(localStorage.getItem(`db_${userId}`)) || { courses: [], notifications: [] };
+                        if(!dbUser.courses) dbUser.courses = [];
+                        if(!dbUser.courses.includes(courseId)) dbUser.courses.push(courseId);
+                        if(!dbUser.notifications) dbUser.notifications = [];
+                        dbUser.notifications.push({
+                            title: 'تم قبول اشتراكك بنجاح 🎉',
+                            message: `تهانينا! تم تفعيل كورس "${courseName}" بنجاح.`,
+                            timestamp: new Date().toISOString(),
+                            read: false,
+                            courseId: courseId
+                        });
+                        localStorage.setItem(`db_${userId}`, JSON.stringify(dbUser));
+                        localStorage.setItem('paymentRequests', JSON.stringify(paymentRequests));
+
+                        // Sync to Firestore
+                        if (window.FirebaseService && typeof window.FirebaseService.isReady === 'function' && window.FirebaseService.isReady()) {
+                            try {
+                                await window.FirebaseService.updatePaymentStatus(id, 'approved');
+                                await window.FirebaseService.addCourseToStudent(userId, courseId);
+                                await window.FirebaseService.addNotificationToStudent(userId, {
+                                    title: 'تم قبول اشتراكك بنجاح 🎉',
+                                    message: `تهانينا! تم تفعيل كورس "${courseName}" بنجاح. يمكنك الآن بدء المذاكرة.`,
+                                    courseId: courseId
+                                });
+                            } catch(e) { console.warn('Firebase sync failed for payment approval', e); }
                         }
 
                         renderPayments();
@@ -433,8 +437,9 @@
                     const reqIndex = paymentRequests.findIndex(r => r.id === id);
                     if(reqIndex > -1) {
                         const userId = paymentRequests[reqIndex].userId;
-                        paymentRequests[reqIndex].status = 'rejected';
                         
+                        // ALWAYS update local cache
+                        paymentRequests[reqIndex].status = 'rejected';
                         let dbUser = JSON.parse(localStorage.getItem(`db_${userId}`)) || { notifications: [] };
                         if(!dbUser.notifications) dbUser.notifications = [];
                         dbUser.notifications.push({

@@ -1,6 +1,6 @@
 // js/courses-renderer.js
 document.addEventListener('DOMContentLoaded', () => {
-    // Helper: load courses and restore separated base64 images
+    // Helper: load courses and restore separated base64 images from cache
     function loadAdminCourses() {
         var raw = JSON.parse(localStorage.getItem('adminCourses') || '[]');
         return raw.map(function(c) {
@@ -16,17 +16,20 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Seed Default Courses if not exist
     let adminCourses = loadAdminCourses();
-    if (!adminCourses || adminCourses.length === 0) {
-        adminCourses = [
-            { id: 'c1', title: 'منهج الجغرافيا كاملاّ - الترم الأول', desc: 'شرح تفصيلي لمنهج الجغرافيا مع خرائط ذهنية وامتحانات أسبوعية وتدريب على النظام الجديد.', price: '150', grade: 'prep3', image: 'https://via.placeholder.com/400x250/071326/D4A64F?text=Geography' },
-            { id: 'c2', title: 'تاريخ مصر القديمة والحضارات', desc: 'فهم عميق للتاريخ بأسلوب قصصي ممتع يجعلك تعيش الأحداث وتستنتج الأسئلة.', price: '200', grade: 'sec1', image: 'https://via.placeholder.com/400x250/071326/58C4DD?text=History' },
-            { id: 'c3', title: 'الدراسات الاجتماعية - تأسيس', desc: 'كورس التأسيس الشامل لطلاب الصف الأول الإعدادي، مدخلك لفهم المادة ببساطة.', price: '100', grade: 'prep1', image: 'https://via.placeholder.com/400x250/0A1E3A/D4A64F?text=Social+Studies' }
-        ];
-        localStorage.setItem('adminCourses', JSON.stringify(adminCourses));
+
+    function seedDefaultCourses() {
+        if (!adminCourses || adminCourses.length === 0) {
+            adminCourses = [
+                { id: 'c1', title: 'منهج الجغرافيا كاملاّ - الترم الأول', desc: 'شرح تفصيلي لمنهج الجغرافيا مع خرائط ذهنية وامتحانات أسبوعية وتدريب على النظام الجديد.', price: '150', grade: 'prep3', image: 'https://via.placeholder.com/400x250/071326/D4A64F?text=Geography' },
+                { id: 'c2', title: 'تاريخ مصر القديمة والحضارات', desc: 'فهم عميق للتاريخ بأسلوب قصصي ممتع يجعلك تعيش الأحداث وتستنتج الأسئلة.', price: '200', grade: 'sec1', image: 'https://via.placeholder.com/400x250/071326/58C4DD?text=History' },
+                { id: 'c3', title: 'الدراسات الاجتماعية - تأسيس', desc: 'كورس التأسيس الشامل لطلاب الصف الأول الإعدادي، مدخلك لفهم المادة ببساطة.', price: '100', grade: 'prep1', image: 'https://via.placeholder.com/400x250/0A1E3A/D4A64F?text=Social+Studies' }
+            ];
+            localStorage.setItem('adminCourses', JSON.stringify(adminCourses));
+        }
     }
-    
+    seedDefaultCourses();
+
     function generateCourseCard(course) {
         const grades = {
             'prep1': 'أولى إعدادي',
@@ -105,27 +108,48 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    window.renderCourses = function() {
-        if (!coursesGrid) return;
-        const adminCourses = loadAdminCourses();
-        coursesGrid.innerHTML = adminCourses.map(generateCourseCard).join('');
-        attachCourseFilters();
+    window.renderCourses = async function() {
+        // Initial quick render from cache
+        if (coursesGrid) {
+            coursesGrid.innerHTML = adminCourses.map(generateCourseCard).join('');
+            attachCourseFilters();
+        }
+        const homeCoursesContainer = document.getElementById('homeCoursesContainer');
+        if (homeCoursesContainer) {
+            homeCoursesContainer.innerHTML = adminCourses.slice(-3).reverse().map(generateCourseCard).join('');
+        }
+
+        // Fetch fresh from Firebase if available
+        if (window.FirebaseService && typeof window.FirebaseService.getCourses === 'function') {
+            try {
+                const fbCourses = await window.FirebaseService.getCourses();
+                if (fbCourses && fbCourses.length > 0) {
+                    adminCourses = fbCourses;
+                    localStorage.setItem('adminCourses', JSON.stringify(adminCourses));
+                    
+                    // Re-render with fresh data
+                    if (coursesGrid) {
+                        coursesGrid.innerHTML = adminCourses.map(generateCourseCard).join('');
+                        attachCourseFilters();
+                    }
+                    if (homeCoursesContainer) {
+                        homeCoursesContainer.innerHTML = adminCourses.slice(-3).reverse().map(generateCourseCard).join('');
+                    }
+                }
+            } catch (e) {
+                console.warn('Failed to fetch courses from Firebase for rendering', e);
+            }
+        }
     };
 
-    if (coursesGrid) {
-        window.renderCourses();
-        const params = new URLSearchParams(window.location.search);
-        const focusCourse = params.get('focusCourse');
-        if (focusCourse) {
-            focusCourseCard(focusCourse);
+    // Execute render flow
+    window.renderCourses().then(() => {
+        if (coursesGrid) {
+            const params = new URLSearchParams(window.location.search);
+            const focusCourse = params.get('focusCourse');
+            if (focusCourse) focusCourseCard(focusCourse);
         }
-    }
-
-    const homeCoursesContainer = document.getElementById('homeCoursesContainer');
-    if (homeCoursesContainer) {
-        // Show up to 3 latest courses on home page
-        homeCoursesContainer.innerHTML = adminCourses.slice(-3).reverse().map(generateCourseCard).join('');
-    }
+    });
     
     window.openPaymentModal = function(e, courseId) {
         e.preventDefault();

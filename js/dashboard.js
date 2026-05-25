@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   // Check auth
   const userStr = sessionStorage.getItem('currentStudent');
   const isDashboardPage = window.location.pathname.includes('dashboard.html') && !window.location.pathname.includes('admin-dashboard.html');
@@ -32,12 +32,25 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Fetch Real Data from DB/LocalStorage
-    // We try to find real database values, otherwise default to empty to show the Empty States
-    const dbUser = JSON.parse(localStorage.getItem(`db_${user.phone}`)) || {
+    let dbUser = JSON.parse(localStorage.getItem(`db_${user.phone}`)) || {
         stats: { commitment: 0, videosWatched: 0, homeworkCompleted: 0, homeworkTotal: 0 },
         courses: [],
         notifications: []
     };
+    
+    try {
+        if (window.FirebaseService && typeof window.FirebaseService.getUser === 'function') {
+            const onlineUser = await window.FirebaseService.getUser(user.phone);
+            if (onlineUser) {
+                dbUser = Object.assign(dbUser, onlineUser);
+                localStorage.setItem(`db_${user.phone}`, JSON.stringify(dbUser));
+            }
+        }
+    } catch(e) { console.warn('Failed to fetch user from Firebase', e); }
+
+    if (!dbUser.stats) {
+        dbUser.stats = { commitment: 0, videosWatched: 0, homeworkCompleted: 0, homeworkTotal: 0 };
+    }
 
     // Update Stats
     const statCommitment = document.getElementById('statCommitment');
@@ -56,6 +69,16 @@ document.addEventListener('DOMContentLoaded', () => {
             coursesEmptyState.style.display = 'none';
             
             let adminCourses = JSON.parse(localStorage.getItem('adminCourses')) || [];
+            try {
+                if (window.FirebaseService && typeof window.FirebaseService.getCourses === 'function') {
+                    const onlineCourses = await window.FirebaseService.getCourses();
+                    if (onlineCourses && onlineCourses.length > 0) {
+                        adminCourses = onlineCourses;
+                        localStorage.setItem('adminCourses', JSON.stringify(adminCourses));
+                    }
+                }
+            } catch(e) {}
+
             coursesProgressContainer.innerHTML = '';
             
             dbUser.courses.forEach(cId => {

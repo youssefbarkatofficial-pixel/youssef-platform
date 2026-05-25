@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -116,101 +116,93 @@
         </main>
     </div>
 
-    <script src="js/storage-service.js"></script>
-    <script src="js/main.js"></script>
-    <script src="js/support-chat.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            let userStr = sessionStorage.getItem('currentStudent');
-            if(!userStr) {
-                window.location.href = 'index.html';
-                return;
-            }
-            
-            let user = JSON.parse(userStr);
-            document.getElementById('userNameDisplay').textContent = user.name;
-            const grades = {'prep1':'أولى إعدادي', 'prep2':'تانية إعدادي', 'prep3':'تالتة إعدادي', 'sec1':'أولى ثانوي'};
-            document.getElementById('userGradeDisplay').textContent = grades[user.grade] || 'طالب';
-            
-            let dbUser = JSON.parse(localStorage.getItem(`db_${user.phone}`)) || { courses: [] };
-            const container = document.getElementById('hwListContainer');
-            const emptyState = document.getElementById('noHwState');
-            
-            if(dbUser.courses && dbUser.courses.length > 0) {
-                container.style.display = 'block';
-                emptyState.style.display = 'none';
-                
-                let adminCourses = JSON.parse(localStorage.getItem('adminCourses')) || [];
-                
-                dbUser.courses.forEach(cId => {
-                    const c = adminCourses.find(course => course.id === cId);
-                    if(c) {
-                        const row = document.createElement('div');
-                        row.className = 'course-hw-row';
-                        
-                        row.innerHTML = `
-                            <div class="course-hw-header">
-                                <div style="display: flex; align-items: center; gap: 15px;">
-                                    <i class="fas fa-book text-gold" style="font-size: 1.5rem;"></i>
-                                    <h3 style="margin: 0; color: var(--text-primary);">${c.title}</h3>
-                                </div>
-                                <button class="btn btn-outline toggle-btn">أظهر واجباتي <i class="fas fa-chevron-down ml-2" style="margin-right: 8px;"></i></button>
-                            </div>
-                            <div class="course-hw-body">
-                                <div class="hw-category">
-                                    <h4 style="color: #2ecc71;"><i class="fas fa-check-circle"></i> الواجبات المكتملة</h4>
-                                    <div class="hw-item">
-                                        <span style="font-weight: bold;">واجب الدرس الأول: الموقع الفلكي</span>
-                                        <span class="badge" style="background: rgba(46, 204, 113, 0.2); color: #2ecc71;">تم التسليم 10/10</span>
-                                    </div>
-                                    <div class="hw-item">
-                                        <span style="font-weight: bold;">واجب الدرس الثاني: التضاريس</span>
-                                        <span class="badge" style="background: rgba(46, 204, 113, 0.2); color: #2ecc71;">تم التسليم 9/10</span>
-                                    </div>
-                                </div>
-                                
-                                <div class="hw-category">
-                                    <h4 style="color: #e74c3c;"><i class="fas fa-exclamation-circle"></i> الواجبات المتأخرة (لم تُسلم)</h4>
-                                    <!-- Dynamic Missing State -->
-                                    <div class="empty-message" style="color: #2ecc71; border: 1px dashed #2ecc71;">أشطر شطور مفيش واجب متأخر! 🌟</div>
-                                </div>
-
-                                <div class="hw-category">
-                                    <h4 style="color: var(--accent-cyan);"><i class="fas fa-clock"></i> الواجبات المستقبلية</h4>
-                                    <div class="hw-item" style="opacity: 0.6;">
-                                        <span>واجب الدرس الثالث (مغلق حالياً)</span>
-                                        <i class="fas fa-lock"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-                        
-                        const toggleBtn = row.querySelector('.toggle-btn');
-                        toggleBtn.addEventListener('click', () => {
-                            row.classList.toggle('active');
-                            if(row.classList.contains('active')) {
-                                toggleBtn.innerHTML = `أخفِ واجباتي <i class="fas fa-chevron-up ml-2" style="margin-right: 8px;"></i>`;
-                            } else {
-                                toggleBtn.innerHTML = `أظهر واجباتي <i class="fas fa-chevron-down ml-2" style="margin-right: 8px;"></i>`;
-                            }
-                        });
-                        
-                        container.appendChild(row);
-                    }
-                });
-            } else {
-                container.style.display = 'none';
-                emptyState.style.display = 'block';
-            }
-        });
-    </script>
-    <!-- Firebase SDKs -->
+    <!-- Firebase SDKs (load first) -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
     <script src="js/firebase-config.js"></script>
     <script src="js/firebase-service.js"></script>
+    <script src="js/storage-service.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/support-chat.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            let userStr = sessionStorage.getItem('currentStudent');
+            if (!userStr) { window.location.href = 'index.html'; return; }
+
+            let user = JSON.parse(userStr);
+            document.getElementById('userNameDisplay').textContent = user.name;
+            const grades = {'prep1':'أولى إعدادي','prep2':'تانية إعدادي','prep3':'تالتة إعدادي','sec1':'أولى ثانوي'};
+            document.getElementById('userGradeDisplay').textContent = grades[user.grade] || 'طالب';
+
+            // Sync user from Firebase
+            let dbUser = JSON.parse(localStorage.getItem(`db_${user.phone}`)) || { courses: [] };
+            try {
+                if (window.FirebaseService && typeof window.FirebaseService.getUser === 'function') {
+                    const onlineUser = await window.FirebaseService.getUser(user.phone);
+                    if (onlineUser) { dbUser = onlineUser; localStorage.setItem(`db_${user.phone}`, JSON.stringify(dbUser)); }
+                }
+            } catch(e) {}
+
+            // Sync courses from Firebase
+            try {
+                if (window.FirebaseService && typeof window.FirebaseService.getCourses === 'function') {
+                    const onlineCourses = await window.FirebaseService.getCourses();
+                    if (onlineCourses && onlineCourses.length > 0) localStorage.setItem('adminCourses', JSON.stringify(onlineCourses));
+                }
+            } catch(e) {}
+
+            const container = document.getElementById('hwListContainer');
+            const emptyState = document.getElementById('noHwState');
+
+            if (dbUser.courses && dbUser.courses.length > 0) {
+                container.style.display = 'block';
+                emptyState.style.display = 'none';
+                let adminCourses = JSON.parse(localStorage.getItem('adminCourses')) || [];
+
+                dbUser.courses.forEach(cId => {
+                    const c = adminCourses.find(course => course.id === cId);
+                    if (!c) return;
+                    // Collect real homeworks from course contents
+                    const homeworks = (c.contents && c.contents.homeworks) ? c.contents.homeworks : [];
+                    const row = document.createElement('div');
+                    row.className = 'course-hw-row';
+                    const hwItems = homeworks.length > 0
+                        ? homeworks.map(hw => `<div class="hw-item"><span style="font-weight:bold">${hw.title || 'واجب'}</span><a href="${hw.link || '#'}" target="_blank" class="btn btn-outline" style="padding:4px 12px;font-size:0.85rem;"><i class="fas fa-external-link-alt"></i> فتح</a></div>`).join('')
+                        : `<div class="empty-message">لا يوجد واجبات في هذا الكورس بعد</div>`;
+                    row.innerHTML = `
+                        <div class="course-hw-header">
+                            <div style="display:flex;align-items:center;gap:15px;">
+                                <i class="fas fa-book text-gold" style="font-size:1.5rem;"></i>
+                                <h3 style="margin:0;color:var(--text-primary);">${c.title}</h3>
+                            </div>
+                            <button class="btn btn-outline toggle-btn">أظهر واجباتي <i class="fas fa-chevron-down" style="margin-right:8px;"></i></button>
+                        </div>
+                        <div class="course-hw-body">
+                            <div class="hw-category">
+                                <h4 style="color:var(--accent-cyan);"><i class="fas fa-tasks"></i> واجبات الكورس</h4>
+                                ${hwItems}
+                            </div>
+                        </div>`;
+                    const toggleBtn = row.querySelector('.toggle-btn');
+                    toggleBtn.addEventListener('click', () => {
+                        row.classList.toggle('active');
+                        toggleBtn.innerHTML = row.classList.contains('active')
+                            ? 'أخفِ واجباتي <i class="fas fa-chevron-up" style="margin-right:8px;"></i>'
+                            : 'أظهر واجباتي <i class="fas fa-chevron-down" style="margin-right:8px;"></i>';
+                    });
+                    container.appendChild(row);
+                });
+            } else {
+                container.style.display = 'none';
+                emptyState.style.display = 'block';
+            }
+
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) logoutBtn.addEventListener('click', e => { e.preventDefault(); sessionStorage.removeItem('currentStudent'); window.location.href = 'index.html'; });
+        });
+    </script>
 </body>
 </html>
 

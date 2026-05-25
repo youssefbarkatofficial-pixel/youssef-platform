@@ -426,12 +426,32 @@ window.FirebaseService = (function () {
         console.log('✅ انتهت المزامنة!');
     }
 
+    // Aliases used by pages (getUser, getCourse)
+    async function getUser(phone) {
+        return getStudentByPhone(phone);
+    }
+
+    async function getCourse(courseId) {
+        // Try Firebase first
+        if (isFirebaseReady()) {
+            try {
+                const doc = await getDb().collection('courses').doc(courseId).get();
+                if (doc.exists) return { id: doc.id, ...doc.data() };
+            } catch (e) { console.warn('getCourse Firebase failed', e); }
+        }
+        // Fallback to local cache
+        const courses = getCoursesFromStorage();
+        return courses.find(c => c.id === courseId) || null;
+    }
+
     // Public API
     return {
         isReady: isFirebaseReady,
         registerStudent,
         loginStudent,
         getStudentByPhone,
+        getUser,
+        getCourse,
         getCourses,
         saveCourse,
         deleteCourse,
@@ -449,6 +469,7 @@ window.FirebaseService = (function () {
     };
 
 })();
+
 
 // Make safe storage helpers globally available for all pages
 window.getCoursesFromStorage = function() {
