@@ -428,9 +428,20 @@
 // --- DYNAMIC SECTIONS RENDERER ---
 
             function migrateCourseToSections(contents) {
-                if (contents && Array.isArray(contents.sections)) return contents;
                 let sections = [];
                 const c = contents || {};
+
+                if (c.sections && Array.isArray(c.sections) && c.sections.length > 0) {
+                    return { sections: c.sections };
+                }
+
+                if (c.sections && Array.isArray(c.sections) && c.sections.length === 0) {
+                    return { sections: [
+                        { id: 'sec_lectures', title: 'المحاضرات', items: [] },
+                        { id: 'sec_homeworks', title: 'الواجبات', items: [] },
+                        { id: 'sec_exams', title: 'الامتحانات', items: [] }
+                    ]};
+                }
                 
                 if (c.lectures && c.lectures.length) {
                     let items = [];
@@ -452,7 +463,14 @@
                         sections.push({ id: 'sec_custom_'+idx, title: sec.name || 'قسم مخصص', items: sec.items || [] });
                     });
                 }
-                if (sections.length === 0) sections.push({ id: 'sec_default', title: 'القسم الأول', items: [] });
+                
+                if (sections.length === 0) {
+                    sections = [
+                        { id: 'sec_lectures', title: 'المحاضرات', items: [] },
+                        { id: 'sec_homeworks', title: 'الواجبات', items: [] },
+                        { id: 'sec_exams', title: 'الامتحانات', items: [] }
+                    ];
+                }
                 return { sections: sections };
             }
 
