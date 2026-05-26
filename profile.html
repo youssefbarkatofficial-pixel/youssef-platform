@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -263,7 +263,7 @@
                 document.getElementById('profileGrade').textContent = grades[user.grade] || user.grade;
 
                 // Load Profile Picture
-                const profilePic = localStorage.getItem(`profilePic_${user.phone}`);
+                const profilePic = localStorage.getItem(`profilePic_${user.phone}`) || user.profilePic;
                 const mainPic = document.getElementById('mainProfilePic');
                 if (profilePic && mainPic) {
                     mainPic.src = profilePic;
@@ -276,19 +276,69 @@
                     if (file) {
                         const reader = new FileReader();
                         reader.onload = function(event) {
-                            const base64Data = event.target.result;
-                            
-                            // Update Images
-                            mainPic.src = base64Data;
-                            const sidebarPic = document.getElementById('userAvatarImg');
-                            if (sidebarPic) sidebarPic.src = base64Data;
+                            const img = new Image();
+                            img.onload = function() {
+                                const canvas = document.createElement('canvas');
+                                const MAX_SIZE = 300;
+                                let width = img.width;
+                                let height = img.height;
+                                
+                                if (width > height) {
+                                    if (width > MAX_SIZE) {
+                                        height *= MAX_SIZE / width;
+                                        width = MAX_SIZE;
+                                    }
+                                } else {
+                                    if (height > MAX_SIZE) {
+                                        width *= MAX_SIZE / height;
+                                        height = MAX_SIZE;
+                                    }
+                                }
+                                canvas.width = width;
+                                canvas.height = height;
+                                const ctx = canvas.getContext('2d');
+                                ctx.drawImage(img, 0, 0, width, height);
+                                
+                                const base64Data = canvas.toDataURL('image/jpeg', 0.8);
+                                
+                                // Update Images
+                                mainPic.src = base64Data;
+                                const sidebarPic = document.getElementById('userAvatarImg');
+                                if (sidebarPic) sidebarPic.src = base64Data;
 
-                            // Save to LocalStorage
-                            localStorage.setItem(`profilePic_${user.phone}`, base64Data);
-                            
-                            if (window.showToast) {
-                                window.showToast('تم تحديث الصورة الشخصية بنجاح!', 'success');
-                            }
+                                try {
+                                    // Save to LocalStorage and update current session user
+                                    localStorage.setItem(`profilePic_${user.phone}`, base64Data);
+                                    user.profilePic = base64Data;
+                                    sessionStorage.setItem('currentStudent', JSON.stringify(user));
+                                } catch (err) {
+                                    console.warn('Failed to save to local storage (quota exceeded?):', err);
+                                }
+                                
+                                try {
+                                    // Save to Firebase
+                                    const docId = user.phone || user.id || user.uid;
+                                    if (!docId) throw new Error("No valid user ID to save profilePic");
+                                    
+                                    if (window.firebaseDb) {
+                                        window.firebaseDb.collection('students').doc(docId).set({ profilePic: base64Data }, { merge: true })
+                                            .catch(err => console.warn('Failed to upload picture to Firebase:', err));
+                                        // Also save to users collection to be safe
+                                        window.firebaseDb.collection('users').doc(docId).set({ profilePic: base64Data }, { merge: true })
+                                            .catch(err => console.warn('Failed to update users collection:', err));
+                                    } else if (window.FirebaseService && typeof window.FirebaseService.updateStudentData === 'function') {
+                                        window.FirebaseService.updateStudentData(docId, { profilePic: base64Data })
+                                            .catch(err => console.warn('Failed to upload picture to Firebase:', err));
+                                    }
+                                } catch(firebaseErr) {
+                                    console.error('Firebase save error:', firebaseErr);
+                                }
+                                
+                                if (window.showToast) {
+                                    window.showToast('تم تحديث الصورة الشخصية بنجاح!', 'success');
+                                }
+                            };
+                            img.src = event.target.result;
                         };
                         reader.readAsDataURL(file);
                     }
@@ -298,4 +348,3 @@
     </script>
 </body>
 </html>
-

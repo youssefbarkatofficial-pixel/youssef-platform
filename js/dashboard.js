@@ -25,8 +25,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // Load Profile Picture if exists
-    const profilePic = localStorage.getItem(`profilePic_${user.phone}`);
     const avatarImg = document.getElementById('userAvatarImg');
+    let profilePic = localStorage.getItem(`profilePic_${user.phone}`);
+    if (!profilePic && window.FirebaseService && typeof window.FirebaseService.getUser === 'function') {
+        try {
+            const remoteUser = await window.FirebaseService.getUser(user.phone);
+            profilePic = remoteUser?.profilePic;
+            if (profilePic) {
+                localStorage.setItem(`profilePic_${user.phone}`, profilePic);
+            }
+        } catch (e) {
+            console.warn('Failed to fetch profile picture from Firebase', e);
+        }
+    }
     if (profilePic && avatarImg) {
         avatarImg.src = profilePic;
     }

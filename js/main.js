@@ -739,9 +739,9 @@ document.addEventListener('DOMContentLoaded', () => {
       let user = JSON.parse(userStr);
       let dbUser = JSON.parse(localStorage.getItem(`db_${user.phone}`)) || {};
       
-      const profilePic = localStorage.getItem(`profilePic_${user.phone}`);
+      const profilePic = localStorage.getItem(`profilePic_${user.phone}`) || user.profilePic;
       if (profilePic) {
-          const avatarImgs = document.querySelectorAll('.avatar img, #userAvatarImg');
+          const avatarImgs = document.querySelectorAll('.avatar img, #userAvatarImg, .avatar-name img');
           avatarImgs.forEach(img => {
               img.src = profilePic;
               img.style.display = 'block';
