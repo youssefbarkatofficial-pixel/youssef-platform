@@ -45,7 +45,7 @@ async function checkAdminAuth() {
     
     // If not logged in as admin, redirect to admin login
     if (!adminStr) {
-        window.location.href = 'admin-login.html';
+        window.location.href = 'admin-login';
         return null;
     }
 
@@ -57,7 +57,7 @@ async function checkAdminAuth() {
     
     if (!isValidLocal) {
         sessionStorage.removeItem('currentAdmin');
-        window.location.href = 'admin-login.html';
+        window.location.href = 'admin-login';
         return null;
     }
 
@@ -69,7 +69,7 @@ async function checkAdminAuth() {
                 const remoteAdmin = adminDoc.data();
                 if (remoteAdmin.password !== admin.password) {
                     sessionStorage.removeItem('currentAdmin');
-                    window.location.href = 'admin-login.html';
+                    window.location.href = 'admin-login';
                     return null;
                 }
             } else {
