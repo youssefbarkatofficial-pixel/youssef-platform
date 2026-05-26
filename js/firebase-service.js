@@ -169,7 +169,21 @@ window.FirebaseService = (function () {
     async function loginStudent(phone, password) {
         if (!isFirebaseReady()) throw new Error('Firebase not ready');
         await getAuth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-        const email = `${phone}@student.youssefbarakat.com`;
+                const email = ${phone}@student.youssefbarakat.com;
+
+        // Check if student actually exists in Firestore first to give a helpful error
+        try {
+            const querySnapshot = await getDb().collection('students').where('phone', '==', phone).limit(1).get();
+            if (querySnapshot.empty) {
+                const userError = new Error('هذا الحساب غير مسجل على المنصة، اضغط إنشاء حساب جديد للدخول');
+                userError.code = 'custom/user-not-found';
+                throw userError;
+            }
+        } catch(e) {
+            if(e.code === 'custom/user-not-found') throw e;
+            // Ignore other firestore errors and let auth try
+        }
+
         const userCredential = await getAuth().signInWithEmailAndPassword(email, password);
         const uid = userCredential.user.uid;
 
