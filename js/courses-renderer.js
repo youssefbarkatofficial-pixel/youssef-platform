@@ -1,4 +1,4 @@
-// js/courses-renderer.js
+﻿// js/courses-renderer.js
 document.addEventListener('DOMContentLoaded', () => {
     // Helper: load courses and restore separated base64 images from cache
     function loadAdminCourses() {
@@ -20,11 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function seedDefaultCourses() {
         if (!adminCourses || adminCourses.length === 0) {
-            adminCourses = [
-                { id: 'c1', title: 'منهج الجغرافيا كاملاّ - الترم الأول', desc: 'شرح تفصيلي لمنهج الجغرافيا مع خرائط ذهنية وامتحانات أسبوعية وتدريب على النظام الجديد.', price: '150', grade: 'prep3', image: 'https://via.placeholder.com/400x250/071326/D4A64F?text=Geography' },
-                { id: 'c2', title: 'تاريخ مصر القديمة والحضارات', desc: 'فهم عميق للتاريخ بأسلوب قصصي ممتع يجعلك تعيش الأحداث وتستنتج الأسئلة.', price: '200', grade: 'sec1', image: 'https://via.placeholder.com/400x250/071326/58C4DD?text=History' },
-                { id: 'c3', title: 'الدراسات الاجتماعية - تأسيس', desc: 'كورس التأسيس الشامل لطلاب الصف الأول الإعدادي، مدخلك لفهم المادة ببساطة.', price: '100', grade: 'prep1', image: 'https://via.placeholder.com/400x250/0A1E3A/D4A64F?text=Social+Studies' }
-            ];
+            adminCourses = [];
             localStorage.setItem('adminCourses', JSON.stringify(adminCourses));
         }
     }
