@@ -126,7 +126,7 @@ initAdminDB();
 
 document.addEventListener('DOMContentLoaded', () => {
     // If we are on any admin page except login
-    if (window.location.pathname.includes('admin-') && !window.location.pathname.includes('admin-login.html')) {
+    if (window.location.pathname.includes('admin-') && !window.location.pathname.includes('admin-login')) {
         const admin = checkAdminAuth();
         if (admin) {
             // Setup logout button
