@@ -808,7 +808,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         throw new Error('Firebase not configured');
       } catch (error) {
-        console.warn('Firebase failed, using STRICT Local Storage fallback.', error);
+        if (window.FirebaseService && window.FirebaseService.isReady()) {
+            console.warn('Firebase login rejected:', error);
+            showLoginError(error.message || 'بيانات الدخول غير صحيحة أو الحساب غير موجود.');
+            return;
+        }
+        console.warn('Firebase failed/not configured, using STRICT Local Storage fallback.', error);
         const users = JSON.parse(localStorage.getItem('strictUsers') || '[]');
         let user = null;
         if (isEmailInput) {

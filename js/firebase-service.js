@@ -182,19 +182,13 @@ window.FirebaseService = (function () {
 
         let userData;
         if (!doc || !doc.exists) {
-            console.warn('[LOGIN] Student document missing, creating safe repair object');
-            userData = {
-                uid,
-                phone,
-                email,
-                name: 'طالب منصة',
-                grade: 'غير محدد',
-                role: 'student',
-                courses: [],
-                notifications: [],
-                createdAt: new Date().toISOString()
-            };
-            try { await saveStudentProfile(userCredential.user, userData); } catch(e) {}
+            console.warn('[LOGIN] Student document missing, this account was deleted by admin.');
+            // Sign them out of Firebase Auth
+            try { await getAuth().signOut(); } catch(e) {}
+            // Optionally try to delete their Firebase Auth account since their data is gone
+            try { await userCredential.user.delete(); } catch(e) {}
+            
+            throw new Error('تم مسح هذا الحساب نهائياً من قبل الإدارة. يرجى إنشاء حساب جديد.');
         } else {
             userData = doc.data();
         }
