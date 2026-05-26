@@ -668,7 +668,7 @@ document.addEventListener('DOMContentLoaded', () => {
           ytBtn.id = 'ytNavBtn';
           ytBtn.className = 'btn btn-outline';
           ytBtn.style.cssText = 'color: #ff0000; border-color: rgba(255,0,0,0.5); padding: 8px 15px; border-radius: 20px; margin-right: 5px;';
-          ytBtn.innerHTML = '<i class="fab fa-youtube" style="margin-left: 5px;"></i> قناة اليوتيوب';
+          ytBtn.innerHTML = '<i class="fab fa-youtube mobile-icon"></i><span class="desktop-text" style="margin-right: 5px;">قناة اليوتيوب</span>';
           
           const mobileBtn = navActionsContainer.querySelector('.mobile-menu-btn');
           if (mobileBtn) navActionsContainer.insertBefore(ytBtn, mobileBtn);
@@ -765,7 +765,7 @@ document.addEventListener('DOMContentLoaded', () => {
               logoutBtn.id = 'logoutBtn';
               logoutBtn.className = 'btn btn-outline';
               logoutBtn.style.cssText = 'border-color: #e74c3c; color: #e74c3c; padding: 8px 15px; border-radius: 20px; margin-right: 5px;';
-              logoutBtn.innerHTML = 'خروج <i class="fas fa-sign-out-alt" style="margin-right: 5px;"></i>';
+              logoutBtn.innerHTML = '<span class="desktop-text" style="margin-left: 5px;">خروج</span><i class="fas fa-sign-out-alt mobile-icon"></i>';
               
               const mobileBtn = navActions.querySelector('.mobile-menu-btn');
               if (mobileBtn) navActions.insertBefore(logoutBtn, mobileBtn);

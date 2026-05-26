@@ -538,6 +538,9 @@ img, video {
   }
 }
 
+.mobile-icon { display: none; }
+.desktop-text { display: inline-block; }
+
 @media (max-width: 768px) {
   /* Navbar Actions */
   .nav-actions {
@@ -547,11 +550,32 @@ img, video {
     padding: 6px 12px;
     font-size: 0.9rem;
   }
-  /* Hide extra buttons on mobile to keep navbar premium; they will be moved to drawer via JS */
+  /* Show extra buttons on mobile as circular icons */
+  .mobile-icon { display: inline-block; margin: 0; font-size: 1.1rem; }
+  .desktop-text { display: none; }
   .nav-actions .btn:not(.mobile-menu-btn):not(#themeToggle) {
-    display: none !important;
+    display: flex !important;
+    padding: 0 !important;
+    width: 36px !important;
+    height: 36px !important;
+    justify-content: center !important;
+    align-items: center !important;
+    border-radius: 50% !important;
   }
+  .nav-actions .btn .fa-youtube { margin: 0 !important; font-size: 1.2rem !important; }
   
+  /* Reset cloned buttons in sidebar */
+  .mobile-injected-actions .btn {
+    width: 100% !important;
+    border-radius: 99px !important;
+    justify-content: center !important;
+    padding: 12px 24px !important;
+    height: auto !important;
+  }
+  .mobile-injected-actions .btn .mobile-icon { display: inline-block; margin: 0 0 0 8px; }
+  .mobile-injected-actions .btn .desktop-text { display: inline-block; margin: 0 !important; }
+  .mobile-injected-actions .btn .fa-youtube { margin: 0 0 0 8px !important; font-size: 1.2rem !important; }
+
   .logo-circle {
     width: 40px;
     height: 40px;
