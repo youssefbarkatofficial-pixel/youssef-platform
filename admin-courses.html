@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -159,30 +159,10 @@
 
             <h2 style="color: var(--accent-cyan); margin-top: 40px; border-bottom: 2px solid rgba(255,255,255,0.1); padding-bottom: 10px;">إدارة المحتويات</h2>
             
-            <!-- Lectures Section -->
-            <div class="section-header">
-                <h3 style="color: var(--text-primary);"><i class="fas fa-play-circle text-gold mr-2"></i> المحاضرات (والوحدات)</h3>
-                <button class="btn btn-outline" style="padding: 5px 15px;" onclick="addContentItem('lectures')"><i class="fas fa-plus"></i> إضافة محاضرة</button>
-            </div>
-            <div id="fcLecturesList"></div>
-
-            <!-- Homeworks Section -->
-            <div class="section-header">
-                <h3 style="color: var(--text-primary);"><i class="fas fa-tasks text-gold mr-2"></i> الواجبات</h3>
-                <button class="btn btn-outline" style="padding: 5px 15px;" onclick="addContentItem('homeworks')"><i class="fas fa-plus"></i> إضافة واجب</button>
-            </div>
-            <div id="fcHomeworksList"></div>
-
-            <!-- Exams Section -->
-            <div class="section-header">
-                <h3 style="color: var(--text-primary);"><i class="fas fa-clipboard-list text-gold mr-2"></i> الامتحانات</h3>
-                <button class="btn btn-outline" style="padding: 5px 15px;" onclick="addContentItem('exams')"><i class="fas fa-plus"></i> إضافة امتحان</button>
-            </div>
-            <div id="fcExamsList"></div>
-            <!-- Custom Sections -->
-            <div id="fcCustomSectionsContainer"></div>
-            <div style="margin-top: 20px; text-align: center;">
-                <button class="btn btn-outline" style="border-color: var(--accent-cyan); color: var(--accent-cyan);" onclick="addCustomSection()"><i class="fas fa-folder-plus"></i> إضافة قسم مخصص</button>
+            <!-- Dynamic Sections Container -->
+            <div id="fcSectionsContainer"></div>
+            <div style="margin-top: 30px; text-align: center;">
+                <button class="btn btn-outline" style="border-color: var(--accent-cyan); color: var(--accent-cyan); padding: 10px 20px;" onclick="addNewSection()"><i class="fas fa-folder-plus mr-2"></i> إضافة قسم جديد</button>
             </div>
 
             <div style="margin-top: 40px; text-align: left;">
@@ -439,165 +419,289 @@
         };
 
         // Editor Logic
-        function renderContentLists() { renderCustomSections();
-            ['lectures', 'homeworks', 'exams'].forEach(type => {
-                const listEl = document.getElementById(`fc${type.charAt(0).toUpperCase() + type.slice(1)}List`);
-                listEl.innerHTML = '';
+        // --- DYNAMIC SECTIONS REPLACEMENT ---
+
+function migrateCourseToSections(contents) {
+    if (contents && Array.isArray(contents.sections)) {
+        return contents; // already migrated
+    }
+    
+    let sections = [];
+    const c = contents || {};
+    
+    if (c.lectures && c.lectures.length) {
+        let items = [];
+        c.lectures.forEach(lec => {
+            if (lec.children && lec.children.length) {
+                // Flatten children into the section
+                let lecHeader = { id: lec.id || 'lec_'+Date.now(), title: lec.title, type: 'header', thumbnail: lec.thumbnail };
+                items.push(lecHeader);
+                lec.children.forEach(child => items.push(child));
+            } else {
+                items.push(lec);
+            }
+        });
+        sections.push({ id: 'sec_lectures', title: 'المحاضرات', items: items });
+    }
+    
+    if (c.homeworks && c.homeworks.length) {
+        sections.push({ id: 'sec_homeworks', title: 'الواجبات', items: c.homeworks });
+    }
+    
+    if (c.exams && c.exams.length) {
+        sections.push({ id: 'sec_exams', title: 'الامتحانات', items: c.exams });
+    }
+    
+    if (c.customSections && c.customSections.length) {
+        c.customSections.forEach((sec, idx) => {
+            sections.push({ id: 'sec_custom_'+idx, title: sec.name || 'قسم مخصص', items: sec.items || [] });
+        });
+    }
+
+    if (sections.length === 0) {
+        sections.push({ id: 'sec_default', title: 'القسم الأول', items: [] });
+    }
+
+    return { sections: sections };
+}
+
+function renderContentLists() {
+    const container = document.getElementById('fcSectionsContainer');
+    if(!container) return;
+    container.innerHTML = '';
+    
+    if(!tempContents.sections) {
+        tempContents = migrateCourseToSections(tempContents);
+    }
+
+    tempContents.sections.forEach((sec, sIdx) => {
+        const secDiv = document.createElement('div');
+        secDiv.style.cssText = 'background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 20px; margin-bottom: 20px;';
+        
+        secDiv.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; margin-bottom: 15px;">
+                <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
+                    <i class="fas fa-folder-open text-gold" style="font-size: 1.5rem;"></i>
+                    <input type="text" value="${sec.title}" class="form-control" style="font-size: 1.2rem; font-weight: bold; background: transparent; border: none; color: var(--accent-cyan); width: 100%; max-width: 300px;" onchange="updateSectionTitle(${sIdx}, this.value)" placeholder="اسم القسم">
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn btn-outline" style="padding: 5px 12px; font-size: 0.85rem;" onclick="addSectionItem(${sIdx})"><i class="fas fa-plus"></i> إضافة محتوى</button>
+                    <button class="btn btn-outline" style="padding: 5px 12px; font-size: 0.85rem; border-color: #e74c3c; color: #e74c3c;" onclick="removeSection(${sIdx})"><i class="fas fa-trash"></i> حذف القسم</button>
+                </div>
+            </div>
+            <div id="sectionItems_${sIdx}" style="display: flex; flex-direction: column; gap: 10px;"></div>
+        `;
+        
+        container.appendChild(secDiv);
+        
+        const itemsContainer = document.getElementById('sectionItems_' + sIdx);
+        if(!sec.items || sec.items.length === 0) {
+            itemsContainer.innerHTML = '<div style="text-align: center; color: rgba(255,255,255,0.4); padding: 15px; background: rgba(0,0,0,0.2); border-radius: 8px;">لا يوجد محتوى في هذا القسم. اضغط على إضافة محتوى.</div>';
+        } else {
+            sec.items.forEach((item, iIdx) => {
+                const itemDiv = document.createElement('div');
+                itemDiv.style.cssText = 'background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 15px;';
                 
-                if (tempContents[type].length === 0) {
-                    listEl.innerHTML = `<p style="color: rgba(255,255,255,0.4); text-align: center; padding: 10px;">لا يوجد محتوى. اضغط إضافة.</p>`;
-                    return;
+                let icon = 'fa-file';
+                if(item.type === 'video') icon = 'fa-play-circle';
+                else if(item.type === 'pdf') icon = 'fa-file-pdf';
+                else if(item.type === 'task') icon = 'fa-edit';
+                else if(item.type === 'quiz') icon = 'fa-star';
+                else if(item.type === 'header') icon = 'fa-heading';
+
+                // Core fields
+                let html = `
+                    <div style="display: flex; align-items: flex-start; gap: 15px;">
+                        <select onchange="updateItemType(${sIdx}, ${iIdx}, this.value)" style="background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 5px; padding: 5px; width: 120px;">
+                            <option value="video" ${item.type==='video'?'selected':''}>فيديو (درس)</option>
+                            <option value="pdf" ${item.type==='pdf'?'selected':''}>مذكرة (PDF)</option>
+                            <option value="task" ${item.type==='task'?'selected':''}>تدريب / واجب</option>
+                            <option value="quiz" ${item.type==='quiz'?'selected':''}>امتحان شامل</option>
+                            <option value="header" ${item.type==='header'?'selected':''}>عنوان فرعي</option>
+                        </select>
+                        
+                        <div style="flex: 1; display: flex; flex-direction: column; gap: 10px;">
+                            <input type="text" class="form-control" value="${item.title || ''}" onchange="updateItemField(${sIdx}, ${iIdx}, 'title', this.value)" placeholder="عنوان المحتوى (مثال: الحصة الأولى)" style="padding: 8px; border: 1px solid rgba(255,255,255,0.2);">
+                `;
+
+                // URL fields based on type
+                if (item.type === 'video') {
+                    html += `<input type="text" class="form-control" value="${item.videoUrl || item.youtubeUrl || ''}" onchange="updateItemUrl(${sIdx}, ${iIdx}, 'video', this.value)" placeholder="رابط الفيديو (سيرفر أو يوتيوب)" style="padding: 6px; font-size: 0.9rem;">`;
+                    html += `<input type="text" class="form-control" value="${item.thumbnail || ''}" onchange="updateItemField(${sIdx}, ${iIdx}, 'thumbnail', this.value)" placeholder="رابط الصورة المصغرة (اختياري)" style="padding: 6px; font-size: 0.9rem;">`;
+                } else if (item.type === 'pdf') {
+                    html += `<input type="text" class="form-control" value="${item.pdfUrl || ''}" onchange="updateItemUrl(${sIdx}, ${iIdx}, 'pdf', this.value)" placeholder="رابط المذكرة (PDF)" style="padding: 6px; font-size: 0.9rem;">`;
                 }
-                
-                tempContents[type].forEach((item, index) => {
-                    const div = document.createElement('div');
-                    div.className = 'content-item';
-                    
-                    let icon = 'fa-file';
-                    if (item.type === 'video') icon = 'fa-play-circle';
-                    if (item.type === 'pdf') icon = 'fa-file-pdf';
-                    if (type === 'homeworks') icon = 'fa-edit';
-                    if (type === 'exams') icon = 'fa-star';
 
-                    let childrenHtml = '';
-                    if(type === 'lectures' && item.children && item.children.length) {
-                        childrenHtml = `<div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.08); color: rgba(255,255,255,0.75); font-size: 0.95rem;">` +
-                            item.children.map((child, cIdx) => {
-                                const childIcon = child.type === 'video' ? 'fa-play-circle' : child.type === 'pdf' ? 'fa-file-pdf' : child.type === 'training' ? 'fa-flask' : 'fa-file';
-                                let urlInput = '';
-                                if(child.type === 'video') {
-                                    urlInput = `<input type="text" value="${child.videoUrl || child.youtubeUrl || ''}" class="form-control" style="padding:2px 5px; font-size:0.8rem; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); color:#fff; flex:1;" placeholder="رابط الفيديو (أو يوتيوب)" onchange="updateChildUrl(${index}, ${cIdx}, this.value)">`;
-                                } else if(child.type === 'pdf') {
-                                    urlInput = `<input type="text" value="${child.pdfUrl || ''}" class="form-control" style="padding:2px 5px; font-size:0.8rem; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); color:#fff; flex:1;" placeholder="رابط المذكرة (PDF)" onchange="updateChildUrl(${index}, ${cIdx}, this.value)">`;
-                                }
-                                return '<div style="display:flex; flex-direction: column; gap: 5px; margin-bottom: 12px; background: rgba(0,0,0,0.15); padding: 8px; border-radius: 5px;">' +
-                                       '<div style="display:flex; align-items:center; gap: 10px;">' +
-                                       '<i class="fas ' + childIcon + '" style="width: 16px;"></i> <input type="text" value="' + child.title + '" class="form-control" style="padding:2px 5px; font-size:0.9rem; background: transparent; border: 1px solid rgba(255,255,255,0.1); color:#fff; flex:1;" placeholder="العنوان" onchange="updateChildTitle('+index+','+cIdx+',this.value)"> <button onclick="removeChildItem('+index+','+cIdx+')" style="background:transparent; border:none; color:#e74c3c;"><i class="fas fa-trash"></i></button>' +
-                                       '</div>' +
-                                       (urlInput ? '<div style="display:flex; padding-left:26px;">' + urlInput + '</div>' : '') +
-                                       '</div>';
-                            }).join('') +
-                        `</div>`;
-                    }
-
-                    let extraFields = '';
-                    if(type === 'lectures') {
-                        extraFields = `
-                        <div style="margin-top:10px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-                            <input type="text" class="form-control" placeholder="رابط الصورة المصغرة (اختياري)" style="padding: 5px; font-size:0.85rem; flex:1; min-width: 200px;" value="${item.thumbnail || ''}" onchange="updateLectureThumbnail(${index}, this.value)">
-                            <button class="btn btn-outline" style="padding: 5px 10px; font-size: 0.8rem; color: #3498db; border-color: #3498db;" onclick="addChildToLecture(${index}, 'video')"><i class="fas fa-video mr-1"></i> إضافة فيديو</button>
-                            <button class="btn btn-outline" style="padding: 5px 10px; font-size: 0.8rem; color: #2ecc71; border-color: #2ecc71;" onclick="addChildToLecture(${index}, 'pdf')"><i class="fas fa-file-pdf mr-1"></i> إضافة مذكرة</button>
-                            <button class="btn btn-outline" style="padding: 5px 10px; font-size: 0.8rem; color: var(--accent-cyan); border-color: var(--accent-cyan);" onclick="addChildToLecture(${index}, 'training')"><i class="fas fa-flask mr-1"></i> إضافة تدريب</button>
-                        </div>
-                        `;
-                    }
-
-                    div.innerHTML = `
-                        <div style="display: flex; align-items: flex-start; gap: 15px; flex: 1; flex-wrap: wrap;">
-                            <i class="fas ${icon} text-gold" style="margin-top: 10px;"></i>
-                            <div style="flex:1; min-width:0;">
-                                <input type="text" class="form-control" style="padding: 5px 10px; width: 100%;" value="${item.title}" onchange="updateContentTitle('${type}', ${index}, this.value)">
-                                ${extraFields}
-                                ${childrenHtml}
+                // Advanced LMS fields (Availability, Deadline, Depends On)
+                if (item.type !== 'header') {
+                    html += `
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 5px; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 5px;">
+                            <div style="flex: 1; min-width: 150px;">
+                                <label style="font-size: 0.8rem; color: #aaa; margin-bottom: 2px; display: block;">تاريخ الإتاحة (لفتح الدرس)</label>
+                                <input type="datetime-local" class="form-control" value="${item.availabilityDate || ''}" onchange="updateItemField(${sIdx}, ${iIdx}, 'availabilityDate', this.value)" style="padding: 4px; font-size: 0.8rem;">
+                            </div>
+                            <div style="flex: 1; min-width: 150px;">
+                                <label style="font-size: 0.8rem; color: #e74c3c; margin-bottom: 2px; display: block;">الموعد النهائي (الديدلاين)</label>
+                                <input type="datetime-local" class="form-control" value="${item.deadlineDate || ''}" onchange="updateItemField(${sIdx}, ${iIdx}, 'deadlineDate', this.value)" style="padding: 4px; font-size: 0.8rem;">
+                            </div>
+                            <div style="flex: 1; min-width: 100px;">
+                                <label style="font-size: 0.8rem; color: #f39c12; margin-bottom: 2px; display: block;">الخصم عند التأخير (%)</label>
+                                <input type="number" min="0" max="100" class="form-control" value="${item.penalty || 0}" onchange="updateItemField(${sIdx}, ${iIdx}, 'penalty', this.value)" style="padding: 4px; font-size: 0.8rem;" placeholder="مثال: 10">
+                            </div>
+                            <div style="flex: 1; min-width: 150px;">
+                                <label style="font-size: 0.8rem; color: #3498db; margin-bottom: 2px; display: block;">يعتمد على (مقفل حتى يُنجز)</label>
+                                <select class="form-control" onchange="updateItemField(${sIdx}, ${iIdx}, 'dependsOn', this.value)" style="padding: 4px; font-size: 0.8rem;">
+                                    <option value="">-- لا يوجد (متاح فوراً) --</option>
+                                    ${generateDependsOnOptions(sIdx, iIdx, item.dependsOn)}
+                                </select>
                             </div>
                         </div>
-                        <div class="content-item-actions">
-                            <button onclick="removeContentItem('${type}', ${index})" title="حذف"><i class="fas fa-trash"></i></button>
+                    `;
+                }
+
+                // Strict Mode & Timer for Exams/Tasks
+                if (item.type === 'quiz' || item.type === 'task') {
+                    html += `
+                        <div style="display: flex; gap: 15px; margin-top: 5px; background: rgba(46, 204, 113, 0.1); padding: 10px; border-radius: 5px; border: 1px solid rgba(46, 204, 113, 0.3);">
+                            <div style="flex: 1; display: flex; align-items: center; gap: 8px;">
+                                <input type="checkbox" id="strictMode_${sIdx}_${iIdx}" onchange="updateItemField(${sIdx}, ${iIdx}, 'strictMode', this.checked)" ${item.strictMode ? 'checked' : ''}>
+                                <label for="strictMode_${sIdx}_${iIdx}" style="margin:0; font-size: 0.9rem; color: #2ecc71; cursor: pointer;">تفعيل الوضع الصارم (منع الخروج من نافذة الامتحان)</label>
+                            </div>
+                            <div style="flex: 1; display: flex; align-items: center; gap: 8px;">
+                                <label style="font-size: 0.9rem; color: #fff;">مدة الامتحان (بالدقائق):</label>
+                                <input type="number" min="0" class="form-control" value="${item.duration || 0}" onchange="updateItemField(${sIdx}, ${iIdx}, 'duration', this.value)" style="padding: 4px; font-size: 0.9rem; width: 80px;" placeholder="0 = غير محدد">
+                            </div>
                         </div>
                     `;
-                    listEl.appendChild(div);
-                });
+                }
+
+                html += `
+                        </div>
+                        <button class="btn btn-outline" style="padding: 6px 10px; border-color: #e74c3c; color: #e74c3c;" onclick="removeItem(${sIdx}, ${iIdx})" title="حذف المحتوى"><i class="fas fa-trash"></i></button>
+                    </div>
+                `;
+                
+                itemDiv.innerHTML = html;
+                itemsContainer.appendChild(itemDiv);
             });
         }
+    });
+}
 
-        window.updateChildTitle = function(lecIdx, childIdx, value) {
-            if(tempContents.lectures[lecIdx].children) {
-                tempContents.lectures[lecIdx].children[childIdx].title = value;
-                markUnsaved();
-            }
-        };
-
-        window.updateChildUrl = function(lecIdx, childIdx, value) {
-            if(tempContents.lectures[lecIdx].children) {
-                const child = tempContents.lectures[lecIdx].children[childIdx];
-                if (child.type === 'video') {
-                    if(value.includes('youtube') || value.includes('youtu.be')) child.youtubeUrl = value;
-                    else child.videoUrl = value;
-                } else if (child.type === 'pdf') {
-                    child.pdfUrl = value;
-                }
-                markUnsaved();
-            }
-        };
-
-        window.removeChildItem = function(lecIdx, childIdx) {
-            if(confirm('هل أنت متأكد من حذف هذا العنصر من المحاضرة؟')) {
-                tempContents.lectures[lecIdx].children.splice(childIdx, 1);
-                markUnsaved();
-                renderContentLists();
-            }
-        };
-
-        window.updateLectureThumbnail = function(lecIdx, value) {
-            tempContents.lectures[lecIdx].thumbnail = value;
-            markUnsaved();
-        };
-
-        window.addChildToLecture = function(lecIdx, type) {
-            if(!tempContents.lectures[lecIdx].children) tempContents.lectures[lecIdx].children = [];
-            let title = type === 'video' ? 'فيديو جديد' : (type === 'pdf' ? 'مذكرة جديدة' : 'تدريب جديد');
-            let childId = type.charAt(0) + '_' + Date.now();
-            tempContents.lectures[lecIdx].children.push({ title: title, type: type, id: childId });
-            markUnsaved();
-            renderContentLists();
-        };
-
-        window.updateContentTitle = function(type, index, value) {
-            tempContents[type][index].title = value;
-            markUnsaved();
-        };
-
-        window.addContentItem = function(type) {
-            let defType = 'video';
-            if (type === 'homeworks') defType = 'task';
-            if (type === 'exams') defType = 'quiz';
-            
-            tempContents[type].push({ title: 'محتوى جديد', type: defType });
-            markUnsaved();
-            renderContentLists();
-        };
-
-        window.removeContentItem = function(type, index) {
-            if(confirm('هل أنت متأكد من حذف هذا العنصر؟ (يجب حفظ التعديلات لتأكيد الحذف)')) {
-                tempContents[type].splice(index, 1);
-                markUnsaved();
-                renderContentLists();
-            }
-        };
-
-        window.openCourseEditor = function(id = null) {
-            hasUnsavedChanges = false;
-            if (id) {
-                const c = adminCourses.find(x => x.id === id);
-                currentEditingCourse = c;
-                document.getElementById('editorTitle').textContent = 'تعديل الكورس: ' + c.title;
-                document.getElementById('fcId').value = c.id;
-                document.getElementById('fcTitle').value = c.title;
-                document.getElementById('fcPrice').value = c.price;
-                document.getElementById('fcDesc').value = c.desc;
-                document.getElementById('fcImage').value = c.image || 'https://via.placeholder.com/400x250/071326/D4A64F?text=Course';
-                document.getElementById('fcImagePreview').src = c.image || 'https://via.placeholder.com/400x250/071326/D4A64F?text=Course';
+function generateDependsOnOptions(currentSIdx, currentIIdx, selectedVal) {
+    let optionsHtml = '';
+    tempContents.sections.forEach((sec, sIdx) => {
+        if(sec.items) {
+            sec.items.forEach((item, iIdx) => {
+                // Cannot depend on itself or items after it (to avoid circular deps)
+                if(sIdx > currentSIdx || (sIdx === currentSIdx && iIdx >= currentIIdx)) return;
+                if(item.type === 'header') return;
                 
-                // load contents or mock if none
-                tempContents = c.contents || { lectures: [], homeworks: [], exams: [], trainings: [], customSections: [] };
-                
-                // Migrating old flat contents to categorized contents for backward compatibility
-                if (Array.isArray(tempContents)) {
-                    let old = tempContents;
-                    tempContents = { lectures: old, homeworks: [], exams: [], trainings: [], customSections: [] };
-                }
-            } else {
-                currentEditingCourse = null;
+                const isSelected = (item.id === selectedVal) ? 'selected' : '';
+                optionsHtml += `<option value="${item.id}" ${isSelected}>${item.title || 'بدون اسم'}</option>`;
+            });
+        }
+    });
+    return optionsHtml;
+}
+
+window.addNewSection = function() {
+    if(!tempContents.sections) tempContents.sections = [];
+    tempContents.sections.push({ id: 'sec_' + Date.now(), title: 'قسم جديد', items: [] });
+    markUnsaved();
+    renderContentLists();
+};
+
+window.removeSection = function(sIdx) {
+    if(confirm('هل أنت متأكد من حذف هذا القسم بالكامل بما يحتويه؟')) {
+        tempContents.sections.splice(sIdx, 1);
+        markUnsaved();
+        renderContentLists();
+    }
+};
+
+window.updateSectionTitle = function(sIdx, val) {
+    tempContents.sections[sIdx].title = val;
+    markUnsaved();
+};
+
+window.addSectionItem = function(sIdx) {
+    if(!tempContents.sections[sIdx].items) tempContents.sections[sIdx].items = [];
+    tempContents.sections[sIdx].items.push({
+        id: 'item_' + Date.now(),
+        title: 'محتوى جديد',
+        type: 'video'
+    });
+    markUnsaved();
+    renderContentLists();
+};
+
+window.openCourseEditor = function(id = null) {
+    hasUnsavedChanges = false;
+    if (id) {
+        const c = adminCourses.find(x => x.id === id);
+        currentEditingCourse = c;
+        document.getElementById('editorTitle').textContent = 'تعديل الكورس: ' + c.title;
+        document.getElementById('fcId').value = c.id;
+        document.getElementById('fcTitle').value = c.title;
+        document.getElementById('fcPrice').value = c.price;
+        document.getElementById('fcDesc').value = c.desc;
+        document.getElementById('fcImage').value = c.image || 'https://via.placeholder.com/400x250/071326/D4A64F?text=Course';
+        document.getElementById('fcImagePreview').src = c.image || 'https://via.placeholder.com/400x250/071326/D4A64F?text=Course';
+        
+        tempContents = migrateCourseToSections(c.contents);
+    } else {
+        currentEditingCourse = null;
+        document.getElementById('editorTitle').textContent = 'إضافة كورس جديد';
+        document.getElementById('fcId').value = '';
+        document.getElementById('fcTitle').value = '';
+        document.getElementById('fcPrice').value = '';
+        document.getElementById('fcIsFree').checked = false;
+        document.getElementById('fcDesc').value = '';
+        document.getElementById('fcImage').value = 'https://via.placeholder.com/400x250/071326/D4A64F?text=Course';
+        document.getElementById('fcImagePreview').src = 'https://via.placeholder.com/400x250/071326/D4A64F?text=Course';
+        tempContents = { sections: [] };
+    }
+    
+    renderContentLists();
+    document.getElementById('fullCourseEditor').style.display = 'block';
+};
+
+window.removeItem = function(sIdx, iIdx) {
+    if(confirm('هل أنت متأكد من حذف هذا العنصر؟')) {
+        tempContents.sections[sIdx].items.splice(iIdx, 1);
+        markUnsaved();
+        renderContentLists();
+    }
+};
+
+window.updateItemField = function(sIdx, iIdx, field, val) {
+    tempContents.sections[sIdx].items[iIdx][field] = val;
+    markUnsaved();
+};
+
+window.updateItemType = function(sIdx, iIdx, type) {
+    tempContents.sections[sIdx].items[iIdx].type = type;
+    markUnsaved();
+    renderContentLists();
+};
+
+window.updateItemUrl = function(sIdx, iIdx, type, val) {
+    const item = tempContents.sections[sIdx].items[iIdx];
+    if(type === 'video') {
+        if(val.includes('youtube') || val.includes('youtu.be')) {
+            item.youtubeUrl = val;
+            item.videoUrl = '';
+        } else {
+            item.videoUrl = val;
+            item.youtubeUrl = '';
+        }
+    } else if (type === 'pdf') {
+        item.pdfUrl = val;
+    }
+    markUnsaved();
+};
+
                 document.getElementById('editorTitle').textContent = 'إضافة كورس جديد';
                 document.getElementById('fcId').value = '';
                 document.getElementById('fcTitle').value = '';
