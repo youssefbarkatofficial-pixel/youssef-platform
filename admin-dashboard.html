@@ -256,8 +256,44 @@
             document.getElementById('incomeResetModal').style.display = 'flex';
         };
 
+        window.requireAdminPassword = function() {
+            return new Promise((resolve) => {
+                const overlay = document.createElement('div');
+                overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:9999;display:flex;justify-content:center;align-items:center;backdrop-filter:blur(5px);';
+                
+                const modal = document.createElement('div');
+                modal.style.cssText = 'background:var(--primary-navy, #071326);padding:30px;border-radius:15px;border:1px solid var(--royal-gold, #d4af37);text-align:center;max-width:350px;width:90%;box-shadow:0 0 20px rgba(212,175,55,0.2);';
+                
+                modal.innerHTML = `
+                    <h3 style="color:var(--royal-gold, #d4af37);margin-bottom:15px;"><i class="fas fa-lock"></i> تأكيد الأمان</h3>
+                    <p style="color:#fff;margin-bottom:20px;font-size:0.95rem;">يرجى إدخال كلمة مرور المالك للمتابعة:</p>
+                    <input type="password" id="tempAdminPwd" class="form-control" style="width:100%;margin-bottom:20px;text-align:center;letter-spacing:5px;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.1);color:#fff;" placeholder="••••••••">
+                    <div style="display:flex;gap:10px;justify-content:center;">
+                        <button id="btnPwdCancel" class="btn btn-outline" style="flex:1;border-color:#e74c3c;color:#e74c3c;">إلغاء</button>
+                        <button id="btnPwdConfirm" class="btn btn-gold" style="flex:1;">تأكيد</button>
+                    </div>
+                `;
+                
+                overlay.appendChild(modal);
+                document.body.appendChild(overlay);
+                
+                const input = document.getElementById('tempAdminPwd');
+                input.focus();
+                
+                const close = (val) => {
+                    document.body.removeChild(overlay);
+                    resolve(val);
+                };
+                
+                document.getElementById('btnPwdCancel').onclick = () => close(null);
+                document.getElementById('btnPwdConfirm').onclick = () => close(input.value);
+                input.onkeypress = (e) => { if(e.key === 'Enter') close(input.value); };
+            });
+        };
+
         window.executeIncomeReset = async function(type) {
-            const pwd = prompt("يرجى إدخال كلمة المرور للمالك للتصفير:");
+            const pwd = await window.requireAdminPassword();
+            if (pwd === null) return; // Cancelled
             if (pwd !== "My@36_172001") {
                 alert("كلمة المرور غير صحيحة!");
                 return;
