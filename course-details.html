@@ -336,21 +336,6 @@
             document.getElementById('cdPrice').textContent = course.price + ' ج.م';
             document.getElementById('cdGrade').textContent = grades[course.grade] || course.grade;
 
-            let userStr = sessionStorage.getItem('currentStudent');
-            let isOwned = false;
-            let isPending = false;
-            
-            if (userStr) {
-                let user = JSON.parse(userStr);
-                let dbUser = JSON.parse(localStorage.getItem(`db_${user.phone}`)) || { courses: [] };
-                isOwned = dbUser.courses && dbUser.courses.includes(courseId);
-                
-                let paymentRequests = JSON.parse(localStorage.getItem('paymentRequests')) || [];
-                let existingReq = paymentRequests.find(req => req.courseId === courseId && req.userId === user.phone);
-                if (existingReq && existingReq.status === 'pending') {
-                    isPending = true;
-                }
-            }
 
                         const actionContainer = document.getElementById('cdActionBtnContainer');
             
