@@ -366,6 +366,17 @@ document.addEventListener('DOMContentLoaded', () => {
                         <label>اسم الكورس الجديد</label>
                         <input type="text" id="quickCourseTitle" class="form-control" placeholder="مثال: المراجعة النهائية">
                     </div>
+                    <div class="form-group" style="margin-top: 15px;">
+                        <label>الصف الدراسي</label>
+                        <select id="quickCourseGrade" class="form-control" style="background: rgba(255,255,255,0.05); color: var(--text-primary);">
+                            <option value="prep1" style="color:black;">الصف الأول الإعدادي</option>
+                            <option value="prep2" style="color:black;">الصف الثاني الإعدادي</option>
+                            <option value="prep3" style="color:black;">الصف الثالث الإعدادي</option>
+                            <option value="sec1" style="color:black;">الصف الأول الثانوي</option>
+                            <option value="sec2" style="color:black;">الصف الثاني الثانوي</option>
+                            <option value="sec3" style="color:black;">الصف الثالث الثانوي</option>
+                        </select>
+                    </div>
                     <div class="form-group">
                         <label>صورة الكورس</label>
                         <input type="file" id="quickCourseImageFile" accept="image/*" class="form-control" style="background: rgba(255,255,255,0.05); cursor: pointer;">
@@ -468,7 +479,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     title: title,
                     desc: 'كورس جديد تمت إضافته سريعاً',
                     price: '0',
-                    grade: 'prep1',
+                    grade: document.getElementById('quickCourseGrade') ? document.getElementById('quickCourseGrade').value : 'prep1',
                     image: imageStr
                 };
                 adminCourses.push(newCourse);

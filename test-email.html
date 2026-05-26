@@ -1,0 +1,18 @@
+﻿<!DOCTYPE html>
+<html>
+<body>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script>
+const firebaseConfig = {
+    apiKey: "AIzaSyCT05MbiNBz15USSAPzqx1xxdIiDxykvHs",
+    authDomain: "youssefbarakatplatform-8abff.firebaseapp.com",
+    projectId: "youssefbarakatplatform-8abff"
+};
+firebase.initializeApp(firebaseConfig);
+firebase.auth().fetchSignInMethodsForEmail("fake999@student.youssefbarakat.com")
+  .then(methods => console.log("Methods:", methods))
+  .catch(err => console.error("FetchError:", err.code));
+</script>
+</body>
+</html>

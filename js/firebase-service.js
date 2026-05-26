@@ -1,4 +1,4 @@
-﻿/**
+/**
  * ==========================================
  * Firebase Service Layer - يوسف بركات منصة
  * ==========================================
@@ -169,7 +169,20 @@ window.FirebaseService = (function () {
     async function loginStudent(phone, password) {
         if (!isFirebaseReady()) throw new Error('Firebase not ready');
         await getAuth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-                const email = ${phone}@student.youssefbarakat.com;
+        const email = `${phone}@student.youssefbarakat.com`;
+
+        // Check if email exists in Firebase Auth to give a helpful "user not found" error
+        try {
+            const methods = await getAuth().fetchSignInMethodsForEmail(email);
+            if (methods.length === 0) {
+                const userError = new Error('هذا الحساب غير مسجل على المنصة، اضغط إنشاء حساب جديد للدخول');
+                userError.code = 'custom/user-not-found';
+                throw userError;
+            }
+        } catch(e) {
+            if (e.code === 'custom/user-not-found') throw e;
+            // Ignore if fetchSignInMethodsForEmail fails and let it proceed
+        }
 
         // Check if student actually exists in Firestore first to give a helpful error
         try {
