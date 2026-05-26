@@ -191,7 +191,7 @@
 }
 .pf-chat-input input{
   width:100%;
-  padding:14px 56px 14px 16px;
+  padding:14px 16px 14px 56px;
   border-radius:999px;
   border:1px solid rgba(255,255,255,0.12);
   background: rgba(255,255,255,0.08);
@@ -206,7 +206,7 @@
 }
 .pf-chat-input button{
   position:absolute;
-  right:10px;
+  left:10px;
   top:50%;
   transform: translateY(-50%);
   width:42px;
