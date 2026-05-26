@@ -174,7 +174,9 @@
                 window.firebaseDb.collection('students').onSnapshot(snapshot => {
                     const newUsers = [];
                     snapshot.forEach(doc => {
-                        newUsers.push({ id: doc.id, ...doc.data() });
+                        const data = doc.data();
+                        if (!data.phone || data.phone === 'undefined' || !data.name || data.name === 'undefined') return;
+                        newUsers.push({ id: doc.id, ...data });
                     });
                     newUsers.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
                     users = newUsers;

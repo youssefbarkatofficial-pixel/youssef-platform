@@ -317,7 +317,7 @@
                                 
                                 try {
                                     // Save to Firebase
-                                    const docId = user.phone || user.id || user.uid;
+                                    const docId = user.uid || user.id || user.phone;
                                     if (!docId) throw new Error("No valid user ID to save profilePic");
                                     
                                     if (window.firebaseDb) {
