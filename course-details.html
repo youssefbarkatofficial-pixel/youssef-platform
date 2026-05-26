@@ -682,12 +682,19 @@
                                 }
                             }
                             
-                            if (item.availabilityDate) {
-                                const availTime = new Date(item.availabilityDate).getTime();
+                            let availStr = item.availabilityDate || item.availableFrom;
+                            if (availStr) {
+                                const availTime = new Date(availStr).getTime();
                                 if (Date.now() < availTime) {
                                     isLocked = true;
-                                    const dateStr = new Date(item.availabilityDate).toLocaleDateString('ar-EG');
+                                    const dateStr = new Date(availStr).toLocaleDateString('ar-EG');
                                     lockReason = `سيكون متاحاً يوم ${dateStr}`;
+                                    // If user is not admin and requested to hide it completely (since some users expect scheduled items to be hidden from students):
+                                    if(!isAdmin && !isOwned) {
+                                        // For now we lock it, but if they want it completely invisible we can return; 
+                                        // Returning here prevents it from rendering in the list.
+                                        return; 
+                                    }
                                 }
                             }
 
