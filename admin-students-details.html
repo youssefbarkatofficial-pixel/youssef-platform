@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إحصائيات الطلاب التفصيلية - لوحة الإدارة</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <style>
+        .filter-panel { background: var(--bg-secondary); padding: 20px; border-radius: 12px; border: 1px solid var(--border-color); margin-bottom: 25px; display: flex; gap: 15px; align-items: flex-end; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px; }
+        .stat-card { background: rgba(255,255,255,0.05); padding: 20px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); text-align: center; }
+        .stat-card h3 { color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 10px; }
+        .stat-card .val { color: var(--royal-gold); font-size: 1.8rem; font-weight: bold; }
+        .detail-badge { padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; margin-left: 5px; }
+        .badge-green { background: rgba(46, 204, 113, 0.2); color: #2ecc71; }
+        .badge-red { background: rgba(231, 76, 60, 0.2); color: #e74c3c; }
+        .badge-blue { background: rgba(52, 152, 219, 0.2); color: #3498db; }
+    </style>
+</head>
+<body>
+    <div class="bg-effects"></div>
+
+    <header class="navbar glass-panel" style="border-bottom-color: var(--royal-gold);">
+        <a href="index.html" class="nav-brand">
+            <div class="logo-circle" style="color: #fff; background: var(--royal-gold);">ي</div>
+            <span class="nav-brand-text text-gold">لوحة الإدارة - يوسف بركات</span>
+        </a>
+        <div class="nav-actions">
+            <a href="#" id="logoutBtn" class="btn btn-outline" style="border-color: #e74c3c; color: #e74c3c; padding: 8px 15px; border-radius: 20px;">خروج <i class="fas fa-sign-out-alt"></i></a>
+        </div>
+    </header>
+
+    <div class="dashboard-layout">
+        <aside class="sidebar" id="sidebar" style="border-left-color: var(--royal-gold);">
+            <ul class="sidebar-nav" style="margin-top: 20px;">
+                <li><a href="admin-dashboard.html"><i class="fas fa-chart-line"></i> الإحصائيات العامة</a></li>
+                <li><a href="admin-students.html"><i class="fas fa-users"></i> إدارة الطلاب</a></li>
+                <li><a href="admin-students-details.html" class="active"><i class="fas fa-user-graduate"></i> إحصائيات الطلاب (تفصيلي)</a></li>
+                <li><a href="admin-courses.html"><i class="fas fa-book-open"></i> إدارة الكورسات</a></li>
+                <li><a href="admin-upload.html"><i class="fas fa-bolt"></i> الرفع السريع</a></li>
+                <li><a href="admin-payments.html"><i class="fas fa-money-check-alt"></i> مراجعة المدفوعات</a></li>
+                <li><a href="admin-compass.html"><i class="fas fa-compass"></i> بوت البوصلة</a></li>
+                <li><a href="admin-bot-monitor.html"><i class="fas fa-eye"></i> مراقبة شات البوصلة</a></li>
+                <li><a href="admin-notifications.html"><i class="fas fa-bell"></i> إرسال الإشعارات</a></li>
+                <li><a href="admin-settings.html"><i class="fas fa-cog"></i> إعدادات المنصة</a></li>
+            </ul>
+        </aside>
+
+        <main class="main-content">
+            <div class="page-header">
+                <h1 class="page-title"><i class="fas fa-user-graduate mr-2"></i> إحصائيات الطلاب التفصيلية بالصفوف</h1>
+            </div>
+
+            <div class="filter-panel">
+                <div style="flex:1;">
+                    <label style="display:block; margin-bottom:8px; color:var(--text-secondary);">اختر الصف الدراسي لمعاينة بياناته التفصيلية</label>
+                    <select id="gradeFilter" class="form-control" style="font-size:1.1rem; padding:10px;">
+                        <option value="">-- اختر الصف --</option>
+                        <option value="prep1">الصف الأول الإعدادي</option>
+                        <option value="prep2">الصف الثاني الإعدادي</option>
+                        <option value="prep3">الصف الثالث الإعدادي</option>
+                        <option value="sec1">الصف الأول الثانوي</option>
+                    </select>
+                </div>
+                <div>
+                    <button class="btn btn-gold" id="btnExportCSV" style="display:none;"><i class="fas fa-download mr-2"></i> تحميل السجل (CSV)</button>
+                </div>
+            </div>
+
+            <div class="stats-grid" id="gradeStatsGrid" style="display:none;">
+                <div class="stat-card">
+                    <h3>إجمالي الطلاب</h3>
+                    <div class="val" id="stTotal">0</div>
+                </div>
+                <div class="stat-card" style="border-color: rgba(46, 204, 113, 0.4);">
+                    <h3>الطلاب المتفاعلين (نشط مؤخراً)</h3>
+                    <div class="val" id="stActive" style="color: #2ecc71;">0</div>
+                </div>
+                <div class="stat-card" style="border-color: rgba(231, 76, 60, 0.4);">
+                    <h3>الغياب العالي (احتمالية انقطاع)</h3>
+                    <div class="val" id="stAbsent" style="color: #e74c3c;">0</div>
+                </div>
+                <div class="stat-card" style="border-color: rgba(52, 152, 219, 0.4);">
+                    <h3>متوسط الاشتراكات</h3>
+                    <div class="val" id="stAvgCourses" style="color: #3498db;">0</div>
+                </div>
+            </div>
+
+            <div class="glass-panel dash-panel" id="studentsListContainer" style="display:none;">
+                <h3 style="color: var(--accent-cyan); margin-bottom: 20px;"><i class="fas fa-list mr-2"></i> قائمة طلاب الصف المحدد</h3>
+                <div style="overflow-x: auto;">
+                    <table class="admin-table" id="detailsTable">
+                        <thead>
+                            <tr>
+                                <th>اسم الطالب</th>
+                                <th>رقم الهاتف</th>
+                                <th>تاريخ الانضمام</th>
+                                <th>الكورسات المشترك بها</th>
+                                <th>تقييم التفاعل</th>
+                                <th>آخر نشاط</th>
+                            </tr>
+                        </thead>
+                        <tbody id="detailsTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/firebase-service.js"></script>
+    <script src="js/admin-students-details.js"></script>
+</body>
+</html>

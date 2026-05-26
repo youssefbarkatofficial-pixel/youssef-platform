@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -447,9 +447,15 @@
             else if (isOwned) {
                 actionContainer.innerHTML = `<button class="btn btn-green"><i class="fas fa-check-circle mr-2"></i> المحتوى مفتوح لك</button>`;
             } else if (isPending) {
-                actionContainer.innerHTML = `<button class="btn btn-outline" style="color:var(--accent-orange); border-color:var(--accent-orange);" onclick="showPendingMessageDetails()"><i class="fas fa-clock mr-2"></i> طلبك قيد المراجعة</button>`;
+                actionContainer.innerHTML = <button class="btn btn-outline" style="color:var(--accent-orange); border-color:var(--accent-orange);" onclick="showPendingMessageDetails()"><i class="fas fa-clock mr-2"></i> طلبك قيد المراجعة</button>;
+            } else if (course.isFree || course.price == '0' || course.price === 0) {
+                if (userStr) {
+                    actionContainer.innerHTML = <button class="btn btn-green" onclick="enrollFreeCourse('+course.id+')"><i class="fas fa-door-open mr-2"></i> دخول الكورس مجاناً</button>;
+                } else {
+                    actionContainer.innerHTML = <button class="btn btn-outline" style="color:#f1c40f; border-color:#f1c40f;" onclick="window.location.href='index.html#login'"><i class="fas fa-user-lock mr-2"></i> يجب تسجيل الدخول للاستمتاع بالكورس المجاني</button>;
+                }
             } else {
-                actionContainer.innerHTML = `<button class="btn btn-gold" onclick="openPaymentModalDetails('${course.id}')"><i class="fas fa-lock-open mr-2"></i> الاشتراك لفتح المحتوى</button>`;
+                actionContainer.innerHTML = <button class="btn btn-gold" onclick="openPaymentModalDetails('+course.id+')"><i class="fas fa-lock-open mr-2"></i> الاشتراك لفتح المحتوى</button>;
             }
 
             const rawContents = course.contents || {};
@@ -1166,6 +1172,34 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
     <script src="js/firebase-config.js"></script>
     <script src="js/firebase-service.js"></script>
+<script>
+window.enrollFreeCourse = async function(courseId) {
+    if(!sessionStorage.getItem('currentStudent')) return;
+    const user = JSON.parse(sessionStorage.getItem('currentStudent'));
+    
+    // Add to local DB
+    let dbUser = JSON.parse(localStorage.getItem('db_' + user.phone)) || {courses:[]};
+    if (window.FirebaseService && typeof window.FirebaseService.getUser === 'function') {
+        const remoteUser = await window.FirebaseService.getUser(user.phone);
+        if(remoteUser) dbUser = remoteUser;
+    }
+    
+    if(!dbUser.courses) dbUser.courses = [];
+    if(!dbUser.courses.includes(courseId)) {
+        dbUser.courses.push(courseId);
+        localStorage.setItem('db_' + user.phone, JSON.stringify(dbUser));
+        
+        if (window.FirebaseService && typeof window.FirebaseService.updateStudentData === 'function') {
+            await window.FirebaseService.updateStudentData(user.phone, { courses: dbUser.courses });
+        }
+    }
+    
+    if(window.showToast) window.showToast('مرحباً بك في الكورس المجاني!', 'success');
+    setTimeout(() => {
+        window.location.reload();
+    }, 1000);
+};
+</script>
 </body>
 </html>
 
