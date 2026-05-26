@@ -32,7 +32,9 @@
                 const snap = await window.FirebaseService.getDb().collection('students').get();
                 let remoteUsers = [];
                 snap.forEach(doc => {
-                    remoteUsers.push(doc.data());
+                    const data = doc.data();
+                    if (!data.phone || data.phone === 'undefined' || !data.name || data.name === 'undefined') return;
+                    remoteUsers.push(data);
                 });
                 if(remoteUsers.length > 0) {
                     cachedUsers = remoteUsers;
@@ -68,7 +70,17 @@
             return;
         }
 
-        const filtered = allStudents.filter(s => s.grade === gradeId);
+        const gradesMap = {
+            'prep1': ['prep1', 'أولى إعدادي', 'الصف الأول الإعدادي', 'الصف الاول الاعدادي', 'اولى اعدادي', 'الاول الاعدادي', 'الصف الاول الإعدادي'],
+            'prep2': ['prep2', 'تانية إعدادي', 'ثانية إعدادي', 'الصف الثاني الإعدادي', 'الصف الثاني الاعدادي', 'الثاني الاعدادي', 'الصف الثانى الإعدادى'],
+            'prep3': ['prep3', 'تالتة إعدادي', 'ثالثة إعدادي', 'الصف الثالث الإعدادي', 'الصف الثالث الاعدادي', 'الثالث الاعدادي', 'الصف الثالث الإعدادى'],
+            'sec1': ['sec1', 'أولى ثانوي', 'اولى ثانوي', 'الصف الأول الثانوي', 'الصف الاول الثانوي', 'الاول الثانوي', 'الصف الاول الثانوى']
+        };
+        const filtered = allStudents.filter(s => {
+            const sg = (s.grade || '').trim();
+            const gmap = gradesMap[gradeId] || [gradeId];
+            return gmap.includes(sg);
+        });
         
         let activeCount = 0;
         let absentCount = 0;
@@ -133,7 +145,17 @@
     btnExportCSV.addEventListener('click', () => {
         const gradeId = gradeFilter.value;
         if(!gradeId) return;
-        const filtered = allStudents.filter(s => s.grade === gradeId);
+        const gradesMap = {
+            'prep1': ['prep1', 'أولى إعدادي', 'الصف الأول الإعدادي', 'الصف الاول الاعدادي', 'اولى اعدادي', 'الاول الاعدادي', 'الصف الاول الإعدادي'],
+            'prep2': ['prep2', 'تانية إعدادي', 'ثانية إعدادي', 'الصف الثاني الإعدادي', 'الصف الثاني الاعدادي', 'الثاني الاعدادي', 'الصف الثانى الإعدادى'],
+            'prep3': ['prep3', 'تالتة إعدادي', 'ثالثة إعدادي', 'الصف الثالث الإعدادي', 'الصف الثالث الاعدادي', 'الثالث الاعدادي', 'الصف الثالث الإعدادى'],
+            'sec1': ['sec1', 'أولى ثانوي', 'اولى ثانوي', 'الصف الأول الثانوي', 'الصف الاول الثانوي', 'الاول الثانوي', 'الصف الاول الثانوى']
+        };
+        const filtered = allStudents.filter(s => {
+            const sg = (s.grade || '').trim();
+            const gmap = gradesMap[gradeId] || [gradeId];
+            return gmap.includes(sg);
+        });
         
         let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
         csvContent += "الاسم,رقم الموبايل,رقم ولي الأمر,تاريخ التسجيل,عدد الكورسات,الصف\r\n";
