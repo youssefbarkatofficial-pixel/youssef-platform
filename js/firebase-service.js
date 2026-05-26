@@ -674,3 +674,53 @@ window.getCoursesFromStorage = function() {
 };
 
 console.log('🔥 FirebaseService loaded');
+
+// ============================================================
+// ANTI-COPY & SECURITY PROTECTION
+// ============================================================
+document.addEventListener('DOMContentLoaded', () => {
+    let isAdmin = false;
+    try {
+        const adminStr = sessionStorage.getItem('currentAdmin');
+        if (adminStr && JSON.parse(adminStr).role === 'admin') {
+            isAdmin = true;
+        }
+    } catch (e) {}
+
+    // Apply strict protections if NOT admin
+    if (!isAdmin) {
+        // Prevent context menu (right click)
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        
+        // Prevent copy event
+        document.addEventListener('copy', e => {
+            e.preventDefault();
+            if(window.showToast) window.showToast('عفواً، النسخ غير مسموح به في هذه المنصة', 'error');
+        });
+        
+        // Prevent selection via keyboard shortcuts (Ctrl+C, Ctrl+A, Ctrl+X, Ctrl+P)
+        document.addEventListener('keydown', e => {
+            if ((e.ctrlKey || e.metaKey) && (e.key === 'c' || e.key === 'C' || e.key === 'a' || e.key === 'A' || e.key === 'x' || e.key === 'X' || e.key === 'p' || e.key === 'P')) {
+                e.preventDefault();
+            }
+        });
+
+        // Add CSS to disable selection globally
+        const style = document.createElement('style');
+        style.textContent = `
+            * {
+                -webkit-user-select: none !important;
+                -moz-user-select: none !important;
+                -ms-user-select: none !important;
+                user-select: none !important;
+            }
+            input, textarea {
+                -webkit-user-select: auto !important;
+                -moz-user-select: auto !important;
+                -ms-user-select: auto !important;
+                user-select: auto !important;
+            }
+        `;
+        document.head.appendChild(style);
+    }
+});
