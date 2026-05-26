@@ -252,6 +252,6 @@
   .pf-chat-messages { padding: 14px 14px 10px; }
   .pf-suggestion-panel { grid-template-columns: 1fr; }
   .pf-suggestion-card { font-size:0.88rem; padding:11px 12px; }
-  .pf-chat-input input { padding: 14px 48px 14px 14px; }
+  .pf-chat-input input { padding: 14px 85px 14px 56px; }
 }
 
