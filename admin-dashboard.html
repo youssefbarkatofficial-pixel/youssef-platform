@@ -258,7 +258,7 @@
                         let remoteUsers = [];
                         snap.forEach(doc => {
                             const data = doc.data();
-                            if (!data.phone || data.phone === 'undefined' || !data.name || data.name === 'undefined') return;
+                            if (!data.phone || data.phone === 'undefined' || !data.name || data.name === 'undefined' || data.role === 'admin') return;
                             remoteUsers.push(data);
                         });
                         if (remoteUsers.length > 0) {

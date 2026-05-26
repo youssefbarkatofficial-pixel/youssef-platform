@@ -178,7 +178,7 @@
                     const newUsers = [];
                     snapshot.forEach(doc => {
                         const data = doc.data();
-                        if (!data.phone || data.phone === 'undefined' || !data.name || data.name === 'undefined') return;
+                        if (!data.phone || data.phone === 'undefined' || !data.name || data.name === 'undefined' || data.role === 'admin') return;
                         newUsers.push({ id: doc.id, ...data });
                     });
                     newUsers.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
