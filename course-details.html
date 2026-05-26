@@ -295,6 +295,7 @@
             let userStr = sessionStorage.getItem('currentStudent');
             let isOwned = false;
             let isPending = false;
+            let dbUser = { courses: [], completedItems: [] };
             
             if (userStr) {
                 let user = JSON.parse(userStr);
@@ -314,7 +315,7 @@
                     } catch(e) {}
                 }
 
-                let dbUser = JSON.parse(localStorage.getItem(`db_${user.phone}`)) || { courses: [] };
+                dbUser = JSON.parse(localStorage.getItem(`db_${user.phone}`)) || { courses: [], completedItems: [] };
                 isOwned = dbUser.courses && dbUser.courses.includes(courseId);
                 
                 let paymentRequests = JSON.parse(localStorage.getItem('paymentRequests')) || [];
