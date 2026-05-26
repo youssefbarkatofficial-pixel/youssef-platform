@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Check if admin
     const adminStr = sessionStorage.getItem('currentAdmin');
     if (!adminStr) {
-        window.location.href = 'admin-login.html';
+        window.location.href = 'admin-login';
         return;
     }
 
