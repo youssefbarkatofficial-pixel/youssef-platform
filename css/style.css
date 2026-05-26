@@ -127,9 +127,9 @@ body {
 /* Glassmorphism Classes */
 .glass-panel {
   background: var(--glass-bg);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: var(--glass-glow);
   border-radius: 20px;
 }
@@ -307,8 +307,13 @@ body.light-mode .navbar.scrolled {
   text-decoration: none;
   font-weight: 600;
   font-size: 1.1rem;
-  transition: var(--transition-smooth);
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), color 0.3s ease;
   position: relative;
+  display: inline-block;
+}
+
+.nav-links a:hover {
+  transform: translateY(-2px);
 }
 
 .nav-links a::after {
@@ -608,25 +613,26 @@ img, video {
    SAFE UI POLISH (Animations & Aesthetics)
    ========================================================================== */
 .course-card {
-  transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s ease !important;
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease !important;
 }
 
 .course-card:hover {
-  transform: translateY(-6px) !important;
-  box-shadow: 0 15px 35px rgba(212, 166, 79, 0.15) !important;
+  transform: translateY(-8px) scale(1.02) !important;
+  box-shadow: 0 25px 50px rgba(88, 196, 221, 0.25) !important;
+  border-color: rgba(88, 196, 221, 0.4) !important;
 }
 
-.btn-subscribe, .btn-gold {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+.btn-subscribe, .btn-gold, .btn-green {
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease;
 }
 
-.btn-subscribe:hover:not(:disabled) {
+.btn-subscribe:hover:not(:disabled), .btn-gold:hover, .btn-green:hover {
   animation: safePulse 1.5s infinite;
 }
 
 @keyframes safePulse {
-  0% { box-shadow: 0 0 0 0 rgba(212, 166, 79, 0.5); }
-  70% { box-shadow: 0 0 0 12px rgba(212, 166, 79, 0); }
+  0% { box-shadow: 0 0 0 0 rgba(212, 166, 79, 0.6); }
+  70% { box-shadow: 0 0 0 15px rgba(212, 166, 79, 0); }
   100% { box-shadow: 0 0 0 0 rgba(212, 166, 79, 0); }
 }
 
@@ -652,18 +658,20 @@ body.light-mode #toast-container .toast {
 
 /* 1. Custom Premium Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
 }
 ::-webkit-scrollbar-track {
   background: var(--bg-main);
+  border-left: 1px solid rgba(255,255,255,0.02);
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--border-color);
+  background: linear-gradient(180deg, rgba(212, 166, 79, 0.7), rgba(244, 210, 122, 0.7));
   border-radius: 10px;
+  border: 2px solid var(--bg-main);
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--royal-gold);
+  background: linear-gradient(180deg, var(--accent-cyan), #3bb1e0);
 }
 
 /* 2. Text Selection Color */

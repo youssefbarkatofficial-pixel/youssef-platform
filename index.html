@@ -19,6 +19,27 @@
 </head>
 
 <body>
+    <!-- Premium Preloader -->
+    <div id="premiumPreloader" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--bg-main); z-index: 9999999999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.6s cubic-bezier(0.165, 0.84, 0.44, 1), visibility 0.6s ease;">
+        <div class="logo-circle" style="width: 80px; height: 80px; margin-bottom: 20px; animation: safePulse 1.5s infinite;">
+            <span style="font-size: 2.2rem; color: var(--royal-gold);">ي</span>
+        </div>
+        <h2 style="color: var(--royal-gold); letter-spacing: 1px; font-weight: 700; opacity: 0; animation: pfFadeIn 0.8s ease 0.2s forwards;">منصة يوسف بركات</h2>
+    </div>
+    <script>
+        window.addEventListener('load', () => {
+            const preloader = document.getElementById('premiumPreloader');
+            if (preloader) {
+                setTimeout(() => {
+                    preloader.style.opacity = '0';
+                    preloader.style.visibility = 'hidden';
+                    preloader.style.pointerEvents = 'none';
+                    setTimeout(() => preloader.remove(), 600);
+                }, 300); // Small delay to ensure smooth transition
+            }
+        });
+    </script>
+    
     <!-- Background Effects -->
     <div class="bg-effects">
         <!-- Educational Floating Icons (Fixed behind everything) -->
