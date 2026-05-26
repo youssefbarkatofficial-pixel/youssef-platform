@@ -51,14 +51,16 @@
                 <button class="btn btn-gold"><i class="fas fa-plus mr-2"></i> إضافة كورس جديد</button>
             </div>
 
-            <div id="ownerWelcomeBanner" class="glass-panel p-6 mb-6" style="background: linear-gradient(135deg, rgba(212,166,79,0.15), var(--card-bg)); border-right: 4px solid var(--royal-gold); position: relative;">
-                <div style="display:flex; align-items:center; justify-content:space-between; gap:15px; flex-wrap:wrap;">
-                    <div style="flex:1; min-width:220px;">
-                        <h3 style="color: var(--royal-gold); margin:0 0 8px; font-size:1.15rem;"><i class="fas fa-crown" style="margin-left:10px;"></i> مرحباً بك يا قائدنا!</h3>
-                        <p id="ownerWelcomeMsg" style="color: var(--text-secondary); margin:0; line-height:1.5;">تشرفنا بإدارتك الذكية للمنصة. نأمل لك وقتاً ناجحاً ومكافآت متعددة.</p>
-                    </div>
-                    <button id="closeOwnerWelcome" class="btn btn-outline" style="min-width: 50px; border-color: rgba(212,166,79,0.8); color: var(--royal-gold); background: var(--card-bg);" title="إغلاق"><i class="fas fa-times"></i></button>
+            <div id="ownerWelcomeBanner" class="glass-panel" style="background: linear-gradient(135deg, rgba(212,166,79,0.2) 0%, rgba(7,19,38,0.95) 100%); border-right: 5px solid var(--royal-gold); border-radius: 16px; padding: 30px; margin-bottom: 30px; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1); display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; transition: all 0.3s ease;">
+                <div style="flex:1;">
+                    <h3 style="color: var(--royal-gold); margin: 0 0 12px; font-size: 1.5rem; font-weight: bold; display: flex; align-items: center; gap: 12px; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">
+                        <i class="fas fa-crown" style="font-size: 1.8rem; filter: drop-shadow(0 0 8px rgba(212,166,79,0.6));"></i> مرحباً بك يا قائدنا!
+                    </h3>
+                    <p id="ownerWelcomeMsg" style="color: #f1f5f9; margin: 0; line-height: 1.8; font-size: 1.1rem; letter-spacing: 0.2px;">تشرفنا بإدارتك الذكية للمنصة. نأمل لك وقتاً ناجحاً ومكافآت متعددة.</p>
                 </div>
+                <button id="closeOwnerWelcome" class="btn btn-outline" style="min-width: 45px; width: 45px; height: 45px; border-radius: 50%; border: 1px solid rgba(212,166,79,0.4); color: var(--royal-gold); background: rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; padding: 0; transition: all 0.3s ease; cursor: pointer;" title="إغلاق" onmouseover="this.style.background='rgba(212,166,79,0.2)'; this.style.transform='scale(1.05)';" onmouseout="this.style.background='rgba(0,0,0,0.3)'; this.style.transform='scale(1)';">
+                    <i class="fas fa-times" style="font-size: 1.2rem;"></i>
+                </button>
             </div>
 
             <div class="glass-panel owner-compass-summary" style="margin-bottom: 25px; padding: 22px 24px; display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; background: var(--bg-secondary); border: 1px solid var(--border-color);">
