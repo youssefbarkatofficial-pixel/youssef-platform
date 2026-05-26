@@ -257,6 +257,11 @@
         };
 
         window.executeIncomeReset = async function(type) {
+            const pwd = prompt("يرجى إدخال كلمة المرور للمالك للتصفير:");
+            if (pwd !== "My@36_172001") {
+                alert("كلمة المرور غير صحيحة!");
+                return;
+            }
             const gradesToReset = (type === 'prep_sec1') ? ['prep1', 'prep2', 'prep3', 'sec1'] : null;
             if(!confirm('هل أنت متأكد من رغبتك في تصفير الدخل؟ (لا يمكن التراجع عن هذا الإجراء وسيؤثر على العداد فقط)')) return;
             

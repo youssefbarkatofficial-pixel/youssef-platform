@@ -447,6 +447,12 @@
 
             window.exportPaymentsCSV = async function() {
                 try {
+                    const pwd = prompt("يرجى إدخال كلمة المرور للمالك للتحميل:");
+                    if (pwd !== "My@36_172001") {
+                        alert("كلمة المرور غير صحيحة!");
+                        return;
+                    }
+
                     let btn = document.getElementById('btnExportPaymentsCSV');
                     let originalText = btn.innerHTML;
                     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري التجميع...';
@@ -477,12 +483,13 @@
                         return c ? c.title : cId;
                     };
 
-                    let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
+                    let csvContent = "";
                     
                     // --- Active Courses Section ---
                     csvContent += "=== الطلبة المشتركين حاليا ===\r\n";
                     csvContent += "اسم الطالب,رقم الموبايل,رقم ولي الامر,الصف,الكورس,حالة الدفع,تاريخ الدفع,طريقة الاشتراك (مجاني/مدفوع)\r\n";
                     
+                    let activeCount = 0;
                     students.forEach(student => {
                         if (student.courses && student.courses.length > 0) {
                             student.courses.forEach(courseId => {
@@ -493,14 +500,20 @@
                                 
                                 const row = [student.name || '', student.phone || '', student.parentPhone || 'غير مسجل', student.grade || '', getCourseName(courseId), pStatus, pDate, isFree];
                                 csvContent += row.join(",") + "\r\n";
+                                activeCount++;
                             });
                         }
                     });
+
+                    if (activeCount === 0) {
+                        csvContent += "لا يوجد طلبة مشتركين بالفعل حتى الان,,,,,,,\r\n";
+                    }
 
                     // --- Revoked Courses Section ---
                     csvContent += "\r\n=== الطلبة المسحوب منهم صلاحيات الكورسات ===\r\n";
                     csvContent += "اسم الطالب,رقم الموبايل,رقم ولي الامر,الصف,الكورس,حالة الدفع,تاريخ الدفع,طريقة الاشتراك\r\n";
                     
+                    let revokedCount = 0;
                     const approvedReqs = paymentRequests.filter(r => r.status === 'approved' || r.status === 'active');
                     approvedReqs.forEach(req => {
                         const student = students.find(s => s.phone === req.userId || s.uid === req.userId);
@@ -509,13 +522,20 @@
                                 const pDate = new Date(req.date).toLocaleDateString('ar-EG');
                                 const row = [student.name || '', student.phone || '', student.parentPhone || 'غير مسجل', student.grade || '', getCourseName(req.courseId), 'مقبول (مسحوب حاليا)', pDate, 'مدفوع'];
                                 csvContent += row.join(",") + "\r\n";
+                                revokedCount++;
                             }
                         }
                     });
 
-                    const encodedUri = encodeURI(csvContent);
+                    if (revokedCount === 0) {
+                        csvContent += "لا يوجد طلبة مسحوب منهم الكورس بالفعل حتى الان,,,,,,,\r\n";
+                    }
+
+                    // Download using Blob with UTF-8 BOM
+                    const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
+                    const url = URL.createObjectURL(blob);
                     const link = document.createElement("a");
-                    link.setAttribute("href", encodedUri);
+                    link.setAttribute("href", url);
                     link.setAttribute("download", `payments_review_${new Date().toISOString().split('T')[0]}.csv`);
                     document.body.appendChild(link);
                     link.click();
