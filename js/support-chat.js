@@ -138,6 +138,75 @@
     return key.includes('_guest_') ? sessionStorage : localStorage;
   }
 
+  // --- FIREBASE SYNC LOGIC ---
+  let isBotPausedByAdmin = false;
+  let supportSyncInitialized = false;
+
+  function initFirebaseSupportSync() {
+    if (supportSyncInitialized || !window.firebaseDb) return;
+    const user = getCurrentUser();
+    if (!user || !user.phone) return;
+
+    supportSyncInitialized = true;
+    
+    // Sync Chats
+    const chatDocRef = window.firebaseDb.collection('bot_chats').doc(user.phone);
+    chatDocRef.onSnapshot(doc => {
+      if (doc.exists) {
+        const data = doc.data();
+        
+        // Update Bot Pause state based on Admin Heartbeat
+        if (data.botPaused && data.adminActive) {
+            const timeDiff = Date.now() - data.adminActive;
+            isBotPausedByAdmin = timeDiff < 60000; // 60 seconds heartbeat
+        } else {
+            isBotPausedByAdmin = false;
+        }
+
+        if (data.messages && data.messages.length > 0) {
+            const key = getStorageKey(BASE_HISTORY_KEY);
+            const storage = getStorageForKey(key);
+            safeSetItem(storage, key, JSON.stringify(data.messages));
+            if (document.getElementById('pfChatWindow') && document.getElementById('pfChatWindow').style.display === 'flex') {
+                renderHistory();
+            }
+        }
+      }
+    });
+
+    // Sync Tickets (listen to my own tickets just in case admin replies)
+    window.firebaseDb.collection('support_tickets').where('userId', '==', user.phone)
+      .onSnapshot(snapshot => {
+         const tickets = [];
+         snapshot.forEach(doc => {
+             tickets.push({ id: doc.id, ...doc.data() });
+         });
+         tickets.sort((a,b) => (a.ts||0) - (b.ts||0));
+         const key = getStorageKey(BASE_TICKETS_KEY);
+         const storage = getStorageForKey(key);
+         safeSetItem(storage, key, JSON.stringify(tickets));
+      });
+  }
+
+  // Push to Firebase helpers
+  function syncHistoryToFirebase(h) {
+    if (!window.firebaseDb) return;
+    const user = getCurrentUser();
+    if (!user || !user.phone) return;
+    
+    window.firebaseDb.collection('bot_chats').doc(user.phone).set({
+        messages: h,
+        updatedAt: Date.now(),
+        user: { name: user.name || '', phone: user.phone }
+    }, { merge: true }).catch(console.error);
+  }
+
+  function syncTicketToFirebase(ticket) {
+    if (!window.firebaseDb || !ticket || !ticket.id) return;
+    window.firebaseDb.collection('support_tickets').doc(ticket.id).set(ticket).catch(console.error);
+  }
+  // ---------------------------
+
   function isElementBroken(el) {
     if (!el) return true;
     if (!document.body.contains(el)) return true;
@@ -844,7 +913,12 @@
     } catch(e){ return []; }
   }
 
-  function saveHistory(h){ const key = getStorageKey(BASE_HISTORY_KEY); const storage = getStorageForKey(key); safeSetItem(storage, key, JSON.stringify(h)); }
+  function saveHistory(h){ 
+    const key = getStorageKey(BASE_HISTORY_KEY); 
+    const storage = getStorageForKey(key); 
+    safeSetItem(storage, key, JSON.stringify(h)); 
+    syncHistoryToFirebase(h);
+  }
 
   function loadTickets(){
     try{
@@ -854,7 +928,14 @@
     } catch(e){ return []; }
   }
 
-  function saveTickets(t){ const key = getStorageKey(BASE_TICKETS_KEY); const storage = getStorageForKey(key); safeSetItem(storage, key, JSON.stringify(t)); }
+  function saveTickets(t){ 
+    const key = getStorageKey(BASE_TICKETS_KEY); 
+    const storage = getStorageForKey(key); 
+    safeSetItem(storage, key, JSON.stringify(t)); 
+    if (t && t.length) {
+      t.forEach(syncTicketToFirebase);
+    }
+  }
 
   function loadCustom(){ try{ return JSON.parse(localStorage.getItem(CUSTOM_ANSWERS_KEY) || '{}'); }catch(e){ return {} } }
   function saveCustom(c){ safeSetItem(localStorage, CUSTOM_ANSWERS_KEY, JSON.stringify(c)); }
@@ -1057,6 +1138,8 @@
     addTyping(); 
     setTimeout(()=>{
       removeTyping(); 
+      if (isBotPausedByAdmin) return; // Wait for admin to reply manually
+      
       const complaintFlow = getComplaintFlow(text);
       if (complaintFlow && complaintFlow.action === 'prompt') {
         complaintCaptureMode = true;
@@ -1261,6 +1344,7 @@
 
         // signal minimal success
         try { console.log('pfChat mounted successfully'); } catch(e){}
+        try { initFirebaseSupportSync(); } catch(e){}
         try { ensureWelcome(); } catch(e){}
         try { setTimeout(()=>{ showWelcomeBubble(); }, 1200); } catch(e){}
       } catch(e){ /* guard - do not stop execution */ }

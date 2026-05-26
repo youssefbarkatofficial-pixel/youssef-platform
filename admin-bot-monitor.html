@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مراقبة شات البوصلة - يوسف بركات</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <style>
+        .compass-container {
+            display: flex;
+            gap: 20px;
+            height: calc(100vh - 150px);
+            margin-top: 20px;
+        }
+        .students-list {
+            flex: 1;
+            min-width: 300px;
+            max-width: 400px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        .student-item {
+            padding: 15px;
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .student-item:hover {
+            background: rgba(212, 166, 79, 0.05);
+        }
+        .student-item.active {
+            background: rgba(212, 166, 79, 0.15);
+            border-right: 4px solid var(--royal-gold);
+        }
+        .student-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: rgba(212, 166, 79, 0.2);
+            color: var(--royal-gold);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            object-fit: cover;
+        }
+        .student-info {
+            flex: 1;
+        }
+        .student-name {
+            font-weight: bold;
+            color: var(--text-primary);
+            margin-bottom: 3px;
+        }
+        .student-phone {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+        .chat-container {
+            flex: 2;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+        }
+        .chat-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border-color);
+            background: rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            justify-content: space-between;
+        }
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(231, 76, 60, 0.1);
+            padding: 8px 15px;
+            border-radius: 20px;
+            border: 1px solid rgba(231, 76, 60, 0.3);
+            transition: all 0.3s ease;
+        }
+        .toggle-container.active {
+            background: rgba(46, 204, 113, 0.1);
+            border-color: rgba(46, 204, 113, 0.3);
+        }
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 46px;
+            height: 24px;
+        }
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: #2ecc71;
+        }
+        input:checked + .slider:before {
+            transform: translateX(22px);
+        }
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .msg-bubble {
+            max-width: 75%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        .msg-user {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            align-self: flex-start;
+            border-top-right-radius: 2px;
+        }
+        .msg-bot {
+            background: linear-gradient(135deg, rgba(212,166,79,0.2) 0%, rgba(212,166,79,0.1) 100%);
+            color: var(--text-primary);
+            border: 1px solid rgba(212,166,79,0.3);
+            align-self: flex-end;
+            border-top-left-radius: 2px;
+        }
+        .msg-time {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 5px;
+            text-align: left;
+        }
+        .chat-input {
+            padding: 15px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            gap: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+        .chat-input.disabled {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+        .chat-input input {
+            flex: 1;
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 10px 15px;
+            color: var(--text-primary);
+        }
+        .chat-input button {
+            background: var(--royal-gold);
+            color: #071326;
+            border: none;
+            border-radius: 8px;
+            padding: 0 20px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        .chat-input button:hover {
+            background: #e6b85c;
+        }
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: var(--text-secondary);
+            text-align: center;
+        }
+        .empty-state i {
+            font-size: 4rem;
+            color: rgba(212,166,79,0.3);
+            margin-bottom: 15px;
+        }
+        .admin-indicator {
+            font-size: 0.8rem;
+            color: #2ecc71;
+            font-weight: bold;
+            margin-right: auto;
+            display: none;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 0.5; }
+            50% { opacity: 1; }
+            100% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-effects"></div>
+
+    <header class="navbar glass-panel" style="border-bottom-color: var(--royal-gold);">
+        <a href="index.html" class="nav-brand">
+            <div class="logo-circle" style="color: #fff; background: var(--royal-gold);">ي</div>
+            <span class="nav-brand-text text-gold">لوحة الإدارة - يوسف بركات</span>
+        </a>
+        <div class="nav-actions">
+            <a href="#" id="logoutBtn" class="btn btn-outline" style="border-color: #e74c3c; color: #e74c3c; padding: 8px 15px; border-radius: 20px;">خروج <i class="fas fa-sign-out-alt"></i></a>
+            <div class="mobile-menu-btn"><i class="fas fa-bars"></i></div>
+        </div>
+    </header>
+
+    <div class="dashboard-layout">
+        <!-- Admin Sidebar -->
+        <aside class="sidebar" id="sidebar" style="border-left-color: var(--royal-gold);">
+            <ul class="sidebar-nav" style="margin-top: 20px;">
+                <li><a href="admin-dashboard.html"><i class="fas fa-chart-line"></i> الإحصائيات العامة</a></li>
+                <li><a href="admin-students.html"><i class="fas fa-users"></i> إدارة الطلاب</a></li>
+                <li><a href="admin-courses.html"><i class="fas fa-book-open"></i> إدارة الكورسات</a></li>
+                <li><a href="admin-upload.html"><i class="fas fa-bolt"></i> الرفع السريع</a></li>
+                <li><a href="admin-payments.html"><i class="fas fa-money-check-alt"></i> مراجعة المدفوعات</a></li>
+                <li><a href="admin-compass.html"><i class="fas fa-compass"></i> بوت البوصلة</a></li>
+                <li><a href="admin-bot-monitor.html" class="active"><i class="fas fa-eye"></i> مراقبة شات البوصلة</a></li>
+                <li><a href="admin-notifications.html"><i class="fas fa-bell"></i> إرسال الإشعارات</a></li>
+                <li><a href="admin-settings.html"><i class="fas fa-cog"></i> إعدادات المنصة</a></li>
+            </ul>
+        </aside>
+
+        <!-- Admin Main Content -->
+        <main class="main-content">
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title"><i class="fas fa-eye text-gold"></i> مراقبة شات البوصلة</h1>
+                    <p style="color: var(--text-secondary); margin-top: 5px;">راقب كل محادثات الطلاب مع البوت، وتدخل للرد عليهم عند الحاجة.</p>
+                </div>
+            </div>
+
+            <div class="compass-container">
+                <!-- Students List -->
+                <div class="students-list">
+                    <div style="padding: 15px; border-bottom: 1px solid var(--border-color); position: sticky; top: 0; background: var(--bg-secondary); z-index: 10;">
+                        <h3 style="margin: 0; color: var(--royal-gold);">شاتات الطلاب</h3>
+                    </div>
+                    <div id="studentsContainer">
+                        <!-- Students injected via JS -->
+                        <div style="padding: 20px; text-align: center; color: var(--text-secondary);">جاري التحميل...</div>
+                    </div>
+                </div>
+
+                <!-- Chat Area -->
+                <div class="chat-container">
+                    <div id="chatArea" style="display: none; height: 100%; flex-direction: column;">
+                        <div class="chat-header">
+                            <div style="display: flex; align-items: center; gap: 15px;">
+                                <img id="chatStudentAvatar" src="" class="student-avatar" style="display: none;" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                                <div class="student-avatar" id="chatStudentAvatarFallback"><i class="fas fa-user"></i></div>
+                                <div>
+                                    <h3 id="chatStudentName" style="margin: 0; font-size: 1.1rem;">اسم الطالب</h3>
+                                    <p id="chatStudentPhone" style="margin: 2px 0 0; font-size: 0.85rem; color: var(--text-secondary);">رقم الموبايل</p>
+                                </div>
+                            </div>
+                            
+                            <span class="admin-indicator" id="adminIndicator"><i class="fas fa-circle"></i> أنت تتحكم بالمحادثة الآن</span>
+
+                            <div class="toggle-container" id="toggleContainer">
+                                <span style="font-weight: bold; font-size: 0.9rem;" id="toggleText">البوت يرد تلقائياً</span>
+                                <label class="switch">
+                                    <input type="checkbox" id="pauseBotToggle">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="chat-messages" id="chatMessages">
+                            <!-- Messages injected via JS -->
+                        </div>
+
+                        <div class="chat-input disabled" id="chatInputArea">
+                            <input type="text" id="adminReplyInput" placeholder="فعل خيار الرد بدلاً من البوصلة لكي تتمكن من الكتابة..." disabled>
+                            <button id="sendReplyBtn" disabled><i class="fas fa-paper-plane"></i> إرسال</button>
+                        </div>
+                    </div>
+
+                    <div id="chatEmptyState" class="empty-state">
+                        <i class="fas fa-comments"></i>
+                        <h3>لم يتم تحديد أي طالب</h3>
+                        <p>اختر طالباً من القائمة الجانبية لعرض المحادثة والتحكم بالبوت.</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/firebase-service.js"></script>
+
+    <script src="js/admin-auth.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const authStr = sessionStorage.getItem('currentAdmin');
+            if(!authStr || JSON.parse(authStr).role !== 'admin') {
+                window.location.href = 'admin-login.html';
+                return;
+            }
+
+            const studentsContainer = document.getElementById('studentsContainer');
+            const chatArea = document.getElementById('chatArea');
+            const chatEmptyState = document.getElementById('chatEmptyState');
+            const chatMessages = document.getElementById('chatMessages');
+            const chatStudentName = document.getElementById('chatStudentName');
+            const chatStudentPhone = document.getElementById('chatStudentPhone');
+            const chatStudentAvatar = document.getElementById('chatStudentAvatar');
+            const chatStudentAvatarFallback = document.getElementById('chatStudentAvatarFallback');
+            const adminReplyInput = document.getElementById('adminReplyInput');
+            const sendReplyBtn = document.getElementById('sendReplyBtn');
+            const chatInputArea = document.getElementById('chatInputArea');
+            const pauseBotToggle = document.getElementById('pauseBotToggle');
+            const toggleContainer = document.getElementById('toggleContainer');
+            const toggleText = document.getElementById('toggleText');
+            const adminIndicator = document.getElementById('adminIndicator');
+
+            let allChats = [];
+            let currentActivePhone = null;
+            let currentChatUnsubscribe = null;
+            let currentChatHistory = [];
+            let heartbeatInterval = null;
+
+            // Load student profile pictures for avatar display
+            let studentProfiles = {};
+            function loadStudentProfiles() {
+                try {
+                    const localProfiles = JSON.parse(localStorage.getItem('strictUsers') || '[]');
+                    localProfiles.forEach(u => {
+                        studentProfiles[u.phone] = u.profilePic || u.image || null;
+                    });
+                } catch(e){}
+            }
+
+            // Listen to all bot chats globally
+            function listenToAllChats() {
+                loadStudentProfiles();
+
+                if (!window.firebaseDb) {
+                    setTimeout(listenToAllChats, 500);
+                    return;
+                }
+                
+                window.firebaseDb.collection('bot_chats').onSnapshot(snapshot => {
+                    allChats = [];
+                    snapshot.forEach(doc => {
+                        allChats.push({ phoneId: doc.id, ...doc.data() });
+                    });
+                    
+                    // Sort by newest updated
+                    allChats.sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+                    renderStudentsList();
+                }, error => {
+                    console.error("Error fetching chats:", error);
+                    studentsContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: #e74c3c;">خطأ في الاتصال بقاعدة البيانات.</div>';
+                });
+            }
+
+            function formatTime(ts) {
+                if (!ts) return '';
+                const d = new Date(ts);
+                return d.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit', hour12: false }) + ' • ' + d.toLocaleDateString('ar-EG', { day: '2-digit', month: 'short' });
+            }
+
+            function renderStudentsList() {
+                studentsContainer.innerHTML = '';
+                if (allChats.length === 0) {
+                    studentsContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-secondary);">لا توجد محادثات مسجلة حالياً.</div>';
+                    return;
+                }
+
+                allChats.forEach(chat => {
+                    if (!chat.messages || chat.messages.length === 0) return;
+                    
+                    const div = document.createElement('div');
+                    div.className = `student-item ${currentActivePhone === chat.phoneId ? 'active' : ''}`;
+                    
+                    const lastMsg = chat.messages[chat.messages.length - 1];
+                    const userName = chat.user ? chat.user.name : 'طالب غير معروف';
+                    const userPhone = chat.phoneId;
+                    
+                    let avatarHtml = `<div class="student-avatar"><i class="fas fa-user"></i></div>`;
+                    let pic = studentProfiles[userPhone] || localStorage.getItem('profilePic_' + userPhone);
+                    if (pic) {
+                        avatarHtml = `<img src="${pic}" class="student-avatar" style="object-fit:cover;" onerror="this.outerHTML='<div class=\\'student-avatar\\'><i class=\\'fas fa-user\\'></i></div>'" />`;
+                    }
+                    
+                    div.innerHTML = `
+                        ${avatarHtml}
+                        <div class="student-info">
+                            <div class="student-name">${userName}</div>
+                            <div class="student-phone">${userPhone}</div>
+                            <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                ${lastMsg.text}
+                            </div>
+                        </div>
+                        <div style="font-size: 0.7rem; color: var(--royal-gold);">
+                            ${new Date(chat.updatedAt || Date.now()).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit', hour12: false })}
+                        </div>
+                    `;
+                    
+                    div.addEventListener('click', () => {
+                        openChat(chat);
+                        renderStudentsList(); // Re-render to update active class
+                    });
+                    
+                    studentsContainer.appendChild(div);
+                });
+            }
+
+            function openChat(chat) {
+                currentActivePhone = chat.phoneId;
+                chatEmptyState.style.display = 'none';
+                chatArea.style.display = 'flex';
+                
+                chatStudentName.textContent = chat.user ? chat.user.name : 'طالب غير معروف';
+                chatStudentPhone.textContent = chat.phoneId;
+                
+                let pic = studentProfiles[chat.phoneId] || localStorage.getItem('profilePic_' + chat.phoneId);
+                if (pic) {
+                    chatStudentAvatar.src = pic;
+                    chatStudentAvatar.style.display = 'block';
+                    chatStudentAvatarFallback.style.display = 'none';
+                } else {
+                    chatStudentAvatar.style.display = 'none';
+                    chatStudentAvatarFallback.style.display = 'flex';
+                }
+
+                // Reset toggle
+                pauseBotToggle.checked = false;
+                updateToggleUI();
+                stopHeartbeat();
+
+                // Unsubscribe previous
+                if (currentChatUnsubscribe) {
+                    currentChatUnsubscribe();
+                }
+
+                // Subscribe to real-time messages for this student
+                currentChatUnsubscribe = window.firebaseDb.collection('bot_chats').doc(chat.phoneId)
+                    .onSnapshot(doc => {
+                        if (doc.exists) {
+                            const data = doc.data();
+                            currentChatHistory = data.messages || [];
+                            
+                            // Check if bot is paused by another admin session
+                            if (data.botPaused && data.adminActive && (Date.now() - data.adminActive < 60000)) {
+                                if (!pauseBotToggle.checked) {
+                                    pauseBotToggle.checked = true;
+                                    updateToggleUI(true); // silent update, don't trigger confirmation
+                                }
+                            } else if (pauseBotToggle.checked && !heartbeatInterval) {
+                                // Admin abandoned session or heartbeat died
+                                pauseBotToggle.checked = false;
+                                updateToggleUI(true);
+                            }
+
+                            renderChatMessages();
+                        } else {
+                            currentChatHistory = [];
+                            renderChatMessages();
+                        }
+                    });
+            }
+
+            function renderChatMessages() {
+                chatMessages.innerHTML = '';
+                if (currentChatHistory.length === 0) {
+                    chatMessages.innerHTML = '<div style="text-align: center; color: var(--text-secondary); margin-top: 20px;">لا يوجد سجل محادثة.</div>';
+                    return;
+                }
+
+                currentChatHistory.forEach(msg => {
+                    const isUser = msg.sender === 'user' || msg.who === 'user';
+                    const div = document.createElement('div');
+                    div.className = `msg-bubble ${isUser ? 'msg-user' : 'msg-bot'}`;
+                    
+                    let senderName = isUser ? chatStudentName.textContent : 'البوصلة (الإدارة)';
+                    
+                    div.innerHTML = `
+                        <div style="font-weight: bold; margin-bottom: 5px; font-size: 0.8rem; color: ${isUser ? 'var(--text-secondary)' : 'var(--royal-gold)'};">${senderName}</div>
+                        <div>${msg.text}</div>
+                        <div class="msg-time">${formatTime(msg.ts)}</div>
+                    `;
+                    chatMessages.appendChild(div);
+                });
+
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+
+            // --- Heartbeat & Toggle Logic ---
+            
+            function updateToggleUI(silent = false) {
+                if (pauseBotToggle.checked) {
+                    toggleContainer.classList.add('active');
+                    toggleText.textContent = "أنت ترد الآن (البوت متوقف)";
+                    toggleText.style.color = "#2ecc71";
+                    chatInputArea.classList.remove('disabled');
+                    adminReplyInput.disabled = false;
+                    sendReplyBtn.disabled = false;
+                    adminIndicator.style.display = 'block';
+                    adminReplyInput.placeholder = "اكتب ردك هنا لترسله للطالب مباشرة...";
+                    
+                    if (!silent) startHeartbeat();
+                } else {
+                    toggleContainer.classList.remove('active');
+                    toggleText.textContent = "البوت يعمل تلقائياً";
+                    toggleText.style.color = "#e74c3c";
+                    chatInputArea.classList.add('disabled');
+                    adminReplyInput.disabled = true;
+                    sendReplyBtn.disabled = true;
+                    adminIndicator.style.display = 'none';
+                    adminReplyInput.placeholder = "فعل خيار الرد بدلاً من البوصلة لكي تتمكن من الكتابة...";
+                    
+                    if (!silent) stopHeartbeat();
+                }
+            }
+
+            pauseBotToggle.addEventListener('change', (e) => {
+                if (e.target.checked) {
+                    if (confirm("هل أنت متأكد من إيقاف البوت مؤقتاً والرد بنفسك على هذا الطالب؟\nملاحظة: إذا أغلقت الصفحة سيعود البوت للعمل تلقائياً.")) {
+                        updateToggleUI();
+                    } else {
+                        e.target.checked = false;
+                    }
+                } else {
+                    updateToggleUI();
+                }
+            });
+
+            function startHeartbeat() {
+                if (!currentActivePhone || !window.firebaseDb) return;
+                
+                const sendBeat = () => {
+                    window.firebaseDb.collection('bot_chats').doc(currentActivePhone).set({
+                        botPaused: true,
+                        adminActive: Date.now()
+                    }, { merge: true }).catch(console.error);
+                };
+                
+                sendBeat(); // send immediately
+                heartbeatInterval = setInterval(sendBeat, 20000); // every 20 seconds
+            }
+
+            function stopHeartbeat() {
+                if (heartbeatInterval) {
+                    clearInterval(heartbeatInterval);
+                    heartbeatInterval = null;
+                }
+                if (currentActivePhone && window.firebaseDb) {
+                    window.firebaseDb.collection('bot_chats').doc(currentActivePhone).set({
+                        botPaused: false,
+                        adminActive: 0
+                    }, { merge: true }).catch(console.error);
+                }
+            }
+
+            // Cleanup heartbeat on unload
+            window.addEventListener('beforeunload', () => {
+                if (pauseBotToggle.checked && heartbeatInterval) {
+                    stopHeartbeat();
+                }
+            });
+
+            // --- Sending Reply ---
+            function sendReply() {
+                const text = adminReplyInput.value.trim();
+                if (!text || !currentActivePhone || !pauseBotToggle.checked) return;
+
+                const newMsg = {
+                    id: 'msg_' + Date.now(),
+                    sender: 'bot',
+                    who: 'bot',
+                    text: text,
+                    ts: Date.now(),
+                    tag: 'admin-reply'
+                };
+                
+                currentChatHistory.push(newMsg);
+                
+                window.firebaseDb.collection('bot_chats').doc(currentActivePhone).set({
+                    messages: currentChatHistory,
+                    updatedAt: Date.now()
+                }, { merge: true });
+
+                adminReplyInput.value = '';
+                if(window.showToast) window.showToast('تم إرسال الرد للطالب فوراً!', 'success');
+            }
+
+            sendReplyBtn.addEventListener('click', sendReply);
+            adminReplyInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') sendReply();
+            });
+
+            listenToAllChats();
+        });
+    </script>
+</body>
+</html>

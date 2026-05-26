@@ -186,6 +186,7 @@
                 <li><a href="admin-upload.html"><i class="fas fa-bolt"></i> الرفع السريع</a></li>
                 <li><a href="admin-payments.html"><i class="fas fa-money-check-alt"></i> مراجعة المدفوعات</a></li>
                 <li><a href="admin-compass.html" class="active"><i class="fas fa-compass"></i> بوت البوصلة</a></li>
+                <li><a href="admin-bot-monitor.html"><i class="fas fa-eye"></i> مراقبة شات البوصلة</a></li>
                 <li><a href="admin-notifications.html"><i class="fas fa-bell"></i> إرسال الإشعارات</a></li>
                 <li><a href="admin-settings.html"><i class="fas fa-cog"></i> إعدادات المنصة</a></li>
             </ul>
@@ -267,20 +268,27 @@
 
             let allTickets = [];
             let currentActiveTicket = null;
+            let currentChatUnsubscribe = null;
+            let currentChatHistory = [];
 
-            function loadAllTickets() {
-                allTickets = [];
-                for (let i = 0; i < localStorage.length; i++) {
-                    const key = localStorage.key(i);
-                    if (key && key.startsWith('pf_support_tickets_v1_')) {
-                        try {
-                            const userTickets = JSON.parse(localStorage.getItem(key) || '[]');
-                            allTickets = [...allTickets, ...userTickets];
-                        } catch(e) {}
-                    }
+            // Listen to all tickets globally
+            function listenToTickets() {
+                if (!window.firebaseDb) {
+                    setTimeout(listenToTickets, 500);
+                    return;
                 }
-                allTickets.sort((a, b) => (b.ts || 0) - (a.ts || 0));
-                renderTickets();
+                
+                window.firebaseDb.collection('support_tickets').onSnapshot(snapshot => {
+                    allTickets = [];
+                    snapshot.forEach(doc => {
+                        allTickets.push({ id: doc.id, ...doc.data() });
+                    });
+                    // Sort by newest
+                    allTickets.sort((a, b) => (b.ts || 0) - (a.ts || 0));
+                    renderTickets();
+                }, error => {
+                    console.error("Error fetching tickets:", error);
+                });
             }
 
             function formatTime(ts) {
@@ -316,7 +324,7 @@
                     
                     div.addEventListener('click', () => {
                         openTicket(ticket);
-                        renderTickets(); 
+                        renderTickets(); // Re-render to update active class
                     });
                     
                     ticketsContainer.appendChild(div);
@@ -340,31 +348,40 @@
                 loadChatHistory(ticket);
             }
 
-            function getChatHistoryKey(phone) {
-                return `pf_support_chat_history_v2_student_${phone}`;
-            }
-
             function loadChatHistory(ticket) {
                 chatMessages.innerHTML = '';
                 if (!ticket || !ticket.user || !ticket.user.phone) return;
                 
-                const historyKey = getChatHistoryKey(ticket.user.phone);
-                let history = [];
-                try {
-                    history = JSON.parse(localStorage.getItem(historyKey) || '[]');
-                } catch(e) {}
+                if (currentChatUnsubscribe) {
+                    currentChatUnsubscribe();
+                }
 
-                if (history.length === 0) {
+                currentChatUnsubscribe = window.firebaseDb.collection('bot_chats').doc(ticket.user.phone)
+                    .onSnapshot(doc => {
+                        if (doc.exists) {
+                            const data = doc.data();
+                            currentChatHistory = data.messages || [];
+                            renderChatMessages();
+                        } else {
+                            currentChatHistory = [];
+                            renderChatMessages();
+                        }
+                    });
+            }
+
+            function renderChatMessages() {
+                chatMessages.innerHTML = '';
+                if (currentChatHistory.length === 0) {
                     chatMessages.innerHTML = '<div style="text-align: center; color: var(--text-secondary); margin-top: 20px;">لا يوجد سجل محادثة.</div>';
                     return;
                 }
 
-                history.forEach(msg => {
-                    const isUser = msg.sender === 'user';
+                currentChatHistory.forEach(msg => {
+                    const isUser = msg.sender === 'user' || msg.who === 'user';
                     const div = document.createElement('div');
                     div.className = `msg-bubble ${isUser ? 'msg-user' : 'msg-bot'}`;
                     
-                    let senderName = isUser ? (ticket.user.name || 'الطالب') : 'البوصلة (البوت/الإدارة)';
+                    let senderName = isUser ? (currentActiveTicket.user.name || 'الطالب') : 'البوصلة (البوت/الإدارة)';
                     
                     div.innerHTML = `
                         <div style="font-weight: bold; margin-bottom: 5px; font-size: 0.8rem; color: ${isUser ? 'var(--text-secondary)' : 'var(--royal-gold)'};">${senderName}</div>
@@ -380,8 +397,8 @@
             function saveAdminLearning(question, adminResponse) {
                 if (!question || !adminResponse) return;
                 try {
-                    let normalized = question.toLowerCase().replace(/[\\u000B\\u000C\\u001F]/g, ' ').trim();
-                    normalized = normalized.replace(/[إأآا]/g, 'ا').replace(/ى/g, 'ي').replace(/ة/g, 'ه').replace(/[ؤئ]/g, 'ء').replace(/[^0-9A-Za-z\\u0600-\\u06FF\\s،\\.,\\?\\!\\-]/g, ' ').replace(/\\s+/g, ' ').trim();
+                    let normalized = question.toLowerCase().replace(/[\u000B\u000C\u001F]/g, ' ').trim();
+                    normalized = normalized.replace(/[إأآا]/g, 'ا').replace(/ى/g, 'ي').replace(/ة/g, 'ه').replace(/[ؤئ]/g, 'ء').replace(/[^0-9A-Za-z\u0600-\u06FF\s،\.,\?\!\-]/g, ' ').replace(/\s+/g, ' ').trim();
 
                     const ADMIN_LEARNING_KEY = 'pf_admin_learning_v1';
                     const learning = JSON.parse(localStorage.getItem(ADMIN_LEARNING_KEY) || '{}');
@@ -411,50 +428,39 @@
                 if (!text || !currentActiveTicket) return;
 
                 const phone = currentActiveTicket.user.phone;
-                const historyKey = getChatHistoryKey(phone);
-                let history = [];
-                try {
-                    history = JSON.parse(localStorage.getItem(historyKey) || '[]');
-                } catch(e) {}
-
-                history.push({
+                
+                // Add message directly to currentChatHistory and update Firebase
+                const newMsg = {
                     id: 'msg_' + Date.now(),
                     sender: 'bot',
+                    who: 'bot',
                     text: text,
                     ts: Date.now(),
                     tag: 'admin-reply'
-                });
-                localStorage.setItem(historyKey, JSON.stringify(history));
+                };
+                
+                currentChatHistory.push(newMsg);
+                
+                window.firebaseDb.collection('bot_chats').doc(phone).set({
+                    messages: currentChatHistory,
+                    updatedAt: Date.now()
+                }, { merge: true });
 
+                // Mark ticket as resolved
                 if (currentActiveTicket.status !== 'resolved') {
                     currentActiveTicket.status = 'resolved';
-                    updateTicketInStorage(currentActiveTicket);
+                    updateTicketInFirebase(currentActiveTicket);
                 }
 
                 saveAdminLearning(currentActiveTicket.message, text);
 
                 adminReplyInput.value = '';
                 if(window.showToast) window.showToast('تم إرسال الرد للطالب، وتعلّم البوت الإجابة للمرات القادمة!', 'success');
-                
-                loadAllTickets();
-                openTicket(currentActiveTicket);
             }
 
-            function updateTicketInStorage(updatedTicket) {
-                for (let i = 0; i < localStorage.length; i++) {
-                    const key = localStorage.key(i);
-                    if (key && key.startsWith('pf_support_tickets_v1_')) {
-                        try {
-                            let userTickets = JSON.parse(localStorage.getItem(key) || '[]');
-                            const index = userTickets.findIndex(t => t.id === updatedTicket.id);
-                            if (index !== -1) {
-                                userTickets[index] = updatedTicket;
-                                localStorage.setItem(key, JSON.stringify(userTickets));
-                                break;
-                            }
-                        } catch(e) {}
-                    }
-                }
+            function updateTicketInFirebase(updatedTicket) {
+                if (!window.firebaseDb || !updatedTicket || !updatedTicket.id) return;
+                window.firebaseDb.collection('support_tickets').doc(updatedTicket.id).set(updatedTicket, { merge: true });
             }
 
             sendReplyBtn.addEventListener('click', sendReply);
@@ -465,8 +471,7 @@
             resolveTicketBtn.addEventListener('click', () => {
                 if (!currentActiveTicket) return;
                 currentActiveTicket.status = 'resolved';
-                updateTicketInStorage(currentActiveTicket);
-                loadAllTickets();
+                updateTicketInFirebase(currentActiveTicket);
                 openTicket(currentActiveTicket);
                 if(window.showToast) window.showToast('تم إغلاق الشكوى بنجاح.', 'info');
             });
