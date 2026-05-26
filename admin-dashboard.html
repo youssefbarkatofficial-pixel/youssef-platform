@@ -191,8 +191,15 @@
             <button class="btn btn-outline btn-block mb-1" style="border-color: #e74c3c; color: #e74c3c; text-align: right; padding-right: 20px; margin-bottom: 10px;" onclick="executeIncomeReset('all')">
                 <i class="fas fa-trash-alt mr-2"></i> تصفير الدخل بالكامل (لجميع المراحل السنوية الكاملة)
             </button>
-            <button class="btn btn-outline btn-block" style="border-color: #f39c12; color: #f39c12; text-align: right; padding-right: 20px;" onclick="executeIncomeReset('prep_sec1')">
+            <button class="btn btn-outline btn-block mb-1" style="border-color: #f39c12; color: #f39c12; text-align: right; padding-right: 20px; margin-bottom: 20px;" onclick="executeIncomeReset('prep_sec1')">
                 <i class="fas fa-minus-circle mr-2"></i> تصفير طلاب النقل (إعدادي + 1 ثانوي) فقط
+            </button>
+            
+            <hr style="border-color: rgba(255,255,255,0.1); margin-bottom: 20px;">
+            <h3 style="color: #e74c3c; font-size: 1.1rem; margin-bottom: 15px;"><i class="fas fa-exclamation-triangle"></i> خيارات متقدمة (حذف نهائي)</h3>
+            
+            <button id="btnFactoryReset" class="btn btn-block" style="background: rgba(231, 76, 60, 0.1); border: 1px solid #e74c3c; color: #e74c3c; text-align: right; padding-right: 20px;" onclick="executeFactoryReset()">
+                <i class="fas fa-radiation-alt mr-2"></i> مسح جميع حسابات الطلاب وبياناتهم (تهيئة المنصة)
             </button>
         </div>
     </div>
@@ -289,6 +296,63 @@
                 document.getElementById('btnPwdConfirm').onclick = () => close(input.value);
                 input.onkeypress = (e) => { if(e.key === 'Enter') close(input.value); };
             });
+        };
+
+        window.executeFactoryReset = async function() {
+            const pwd = await window.requireAdminPassword();
+            if (pwd === null) return; // Cancelled
+            if (pwd !== "My@36_172001") {
+                alert("كلمة المرور غير صحيحة!");
+                return;
+            }
+            
+            if(!confirm("تحذير خطير جداً: هذا الإجراء سيقوم بمسح جميع الطلاب المشتركين وجميع بياناتهم وتصنيفاتهم ومحادثاتهم من قاعدة البيانات ولن يتبقى سوى حسابك كمالك للمنصة والكورسات فقط. (سيؤدي ذلك لتسجيل خروج أي طالب وهمي حالي). هل أنت متأكد بنسبة 100%؟")) return;
+            
+            let btn = document.getElementById('btnFactoryReset');
+            let originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري مسح وتهيئة المنصة...';
+            btn.disabled = true;
+            
+            try {
+                // Delete from Firebase
+                if (window.firebaseDb) {
+                    const collectionsToWipe = ['students', 'paymentRequests', 'chatMessages', 'studentProgress', 'activityLogs', 'supportTickets'];
+                    for (const collName of collectionsToWipe) {
+                        try {
+                            const snap = await window.firebaseDb.collection(collName).get();
+                            if(!snap.empty) {
+                                const batch = window.firebaseDb.batch();
+                                snap.forEach(doc => {
+                                    if(doc.id !== 'admin' && doc.id !== 'owner') {
+                                        batch.delete(doc.ref);
+                                    }
+                                });
+                                await batch.commit();
+                            }
+                        } catch(e) { console.warn('Could not wipe collection ' + collName, e); }
+                    }
+                }
+                
+                // Keep only essential LocalStorage items
+                const safeKeys = ['platformAdmins', 'adminCourses', 'platformSettings', 'adminSettings', 'firebase_config', 'currentAdmin'];
+                const savedData = {};
+                safeKeys.forEach(k => { if(localStorage.getItem(k)) savedData[k] = localStorage.getItem(k); });
+                
+                localStorage.clear();
+                
+                safeKeys.forEach(k => { if(savedData[k]) localStorage.setItem(k, savedData[k]); });
+                
+                // Force empty strictUsers
+                localStorage.setItem('strictUsers', '[]');
+                
+                alert("تم مسح جميع حسابات الطلاب الوهمية وتهيئة قاعدة البيانات بنجاح! المنصة الآن جديدة تماماً وتستقبل فقط الطلاب الحقيقيين.");
+                window.location.reload();
+            } catch(e) {
+                console.error(e);
+                alert("حدث خطأ أثناء المسح الكامل.");
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
         };
 
         window.executeIncomeReset = async function(type) {
