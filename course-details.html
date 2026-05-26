@@ -480,12 +480,27 @@
             }
 
             function openCourseResource(item, isLocked, lockReason) {
-                if(!isOwned) {
-                    if(window.showToast) window.showToast('هذا المحتوى غير متاح حتى تشترك بالكورس','error');
-                    else alert('هذا المحتوى غير متاح حتى تشترك بالكورس');
-                    return;
+                let userStr = sessionStorage.getItem('currentStudent');
+                let isFreeCourse = (course.isFree || course.price == '0' || course.price === 0);
+
+                if (!isOwned && !isAdmin) {
+                    if (isFreeCourse) {
+                        if (!userStr) {
+                            window.location.href = 'index.html?login=true';
+                            return;
+                        } else {
+                            if(window.showToast) window.showToast('يرجى الضغط على زر "دخول الكورس مجاناً" باللون الأخضر بالأعلى أولاً', 'info');
+                            else alert('يرجى الضغط على زر "دخول الكورس مجاناً" باللون الأخضر بالأعلى أولاً');
+                            return;
+                        }
+                    } else {
+                        if(window.showToast) window.showToast('هذا المحتوى غير متاح، يجب عليك الاشتراك في الكورس أولاً', 'error');
+                        else alert('هذا المحتوى غير متاح، يجب عليك الاشتراك في الكورس أولاً');
+                        return;
+                    }
                 }
-                if(isLocked) {
+                
+                if(isLocked && !isAdmin) {
                     if(window.showToast) window.showToast(lockReason || 'هذا المحتوى مقفول حالياً', 'error');
                     else alert(lockReason || 'هذا المحتوى مقفول حالياً');
                     return;
@@ -659,13 +674,24 @@
                                 actionBtn.style.borderColor = 'rgba(255,255,255,0.2)';
                                 actionBtn.style.color = 'rgba(255,255,255,0.5)';
                             } else {
-                                actionBtn.textContent = isOwned ? (isCompleted ? 'مراجعة' : 'بدء') : 'اشترك لفتح';
-                                if (isCompleted) {
-                                    actionBtn.style.borderColor = '#2ecc71';
-                                    actionBtn.style.color = '#2ecc71';
+                                let isFreeCourse = (course.isFree || course.price == '0' || course.price === 0);
+                                if (isOwned || isAdmin) {
+                                    actionBtn.textContent = isCompleted ? 'مراجعة' : 'بدء';
+                                    if (isCompleted) {
+                                        actionBtn.style.borderColor = '#2ecc71';
+                                        actionBtn.style.color = '#2ecc71';
+                                    } else {
+                                        actionBtn.style.borderColor = 'var(--accent-cyan)';
+                                        actionBtn.style.color = 'var(--accent-cyan)';
+                                    }
                                 } else {
-                                    actionBtn.style.borderColor = 'var(--accent-cyan)';
-                                    actionBtn.style.color = 'var(--accent-cyan)';
+                                    if (isFreeCourse) {
+                                        actionBtn.textContent = userStr ? 'انضمام مجاني' : 'سجل الدخول';
+                                    } else {
+                                        actionBtn.textContent = 'اشترك لفتح';
+                                    }
+                                    actionBtn.style.borderColor = 'var(--accent-orange)';
+                                    actionBtn.style.color = 'var(--accent-orange)';
                                 }
                             }
                             
