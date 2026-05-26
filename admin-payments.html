@@ -531,8 +531,9 @@
                         csvContent += "لا يوجد طلبة مسحوب منهم الكورس بالفعل حتى الان,,,,,,,\r\n";
                     }
 
-                    // Download using Blob with UTF-8 BOM
-                    const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
+                    // Download using Blob with proper UTF-8 BOM byte array
+                    const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
+                    const blob = new Blob([bom, csvContent], { type: 'text/csv;charset=utf-8;' });
                     const url = URL.createObjectURL(blob);
                     const link = document.createElement("a");
                     link.setAttribute("href", url);
