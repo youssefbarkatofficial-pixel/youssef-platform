@@ -582,9 +582,10 @@ img, video {
     font-size: 1.2rem;
   }
 
-  /* Hide brand text on smaller screens to keep nav clean and premium */
+  /* Show brand text on smaller screens as requested */
   .nav-brand-text {
-    display: none;
+    display: inline-block;
+    font-size: 1.1rem;
   }
 
   /* Footers */
