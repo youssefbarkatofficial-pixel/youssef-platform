@@ -430,49 +430,77 @@
 // --- DYNAMIC SECTIONS RENDERER ---
 
             function migrateCourseToSections(contents) {
-                let sections = [];
                 const c = contents || {};
 
                 if (c.sections && Array.isArray(c.sections) && c.sections.length > 0) {
                     return { sections: c.sections };
                 }
 
-                if (c.sections && Array.isArray(c.sections) && c.sections.length === 0) {
-                    return { sections: [
-                        { id: 'sec_lectures', title: 'المحاضرات', items: [] },
-                        { id: 'sec_homeworks', title: 'الواجبات', items: [] },
-                        { id: 'sec_exams', title: 'الامتحانات', items: [] }
-                    ]};
-                }
+                let defaultSections = [
+                    { id: 'sec_lectures', title: 'المحاضرات', items: [] },
+                    { id: 'sec_homeworks', title: 'الواجبات', items: [] },
+                    { id: 'sec_exams', title: 'الامتحانات', items: [] }
+                ];
                 
+                // Helper to find items attached to a specific lecture
+                function getAttachedItems(lectureId) {
+                    let attached = [];
+                    ['trainings', 'homeworks', 'exams'].forEach(key => {
+                        if (c[key] && Array.isArray(c[key])) {
+                            c[key].forEach(item => {
+                                if (item.attachedToLectureId === lectureId) {
+                                    attached.push(item);
+                                }
+                            });
+                        }
+                    });
+                    return attached;
+                }
+
                 if (c.lectures && c.lectures.length) {
                     let items = [];
                     c.lectures.forEach(lec => {
-                        if (lec.children && lec.children.length) {
+                        let attachedFromOtherSections = getAttachedItems(lec.id);
+                        let hasChildren = (lec.children && lec.children.length) || attachedFromOtherSections.length > 0;
+                        
+                        if (hasChildren) {
                             items.push({ id: lec.id || 'lec_'+Date.now(), title: lec.title, type: 'header', thumbnail: lec.thumbnail });
-                            lec.children.forEach(child => items.push(child));
+                            if (lec.children) lec.children.forEach(child => items.push(child));
+                            attachedFromOtherSections.forEach(child => items.push(child));
                         } else {
                             items.push(lec);
                         }
                     });
-                    sections.push({ id: 'sec_lectures', title: 'المحاضرات', items: items });
+                    defaultSections[0].items = items;
                 }
                 
-                if (c.homeworks && c.homeworks.length) sections.push({ id: 'sec_homeworks', title: 'الواجبات', items: c.homeworks });
-                if (c.exams && c.exams.length) sections.push({ id: 'sec_exams', title: 'الامتحانات', items: c.exams });
+                if (c.homeworks && c.homeworks.length) {
+                    // Filter out items already attached to a lecture to avoid duplication
+                    let unattached = c.homeworks.filter(h => !h.attachedToLectureId);
+                    if (unattached.length) defaultSections[1].items = unattached;
+                }
+                
+                if (c.exams && c.exams.length) {
+                    let unattached = c.exams.filter(e => !e.attachedToLectureId);
+                    if (unattached.length) defaultSections[2].items = unattached;
+                }
+                
+                let sections = defaultSections;
+
+                // Add trainings section if any trainings exist that aren't attached to lectures
+                if (c.trainings && c.trainings.length) {
+                    let unattached = c.trainings.filter(t => !t.attachedToLectureId);
+                    if (unattached.length) {
+                        sections.push({ id: 'sec_trainings', title: 'التدريبات', items: unattached });
+                    }
+                }
+
                 if (c.customSections && c.customSections.length) {
                     c.customSections.forEach((sec, idx) => {
                         sections.push({ id: 'sec_custom_'+idx, title: sec.name || 'قسم مخصص', items: sec.items || [] });
                     });
                 }
                 
-                if (sections.length === 0) {
-                    sections = [
-                        { id: 'sec_lectures', title: 'المحاضرات', items: [] },
-                        { id: 'sec_homeworks', title: 'الواجبات', items: [] },
-                        { id: 'sec_exams', title: 'الامتحانات', items: [] }
-                    ];
-                }
                 return { sections: sections };
             }
 
