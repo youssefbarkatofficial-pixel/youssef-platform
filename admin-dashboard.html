@@ -430,7 +430,12 @@
                     { id: 'c2', title: 'تاريخ مصر القديمة والحضارات', desc: 'فهم عميق للتاريخ بأسلوب قصصي ممتع يجعلك تعيش الأحداث وتستنتج الأسئلة.', price: '200', grade: 'sec1', image: 'https://via.placeholder.com/400x250/071326/58C4DD?text=History' },
                     { id: 'c3', title: 'الدراسات الاجتماعية - تأسيس', desc: 'كورس التأسيس الشامل لطلاب الصف الأول الإعدادي، مدخلك لفهم المادة ببساطة.', price: '100', grade: 'prep1', image: 'https://via.placeholder.com/400x250/0A1E3A/D4A64F?text=Social+Studies' }
                 ];
-                localStorage.setItem('adminCourses', JSON.stringify(adminCourses));
+                // Use safe global function if available
+                if (typeof window.safeStorageSaveCourses === 'function') {
+                    window.safeStorageSaveCourses(adminCourses);
+                } else {
+                    try { localStorage.setItem('adminCourses', JSON.stringify(adminCourses)); } catch(e) {}
+                }
             }
 
             // Real Stats Calculation
@@ -869,7 +874,11 @@
             window.deleteCourse = function(id) {
                 if(confirm('هل أنت متأكد من حذف هذا الكورس نهائياً؟')) {
                     adminCourses = adminCourses.filter(c => c.id !== id);
-                    localStorage.setItem('adminCourses', JSON.stringify(adminCourses));
+                    if (typeof window.safeStorageSaveCourses === 'function') {
+                        window.safeStorageSaveCourses(adminCourses);
+                    } else {
+                        try { localStorage.setItem('adminCourses', JSON.stringify(adminCourses)); } catch(e) {}
+                    }
                     renderCourses();
                     if(window.showToast) window.showToast('تم الحذف بنجاح', 'success');
                 }
@@ -913,7 +922,11 @@
                         }
                     }
                     
-                    localStorage.setItem('adminCourses', JSON.stringify(adminCourses));
+                    if (typeof window.safeStorageSaveCourses === 'function') {
+                        window.safeStorageSaveCourses(adminCourses);
+                    } else {
+                        try { localStorage.setItem('adminCourses', JSON.stringify(adminCourses)); } catch(e) {}
+                    }
                     closeEditor();
                     renderCourses();
                     calculateStats();

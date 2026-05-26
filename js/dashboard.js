@@ -85,7 +85,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const onlineCourses = await window.FirebaseService.getCourses();
                     if (onlineCourses && onlineCourses.length > 0) {
                         adminCourses = onlineCourses;
-                        localStorage.setItem('adminCourses', JSON.stringify(adminCourses));
+                        if (typeof window.safeStorageSaveCourses === 'function') {
+                            window.safeStorageSaveCourses(adminCourses);
+                        } else {
+                            try { localStorage.setItem('adminCourses', JSON.stringify(adminCourses)); } catch(e) {}
+                        }
                     }
                 }
             } catch(e) {}

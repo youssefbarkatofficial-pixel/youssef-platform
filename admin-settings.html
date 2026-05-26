@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -201,11 +201,41 @@
                 }
             });
 
-            document.getElementById('btnExportBackup').addEventListener('click', () => {
-                if (window.PlatformDB && window.PlatformDB.backup.exportData()) {
-                    if (window.showToast) window.showToast('تم تصدير النسخة الاحتياطية بنجاح!', 'success');
-                } else {
-                    alert('حدث خطأ أثناء تصدير النسخة الاحتياطية.');
+            document.getElementById('btnExportBackup').addEventListener('click', async () => {
+                const originalText = document.getElementById('btnExportBackup').innerHTML;
+                document.getElementById('btnExportBackup').innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> جاري استخراج النسخة...';
+                document.getElementById('btnExportBackup').disabled = true;
+
+                try {
+                    if (!window.firebaseDb) throw new Error("Firebase غير متصل");
+                    let backupData = { timestamp: new Date().toISOString(), collections: {} };
+                    const collections = ['courses', 'students', 'paymentRequests', 'chatMessages', 'studentProgress'];
+                    
+                    for (let coll of collections) {
+                        const snap = await window.firebaseDb.collection(coll).get();
+                        backupData.collections[coll] = [];
+                        snap.forEach(doc => {
+                            backupData.collections[coll].push({ id: doc.id, ...doc.data() });
+                        });
+                    }
+                    
+                    const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `platform_firebase_backup_${new Date().toISOString().split('T')[0]}.json`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    
+                    if (window.showToast) window.showToast('تم استخراج النسخة من السيرفر بنجاح!', 'success');
+                } catch(e) {
+                    console.error('Backup export error', e);
+                    alert('خطأ أثناء تصدير النسخة: ' + e.message);
+                } finally {
+                    document.getElementById('btnExportBackup').innerHTML = originalText;
+                    document.getElementById('btnExportBackup').disabled = false;
                 }
             });
             importInput.addEventListener('change', (e) => {
@@ -213,12 +243,41 @@
                 if (!file) return;
 
                 const reader = new FileReader();
-                reader.onload = function(evt) {
-                    if (window.PlatformDB && window.PlatformDB.backup.importData(evt.target.result)) {
-                        alert('تم استعادة النسخة الاحتياطية بنجاح. سيتم إعادة تحميل المنصة.');
+                reader.onload = async function(evt) {
+                    try {
+                        const backupData = JSON.parse(evt.target.result);
+                        if(!backupData.collections) throw new Error("ملف النسخة غير صالح");
+                        
+                        document.getElementById('btnImportBackup').innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> جاري رفع النسخة للسيرفر...';
+                        document.getElementById('btnImportBackup').disabled = true;
+
+                        for (let coll in backupData.collections) {
+                            const items = backupData.collections[coll];
+                            const batch = window.firebaseDb.batch();
+                            let count = 0;
+                            for (let item of items) {
+                                const id = item.id;
+                                const data = { ...item };
+                                delete data.id;
+                                const ref = window.firebaseDb.collection(coll).doc(id);
+                                batch.set(ref, data);
+                                count++;
+                                // Firestore batch limit is 500 operations
+                                if(count >= 490) {
+                                    await batch.commit();
+                                    count = 0;
+                                }
+                            }
+                            if(count > 0) await batch.commit();
+                        }
+                        
+                        alert('تم استعادة النسخة المرفوعة إلى سيرفر الفاير بيز بنجاح!');
                         window.location.reload();
-                    } else {
-                        alert('ملف النسخة الاحتياطية غير صالح أو تالف.');
+                    } catch(err) {
+                        console.error('Backup import error', err);
+                        alert('خطأ أثناء الاستعادة: ' + err.message);
+                        document.getElementById('btnImportBackup').innerHTML = '<i class="fas fa-upload mr-2"></i> استعادة نسخة (Import)';
+                        document.getElementById('btnImportBackup').disabled = false;
                     }
                 };
                 reader.readAsText(file);

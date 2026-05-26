@@ -1,4 +1,4 @@
-﻿// js/courses-renderer.js
+// js/courses-renderer.js
 document.addEventListener('DOMContentLoaded', () => {
     // Helper: load courses and restore separated base64 images from cache
     function loadAdminCourses() {
@@ -21,7 +21,11 @@ document.addEventListener('DOMContentLoaded', () => {
     function seedDefaultCourses() {
         if (!adminCourses || adminCourses.length === 0) {
             adminCourses = [];
-            localStorage.setItem('adminCourses', JSON.stringify(adminCourses));
+            if (typeof window.safeStorageSaveCourses === 'function') {
+                window.safeStorageSaveCourses(adminCourses);
+            } else {
+                try { localStorage.setItem('adminCourses', JSON.stringify(adminCourses)); } catch(e) {}
+            }
         }
     }
     seedDefaultCourses();
@@ -121,7 +125,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 const fbCourses = await window.FirebaseService.getCourses();
                 if (fbCourses && fbCourses.length > 0) {
                     adminCourses = fbCourses;
-                    localStorage.setItem('adminCourses', JSON.stringify(adminCourses));
+                    if (typeof window.safeStorageSaveCourses === 'function') {
+                        window.safeStorageSaveCourses(adminCourses);
+                    } else {
+                        try { localStorage.setItem('adminCourses', JSON.stringify(adminCourses)); } catch(e) {}
+                    }
                     
                     // Re-render with fresh data
                     if (coursesGrid) {

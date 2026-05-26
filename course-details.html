@@ -562,12 +562,13 @@
                         if(item.youtubeUrl) {
                             let videoId = '';
                             try {
-                                const urlObj = new URL(item.youtubeUrl);
-                                if(urlObj.hostname.includes('youtube.com')) videoId = urlObj.searchParams.get('v');
-                                else if(urlObj.hostname.includes('youtu.be')) videoId = urlObj.pathname.slice(1);
+                                const match = item.youtubeUrl.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i);
+                                if (match && match[1]) {
+                                    videoId = match[1];
+                                }
                             } catch(e) {}
                             if(videoId) {
-                                container.innerHTML = `<iframe width="100%" height="100%" src="https://www.youtube.com/embed/${videoId}?autoplay=1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+                                container.innerHTML = `<iframe width="100%" height="100%" src="https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1&showinfo=0" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
                             } else {
                                 window.open(item.youtubeUrl, '_blank');
                             }
