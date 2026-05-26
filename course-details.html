@@ -310,6 +310,38 @@
                 return;
             }
 
+            let userStr = sessionStorage.getItem('currentStudent');
+            let isOwned = false;
+            let isPending = false;
+            
+            if (userStr) {
+                let user = JSON.parse(userStr);
+                
+                // Fetch latest from Firebase to ensure fast unlock if admin approved
+                if (window.FirebaseService && typeof window.FirebaseService.getUser === 'function') {
+                    try {
+                        const remoteUser = await window.FirebaseService.getUser(user.phone);
+                        if(remoteUser) {
+                            localStorage.setItem(`db_${user.phone}`, JSON.stringify(remoteUser));
+                        }
+                    } catch(e) {}
+                }
+                if (window.FirebaseService && typeof window.FirebaseService.getPaymentRequests === 'function') {
+                    try {
+                        await window.FirebaseService.getPaymentRequests();
+                    } catch(e) {}
+                }
+
+                let dbUser = JSON.parse(localStorage.getItem(`db_${user.phone}`)) || { courses: [] };
+                isOwned = dbUser.courses && dbUser.courses.includes(courseId);
+                
+                let paymentRequests = JSON.parse(localStorage.getItem('paymentRequests')) || [];
+                let existingReq = paymentRequests.find(req => req.courseId === courseId && req.userId === user.phone);
+                if (existingReq && existingReq.status === 'pending') {
+                    isPending = true;
+                }
+            }
+
             const grades = {
                 'prep1': 'أولى إعدادي',
                 'prep2': 'تانية إعدادي',
@@ -1136,6 +1168,7 @@
     <script src="js/firebase-service.js"></script>
 </body>
 </html>
+
 
 
 
