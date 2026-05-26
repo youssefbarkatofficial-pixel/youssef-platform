@@ -1015,19 +1015,20 @@ window.exportSubscribersCSV = function() {
         return;
     }
     
-    let csvContent = "الاسم,رقم الموبايل,رقم ولي الأمر,الصف\r\n";
+    let htmlContent = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"></head><body dir="rtl">';
+    htmlContent += '<table border="1"><thead><tr><th>الاسم</th><th>رقم الموبايل</th><th>رقم ولي الأمر</th><th>الصف</th></tr></thead><tbody>';
     
     currentCourseSubscribersData.forEach(s => {
-        const row = [s.name, s.phone, s.parentPhone || 'غير مسجل', s.grade];
-        csvContent += row.join(",") + "\r\n";
+        htmlContent += `<tr><td>${s.name}</td><td style="mso-number-format:'\\@'">${s.phone}</td><td style="mso-number-format:'\\@'">${s.parentPhone || 'غير مسجل'}</td><td>${s.grade}</td></tr>`;
     });
     
-    const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
-    const blob = new Blob([bom, csvContent], { type: 'text/csv;charset=utf-8;' });
+    htmlContent += '</tbody></table></body></html>';
+    
+    const blob = new Blob([htmlContent], { type: 'application/vnd.ms-excel;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.setAttribute("href", url);
-    link.setAttribute("download", `subscribers_course_${currentCourseSubscribersId}_${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute("download", `subscribers_course_${currentCourseSubscribersId}_${new Date().toISOString().split('T')[0]}.xls`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
