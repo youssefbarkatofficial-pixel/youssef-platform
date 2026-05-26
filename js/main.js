@@ -1,4 +1,32 @@
 document.addEventListener('DOMContentLoaded', () => {
+  // --- Global Safety Check: Auto-logout deleted accounts ---
+  const checkStudentStr = sessionStorage.getItem('currentStudent') || localStorage.getItem('currentStudent');
+  if (checkStudentStr && !window.location.pathname.includes('admin-')) {
+      try {
+          const sObj = JSON.parse(checkStudentStr);
+          setTimeout(async () => {
+              if (window.firebaseDb) {
+                  try {
+                      // If user doesn't exist in DB anymore, kick them out
+                      const doc = await window.firebaseDb.collection('students').doc(sObj.phone || sObj.uid).get();
+                      if (!doc.exists) {
+                          sessionStorage.removeItem('currentStudent');
+                          localStorage.removeItem('currentStudent');
+                          let accs = JSON.parse(localStorage.getItem('savedLocalAccounts') || '[]');
+                          accs = accs.filter(a => a.phone !== sObj.phone);
+                          localStorage.setItem('savedLocalAccounts', JSON.stringify(accs));
+                          if (!window.location.pathname.includes('index.html')) {
+                              window.location.href = 'index.html';
+                          } else {
+                              window.location.reload();
+                          }
+                      }
+                  } catch(e) {}
+              }
+          }, 2000); // wait for firebase to initialize
+      } catch(e) {}
+  }
+
   // Navbar Scroll Effect
   const navbar = document.querySelector('.navbar');
   window.addEventListener('scroll', () => {
