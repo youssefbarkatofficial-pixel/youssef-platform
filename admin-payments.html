@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/dashboard.css">
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 </head>
 <body>
     <div class="bg-effects"></div>
@@ -483,11 +484,11 @@
                         return c ? c.title : cId;
                     };
 
-                    let htmlContent = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"></head><body dir="rtl">';
+                    let aoa = [];
                     
                     // --- Active Courses Section ---
-                    htmlContent += '<h3>الطلبة المشتركين حاليا</h3>';
-                    htmlContent += '<table border="1"><thead><tr><th>اسم الطالب</th><th>رقم الموبايل</th><th>رقم ولي الامر</th><th>الصف</th><th>الكورس</th><th>حالة الدفع</th><th>تاريخ الدفع</th><th>طريقة الاشتراك (مجاني/مدفوع)</th></tr></thead><tbody>';
+                    aoa.push(['الطلبة المشتركين حاليا']);
+                    aoa.push(["اسم الطالب", "رقم الموبايل", "رقم ولي الامر", "الصف", "الكورس", "حالة الدفع", "تاريخ الدفع", "طريقة الاشتراك (مجاني/مدفوع)"]);
                     
                     let activeCount = 0;
                     students.forEach(student => {
@@ -498,20 +499,21 @@
                                 const pDate = req ? new Date(req.date).toLocaleDateString('ar-EG') : 'غير محدد';
                                 const isFree = req ? 'مدفوع' : 'مجاني (اضافة يدوية)';
                                 
-                                htmlContent += `<tr><td>${student.name || ''}</td><td style="mso-number-format:'\\@'">${student.phone || ''}</td><td style="mso-number-format:'\\@'">${student.parentPhone || 'غير مسجل'}</td><td>${student.grade || ''}</td><td>${getCourseName(courseId)}</td><td>${pStatus}</td><td>${pDate}</td><td>${isFree}</td></tr>`;
+                                aoa.push([student.name || '', student.phone || '', student.parentPhone || 'غير مسجل', student.grade || '', getCourseName(courseId), pStatus, pDate, isFree]);
                                 activeCount++;
                             });
                         }
                     });
 
                     if (activeCount === 0) {
-                        htmlContent += '<tr><td colspan="8" style="text-align:center;">لا يوجد طلبة مشتركين بالفعل حتى الان</td></tr>';
+                        aoa.push(["لا يوجد طلبة مشتركين بالفعل حتى الان"]);
                     }
-                    htmlContent += '</tbody></table><br><br>';
+
+                    aoa.push([]); // empty row
 
                     // --- Revoked Courses Section ---
-                    htmlContent += '<h3>الطلبة المسحوب منهم صلاحيات الكورسات</h3>';
-                    htmlContent += '<table border="1"><thead><tr><th>اسم الطالب</th><th>رقم الموبايل</th><th>رقم ولي الامر</th><th>الصف</th><th>الكورس</th><th>حالة الدفع</th><th>تاريخ الدفع</th><th>طريقة الاشتراك</th></tr></thead><tbody>';
+                    aoa.push(['الطلبة المسحوب منهم صلاحيات الكورسات']);
+                    aoa.push(["اسم الطالب", "رقم الموبايل", "رقم ولي الامر", "الصف", "الكورس", "حالة الدفع", "تاريخ الدفع", "طريقة الاشتراك"]);
                     
                     let revokedCount = 0;
                     const approvedReqs = paymentRequests.filter(r => r.status === 'approved' || r.status === 'active');
@@ -520,26 +522,22 @@
                         if (student) {
                             if (!student.courses || !student.courses.includes(req.courseId)) {
                                 const pDate = new Date(req.date).toLocaleDateString('ar-EG');
-                                htmlContent += `<tr><td>${student.name || ''}</td><td style="mso-number-format:'\\@'">${student.phone || ''}</td><td style="mso-number-format:'\\@'">${student.parentPhone || 'غير مسجل'}</td><td>${student.grade || ''}</td><td>${getCourseName(req.courseId)}</td><td>مقبول (مسحوب حاليا)</td><td>${pDate}</td><td>مدفوع</td></tr>`;
+                                aoa.push([student.name || '', student.phone || '', student.parentPhone || 'غير مسجل', student.grade || '', getCourseName(req.courseId), 'مقبول (مسحوب حاليا)', pDate, 'مدفوع']);
                                 revokedCount++;
                             }
                         }
                     });
 
                     if (revokedCount === 0) {
-                        htmlContent += '<tr><td colspan="8" style="text-align:center;">لا يوجد طلبة مسحوب منهم الكورس بالفعل حتى الان</td></tr>';
+                        aoa.push(["لا يوجد طلبة مسحوب منهم الكورس بالفعل حتى الان"]);
                     }
                     
-                    htmlContent += '</tbody></table></body></html>';
-
-                    const blob = new Blob([htmlContent], { type: 'application/vnd.ms-excel;charset=utf-8;' });
-                    const url = URL.createObjectURL(blob);
-                    const link = document.createElement("a");
-                    link.setAttribute("href", url);
-                    link.setAttribute("download", `payments_review_${new Date().toISOString().split('T')[0]}.xls`);
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
+                    const ws = XLSX.utils.aoa_to_sheet(aoa);
+                    ws['!dir'] = 'rtl'; // RTL support
+                    const wb = XLSX.utils.book_new();
+                    XLSX.utils.book_append_sheet(wb, ws, "المدفوعات");
+                    
+                    XLSX.writeFile(wb, `payments_review_${new Date().toISOString().split('T')[0]}.xlsx`);
 
                     btn.innerHTML = originalText;
                     btn.disabled = false;
