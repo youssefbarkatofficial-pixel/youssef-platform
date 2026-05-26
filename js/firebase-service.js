@@ -262,9 +262,20 @@ window.FirebaseService = (function () {
             }
 
             const snap = await getDb().collection('courses').get();
-            const courses = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-            safeStorageSaveCourses(courses);
-            return courses;
+            const serverCourses = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+            
+            // Check if server is empty but local has courses (prevent wiping unsynced data)
+            const localCourses = getCoursesFromStorage();
+            if (serverCourses.length === 0 && localCourses.length > 0) {
+                console.warn('Firestore has no courses, but local has data. Syncing local to Firestore...');
+                for (let c of localCourses) {
+                    await saveCourse(c);
+                }
+                return localCourses;
+            }
+
+            safeStorageSaveCourses(serverCourses);
+            return serverCourses;
         } catch (e) {
             console.warn('getCourses Firestore failed, using cache', e);
             return getCoursesFromStorage();
