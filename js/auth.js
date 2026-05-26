@@ -810,7 +810,20 @@ document.addEventListener('DOMContentLoaded', () => {
       } catch (error) {
         if (window.FirebaseService && window.FirebaseService.isReady()) {
             console.warn('Firebase login rejected:', error);
-            showLoginError(error.message || 'بيانات الدخول غير صحيحة أو الحساب غير موجود.');
+            let userMsg = error.message;
+            // Map common Firebase auth errors to Arabic
+            if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-email' || error.code === 'auth/invalid-credential') {
+                // Since invalid-credential hides the distinction, we'll give a smart combined error or generic
+                // but if we are sure it's invalid-credential, we can say check phone or password
+                userMsg = 'رقم الهاتف أو كلمة المرور غير صحيحة، أو الحساب غير مسجل على المنصة. (اضغط إنشاء حساب جديد إذا لم تكن مسجلاً)';
+            }
+            if (error.code === 'auth/wrong-password') {
+                userMsg = 'كلمة المرور التي أدخلتها خاطئة. الرجاء التأكد منها والمحاولة مجدداً.';
+            }
+            if (error.message && error.message.includes('تم مسح هذا الحساب')) {
+                userMsg = error.message;
+            }
+            showLoginError(userMsg);
             return;
         }
         console.warn('Firebase failed/not configured, using STRICT Local Storage fallback.', error);
