@@ -722,5 +722,22 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         `;
         document.head.appendChild(style);
+        
+        // Global Encoded ID (Anti-Piracy)
+        try {
+            const studentStr = sessionStorage.getItem('currentUser');
+            if (studentStr) {
+                const student = JSON.parse(studentStr);
+                if (student && student.phone) {
+                    const rawString = `${student.name || 'Student'}|${student.phone}|${student.parentPhone || ''}`;
+                    const encodedString = btoa(unescape(encodeURIComponent(rawString)));
+                    
+                    const trackerDiv = document.createElement('div');
+                    trackerDiv.textContent = 'REF:' + encodedString;
+                    trackerDiv.style.cssText = 'position: fixed; bottom: 5px; left: 5px; font-size: 8px; color: #fff; opacity: 0.15; z-index: 999999; pointer-events: none; user-select: none; font-family: monospace; max-width: 90vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 0 1px #000;';
+                    document.body.appendChild(trackerDiv);
+                }
+            }
+        } catch(e) {}
     }
 });

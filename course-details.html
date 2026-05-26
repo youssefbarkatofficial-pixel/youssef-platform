@@ -584,12 +584,14 @@
                             } catch(e) {}
                             if(videoId) {
                                 container.innerHTML = `<iframe width="100%" height="100%" src="https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1&showinfo=0" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+                                if (window.injectVideoWatermark) window.injectVideoWatermark(container);
                             } else {
                                 window.open(item.youtubeUrl, '_blank');
                             }
                         } else if (item.videoUrl) {
                             const posterAttr = item.thumbnail ? `poster="${item.thumbnail}"` : '';
                             container.innerHTML = `<video width="100%" height="100%" controls controlsList="nodownload" autoplay ${posterAttr}><source src="${item.videoUrl}" type="video/mp4">متصفحك لا يدعم تشغيل الفيديو.</video>`;
+                            if (window.injectVideoWatermark) window.injectVideoWatermark(container);
                             const vidEl = container.querySelector('video');
                             if(vidEl) {
                                 vidEl.onended = () => {
@@ -1123,6 +1125,44 @@
     <script src="js/firebase-config.js"></script>
     <script src="js/firebase-service.js"></script>
 <script>
+window.injectVideoWatermark = function(container) {
+    try {
+        const studentStr = sessionStorage.getItem('currentUser');
+        if (!studentStr) return;
+        const student = JSON.parse(studentStr);
+        if (!student || !student.phone) return;
+        
+        container.style.position = 'relative';
+
+        const wm = document.createElement('div');
+        wm.className = 'moving-watermark';
+        wm.style.cssText = 'position: absolute; color: rgba(255,255,255,0.25); font-size: 1.2rem; font-weight: bold; pointer-events: none; z-index: 999999; white-space: nowrap; text-shadow: 1px 1px 2px rgba(0,0,0,0.8); transition: all 4s linear; user-select: none; direction: rtl;';
+        
+        const updateText = () => {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('ar-EG');
+            wm.textContent = `${student.name || ''} - ${student.phone} - ${timeStr}`;
+        };
+        updateText();
+        setInterval(updateText, 10000);
+
+        container.appendChild(wm);
+
+        const moveWatermark = () => {
+            if(!container.contains(wm)) return;
+            const maxX = Math.max(0, container.clientWidth - wm.clientWidth - 20);
+            const maxY = Math.max(0, container.clientHeight - wm.clientHeight - 20);
+            const randomX = Math.floor(Math.random() * maxX);
+            const randomY = Math.floor(Math.random() * maxY);
+            const rot = Math.floor(Math.random() * 20 - 10);
+            wm.style.transform = `translate(${randomX}px, ${randomY}px) rotate(${rot}deg)`;
+            setTimeout(moveWatermark, 4500);
+        };
+        
+        setTimeout(moveWatermark, 100);
+    } catch(e) {}
+};
+
 window.enrollFreeCourse = async function(courseId) {
     if(!sessionStorage.getItem('currentStudent')) return;
     const user = JSON.parse(sessionStorage.getItem('currentStudent'));
