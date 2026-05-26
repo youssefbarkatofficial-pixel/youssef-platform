@@ -253,16 +253,33 @@ window.FirebaseService = (function () {
         if (!isFirebaseReady()) {
             return getCoursesFromStorage();
         }
+        
+        function stripContentsIfNotAdmin(coursesArr) {
+            const adminStr = sessionStorage.getItem('currentAdmin');
+            let isAdmin = false;
+            if(adminStr) {
+                try { if(JSON.parse(adminStr).role === 'admin') isAdmin = true; } catch(e){}
+            }
+            if(!isAdmin) {
+                return coursesArr.map(c => {
+                    const { contents, ...rest } = c;
+                    return rest;
+                });
+            }
+            return coursesArr;
+        }
+
         try {
             if (!coursesListenerUnsubscribe) {
                 coursesListenerUnsubscribe = getDb().collection('courses').onSnapshot(snap => {
-                    const courses = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                    let courses = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                    courses = stripContentsIfNotAdmin(courses);
                     safeStorageSaveCourses(courses);
                 }, err => console.warn('Courses listener error', err));
             }
 
             const snap = await getDb().collection('courses').get();
-            const serverCourses = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+            let serverCourses = snap.docs.map(d => ({ id: d.id, ...d.data() }));
             
             // Check if server is empty but local has courses (prevent wiping unsynced data)
             const localCourses = getCoursesFromStorage();
@@ -271,9 +288,10 @@ window.FirebaseService = (function () {
                 for (let c of localCourses) {
                     await saveCourse(c);
                 }
-                return localCourses;
+                return stripContentsIfNotAdmin(localCourses);
             }
 
+            serverCourses = stripContentsIfNotAdmin(serverCourses);
             safeStorageSaveCourses(serverCourses);
             return serverCourses;
         } catch (e) {

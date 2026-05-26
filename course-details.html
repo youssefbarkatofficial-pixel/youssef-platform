@@ -300,24 +300,39 @@
             if (userStr) {
                 let user = JSON.parse(userStr);
                 
-                // Fetch latest from Firebase to ensure fast unlock if admin approved
-                if (window.FirebaseService && typeof window.FirebaseService.getUser === 'function') {
+                // Force Secure Server-Side Verification for Course Ownership
+                let serverVerified = false;
+                if (window.FirebaseService && window.FirebaseService.isReady()) {
                     try {
                         const remoteUser = await window.FirebaseService.getUser(user.phone);
                         if(remoteUser) {
                             localStorage.setItem(`db_${user.phone}`, JSON.stringify(remoteUser));
+                            isOwned = remoteUser.courses && remoteUser.courses.includes(courseId);
+                            dbUser = remoteUser;
+                            serverVerified = true;
+                        } else {
+                            isOwned = false;
                         }
-                    } catch(e) {}
+                    } catch(e) {
+                        console.error('Server verification failed', e);
+                        isOwned = false;
+                        alert('تعذر التحقق من ملكيتك للكورس بسبب مشكلة في الاتصال بالإنترنت. يرجى المحاولة لاحقاً.');
+                        window.location.href = 'courses.html';
+                        return;
+                    }
                 }
+
+                if (!serverVerified) {
+                    dbUser = JSON.parse(localStorage.getItem(`db_${user.phone}`)) || { courses: [], completedItems: [] };
+                    isOwned = dbUser.courses && dbUser.courses.includes(courseId);
+                }
+
                 if (window.FirebaseService && typeof window.FirebaseService.getPaymentRequests === 'function') {
                     try {
                         await window.FirebaseService.getPaymentRequests();
                     } catch(e) {}
                 }
 
-                dbUser = JSON.parse(localStorage.getItem(`db_${user.phone}`)) || { courses: [], completedItems: [] };
-                isOwned = dbUser.courses && dbUser.courses.includes(courseId);
-                
                 let paymentRequests = JSON.parse(localStorage.getItem('paymentRequests')) || [];
                 let existingReq = paymentRequests.find(req => req.courseId === courseId && req.userId === user.phone);
                 if (existingReq && existingReq.status === 'pending') {

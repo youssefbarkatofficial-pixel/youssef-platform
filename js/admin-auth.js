@@ -40,7 +40,7 @@ function adminLogout() {
 }
 
 // Check Admin Authentication
-function checkAdminAuth() {
+async function checkAdminAuth() {
     const adminStr = sessionStorage.getItem('currentAdmin');
     
     // If not logged in as admin, redirect to admin login
@@ -51,6 +51,34 @@ function checkAdminAuth() {
 
     const admin = JSON.parse(adminStr);
     
+    // Check against local valid admins first
+    const validAdmins = JSON.parse(localStorage.getItem('platformAdmins') || '[]');
+    const isValidLocal = validAdmins.find(a => a.email === admin.email && a.password === admin.password);
+    
+    if (!isValidLocal) {
+        sessionStorage.removeItem('currentAdmin');
+        window.location.href = 'admin-login.html';
+        return null;
+    }
+
+    // Optional: Firebase strict verification (if firebase is ready)
+    if (window.firebaseDb) {
+        try {
+            const adminDoc = await window.firebaseDb.collection('platformAdmins').doc(admin.email).get();
+            if (adminDoc.exists) {
+                const remoteAdmin = adminDoc.data();
+                if (remoteAdmin.password !== admin.password) {
+                    sessionStorage.removeItem('currentAdmin');
+                    window.location.href = 'admin-login.html';
+                    return null;
+                }
+            } else {
+                // Seed admin if first time
+                await window.firebaseDb.collection('platformAdmins').doc(admin.email).set(admin);
+            }
+        } catch(e) { console.warn("Admin Firebase verify failed", e); }
+    }
+
     // VIP Admin Welcome Experience
     if (!sessionStorage.getItem('adminWelcomeShown') && window.audioManager) {
         sessionStorage.setItem('adminWelcomeShown', 'true');
