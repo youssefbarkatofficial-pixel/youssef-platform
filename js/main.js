@@ -97,11 +97,11 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Open login modal automatically if hash is #login or URL param login=true
-  if (loginModal && (window.location.hash === '#login' || new URLSearchParams(window.location.search).get('login') === 'true')) {
-    setTimeout(() => {
-        loginModal.classList.add('active');
-    }, 100);
-  }
+  // if (loginModal && (window.location.hash === '#login' || new URLSearchParams(window.location.search).get('login') === 'true')) {
+  //   setTimeout(() => {
+  //       loginModal.classList.add('active');
+  //   }, 100);
+  // }
     try { window.showStudentWelcomeToast = showStudentWelcomeToast; } catch(e) {}
     // Expose globally in case auth.js runs before this file's function scope
     try { window.showStudentWelcomeToast = showStudentWelcomeToast; } catch (e) {}
