@@ -87,7 +87,7 @@ async function checkAdminAuth() {
             
             const vipOverlay = document.createElement('div');
             vipOverlay.className = 'modal-overlay active';
-            vipOverlay.style.cssText = 'z-index: 999999; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(15px); background: rgba(0,0,0,0.8); animation: fadeIn 0.5s ease;';
+            vipOverlay.style.cssText = 'position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 999999; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(15px); background: rgba(0,0,0,0.8); animation: fadeIn 0.5s ease;';
             
             vipOverlay.innerHTML = `
                 <div class="glass-panel modal-content" style="text-align: center; padding: 50px; max-width: 500px; border: 2px solid var(--royal-gold); box-shadow: 0 0 50px rgba(212, 166, 79, 0.3); animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);">
