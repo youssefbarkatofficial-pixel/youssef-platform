@@ -96,12 +96,13 @@
                     </div>
                     <div class="dash-card-icon" style="color: #f1c40f; background: rgba(241, 196, 15, 0.1);"><i class="fas fa-clock"></i></div>
                 </div>
-                <div class="glass-panel dash-card" style="border-color: var(--royal-gold);">
+                <div class="glass-panel dash-card" style="border-color: var(--royal-gold); position: relative;">
                     <div class="dash-card-info">
                         <h3>الإيرادات (الكلية)</h3>
                         <span class="value text-gold" id="adminRevenue" style="color: var(--royal-gold);">0 ج.م</span>
                     </div>
                     <div class="dash-card-icon"><i class="fas fa-wallet"></i></div>
+                    <button class="btn btn-outline" style="position: absolute; bottom: 10px; left: 10px; padding: 3px 8px; font-size: 0.8rem; border-color: #e74c3c; color: #e74c3c;" onclick="openIncomeResetModal()">تصفير <i class="fas fa-undo"></i></button>
                 </div>
             </div>
 
@@ -180,6 +181,22 @@
         </main>
     </div>
 
+    <!-- Income Reset Modal -->
+    <div id="incomeResetModal" class="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; justify-content: center; align-items: center;">
+        <div class="glass-panel" style="width: 90%; max-width: 500px; padding: 30px; position: relative;">
+            <button onclick="document.getElementById('incomeResetModal').style.display='none'" style="position: absolute; top: 15px; right: 15px; background: transparent; border: none; color: var(--text-secondary); font-size: 1.5rem; cursor: pointer;"><i class="fas fa-times"></i></button>
+            <h2 class="text-gold mb-2"><i class="fas fa-undo mr-2"></i> تصفير الدخل</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 20px;">اختر الطريقة التي تريد بها تصفير الدخل المحسوب على المنصة:</p>
+            
+            <button class="btn btn-outline btn-block mb-1" style="border-color: #e74c3c; color: #e74c3c; text-align: right; padding-right: 20px; margin-bottom: 10px;" onclick="executeIncomeReset('all')">
+                <i class="fas fa-trash-alt mr-2"></i> تصفير الدخل بالكامل (لجميع المراحل السنية)
+            </button>
+            <button class="btn btn-outline btn-block" style="border-color: #f39c12; color: #f39c12; text-align: right; padding-right: 20px;" onclick="executeIncomeReset('prep_sec1')">
+                <i class="fas fa-minus-circle mr-2"></i> تصفير طلاب النقل (إعدادي + 1 ثانوي) فقط
+            </button>
+        </div>
+    </div>
+
     <!-- Course Editor Modal -->
     <div id="courseEditorModal" class="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; justify-content: center; align-items: center;">
         <div class="glass-panel" style="width: 90%; max-width: 600px; padding: 30px; position: relative; max-height: 90vh; overflow-y: auto;">
@@ -235,6 +252,70 @@
     </div>
     
     <script>
+        window.openIncomeResetModal = function() {
+            document.getElementById('incomeResetModal').style.display = 'flex';
+        };
+
+        window.executeIncomeReset = async function(type) {
+            const gradesToReset = (type === 'prep_sec1') ? ['prep1', 'prep2', 'prep3', 'sec1'] : null;
+            if(!confirm('هل أنت متأكد من رغبتك في تصفير الدخل؟ (لا يمكن التراجع عن هذا الإجراء وسيؤثر على العداد فقط)')) return;
+            
+            try {
+                let processed = 0;
+                let btn = document.querySelector('#incomeResetModal .glass-panel');
+                let originalContent = btn.innerHTML;
+                btn.innerHTML = '<div style="text-align:center; padding: 30px;"><i class="fas fa-spinner fa-spin fa-2x text-gold mb-3"></i><br><p>جاري تصفير الدخل...</p></div>';
+
+                const paymentRequests = JSON.parse(localStorage.getItem('paymentRequests') || '[]');
+                const approvedPays = paymentRequests.filter(req => req.status === 'approved' && !req.archived_revenue);
+
+                for (let req of approvedPays) {
+                    let shouldArchive = false;
+                    
+                    if (type === 'all') {
+                        shouldArchive = true;
+                    } else if (type === 'prep_sec1') {
+                        // We need to fetch the student's grade to know if we should archive this revenue
+                        let studentGrade = null;
+                        let dbUser = JSON.parse(localStorage.getItem('db_' + req.userId) || '{}');
+                        if(dbUser.grade) studentGrade = dbUser.grade;
+                        else {
+                            const strictUsers = JSON.parse(localStorage.getItem('strictUsers') || '[]');
+                            const sUser = strictUsers.find(u => u.phone === req.userId);
+                            if(sUser && sUser.grade) studentGrade = sUser.grade;
+                        }
+                        
+                        if (studentGrade && gradesToReset.includes(studentGrade)) {
+                            shouldArchive = true;
+                        }
+                    }
+
+                    if (shouldArchive) {
+                        if (window.firebaseDb) {
+                            await window.firebaseDb.collection('paymentRequests').doc(req.id).update({
+                                archived_revenue: true
+                            });
+                        }
+                        req.archived_revenue = true;
+                        processed++;
+                    }
+                }
+
+                localStorage.setItem('paymentRequests', JSON.stringify(paymentRequests));
+                
+                if(window.showToast) window.showToast('تم تصفير الدخل بنجاح!', 'success');
+                else alert('تم تصفير الدخل بنجاح!');
+                
+                document.getElementById('incomeResetModal').style.display = 'none';
+                btn.innerHTML = originalContent; // restore
+                
+                // Refresh UI
+                if(typeof calculateStats === 'function') calculateStats();
+            } catch(e) {
+                console.error("Error resetting income:", e);
+                alert("حدث خطأ أثناء محاولة التصفير");
+            }
+        };
         document.addEventListener('DOMContentLoaded', () => {
             // Seed Default Courses
             let adminCourses = JSON.parse(localStorage.getItem('adminCourses'));
@@ -293,8 +374,10 @@
                 const approvedPays = paymentRequests.filter(req => req.status === 'approved');
                 
                 approvedPays.forEach(req => {
-                    const course = adminCourses.find(c => c.id === req.courseId);
-                    if (course) totalRev += parseInt(course.price || 0);
+                    if(!req.archived_revenue) {
+                        const course = adminCourses.find(c => c.id === req.courseId);
+                        if (course) totalRev += parseInt(course.price || 0);
+                    }
                 });
                 
                 document.getElementById('adminTotalStudents').textContent = users.length;
