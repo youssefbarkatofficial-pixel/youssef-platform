@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -391,14 +391,37 @@
                     <td>${c.hidden ? '<span class="badge" style="background: rgba(231, 76, 60, 0.2); color: #e74c3c;">مخفي</span>' : (c.finished ? '<span class="badge" style="background: rgba(149, 165, 166, 0.2); color: #95a5a6;">منتهي</span>' : '<span class="badge" style="background: rgba(46, 204, 113, 0.2); color: #2ecc71;">معلن</span>')}</td>
                     <td style="display: flex; gap: 5px;">
                         <button class="btn btn-green" style="padding: 5px 10px; font-size: 0.8rem;" onclick="openCourseEditor('${c.id}')"><i class="fas fa-edit"></i> تعديل</button>
-                        <button class="btn btn-outline" style="padding: 5px 10px; font-size: 0.8rem; border-color: var(--royal-gold); color: var(--royal-gold);" onclick="openCourseSubscribers('\${c.id}')"><i class="fas fa-users"></i> المشتركين</button>
+                        <button class="btn btn-outline" style="padding: 5px 10px; font-size: 0.8rem; border-color: var(--royal-gold); color: var(--royal-gold);" onclick="openCourseSubscribers('${c.id}')"><i class="fas fa-users"></i> المشتركين</button>
                         ${visibilityBtn}
                         ${finishBtn}
+                        <button class="btn btn-outline" style="padding: 5px 10px; font-size: 0.8rem; border-color: #e74c3c; color: #e74c3c;" onclick="deleteCourseSecure('${c.id}')" title="حذف الكورس نهائياً"><i class="fas fa-trash"></i></button>
                     </td>
                 `;
                 tbody.appendChild(tr);
             });
         }
+
+        window.deleteCourseSecure = async function(id) {
+            const pwd = await window.requireAdminPassword();
+            if (pwd === null) return;
+            if (pwd !== "My@36_172001") {
+                alert("كلمة المرور غير صحيحة!");
+                return;
+            }
+            if(confirm('تحذير نهائي: هل أنت متأكد من حذف هذا الكورس بالكامل من قاعدة البيانات؟ لا يمكن التراجع عن هذا الإجراء.')) {
+                window.showToast('جاري حذف الكورس...', 'warning');
+                if(window.FirebaseService) {
+                    await window.FirebaseService.deleteCourse(id);
+                } else {
+                    let courses = JSON.parse(localStorage.getItem('adminCourses') || '[]');
+                    courses = courses.filter(c => c.id !== id);
+                    localStorage.setItem('adminCourses', JSON.stringify(courses));
+                }
+                adminCourses = adminCourses.filter(c => c.id !== id);
+                renderCoursesTable();
+                window.showToast('تم حذف الكورس نهائياً', 'success');
+            }
+        };
 
         window.toggleCourseVisibility = function(id) {
             const course = adminCourses.find(c => c.id === id);
@@ -612,8 +635,24 @@ window.addNewSection = function() {
     renderContentLists();
 };
 
-window.removeSection = function(sIdx) {
-    if(confirm('هل أنت متأكد من حذف هذا القسم بالكامل بما يحتويه؟')) {
+window.removeSection = async function(sIdx) {
+    if(!tempContents.sections[sIdx].items || tempContents.sections[sIdx].items.length === 0) {
+        if(confirm('هل أنت متأكد من حذف هذا القسم الفارغ؟')) {
+            tempContents.sections.splice(sIdx, 1);
+            markUnsaved();
+            renderContentLists();
+        }
+        return;
+    }
+    
+    const pwd = await window.requireAdminPassword();
+    if (pwd === null) return;
+    if (pwd !== "My@36_172001") {
+        alert("كلمة المرور غير صحيحة!");
+        return;
+    }
+
+    if(confirm('هل أنت متأكد من حذف هذا القسم بالكامل بما يحتويه من دروس؟')) {
         tempContents.sections.splice(sIdx, 1);
         markUnsaved();
         renderContentLists();
@@ -667,7 +706,14 @@ window.openCourseEditor = function(id = null) {
     document.getElementById('fullCourseEditor').style.display = 'block';
 };
 
-window.removeItem = function(sIdx, iIdx) {
+window.removeItem = async function(sIdx, iIdx) {
+    const pwd = await window.requireAdminPassword();
+    if (pwd === null) return;
+    if (pwd !== "My@36_172001") {
+        alert("كلمة المرور غير صحيحة!");
+        return;
+    }
+
     if(confirm('هل أنت متأكد من حذف هذا العنصر؟')) {
         tempContents.sections[sIdx].items.splice(iIdx, 1);
         markUnsaved();
@@ -727,11 +773,24 @@ window.updateItemUrl = function(sIdx, iIdx, type, val) {
             // Sync courses from Firebase on load to prevent overwriting with old local cache
             try {
                 window.showToast('⏳ جاري تحديث بيانات الكورسات...', 'warning');
+                
+                // Wait for firebase SDK to load if it hasn't
+                let retries = 0;
+                while (!window.firebase && retries < 20) {
+                    await new Promise(r => setTimeout(r, 200));
+                    retries++;
+                }
+
                 if (window.FirebaseService) {
                     if (!window.FirebaseService.isReady()) {
                         await new Promise(resolve => {
-                            window.addEventListener('firebaseReady', resolve, { once: true });
-                            setTimeout(resolve, 3000); // fallback
+                            let waitTimer = setInterval(() => {
+                                if(window.FirebaseService.isReady()) {
+                                    clearInterval(waitTimer);
+                                    resolve();
+                                }
+                            }, 500);
+                            setTimeout(() => { clearInterval(waitTimer); resolve(); }, 4000); // fallback
                         });
                     }
                     if (typeof window.FirebaseService.getCourses === 'function') {
