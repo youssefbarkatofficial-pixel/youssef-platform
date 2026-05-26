@@ -810,17 +810,19 @@
       } catch (error) {
         if (window.FirebaseService && window.FirebaseService.isReady()) {
             console.warn('Firebase login rejected:', error);
-            let userMsg = error.message;
+                        let userMsg = 'حدث خطأ أثناء الاتصال بالخادم. يرجى المحاولة لاحقاً.';
             // Map common Firebase auth errors to Arabic
             if (error.code === 'custom/user-not-found' || error.code === 'auth/user-not-found') {
                 userMsg = 'هذا الحساب غير مسجل على المنصة، اضغط إنشاء حساب جديد للدخول';
             } else if (error.code === 'auth/invalid-email' || error.code === 'auth/invalid-credential') {
                 userMsg = 'كلمة المرور غير صحيحة. يرجى التأكد والمحاولة مرة أخرى.';
-            }
-            if (error.code === 'auth/wrong-password') {
+            } else if (error.code === 'auth/wrong-password') {
                 userMsg = 'كلمة المرور التي أدخلتها خاطئة. الرجاء التأكد منها والمحاولة مجدداً.';
-            }
-            if (error.message && error.message.includes('تم مسح هذا الحساب')) {
+            } else if (error.code === 'auth/too-many-requests') {
+                userMsg = 'لقد حاولت الدخول مرات كثيرة جداً. يرجى الانتظار قليلاً ثم المحاولة.';
+            } else if (error.code === 'auth/network-request-failed') {
+                userMsg = 'تأكد من اتصالك بالإنترنت وحاول مرة أخرى.';
+            } else if (error.message && error.message.includes('تم مسح هذا الحساب')) {
                 userMsg = error.message;
             }
             showLoginError(userMsg);
