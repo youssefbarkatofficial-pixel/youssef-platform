@@ -1,4 +1,4 @@
-﻿document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', () => {
     // Check if admin
     const adminStr = sessionStorage.getItem('currentAdmin');
     if (!adminStr) {
@@ -29,7 +29,7 @@
             
             // Try fetch real from Firebase
             if (window.FirebaseService && typeof window.FirebaseService.isReady === 'function' && window.FirebaseService.isReady()) {
-                const snap = await window.FirebaseService.getDb().collection('students').get();
+                const snap = await window.firebaseDb.collection('students').get();
                 let remoteUsers = [];
                 snap.forEach(doc => {
                     const data = doc.data();

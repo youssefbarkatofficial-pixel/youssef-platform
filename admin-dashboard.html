@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -254,7 +254,7 @@
                 // Try fetch from Firebase for real sync
                 if (window.FirebaseService && typeof window.FirebaseService.isReady === 'function' && window.FirebaseService.isReady()) {
                     try {
-                        const snap = await window.FirebaseService.getDb().collection('students').get();
+                        const snap = await window.firebaseDb.collection('students').get();
                         let remoteUsers = [];
                         snap.forEach(doc => {
                             const data = doc.data();

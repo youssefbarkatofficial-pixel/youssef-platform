@@ -901,8 +901,8 @@ window.openCourseSubscribers = async function(courseId) {
 
     try {
         let allUsers = [];
-        if (window.FirebaseService && typeof window.FirebaseService.isReady === 'function' && window.FirebaseService.isReady()) {
-            const snap = await window.FirebaseService.getDb().collection('students').get();
+        if (window.firebaseDb) {
+            const snap = await window.firebaseDb.collection('students').get();
             snap.forEach(doc => {
                 const data = doc.data();
                 if(data.courses && data.courses.includes(courseId)) {
