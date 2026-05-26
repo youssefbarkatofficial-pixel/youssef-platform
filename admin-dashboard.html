@@ -248,17 +248,41 @@
             }
 
             // Real Stats Calculation
-            function calculateStats() {
-                const users = JSON.parse(localStorage.getItem('strictUsers') || '[]');
+            async function calculateStats() {
+                let users = JSON.parse(localStorage.getItem('strictUsers') || '[]');
+                
+                // Try fetch from Firebase for real sync
+                if (window.FirebaseService && typeof window.FirebaseService.isReady === 'function' && window.FirebaseService.isReady()) {
+                    try {
+                        const snap = await window.FirebaseService.getDb().collection('students').get();
+                        let remoteUsers = [];
+                        snap.forEach(doc => remoteUsers.push(doc.data()));
+                        if (remoteUsers.length > 0) {
+                            users = remoteUsers;
+                            localStorage.setItem('strictUsers', JSON.stringify(users));
+                            localStorage.setItem('cached_students', JSON.stringify(users));
+                        }
+                    } catch(e) { console.error('Error fetching students for stats', e); }
+                }
+
                 let totalSubs = 0;
                 let totalRev = 0;
                 
-                users.forEach(u => {
-                    const db = JSON.parse(localStorage.getItem(`db_${u.phone}`) || '{}');
+                for (let u of users) {
+                    let db = JSON.parse(localStorage.getItem('db_' + u.phone) || '{}');
+                    if (window.FirebaseService && window.FirebaseService.getUser) {
+                        try {
+                            const remoteDb = await window.FirebaseService.getUser(u.phone);
+                            if (remoteDb) {
+                                db = remoteDb;
+                                localStorage.setItem('db_' + u.phone, JSON.stringify(db));
+                            }
+                        } catch(e) {}
+                    }
                     if (db && db.courses) {
                         totalSubs += db.courses.length;
                     }
-                });
+                }
                 
                 const paymentRequests = JSON.parse(localStorage.getItem('paymentRequests') || '[]');
                 const pendingPays = paymentRequests.filter(req => req.status === 'pending');

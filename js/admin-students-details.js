@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', () => {
+﻿document.addEventListener('DOMContentLoaded', () => {
     // Check if admin
     const adminStr = sessionStorage.getItem('currentAdmin');
     if (!adminStr) {
@@ -24,23 +24,29 @@ document.addEventListener('DOMContentLoaded', () => {
     async function loadData() {
         try {
             // Load all students and DBs
-            const strictUsers = JSON.parse(localStorage.getItem('strictUsers') || '[]');
+            // Load all students and DBs
+            let cachedUsers = JSON.parse(localStorage.getItem('cached_students') || localStorage.getItem('strictUsers') || '[]');
             
             // Try fetch real from Firebase
-            let remoteUsers = [];
             if (window.FirebaseService && typeof window.FirebaseService.isReady === 'function' && window.FirebaseService.isReady()) {
                 const snap = await window.FirebaseService.getDb().collection('students').get();
+                let remoteUsers = [];
                 snap.forEach(doc => {
                     remoteUsers.push(doc.data());
                 });
+                if(remoteUsers.length > 0) {
+                    cachedUsers = remoteUsers;
+                    localStorage.setItem('cached_students', JSON.stringify(cachedUsers));
+                    localStorage.setItem('strictUsers', JSON.stringify(cachedUsers));
+                }
             } else {
-                remoteUsers = strictUsers.map(u => {
-                    let dbUser = JSON.parse(localStorage.getItem(`db_${u.phone}`)) || { courses: [] };
-                    return { ...u, ...dbUser };
+                cachedUsers = cachedUsers.map(u => {
+                    let dbUser = JSON.parse(localStorage.getItem('db_' + u.phone)) || { courses: [] };
+                    return Object.assign({}, u, dbUser);
                 });
             }
 
-            allStudents = remoteUsers;
+            allStudents = cachedUsers;
             
             let courses = JSON.parse(localStorage.getItem('adminCourses') || '[]');
             if (window.FirebaseService && typeof window.FirebaseService.getCourses === 'function') {

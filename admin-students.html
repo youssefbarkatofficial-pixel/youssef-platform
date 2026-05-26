@@ -185,6 +185,7 @@
                     users = newUsers;
                     console.log('[SYNC] current student count:', users.length);
                     localStorage.setItem('cached_students', JSON.stringify(users));
+                    localStorage.setItem('strictUsers', JSON.stringify(users));
                     renderStudentsTable(document.getElementById('studentSearch')?.value || '');
                 }, err => {
                     console.error('[ADMIN] Firestore sync error:', err);
