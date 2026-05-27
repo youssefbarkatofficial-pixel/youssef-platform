@@ -728,17 +728,8 @@
                 }
                 
                 if(item.type === 'task' || item.type === 'quiz' || item.type === 'training') {
-                    // Find it across all sections
-                    let targetList = [];
-                    let idx = -1;
-                    normalizedContents.sections.forEach(sec => {
-                        sec.items.forEach(i => targetList.push(i));
-                    });
-                    idx = targetList.findIndex(x => x.id === item.id);
-                    if(idx > -1 && window.openExamModal) {
-                        // For backwards compat with exam system, we'll just mock the list
-                        course.contents.exams = targetList;
-                        window.openExamModal(course.id, idx, item.type === 'quiz' ? 'exam' : 'task');
+                    if (window.openExamModal) {
+                        window.openExamModal(course.id, item);
                         return;
                     }
                 }
@@ -966,13 +957,15 @@
                     if(_examStrictVisibility){ document.removeEventListener('visibilitychange', _examStrictVisibility); _examStrictVisibility = null; }
                 }
 
-                window.openExamModal = function(courseId, examIndex) {
+                window.openExamModal = function(courseId, examObjOrIndex) {
                     _stopTimer(); _deactivateStrict();
                     const adminCourses = JSON.parse(localStorage.getItem('adminCourses')||'[]');
                     const course = adminCourses.find(c=>c.id===courseId);
                     let exam = null;
-                    if(course && course.contents) {
-                        if(typeof examIndex === 'number' && Array.isArray(course.contents.exams)) exam = course.contents.exams[examIndex];
+                    if (typeof examObjOrIndex === 'object' && examObjOrIndex !== null) {
+                        exam = examObjOrIndex;
+                    } else if(course && course.contents) {
+                        if(typeof examObjOrIndex === 'number' && Array.isArray(course.contents.exams)) exam = course.contents.exams[examObjOrIndex];
                     }
                     if(!exam) { if(window.showToast) window.showToast('لا يوجد امتحان قابل للتشغيل','error'); else alert('لا يوجد امتحان.'); return; }
 
@@ -1083,7 +1076,7 @@
                         container.querySelectorAll('input, textarea').forEach(el => el.disabled = true);
                         submitBtn.disabled = true; submitBtn.innerHTML = '<i class="fas fa-check-circle"></i> تم التسليم';
                         _deactivateStrict();
-                        markItemCompleted(exam.id || ('exam_' + examIndex));
+                        markItemCompleted(exam.id || ('exam_' + (typeof examObjOrIndex === 'number' ? examObjOrIndex : Date.now())));
 
                         try {
                             const dbKey = 'db_' + student.phone;
