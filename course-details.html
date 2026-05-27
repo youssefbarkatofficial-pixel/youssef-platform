@@ -3,11 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>محتويات الكورس - يوسف بركات</title>
+    <title>تفاصيل الكورس | منصة يوسف بركات للدراسات الاجتماعية</title>
+    
+    <!-- Professional SEO Metadata -->
+    <meta name="description" content="تعرف على تفاصيل كورس الدراسات الاجتماعية مع مستر يوسف بركات. شاهد المحاضرات والملازم الخاصة بالكورس وابدأ رحلة التفوق.">
+    <meta name="keywords" content="تفاصيل كورس دراسات, يوسف بركات, منصة يوسف بركات, شرح تاريخ, شرح جغرافيا, مراجعة دراسات اجتماعية, منصة تعليمية">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://youssefbarakat.pages.dev/course-details.html" />
+    
+    <!-- Open Graph (Social Media) -->
+    <meta property="og:title" content="تفاصيل الكورس | منصة يوسف بركات للدراسات الاجتماعية">
+    <meta property="og:description" content="تعرف على تفاصيل كورس الدراسات الاجتماعية مع مستر يوسف بركات.">
+    <meta property="og:type" content="article">
+    <meta property="og:locale" content="ar_EG">
+    <meta property="og:url" content="https://youssefbarakat.pages.dev/course-details.html">
+    <!-- Performance: Preconnect to external resources -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <link rel="preconnect" href="https://www.gstatic.com">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/courses.css">
     <link rel="stylesheet" href="css/auth.css">
+    <!-- Dynamic SEO title/OG per course -->
+    <script>
+    (function(){
+        try {
+            const params = new URLSearchParams(window.location.search);
+            const cid = params.get('id');
+            if (cid) {
+                const courses = JSON.parse(localStorage.getItem('adminCourses') || '[]');
+                const c = courses.find(x => x.id === cid);
+                if (c && c.title) {
+                    document.title = c.title + ' | منصة يوسف بركات للدراسات الاجتماعية';
+                    var ogTitle = document.querySelector('meta[property="og:title"]');
+                    if (ogTitle) ogTitle.setAttribute('content', c.title + ' | منصة يوسف بركات');
+                    var ogDesc = document.querySelector('meta[property="og:description"]');
+                    if (ogDesc && c.desc) ogDesc.setAttribute('content', c.desc);
+                    var metaDesc = document.querySelector('meta[name="description"]');
+                    if (metaDesc && c.desc) metaDesc.setAttribute('content', c.desc);
+                }
+            }
+        } catch(e) {}
+    })();
+    </script>
 </head>
 <body>
     <div class="bg-effects"></div>
@@ -1136,7 +1176,7 @@ window.injectVideoWatermark = function(container) {
 
         const wm = document.createElement('div');
         wm.className = 'moving-watermark';
-        wm.style.cssText = 'position: absolute; color: rgba(255,255,255,0.25); font-size: 1.2rem; font-weight: bold; pointer-events: none; z-index: 999999; white-space: nowrap; text-shadow: 1px 1px 2px rgba(0,0,0,0.8); transition: all 4s linear; user-select: none; direction: rtl;';
+        wm.style.cssText = 'position: absolute; color: rgba(255,255,255,0.25); font-size: 1.2rem; font-weight: bold; pointer-events: none; z-index: 999999; white-space: nowrap; text-shadow: 1px 1px 2px rgba(0,0,0,0.8); transition: all 10s linear; user-select: none; direction: rtl;';
         
         const updateText = () => {
             const now = new Date();
@@ -1154,9 +1194,9 @@ window.injectVideoWatermark = function(container) {
             const maxY = Math.max(0, container.clientHeight - wm.clientHeight - 20);
             const randomX = Math.floor(Math.random() * maxX);
             const randomY = Math.floor(Math.random() * maxY);
-            const rot = Math.floor(Math.random() * 20 - 10);
+            const rot = Math.floor(Math.random() * 10 - 5);
             wm.style.transform = `translate(${randomX}px, ${randomY}px) rotate(${rot}deg)`;
-            setTimeout(moveWatermark, 4500);
+            setTimeout(moveWatermark, 10000);
         };
         
         setTimeout(moveWatermark, 100);

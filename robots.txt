@@ -1,0 +1,24 @@
+User-agent: *
+Allow: /
+
+# Allow all major crawlers
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+# Disallow admin pages from indexing
+Disallow: /admin-dashboard
+Disallow: /admin-dashboard.html
+Disallow: /admin-login
+Disallow: /admin-login.html
+Disallow: /admin-courses.html
+Disallow: /admin-students.html
+Disallow: /admin-payments.html
+Disallow: /admin-upload.html
+Disallow: /admin-settings.html
+Disallow: /admin-notifications.html
+
+# Sitemap
+Sitemap: https://youssefbarakat.pages.dev/sitemap.xml
