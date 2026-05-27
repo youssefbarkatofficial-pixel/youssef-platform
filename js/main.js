@@ -8,6 +8,11 @@ document.addEventListener('DOMContentLoaded', () => {
               if (window.firebaseDb) {
                   try {
                       // If user doesn't exist in DB anymore, kick them out
+                      // Skip for test accounts or admin accounts
+                      if (sObj.isTestAccount || sObj.role === 'admin' || sObj.isAdmin === true) {
+                          return;
+                      }
+                      
                       const doc = await window.firebaseDb.collection('students').doc(sObj.phone || sObj.uid).get();
                       if (!doc.exists) {
                           sessionStorage.removeItem('currentStudent');
@@ -1227,6 +1232,12 @@ document.addEventListener('DOMContentLoaded', () => {
           if (window.firebaseDb) {
               try {
                   const localUser = JSON.parse(currentUserStr);
+                  
+                  // Skip for test accounts or admin accounts
+                  if (localUser && (localUser.isTestAccount || localUser.role === 'admin' || localUser.isAdmin === true)) {
+                      return;
+                  }
+
                   if (localUser && localUser.email) {
                       window.firebaseDb.collection('students').doc(localUser.email).get().then(doc => {
                           if (doc.exists) {
