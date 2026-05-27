@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+    <script>
+        if (!sessionStorage.getItem('currentAdmin')) { window.location.replace('admin-login'); }
+        else { document.documentElement.style.display = 'none'; }
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>يوسف بركات</title>
@@ -871,8 +875,18 @@
                 openEditor(id);
             };
 
-            window.deleteCourse = function(id) {
+            window.deleteCourse = async function(id) {
                 if(confirm('هل أنت متأكد من حذف هذا الكورس نهائياً؟')) {
+                    if (window.FirebaseService && window.FirebaseService.isReady()) {
+                        try {
+                            if(window.showToast) window.showToast('جاري الحذف من السحابة...', 'warning');
+                            await window.FirebaseService.deleteCourse(id);
+                        } catch(err) {
+                            console.error('Delete failed:', err);
+                            if(window.showToast) window.showToast('فشل الحذف من السحابة، يرجى المحاولة مرة أخرى.', 'error');
+                            return; // Stop deletion locally if cloud fails
+                        }
+                    }
                     adminCourses = adminCourses.filter(c => c.id !== id);
                     if (typeof window.safeStorageSaveCourses === 'function') {
                         window.safeStorageSaveCourses(adminCourses);
@@ -887,7 +901,7 @@
             // Handle Save Course from dashboard modal
             const btnSaveCourse = document.getElementById('btnSaveCourse');
             if(btnSaveCourse) {
-                btnSaveCourse.addEventListener('click', () => {
+                btnSaveCourse.addEventListener('click', async () => {
                     const id = document.getElementById('editCourseId').value;
                     const title = document.getElementById('editCourseName').value.trim();
                     const desc = document.getElementById('editCourseDesc').value.trim();
@@ -901,37 +915,49 @@
                         return;
                     }
                     
-                    if(id) {
-                        const idx = adminCourses.findIndex(c => c.id === id);
-                        if(idx !== -1) {
-                            adminCourses[idx] = { ...adminCourses[idx], title, desc, price: isFree ? '0' : price, isFree, grade, image };
+                    const originalBtnText = btnSaveCourse.innerHTML;
+                    btnSaveCourse.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الحفظ...';
+                    btnSaveCourse.disabled = true;
+
+                    try {
+                        if(id) {
+                            const idx = adminCourses.findIndex(c => c.id === id);
+                            if(idx !== -1) {
+                                adminCourses[idx] = { ...adminCourses[idx], title, desc, price: isFree ? '0' : price, isFree, grade, image };
+                                if (window.FirebaseService && window.FirebaseService.isReady()) {
+                                    await window.FirebaseService.saveCourse(adminCourses[idx]);
+                                }
+                            }
+                        } else {
+                            const newCourse = {
+                                id: 'c' + Date.now(),
+                                title, desc, price: isFree ? '0' : price, isFree, grade, image,
+                                hidden: false, finished: false,
+                                contents: { lectures: [], homeworks: [], exams: [], trainings: [], customSections: [] }
+                            };
+                            adminCourses.push(newCourse);
                             if (window.FirebaseService && window.FirebaseService.isReady()) {
-                                window.FirebaseService.saveCourse(adminCourses[idx]);
+                                await window.FirebaseService.saveCourse(newCourse);
                             }
                         }
-                    } else {
-                        const newCourse = {
-                            id: 'c' + Date.now(),
-                            title, desc, price: isFree ? '0' : price, isFree, grade, image,
-                            hidden: false, finished: false,
-                            contents: { lectures: [], homeworks: [], exams: [], trainings: [], customSections: [] }
-                        };
-                        adminCourses.push(newCourse);
-                        if (window.FirebaseService && window.FirebaseService.isReady()) {
-                            window.FirebaseService.saveCourse(newCourse);
+                        
+                        if (typeof window.safeStorageSaveCourses === 'function') {
+                            window.safeStorageSaveCourses(adminCourses);
+                        } else {
+                            try { localStorage.setItem('adminCourses', JSON.stringify(adminCourses)); } catch(e) {}
                         }
+                        closeEditor();
+                        renderCourses();
+                        calculateStats();
+                        if(window.showToast) window.showToast('تم حفظ الكورس بنجاح ✅', 'success');
+                        else alert('تم حفظ الكورس بنجاح!');
+                    } catch(err) {
+                        console.error('Save failed:', err);
+                        if(window.showToast) window.showToast('فشل حفظ الكورس على السحابة.', 'error');
+                    } finally {
+                        btnSaveCourse.innerHTML = originalBtnText;
+                        btnSaveCourse.disabled = false;
                     }
-                    
-                    if (typeof window.safeStorageSaveCourses === 'function') {
-                        window.safeStorageSaveCourses(adminCourses);
-                    } else {
-                        try { localStorage.setItem('adminCourses', JSON.stringify(adminCourses)); } catch(e) {}
-                    }
-                    closeEditor();
-                    renderCourses();
-                    calculateStats();
-                    if(window.showToast) window.showToast('تم حفظ الكورس بنجاح ✅', 'success');
-                    else alert('تم حفظ الكورس بنجاح!');
                 });
             }
 
@@ -943,8 +969,7 @@
             renderCourses();
         });
     </script>
-
-    <script src="js/admin-auth.js"></script>
+    <script src="js/admin-auth.js?v=3"></script>
     <script src="js/storage-service.js"></script>
     <script src="js/main.js"></script>
     <script src="js/support-chat.js"></script>

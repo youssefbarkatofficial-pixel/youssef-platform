@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+    <script>
+        if (!sessionStorage.getItem('currentAdmin')) { window.location.replace('admin-login'); }
+        else { document.documentElement.style.display = 'none'; }
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>إدارة الطلاب - لوحة الإدارة</title>
@@ -61,6 +65,7 @@
             <div class="page-header">
                 <h1 class="page-title">إدارة الطلاب</h1>
                 <div style="display: flex; gap: 10px;">
+                    <button class="btn btn-gold" onclick="openDecoderModal()" style="white-space: nowrap;"><i class="fas fa-search-plus mr-2"></i> فك شفرة تسريب</button>
                     <input type="text" id="studentSearch" class="form-control" placeholder="ابحث برقم الموبايل..." style="width: 250px;">
                 </div>
             </div>
@@ -377,6 +382,76 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
     <script src="js/firebase-config.js"></script>
     <script src="js/firebase-service.js"></script>
+    <!-- Decoder Modal -->
+    <div id="decoderModal" class="confirm-modal">
+        <div class="confirm-modal-content" style="max-width: 500px; padding: 30px;">
+            <i class="fas fa-search-plus text-gold" style="font-size: 3rem; margin-bottom: 15px;"></i>
+            <h3 style="margin-bottom: 20px; color: var(--royal-gold);">فك شفرة التسريب (REF Code)</h3>
+            <p style="color: rgba(255,255,255,0.7); margin-bottom: 20px; font-size: 0.9rem;">
+                أدخل الكود الموجود في زاوية الشاشة أو على الفيديو (مثال: YB-XXXX-YYYY) لمعرفة هوية الطالب.
+            </p>
+            <input type="text" id="decoderInput" class="form-control" placeholder="YB-..." style="text-align: center; font-size: 1.2rem; letter-spacing: 2px; text-transform: uppercase;">
+            <div id="decoderResult" style="margin-top: 20px; text-align: right; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; display: none;"></div>
+            <div class="confirm-modal-actions" style="margin-top: 25px;">
+                <button class="btn btn-gold" onclick="decodeRefCode()" style="flex: 1;">فك الشفرة</button>
+                <button class="btn btn-outline" onclick="closeDecoderModal()" style="flex: 1;">إغلاق</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function openDecoderModal() {
+            document.getElementById('decoderInput').value = '';
+            document.getElementById('decoderResult').style.display = 'none';
+            document.getElementById('decoderModal').style.display = 'flex';
+        }
+        function closeDecoderModal() {
+            document.getElementById('decoderModal').style.display = 'none';
+        }
+        function decodeRefCode() {
+            let code = document.getElementById('decoderInput').value.trim().toUpperCase();
+            const resultDiv = document.getElementById('decoderResult');
+            resultDiv.style.display = 'block';
+            
+            if (!code.startsWith('YB-')) {
+                resultDiv.innerHTML = '<span style="color:#e74c3c;">الكود غير صحيح. يجب أن يبدأ بـ YB-</span>';
+                return;
+            }
+            const parts = code.split('-');
+            if (parts.length < 3) {
+                resultDiv.innerHTML = '<span style="color:#e74c3c;">تنسيق الكود غير مكتمل.</span>';
+                return;
+            }
+            
+            try {
+                let p1 = parseInt(parts[1], 36);
+                let p2 = parseInt(parts[2], 36);
+                
+                let phone = '0' + p1.toString();
+                let parentPhone = '0' + p2.toString();
+                
+                let users = JSON.parse(localStorage.getItem('cached_students') || '[]');
+                let student = users.find(u => u.phone === phone);
+                
+                let html = `<div style="color:var(--accent-cyan); font-weight:bold; margin-bottom:10px;">تم فك الشفرة بنجاح:</div>`;
+                html += `<div><strong>رقم هاتف الطالب:</strong> <span dir="ltr">${phone}</span></div>`;
+                html += `<div><strong>رقم ولي الأمر:</strong> <span dir="ltr">${parentPhone}</span></div>`;
+                
+                if (student) {
+                    html += `<div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.1);">`;
+                    html += `<div><strong>اسم الطالب:</strong> ${student.name}</div>`;
+                    html += `<div><strong>الصف الدراسي:</strong> ${student.grade}</div>`;
+                    html += `</div>`;
+                } else {
+                    html += `<div style="margin-top: 10px; color:#f39c12; font-size:0.85rem;"><i class="fas fa-exclamation-triangle"></i> الطالب غير مسجل حالياً في قاعدة البيانات بهذه الأرقام، ربما قام بحذف حسابه.</div>`;
+                }
+                
+                resultDiv.innerHTML = html;
+            } catch(e) {
+                resultDiv.innerHTML = '<span style="color:#e74c3c;">خطأ أثناء فك الشفرة. تأكد من الحروف والأرقام.</span>';
+            }
+        }
+    </script>
 </body>
 </html>
 

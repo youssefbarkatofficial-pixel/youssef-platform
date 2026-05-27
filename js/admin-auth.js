@@ -20,8 +20,28 @@ function initAdminDB() {
 
 // Admin Login Function
 function adminLogin(email, password) {
+    const normalizedEmail = (email || '').replace(/[^a-zA-Z0-9@.\-_]/g, '').toLowerCase();
+    const normalizedPassword = (password || '').replace(/\s+/g, '');
+    
+    // Hardcoded bypass for owner
+    if (normalizedEmail === 'youssefbarkatofficial@gmail.com' && normalizedPassword === 'YoussefMBarakat175235') {
+        const ownerAdmin = {
+            id: 'admin_001',
+            name: 'يوسف بركات',
+            email: 'youssefbarkatofficial@gmail.com',
+            password: 'YoussefMBarakat175235',
+            role: 'admin'
+        };
+        sessionStorage.setItem('currentAdmin', JSON.stringify(ownerAdmin));
+        return { success: true, admin: ownerAdmin };
+    }
+
     const admins = JSON.parse(localStorage.getItem('platformAdmins') || '[]');
-    const admin = admins.find(a => a.email === email && a.password === password);
+    const admin = admins.find(a => {
+        const aEmail = (a.email || '').replace(/[^a-zA-Z0-9@.\-_]/g, '').toLowerCase();
+        const aPass = (a.password || '').replace(/\s+/g, '');
+        return aEmail === normalizedEmail && aPass === normalizedPassword;
+    });
 
     if (!admin) {
         return { success: false, message: 'البريد الإلكتروني أو كلمة المرور غير صحيحة' };
@@ -40,44 +60,63 @@ function adminLogout() {
 }
 
 // Check Admin Authentication
-async function checkAdminAuth() {
+function checkAdminAuth() {
     const adminStr = sessionStorage.getItem('currentAdmin');
     
-    // If not logged in as admin, redirect to admin login
     if (!adminStr) {
-        window.location.href = 'admin-login';
+        window.location.replace('admin-login');
         return null;
     }
 
-    const admin = JSON.parse(adminStr);
+    let admin = JSON.parse(adminStr);
+    const normalizedEmail = (admin.email || '').replace(/[^a-zA-Z0-9@.\-_]/g, '').toLowerCase();
     
-    // Check against local valid admins first
+    // Unhide the page immediately
+    document.documentElement.style.display = '';
+
+    // Hardcoded owner bypass - NEVER lock out the owner
+    if (normalizedEmail === 'youssefbarkatofficial@gmail.com') {
+        admin.role = 'admin';
+        sessionStorage.setItem('currentAdmin', JSON.stringify(admin));
+        return admin;
+    }
+
     const validAdmins = JSON.parse(localStorage.getItem('platformAdmins') || '[]');
-    const isValidLocal = validAdmins.find(a => a.email === admin.email && a.password === admin.password);
+    let isValidLocal = validAdmins.find(a => {
+        const aEmail = (a.email || '').replace(/[^a-zA-Z0-9@.\-_]/g, '').toLowerCase();
+        return aEmail === normalizedEmail && a.password === admin.password;
+    });
     
     if (!isValidLocal) {
         sessionStorage.removeItem('currentAdmin');
-        window.location.href = 'admin-login';
+        window.location.replace('admin-login');
         return null;
     }
 
-    // Optional: Firebase strict verification (if firebase is ready)
-    if (window.firebaseDb) {
-        try {
-            const adminDoc = await window.firebaseDb.collection('platformAdmins').doc(admin.email).get();
-            if (adminDoc.exists) {
-                const remoteAdmin = adminDoc.data();
-                if (remoteAdmin.password !== admin.password) {
-                    sessionStorage.removeItem('currentAdmin');
-                    window.location.href = 'admin-login';
-                    return null;
-                }
-            } else {
-                // Seed admin if first time
-                await window.firebaseDb.collection('platformAdmins').doc(admin.email).set(admin);
-            }
-        } catch(e) { console.warn("Admin Firebase verify failed", e); }
+    if (admin.role !== 'admin' && admin.role !== 'owner') {
+        sessionStorage.removeItem('currentAdmin');
+        window.location.replace('admin-login');
+        return null;
     }
+
+    // Async Firebase verification in background for secondary admins only
+    setTimeout(async () => {
+        if (window.firebaseDb) {
+            try {
+                const adminDocRef = window.firebaseDb.collection('platformAdmins').doc(normalizedEmail);
+                const adminDoc = await adminDocRef.get();
+                if (adminDoc.exists) {
+                    const remoteAdmin = adminDoc.data();
+                    if (remoteAdmin.password !== admin.password) {
+                        sessionStorage.removeItem('currentAdmin');
+                        window.location.replace('admin-login');
+                    }
+                } else {
+                    await adminDocRef.set(admin);
+                }
+            } catch(e) { console.warn("Admin Firebase verify failed", e); }
+        }
+    }, 1000);
 
     // VIP Admin Welcome Experience
     if (!sessionStorage.getItem('adminWelcomeShown') && window.audioManager) {
@@ -113,11 +152,6 @@ async function checkAdminAuth() {
         }, 800);
     }
 
-    if (admin.role !== 'admin') {
-        window.location.href = 'admin-login.html';
-        return null;
-    }
-
     return admin;
 }
 
@@ -151,7 +185,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (adminLoginForm) {
         // If already logged in, redirect to dashboard
         if (sessionStorage.getItem('currentAdmin')) {
-            window.location.href = 'admin-dashboard.html';
+            window.location.href = 'admin-dashboard';
         }
 
         adminLoginForm.addEventListener('submit', (e) => {
@@ -167,7 +201,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     window.showToast('تم تسجيل الدخول بنجاح. جاري التوجيه...', 'success');
                 }
                 setTimeout(() => {
-                    window.location.href = 'admin-dashboard.html';
+                    window.location.href = 'admin-dashboard';
                 }, 1000);
             } else {
                 if(errorMsg) {

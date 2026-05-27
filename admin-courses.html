@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+    <script>
+        if (!sessionStorage.getItem('currentAdmin')) { window.location.replace('admin-login'); }
+        else { document.documentElement.style.display = 'none'; }
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>إدارة الكورسات - لوحة الإدارة</title>
@@ -695,7 +699,7 @@ window.openCourseEditor = function(id = null) {
         document.getElementById('fcId').value = '';
         document.getElementById('fcTitle').value = '';
         document.getElementById('fcPrice').value = '';
-        document.getElementById('fcIsFree').checked = false;
+        if(document.getElementById('fcIsFree')) document.getElementById('fcIsFree').checked = false;
         document.getElementById('fcDesc').value = '';
         document.getElementById('fcImage').value = 'https://via.placeholder.com/400x250/071326/D4A64F?text=Course';
         document.getElementById('fcImagePreview').src = 'https://via.placeholder.com/400x250/071326/D4A64F?text=Course';
@@ -747,20 +751,6 @@ window.updateItemUrl = function(sIdx, iIdx, type, val) {
     }
     markUnsaved();
 };
-
-                document.getElementById('editorTitle').textContent = 'إضافة كورس جديد';
-                document.getElementById('fcId').value = '';
-                document.getElementById('fcTitle').value = '';
-                document.getElementById('fcPrice').value = '';
-                document.getElementById('fcDesc').value = '';
-                document.getElementById('fcImage').value = 'https://via.placeholder.com/400x250/071326/D4A64F?text=Course';
-                document.getElementById('fcImagePreview').src = 'https://via.placeholder.com/400x250/071326/D4A64F?text=Course';
-                tempContents = { lectures: [], homeworks: [], exams: [], trainings: [], customSections: [] };
-            }
-            
-            renderContentLists();
-            document.getElementById('fullCourseEditor').style.display = 'block';
-        };
 
         document.addEventListener('DOMContentLoaded', async () => {
             // Ensure auth

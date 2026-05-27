@@ -1147,6 +1147,111 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!img.hasAttribute('loading')) img.setAttribute('loading', 'lazy');
       if (!img.hasAttribute('decoding')) img.setAttribute('decoding', 'async');
   });
+  // --- Content Anti-Theft & Security (F12, Right Click, Selection) ---
+  document.addEventListener('contextmenu', e => {
+      if (!window.location.pathname.includes('admin-')) {
+          e.preventDefault();
+      }
+  });
+
+  document.addEventListener('keydown', e => {
+      if (!window.location.pathname.includes('admin-')) {
+          // Disable F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U, Ctrl+C, Ctrl+S, Ctrl+P
+          if (
+              e.key === 'F12' || 
+              (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) || 
+              (e.ctrlKey && (e.key === 'U' || e.key === 'S' || e.key === 'P' || e.key === 'C')) ||
+              (e.metaKey && (e.key === 'U' || e.key === 'S' || e.key === 'P' || e.key === 'C'))
+          ) {
+              e.preventDefault();
+              if(window.showToast) window.showToast('عذراً، هذا الإجراء غير مسموح به لحماية حقوق الملكية.', 'error');
+          }
+      }
+  });
+
+  // Detect DevTools open (Simple method)
+  let devtools = function() {};
+  devtools.toString = function() {
+      if (!window.location.pathname.includes('admin-')) {
+          const studentStr = sessionStorage.getItem('currentStudent');
+          if (studentStr) {
+              console.warn("Unauthorized Developer Tools access detected.");
+              sessionStorage.removeItem('currentStudent');
+              window.location.href = 'index.html';
+          }
+      }
+      return '';
+  }
+  setInterval(() => {
+      console.profile(devtools);
+      console.profileEnd(devtools);
+  }, 2000);
+
+  // Stop Print Screen (Partial mitigation)
+  document.addEventListener('keyup', (e) => {
+      if (e.key == 'PrintScreen') {
+          if (!window.location.pathname.includes('admin-')) {
+              navigator.clipboard.writeText('عذراً، تصوير الشاشة غير مسموح به.');
+              if(window.showToast) window.showToast('تحذير: لا يمكنك أخذ لقطة شاشة.', 'error');
+          }
+      }
+  });
+
+  // --- Forensic Tracking (Global REF Code) ---
+  window.generateForensicRef = function(student) {
+      if (!student || !student.phone) return '';
+      try {
+          const phoneNum = parseInt(student.phone, 10);
+          const parentNum = student.parentPhone ? parseInt(student.parentPhone, 10) : 0;
+          return `YB-${phoneNum.toString(36).toUpperCase()}-${parentNum.toString(36).toUpperCase()}`;
+      } catch(e) { return ''; }
+  };
+
+  // Inject hidden tracking code on every student page
+  const studentStrForRef = sessionStorage.getItem('currentStudent') || localStorage.getItem('currentStudent');
+  if (studentStrForRef && !window.location.pathname.includes('admin-')) {
+      const student = JSON.parse(studentStrForRef);
+      const ref = window.generateForensicRef(student);
+      if (ref) {
+          const refEl = document.createElement('div');
+          refEl.textContent = ref;
+          refEl.style.cssText = 'position: fixed; bottom: 5px; left: 5px; font-size: 8px; color: rgba(0,0,0,0.05); z-index: 999999; pointer-events: none; user-select: none; font-family: monospace; opacity: 0.3;';
+          document.body.appendChild(refEl);
+      }
+  }
+
+  // --- Server-Side Anti-Cheat (Shadow Sync) ---
+  const currentUserStr = sessionStorage.getItem('currentStudent') || localStorage.getItem('currentStudent');
+  if (currentUserStr && !window.location.pathname.includes('admin-')) {
+      setTimeout(() => {
+          if (window.firebaseDb) {
+              try {
+                  const localUser = JSON.parse(currentUserStr);
+                  if (localUser && localUser.email) {
+                      window.firebaseDb.collection('students').doc(localUser.email).get().then(doc => {
+                          if (doc.exists) {
+                              const remoteUser = doc.data();
+                              // Check if local courses array is manipulated
+                              const localCourses = Array.isArray(localUser.courses) ? localUser.courses : [];
+                              const remoteCourses = Array.isArray(remoteUser.courses) ? remoteUser.courses : [];
+                              
+                              // If local has more courses than remote, or remote has been disabled
+                              if (localCourses.length > remoteCourses.length || remoteUser.status === 'blocked') {
+                                  console.warn("Security Alert: Course manipulation detected or account blocked. Syncing with server...");
+                                  sessionStorage.setItem('currentStudent', JSON.stringify(remoteUser));
+                                  if (localStorage.getItem('currentStudent')) {
+                                      localStorage.setItem('currentStudent', JSON.stringify(remoteUser));
+                                  }
+                                  if(window.showToast) window.showToast('تم تحديث بيانات حسابك من الخادم الأساسي.', 'warning');
+                                  setTimeout(() => window.location.reload(), 2000);
+                              }
+                          }
+                      }).catch(e => console.warn('Anti-cheat verify failed', e));
+                  }
+              } catch(e) {}
+          }
+      }, 3000); // Wait 3 seconds to let Firebase initialize
+  }
 
   // 2. Prevent Double-Clicks on generic forms
   document.querySelectorAll('form').forEach(form => {

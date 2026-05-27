@@ -313,10 +313,13 @@ window.FirebaseService = (function () {
         if (idx > -1) courses[idx] = data; else courses.push(data);
         safeStorageSaveCourses(courses);
 
-        if (!isFirebaseReady()) return data;
+        if (!isFirebaseReady()) throw new Error("Firebase is not ready. Course saved locally but not to cloud.");
         try {
             await getDb().collection('courses').doc(id).set(data, { merge: true });
-        } catch (e) { console.warn('saveCourse Firestore failed', e); }
+        } catch (e) { 
+            console.error('saveCourse Firestore failed', e);
+            throw e;
+        }
         return data;
     }
 
@@ -328,10 +331,13 @@ window.FirebaseService = (function () {
         courses = courses.filter(c => c.id !== id);
         localStorage.setItem('adminCourses', JSON.stringify(courses));
 
-        if (!isFirebaseReady()) return;
+        if (!isFirebaseReady()) throw new Error("Firebase is not ready. Course deleted locally but not from cloud.");
         try {
             await getDb().collection('courses').doc(id).delete();
-        } catch (e) { console.warn('deleteCourse Firestore failed', e); }
+        } catch (e) { 
+            console.error('deleteCourse Firestore failed', e);
+            throw e;
+        }
     }
 
     // ============================================================
