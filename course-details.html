@@ -520,7 +520,10 @@
                         
                         if (hasChildren) {
                             items.push({ id: lec.id || 'lec_'+Date.now(), title: lec.title, type: 'header', thumbnail: lec.thumbnail });
-                            if (lec.children) lec.children.forEach(child => items.push(child));
+                            if (lec.children) lec.children.forEach(child => {
+                                child._parentLecId = lec.id;
+                                items.push(child);
+                            });
                             attachedFromOtherSections.forEach(child => items.push(child));
                         } else {
                             items.push(lec);
@@ -623,8 +626,66 @@
                                 }
                             } catch(e) {}
                             if(videoId) {
-                                container.innerHTML = `<iframe width="100%" height="100%" src="https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1&showinfo=0" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+                                container.innerHTML = `<div id="ytplayer_${videoId}" style="width:100%; height:100%;"></div>`;
                                 if (window.injectVideoWatermark) window.injectVideoWatermark(container);
+                                
+                                const handleVideoEnded = () => {
+                                    markItemCompleted(item.id);
+                                    if(window.showToast) window.showToast('تم اكتمال مشاهدة الدرس بنجاح!', 'success');
+                                    
+                                    // Find next attached training
+                                    let parentId = item._parentLecId || item.id;
+                                    let nextItem = null;
+                                    normalizedContents.sections.forEach(sec => {
+                                        sec.items.forEach(i => {
+                                            if (i.attachedToLectureId === parentId && (i.type === 'training' || i.type === 'quiz' || i.type === 'task')) {
+                                                nextItem = i;
+                                            }
+                                        });
+                                    });
+                                    
+                                    if (nextItem) {
+                                        document.getElementById('videoModal').classList.remove('active');
+                                        container.innerHTML = '';
+                                        setTimeout(() => openCourseResource(nextItem, false, ''), 500);
+                                    } else {
+                                        setTimeout(() => window.location.reload(), 1500);
+                                    }
+                                };
+                                
+                                const initYT = () => {
+                                    new YT.Player(`ytplayer_${videoId}`, {
+                                        height: '100%',
+                                        width: '100%',
+                                        videoId: videoId,
+                                        playerVars: { 'autoplay': 1, 'rel': 0, 'modestbranding': 1, 'showinfo': 0 },
+                                        events: {
+                                            'onStateChange': function(event) {
+                                                if (event.data === YT.PlayerState.ENDED) {
+                                                    handleVideoEnded();
+                                                }
+                                            }
+                                        }
+                                    });
+                                };
+                                
+                                if (typeof YT !== 'undefined' && YT && YT.Player) {
+                                    initYT();
+                                } else {
+                                    if (!document.getElementById('ytapi_script')) {
+                                        const tag = document.createElement('script');
+                                        tag.id = 'ytapi_script';
+                                        tag.src = "https://www.youtube.com/iframe_api";
+                                        const firstScriptTag = document.getElementsByTagName('script')[0];
+                                        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+                                    }
+                                    let ytWait = setInterval(() => {
+                                        if (typeof YT !== 'undefined' && YT && YT.Player) {
+                                            clearInterval(ytWait);
+                                            initYT();
+                                        }
+                                    }, 100);
+                                }
                             } else {
                                 window.open(item.youtubeUrl, '_blank');
                             }
@@ -637,11 +698,28 @@
                                 vidEl.onended = () => {
                                     markItemCompleted(item.id);
                                     if(window.showToast) window.showToast('تم اكتمال مشاهدة الدرس بنجاح!', 'success');
-                                    setTimeout(() => window.location.reload(), 1500);
+                                    
+                                    // Find next attached training
+                                    let parentId = item._parentLecId || item.id;
+                                    let nextItem = null;
+                                    normalizedContents.sections.forEach(sec => {
+                                        sec.items.forEach(i => {
+                                            if (i.attachedToLectureId === parentId && (i.type === 'training' || i.type === 'quiz' || i.type === 'task')) {
+                                                nextItem = i;
+                                            }
+                                        });
+                                    });
+                                    
+                                    if (nextItem) {
+                                        document.getElementById('videoModal').classList.remove('active');
+                                        container.innerHTML = '';
+                                        setTimeout(() => openCourseResource(nextItem, false, ''), 500);
+                                    } else {
+                                        setTimeout(() => window.location.reload(), 1500);
+                                    }
                                 };
                             }
                         }
-                        if(item.youtubeUrl) markItemCompleted(item.id);
                         modal.classList.add('active');
                     } else {
                         window.open(item.youtubeUrl || item.videoUrl, '_blank');
@@ -720,12 +798,20 @@
                     if(!sec.items || sec.items.length === 0) {
                         detailsInner.innerHTML = '<div style="text-align:center; padding: 30px; background: rgba(0,0,0,0.2); border-radius: 12px; margin-top: 10px;"><i class="fas fa-laptop-code mb-3" style="font-size: 2.5rem; color: var(--accent-cyan); opacity: 0.8;"></i><h3 style="color: var(--royal-gold); margin-bottom: 10px;">المحتوى قيد التجهيز 🚀</h3><p style="color: rgba(255,255,255,0.7); line-height: 1.6; font-size: 0.95rem;">يتم الآن إعداد وتجهيز محتوى هذا القسم بأفضل جودة ليكون متاحاً قريباً، ابقوا متابعين ولا تفوتوا الجديد!</p></div>';
                     } else {
+                        let currentHeaderGroup = null;
+
                         sec.items.forEach(item => {
                             if (item.type === 'header') {
+                                if (currentHeaderGroup) {
+                                    detailsInner.appendChild(currentHeaderGroup);
+                                }
+                                currentHeaderGroup = document.createElement('div');
+                                currentHeaderGroup.style.cssText = 'background: rgba(0,0,0,0.15); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 15px; margin-bottom: 15px; border-right: 3px solid var(--accent-cyan); position: relative;';
+                                
                                 const hDiv = document.createElement('div');
-                                hDiv.style.cssText = 'margin-top: 15px; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--royal-gold); font-weight: bold; font-size: 1.1rem; display: flex; align-items: center; gap: 10px;';
+                                hDiv.style.cssText = 'padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--royal-gold); font-weight: bold; font-size: 1.1rem; display: flex; align-items: center; gap: 10px; margin-bottom: 10px;';
                                 hDiv.innerHTML = `<i class="fas fa-bookmark"></i> ${item.title}`;
-                                detailsInner.appendChild(hDiv);
+                                currentHeaderGroup.appendChild(hDiv);
                                 return;
                             }
 
@@ -741,23 +827,29 @@
                             }
                             
                             let availStr = item.availabilityDate || item.availableFrom;
+                            let untilStr = item.availableUntil;
+                            
                             if (availStr) {
                                 const availTime = new Date(availStr).getTime();
                                 if (Date.now() < availTime) {
                                     isLocked = true;
                                     const dateStr = new Date(availStr).toLocaleDateString('ar-EG');
                                     lockReason = `سيكون متاحاً يوم ${dateStr}`;
-                                    // If user is not admin and requested to hide it completely (since some users expect scheduled items to be hidden from students):
-                                    if(!isAdmin && !isOwned) {
-                                        // For now we lock it, but if they want it completely invisible we can return; 
-                                        // Returning here prevents it from rendering in the list.
-                                        return; 
-                                    }
+                                    if(!isAdmin && !isOwned) return; 
+                                }
+                            }
+                            
+                            if (untilStr) {
+                                const untilTime = new Date(untilStr).getTime();
+                                if (Date.now() > untilTime) {
+                                    isLocked = true;
+                                    lockReason = `انتهى وقت إتاحة المحتوى`;
+                                    if(!isAdmin && !isOwned) return; 
                                 }
                             }
 
                             const row = document.createElement('div');
-                            row.style.cssText = `display:flex; align-items:center; justify-content:space-between; gap:12px; padding:14px 16px; border-radius:12px; background: rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.05); ${isLocked ? 'opacity: 0.6; filter: grayscale(0.8); cursor: not-allowed;' : ''}`;
+                            row.style.cssText = `display:flex; align-items:center; justify-content:space-between; gap:12px; padding:14px 16px; border-radius:12px; background: rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.05); margin-bottom: 8px; ${isLocked ? 'opacity: 0.6; filter: grayscale(0.8); cursor: not-allowed;' : ''}`;
 
                             const isCompleted = isItemCompleted(item.id);
                             const iconColor = isLocked ? 'rgba(255,255,255,0.4)' : (isCompleted ? '#2ecc71' : 'var(--accent-cyan)');
@@ -810,8 +902,22 @@
                             
                             actionBtn.addEventListener('click', () => openCourseResource(item, isLocked, lockReason));
                             row.appendChild(actionBtn);
-                            detailsInner.appendChild(row);
+                            
+                            if (currentHeaderGroup && (item._parentLecId || item.attachedToLectureId)) {
+                                currentHeaderGroup.appendChild(row);
+                            } else {
+                                if (currentHeaderGroup) {
+                                    detailsInner.appendChild(currentHeaderGroup);
+                                    currentHeaderGroup = null;
+                                }
+                                detailsInner.appendChild(row);
+                            }
                         });
+                        
+                        if (currentHeaderGroup) {
+                            detailsInner.appendChild(currentHeaderGroup);
+                        }
+                    }
                     }
 
                     details.appendChild(detailsInner);
