@@ -1,4 +1,4 @@
-﻿document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', () => {
   const savedAdmin = localStorage.getItem('currentAdmin');
   if (savedAdmin && !sessionStorage.getItem('currentAdmin')) {
     sessionStorage.setItem('currentAdmin', savedAdmin);
@@ -776,6 +776,30 @@
           }
           if (window.showToast) window.showToast('أهلا بك يا صانع المجد في مملكتك.\nمنصتك جاهزة لإبداعك اليومي.', 'majestic', { title: '👑 مرحبا بك يا أستاذ يوسف', duration: 1500 });
           setTimeout(() => { window.location.href = 'admin-dashboard.html'; }, 1500);
+          return;
+        } else if (rawId === 'youssefda3m@gmail.com' && pwd === 'Da3mYoussef@36') {
+          const supportStudent = {
+            name: 'الدعم الفني',
+            email: 'youssefda3m@gmail.com',
+            phone: 'support_000',
+            grade: 'prep2',
+            role: 'student',
+            isTestAccount: true
+          };
+          sessionStorage.setItem('currentStudent', JSON.stringify(supportStudent));
+          sessionStorage.setItem('pfJustLoggedIn', 'true');
+          if (rememberMe) {
+            localStorage.setItem('currentStudent', JSON.stringify(supportStudent));
+            let savedAccounts = JSON.parse(localStorage.getItem('savedLocalAccounts') || '[]');
+            savedAccounts = savedAccounts.filter(a => a.phone !== rawId);
+            savedAccounts.push({ phone: rawId, pwd, name: 'الدعم الفني' });
+            localStorage.setItem('savedLocalAccounts', JSON.stringify(savedAccounts));
+          }
+          if (typeof window.pfTransferGuestSupportSessionToAccount === 'function') {
+            window.pfTransferGuestSupportSessionToAccount(supportStudent);
+          }
+          if (window.showToast) window.showToast('تم تسجيل الدخول بحساب الدعم الفني التجريبي.', 'info');
+          setTimeout(() => { window.location.href = 'dashboard.html'; }, 1000);
           return;
         }
         const phone = rawId;
