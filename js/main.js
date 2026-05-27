@@ -1180,6 +1180,13 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!window.location.pathname.includes('admin-')) {
           const studentStr = sessionStorage.getItem('currentStudent');
           if (studentStr) {
+              try {
+                  const st = JSON.parse(studentStr);
+                  if (st.isTestAccount || st.role === 'admin' || st.isAdmin === true) {
+                      return ''; // Bypass DevTools kick for test accounts
+                  }
+              } catch(e) {}
+              
               console.warn("Unauthorized Developer Tools access detected.");
               sessionStorage.removeItem('currentStudent');
               window.location.href = 'index.html';
