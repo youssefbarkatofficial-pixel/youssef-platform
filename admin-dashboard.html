@@ -252,7 +252,9 @@
                 <label style="color: var(--text-primary); margin-bottom: 5px; display: block;">صورة الكورس</label>
                 <input type="file" id="editCourseImageFile" accept="image/*" class="form-control" style="background: rgba(255,255,255,0.05); cursor: pointer;">
                 <input type="hidden" id="editCourseImage" value="https://via.placeholder.com/400x250/071326/D4A64F?text=Course">
-                <img id="editCourseImagePreview" src="https://via.placeholder.com/400x250/071326/D4A64F?text=Course" style="width: 100%; height: 150px; object-fit: cover; border-radius: 10px; margin-top: 10px; border: 1px solid var(--border-color);">
+                <div style="width: 100%; aspect-ratio: 16/9; overflow: hidden; border-radius: 10px; margin-top: 10px; border: 1px solid var(--border-color); background: var(--secondary-navy, #0a1e3a);">
+                    <img id="editCourseImagePreview" src="https://via.placeholder.com/400x250/071326/D4A64F?text=Course" style="width: 100%; height: 100%; object-fit: cover; object-position: center; display: block;">
+                </div>
             </div>
 
             <div style="margin-top: 25px; text-align: left; display: flex; gap: 15px;">
@@ -817,7 +819,9 @@
                     card.style.padding = '15px';
                     card.style.borderRadius = '10px';
                     card.innerHTML = `
-                        <img src="${course.image}" alt="Course" style="width: 100%; height: 120px; object-fit: cover; border-radius: 8px; margin-bottom: 15px;">
+                        <div style="width: 100%; aspect-ratio: 16/9; overflow: hidden; border-radius: 8px; margin-bottom: 15px; background: var(--secondary-navy, #0a1e3a);">
+                            <img src="${course.image}" alt="Course" style="width: 100%; height: 100%; object-fit: cover; object-position: center; display: block;">
+                        </div>
                         <span class="badge" style="background: rgba(212, 166, 79, 0.2); color: var(--royal-gold); padding: 5px 10px; border-radius: 5px; font-size: 0.8rem;">${course.grade}</span>
                         <h4 style="color: var(--text-primary); margin: 10px 0;">${course.title}</h4>
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; border-top: 1px solid var(--border-color); padding-top: 10px;">

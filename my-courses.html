@@ -131,7 +131,9 @@
                         card.onmouseenter = () => card.style.transform = 'translateY(-5px)';
                         card.onmouseleave = () => card.style.transform = 'translateY(0)';
                         card.innerHTML = `
-                            <img src="${c.image || ''}" style="width: 100%; height: 150px; object-fit: cover;" onerror="this.style.display='none'">
+                            <div style="aspect-ratio: 16/9; overflow: hidden; background: var(--secondary-navy, #0a1e3a);">
+                                <img src="${c.image || ''}" style="width: 100%; height: 100%; object-fit: cover; object-position: center; display: block;" onerror="this.style.display='none'">
+                            </div>
                             <div style="padding: 20px; flex: 1; display: flex; flex-direction: column;">
                                 <h3 style="color: var(--text-primary); margin-bottom: 10px;">${c.title || 'كورس'}</h3>
                                 <p style="color: rgba(255,255,255,0.6); font-size: 0.9rem; margin-bottom: 15px; flex: 1;">${(c.desc || '').substring(0, 80)}...</p>

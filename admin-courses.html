@@ -153,7 +153,9 @@
                     <label>صورة الغلاف (الكورس)</label>
                     <input type="file" id="fcImageFile" accept="image/*" class="form-control" style="background: rgba(255,255,255,0.05); cursor: pointer;">
                     <input type="hidden" id="fcImage">
-                    <img id="fcImagePreview" src="https://via.placeholder.com/400x250/071326/D4A64F?text=Course" style="width: 100%; height: 200px; object-fit: cover; border-radius: 10px; margin-top: 10px; border: 1px solid var(--border-color);">
+                    <div style="width: 100%; aspect-ratio: 16/9; overflow: hidden; border-radius: 10px; margin-top: 10px; border: 1px solid var(--border-color); background: var(--secondary-navy, #0a1e3a);">
+                        <img id="fcImagePreview" src="https://via.placeholder.com/400x250/071326/D4A64F?text=Course" style="width: 100%; height: 100%; object-fit: cover; object-position: center; display: block;">
+                    </div>
                 </div>
                 <div class="form-group" style="grid-column: 1/-1;">
                     <label>وصف الكورس</label>
@@ -388,7 +390,7 @@
                     `<button class="btn btn-outline" style="padding: 5px; font-size: 0.8rem;" onclick="toggleCourseFinish('${c.id}')" title="تحديد كمنتهي"><i class="fas fa-calendar-check text-green"></i></button>`;
 
                 tr.innerHTML = `
-                    <td><img src="${c.image}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px; ${c.finished ? 'filter: grayscale(1); opacity: 0.5;' : ''}"></td>
+                    <td><div style="width: 50px; height: 50px; overflow: hidden; border-radius: 5px; ${c.finished ? 'filter: grayscale(1); opacity: 0.5;' : ''}"><img src="${c.image}" style="width: 100%; height: 100%; object-fit: cover; object-position: center; display: block;"></div></td>
                     <td style="${c.finished ? 'text-decoration: line-through; opacity: 0.5;' : ''}">${c.title}</td>
                     <td><span class="badge" style="background: rgba(255,255,255,0.1);">${c.grade}</span></td>
                     <td>${c.price} ج.م</td>

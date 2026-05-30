@@ -381,7 +381,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         <label>صورة الكورس</label>
                         <input type="file" id="quickCourseImageFile" accept="image/*" class="form-control" style="background: rgba(255,255,255,0.05); cursor: pointer;">
                         <input type="hidden" id="quickCourseImage" value="https://via.placeholder.com/400x250/071326/D4A64F?text=Course">
-                        <img id="quickCourseImagePreview" src="https://via.placeholder.com/400x250/071326/D4A64F?text=Course" style="width: 100%; height: 100px; object-fit: cover; border-radius: 10px; margin-top: 10px; border: 1px solid var(--royal-gold);">
+                        <div style="width: 100%; aspect-ratio: 16/9; overflow: hidden; border-radius: 10px; margin-top: 10px; border: 1px solid var(--royal-gold); background: var(--secondary-navy, #0a1e3a);">
+                            <img id="quickCourseImagePreview" src="https://via.placeholder.com/400x250/071326/D4A64F?text=Course" style="width: 100%; height: 100%; object-fit: cover; object-position: center; display: block;">
+                        </div>
                     </div>
                     
                     <button id="quickAddCourseBtn" class="btn btn-green btn-block mt-2">إضافة الكورس للمنصة</button>

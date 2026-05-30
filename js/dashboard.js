@@ -103,7 +103,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                     card.style.cssText = 'display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; border: 1px solid var(--border-color);';
                     card.innerHTML = `
                         <div style="display: flex; align-items: center; gap: 15px;">
-                            <img src="${c.image}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px;">
+                            <div style="width: 60px; height: 60px; overflow: hidden; border-radius: 8px; flex-shrink: 0; background: var(--secondary-navy, #0a1e3a);">
+                                <img src="${c.image}" style="width: 100%; height: 100%; object-fit: cover; object-position: center; display: block;">
+                            </div>
                             <div>
                                 <h4 style="color: var(--text-primary); margin-bottom: 5px;">${c.title}</h4>
                                 <span class="badge" style="background: rgba(88, 196, 221, 0.2); color: var(--accent-cyan); font-size: 0.8rem;">${c.grade === 'prep1' ? 'أولى إعدادي' : c.grade === 'prep2' ? 'تانية إعدادي' : c.grade === 'prep3' ? 'تالتة إعدادي' : 'أولى ثانوي'}</span>
