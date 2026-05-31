@@ -314,6 +314,8 @@
 
     // 4. Conversation Drops (Tracked before pushing new user context)
     const currentContext = loadContextMemory();
+    const isFirstMessageInSession = currentContext.length === 0 || ((Date.now() - currentContext[currentContext.length - 1].timestamp) > 60 * 60 * 1000);
+    
     if (currentContext.length > 0) {
       const lastInteraction = currentContext[currentContext.length - 1];
       if (lastInteraction.role === 'bot' && (Date.now() - lastInteraction.timestamp) > 30 * 60 * 1000) {
@@ -325,6 +327,10 @@
       }
     }
     
+    // 🧠 HUMAN CONVERSATION MEMORY ENGINE (Track User Identity & Preferences)
+    const platformFacts = getPlatformFacts();
+    humanMemoryEngine(normalized, thoughtProcess.extractedData.abstractConcept, thoughtProcess.extractedData.subjects, platformFacts.dbUser, userMessage);
+
     pushContext('user', userMessage, purpose, thoughtProcess.extractedData.subjects);
 
     for (let attempt = 1; attempt <= 5; attempt++) {
@@ -410,6 +416,9 @@
 
     let finalResponseText = bestResponse.text;
     let responseTag = bestResponse.tag;
+
+    // 🧠 HUMAN CONVERSATION MEMORY ENGINE (Inject subtle memory)
+    finalResponseText = injectHumanMemory(finalResponseText, isFirstMessageInSession);
 
     // 4. SELF LEARNING MEMORY & CONTEXT (Analyze and record conversation)
     analyzeAndLearnFromMessage(userMessage, responseTag);
@@ -1616,6 +1625,83 @@
             modified = '😂😂 يا سيدي على الروقان..\n\n' + modified;
           }
           break;
+      }
+    }
+
+    return modified;
+  }
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // 🧠 HUMAN CONVERSATION MEMORY ENGINE
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  function loadHumanMemory() {
+    try {
+      const raw = localStorage.getItem('bot_human_memory');
+      if (raw) return JSON.parse(raw);
+    } catch(e) {}
+    return { name: null, grade: null, style: null, interests: [], lastTopics: [] };
+  }
+
+  function saveHumanMemory(mem) {
+    localStorage.setItem('bot_human_memory', JSON.stringify(mem));
+  }
+
+  function humanMemoryEngine(normalizedText, abstractConcept, subjects, dbUser, userMessage) {
+    let memory = loadHumanMemory();
+
+    // 1. Extract Name
+    if (!memory.name && dbUser && dbUser.name) {
+      memory.name = dbUser.name.split(' ')[0]; // First name only
+    } else if (normalizedText.includes('انا اسمي') || normalizedText.includes('اسمي ')) {
+      const words = userMessage.split(' ');
+      const nameIndex = words.findIndex(w => w === 'اسمي' || w === 'اسمى');
+      if (nameIndex !== -1 && words[nameIndex + 1]) {
+        memory.name = words[nameIndex + 1];
+      }
+    }
+
+    // 2. Track Topics & Deduce Grade
+    if (subjects && subjects.length > 0) {
+      subjects.forEach(sub => {
+        if (!memory.interests.includes(sub)) memory.interests.push(sub);
+        if (!memory.lastTopics.includes(sub)) {
+          memory.lastTopics.push(sub);
+          if (memory.lastTopics.length > 2) memory.lastTopics.shift(); // Keep last 2
+        }
+      });
+    }
+
+    // 3. Detect Style
+    if (abstractConcept === 'CONCEPT_HUMOR' || abstractConcept === 'CONCEPT_VENTING') {
+      memory.style = 'CASUAL';
+    } else if (userMessage.includes('شكرا') || userMessage.includes('استاذ')) {
+      memory.style = 'POLITE';
+    }
+
+    saveHumanMemory(memory);
+    return memory;
+  }
+
+  function injectHumanMemory(candidateText, isFirstMessageInSession) {
+    let memory = loadHumanMemory();
+    if (!memory.name || candidateText.length < 15) return candidateText;
+
+    let modified = candidateText;
+
+    // Subtle Injection Logic (20% chance or if it's the first interaction)
+    if (isFirstMessageInSession || Math.random() < 0.2) {
+      
+      // Don't inject if name already mentioned
+      if (modified.includes(memory.name)) return modified;
+
+      if (isFirstMessageInSession && memory.lastTopics.length > 0 && Math.random() < 0.5) {
+        modified = `أهلاً بيك يا ${memory.name}، عاش من شافك! جاهز نكمل حماسنا؟\n\n` + modified;
+      } else if (modified.includes('يا بطل')) {
+        modified = modified.replace('يا بطل', `يا ${memory.name}`);
+      } else if (modified.includes('يا صاحبي')) {
+        modified = modified.replace('يا صاحبي', `يا ${memory.name}`);
+      } else if (modified.includes('بص يا ')) {
+        modified = modified.replace('بص يا ', `بص يا ${memory.name} `);
       }
     }
 
