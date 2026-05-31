@@ -67,6 +67,79 @@
     safeSetItem(localStorage, SELF_LEARNING_KEY, JSON.stringify(data));
   }
 
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // 🧠 SELF IMPROVEMENT BRAIN
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  const IMPROVEMENT_BRAIN_KEY = 'pf_improvement_brain_v2';
+  
+  function loadImprovementBrain() {
+    try { 
+      return JSON.parse(localStorage.getItem(IMPROVEMENT_BRAIN_KEY) || '{"ununderstood":{}, "frequent_questions":{}, "conversation_drops":{}, "caused_confusion":{}, "suggestions":[]}'); 
+    } catch(e) { 
+      return {"ununderstood":{}, "frequent_questions":{}, "conversation_drops":{}, "caused_confusion":{}, "suggestions":[]}; 
+    }
+  }
+
+  function saveImprovementBrain(data) {
+    safeSetItem(localStorage, IMPROVEMENT_BRAIN_KEY, JSON.stringify(data));
+  }
+
+  function monitorConversationFlow(userMsg, botReplyTag, purpose, isConfused) {
+    const memory = loadImprovementBrain();
+    const normalized = normalizeText(userMsg);
+
+    // 1. Ununderstood (Fallback)
+    if (botReplyTag === 'fallback' || purpose === 'UNKNOWN_PURPOSE') {
+      if (!memory.ununderstood[normalized]) memory.ununderstood[normalized] = 0;
+      memory.ununderstood[normalized]++;
+    } else {
+      // 2. Frequent Questions (Successfully handled)
+      if (purpose === 'EDUCATIONAL_EXPLANATION' || purpose === 'ASSISTANCE') {
+        if (!memory.frequent_questions[normalized]) memory.frequent_questions[normalized] = 0;
+        memory.frequent_questions[normalized]++;
+      }
+    }
+
+    // 3. Caused Confusion (If the user is confused now, the PREVIOUS bot message caused it)
+    if (isConfused) {
+      const context = loadContextMemory();
+      let lastBotMsg = null;
+      for (let i = context.length - 1; i >= 0; i--) {
+        if (context[i].role === 'bot') {
+          lastBotMsg = context[i].text;
+          break;
+        }
+      }
+      if (lastBotMsg) {
+        if (!memory.caused_confusion[lastBotMsg]) memory.caused_confusion[lastBotMsg] = 0;
+        memory.caused_confusion[lastBotMsg]++;
+      }
+    }
+
+    saveImprovementBrain(memory);
+  }
+
+  function generateImprovementReport() {
+    const memory = loadImprovementBrain();
+    
+    // Auto-suggest new intents based on highly frequent ununderstood messages
+    Object.keys(memory.ununderstood).forEach(msg => {
+      if (memory.ununderstood[msg] >= 3 && !memory.suggestions.some(s => s.text === msg && s.type === 'new_intent')) {
+        memory.suggestions.push({ type: 'new_intent', text: msg, reason: 'تكرر عدم فهم هذه الرسالة', date: Date.now() });
+      }
+    });
+
+    // Auto-suggest simplifying a response if it caused confusion multiple times
+    Object.keys(memory.caused_confusion).forEach(msg => {
+      if (memory.caused_confusion[msg] >= 2 && !memory.suggestions.some(s => s.text === msg && s.type === 'needs_simplification')) {
+        memory.suggestions.push({ type: 'needs_simplification', text: msg, reason: 'هذا الرد تسبب في ارتباك الطالب أكثر من مرة', date: Date.now() });
+      }
+    });
+
+    saveImprovementBrain(memory);
+    return memory.suggestions;
+  }
+
   function analyzeAndLearnFromMessage(userMessage, finalResponseTag) {
     const normalized = normalizeText(userMessage);
     const memory = loadSelfLearning();
@@ -232,8 +305,24 @@
         normalized = normalized + ' ' + contextSubject;
       }
     }
+
+    // 4. Conversation Drops (Tracked before pushing new user context)
+    const currentContext = loadContextMemory();
+    if (currentContext.length > 0) {
+      const lastInteraction = currentContext[currentContext.length - 1];
+      if (lastInteraction.role === 'bot' && (Date.now() - lastInteraction.timestamp) > 30 * 60 * 1000) {
+        const droppedText = lastInteraction.text;
+        const brainMem = loadImprovementBrain();
+        if (!brainMem.conversation_drops[droppedText]) brainMem.conversation_drops[droppedText] = 0;
+        brainMem.conversation_drops[droppedText]++;
+        saveImprovementBrain(brainMem);
+      }
+    }
     
     pushContext('user', userMessage, purpose, thoughtProcess.extractedData.subjects);
+    
+    // 🧠 STUDENT UNDERSTANDING DETECTOR (Analyze)
+    let isConfused = analyzeStudentConfusion(normalized);
     
     // 2. REFLECTION ENGINE (Generate multiple variants, pick best)
     let bestResponse = { text: '', score: -1, tag: 'fallback' };
@@ -271,7 +360,6 @@
       }
 
       // 🧠 STUDENT UNDERSTANDING DETECTOR (SIMPLIFY)
-      let isConfused = analyzeStudentConfusion(normalized);
       if (isConfused && candidateTag === 'educational') {
         candidateText = simplifyResponse(candidateText);
       }
@@ -292,6 +380,8 @@
 
     // 4. SELF LEARNING MEMORY & CONTEXT (Analyze and record conversation)
     analyzeAndLearnFromMessage(userMessage, responseTag);
+    monitorConversationFlow(userMessage, responseTag, purpose, isConfused);
+    generateImprovementReport(); // Auto generate suggestions silently
     pushContext('bot', finalResponseText, purpose, thoughtProcess.extractedData.subjects);
 
     return finalResponseText;
