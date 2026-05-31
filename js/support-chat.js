@@ -1611,19 +1611,79 @@
       }
       followUp = eduFollowUps[Math.floor(Math.random() * eduFollowUps.length)];
     } else if (tag === 'social') {
-      const socialFollowUps = [
-        'أخبارك إيه في المذاكرة؟ ماشي تمام ولا في حاجة موقفاك؟',
-        'جاهز تكسر الدنيا في منهج الدراسات؟',
-        'طمني، الكورسات معاك ماشية زي الفل ولا محتاج مساعدة؟',
-        'قولي بقى، إيه أكتر جزء عجبك في الدروس اللي ذاكرتها؟'
-      ];
-      followUp = socialFollowUps[Math.floor(Math.random() * socialFollowUps.length)];
+      const topInterest = getTopInterest();
+      if (topInterest && Math.random() > 0.3) { // 70% chance if they have a top interest
+        const curiosityFollowUps = [
+          `بالمناسبة، أنا ملاحظ إنك من عشاق (${topInterest})، عاش بجد!`,
+          `على فكرة، شغفك بـ (${topInterest}) واضح جداً، استمر يا بطل!`,
+          `أنا بقيت عارف إنك بتحب تسأل كتير في (${topInterest})، وده شيء ممتاز.`
+        ];
+        followUp = curiosityFollowUps[Math.floor(Math.random() * curiosityFollowUps.length)];
+      } else {
+        const socialFollowUps = [
+          'أخبارك إيه في المذاكرة؟ ماشي تمام ولا في حاجة موقفاك؟',
+          'جاهز تكسر الدنيا في منهج الدراسات؟',
+          'طمني، الكورسات معاك ماشية زي الفل ولا محتاج مساعدة؟',
+          'قولي بقى، إيه أكتر جزء عجبك في الدروس اللي ذاكرتها؟'
+        ];
+        followUp = socialFollowUps[Math.floor(Math.random() * socialFollowUps.length)];
+      }
     }
 
     if (followUp && !text.includes(followUp)) {
       return text + '\n\n' + followUp;
     }
     return text;
+  }
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // 🧠 CURIOSITY ENGINE (USER INTEREST TRACKER)
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  function updateUserInterests(subjects) {
+    if (!subjects || subjects.length === 0) return;
+    
+    let interests;
+    try {
+      interests = JSON.parse(localStorage.getItem('pf_user_interests') || '{}');
+    } catch (e) {
+      interests = {};
+    }
+
+    subjects.forEach(subject => {
+      // Exclude generic words that aren't true academic subjects
+      const genericSubjects = ['سؤال', 'امتحان', 'واجب', 'دفع', 'اشتراك', 'كورس', 'درس', 'منصة', 'باسورد', 'حصة', 'منهج', 'شرح'];
+      if (!genericSubjects.includes(subject)) {
+        interests[subject] = (interests[subject] || 0) + 1;
+      }
+    });
+
+    try {
+      localStorage.setItem('pf_user_interests', JSON.stringify(interests));
+    } catch (e) {
+      console.warn('Could not save user interests', e);
+    }
+  }
+
+  function getTopInterest() {
+    let interests;
+    try {
+      interests = JSON.parse(localStorage.getItem('pf_user_interests') || '{}');
+    } catch (e) {
+      return null;
+    }
+
+    let topSubject = null;
+    let maxCount = 0;
+
+    for (const [subject, count] of Object.entries(interests)) {
+      if (count > maxCount) {
+        maxCount = count;
+        topSubject = subject;
+      }
+    }
+
+    // Return top interest if it's been mentioned at least twice to avoid false positives
+    return maxCount >= 2 ? topSubject : null;
   }
 
   function multiStepThinkEngine(normalized, userMessage) {
@@ -1639,6 +1699,9 @@
     // 1. EXTRACT IMPORTANT INFO
     const educationalKeywords = [...DYNAMIC_VOCAB.subjects, 'شرح', 'سؤال', 'امتحان', 'واجب', 'دفع', 'اشتراك', 'كورس', 'درس', 'منصة', 'باسورد', 'حصة', 'منهج'];
     thoughtProcess.extractedData.subjects = educationalKeywords.filter(k => normalized.includes(k));
+    
+    // 🧠 UPDATE CURIOSITY ENGINE
+    updateUserInterests(thoughtProcess.extractedData.subjects);
     
     const isAsking = /\?|؟|فين|امتى|ازاي|ليه|مين|كام|بكام/.test(normalized);
     const isChatting = isFuzzyMatch(normalized, [...DYNAMIC_VOCAB.greetings, ...DYNAMIC_VOCAB.check_status, 'انت مين', 'عمرك']);
