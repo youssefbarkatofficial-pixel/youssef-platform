@@ -383,6 +383,9 @@
         candidateText = simplifyResponse(candidateText);
       }
 
+      // 🧠 SELF QUESTIONING ENGINE (QA)
+      candidateText = selfQuestioningEngine(candidateText, normalized, thoughtProcess.internalPlan, candidateTag);
+
       // 🧠 SMART FOLLOW-UP ENGINE
       candidateText = applySmartFollowUp(candidateText, candidateTag, thoughtProcess.extractedData.goal, thoughtProcess.extractedData.subjects);
 
@@ -1623,6 +1626,58 @@
     // 5. Before and After (قبل وبعد)
     if (/(قبل|بعد|حالياً|الآن|زمان|أصبح)/.test(modified) && !modified.includes('الوضع قبل وبعد')) {
       modified = modified.replace(/^/, "عشان الصورة توضح، خلينا نبص على الوضع (قبل وبعد):\n");
+    }
+
+    return modified;
+  }
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // 🧠 SELF QUESTIONING ENGINE (INTERNAL QA)
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  function selfQuestioningEngine(candidateText, normalized, internalPlan, tag) {
+    if (!candidateText || tag !== 'educational') return candidateText;
+    
+    let modified = candidateText;
+    let didModify = false;
+
+    // 1. COMPLETENESS (Why/Reasoning)
+    if (/(ليه|بم تفسر|سبب|لي|لماذا|عشان ايه)/.test(normalized)) {
+      if (!/(لأن|بسبب|علشان|عشان|نتيجة|من هنا|بيرجع لـ)/.test(modified)) {
+        console.log('[SELF QUESTIONING ENGINE] Checking: Completeness... Failed! Injecting clarity...');
+        modified += '\n\nوللتوضيح أكتر، السبب الأساسي لده هو إن الأحداث دي مترتبة على بعضها نتيجتها الطبيعية للظروف دي.';
+        didModify = true;
+      }
+    }
+
+    // 2. RELEVANCE (When/Dates)
+    if (/(امتى|متى|سنة كام|تاريخ)/.test(normalized)) {
+      if (!/\d{3,4}/.test(modified)) {
+        console.log('[SELF QUESTIONING ENGINE] Checking: Relevance (Dates)... Failed! Injecting context...');
+        modified += '\n\n(أهم حاجة هنا تركز على التواريخ والترتيب الزمني للأحداث دي في المنهج.)';
+        didModify = true;
+      }
+    }
+
+    // 3. VALUE ADD (Where/Locations)
+    if (/(فين|مكان|اين)/.test(normalized)) {
+      if (!/(في|يقع|شمال|جنوب|شرق|غرب|محافظة|مدينة)/.test(modified)) {
+        console.log('[SELF QUESTIONING ENGINE] Checking: Value Add (Location)... Failed! Injecting spatial context...');
+        modified += '\n\n(خد بالك، الخريطة هنا مهمة جداً لمعرفة المكان بالتحديد والتخيل الجغرافي ليه.)';
+        didModify = true;
+      }
+    }
+
+    // 4. CLARITY (Beginner Fallback)
+    if (internalPlan && internalPlan.studentTier === 'Beginner' && modified.length > 150) {
+      if (!/(باختصار|علشان نلخص|الخلاصة)/.test(modified)) {
+        console.log('[SELF QUESTIONING ENGINE] Checking: Clarity for Beginner... Failed! Injecting summary...');
+        modified += '\n\nلو حاسس إن الكلام كتير، الخلاصة ببساطة إنك تركز على الفكرة الأساسية وماتشغلش بالك بالتفاصيل دلوقتي.';
+        didModify = true;
+      }
+    }
+
+    if (!didModify) {
+      console.log('[SELF QUESTIONING ENGINE] All checks passed. Response is solid.');
     }
 
     return modified;
