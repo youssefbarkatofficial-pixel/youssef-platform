@@ -1684,10 +1684,29 @@
   }
 
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // 🧠 SMART FOLLOW-UP ENGINE
+  // 🧠 SMART FOLLOW-UP ENGINE & SEMANTIC CONCEPTS
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   function applySmartFollowUp(text, tag, goal, subjects) {
-    // Only apply ~30% of the time so it doesn't get annoying
+    const profile = getStudentProfile();
+    
+    // Check for explicit Semantic Concepts to address
+    if (profile && profile.semanticMemory && tag !== 'educational') {
+       if (profile.semanticMemory['EXAM_ANXIETY'] > 0 && Math.random() > 0.5) {
+         profile.semanticMemory['EXAM_ANXIETY'] -= 0.5; // Decay it so we don't spam it forever
+         localStorage.setItem('pf_student_profile', JSON.stringify(profile));
+         return text + '\n\nبالمناسبة، طمني قلق الامتحانات خف شوية ولا لسه؟ متخليش التوتر يسيطر عليك، أنت بطل وتقدر.';
+       }
+       if (profile.semanticMemory['LOW_SCORE'] > 0 && Math.random() > 0.5) {
+         profile.semanticMemory['LOW_SCORE'] -= 0.5;
+         localStorage.setItem('pf_student_profile', JSON.stringify(profile));
+         return text + '\n\nعلى فكرة، الدرجة الوحشة اللي جبتها قبل كده مش مقياس ليك، دي مجرد خطوة عشان تتعلم منها وتقفل المرة الجاية.';
+       }
+       if (profile.semanticMemory['AMBITION_HIGH'] > 0 && Math.random() > 0.5) {
+         return text + '\n\nأنا واثق إنك هتوصل لحلمك وهتبقى من الأوائل زي ما بتتمنى، استمر يا بطل!';
+       }
+    }
+
+    // Only apply general follow-up ~30% of the time
     if (Math.random() > 0.3) return text;
 
     // Do not follow up if the user is frustrated, asking for problem solving, or verification
@@ -1733,8 +1752,27 @@
   }
 
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // 🧠 STUDENT PROFILE BUILDER
+  // 🧠 STUDENT PROFILE BUILDER & SEMANTIC MEMORY
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  const SEMANTIC_RULES = [
+    { pattern: /(بحب|عشق|أفضل|مفضل|بموت في|حبيت|اكتر مادة).*(تاريخ|جغرافيا|تضاريس|دراسات|خرائط)/, getConcept: (match) => `INTEREST_${match[2]}` },
+    { pattern: /(مش فاهم|صعب|معقد|مش عارف|مش بستوعب|مش داخله دماغي|عقدتي).*(تاريخ|جغرافيا|تضاريس|دراسات|خرائط)/, getConcept: (match) => `STRUGGLE_${match[2]}` },
+    { pattern: /(امتحان|اختبار|ميدتيرم|كويز).*(بكرة|قريب|الاسبوع|خايف|مرعوب|رعب)/, getConcept: () => 'EXAM_ANXIETY' },
+    { pattern: /(نفسي|عايز|حلمي|ياريت|بتمناها).*(ابقى شاطر|اقفل|اجيب مجموع|اطلع الاول|انجح)/, getConcept: () => 'AMBITION_HIGH' },
+    { pattern: /(جبت|درجتي|نقصت|سقطت).*(وحش|سيئ|قليل|زفت)/, getConcept: () => 'LOW_SCORE' }
+  ];
+
+  function extractSemanticConcepts(userMessage) {
+    let concepts = [];
+    SEMANTIC_RULES.forEach(rule => {
+      const match = userMessage.match(rule.pattern);
+      if (match) {
+        concepts.push(rule.getConcept(match));
+      }
+    });
+    return concepts;
+  }
+
   function updateStudentProfile(thoughtProcess, userMessage, normalized) {
     let profile;
     try {
@@ -1788,6 +1826,13 @@
     
     if (userMessage.length < 15) profile.writingStyle.shortMessages += 1;
 
+    // 4. Track Semantic Memory (Abstract Concepts)
+    if (!profile.semanticMemory) profile.semanticMemory = {};
+    const concepts = extractSemanticConcepts(userMessage || normalized);
+    concepts.forEach(c => {
+      profile.semanticMemory[c] = (profile.semanticMemory[c] || 0) + 1;
+    });
+
     try {
       localStorage.setItem('pf_student_profile', JSON.stringify(profile));
     } catch (e) {
@@ -1805,15 +1850,31 @@
 
   function getTopInterest() {
     const profile = getStudentProfile();
-    if (!profile || !profile.topics) return null;
+    if (!profile) return null;
 
     let topSubject = null;
     let maxCount = 0;
 
-    for (const [subject, data] of Object.entries(profile.topics)) {
-      if (data.asks > maxCount) {
-        maxCount = data.asks;
-        topSubject = subject;
+    // 1. Try to find top Semantic Interest first
+    if (profile.semanticMemory) {
+      for (const [concept, count] of Object.entries(profile.semanticMemory)) {
+        if (concept.startsWith('INTEREST_') && count > maxCount) {
+          maxCount = count;
+          topSubject = concept.split('_')[1]; // Extract the subject name
+        }
+      }
+    }
+
+    if (topSubject && maxCount >= 2) return topSubject;
+
+    // 2. Fallback to raw topics
+    maxCount = 0;
+    if (profile.topics) {
+      for (const [subject, data] of Object.entries(profile.topics)) {
+        if (data.asks > maxCount) {
+          maxCount = data.asks;
+          topSubject = subject;
+        }
       }
     }
 
