@@ -624,6 +624,72 @@
     return responseStr;
   }
 
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // 🧠 HUMANIZATION LAYER
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  function humanizeText(text) {
+    if (!text || text.length < 10) return text;
+    let modified = text;
+
+    // 1. Synonym Swapper (only 50% probability to maintain original flavor)
+    if (Math.random() > 0.5) {
+      const synonyms = [
+        { find: /شوف/g, replace: ['بص', 'ركز معايا', 'لاحظ'] },
+        { find: /تقدر/g, replace: ['ممكن', 'في إمكانك', 'متاح ليك'] },
+        { find: /مهم جداً/g, replace: ['ضروري أوي', 'أساسي ومهم', 'لازم نركز عليه'] },
+        { find: /عشان/g, replace: ['علشان', 'لأن', 'بسبب إن'] }
+      ];
+      for (const rule of synonyms) {
+        if (Math.random() > 0.5 && modified.match(rule.find)) {
+          const replacement = rule.replace[Math.floor(Math.random() * rule.replace.length)];
+          modified = modified.replace(rule.find, replacement);
+        }
+      }
+    }
+
+    // 2. List Shuffling (If it contains a list of items like - Item 1 \n - Item 2)
+    // We look for patterns of "- " or "* " lines.
+    if (modified.includes('- ') && Math.random() > 0.4) {
+      const lines = modified.split('\n');
+      const listItems = [];
+      const normalLines = [];
+      
+      lines.forEach(line => {
+        if (line.trim().startsWith('- ')) listItems.push(line);
+        else normalLines.push(line);
+      });
+
+      if (listItems.length > 1) {
+        // Shuffle list
+        for (let i = listItems.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [listItems[i], listItems[j]] = [listItems[j], listItems[i]];
+        }
+        
+        // Reconstruct: Try to insert them back where the first list item was found
+        const firstListIndex = lines.findIndex(l => l.trim().startsWith('- '));
+        if (firstListIndex !== -1) {
+          lines.splice(firstListIndex, listItems.length, ...listItems);
+          modified = lines.join('\n');
+        }
+      }
+    }
+
+    // 3. Dynamic Outros (Append randomly 40% of the time)
+    if (Math.random() > 0.6 && !modified.includes('بالتوفيق') && !modified.includes('محتاج حاجة')) {
+      const outros = [
+        '\n\nأتمنى يكون الموضوع وصلك صح، محتاج حاجة تانية؟',
+        '\n\nدي الخلاصة يا بطل، لو لسه في حاجة غامضة أنا معاك.',
+        '\n\nبالتوفيق في المذاكرة، قولي لو حابب نكمل في درس جديد.',
+        '\n\nيا رب أكون قدرت أبسطهالك، عندك استفسار تاني؟'
+      ];
+      const outro = outros[Math.floor(Math.random() * outros.length)];
+      modified += outro;
+    }
+
+    return modified;
+  }
+
   function composeFinalResponse(rule, question, intentData) {
     let response = rule && typeof rule.text === 'string' ? rule.text : '';
 
@@ -658,7 +724,9 @@
       escalationSuggested = true;
       response = `${response}\n\n${ESCALATION_SUGGESTION}`.trim();
     }
-    return applyAntiRepetition(response, rule ? rule.tag : null);
+    
+    let finalized = applyAntiRepetition(response, rule ? rule.tag : null);
+    return humanizeText(finalized);
   }
 
   function loadTraining() {
