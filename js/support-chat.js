@@ -1957,6 +1957,25 @@
     return maxCount >= 2 ? topSubject : null;
   }
 
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // 🧠 MEANING FIRST ARCHITECTURE (CONCEPTS)
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  const MEANING_CLUSTERS = {
+    CONCEPT_CONFUSION: ['انا تايه', 'مش فاهم', 'مش مستوعب', 'حاسس اني ضايع', 'مش مجمع', 'هنجت', 'الدنيا لفت', 'فصلت', 'مخي قفل', 'معقد', 'مش راكبة', 'تايه', 'وقفت معايا'],
+    CONCEPT_FRUSTRATION: ['زهقت', 'مش شغال', 'بايظ', 'عطلان', 'انا تعبت', 'قرفت', 'خربان', 'يأس', 'مخنوق', 'زفت', 'واقع'],
+    CONCEPT_APPRECIATION: ['شكرا', 'تسلم', 'عاش', 'حبيبي', 'الف شكر', 'الله ينور', 'جزاك', 'متشكر', 'تسلم ايدك', 'عظمة'],
+    CONCEPT_GREETING: ['اهلا', 'ازيك', 'عامل ايه', 'السلام عليكم', 'صباح الفل', 'مرحبا', 'يا هلا', 'هاي', 'هلو', 'اخبارك', 'كيفك', 'طمني']
+  };
+
+  function analyzeMeaningFirst(normalized) {
+    for (const [concept, phrases] of Object.entries(MEANING_CLUSTERS)) {
+      if (phrases.some(phrase => normalized.includes(phrase))) {
+        return concept;
+      }
+    }
+    return 'CONCEPT_UNKNOWN';
+  }
+
   function multiStepThinkEngine(normalized, userMessage) {
     let thoughtProcess = {
       purpose: 'UNKNOWN_PURPOSE',
@@ -1967,18 +1986,23 @@
 
     const words = normalized.split(/\s+/).filter(w => w.length >= 2);
     
+    // 0. MEANING FIRST ARCHITECTURE (Extract Abstract Concept)
+    const abstractConcept = analyzeMeaningFirst(normalized);
+    thoughtProcess.extractedData.abstractConcept = abstractConcept;
+    console.log(`[MEANING FIRST] Extracted Concept: ${abstractConcept}`);
+
     // 1. EXTRACT IMPORTANT INFO
     const educationalKeywords = [...DYNAMIC_VOCAB.subjects, 'شرح', 'سؤال', 'امتحان', 'واجب', 'دفع', 'اشتراك', 'كورس', 'درس', 'منصة', 'باسورد', 'حصة', 'منهج'];
     thoughtProcess.extractedData.subjects = educationalKeywords.filter(k => normalized.includes(k));
     
     const isAsking = /\?|؟|فين|امتى|ازاي|ليه|مين|كام|بكام/.test(normalized);
-    const isChatting = isFuzzyMatch(normalized, [...DYNAMIC_VOCAB.greetings, ...DYNAMIC_VOCAB.check_status, 'انت مين', 'عمرك']);
+    const isChatting = abstractConcept === 'CONCEPT_GREETING' || isFuzzyMatch(normalized, [...DYNAMIC_VOCAB.greetings, ...DYNAMIC_VOCAB.check_status, 'انت مين', 'عمرك']);
     const isJoking = isFuzzyMatch(normalized, DYNAMIC_VOCAB.humor);
-    const isComplaining = isFuzzyMatch(normalized, DYNAMIC_VOCAB.complaint);
-    const isStressed = isFuzzyMatch(normalized, [...DYNAMIC_VOCAB.need_simplification, 'زعلان', 'تعبان', 'مضغوط', 'مخنوق', 'يأس']);
+    const isComplaining = abstractConcept === 'CONCEPT_FRUSTRATION' || isFuzzyMatch(normalized, DYNAMIC_VOCAB.complaint);
+    const isStressed = abstractConcept === 'CONCEPT_CONFUSION' || isFuzzyMatch(normalized, [...DYNAMIC_VOCAB.need_simplification, 'زعلان', 'تعبان', 'مضغوط', 'مخنوق', 'يأس']);
     const wantsExplanation = isFuzzyMatch(normalized, ['اشرح', 'ازاي', 'ليه', 'فهمني', 'يعني ايه']);
     const wantsHelp = isFuzzyMatch(normalized, DYNAMIC_VOCAB.help);
-    const wantsSocial = isFuzzyMatch(normalized, [...DYNAMIC_VOCAB.thanks, 'سلام', 'باي', 'تصبح على خير']);
+    const wantsSocial = abstractConcept === 'CONCEPT_APPRECIATION' || isFuzzyMatch(normalized, [...DYNAMIC_VOCAB.thanks, 'سلام', 'باي', 'تصبح على خير']);
     const isFollowUp = isFuzzyMatch(normalized, DYNAMIC_VOCAB.follow_up);
     const hasEduKeywords = thoughtProcess.extractedData.subjects.length > 0;
 
