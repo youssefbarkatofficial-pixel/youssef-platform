@@ -528,16 +528,39 @@
     const contentBased = getContentBasedResponse(userMessage);
     if (contentBased && contentBased.text) return composeFinalResponse(contentBased, userMessage, analyzeStudentIntent(userMessage));
 
-    // 🧠 KNOWLEDGE EXPANSION ENGINE (Last resort before fallback)
-    const expansionResponse = executeKnowledgeExpansionEngine(normalized, userMessage);
+    // 🧠 OFFLINE KNOWLEDGE RESEARCHER (Last resort before fallback)
+    const expansionResponse = offlineKnowledgeResearcher(normalized, userMessage);
     if (expansionResponse) return expansionResponse;
 
     return executeFallbackEngine(normalized, userMessage);
   }
 
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // 🧠 KNOWLEDGE EXPANSION ENGINE
+  // 📚 OFFLINE KNOWLEDGE RESEARCHER
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  const OFFLINE_KNOWLEDGE_BASE = [
+    {
+      topic: 'الحملة الفرنسية',
+      keywords: ['فرنسا', 'حملة', 'نابليون', 'كليبر', 'مينو', 'رشيد'],
+      content: 'الحملة الفرنسية على مصر (1798-1801) بقيادة نابليون بونابرت كان هدفها قطع طريق التجارة على إنجلترا للهند، وتأسيس إمبراطورية فرنسية في الشرق. فشلت الحملة عسكرياً بسبب صمود الشعب المصري وثوراته، ومقاومة المماليك والعثمانيين، وتدمير الأسطول الفرنسي في موقعة أبي قير البحرية. من أهم نتائجها العلمية: فك رموز حجر رشيد، وكتاب وصف مصر.'
+    },
+    {
+      topic: 'محمد علي',
+      keywords: ['محمد علي', 'مذبحة القلعة', 'الاحتكار', 'مؤسس'],
+      content: 'محمد علي باشا يعتبر مؤسس مصر الحديثة. تولى الحكم عام 1805 باختيار الزعامة الشعبية بقيادة عمر مكرم. تخلص من المماليك في مذبحة القلعة (1811) لينفرد بالحكم. بنى جيشاً قوياً واهتم بالزراعة (نظام الاحتكار) والصناعة والتعليم وأرسل بعثات لأوروبا.'
+    },
+    {
+      topic: 'تضاريس مصر',
+      keywords: ['تضاريس', 'جبال', 'هضاب', 'الصحراء', 'وادي النيل'],
+      content: 'تنقسم تضاريس مصر لـ 4 أقسام رئيسية: 1. وادي النيل والدلتا ومنخفض الفيوم (وهي أخصب الأراضي الزراعية). 2. الصحراء الغربية (أكبر مساحة وفيها هضاب مرمريكا والعبابدة). 3. الصحراء الشرقية (جبلية وفيها سلسلة جبال البحر الأحمر). 4. شبه جزيرة سيناء.'
+    },
+    {
+      topic: 'الفراعنة',
+      keywords: ['فرعون', 'الدولة القديمة', 'الهكسوس', 'أحمس', 'تاريخ قديم', 'الاهرامات'],
+      content: 'تاريخ مصر الفرعوني ينقسم لعدة عصور: الدولة القديمة (عصر بناة الأهرامات)، الدولة الوسطى (عصر الرخاء الاقتصادي)، والدولة الحديثة (عصر المجد الحربي). الهكسوس احتلو مصر في عصر الاضمحلال الثاني، لكن أحمس طردهم.'
+    }
+  ];
+
   function searchPlatformKnowledge(normalized) {
     try {
       let adminCourses = JSON.parse(localStorage.getItem('adminCourses') || '[]');
@@ -587,27 +610,41 @@
     }
   }
 
-  function executeKnowledgeExpansionEngine(normalized, userMessage) {
-    const finding = searchPlatformKnowledge(normalized);
-    if (!finding) return null;
-
-    let responseText = '';
-    const prefixes = [
-      'أنا دورت في المنصة ولقيت إن ',
-      'ولا يهمك، دورتلك في الكورسات ولقيت إن ',
-      'الموضوع ده عندنا! لقيت إن '
-    ];
-    const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
-
-    if (finding.type === 'lesson') {
-      responseText = `${prefix}الموضوع ده مشروح بالتفصيل في كورس (${finding.courseTitle})، وتحديداً في وحدة (${finding.unitTitle})، درس (${finding.lessonTitle}). تقدر تدخله من صفحة الكورسات وتتفرج على الفيديو الخاص به أو تقرأ الملزمة بتاعته.`;
-    } else if (finding.type === 'unit') {
-      responseText = `${prefix}الوحدة اللي بتسأل عنها دي (${finding.unitTitle}) موجودة جوه كورس (${finding.courseTitle}). افتح الكورس وهتلاقي كل دروسها هناك.`;
-    } else {
-      responseText = `${prefix}الطلب بتاعك ده موجود في كورس كامل اسمه (${finding.courseTitle}). أنصحك تفتحه من صفحة الكورسات وتبدأ تذاكره!`;
+  function offlineKnowledgeResearcher(normalized, userMessage) {
+    let findings = [];
+    let courseLink = '';
+    
+    // 1. Search Offline Base
+    for (let item of OFFLINE_KNOWLEDGE_BASE) {
+      if (item.keywords.some(k => normalized.includes(k) || userMessage.includes(k))) {
+        findings.push(item.content);
+      }
     }
 
-    return composeFinalResponse({ text: responseText, tag: 'educational' }, userMessage, 'knowledge_expansion');
+    // 2. Search Admin Courses
+    const courseFinding = searchPlatformKnowledge(normalized);
+    if (courseFinding) {
+      if (courseFinding.type === 'lesson') {
+        courseLink = `وللعلم، تفاصيل الدرس ده مشروحة كاملة في كورس (${courseFinding.courseTitle})، وحدة (${courseFinding.unitTitle})، درس (${courseFinding.lessonTitle}).`;
+      } else if (courseFinding.type === 'unit') {
+        courseLink = `ولو حابب تذاكر الموضوع ده بتركيز، هتلاقيه في كورس (${courseFinding.courseTitle}) وتحديداً في وحدة (${courseFinding.unitTitle}).`;
+      } else {
+        courseLink = `ولو حابب تذاكر الموضوع ده بتركيز، هتلاقيه في كورس (${courseFinding.courseTitle}).`;
+      }
+    }
+
+    if (findings.length === 0 && !courseLink) return null;
+
+    let finalResponse = '';
+    
+    if (findings.length > 0) {
+      finalResponse = `بحثت لك في ملخصات المنصة وجمعت لك الخلاصة دي:\n\n${findings.join('\n\n')}`;
+      if (courseLink) finalResponse += `\n\n${courseLink}`;
+    } else {
+      finalResponse = `أنا دورتلك في الكورسات بتاعتنا ولقيت إن الموضوع اللي بتسأل عنه موجود.. ${courseLink}\nأرجوك افتح صفحة الكورسات وابدأ ذاكره!`;
+    }
+
+    return composeFinalResponse({ text: finalResponse, tag: 'educational' }, userMessage, 'knowledge_expansion');
   }
 
   function executeContextEngine(normalized, userMessage) {
