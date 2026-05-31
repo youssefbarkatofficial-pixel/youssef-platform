@@ -70,35 +70,56 @@
       return 'مقدرش أساعدك فى ده، الأستاذ يوسف بركات لو لمحني هيمرجحني 😂';
     }
 
-    const rule = ruleAnswerFor(userMessage);
-    if (rule && rule.text) {
-      return composeFinalResponse(rule, userMessage, analyzeStudentIntent(userMessage));
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 🚪 CONVERSATION GATE (Layer 1)
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    const category = categorizeConversation(normalized);
+
+    // 1. SOCIAL ROUTE
+    if (['Greeting', 'Small Talk', 'Social Conversation', 'Emotional Message', 'Joke', 'Farewell'].includes(category)) {
+      const socialResponse = generateSocialResponse(normalized, category);
+      return composeFinalResponse({ text: socialResponse, tag: 'social' }, userMessage, analyzeStudentIntent(userMessage));
     }
+    // 2. FOLLOW-UP ROUTE
+    else if (category === 'Follow-up') {
+      return executeContextEngine(normalized, userMessage);
+    }
+    // 3. EDUCATIONAL ROUTE
+    else if (category === 'Educational') {
+      return executeEducationalIntentEngine(normalized, userMessage);
+    }
+    // 4. UNKNOWN ROUTE
+    else {
+      return executeFallbackEngine(normalized, userMessage);
+    }
+  }
+
+  function executeEducationalIntentEngine(normalized, userMessage) {
+    const rule = ruleAnswerFor(userMessage);
+    if (rule && rule.text) return composeFinalResponse(rule, userMessage, analyzeStudentIntent(userMessage));
 
     const platformReply = getPlatformReply(userMessage);
-    if (platformReply && platformReply.text) {
-      return composeFinalResponse(platformReply, userMessage, analyzeStudentIntent(userMessage));
-    }
-
-    const followUp = getFollowUpReply(userMessage);
-    if (followUp && followUp.text) {
-      return composeFinalResponse(followUp, userMessage, analyzeStudentIntent(userMessage));
-    }
+    if (platformReply && platformReply.text) return composeFinalResponse(platformReply, userMessage, analyzeStudentIntent(userMessage));
 
     const known = getKnownResponses(userMessage);
-    if (known && known.text) {
-      return composeFinalResponse(known, userMessage, analyzeStudentIntent(userMessage));
-    }
+    if (known && known.text) return composeFinalResponse(known, userMessage, analyzeStudentIntent(userMessage));
 
     const contentBased = getContentBasedResponse(userMessage);
-    if (contentBased && contentBased.text) {
-      return composeFinalResponse(contentBased, userMessage, analyzeStudentIntent(userMessage));
-    }
+    if (contentBased && contentBased.text) return composeFinalResponse(contentBased, userMessage, analyzeStudentIntent(userMessage));
 
+    return executeFallbackEngine(normalized, userMessage);
+  }
+
+  function executeContextEngine(normalized, userMessage) {
+    const followUp = getFollowUpReply(userMessage);
+    if (followUp && followUp.text) return composeFinalResponse(followUp, userMessage, analyzeStudentIntent(userMessage));
+    return executeEducationalIntentEngine(normalized, userMessage);
+  }
+
+  function executeFallbackEngine(normalized, userMessage) {
     if (isVeryUnclearMessage(userMessage)) {
       return getFallbackResponse(userMessage).text;
     }
-
     return getFallbackResponse(userMessage).text;
   }
 
@@ -685,56 +706,67 @@
     return false;
   }
 
-  function getSmartResponse(text) {
-    const normalized = normalizeText(text);
-    if (!normalized || normalized.length < 2) return null;
-
+  function categorizeConversation(normalized) {
     const words = normalized.split(/\s+/);
-    let matchedIntent = 'general';
-    let matchedSubject = null;
+    
+    if (isFuzzyMatch(normalized, ['نكتة', 'ضحكني', 'هتموتني من الضحك', 'انت جامد', 'جامد', 'عسل', 'تضحك'])) return 'Joke';
+    
+    if (isFuzzyMatch(normalized, DYNAMIC_VOCAB.frustration) || isFuzzyMatch(normalized, ['زعلان', 'تعبان', 'مضغوط', 'مخنوق', 'يأس'])) return 'Emotional Message';
 
-    // 1. Detect dynamic entities (Subjects) using fuzzy match
+    if (isFuzzyMatch(normalized, DYNAMIC_VOCAB.thanks)) return 'Social Conversation';
+    if (isFuzzyMatch(normalized, ['سلام', 'باي', 'تصبح على خير', 'مع السلامة', 'اشوفك بعدين'])) return 'Farewell';
+    
+    if (isFuzzyMatch(normalized, DYNAMIC_VOCAB.greetings) || isFuzzyMatch(normalized, ['طمني عليك', 'اخبارك', 'ايه يا بطل', 'عامل ايه'])) return 'Greeting';
+
+    if (isFuzzyMatch(normalized, ['انت مين', 'شغال فين', 'بتعمل ايه', 'اسمك ايه', 'عمرك'])) return 'Small Talk';
+
+    if (isFuzzyMatch(normalized, ['طب', 'وبعدين', 'يعني', 'قصدك', 'لسه', 'كمان', 'طيب', 'وبالنسبة'])) return 'Follow-up';
+
+    const educationalKeywords = [...DYNAMIC_VOCAB.subjects, 'شرح', 'سؤال', 'امتحان', 'واجب', 'دفع', 'اشتراك', 'كورس', 'درس', 'منصة', 'باسورد', 'حصة', 'منهج'];
+    if (isFuzzyMatch(normalized, educationalKeywords) || /فين|ازاي|ليه|امتى|بكام/.test(normalized)) {
+      return 'Educational';
+    }
+
+    return 'Unknown';
+  }
+
+  function generateSocialResponse(normalized, category) {
+    let response = '';
+    
+    // 1. Detect dynamic entities (Subjects) to include if any
+    const words = normalized.split(/\s+/);
+    let matchedSubject = null;
     for (const w of words) {
       if (w.length < 3) continue;
       const subj = DYNAMIC_VOCAB.subjects.find(s => s.includes(w) || w.includes(s) || levenshteinDistance(w, s) <= 1);
       if (subj) matchedSubject = subj;
     }
-    
-    // 2. Detect Intents using flexible matching (not rigid regex)
-    const isGreeting = isFuzzyMatch(normalized, DYNAMIC_VOCAB.greetings);
-    const isThanks = isFuzzyMatch(normalized, DYNAMIC_VOCAB.thanks) && words.length < 5;
-    const isFrustrated = isFuzzyMatch(normalized, DYNAMIC_VOCAB.frustration);
 
-    if (isGreeting && !matchedSubject) matchedIntent = 'greeting';
-    else if (isThanks) matchedIntent = 'thanks';
-    else if (isFrustrated) matchedIntent = 'frustration';
-    else if (matchedSubject) matchedIntent = 'subject';
-
-    let response = '';
-
-    // 3. Compose response dynamically like a human
-    if (matchedIntent === 'greeting') {
+    if (category === 'Greeting') {
       response = `${pickRandom(DYNAMIC_RESPONSES.greeting_intros)} ${pickRandom(DYNAMIC_RESPONSES.greeting_outros)}`;
-      return { text: response, tag: 'dynamic_chat' };
     }
-    
-    if (matchedIntent === 'thanks') {
-      response = `${pickRandom(DYNAMIC_RESPONSES.thanks_cores)} لو احتجت حاجة تاني أنا موجود.`;
-      return { text: response, tag: 'dynamic_chat' };
+    else if (category === 'Social Conversation') {
+      response = `${pickRandom(DYNAMIC_RESPONSES.thanks_cores)} لو احتجت أي مساعدة في المنهج أنا في الخدمة.`;
     }
-
-    if (matchedIntent === 'frustration') {
+    else if (category === 'Emotional Message') {
       response = `${pickRandom(DYNAMIC_RESPONSES.frustration_cores)} ${pickRandom(DYNAMIC_RESPONSES.frustration_outros)}`;
-      return { text: response, tag: 'dynamic_chat' };
+    }
+    else if (category === 'Small Talk') {
+      response = 'أنا البوصلة بتاعتك هنا في المنصة، صايع ردود وموجود دايماً عشان أسهل عليك المذاكرة 💪 تحب تسأل عن إيه؟';
+    }
+    else if (category === 'Joke') {
+      response = 'هههههه 😂 ربنا يسعدك يا بطل، يلا بينا نرجع نكسر الدنيا في المذاكرة؟';
+    }
+    else if (category === 'Farewell') {
+      response = 'في رعاية الله يا بطل، مستنيك ترجعلي تاني في أي وقت 👋';
     }
 
-    if (matchedIntent === 'subject' && matchedSubject) {
+    if (matchedSubject && category !== 'Joke' && category !== 'Farewell') {
       let core = pickRandom(DYNAMIC_RESPONSES.subject_cores).replace('[SUBJECT]', matchedSubject);
-      response = `${core} تحب أشرحلك الجزئية دي ولا عندك سؤال محدد فيها؟`;
-      return { text: response, tag: 'dynamic_chat' };
+      response += `\nوبالنسبة لـ ${matchedSubject}، ${core} تحب أشرحلك الجزئية دي ولا عندك سؤال محدد فيها؟`;
     }
 
-    return null;
+    return response || 'حبيبي يا بطل! أنا معاك، قل لي بس إزاي أقدر أساعدك؟';
   }
 
   function isVeryUnclearMessage(text) {
@@ -946,9 +978,6 @@
 
     const stableIntent = getStableIntentResponse(text);
     if (stableIntent) return stableIntent;
-
-    const smart = getSmartResponse(text);
-    if (smart) return smart;
 
     const antiCheatCheck = checkAntiCheatContext(text);
     if (antiCheatCheck.isCheat) {
