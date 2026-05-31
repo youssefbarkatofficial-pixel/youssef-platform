@@ -411,6 +411,9 @@
       // 🎭 NATURAL CONVERSATION ENGINE (PERSONA)
       candidateText = applyPersonaEngine(candidateText, thoughtProcess.extractedData.abstractConcept, purpose, thoughtProcess.internalPlan);
 
+      // ⚡ MICRO REASONING ENGINE
+      candidateText = applyMicroReasoning(candidateText, thoughtProcess.microInferences);
+
       // 🧠 STUDENT UNDERSTANDING DETECTOR (SIMPLIFY)
       if ((isConfused || thoughtProcess.internalPlan.isStrugglingTopic || thoughtProcess.internalPlan.lowUnderstanding) && candidateTag === 'educational') {
         candidateText = simplifyResponse(candidateText);
@@ -2189,15 +2192,64 @@
     return 'CONCEPT_UNKNOWN';
   }
 
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // ⚡ MICRO REASONING ENGINE
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  function extractMicroInferences(normalized) {
+    let inferences = [];
+    
+    // Urgent / Exam
+    if (/(امتحان|بكرة|النهارده|حالا|بسرعة|الوقت|مفيش وقت|لجنة)/.test(normalized)) {
+      inferences.push('URGENT');
+      inferences.push('NEEDS_SIMPLIFICATION');
+    }
+    
+    // Confidence / Frustration
+    if (/(غبي|بنسى|مش بفهم|يأست|صعب اوي|مفيش فايدة|تعبت|مخنوق|ضايع)/.test(normalized)) {
+      inferences.push('CONFIDENCE_BOOST');
+    }
+    
+    // Technical Frustration / Access issues
+    if (/(الكورس مش|مش لاقي|مش شغال|الباسورد|الموقع واقع|مش بيفتح|بايظ)/.test(normalized)) {
+      inferences.push('NEEDS_DIRECT_ACTION');
+    }
+
+    return inferences;
+  }
+
+  function applyMicroReasoning(text, inferences) {
+    if (!inferences || inferences.length === 0) return text;
+    
+    let prefix = '';
+    
+    if (inferences.includes('URGENT')) {
+      prefix = 'مفيش وقت للتوتر، ركز معايا في الخلاصة دي:\n\n';
+    } else if (inferences.includes('CONFIDENCE_BOOST')) {
+      prefix = 'يا بطل، أنت شاطر وممتاز بس محتاج تركز في نقطة بسيطة وهي دي:\n\n';
+    } else if (inferences.includes('NEEDS_DIRECT_ACTION')) {
+      prefix = 'ولا تزعل نفسك، حل المشكلة دي بسيط جداً:\n\n';
+    }
+
+    if (prefix && !text.includes(prefix) && !text.includes('مفيش وقت للتوتر')) {
+      return prefix + text;
+    }
+    return text;
+  }
+
   function multiStepThinkEngine(normalized, userMessage) {
     let thoughtProcess = {
       purpose: 'UNKNOWN_PURPOSE',
       confidence: 100,
       extractedData: { subjects: [], verbs: [] },
-      interpretations: []
+      interpretations: [],
+      microInferences: []
     };
 
     const words = normalized.split(/\s+/).filter(w => w.length >= 2);
+    
+    // 0. MICRO REASONING
+    thoughtProcess.microInferences = extractMicroInferences(normalized);
+    console.log(`[MICRO REASONING] Inferences:`, thoughtProcess.microInferences);
     
     // 0. MEANING FIRST ARCHITECTURE (Extract Abstract Concept)
     const abstractConcept = analyzeMeaningFirst(normalized);
