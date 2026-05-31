@@ -173,6 +173,34 @@
     return null;
   }
 
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // 🧠 STUDENT UNDERSTANDING DETECTOR
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  function analyzeStudentConfusion(normalized) {
+    const confusionWords = ['صعبة', 'معقد', 'تايه', 'ضايع', 'مش فاهم', 'مش مستوعب', 'مفهمتش', 'مش واضح'];
+    return confusionWords.some(w => normalized.includes(w));
+  }
+
+  function simplifyResponse(originalText) {
+    if (!originalText || originalText.length < 50) return originalText;
+
+    // Trim long responses down to 1-2 sentences.
+    const sentences = originalText.split(/(?<=[.?!])\s+/);
+    let trimmed = sentences.slice(0, 2).join(' ').trim();
+
+    // Remove any personality hooks that might contradict the simplification
+    trimmed = trimmed.replace(/بص يا سيدي ركز معايا\.\.|سؤال ممتاز جداً! خليني أوضحلك\.\.|سؤالك في محله يا بطل! شوف يا سيدي\.\./g, '');
+
+    const simplifiers = [
+      'الموضوع أسهل مما تتخيل، خليني ألخصهولك في جملة:',
+      'بص يا بطل، عشان متتوهش مني، الفكرة ببساطة هي:',
+      'عشان نسهلها خالص، ركز في دي بس:'
+    ];
+    const prefix = simplifiers[Math.floor(Math.random() * simplifiers.length)];
+    
+    return `${prefix}\n\n${trimmed}\n\nعشان تقرب الصورة أكتر، اعتبرها زي قصة بسيطة بنمشيها خطوة خطوة، ولو في جزء معين لسه صعب قولي!`;
+  }
+
   // Bot response logic is active and uses the platform-aware Arabic assistant engine.
   const BOT_RESPONSES_DISABLED = false;
   function getTemporarySafeBotReply(userMessage) {
@@ -240,6 +268,12 @@
       else {
         candidateText = executeFallbackEngine(normalized, userMessage);
         candidateTag = 'fallback';
+      }
+
+      // 🧠 STUDENT UNDERSTANDING DETECTOR (SIMPLIFY)
+      let isConfused = analyzeStudentConfusion(normalized);
+      if (isConfused && candidateTag === 'educational') {
+        candidateText = simplifyResponse(candidateText);
       }
 
       // REFLECT & SCORE
