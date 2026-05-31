@@ -369,6 +369,9 @@
         }
       }
 
+      // 🧠 REASONING TEMPLATES ENGINE
+      candidateText = applyReasoningTemplates(candidateText, candidateTag);
+
       // 🧠 GOAL DETECTION ENGINE (FORMATTING)
       candidateText = applyGoalBasedFormatting(candidateText, thoughtProcess.extractedData.goal);
 
@@ -1391,6 +1394,50 @@
       modified = 'ولا يهمك خالص، أنا في ظهرك ومعاك خطوة بخطوة..\n\n' + modified;
     }
     
+    return modified;
+  }
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // 🧠 REASONING TEMPLATES ENGINE
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  function applyReasoningTemplates(text, tag) {
+    if (!text || tag !== 'educational' || text.length < 40) return text;
+
+    let modified = text;
+
+    // 1. Cause and Effect (السبب والنتيجة)
+    if (/(بسبب|أدى إلى|نتيجة|عشان كده|لذلك)/.test(modified) && !modified.includes('عشان نفهم ده صح')) {
+      modified = modified.replace(/(بسبب|أدى إلى|نتيجة|عشان كده|لذلك)/, "\n\nوهنا بيجي دور السبب المباشر، اللي هو: ")
+                         .replace(/^/, "عشان نفهم ده صح، لازم نعرف الأسباب والنتائج المرتبطة ببعضها.\n");
+      return modified;
+    }
+
+    // 2. Comparison (المقارنة)
+    if (/(بينما|لكن|في المقابل|يختلف|أما|على عكس)/.test(modified) && !modified.includes('لو جينا نقارن')) {
+      modified = modified.replace(/(بينما|لكن|في المقابل|أما|على عكس)/, "\n\nلكن لو جينا نقارن في المقابل هنلاقي إن: ")
+                         .replace(/^/, "الموضوع ده فيه تفريعات، وعشان نسهله هنعمل مقارنة سريعة بتبين الفرق:\n");
+      return modified;
+    }
+
+    // 3. Chronological (التدرج الزمني)
+    if (/(ثم|بعد ذلك|قبل|قديماً|أولاً|بعدين|في النهاية|أخيراً)/.test(modified) && !modified.includes('بالترتيب الزمني')) {
+      modified = modified.replace(/^/, "تعالى نمشي معاها خطوة بخطوة وناخدها بالترتيب الزمني عشان منتهش:\n");
+      modified = modified.replace(/(ثم|بعد ذلك|بعدين)/, "\n\nوبعد كده في المرحلة اللي بعدها: ");
+      return modified;
+    }
+
+    // 4. Problem and Solution (المشكلة والحل)
+    if (/(حل|مشكلة|أزمة|طريقة|للتخلص|واجه|تغلب)/.test(modified) && !modified.includes('الأزمة الحقيقية')) {
+      modified = modified.replace(/^/, "بص، الفكرة هنا بتبدأ بوجود مشكلة لازم نعالجها:\n");
+      modified = modified.replace(/(حل|للتخلص|تغلب|طريقة)/, "\n\nوهنا بقى ظهر الحل للمشكلة دي، واللي كان عبارة عن: ");
+      return modified;
+    }
+
+    // 5. Before and After (قبل وبعد)
+    if (/(قبل|بعد|حالياً|الآن|زمان|أصبح)/.test(modified) && !modified.includes('الوضع قبل وبعد')) {
+      modified = modified.replace(/^/, "عشان الصورة توضح، خلينا نبص على الوضع (قبل وبعد):\n");
+    }
+
     return modified;
   }
 
