@@ -119,6 +119,32 @@
     saveSelfLearning(memory);
   }
 
+  function evaluateResponseQuality(responseText, userMessage, purpose) {
+    let score = 100;
+    if (!responseText || responseText.length < 5) return 0;
+    
+    // Core check
+    if (typeof isHumanLike === 'function' && !isHumanLike(responseText)) score -= 80;
+    
+    // Penalty for fallbacks when asking detailed questions
+    if (userMessage.length > 20 && responseText.includes('تذكرة')) score -= 30;
+    
+    // Emotion and warmth bonus
+    if (responseText.includes('بطل') || responseText.includes('عاش') || responseText.includes('يا') || responseText.includes('💪')) score += 10;
+    
+    // Vocabulary Bonus for Educational
+    if (purpose === 'EDUCATIONAL_EXPLANATION' && typeof DYNAMIC_VOCAB !== 'undefined') {
+      const containsVocab = Object.values(DYNAMIC_VOCAB).flat().some(v => responseText.includes(v));
+      if (containsVocab) score += 20;
+    }
+
+    // Repetition check (anti-robot behavior)
+    const history = typeof getBotHistory === 'function' ? getBotHistory() : [];
+    if (history.includes(responseText)) score -= 60;
+    
+    return Math.max(0, Math.min(100, score));
+  }
+
   // Bot response logic is active and uses the platform-aware Arabic assistant engine.
   const BOT_RESPONSES_DISABLED = false;
   function getTemporarySafeBotReply(userMessage) {
@@ -130,43 +156,51 @@
     }
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 🧠 COGNITIVE LAYER V1: UNDERSTAND -> THINK -> RESPOND
+    // 🧠 COGNITIVE LAYER V2: UNDERSTAND -> THINK -> REFLECT -> RESPOND
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     
     // 1. UNDERSTAND
     const purpose = analyzePurpose(normalized);
-    let finalResponseText = '';
-    let responseTag = 'fallback';
+    
+    // 2. REFLECTION ENGINE (Generate multiple variants, pick best)
+    let bestResponse = { text: '', score: -1, tag: 'fallback' };
 
-    // 2. THINK & ROUTE
-    if (['HUMOR', 'SOCIAL_CONNECTION', 'EMOTIONAL_SUPPORT'].includes(purpose)) {
-      const socialResponse = generateSocialResponse(normalized, purpose);
-      finalResponseText = composeFinalResponse({ text: socialResponse, tag: 'social' }, userMessage, analyzeStudentIntent(userMessage));
-      responseTag = 'social';
-    }
-    else if (purpose === 'FOLLOW_UP') {
-      finalResponseText = executeContextEngine(normalized, userMessage);
-      responseTag = 'follow_up';
-    }
-    else if (['EDUCATIONAL_EXPLANATION', 'INFORMATION_SEEKING', 'ASSISTANCE', 'COMPLAINT'].includes(purpose)) {
-      finalResponseText = executeEducationalIntentEngine(normalized, userMessage);
-      // Wait, executeEducationalIntentEngine might return a fallback string if it fails to match a rule.
-      // We will assume it was handled educationally unless it explicitly says 'fallback', but we don't have the tag back from it. 
-      // For now, tracking it as 'educational' is okay.
-      responseTag = 'educational';
-    }
-    else {
-      finalResponseText = executeFallbackEngine(normalized, userMessage);
-      responseTag = 'fallback';
+    for (let attempt = 0; attempt < 3; attempt++) {
+      let candidateText = '';
+      let candidateTag = 'fallback';
+
+      // ROUTE & GENERATE
+      if (['HUMOR', 'SOCIAL_CONNECTION', 'EMOTIONAL_SUPPORT'].includes(purpose)) {
+        const socialResponse = generateSocialResponse(normalized, purpose);
+        candidateText = composeFinalResponse({ text: socialResponse, tag: 'social' }, userMessage, analyzeStudentIntent(userMessage));
+        candidateTag = 'social';
+      }
+      else if (purpose === 'FOLLOW_UP') {
+        candidateText = executeContextEngine(normalized, userMessage);
+        candidateTag = 'follow_up';
+      }
+      else if (['EDUCATIONAL_EXPLANATION', 'INFORMATION_SEEKING', 'ASSISTANCE', 'COMPLAINT'].includes(purpose)) {
+        candidateText = executeEducationalIntentEngine(normalized, userMessage);
+        candidateTag = 'educational';
+      }
+      else {
+        candidateText = executeFallbackEngine(normalized, userMessage);
+        candidateTag = 'fallback';
+      }
+
+      // REFLECT & SCORE
+      let score = evaluateResponseQuality(candidateText, userMessage, purpose);
+      
+      if (score > bestResponse.score) {
+        bestResponse = { text: candidateText, score: score, tag: candidateTag };
+      }
+      
+      // If we hit a very high score or perfect logic, stop generating
+      if (bestResponse.score >= 90) break;
     }
 
-    // 3. RESPOND (With Internal Human-Like Verification)
-    let attempt = 0;
-    while (!isHumanLike(finalResponseText) && attempt < 3) {
-      finalResponseText = executeFallbackEngine(normalized, userMessage);
-      responseTag = 'fallback';
-      attempt++;
-    }
+    let finalResponseText = bestResponse.text;
+    let responseTag = bestResponse.tag;
 
     // 4. SELF LEARNING MEMORY (Analyze and record conversation)
     analyzeAndLearnFromMessage(userMessage, responseTag);
