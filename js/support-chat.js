@@ -159,8 +159,9 @@
     // 🧠 COGNITIVE LAYER V2: UNDERSTAND -> THINK -> REFLECT -> RESPOND
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     
-    // 1. UNDERSTAND
-    const purpose = analyzePurpose(normalized);
+    // 1. UNDERSTAND & MULTI-STEP THINKING
+    const thoughtProcess = multiStepThinkEngine(normalized);
+    const purpose = thoughtProcess.purpose;
     
     // 2. REFLECTION ENGINE (Generate multiple variants, pick best)
     let bestResponse = { text: '', score: -1, tag: 'fallback' };
@@ -170,7 +171,16 @@
       let candidateTag = 'fallback';
 
       // ROUTE & GENERATE
-      if (['HUMOR', 'SOCIAL_CONNECTION', 'EMOTIONAL_SUPPORT'].includes(purpose)) {
+      if (purpose === 'CLARIFICATION') {
+        candidateText = composeFinalResponse({ 
+          text: pickRandom(DYNAMIC_RESPONSES.clarification || ['أنا مش متأكد إني فهمت قصدك بالظبط يا بطل، تقصد إيه تحديداً؟', 'كلامك كبير عليا شوية، ممكن تبسطهولي عشان أقدر أساعدك؟']), 
+          tag: 'clarification' 
+        }, userMessage, 'clarification');
+        candidateTag = 'clarification';
+        bestResponse = { text: candidateText, score: 100, tag: candidateTag };
+        break; // No need to reflect on clarification
+      }
+      else if (['HUMOR', 'SOCIAL_CONNECTION', 'EMOTIONAL_SUPPORT'].includes(purpose)) {
         const socialResponse = generateSocialResponse(normalized, purpose);
         candidateText = composeFinalResponse({ text: socialResponse, tag: 'social' }, userMessage, analyzeStudentIntent(userMessage));
         candidateTag = 'social';
@@ -850,7 +860,13 @@
       empathy: ['قولي بس إيه اللي مش واضح؟', 'تحب أشرحلك من الأول بطريقة تانية؟', 'تفتكر المشكلة فين بالظبط؟', 'خلينا ناخدها حتة حتة، إيه رأيك؟'],
       subject: ['تحب أشرحلك الجزئية دي ولا عندك سؤال محدد فيها؟', 'عندك استفسار معين في الجزء ده؟', 'في حاجة معينة واقفة معاك هنا؟'],
       action: ['يلا بينا نرجع نكسر الدنيا في المذاكرة؟', 'تحب نفتح درس جديد ولا نراجع؟']
-    }
+    },
+    clarification: [
+      'أنا مش متأكد إني فهمت قصدك بالظبط يا بطل، تقصد إيه تحديداً؟',
+      'كلامك كبير عليا شوية، ممكن تبسطهولي عشان أقدر أساعدك؟',
+      'انا بحاول أفهمك بس الموضوع تايه مني، تقصد إيه؟',
+      'وضحلي أكتر يا صاحبي عشان أقدر أرد عليك صح.'
+    ]
   };
 
   function pickRandom(arr) {
@@ -898,7 +914,20 @@
     return false;
   }
 
-  function analyzePurpose(normalized) {
+  function multiStepThinkEngine(normalized) {
+    let thoughtProcess = {
+      purpose: 'UNKNOWN_PURPOSE',
+      confidence: 100,
+      extractedData: { subjects: [], verbs: [] },
+      interpretations: []
+    };
+
+    const words = normalized.split(/\s+/).filter(w => w.length >= 2);
+    
+    // 1. EXTRACT IMPORTANT INFO
+    const educationalKeywords = [...DYNAMIC_VOCAB.subjects, 'شرح', 'سؤال', 'امتحان', 'واجب', 'دفع', 'اشتراك', 'كورس', 'درس', 'منصة', 'باسورد', 'حصة', 'منهج'];
+    thoughtProcess.extractedData.subjects = educationalKeywords.filter(k => normalized.includes(k));
+    
     const isAsking = /\?|؟|فين|امتى|ازاي|ليه|مين|كام|بكام/.test(normalized);
     const isChatting = isFuzzyMatch(normalized, [...DYNAMIC_VOCAB.greetings, ...DYNAMIC_VOCAB.check_status, 'انت مين', 'عمرك']);
     const isJoking = isFuzzyMatch(normalized, DYNAMIC_VOCAB.humor);
@@ -907,20 +936,46 @@
     const wantsExplanation = isFuzzyMatch(normalized, ['اشرح', 'ازاي', 'ليه', 'فهمني', 'يعني ايه']);
     const wantsHelp = isFuzzyMatch(normalized, DYNAMIC_VOCAB.help);
     const wantsSocial = isFuzzyMatch(normalized, [...DYNAMIC_VOCAB.thanks, 'سلام', 'باي', 'تصبح على خير']);
-    
-    if (isJoking) return 'HUMOR';
-    if (isStressed) return 'EMOTIONAL_SUPPORT';
-    if (isComplaining) return 'COMPLAINT';
-    if (isChatting || wantsSocial) return 'SOCIAL_CONNECTION';
-    if (wantsExplanation) return 'EDUCATIONAL_EXPLANATION';
-    if (wantsHelp) return 'ASSISTANCE';
-    if (isAsking) return 'INFORMATION_SEEKING';
-    
-    if (isFuzzyMatch(normalized, DYNAMIC_VOCAB.follow_up)) return 'FOLLOW_UP';
-    const educationalKeywords = [...DYNAMIC_VOCAB.subjects, 'شرح', 'سؤال', 'امتحان', 'واجب', 'دفع', 'اشتراك', 'كورس', 'درس', 'منصة', 'باسورد', 'حصة', 'منهج'];
-    if (isFuzzyMatch(normalized, educationalKeywords)) return 'EDUCATIONAL_EXPLANATION';
+    const isFollowUp = isFuzzyMatch(normalized, DYNAMIC_VOCAB.follow_up);
+    const hasEduKeywords = thoughtProcess.extractedData.subjects.length > 0;
 
-    return 'UNKNOWN_PURPOSE';
+    // 2. MULTIPLE INTERPRETATIONS (Ambiguity Handling)
+    if (isChatting) thoughtProcess.interpretations.push('SOCIAL_CONNECTION');
+    if (isAsking || wantsExplanation || hasEduKeywords) thoughtProcess.interpretations.push('EDUCATIONAL_EXPLANATION');
+    if (isStressed) thoughtProcess.interpretations.push('EMOTIONAL_SUPPORT');
+    if (isComplaining) thoughtProcess.interpretations.push('COMPLAINT');
+    if (isJoking) thoughtProcess.interpretations.push('HUMOR');
+
+    // 3. DEDUCE TRUE INTENT (Priority Logic)
+    // If user says "hello I have a complaint", COMPLAINT > SOCIAL_CONNECTION
+    if (thoughtProcess.interpretations.includes('COMPLAINT')) thoughtProcess.purpose = 'COMPLAINT';
+    else if (thoughtProcess.interpretations.includes('EMOTIONAL_SUPPORT')) thoughtProcess.purpose = 'EMOTIONAL_SUPPORT';
+    else if (thoughtProcess.interpretations.includes('EDUCATIONAL_EXPLANATION')) thoughtProcess.purpose = 'EDUCATIONAL_EXPLANATION';
+    else if (thoughtProcess.interpretations.includes('HUMOR')) thoughtProcess.purpose = 'HUMOR';
+    else if (wantsHelp) thoughtProcess.purpose = 'ASSISTANCE';
+    else if (thoughtProcess.interpretations.includes('SOCIAL_CONNECTION')) thoughtProcess.purpose = 'SOCIAL_CONNECTION';
+    else if (isFollowUp) thoughtProcess.purpose = 'FOLLOW_UP';
+
+    // 4. CONFIDENCE SCORING
+    if (thoughtProcess.purpose === 'UNKNOWN_PURPOSE') {
+      if (normalized.length > 15) {
+        // Long sentence but no clear keywords
+        thoughtProcess.confidence = 20; 
+      } else {
+        thoughtProcess.confidence = 40;
+      }
+    } else {
+      // If we only have 'SOCIAL_CONNECTION' but it's a very long message, user might be explaining an issue without keywords
+      if (thoughtProcess.purpose === 'SOCIAL_CONNECTION' && normalized.length > 30) {
+        thoughtProcess.confidence = 35;
+      }
+    }
+
+    if (thoughtProcess.confidence < 40) {
+      thoughtProcess.purpose = 'CLARIFICATION';
+    }
+
+    return thoughtProcess;
   }
 
   function isHumanLike(text) {
