@@ -843,19 +843,26 @@
       }
     }
 
-    // 3. Dynamic Outros (Append randomly 40% of the time)
-    if (Math.random() > 0.6 && !modified.includes('بالتوفيق') && !modified.includes('محتاج حاجة')) {
-      const outros = [
-        '\n\nأتمنى يكون الموضوع وصلك صح، محتاج حاجة تانية؟',
-        '\n\nدي الخلاصة يا بطل، لو لسه في حاجة غامضة أنا معاك.',
-        '\n\nبالتوفيق في المذاكرة، قولي لو حابب نكمل في درس جديد.',
-        '\n\nيا رب أكون قدرت أبسطهالك، عندك استفسار تاني؟'
+    // 4. ANTI ROBOT LAYER (Strict filter for robotic helpers)
+    // Strip "كيف يمكنني مساعدتك" completely if the response is already long enough
+    if (modified.length > 50) {
+      modified = modified.replace(/(كيف أستطيع مساعدتك|كيف يمكنني مساعدتك|كيف أساعدك|ماذا تريد|هل تحتاج شيئاً|هل تريد شيئاً آخر|محتاج حاجة تانية|عندك استفسار تاني)/g, '');
+    } else {
+      // If it's a short response, maybe it's just a greeting, so rotate wildly
+      const roboticPhrases = [
+        { find: /(كيف أستطيع مساعدتك|كيف يمكنني مساعدتك|كيف أساعدك)\b/g, replace: ['أقدر أعملك إيه دلوقتي؟', 'عايزني أساعدك في إيه يا بطل؟', 'تحب أساعدك إزاي؟', 'في خدمتك، أقدر أساعدك إزاي؟', ''] },
+        { find: /(ماذا تريد|هل تريد شيئاً آخر|هل تحتاج شيئاً)\b/g, replace: ['أقدر أقدملك حاجة تانية؟', 'تؤمرني بحاجة كمان؟', 'محتاج مني أي خدمة تانية؟', ''] },
+        { find: /(لا أستطيع فهمك|لم أفهم|عفواً لم أفهم)\b/g, replace: ['كلامك كبير عليا شوية، ممكن تبسطه؟', 'أنا تهت منك، تقصد إيه بالظبط؟', 'حاسس إني مش مجمع، ممكن تشرحلي قصدك تاني؟'] }
       ];
-      const outro = outros[Math.floor(Math.random() * outros.length)];
-      modified += outro;
+      for (const rule of roboticPhrases) {
+        if (modified.match(rule.find)) {
+          const replacement = rule.replace[Math.floor(Math.random() * rule.replace.length)];
+          modified = modified.replace(rule.find, replacement);
+        }
+      }
     }
 
-    return modified;
+    return modified.trim();
   }
 
   function composeFinalResponse(rule, question, intentData) {
