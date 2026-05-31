@@ -289,7 +289,7 @@
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     
     // 1. UNDERSTAND & MULTI-STEP THINKING
-    const thoughtProcess = multiStepThinkEngine(normalized);
+    const thoughtProcess = multiStepThinkEngine(normalized, userMessage);
     let purpose = thoughtProcess.purpose;
 
     // 🧠 DEEP CONTEXT ENGINE (Resolve context for follow-ups)
@@ -369,6 +369,9 @@
         }
       }
 
+      // 🧠 GOAL DETECTION ENGINE (FORMATTING)
+      candidateText = applyGoalBasedFormatting(candidateText, thoughtProcess.extractedData.goal);
+
       // 🧠 STUDENT UNDERSTANDING DETECTOR (SIMPLIFY)
       if (isConfused && candidateTag === 'educational') {
         candidateText = simplifyResponse(candidateText);
@@ -409,7 +412,10 @@
     let tags = [];
 
     // 1. Social / Greeting (Always comes first)
-    if (purposes.includes('SOCIAL_CONNECTION') || isFuzzyMatch(normalized, DYNAMIC_VOCAB.greetings)) {
+    if (thoughtProcess.extractedData.islamicGreeting && thoughtProcess.extractedData.islamicGreeting.level > 1) {
+      responseParts.push(thoughtProcess.extractedData.islamicGreeting.reply + '، أهلاً بيك يا بطل!');
+      tags.push('social');
+    } else if (purposes.includes('SOCIAL_CONNECTION') || isFuzzyMatch(normalized, DYNAMIC_VOCAB.greetings)) {
       responseParts.push(pickRandom(DYNAMIC_RESPONSES.greetings));
       tags.push('social');
     }
@@ -1321,7 +1327,71 @@
     return false;
   }
 
-  function multiStepThinkEngine(normalized) {
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // 🧠 GOAL DETECTION & ISLAMIC GREETING ENGINE
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  function analyzeIslamicGreeting(text) {
+    const clean = text.replace(/أ/g, 'ا').replace(/إ/g, 'ا').replace(/آ/g, 'ا');
+    
+    // Level 3: Full greeting (ورحمة الله وبركاته)
+    if (/(و\s*ر+ح+م+ة*\s*ا+ل+ل+ه+\s*و*\s*ب+ر+ك+ا+ت+ه+)/.test(clean) && /(س+ل+ا+م+و*\s*ع+ل+ي+ك+و+م*)/.test(clean)) {
+      return { level: 3, reply: 'وعليكم السلام ورحمة الله وبركاته' };
+    }
+    // Level 2.5: (ورحمة الله)
+    if (/(و\s*ر+ح+م+ة*\s*ا+ل+ل+ه+)/.test(clean) && /(س+ل+ا+م+و*\s*ع+ل+ي+ك+و+م*)/.test(clean)) {
+      return { level: 2.5, reply: 'وعليكم السلام ورحمة الله' };
+    }
+    // Level 2: Basic Islamic (سلام عليكم)
+    if (/(س+ل+ا+م+و*\s*ع+ل+ي+ك+و+م*)/.test(clean)) {
+      return { level: 2, reply: 'وعليكم السلام ورحمة الله' };
+    }
+    return { level: 1, reply: null };
+  }
+
+  function detectUserGoal(normalized) {
+    // FACT_SEEKING: مين، امتى، فين، بكام
+    if (/\b(مين|امتى|متى|فين|بكام|كم|ايه هو)\b/.test(normalized) && normalized.length < 30) return 'FACT_SEEKING';
+    
+    // VERIFICATION: هل، صح كده، بجد، متأكد
+    if (/\b(هل|صح كده|متاكد|بجد|مظبوط)\b/.test(normalized)) return 'VERIFICATION';
+    
+    // PROBLEM_SOLVING: مش شغال، عطلان، مش عارف
+    if (/\b(مش شغال|عطلان|نسيت|ازاي ادفع|ازاي اشترك|مش بيفتح)\b/.test(normalized)) return 'PROBLEM_SOLVING';
+    
+    // DEEP_UNDERSTANDING: اشرحلي، ازاي، ليه، يعني ايه
+    if (/\b(اشرح|ازاي|ليه|يعني ايه|فهمني|بسرعة)\b/.test(normalized)) return 'DEEP_UNDERSTANDING';
+    
+    // EMOTIONAL_VALIDATION: تايه، خايف، صعب
+    if (/\b(تايه|خايف|صعب|قلقان|متوتر|مخنوق|يأس|زعلان)\b/.test(normalized)) return 'EMOTIONAL_VALIDATION';
+    
+    return 'GENERAL';
+  }
+
+  function applyGoalBasedFormatting(text, goal) {
+    if (!text || text.length < 10) return text;
+    let modified = text;
+
+    if (goal === 'FACT_SEEKING') {
+      // Strip out long intros, make it very concise
+      modified = modified.replace(/بص يا سيدي ركز معايا\.\.|سؤال ممتاز جداً! خليني أوضحلك\.\.|سؤالك في محله يا بطل! شوف يا سيدي\.\./g, '');
+      // Keep only first 2 sentences max
+      const sentences = modified.split(/(?<=[.?!])\s+/);
+      modified = sentences.slice(0, 2).join(' ').trim();
+    } else if (goal === 'VERIFICATION') {
+      const verifications = ['بالظبط كده! ', 'كلامك مظبوط، ', 'فعلاً يا بطل، ', 'أأكدلك كلامك: '];
+      modified = verifications[Math.floor(Math.random() * verifications.length)] + modified;
+    } else if (goal === 'DEEP_UNDERSTANDING') {
+      if (!modified.includes('بص يا سيدي')) {
+        modified = 'بص يا سيدي ركز معايا، هبسطهالك خالص:\n\n' + modified;
+      }
+    } else if (goal === 'EMOTIONAL_VALIDATION') {
+      modified = 'ولا يهمك خالص، أنا في ظهرك ومعاك خطوة بخطوة..\n\n' + modified;
+    }
+    
+    return modified;
+  }
+
+  function multiStepThinkEngine(normalized, userMessage) {
     let thoughtProcess = {
       purpose: 'UNKNOWN_PURPOSE',
       confidence: 100,
@@ -1353,7 +1423,12 @@
     if (isComplaining) thoughtProcess.interpretations.push('COMPLAINT');
     if (isJoking) thoughtProcess.interpretations.push('HUMOR');
 
-    // 3. DEDUCE TRUE INTENT (Priority Logic)
+    // 3. GOAL DETECTION ENGINE
+    thoughtProcess.extractedData.goal = detectUserGoal(normalized);
+    // Use raw userMessage to catch Arabic suffixes correctly
+    thoughtProcess.extractedData.islamicGreeting = analyzeIslamicGreeting(userMessage || normalized);
+
+    // 4. DEDUCE TRUE INTENT (Priority Logic)
     // If it's very short and contains follow up words, or explicitly asks "why?" with no context, it's a FOLLOW_UP
     if (isFollowUp && normalized.length < 25 && !hasEduKeywords) thoughtProcess.purpose = 'FOLLOW_UP';
     else if (isAsking && normalized.length < 15 && !hasEduKeywords) thoughtProcess.purpose = 'FOLLOW_UP';
