@@ -71,6 +71,18 @@ except Exception as _enh3_err:
     print(f"[SMART_BRAIN_INFO] Enhancements V3 not loaded (optional): {_enh3_err}")
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# Safe import of Enhancement Layer V4 (ADDITIVE, optional)
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+_HAS_ENHANCEMENTS_V4 = False
+_SmartEnhancementsV4 = None
+try:
+    from bot_addons.smart_enhancements_v4 import SmartEnhancementsV4 as _SEv4
+    _SmartEnhancementsV4 = _SEv4
+    _HAS_ENHANCEMENTS_V4 = True
+except Exception as _enh4_err:
+    print(f"[SMART_BRAIN_INFO] Enhancements V4 not loaded (optional): {_enh4_err}")
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # Safe import of sklearn (with auto-install fallback)
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 _HAS_SKLEARN = False
@@ -315,6 +327,8 @@ class SmartBotBrain:
         self._enhancements = None  # Enhancement layer (optional)
         self._enhancements_v2 = None  # Enhancement layer V2 (optional)
         self._enhancements_v3 = None  # Enhancement layer V3 (optional)
+        self._enhancements_v4 = None  # Enhancement layer V4 (optional)
+        self._v4_layers = None  # V4 analysis layers for current message
 
         try:
             self._load_data()
@@ -340,6 +354,13 @@ class SmartBotBrain:
             except Exception as enh3_e:
                 print(f"[SMART_BRAIN_INFO] Enhancements V3 init skipped: {enh3_e}")
                 self._enhancements_v3 = None
+            # Load enhancements V4 safely (optional layer)
+            try:
+                if _HAS_ENHANCEMENTS_V4 and _SmartEnhancementsV4:
+                    self._enhancements_v4 = _SmartEnhancementsV4()
+            except Exception as enh4_e:
+                print(f"[SMART_BRAIN_INFO] Enhancements V4 init skipped: {enh4_e}")
+                self._enhancements_v4 = None
             self._ready = True
             print("[SMART_BRAIN] ✅ SmartBotBrain initialized successfully")
         except Exception as e:
@@ -618,6 +639,13 @@ class SmartBotBrain:
                     response, intent_id, user_id)
             except Exception:
                 pass
+        # V4 enhancements (post-processing: intent fusion, topic prediction, personality)
+        if self._enhancements_v4 and self._v4_layers:
+            try:
+                response = self._enhancements_v4.post_process(
+                    response, intent_id, user_id, self._v4_layers)
+            except Exception:
+                pass
         return response
 
     def get_response(self, text, user_id=None):
@@ -648,6 +676,15 @@ class SmartBotBrain:
 
             enh_v2 = self._enhancements_v2  # may be None
             enh_v3 = self._enhancements_v3  # may be None
+            enh_v4 = self._enhancements_v4  # may be None
+
+            # ━━ [V4 Pre-processing: 51/52-LayerAnalysis, 60-Personality] ━━
+            self._v4_layers = None
+            if enh_v4:
+                try:
+                    self._v4_layers = enh_v4.pre_process(normalized, user_id)
+                except Exception:
+                    self._v4_layers = None
 
             # ━━ [V3 Pre-processing: 44-HeavySlang, 32-Keywords, 29-HiddenIntent, 34-Frustration, 40-Fragments] ━━
             if enh_v3:
@@ -863,6 +900,18 @@ class SmartBotBrain:
                         if user_id:
                             self._set_context(user_id, text, clarification, "smart_clarify")
                         return clarification
+                except Exception:
+                    pass
+
+            # ━━ [V4-70] ChatGPT-like deep understanding (last resort) ━━
+            if enh_v4:
+                try:
+                    last_ctx = self._get_context(user_id) if user_id else {}
+                    deep_resp = enh_v4.deep_fallback(normalized, TOPIC_KEYWORDS, last_ctx)
+                    if deep_resp:
+                        if user_id:
+                            self._set_context(user_id, text, deep_resp, "v4_deep")
+                        return deep_resp
                 except Exception:
                     pass
 
