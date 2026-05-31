@@ -84,7 +84,7 @@
 
       // 2. Identify Potential Slang or Typos
       const words = normalized.split(/\s+/);
-      const knownVocab = [...(DYNAMIC_VOCAB.greetings || []), ...(DYNAMIC_VOCAB.thanks || []), ...(DYNAMIC_VOCAB.frustration || []), ...(DYNAMIC_VOCAB.subjects || []), ...(DYNAMIC_VOCAB.inquiry || [])];
+      const knownVocab = Object.values(DYNAMIC_VOCAB).flat();
       
       words.forEach(word => {
         if (word.length < 3) return;
@@ -756,11 +756,16 @@
   // 🔥 THE NEW DYNAMIC CONVERSATIONAL ENGINE
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   const DYNAMIC_VOCAB = {
-    greetings: ['صباح', 'مسا', 'اهلا', 'مرحبا', 'ازيك', 'عامل', 'اخبار', 'هاي', 'هلو', 'مورنينج', 'سلام', 'تحياتي', 'كيفك'],
-    thanks: ['شكرا', 'تسلم', 'عاش', 'حبيبي', 'بطل', 'جزاك', 'متشكر', 'ميرسي', 'تمام', 'اوك', 'حلو', 'جميل'],
-    frustration: ['مش فاهم', 'صعب', 'وحش', 'معقد', 'متلخبط', 'تايه', 'معرفش', 'غبي', 'صعبة', 'مش قادر'],
+    check_status: ['اخبارك', 'عامل ايه', 'عامل اي', 'طمني', 'عامل ايه يا نجم', 'ايه الاخبار', 'الدنيا معاك', 'كيفك', 'عامل ايه يا بطل', 'طمني عليك', 'عامل ايه يارب تكون بخير', 'طمنا', 'ايه الدنيا', 'شغال فين'],
+    greetings: ['صباح', 'مسا', 'اهلا', 'مرحبا', 'ازيك', 'هاي', 'هلو', 'مورنينج', 'سلام', 'يا هلا', 'نورت', 'يا مسا', 'منور', 'يا صباح', 'مساء الفل', 'صباح الفل', 'صباحو'],
+    thanks: ['شكرا', 'تسلم', 'عاش', 'حبيبي', 'بطل', 'جزاك', 'متشكر', 'ميرسي', 'تمام', 'حلو', 'جميل', 'يا غالي', 'الله ينور', 'تسلم ايدك', 'الف شكر', 'حبيبي يا بطل', 'عظمة'],
+    need_simplification: ['مش فاهم', 'مش جايبها', 'تايه', 'ضايع', 'مش مستوعب', 'معقد', 'متلخبط', 'معرفش', 'صعبة', 'مش قادر', 'الدنيا لفت', 'مش مجمع', 'هنجت', 'فصلت', 'مش راكبة', 'وقفت معايا'],
+    complaint: ['مش شغال', 'بايظ', 'عطلان', 'مشكلة', 'زفت', 'مش بيفتح', 'خربان', 'واقع', 'بيعلق', 'بيهنج', 'مش راضي'],
+    humor: ['نكتة', 'ضحكني', 'هتموتني من الضحك', 'انت جامد', 'عسل', 'تضحك', 'فصلان', 'هموت', 'يخربيتك', 'جامد زحليقة', 'والله انت برنس', 'ضحك السنين'],
+    help: ['ساعدني', 'عايز مساعدة', 'دعم', 'الحقني', 'مشكلة', 'سؤال', 'حد يرد', 'في مشكلة', 'محتاج حد'],
+    follow_up: ['طب', 'وبعدين', 'يعني', 'قصدك', 'لسه', 'كمان', 'طيب', 'وبالنسبة', 'امال', 'وبعدين بقى'],
     subjects: ['نيل', 'قناة السويس', 'تاريخ', 'جغرافيا', 'محمد علي', 'ديمقراطية', 'حضارة', 'خريطة', 'مناخ', 'زراعة', 'بيئة', 'اقتصاد'],
-    inquiry: ['ايه', 'ازاي', 'ليه', 'فين', 'امتى', 'مين', 'اشرح']
+    inquiry: ['ايه', 'ازاي', 'ليه', 'فين', 'امتى', 'مين', 'اشرح', 'بكام']
   };
 
   const DYNAMIC_RESPONSES = {
@@ -831,12 +836,12 @@
 
   function analyzePurpose(normalized) {
     const isAsking = /\?|؟|فين|امتى|ازاي|ليه|مين|كام|بكام/.test(normalized);
-    const isChatting = isFuzzyMatch(normalized, [...DYNAMIC_VOCAB.greetings, 'طمني عليك', 'اخبارك', 'ايه يا بطل', 'عامل ايه', 'انت مين', 'عمرك', 'شغال']);
-    const isJoking = isFuzzyMatch(normalized, ['نكتة', 'ضحكني', 'هتموتني من الضحك', 'انت جامد', 'جامد', 'عسل', 'تضحك']);
-    const isComplaining = isFuzzyMatch(normalized, ['مش شغال', 'بايظ', 'مش بيفتح', 'عطلان', 'مشكلة', 'زفت']);
-    const isStressed = isFuzzyMatch(normalized, [...DYNAMIC_VOCAB.frustration, 'زعلان', 'تعبان', 'مضغوط', 'مخنوق', 'يأس']);
+    const isChatting = isFuzzyMatch(normalized, [...DYNAMIC_VOCAB.greetings, ...DYNAMIC_VOCAB.check_status, 'انت مين', 'عمرك']);
+    const isJoking = isFuzzyMatch(normalized, DYNAMIC_VOCAB.humor);
+    const isComplaining = isFuzzyMatch(normalized, DYNAMIC_VOCAB.complaint);
+    const isStressed = isFuzzyMatch(normalized, [...DYNAMIC_VOCAB.need_simplification, 'زعلان', 'تعبان', 'مضغوط', 'مخنوق', 'يأس']);
     const wantsExplanation = isFuzzyMatch(normalized, ['اشرح', 'ازاي', 'ليه', 'فهمني', 'يعني ايه']);
-    const wantsHelp = isFuzzyMatch(normalized, ['ساعدني', 'عايز مساعدة', 'دعم', 'مشكلة', 'الحقني']);
+    const wantsHelp = isFuzzyMatch(normalized, DYNAMIC_VOCAB.help);
     const wantsSocial = isFuzzyMatch(normalized, [...DYNAMIC_VOCAB.thanks, 'سلام', 'باي', 'تصبح على خير']);
     
     if (isJoking) return 'HUMOR';
@@ -847,7 +852,7 @@
     if (wantsHelp) return 'ASSISTANCE';
     if (isAsking) return 'INFORMATION_SEEKING';
     
-    if (isFuzzyMatch(normalized, ['طب', 'وبعدين', 'يعني', 'قصدك', 'لسه', 'كمان', 'طيب', 'وبالنسبة'])) return 'FOLLOW_UP';
+    if (isFuzzyMatch(normalized, DYNAMIC_VOCAB.follow_up)) return 'FOLLOW_UP';
     const educationalKeywords = [...DYNAMIC_VOCAB.subjects, 'شرح', 'سؤال', 'امتحان', 'واجب', 'دفع', 'اشتراك', 'كورس', 'درس', 'منصة', 'باسورد', 'حصة', 'منهج'];
     if (isFuzzyMatch(normalized, educationalKeywords)) return 'EDUCATIONAL_EXPLANATION';
 
@@ -876,7 +881,7 @@
 
     // Dynamic Response Builder Pipeline
     if (purpose === 'SOCIAL_CONNECTION') {
-      if (isFuzzyMatch(normalized, [...DYNAMIC_VOCAB.greetings, 'طمني', 'اخبارك', 'بطل', 'عامل ايه'])) {
+      if (isFuzzyMatch(normalized, [...DYNAMIC_VOCAB.greetings, ...DYNAMIC_VOCAB.check_status])) {
         responseParts.push(pickRandom(DYNAMIC_RESPONSES.greetings));
         if (Math.random() > 0.5) responseParts.push(pickRandom(DYNAMIC_RESPONSES.emotions.positive));
         responseParts.push(pickRandom(DYNAMIC_RESPONSES.follow_ups.general));
