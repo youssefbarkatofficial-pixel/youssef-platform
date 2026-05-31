@@ -291,6 +291,31 @@
     return `${prefix}\n\n${trimmed}\n\nعشان تقرب الصورة أكتر، اعتبرها زي قصة بسيطة بنمشيها خطوة خطوة، ولو في جزء معين لسه صعب قولي!`;
   }
 
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // 🧠 AMBIGUITY RESOLVER SYSTEM
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  function resolveAmbiguity(thoughtProcess, userMessage) {
+    const interpretations = thoughtProcess.interpretations || [];
+    let options = [];
+    
+    if (interpretations.includes('EDUCATIONAL_EXPLANATION')) options.push('سؤال في المنهج');
+    if (interpretations.includes('COMPLAINT')) options.push('مشكلة تقنية في المنصة');
+    if (interpretations.includes('ASSISTANCE')) options.push('محتاج مساعدة عامة');
+    if (interpretations.includes('SOCIAL_CONNECTION')) options.push('بندردش شوية');
+    if (interpretations.includes('EMOTIONAL_SUPPORT')) options.push('مضغوط وعايز تفضفض');
+
+    // Keep max 2 options to not overwhelm user
+    options = options.slice(0, 2);
+
+    if (options.length < 2) {
+      return "يا بطل كلامك كبير عليا شوية، تقصد إيه بالظبط عشان أقدر أساعدك صح؟";
+    }
+
+    let text = `أنا معاك يا بطل، بس حابب أتأكد.. تقصد `;
+    text += options.join(' ولا ') + '؟';
+    return text;
+  }
+
   // Bot response logic is active and uses the platform-aware Arabic assistant engine.
   const BOT_RESPONSES_DISABLED = false;
   function getTemporarySafeBotReply(userMessage) {
@@ -338,7 +363,12 @@
       let candidateTag = 'fallback';
 
       // ROUTE & GENERATE
-      if (purpose === 'CLARIFICATION' || thoughtProcess.confidence < 40) {
+      if (purpose === 'AMBIGUOUS') {
+        candidateText = resolveAmbiguity(thoughtProcess, userMessage);
+        candidateTag = 'clarification';
+        bestResponse = { text: candidateText, score: 100, tag: candidateTag };
+        break; 
+      } else if (purpose === 'CLARIFICATION' || thoughtProcess.confidence < 40) {
         candidateText = errorRecoverySystem(normalized, userMessage, thoughtProcess);
         candidateTag = 'clarification';
         bestResponse = { text: candidateText, score: 100, tag: candidateTag };
@@ -2103,47 +2133,59 @@
     const isFollowUp = isFuzzyMatch(normalized, DYNAMIC_VOCAB.follow_up);
     const hasEduKeywords = thoughtProcess.extractedData.subjects.length > 0;
 
-    // 2. MULTIPLE INTERPRETATIONS (Ambiguity Handling)
-    if (isChatting) thoughtProcess.interpretations.push('SOCIAL_CONNECTION');
-    if (isAsking || wantsExplanation || hasEduKeywords) thoughtProcess.interpretations.push('EDUCATIONAL_EXPLANATION');
-    if (isStressed) thoughtProcess.interpretations.push('EMOTIONAL_SUPPORT');
-    if (isComplaining) thoughtProcess.interpretations.push('COMPLAINT');
-    if (isJoking) thoughtProcess.interpretations.push('HUMOR');
+    // 2. MULTIPLE INTERPRETATIONS & AMBIGUITY RESOLVER
+    let interpretationScores = {};
+    if (isChatting) interpretationScores['SOCIAL_CONNECTION'] = 20;
+    if (isAsking || wantsExplanation) interpretationScores['EDUCATIONAL_EXPLANATION'] = 40;
+    if (hasEduKeywords) interpretationScores['EDUCATIONAL_EXPLANATION'] = (interpretationScores['EDUCATIONAL_EXPLANATION'] || 0) + 50;
+    if (isStressed) interpretationScores['EMOTIONAL_SUPPORT'] = 60;
+    if (isComplaining) interpretationScores['COMPLAINT'] = 70;
+    if (isJoking) interpretationScores['HUMOR'] = 30;
+    if (wantsHelp) interpretationScores['ASSISTANCE'] = 50;
+    
+    thoughtProcess.interpretations = Object.keys(interpretationScores);
 
     // 3. GOAL & EMOTION DETECTION ENGINE
     thoughtProcess.extractedData.goal = detectUserGoal(normalized);
     thoughtProcess.extractedData.emotion = analyzeEmotion(normalized);
-    // Use raw userMessage to catch Arabic suffixes correctly
     thoughtProcess.extractedData.islamicGreeting = analyzeIslamicGreeting(userMessage || normalized);
 
-    // 4. DEDUCE TRUE INTENT (Priority Logic)
-    // If it's very short and contains follow up words, or explicitly asks "why?" with no context, it's a FOLLOW_UP
-    if (isFollowUp && normalized.length < 25 && !hasEduKeywords) thoughtProcess.purpose = 'FOLLOW_UP';
-    else if (isAsking && normalized.length < 15 && !hasEduKeywords) thoughtProcess.purpose = 'FOLLOW_UP';
-    else if (thoughtProcess.interpretations.includes('COMPLAINT')) thoughtProcess.purpose = 'COMPLAINT';
-    else if (thoughtProcess.interpretations.includes('EMOTIONAL_SUPPORT')) thoughtProcess.purpose = 'EMOTIONAL_SUPPORT';
-    else if (thoughtProcess.interpretations.includes('EDUCATIONAL_EXPLANATION')) thoughtProcess.purpose = 'EDUCATIONAL_EXPLANATION';
-    else if (thoughtProcess.interpretations.includes('HUMOR')) thoughtProcess.purpose = 'HUMOR';
-    else if (wantsHelp) thoughtProcess.purpose = 'ASSISTANCE';
-    else if (thoughtProcess.interpretations.includes('SOCIAL_CONNECTION')) thoughtProcess.purpose = 'SOCIAL_CONNECTION';
-    else if (isFollowUp) thoughtProcess.purpose = 'FOLLOW_UP';
+    // 4. DEDUCE TRUE INTENT (Priority & Weight Logic)
+    let topPurpose = 'UNKNOWN_PURPOSE';
+    let topScore = 0;
+    let secondScore = 0;
 
-    // 4. CONFIDENCE SCORING
-    if (thoughtProcess.purpose === 'UNKNOWN_PURPOSE') {
-      if (normalized.length > 15) {
-        // Long sentence but no clear keywords
-        thoughtProcess.confidence = 20; 
-      } else {
-        thoughtProcess.confidence = 40;
+    for (const [intent, score] of Object.entries(interpretationScores)) {
+      if (score > topScore) {
+        secondScore = topScore;
+        topScore = score;
+        topPurpose = intent;
+      } else if (score > secondScore) {
+        secondScore = score;
       }
+    }
+
+    if (isFollowUp && normalized.length < 25 && !hasEduKeywords) topPurpose = 'FOLLOW_UP';
+    else if (isAsking && normalized.length < 15 && !hasEduKeywords) topPurpose = 'FOLLOW_UP';
+
+    thoughtProcess.purpose = topPurpose;
+
+    // 5. CONFIDENCE SCORING & AMBIGUITY DETECTION
+    if (topPurpose === 'UNKNOWN_PURPOSE') {
+      thoughtProcess.confidence = normalized.length > 15 ? 20 : 40;
     } else {
-      // If we only have 'SOCIAL_CONNECTION' but it's a very long message, user might be explaining an issue without keywords
-      if (thoughtProcess.purpose === 'SOCIAL_CONNECTION' && normalized.length > 30) {
+      const gap = topScore - secondScore;
+      thoughtProcess.confidence = gap === 0 ? 50 : Math.min(100, 50 + gap);
+      
+      if (topPurpose === 'SOCIAL_CONNECTION' && normalized.length > 30) {
         thoughtProcess.confidence = 35;
       }
     }
 
-    if (thoughtProcess.confidence < 40) {
+    if (thoughtProcess.confidence <= 55 && topPurpose !== 'FOLLOW_UP') {
+      thoughtProcess.purpose = 'AMBIGUOUS';
+      console.log(`[AMBIGUITY RESOLVER] Ambiguous intent detected. Scores: Top=${topScore}, Second=${secondScore}`);
+    } else if (thoughtProcess.confidence < 40) {
       thoughtProcess.purpose = 'CLARIFICATION';
     }
 
