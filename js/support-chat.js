@@ -276,7 +276,86 @@
     const contentBased = getContentBasedResponse(userMessage);
     if (contentBased && contentBased.text) return composeFinalResponse(contentBased, userMessage, analyzeStudentIntent(userMessage));
 
+    // 🧠 KNOWLEDGE EXPANSION ENGINE (Last resort before fallback)
+    const expansionResponse = executeKnowledgeExpansionEngine(normalized, userMessage);
+    if (expansionResponse) return expansionResponse;
+
     return executeFallbackEngine(normalized, userMessage);
+  }
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // 🧠 KNOWLEDGE EXPANSION ENGINE
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  function searchPlatformKnowledge(normalized) {
+    try {
+      let adminCourses = JSON.parse(localStorage.getItem('adminCourses') || '[]');
+      if (!adminCourses || adminCourses.length === 0) return null;
+
+      const words = normalized.split(/\s+/).filter(w => w.length >= 3);
+      if (words.length === 0) return null;
+
+      // Filter out common stop words to avoid false positives
+      const stopWords = ['انا', 'عايز', 'مش', 'فاهم', 'فين', 'اشرحلي', 'طب', 'ايه', 'ازاي', 'عن', 'بتاع', 'بتاعة'];
+      const queryWords = words.filter(w => !stopWords.includes(w));
+
+      if (queryWords.length === 0) return null;
+
+      for (let course of adminCourses) {
+        // 1. Check Course Title
+        for (let qw of queryWords) {
+          if (course.title && course.title.includes(qw)) {
+            return { type: 'course', courseTitle: course.title, courseId: course.id };
+          }
+        }
+        
+        // 2. Check Units and Lessons
+        if (course.units && Array.isArray(course.units)) {
+          for (let unit of course.units) {
+            for (let qw of queryWords) {
+              if (unit.title && unit.title.includes(qw)) {
+                return { type: 'unit', courseTitle: course.title, unitTitle: unit.title, courseId: course.id };
+              }
+            }
+            if (unit.lessons && Array.isArray(unit.lessons)) {
+              for (let lesson of unit.lessons) {
+                for (let qw of queryWords) {
+                  if (lesson.title && lesson.title.includes(qw)) {
+                    return { type: 'lesson', courseTitle: course.title, unitTitle: unit.title, lessonTitle: lesson.title, courseId: course.id };
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      return null;
+    } catch(e) {
+      console.error("Knowledge Expansion Error:", e);
+      return null;
+    }
+  }
+
+  function executeKnowledgeExpansionEngine(normalized, userMessage) {
+    const finding = searchPlatformKnowledge(normalized);
+    if (!finding) return null;
+
+    let responseText = '';
+    const prefixes = [
+      'أنا دورت في المنصة ولقيت إن ',
+      'ولا يهمك، دورتلك في الكورسات ولقيت إن ',
+      'الموضوع ده عندنا! لقيت إن '
+    ];
+    const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+
+    if (finding.type === 'lesson') {
+      responseText = `${prefix}الموضوع ده مشروح بالتفصيل في كورس (${finding.courseTitle})، وتحديداً في وحدة (${finding.unitTitle})، درس (${finding.lessonTitle}). تقدر تدخله من صفحة الكورسات وتتفرج على الفيديو الخاص به أو تقرأ الملزمة بتاعته.`;
+    } else if (finding.type === 'unit') {
+      responseText = `${prefix}الوحدة اللي بتسأل عنها دي (${finding.unitTitle}) موجودة جوه كورس (${finding.courseTitle}). افتح الكورس وهتلاقي كل دروسها هناك.`;
+    } else {
+      responseText = `${prefix}الطلب بتاعك ده موجود في كورس كامل اسمه (${finding.courseTitle}). أنصحك تفتحه من صفحة الكورسات وتبدأ تذاكره!`;
+    }
+
+    return composeFinalResponse({ text: responseText, tag: 'educational' }, userMessage, 'knowledge_expansion');
   }
 
   function executeContextEngine(normalized, userMessage) {
