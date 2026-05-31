@@ -363,7 +363,7 @@
             candidateTag = 'educational';
           }
           else {
-            candidateText = executeFallbackEngine(normalized, userMessage);
+            candidateText = executeFallbackEngine(normalized, userMessage, thoughtProcess);
             candidateTag = 'fallback';
           }
         }
@@ -566,8 +566,8 @@
     return executeEducationalIntentEngine(normalized, userMessage);
   }
 
-  function executeFallbackEngine(normalized, userMessage) {
-    let response = getFallbackResponse(userMessage).text;
+  function executeFallbackEngine(normalized, userMessage, thoughtProcess = {}) {
+    let response = getFallbackResponse(userMessage, thoughtProcess).text;
     return applyAntiRepetition(response, 'fallback');
   }
 
@@ -1053,19 +1053,55 @@
     return settings.vCashNum || '01023675235';
   }
 
-  const DYNAMIC_FALLBACKS = [
-    'بصراحة مفهمتش قصدك بالظبط، ممكن توضحلي أكتر؟ 🤔',
-    'الكلام دخل في بعضه شوية 😂... تقصد إيه؟',
-    'حاولت ألقطها بس هربت مني، ممكن تكتبها بطريقة تانية؟',
-    'أنا معاك بس محتاج تفاصيل أكتر عشان أقدر أساعدك صح 🎯',
-    'هممم، مش متأكد إني فهمت. تحب نتكلم في إيه بالظبط؟'
-  ];
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // 🧠 HYBRID AI MODE (LAYER 3: DYNAMIC FALLBACK GENERATOR)
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  function generateHybridFallback(thoughtProcess) {
+    const ext = thoughtProcess.extractedData || {};
+    const subjects = ext.subjects || [];
+    const goal = ext.goal || 'GENERAL';
+    
+    let parts = [];
 
-  function getFallbackResponse(question) {
+    // Build the core sentence based on the extracted subject
+    if (subjects.length > 0) {
+      const subject = subjects[0];
+      if (goal === 'PROBLEM_SOLVING') {
+        parts.push(`بخصوص "${subject}" اللي بتواجه فيه مشكلة، أنا محتاج منك تفاصيل أكتر شوية.`);
+        parts.push(`المشكلة دي بتظهرلك فين بالظبط على المنصة عشان أقدر أحلها معاك؟`);
+      } else if (goal === 'FACT_SEEKING' || goal === 'DEEP_UNDERSTANDING') {
+        parts.push(`بالنسبة لجزئية "${subject}" دي، المنهج مليان تفاصيل فيها.`);
+        parts.push(`لو تقدر تحددلي بتسأل عن إيه بالظبط أو إيه اللي مش واضح، هقدر أديك الخلاصة بسرعة.`);
+      } else {
+        parts.push(`أنا لقطت إن كلامك عن "${subject}"، بس بصراحة مش قادر أحدد إنت محتاج إيه بالظبط.`);
+        parts.push(`ممكن توضحلي أكتر عشان أقدر أفيدك؟`);
+      }
+    } else {
+      // No subjects found
+      if (goal === 'PROBLEM_SOLVING') {
+        parts.push('أنا معاك إن في مشكلة مضايقاك، بس محتاج أعرف تفاصيل أكتر.');
+        parts.push('بتواجه المشكلة دي فين بالظبط؟ (شاشة الدخول، فيديو معين، ولا في الدفع؟)');
+      } else if (goal === 'FACT_SEEKING') {
+        parts.push('سؤالك حلو، بس ناقصه شوية تفاصيل عشان أقدر أديك إجابة دقيقة.');
+        parts.push('تقصد إيه بالظبط؟');
+      } else {
+        const generic = [
+          'حاسس إني تهت منك شوية يا صاحبي 😅، ممكن تبسطهالي أو تشرحلي إنت تقصد إيه بالظبط؟',
+          'الكلام دخل في بعضه شوية معايا... تقصد إيه؟',
+          'أنا معاك بس محتاج تفاصيل أكتر عشان أقدر أساعدك صح 🎯'
+        ];
+        parts.push(generic[Math.floor(Math.random() * generic.length)]);
+      }
+    }
+
+    return parts.join(' ');
+  }
+
+  function getFallbackResponse(question, thoughtProcess = {}) {
     const supportContact = getSupportContact();
-    const fallbackText = DYNAMIC_FALLBACKS[Math.floor(Math.random() * DYNAMIC_FALLBACKS.length)];
+    const fallbackText = generateHybridFallback(thoughtProcess);
     return {
-      text: `${fallbackText}\n\nولو محتاج مساعدة، تواصل مع الدعم على ${supportContact}.`,
+      text: `${fallbackText}\n\nولو محتاج مساعدة فنية، تواصل مع الدعم على ${supportContact}.`,
       type: 'fallback-escalate',
       shouldEscalate: true
     };
