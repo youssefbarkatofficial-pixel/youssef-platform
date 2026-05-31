@@ -332,14 +332,11 @@
       let candidateTag = 'fallback';
 
       // ROUTE & GENERATE
-      if (purpose === 'CLARIFICATION') {
-        candidateText = composeFinalResponse({ 
-          text: pickRandom(DYNAMIC_RESPONSES.clarification || ['أنا مش متأكد إني فهمت قصدك بالظبط يا بطل، تقصد إيه تحديداً؟', 'كلامك كبير عليا شوية، ممكن تبسطهولي عشان أقدر أساعدك؟']), 
-          tag: 'clarification' 
-        }, userMessage, 'clarification');
+      if (purpose === 'CLARIFICATION' || thoughtProcess.confidence < 40) {
+        candidateText = errorRecoverySystem(normalized, userMessage, thoughtProcess);
         candidateTag = 'clarification';
         bestResponse = { text: candidateText, score: 100, tag: candidateTag };
-        break; // No need to reflect on clarification
+        break; // Stop execution to wait for user clarification
       } else {
         // 🧠 INTENT FUSION ENGINE (Handles composite messages)
         const fused = executeIntentFusionEngine(thoughtProcess, normalized, userMessage);
@@ -1098,6 +1095,25 @@
     }
 
     return parts.join(' ');
+  }
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // 🧠 ERROR RECOVERY SYSTEM
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  function errorRecoverySystem(normalized, userMessage, thoughtProcess) {
+    console.log('[ERROR RECOVERY SYSTEM] Triggered. Attempting to salvage intent...');
+    
+    // Attempt 1: Second Pass Semantic Understanding
+    const semanticConcepts = extractSemanticConcepts(normalized || userMessage);
+    if (semanticConcepts.length > 0) {
+      console.log('[ERROR RECOVERY SYSTEM] Recovered via Semantic Concepts:', semanticConcepts);
+      return `أنا لقطت إحساسك واهتمامك بـ (${semanticConcepts[0].split('_')[1] || 'الموضوع ده'})..\nحابب توضحلي أكتر عشان أقدر أساعدك بشكل مباشر؟`;
+    }
+
+    // Attempt 2: Hybrid Fallback (Extracts subjects & goals to ask contextual questions naturally)
+    console.log('[ERROR RECOVERY SYSTEM] Semantic failed. Using Hybrid Keyword Extraction...');
+    const fallbackText = generateHybridFallback(thoughtProcess);
+    return fallbackText;
   }
 
   function getFallbackResponse(question, thoughtProcess = {}) {
