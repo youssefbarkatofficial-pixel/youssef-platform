@@ -35,6 +35,18 @@ import time
 from collections import defaultdict
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# Safe import of Enhancement Layer (ADDITIVE, optional)
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+_HAS_ENHANCEMENTS = False
+_SmartEnhancements = None
+try:
+    from bot_addons.smart_enhancements import SmartEnhancements as _SE
+    _SmartEnhancements = _SE
+    _HAS_ENHANCEMENTS = True
+except Exception as _enh_err:
+    print(f"[SMART_BRAIN_INFO] Enhancements not loaded (optional): {_enh_err}")
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # Safe import of sklearn (with auto-install fallback)
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 _HAS_SKLEARN = False
@@ -276,10 +288,18 @@ class SmartBotBrain:
         self._vectorizer = None
         self._tfidf_matrix = None
         self._ready = False
+        self._enhancements = None  # Enhancement layer (optional)
 
         try:
             self._load_data()
             self._build_index()
+            # Load enhancements safely (optional layer)
+            try:
+                if _HAS_ENHANCEMENTS and _SmartEnhancements:
+                    self._enhancements = _SmartEnhancements()
+            except Exception as enh_e:
+                print(f"[SMART_BRAIN_INFO] Enhancements init skipped: {enh_e}")
+                self._enhancements = None
             self._ready = True
             print("[SMART_BRAIN] ✅ SmartBotBrain initialized successfully")
         except Exception as e:
@@ -521,9 +541,34 @@ class SmartBotBrain:
         except Exception:
             return None, None
 
+    def _enhance_response(self, response, intent_id, user_id):
+        """Apply enhancement layers to a matched response (safe, optional)."""
+        if not self._enhancements or not response:
+            return response
+        try:
+            enh = self._enhancements
+            # [6] Teaching mode: add follow-up question (30% chance)
+            response = enh.add_teaching_followup(response, intent_id)
+            # [9] Response diversity: avoid repeating same response
+            # (we already have the response, just track it)
+            uid = str(user_id) if user_id else "anon"
+            enh._response_history[uid] = (enh._response_history.get(uid, []) + [response])[-10:]
+            # [10] Adaptive: simplify if user is confused
+            if user_id:
+                confusion = enh.check_confusion_level(user_id)
+                response = enh.simplify_response(response, confusion)
+            # [3] Update enhanced context
+            if user_id:
+                topic = enh.extract_topic_entity("" , intent_id)
+                enh.update_enhanced_context(user_id, topic=topic, intent_id=intent_id, response=response)
+            return response
+        except Exception:
+            return response
+
     def get_response(self, text, user_id=None):
         """
         Main entry point. Get a smart response for user input.
+        Enhanced with 10 smart layers (fail-safe, all optional).
         
         Args:
             text: User's message text
@@ -544,22 +589,118 @@ class SmartBotBrain:
             if not normalized or len(normalized) < 2:
                 return None
 
+            enh = self._enhancements  # may be None
+
+            # ━━ [Enhancement 4] Fuzzy spelling correction (internal only) ━━
+            if enh:
+                try:
+                    normalized = enh.fuzzy_correct(normalized)
+                except Exception:
+                    pass
+
+            # ━━ [Enhancement 8] Pronoun resolution ━━
+            if enh and user_id:
+                try:
+                    normalized = enh.resolve_pronouns(normalized, user_id)
+                except Exception:
+                    pass
+
+            # ━━ [Enhancement 7] Emotion detection (priority check) ━━
+            if enh and user_id:
+                try:
+                    emotion = enh.detect_emotion(normalized)
+                    if emotion == "positive":
+                        enh.reset_confusion(user_id)
+                        emotional_resp = enh.get_emotional_response(emotion, user_id)
+                        if emotional_resp:
+                            self._set_context(user_id, text, emotional_resp, "emotion_positive")
+                            return emotional_resp
+                    elif emotion == "negative":
+                        # Check if it's also an educational question
+                        has_edu_keyword = any(kw in normalized for kw in ["ايه", "اشرح", "عايز", "فين", "كام"])
+                        if not has_edu_keyword:
+                            emotional_resp = enh.get_emotional_response(emotion, user_id)
+                            if emotional_resp:
+                                self._set_context(user_id, text, emotional_resp, "emotion_negative")
+                                return emotional_resp
+                except Exception:
+                    pass
+
+            # ━━ [Enhancement 3] Continuation request detection ━━
+            if enh and user_id:
+                try:
+                    if enh.is_continuation_request(normalized):
+                        cont_resp = enh.handle_continuation(user_id, self._intents, self._get_context(user_id))
+                        if cont_resp:
+                            self._set_context(user_id, text, cont_resp,
+                                              self._get_context(user_id).get("last_intent", ""))
+                            return cont_resp
+                except Exception:
+                    pass
+
             # ── Step 0: Check if user is asking for clarification ──
             if user_id and self._is_clarification_request(normalized):
                 clarification = self._handle_clarification(user_id)
                 if clarification:
+                    # [10] Track confusion
+                    if enh:
+                        try:
+                            enh._confusion_counter[str(user_id)] = enh._confusion_counter.get(str(user_id), 0) + 1
+                        except Exception:
+                            pass
                     self._set_context(user_id, text, clarification,
                                       self._get_context(user_id).get("last_intent", ""))
                     return clarification
 
+            # ━━ [Enhancement 2] Short message intent expansion ━━
+            if enh:
+                try:
+                    short_intent, short_id = enh.expand_short_message(normalized, self._intents)
+                    if short_intent:
+                        templates = short_intent.get("response_templates", [""])
+                        response = enh.pick_diverse_response(templates, user_id) if user_id else random.choice(templates)
+                        response = self._enhance_response(response, short_id, user_id)
+                        if user_id:
+                            self._set_context(user_id, text, response, short_id)
+                        return response
+                except Exception:
+                    pass
+
             # ── Step 1: Quick social intent matching ──
             social_match, social_score = self._match_social_quick(normalized)
             if social_match and social_score >= HIGH_CONFIDENCE:
-                response = random.choice(social_match.get("response_templates", [""]))
+                templates = social_match.get("response_templates", [""])
+                # [9] Diverse response selection
+                if enh and user_id:
+                    response = enh.pick_diverse_response(templates, user_id)
+                else:
+                    response = random.choice(templates)
                 if user_id:
                     self._set_context(user_id, text, response,
                                       social_match.get("intent_id", ""))
+                    # [10] Reset confusion on social interaction
+                    if enh:
+                        try:
+                            enh.reset_confusion(user_id)
+                        except Exception:
+                            pass
                 return response
+
+            # ━━ [Enhancement 1] Semantic loose matching (before TF-IDF) ━━
+            if enh:
+                try:
+                    sem_match, sem_score = enh.semantic_keyword_match(
+                        normalized, self._intents, normalize_arabic)
+                    if sem_match and sem_score >= 0.60:
+                        intent_id = sem_match.get("intent_id", "")
+                        templates = sem_match.get("response_templates", [""])
+                        response = enh.pick_diverse_response(templates, user_id) if user_id else random.choice(templates)
+                        response = self._enhance_response(response, intent_id, user_id)
+                        if user_id:
+                            self._set_context(user_id, text, response, intent_id)
+                        return response
+                except Exception:
+                    pass
 
             # ── Step 2: TF-IDF matching (if sklearn available) ──
             tfidf_match, tfidf_score = None, 0.0
@@ -578,10 +719,17 @@ class SmartBotBrain:
                 else:
                     chosen = tfidf_match
 
-                response = random.choice(chosen.get("response_templates", [""]))
+                intent_id = chosen.get("intent_id", "")
+                templates = chosen.get("response_templates", [""])
+                # [9] Diverse response selection
+                if enh and user_id:
+                    response = enh.pick_diverse_response(templates, user_id)
+                else:
+                    response = random.choice(templates)
+                # [6,10] Apply enhancement layers
+                response = self._enhance_response(response, intent_id, user_id)
                 if user_id:
-                    self._set_context(user_id, text, response,
-                                      chosen.get("intent_id", ""))
+                    self._set_context(user_id, text, response, intent_id)
 
                 # Only return if confidence is adequate
                 if max(tfidf_score, social_score) >= SIMILARITY_THRESHOLD:
@@ -592,7 +740,23 @@ class SmartBotBrain:
             if kw_response:
                 if user_id:
                     self._set_context(user_id, text, kw_response, f"topic_{kw_topic}")
+                    if enh:
+                        try:
+                            enh.update_enhanced_context(user_id, topic=kw_topic)
+                        except Exception:
+                            pass
                 return kw_response
+
+            # ━━ [Enhancement 5] Smart clarification instead of giving up ━━
+            if enh:
+                try:
+                    clarification = enh.generate_smart_clarification(normalized)
+                    if clarification:
+                        if user_id:
+                            self._set_context(user_id, text, clarification, "smart_clarify")
+                        return clarification
+                except Exception:
+                    pass
 
             # ── Step 4: Ultimate fallback → return None ──
             # Let the old system handle it
