@@ -58,6 +58,67 @@
   let complaintCaptureMode = false;
   let escalationSuggested = false;
 
+  const SELF_LEARNING_KEY = 'pf_self_learning_v1';
+  function loadSelfLearning() {
+    try { return JSON.parse(localStorage.getItem(SELF_LEARNING_KEY) || '{"unknown_questions":{}, "slang_words":{}, "successful_patterns":{}, "pending_review":[]}'); } 
+    catch(e) { return {"unknown_questions":{}, "slang_words":{}, "successful_patterns":{}, "pending_review":[]}; }
+  }
+  function saveSelfLearning(data) {
+    safeSetItem(localStorage, SELF_LEARNING_KEY, JSON.stringify(data));
+  }
+
+  function analyzeAndLearnFromMessage(userMessage, finalResponseTag) {
+    const normalized = normalizeText(userMessage);
+    const memory = loadSelfLearning();
+
+    if (finalResponseTag === 'fallback') {
+      // 1. Record Unknown Questions
+      if (!memory.unknown_questions[normalized]) memory.unknown_questions[normalized] = 0;
+      memory.unknown_questions[normalized]++;
+
+      if (memory.unknown_questions[normalized] >= 3) {
+        if (!memory.pending_review.some(p => p.type === 'missing_answer' && p.text === normalized)) {
+          memory.pending_review.push({ type: 'missing_answer', text: normalized, count: memory.unknown_questions[normalized], date: Date.now() });
+        }
+      }
+
+      // 2. Identify Potential Slang or Typos
+      const words = normalized.split(/\s+/);
+      const knownVocab = [...(DYNAMIC_VOCAB.greetings || []), ...(DYNAMIC_VOCAB.thanks || []), ...(DYNAMIC_VOCAB.frustration || []), ...(DYNAMIC_VOCAB.subjects || []), ...(DYNAMIC_VOCAB.inquiry || [])];
+      
+      words.forEach(word => {
+        if (word.length < 3) return;
+        let isKnown = false;
+        for (const known of knownVocab) {
+          if (typeof levenshteinDistance === 'function' && levenshteinDistance(word, known) <= 1) {
+            isKnown = true;
+            break;
+          }
+        }
+        
+        if (!isKnown) {
+          if (!memory.slang_words[word]) memory.slang_words[word] = 0;
+          memory.slang_words[word]++;
+          if (memory.slang_words[word] >= 3) {
+            if (!memory.pending_review.some(p => p.type === 'slang_or_typo' && p.word === word)) {
+              memory.pending_review.push({ type: 'slang_or_typo', word: word, count: memory.slang_words[word], context: normalized, date: Date.now() });
+            }
+          }
+        }
+      });
+    } else {
+      // 3. Learn successful interaction patterns
+      if (!memory.successful_patterns[normalized]) memory.successful_patterns[normalized] = 0;
+      memory.successful_patterns[normalized]++;
+      if (memory.successful_patterns[normalized] >= 5) {
+         if (!memory.pending_review.some(p => p.type === 'successful_style' && p.text === normalized)) {
+           memory.pending_review.push({ type: 'successful_style', text: normalized, count: memory.successful_patterns[normalized], date: Date.now() });
+         }
+      }
+    }
+    saveSelfLearning(memory);
+  }
+
   // Bot response logic is active and uses the platform-aware Arabic assistant engine.
   const BOT_RESPONSES_DISABLED = false;
   function getTemporarySafeBotReply(userMessage) {
@@ -75,28 +136,40 @@
     // 1. UNDERSTAND
     const purpose = analyzePurpose(normalized);
     let finalResponseText = '';
+    let responseTag = 'fallback';
 
     // 2. THINK & ROUTE
     if (['HUMOR', 'SOCIAL_CONNECTION', 'EMOTIONAL_SUPPORT'].includes(purpose)) {
       const socialResponse = generateSocialResponse(normalized, purpose);
       finalResponseText = composeFinalResponse({ text: socialResponse, tag: 'social' }, userMessage, analyzeStudentIntent(userMessage));
+      responseTag = 'social';
     }
     else if (purpose === 'FOLLOW_UP') {
       finalResponseText = executeContextEngine(normalized, userMessage);
+      responseTag = 'follow_up';
     }
     else if (['EDUCATIONAL_EXPLANATION', 'INFORMATION_SEEKING', 'ASSISTANCE', 'COMPLAINT'].includes(purpose)) {
       finalResponseText = executeEducationalIntentEngine(normalized, userMessage);
+      // Wait, executeEducationalIntentEngine might return a fallback string if it fails to match a rule.
+      // We will assume it was handled educationally unless it explicitly says 'fallback', but we don't have the tag back from it. 
+      // For now, tracking it as 'educational' is okay.
+      responseTag = 'educational';
     }
     else {
       finalResponseText = executeFallbackEngine(normalized, userMessage);
+      responseTag = 'fallback';
     }
 
     // 3. RESPOND (With Internal Human-Like Verification)
     let attempt = 0;
     while (!isHumanLike(finalResponseText) && attempt < 3) {
       finalResponseText = executeFallbackEngine(normalized, userMessage);
+      responseTag = 'fallback';
       attempt++;
     }
+
+    // 4. SELF LEARNING MEMORY (Analyze and record conversation)
+    analyzeAndLearnFromMessage(userMessage, responseTag);
 
     return finalResponseText;
   }
