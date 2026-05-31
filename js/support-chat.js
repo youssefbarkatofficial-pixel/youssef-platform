@@ -63,7 +63,7 @@
   function getTemporarySafeBotReply(userMessage) {
     const normalized = normalizeText(userMessage);
     if (!normalized) {
-      return 'حاولت أفهم قصدك لكن محتاج تفاصيل أكتر شوية 🙏';
+      return getFallbackResponse(userMessage).text;
     }
 
     if (isCheatingRequest(userMessage)) {
@@ -96,7 +96,7 @@
     }
 
     if (isVeryUnclearMessage(userMessage)) {
-      return 'حاولت أفهم قصدك لكن محتاج تفاصيل أكتر شوية 🙏';
+      return getFallbackResponse(userMessage).text;
     }
 
     return getFallbackResponse(userMessage).text;
@@ -451,10 +451,19 @@
     return settings.vCashNum || '01023675235';
   }
 
+  const DYNAMIC_FALLBACKS = [
+    'بصراحة مفهمتش قصدك بالظبط، ممكن توضحلي أكتر؟ 🤔',
+    'الكلام دخل في بعضه شوية 😂... تقصد إيه؟',
+    'حاولت ألقطها بس هربت مني، ممكن تكتبها بطريقة تانية؟',
+    'أنا معاك بس محتاج تفاصيل أكتر عشان أقدر أساعدك صح 🎯',
+    'هممم، مش متأكد إني فهمت. تحب نتكلم في إيه بالظبط؟'
+  ];
+
   function getFallbackResponse(question) {
     const supportContact = getSupportContact();
+    const fallbackText = DYNAMIC_FALLBACKS[Math.floor(Math.random() * DYNAMIC_FALLBACKS.length)];
     return {
-      text: `مش واضح عليا السؤال تمام، ممكن توضحه شوية؟ لو محتاج مساعدة أسرع، تواصل مع الدعم على ${supportContact} أو اضغط على زر "اكلم الدعم الفني".`,
+      text: `${fallbackText}\n\nولو محتاج مساعدة، تواصل مع الدعم على ${supportContact}.`,
       type: 'fallback-escalate',
       shouldEscalate: true
     };
@@ -638,6 +647,44 @@
     return arr[Math.floor(Math.random() * arr.length)];
   }
 
+  function levenshteinDistance(a, b) {
+    if (a.length === 0) return b.length;
+    if (b.length === 0) return a.length;
+    var matrix = [];
+    for (var i = 0; i <= b.length; i++) { matrix[i] = [i]; }
+    for (var j = 0; j <= a.length; j++) { matrix[0][j] = j; }
+    for (var i = 1; i <= b.length; i++) {
+      for (var j = 1; j <= a.length; j++) {
+        if (b.charAt(i - 1) == a.charAt(j - 1)) {
+          matrix[i][j] = matrix[i - 1][j - 1];
+        } else {
+          matrix[i][j] = Math.min(matrix[i - 1][j - 1] + 1, Math.min(matrix[i][j - 1] + 1, matrix[i - 1][j] + 1));
+        }
+      }
+    }
+    return matrix[b.length][a.length];
+  }
+
+  function isFuzzyMatch(normalizedStr, targetArray) {
+    const words = normalizedStr.split(/\s+/);
+    for (let target of targetArray) {
+      if (normalizedStr.includes(target)) return true;
+      if (!target.includes(' ')) {
+        for (let word of words) {
+          if (word.length < 3) continue;
+          let dist = levenshteinDistance(word, target);
+          let allowed = target.length <= 4 ? 1 : 2;
+          if (dist <= allowed) return true;
+        }
+      } else {
+        if (Math.abs(normalizedStr.length - target.length) < 6) {
+          if (levenshteinDistance(normalizedStr, target) <= 2) return true;
+        }
+      }
+    }
+    return false;
+  }
+
   function getSmartResponse(text) {
     const normalized = normalizeText(text);
     if (!normalized || normalized.length < 2) return null;
@@ -646,17 +693,17 @@
     let matchedIntent = 'general';
     let matchedSubject = null;
 
-    // 1. Detect dynamic entities (Subjects)
+    // 1. Detect dynamic entities (Subjects) using fuzzy match
     for (const w of words) {
       if (w.length < 3) continue;
-      const subj = DYNAMIC_VOCAB.subjects.find(s => s.includes(w) || w.includes(s));
+      const subj = DYNAMIC_VOCAB.subjects.find(s => s.includes(w) || w.includes(s) || levenshteinDistance(w, s) <= 1);
       if (subj) matchedSubject = subj;
     }
     
     // 2. Detect Intents using flexible matching (not rigid regex)
-    const isGreeting = DYNAMIC_VOCAB.greetings.some(g => normalized.includes(g));
-    const isThanks = DYNAMIC_VOCAB.thanks.some(g => normalized.includes(g)) && words.length < 4;
-    const isFrustrated = DYNAMIC_VOCAB.frustration.some(g => normalized.includes(g));
+    const isGreeting = isFuzzyMatch(normalized, DYNAMIC_VOCAB.greetings);
+    const isThanks = isFuzzyMatch(normalized, DYNAMIC_VOCAB.thanks) && words.length < 5;
+    const isFrustrated = isFuzzyMatch(normalized, DYNAMIC_VOCAB.frustration);
 
     if (isGreeting && !matchedSubject) matchedIntent = 'greeting';
     else if (isThanks) matchedIntent = 'thanks';
