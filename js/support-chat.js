@@ -373,10 +373,10 @@
       candidateText = applyReasoningTemplates(candidateText, candidateTag);
 
       // 🧠 GOAL DETECTION ENGINE (FORMATTING)
-      candidateText = applyGoalBasedFormatting(candidateText, thoughtProcess.extractedData.goal);
+      candidateText = applyGoalBasedFormatting(candidateText, thoughtProcess.extractedData.goal, thoughtProcess.internalPlan);
 
       // 🧠 EMOTION DETECTION ENGINE (TONE)
-      candidateText = applyEmotionalTone(candidateText, thoughtProcess.extractedData.emotion);
+      candidateText = applyEmotionalTone(candidateText, thoughtProcess.extractedData.emotion, thoughtProcess.internalPlan);
 
       // 🧠 STUDENT UNDERSTANDING DETECTOR (SIMPLIFY)
       if (isConfused && candidateTag === 'educational') {
@@ -1416,11 +1416,11 @@
     return 'GENERAL';
   }
 
-  function applyGoalBasedFormatting(text, goal) {
+  function applyGoalBasedFormatting(text, goal, internalPlan = {}) {
     if (!text || text.length < 10) return text;
     let modified = text;
 
-    if (goal === 'FACT_SEEKING') {
+    if (goal === 'FACT_SEEKING' || internalPlan.needsShortening) {
       // Strip out long intros, make it very concise
       modified = modified.replace(/بص يا سيدي ركز معايا\.\.|سؤال ممتاز جداً! خليني أوضحلك\.\.|سؤالك في محله يا بطل! شوف يا سيدي\.\./g, '');
       // Keep only first 2 sentences max
@@ -1429,13 +1429,64 @@
     } else if (goal === 'VERIFICATION') {
       const verifications = ['بالظبط كده! ', 'كلامك مظبوط، ', 'فعلاً يا بطل، ', 'أأكدلك كلامك: '];
       modified = verifications[Math.floor(Math.random() * verifications.length)] + modified;
-    } else if (goal === 'DEEP_UNDERSTANDING') {
+    } else if (goal === 'DEEP_UNDERSTANDING' || internalPlan.needsExplanation) {
       if (!modified.includes('بص يا سيدي')) {
         modified = 'بص يا سيدي ركز معايا، هبسطهالك خالص:\n\n' + modified;
       }
     }
     
+    // Example injection
+    if (internalPlan.needsExample && !modified.includes('تخيل إن')) {
+      modified += '\n\n(عشان توضح الفكرة أكتر، تخيل إن الموضوع ده عامل زي قصة أو تطبيق عملي في حياتنا..)';
+    }
+    
     return modified;
+  }
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // 🧠 INTERNAL PLANNER BRAIN
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  function generateInternalPlan(thoughtProcess, normalized) {
+    let plan = {
+      whatUserWants: '',
+      bestApproach: '',
+      needsExplanation: false,
+      needsShortening: false,
+      needsExample: false,
+      needsEncouragement: false
+    };
+
+    const goal = thoughtProcess.extractedData.goal || 'GENERAL';
+    const emotion = thoughtProcess.extractedData.emotion || 'NEUTRAL';
+    const purpose = thoughtProcess.purpose || 'UNKNOWN_PURPOSE';
+
+    // Determine needs
+    if (goal === 'DEEP_UNDERSTANDING') {
+      plan.needsExplanation = true;
+      plan.needsExample = true;
+    }
+    if (goal === 'FACT_SEEKING') {
+      plan.needsShortening = true;
+    }
+    if (['FRUSTRATION', 'ANXIETY', 'BOREDOM'].includes(emotion)) {
+      plan.needsEncouragement = true;
+    }
+
+    if (purpose === 'SOCIAL_CONNECTION') {
+      plan.needsShortening = true;
+      plan.bestApproach = 'Chat casually and naturally';
+    } else if (purpose === 'EDUCATIONAL_EXPLANATION') {
+      plan.bestApproach = plan.needsExplanation ? 'Detailed educational explanation with logic' : 'Direct educational answer';
+    } else if (purpose === 'PROBLEM_SOLVING') {
+      plan.bestApproach = 'Step-by-step troubleshooting';
+    } else {
+      plan.bestApproach = 'General support response';
+    }
+
+    plan.whatUserWants = `Goal: ${goal}, Emotion: ${emotion}`;
+
+    console.log('[INTERNAL PLANNER BRAIN]', plan);
+    return plan;
   }
 
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1452,16 +1503,23 @@
     return 'NEUTRAL';
   }
 
-  function applyEmotionalTone(text, emotion) {
-    if (!text || emotion === 'NEUTRAL') return text;
+  function applyEmotionalTone(text, emotion, internalPlan = {}) {
+    if (!text) return text;
+    
+    let activeEmotion = emotion;
+    if (activeEmotion === 'NEUTRAL' && internalPlan.needsEncouragement) {
+      activeEmotion = 'FRUSTRATION'; // default to empathy if plan requires encouragement
+    }
+
+    if (activeEmotion === 'NEUTRAL') return text;
     
     // Avoid double prefixing
-    if (text.includes('حقك عليا') || text.includes('خد نفس عميق') || text.includes('عاش جداً') || text.includes('يا سيدي على الروقان')) {
+    if (text.includes('حقك عليا') || text.includes('خد نفس عميق') || text.includes('عاش جداً') || text.includes('يا سيدي على الروقان') || text.includes('إحنا قدها')) {
       return text;
     }
 
     let prefix = '';
-    switch (emotion) {
+    switch (activeEmotion) {
       case 'FRUSTRATION':
         prefix = 'عارف إنك ممكن تكون محبط شوية، بس إحنا قدها والأبطال مبيستسلموش..\n\n';
         break;
@@ -1636,6 +1694,9 @@
     if (thoughtProcess.confidence < 40) {
       thoughtProcess.purpose = 'CLARIFICATION';
     }
+
+    // 5. INTERNAL PLANNER BRAIN (New Step)
+    thoughtProcess.internalPlan = generateInternalPlan(thoughtProcess, normalized);
 
     return thoughtProcess;
   }
