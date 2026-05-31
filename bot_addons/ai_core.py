@@ -59,6 +59,18 @@ except Exception as _enh2_err:
     print(f"[SMART_BRAIN_INFO] Enhancements V2 not loaded (optional): {_enh2_err}")
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# Safe import of Enhancement Layer V3 (ADDITIVE, optional)
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+_HAS_ENHANCEMENTS_V3 = False
+_SmartEnhancementsV3 = None
+try:
+    from bot_addons.smart_enhancements_v3 import SmartEnhancementsV3 as _SEv3
+    _SmartEnhancementsV3 = _SEv3
+    _HAS_ENHANCEMENTS_V3 = True
+except Exception as _enh3_err:
+    print(f"[SMART_BRAIN_INFO] Enhancements V3 not loaded (optional): {_enh3_err}")
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # Safe import of sklearn (with auto-install fallback)
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 _HAS_SKLEARN = False
@@ -302,6 +314,7 @@ class SmartBotBrain:
         self._ready = False
         self._enhancements = None  # Enhancement layer (optional)
         self._enhancements_v2 = None  # Enhancement layer V2 (optional)
+        self._enhancements_v3 = None  # Enhancement layer V3 (optional)
 
         try:
             self._load_data()
@@ -320,6 +333,13 @@ class SmartBotBrain:
             except Exception as enh2_e:
                 print(f"[SMART_BRAIN_INFO] Enhancements V2 init skipped: {enh2_e}")
                 self._enhancements_v2 = None
+            # Load enhancements V3 safely (optional layer)
+            try:
+                if _HAS_ENHANCEMENTS_V3 and _SmartEnhancementsV3:
+                    self._enhancements_v3 = _SmartEnhancementsV3()
+            except Exception as enh3_e:
+                print(f"[SMART_BRAIN_INFO] Enhancements V3 init skipped: {enh3_e}")
+                self._enhancements_v3 = None
             self._ready = True
             print("[SMART_BRAIN] ✅ SmartBotBrain initialized successfully")
         except Exception as e:
@@ -591,6 +611,13 @@ class SmartBotBrain:
                     response, intent_id, user_id, normalized_text)
             except Exception:
                 pass
+        # V3 enhancements (post-processing: analogy, visualization, gradual, summary)
+        if self._enhancements_v3:
+            try:
+                response = self._enhancements_v3.post_process(
+                    response, intent_id, user_id)
+            except Exception:
+                pass
         return response
 
     def get_response(self, text, user_id=None):
@@ -620,6 +647,28 @@ class SmartBotBrain:
             enh = self._enhancements  # may be None
 
             enh_v2 = self._enhancements_v2  # may be None
+            enh_v3 = self._enhancements_v3  # may be None
+
+            # ━━ [V3 Pre-processing: 44-HeavySlang, 32-Keywords, 29-HiddenIntent, 34-Frustration, 40-Fragments] ━━
+            if enh_v3:
+                try:
+                    topic_kws = list(TOPIC_KEYWORDS.keys())
+                    normalized, v3_early_resp = enh_v3.pre_process(normalized, user_id, topic_kws)
+                    if v3_early_resp:
+                        if user_id:
+                            self._set_context(user_id, text, v3_early_resp, "v3_early")
+                        return v3_early_resp
+                except Exception:
+                    pass
+
+            # ━━ [V3-40] Fragment context linking ━━
+            if enh_v3 and user_id:
+                try:
+                    fragment_ctx = enh_v3.get_fragment_context(user_id, normalized)
+                    if fragment_ctx:
+                        normalized = fragment_ctx
+                except Exception:
+                    pass
 
             # ━━ [V2 Pre-processing: 20-Franco, 19-Slang, 11-Fillers, 17-Rush, 18-Detail] ━━
             if enh_v2:
@@ -792,6 +841,17 @@ class SmartBotBrain:
                         if user_id:
                             self._set_context(user_id, text, indirect_resp, "indirect")
                         return indirect_resp
+                except Exception:
+                    pass
+
+            # ━━ [V3-43] Broad topic resolver ━━
+            if enh_v3:
+                try:
+                    topic_fallback = enh_v3.get_topic_fallback(normalized)
+                    if topic_fallback:
+                        if user_id:
+                            self._set_context(user_id, text, topic_fallback, "topic_resolve")
+                        return topic_fallback
                 except Exception:
                     pass
 
