@@ -117,10 +117,8 @@
   }
 
   function executeFallbackEngine(normalized, userMessage) {
-    if (isVeryUnclearMessage(userMessage)) {
-      return getFallbackResponse(userMessage).text;
-    }
-    return getFallbackResponse(userMessage).text;
+    let response = getFallbackResponse(userMessage).text;
+    return applyAntiRepetition(response, 'fallback');
   }
 
   const TYPO_MAP = {
@@ -314,13 +312,43 @@
     return final;
   }
 
+  function getBotHistory() {
+    try { return JSON.parse(sessionStorage.getItem('pf_bot_history')) || []; } 
+    catch(e) { return []; }
+  }
+
+  function saveToBotHistory(responseStr) {
+    let history = getBotHistory();
+    history.push(responseStr);
+    if (history.length > 20) history.shift();
+    sessionStorage.setItem('pf_bot_history', JSON.stringify(history));
+  }
+
+  function applyAntiRepetition(responseStr, ruleTag) {
+    if (!responseStr) return responseStr;
+    const history = getBotHistory();
+    
+    if (history.includes(responseStr)) {
+      if (ruleTag === 'social' || ruleTag === 'dynamic_chat') {
+        const emojis = [' 😊', ' ✨', ' 💪', ' 🌟', ' 😄', ' 🎯'];
+        responseStr += emojis[Math.floor(Math.random() * emojis.length)];
+      } else {
+        const PREFIXES = ['زي ما وضحتلك، ', 'تأكيداً لكلامي: ', 'مرة تانية عشانك، ', 'ببساطة: ', 'عشان تكون الصورة واضحة، '];
+        responseStr = PREFIXES[Math.floor(Math.random() * PREFIXES.length)] + '\n' + responseStr;
+      }
+    }
+    
+    saveToBotHistory(responseStr);
+    return responseStr;
+  }
+
   function composeFinalResponse(rule, question, intentData) {
     let response = rule && typeof rule.text === 'string' ? rule.text : '';
     if (shouldAppendEscalationHint(response, question)) {
       escalationSuggested = true;
       response = `${response} ${ESCALATION_SUGGESTION}`.trim();
     }
-    return response;
+    return applyAntiRepetition(response, rule ? rule.tag : null);
   }
 
   function loadTraining() {
@@ -665,7 +693,10 @@
   };
 
   function pickRandom(arr) {
-    return arr[Math.floor(Math.random() * arr.length)];
+    const history = getBotHistory();
+    let options = arr.filter(item => !history.some(h => h && h.includes && h.includes(item)));
+    if (options.length === 0) options = arr;
+    return options[Math.floor(Math.random() * options.length)];
   }
 
   function levenshteinDistance(a, b) {
