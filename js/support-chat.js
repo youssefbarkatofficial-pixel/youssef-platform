@@ -375,6 +375,9 @@
       // 🧠 GOAL DETECTION ENGINE (FORMATTING)
       candidateText = applyGoalBasedFormatting(candidateText, thoughtProcess.extractedData.goal);
 
+      // 🧠 EMOTION DETECTION ENGINE (TONE)
+      candidateText = applyEmotionalTone(candidateText, thoughtProcess.extractedData.emotion);
+
       // 🧠 STUDENT UNDERSTANDING DETECTOR (SIMPLIFY)
       if (isConfused && candidateTag === 'educational') {
         candidateText = simplifyResponse(candidateText);
@@ -1367,9 +1370,6 @@
     // DEEP_UNDERSTANDING: اشرحلي، ازاي، ليه، يعني ايه
     if (/\b(اشرح|ازاي|ليه|يعني ايه|فهمني|بسرعة)\b/.test(normalized)) return 'DEEP_UNDERSTANDING';
     
-    // EMOTIONAL_VALIDATION: تايه، خايف، صعب
-    if (/\b(تايه|خايف|صعب|قلقان|متوتر|مخنوق|يأس|زعلان)\b/.test(normalized)) return 'EMOTIONAL_VALIDATION';
-    
     return 'GENERAL';
   }
 
@@ -1390,11 +1390,56 @@
       if (!modified.includes('بص يا سيدي')) {
         modified = 'بص يا سيدي ركز معايا، هبسطهالك خالص:\n\n' + modified;
       }
-    } else if (goal === 'EMOTIONAL_VALIDATION') {
-      modified = 'ولا يهمك خالص، أنا في ظهرك ومعاك خطوة بخطوة..\n\n' + modified;
     }
     
     return modified;
+  }
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // 🧠 EMOTION DETECTION ENGINE
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  function analyzeEmotion(normalized) {
+    if (/\b(يأس|مش نافع|فاشل|تعبت|مفيش فايدة|محبط|صعب)\b/.test(normalized)) return 'FRUSTRATION';
+    if (/\b(خايف|قلقان|متوتر|خايفة|مرعوب|الامتحان|خوف)\b/.test(normalized)) return 'ANXIETY';
+    if (/\b(جاهز|هنكسر الدنيا|يالا بينا|متحمس|عاش|بطل)\b/.test(normalized)) return 'EXCITEMENT';
+    if (/\b(فرحان|نجحت|قفلت|الحمدلله|شطورة|فرحتني)\b/.test(normalized)) return 'JOY';
+    if (/\b(زهقت|مكسل|ملل|طهقت|مش قادر|تعبان)\b/.test(normalized)) return 'BOREDOM';
+    if (/\b(متعصب|زفت|غبي|مخنوق|نرفزة|ضايق|مستفز)\b/.test(normalized)) return 'ANGER';
+    
+    return 'NEUTRAL';
+  }
+
+  function applyEmotionalTone(text, emotion) {
+    if (!text || emotion === 'NEUTRAL') return text;
+    
+    // Avoid double prefixing
+    if (text.includes('حقك عليا') || text.includes('خد نفس عميق') || text.includes('عاش جداً') || text.includes('يا سيدي على الروقان')) {
+      return text;
+    }
+
+    let prefix = '';
+    switch (emotion) {
+      case 'FRUSTRATION':
+        prefix = 'عارف إنك ممكن تكون محبط شوية، بس إحنا قدها والأبطال مبيستسلموش..\n\n';
+        break;
+      case 'ANXIETY':
+        prefix = 'خد نفس عميق كده، مفيش داعي للتوتر خالص، أنا معاك خطوة بخطوة..\n\n';
+        break;
+      case 'EXCITEMENT':
+        prefix = 'عاش جداً! حماسك ده هو اللي هيوصلك للمركز الأول، يالا بينا..\n\n';
+        break;
+      case 'JOY':
+        prefix = 'يا سيدي على الروقان! فرحني معاك دايماً كده..\n\n';
+        break;
+      case 'BOREDOM':
+        prefix = 'حاسس بيك إنك مكسل شوية، خلينا ننشط كده وناخدها واحدة واحدة من غير تعقيد..\n\n';
+        break;
+      case 'ANGER':
+        prefix = 'حقك عليا لو في حاجة معصباك، أنا هنا عشان أساعدك وأسهل عليك كل حاجة..\n\n';
+        break;
+    }
+
+    return prefix + text;
   }
 
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1512,8 +1557,9 @@
     if (isComplaining) thoughtProcess.interpretations.push('COMPLAINT');
     if (isJoking) thoughtProcess.interpretations.push('HUMOR');
 
-    // 3. GOAL DETECTION ENGINE
+    // 3. GOAL & EMOTION DETECTION ENGINE
     thoughtProcess.extractedData.goal = detectUserGoal(normalized);
+    thoughtProcess.extractedData.emotion = analyzeEmotion(normalized);
     // Use raw userMessage to catch Arabic suffixes correctly
     thoughtProcess.extractedData.islamicGreeting = analyzeIslamicGreeting(userMessage || normalized);
 
