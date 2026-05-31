@@ -377,6 +377,9 @@
         candidateText = simplifyResponse(candidateText);
       }
 
+      // 🧠 SMART FOLLOW-UP ENGINE
+      candidateText = applySmartFollowUp(candidateText, candidateTag, thoughtProcess.extractedData.goal, thoughtProcess.extractedData.subjects);
+
       // REFLECT & SCORE
       let score = evaluateResponseQuality(candidateText, userMessage, purpose);
       
@@ -1389,6 +1392,45 @@
     }
     
     return modified;
+  }
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // 🧠 SMART FOLLOW-UP ENGINE
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  function applySmartFollowUp(text, tag, goal, subjects) {
+    // Only apply ~30% of the time so it doesn't get annoying
+    if (Math.random() > 0.3) return text;
+
+    // Do not follow up if the user is frustrated, asking for problem solving, or verification
+    if (['PROBLEM_SOLVING', 'EMOTIONAL_VALIDATION', 'VERIFICATION'].includes(goal)) return text;
+
+    let followUp = '';
+
+    if (tag === 'educational' || tag === 'content-based') {
+      const eduFollowUps = [
+        'لو في نقطة تانية في الدرس ده لسه مش واضحة، قولي.',
+        'تحب أديك سؤال صغير تختبر بيه فهمك في الجزء ده؟',
+        'ممكن نتكلم عن جزء مرتبط بالموضوع ده لو حابب؟',
+        'لو فهمت دي، نقدر ندخل في اللي بعدها؟'
+      ];
+      if (subjects && subjects.length > 0) {
+        eduFollowUps.push(`تحب نكمل كلامنا عن ${subjects[0]}؟`);
+      }
+      followUp = eduFollowUps[Math.floor(Math.random() * eduFollowUps.length)];
+    } else if (tag === 'social') {
+      const socialFollowUps = [
+        'أخبارك إيه في المذاكرة؟ ماشي تمام ولا في حاجة موقفاك؟',
+        'جاهز تكسر الدنيا في منهج الدراسات؟',
+        'طمني، الكورسات معاك ماشية زي الفل ولا محتاج مساعدة؟',
+        'قولي بقى، إيه أكتر جزء عجبك في الدروس اللي ذاكرتها؟'
+      ];
+      followUp = socialFollowUps[Math.floor(Math.random() * socialFollowUps.length)];
+    }
+
+    if (followUp && !text.includes(followUp)) {
+      return text + '\n\n' + followUp;
+    }
+    return text;
   }
 
   function multiStepThinkEngine(normalized, userMessage) {
