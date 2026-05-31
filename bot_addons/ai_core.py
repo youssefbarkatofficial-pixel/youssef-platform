@@ -47,6 +47,18 @@ except Exception as _enh_err:
     print(f"[SMART_BRAIN_INFO] Enhancements not loaded (optional): {_enh_err}")
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# Safe import of Enhancement Layer V2 (ADDITIVE, optional)
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+_HAS_ENHANCEMENTS_V2 = False
+_SmartEnhancementsV2 = None
+try:
+    from bot_addons.smart_enhancements_v2 import SmartEnhancementsV2 as _SEv2
+    _SmartEnhancementsV2 = _SEv2
+    _HAS_ENHANCEMENTS_V2 = True
+except Exception as _enh2_err:
+    print(f"[SMART_BRAIN_INFO] Enhancements V2 not loaded (optional): {_enh2_err}")
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # Safe import of sklearn (with auto-install fallback)
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 _HAS_SKLEARN = False
@@ -289,6 +301,7 @@ class SmartBotBrain:
         self._tfidf_matrix = None
         self._ready = False
         self._enhancements = None  # Enhancement layer (optional)
+        self._enhancements_v2 = None  # Enhancement layer V2 (optional)
 
         try:
             self._load_data()
@@ -300,6 +313,13 @@ class SmartBotBrain:
             except Exception as enh_e:
                 print(f"[SMART_BRAIN_INFO] Enhancements init skipped: {enh_e}")
                 self._enhancements = None
+            # Load enhancements V2 safely (optional layer)
+            try:
+                if _HAS_ENHANCEMENTS_V2 and _SmartEnhancementsV2:
+                    self._enhancements_v2 = _SmartEnhancementsV2()
+            except Exception as enh2_e:
+                print(f"[SMART_BRAIN_INFO] Enhancements V2 init skipped: {enh2_e}")
+                self._enhancements_v2 = None
             self._ready = True
             print("[SMART_BRAIN] ✅ SmartBotBrain initialized successfully")
         except Exception as e:
@@ -541,29 +561,37 @@ class SmartBotBrain:
         except Exception:
             return None, None
 
-    def _enhance_response(self, response, intent_id, user_id):
-        """Apply enhancement layers to a matched response (safe, optional)."""
-        if not self._enhancements or not response:
+    def _enhance_response(self, response, intent_id, user_id, normalized_text=""):
+        """Apply enhancement layers v1+v2 to a matched response (safe, optional)."""
+        if not response:
             return response
-        try:
-            enh = self._enhancements
-            # [6] Teaching mode: add follow-up question (30% chance)
-            response = enh.add_teaching_followup(response, intent_id)
-            # [9] Response diversity: avoid repeating same response
-            # (we already have the response, just track it)
-            uid = str(user_id) if user_id else "anon"
-            enh._response_history[uid] = (enh._response_history.get(uid, []) + [response])[-10:]
-            # [10] Adaptive: simplify if user is confused
-            if user_id:
-                confusion = enh.check_confusion_level(user_id)
-                response = enh.simplify_response(response, confusion)
-            # [3] Update enhanced context
-            if user_id:
-                topic = enh.extract_topic_entity("" , intent_id)
-                enh.update_enhanced_context(user_id, topic=topic, intent_id=intent_id, response=response)
-            return response
-        except Exception:
-            return response
+        # V1 enhancements
+        if self._enhancements:
+            try:
+                enh = self._enhancements
+                # [6] Teaching mode: add follow-up question (30% chance)
+                response = enh.add_teaching_followup(response, intent_id)
+                # [9] Response diversity: track history
+                uid = str(user_id) if user_id else "anon"
+                enh._response_history[uid] = (enh._response_history.get(uid, []) + [response])[-10:]
+                # [10] Adaptive: simplify if user is confused
+                if user_id:
+                    confusion = enh.check_confusion_level(user_id)
+                    response = enh.simplify_response(response, confusion)
+                # [3] Update enhanced context
+                if user_id:
+                    topic = enh.extract_topic_entity("", intent_id)
+                    enh.update_enhanced_context(user_id, topic=topic, intent_id=intent_id, response=response)
+            except Exception:
+                pass
+        # V2 enhancements (post-processing)
+        if self._enhancements_v2:
+            try:
+                response = self._enhancements_v2.post_process(
+                    response, intent_id, user_id, normalized_text)
+            except Exception:
+                pass
+        return response
 
     def get_response(self, text, user_id=None):
         """
@@ -590,6 +618,15 @@ class SmartBotBrain:
                 return None
 
             enh = self._enhancements  # may be None
+
+            enh_v2 = self._enhancements_v2  # may be None
+
+            # ━━ [V2 Pre-processing: 20-Franco, 19-Slang, 11-Fillers, 17-Rush, 18-Detail] ━━
+            if enh_v2:
+                try:
+                    normalized = enh_v2.pre_process(text, normalized, user_id)
+                except Exception:
+                    pass
 
             # ━━ [Enhancement 4] Fuzzy spelling correction (internal only) ━━
             if enh:
@@ -659,7 +696,7 @@ class SmartBotBrain:
                     if short_intent:
                         templates = short_intent.get("response_templates", [""])
                         response = enh.pick_diverse_response(templates, user_id) if user_id else random.choice(templates)
-                        response = self._enhance_response(response, short_id, user_id)
+                        response = self._enhance_response(response, short_id, user_id, normalized)
                         if user_id:
                             self._set_context(user_id, text, response, short_id)
                         return response
@@ -695,7 +732,7 @@ class SmartBotBrain:
                         intent_id = sem_match.get("intent_id", "")
                         templates = sem_match.get("response_templates", [""])
                         response = enh.pick_diverse_response(templates, user_id) if user_id else random.choice(templates)
-                        response = self._enhance_response(response, intent_id, user_id)
+                        response = self._enhance_response(response, intent_id, user_id, normalized)
                         if user_id:
                             self._set_context(user_id, text, response, intent_id)
                         return response
@@ -726,8 +763,8 @@ class SmartBotBrain:
                     response = enh.pick_diverse_response(templates, user_id)
                 else:
                     response = random.choice(templates)
-                # [6,10] Apply enhancement layers
-                response = self._enhance_response(response, intent_id, user_id)
+                # [6,10,v2] Apply enhancement layers
+                response = self._enhance_response(response, intent_id, user_id, normalized)
                 if user_id:
                     self._set_context(user_id, text, response, intent_id)
 
@@ -746,6 +783,17 @@ class SmartBotBrain:
                         except Exception:
                             pass
                 return kw_response
+
+            # ━━ [V2-12] Indirect statement detection ━━
+            if enh_v2:
+                try:
+                    indirect_resp = enh_v2.detect_indirect_statement(normalized)
+                    if indirect_resp:
+                        if user_id:
+                            self._set_context(user_id, text, indirect_resp, "indirect")
+                        return indirect_resp
+                except Exception:
+                    pass
 
             # ━━ [Enhancement 5] Smart clarification instead of giving up ━━
             if enh:
