@@ -379,7 +379,7 @@
       candidateText = applyEmotionalTone(candidateText, thoughtProcess.extractedData.emotion, thoughtProcess.internalPlan);
 
       // 🧠 STUDENT UNDERSTANDING DETECTOR (SIMPLIFY)
-      if (isConfused && candidateTag === 'educational') {
+      if ((isConfused || thoughtProcess.internalPlan.isStrugglingTopic || thoughtProcess.internalPlan.lowUnderstanding) && candidateTag === 'educational') {
         candidateText = simplifyResponse(candidateText);
       }
 
@@ -1485,6 +1485,26 @@
 
     plan.whatUserWants = `Goal: ${goal}, Emotion: ${emotion}`;
 
+    // 🧠 PROFILE BUILDER INTEGRATION
+    const profile = getStudentProfile();
+    if (profile) {
+      if (profile.understandingLevel < 30) {
+        plan.needsShortening = true;
+        plan.needsEncouragement = true;
+        plan.lowUnderstanding = true;
+      }
+
+      if (thoughtProcess.extractedData.subjects && thoughtProcess.extractedData.subjects.length > 0) {
+        const sub = thoughtProcess.extractedData.subjects[0];
+        if (profile.topics && profile.topics[sub] && profile.topics[sub].struggles > 2) {
+          plan.needsShortening = true;
+          plan.needsEncouragement = true;
+          plan.isStrugglingTopic = true;
+          plan.bestApproach = 'Extreme simplification for struggling topic';
+        }
+      }
+    }
+
     console.log('[INTERNAL PLANNER BRAIN]', plan);
     return plan;
   }
@@ -1637,52 +1657,90 @@
   }
 
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // 🧠 CURIOSITY ENGINE (USER INTEREST TRACKER)
+  // 🧠 STUDENT PROFILE BUILDER
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  function updateUserInterests(subjects) {
-    if (!subjects || subjects.length === 0) return;
-    
-    let interests;
+  function updateStudentProfile(thoughtProcess, userMessage, normalized) {
+    let profile;
     try {
-      interests = JSON.parse(localStorage.getItem('pf_user_interests') || '{}');
+      profile = JSON.parse(localStorage.getItem('pf_student_profile') || 'null');
     } catch (e) {
-      interests = {};
+      profile = null;
     }
 
-    subjects.forEach(subject => {
-      // Exclude generic words that aren't true academic subjects
-      const genericSubjects = ['سؤال', 'امتحان', 'واجب', 'دفع', 'اشتراك', 'كورس', 'درس', 'منصة', 'باسورد', 'حصة', 'منهج', 'شرح'];
-      if (!genericSubjects.includes(subject)) {
-        interests[subject] = (interests[subject] || 0) + 1;
+    if (!profile) {
+      profile = {
+        understandingLevel: 50,
+        topics: {},
+        writingStyle: { usesSlang: 0, usesEmojis: 0, shortMessages: 0 }
+      };
+    }
+
+    const goal = thoughtProcess.extractedData.goal || 'GENERAL';
+    const emotion = thoughtProcess.extractedData.emotion || 'NEUTRAL';
+    const subjects = thoughtProcess.extractedData.subjects || [];
+
+    // 1. Update Understanding Level
+    if (goal === 'SOCIAL_CONNECTION' && isFuzzyMatch(normalized, DYNAMIC_VOCAB.thanks)) {
+      profile.understandingLevel = Math.min(100, profile.understandingLevel + 5);
+    } else if (goal === 'DEEP_UNDERSTANDING' || emotion === 'FRUSTRATION' || emotion === 'ANXIETY') {
+      profile.understandingLevel = Math.max(0, profile.understandingLevel - 2);
+    } else if (isFuzzyMatch(normalized, DYNAMIC_VOCAB.need_simplification)) {
+      profile.understandingLevel = Math.max(0, profile.understandingLevel - 5);
+    }
+
+    // 2. Track Strengths & Weaknesses (Topics)
+    const genericSubjects = ['سؤال', 'امتحان', 'واجب', 'دفع', 'اشتراك', 'كورس', 'درس', 'منصة', 'باسورد', 'حصة', 'منهج', 'شرح'];
+    subjects.forEach(sub => {
+      if (!genericSubjects.includes(sub)) {
+        if (!profile.topics[sub]) profile.topics[sub] = { asks: 0, struggles: 0, successes: 0 };
+        profile.topics[sub].asks += 1;
+        
+        if (['FRUSTRATION', 'ANXIETY', 'ANGER'].includes(emotion)) {
+          profile.topics[sub].struggles += 1;
+        } else if (['JOY', 'EXCITEMENT'].includes(emotion)) {
+          profile.topics[sub].successes += 1;
+        }
       }
     });
 
+    // 3. Track Writing Style
+    const slangRegex = /(يا نجم|باشا|يا ريس|يا غالي|يا سيدي|ايه الدنيا|شغال فين|طمني|زي الفل)/g;
+    if (slangRegex.test(userMessage)) profile.writingStyle.usesSlang += 1;
+    
+    const emojiRegex = /[\u{1F300}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F900}-\u{1F9FF}\u{1FA70}-\u{1FAFF}]/u;
+    if (emojiRegex.test(userMessage)) profile.writingStyle.usesEmojis += 1;
+    
+    if (userMessage.length < 15) profile.writingStyle.shortMessages += 1;
+
     try {
-      localStorage.setItem('pf_user_interests', JSON.stringify(interests));
+      localStorage.setItem('pf_student_profile', JSON.stringify(profile));
     } catch (e) {
-      console.warn('Could not save user interests', e);
+      console.warn('Could not save student profile', e);
+    }
+  }
+
+  function getStudentProfile() {
+    try {
+      return JSON.parse(localStorage.getItem('pf_student_profile')) || null;
+    } catch (e) {
+      return null;
     }
   }
 
   function getTopInterest() {
-    let interests;
-    try {
-      interests = JSON.parse(localStorage.getItem('pf_user_interests') || '{}');
-    } catch (e) {
-      return null;
-    }
+    const profile = getStudentProfile();
+    if (!profile || !profile.topics) return null;
 
     let topSubject = null;
     let maxCount = 0;
 
-    for (const [subject, count] of Object.entries(interests)) {
-      if (count > maxCount) {
-        maxCount = count;
+    for (const [subject, data] of Object.entries(profile.topics)) {
+      if (data.asks > maxCount) {
+        maxCount = data.asks;
         topSubject = subject;
       }
     }
 
-    // Return top interest if it's been mentioned at least twice to avoid false positives
     return maxCount >= 2 ? topSubject : null;
   }
 
@@ -1699,9 +1757,6 @@
     // 1. EXTRACT IMPORTANT INFO
     const educationalKeywords = [...DYNAMIC_VOCAB.subjects, 'شرح', 'سؤال', 'امتحان', 'واجب', 'دفع', 'اشتراك', 'كورس', 'درس', 'منصة', 'باسورد', 'حصة', 'منهج'];
     thoughtProcess.extractedData.subjects = educationalKeywords.filter(k => normalized.includes(k));
-    
-    // 🧠 UPDATE CURIOSITY ENGINE
-    updateUserInterests(thoughtProcess.extractedData.subjects);
     
     const isAsking = /\?|؟|فين|امتى|ازاي|ليه|مين|كام|بكام/.test(normalized);
     const isChatting = isFuzzyMatch(normalized, [...DYNAMIC_VOCAB.greetings, ...DYNAMIC_VOCAB.check_status, 'انت مين', 'عمرك']);
@@ -1757,6 +1812,9 @@
     if (thoughtProcess.confidence < 40) {
       thoughtProcess.purpose = 'CLARIFICATION';
     }
+
+    // 🧠 UPDATE STUDENT PROFILE
+    updateStudentProfile(thoughtProcess, userMessage, normalized);
 
     // 5. INTERNAL PLANNER BRAIN (New Step)
     thoughtProcess.internalPlan = generateInternalPlan(thoughtProcess, normalized);
