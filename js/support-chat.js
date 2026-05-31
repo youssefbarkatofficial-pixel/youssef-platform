@@ -468,9 +468,37 @@
 
   function composeFinalResponse(rule, question, intentData) {
     let response = rule && typeof rule.text === 'string' ? rule.text : '';
+
+    // 🧠 CONVERSATION PERSONALITY ENGINE
+    if (rule && rule.tag && !response.includes('بص يا سيدي') && !response.includes('يا بطل')) {
+      const personalityHooks = {
+        educational: [
+          'بص يا سيدي ركز معايا..',
+          'سؤال ممتاز جداً! خليني أوضحلك..',
+          'سؤالك في محله يا بطل! شوف يا سيدي..',
+          'دي جزئية مهمة جداً ومحتاجة تركيز، بص..',
+          'ولا يهمك خالص، الموضوع أبسط مما تتخيل:',
+          'من أهم الأسئلة اللي بحبها! بص..',
+          'تعظيم سلام للسؤال ده! بص يا نجم المنصة..',
+          'ركز معايا وهتلاقيها سهلة جداً إن شاء الله:'
+        ],
+        assistance: [
+          'طبعاً، عيني ليك:',
+          'تحت أمرك يا كينج، بص معايا:',
+          'معاك وفي ظهرك دايماً، بص يا سيدي:',
+          'ولا تشغل بالك، الحل عندي:'
+        ]
+      };
+
+      if (personalityHooks[rule.tag] && Math.random() > 0.3) {
+        const prefix = personalityHooks[rule.tag][Math.floor(Math.random() * personalityHooks[rule.tag].length)];
+        response = prefix + '\n\n' + response;
+      }
+    }
+
     if (shouldAppendEscalationHint(response, question)) {
       escalationSuggested = true;
-      response = `${response} ${ESCALATION_SUGGESTION}`.trim();
+      response = `${response}\n\n${ESCALATION_SUGGESTION}`.trim();
     }
     return applyAntiRepetition(response, rule ? rule.tag : null);
   }
