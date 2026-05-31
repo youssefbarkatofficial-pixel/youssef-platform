@@ -62,36 +62,43 @@
   const BOT_RESPONSES_DISABLED = false;
   function getTemporarySafeBotReply(userMessage) {
     const normalized = normalizeText(userMessage);
-    if (!normalized) {
-      return getFallbackResponse(userMessage).text;
-    }
+    if (!normalized) return executeFallbackEngine(normalized, userMessage);
 
     if (isCheatingRequest(userMessage)) {
       return 'مقدرش أساعدك فى ده، الأستاذ يوسف بركات لو لمحني هيمرجحني 😂';
     }
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 🚪 CONVERSATION GATE (Layer 1)
+    // 🧠 COGNITIVE LAYER V1: UNDERSTAND -> THINK -> RESPOND
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    const category = categorizeConversation(normalized);
+    
+    // 1. UNDERSTAND
+    const purpose = analyzePurpose(normalized);
+    let finalResponseText = '';
 
-    // 1. SOCIAL ROUTE
-    if (['Greeting', 'Small Talk', 'Social Conversation', 'Emotional Message', 'Joke', 'Farewell'].includes(category)) {
-      const socialResponse = generateSocialResponse(normalized, category);
-      return composeFinalResponse({ text: socialResponse, tag: 'social' }, userMessage, analyzeStudentIntent(userMessage));
+    // 2. THINK & ROUTE
+    if (['HUMOR', 'SOCIAL_CONNECTION', 'EMOTIONAL_SUPPORT'].includes(purpose)) {
+      const socialResponse = generateSocialResponse(normalized, purpose);
+      finalResponseText = composeFinalResponse({ text: socialResponse, tag: 'social' }, userMessage, analyzeStudentIntent(userMessage));
     }
-    // 2. FOLLOW-UP ROUTE
-    else if (category === 'Follow-up') {
-      return executeContextEngine(normalized, userMessage);
+    else if (purpose === 'FOLLOW_UP') {
+      finalResponseText = executeContextEngine(normalized, userMessage);
     }
-    // 3. EDUCATIONAL ROUTE
-    else if (category === 'Educational') {
-      return executeEducationalIntentEngine(normalized, userMessage);
+    else if (['EDUCATIONAL_EXPLANATION', 'INFORMATION_SEEKING', 'ASSISTANCE', 'COMPLAINT'].includes(purpose)) {
+      finalResponseText = executeEducationalIntentEngine(normalized, userMessage);
     }
-    // 4. UNKNOWN ROUTE
     else {
-      return executeFallbackEngine(normalized, userMessage);
+      finalResponseText = executeFallbackEngine(normalized, userMessage);
     }
+
+    // 3. RESPOND (With Internal Human-Like Verification)
+    let attempt = 0;
+    while (!isHumanLike(finalResponseText) && attempt < 3) {
+      finalResponseText = executeFallbackEngine(normalized, userMessage);
+      attempt++;
+    }
+
+    return finalResponseText;
   }
 
   function executeEducationalIntentEngine(normalized, userMessage) {
@@ -737,34 +744,42 @@
     return false;
   }
 
-  function categorizeConversation(normalized) {
-    const words = normalized.split(/\s+/);
+  function analyzePurpose(normalized) {
+    const isAsking = /\?|؟|فين|امتى|ازاي|ليه|مين|كام|بكام/.test(normalized);
+    const isChatting = isFuzzyMatch(normalized, [...DYNAMIC_VOCAB.greetings, 'طمني عليك', 'اخبارك', 'ايه يا بطل', 'عامل ايه', 'انت مين', 'عمرك', 'شغال']);
+    const isJoking = isFuzzyMatch(normalized, ['نكتة', 'ضحكني', 'هتموتني من الضحك', 'انت جامد', 'جامد', 'عسل', 'تضحك']);
+    const isComplaining = isFuzzyMatch(normalized, ['مش شغال', 'بايظ', 'مش بيفتح', 'عطلان', 'مشكلة', 'زفت']);
+    const isStressed = isFuzzyMatch(normalized, [...DYNAMIC_VOCAB.frustration, 'زعلان', 'تعبان', 'مضغوط', 'مخنوق', 'يأس']);
+    const wantsExplanation = isFuzzyMatch(normalized, ['اشرح', 'ازاي', 'ليه', 'فهمني', 'يعني ايه']);
+    const wantsHelp = isFuzzyMatch(normalized, ['ساعدني', 'عايز مساعدة', 'دعم', 'مشكلة', 'الحقني']);
+    const wantsSocial = isFuzzyMatch(normalized, [...DYNAMIC_VOCAB.thanks, 'سلام', 'باي', 'تصبح على خير']);
     
-    if (isFuzzyMatch(normalized, ['نكتة', 'ضحكني', 'هتموتني من الضحك', 'انت جامد', 'جامد', 'عسل', 'تضحك'])) return 'Joke';
+    if (isJoking) return 'HUMOR';
+    if (isStressed) return 'EMOTIONAL_SUPPORT';
+    if (isComplaining) return 'COMPLAINT';
+    if (isChatting || wantsSocial) return 'SOCIAL_CONNECTION';
+    if (wantsExplanation) return 'EDUCATIONAL_EXPLANATION';
+    if (wantsHelp) return 'ASSISTANCE';
+    if (isAsking) return 'INFORMATION_SEEKING';
     
-    if (isFuzzyMatch(normalized, DYNAMIC_VOCAB.frustration) || isFuzzyMatch(normalized, ['زعلان', 'تعبان', 'مضغوط', 'مخنوق', 'يأس'])) return 'Emotional Message';
-
-    if (isFuzzyMatch(normalized, DYNAMIC_VOCAB.thanks)) return 'Social Conversation';
-    if (isFuzzyMatch(normalized, ['سلام', 'باي', 'تصبح على خير', 'مع السلامة', 'اشوفك بعدين'])) return 'Farewell';
-    
-    if (isFuzzyMatch(normalized, DYNAMIC_VOCAB.greetings) || isFuzzyMatch(normalized, ['طمني عليك', 'اخبارك', 'ايه يا بطل', 'عامل ايه'])) return 'Greeting';
-
-    if (isFuzzyMatch(normalized, ['انت مين', 'شغال فين', 'بتعمل ايه', 'اسمك ايه', 'عمرك'])) return 'Small Talk';
-
-    if (isFuzzyMatch(normalized, ['طب', 'وبعدين', 'يعني', 'قصدك', 'لسه', 'كمان', 'طيب', 'وبالنسبة'])) return 'Follow-up';
-
+    if (isFuzzyMatch(normalized, ['طب', 'وبعدين', 'يعني', 'قصدك', 'لسه', 'كمان', 'طيب', 'وبالنسبة'])) return 'FOLLOW_UP';
     const educationalKeywords = [...DYNAMIC_VOCAB.subjects, 'شرح', 'سؤال', 'امتحان', 'واجب', 'دفع', 'اشتراك', 'كورس', 'درس', 'منصة', 'باسورد', 'حصة', 'منهج'];
-    if (isFuzzyMatch(normalized, educationalKeywords) || /فين|ازاي|ليه|امتى|بكام/.test(normalized)) {
-      return 'Educational';
-    }
+    if (isFuzzyMatch(normalized, educationalKeywords)) return 'EDUCATIONAL_EXPLANATION';
 
-    return 'Unknown';
+    return 'UNKNOWN_PURPOSE';
   }
 
-  function generateSocialResponse(normalized, category) {
+  function isHumanLike(text) {
+    if (!text || text.trim() === '') return false;
+    const roboticPhrases = ['حاولت أفهم قصدك', 'غير مدعوم', 'لم أفهم', 'لا أستطيع الإجابة'];
+    for (const p of roboticPhrases) {
+      if (text.includes(p)) return false;
+    }
+    return true;
+  }
+
+  function generateSocialResponse(normalized, purpose) {
     let response = '';
-    
-    // 1. Detect dynamic entities (Subjects) to include if any
     const words = normalized.split(/\s+/);
     let matchedSubject = null;
     for (const w of words) {
@@ -773,31 +788,30 @@
       if (subj) matchedSubject = subj;
     }
 
-    if (category === 'Greeting') {
-      response = `${pickRandom(DYNAMIC_RESPONSES.greeting_intros)} ${pickRandom(DYNAMIC_RESPONSES.greeting_outros)}`;
+    if (purpose === 'SOCIAL_CONNECTION') {
+      if (isFuzzyMatch(normalized, [...DYNAMIC_VOCAB.greetings, 'طمني', 'اخبارك', 'بطل', 'عامل ايه'])) {
+        response = `${pickRandom(DYNAMIC_RESPONSES.greeting_intros)} ${pickRandom(DYNAMIC_RESPONSES.greeting_outros)}`;
+      } else if (isFuzzyMatch(normalized, ['سلام', 'باي', 'تصبح'])) {
+        response = 'في رعاية الله يا بطل، مستنيك ترجعلي تاني في أي وقت 👋';
+      } else if (isFuzzyMatch(normalized, ['انت مين', 'شغال', 'عمرك'])) {
+        response = 'أنا البوصلة بتاعتك هنا في المنصة، صايع ردود وموجود دايماً عشان أسهل عليك المذاكرة 💪 تحب تسأل عن إيه؟';
+      } else {
+        response = `${pickRandom(DYNAMIC_RESPONSES.thanks_cores)} لو احتجت أي مساعدة في المنهج أنا في الخدمة.`;
+      }
     }
-    else if (category === 'Social Conversation') {
-      response = `${pickRandom(DYNAMIC_RESPONSES.thanks_cores)} لو احتجت أي مساعدة في المنهج أنا في الخدمة.`;
-    }
-    else if (category === 'Emotional Message') {
+    else if (purpose === 'EMOTIONAL_SUPPORT') {
       response = `${pickRandom(DYNAMIC_RESPONSES.frustration_cores)} ${pickRandom(DYNAMIC_RESPONSES.frustration_outros)}`;
     }
-    else if (category === 'Small Talk') {
-      response = 'أنا البوصلة بتاعتك هنا في المنصة، صايع ردود وموجود دايماً عشان أسهل عليك المذاكرة 💪 تحب تسأل عن إيه؟';
-    }
-    else if (category === 'Joke') {
+    else if (purpose === 'HUMOR') {
       response = 'هههههه 😂 ربنا يسعدك يا بطل، يلا بينا نرجع نكسر الدنيا في المذاكرة؟';
     }
-    else if (category === 'Farewell') {
-      response = 'في رعاية الله يا بطل، مستنيك ترجعلي تاني في أي وقت 👋';
-    }
 
-    if (matchedSubject && category !== 'Joke' && category !== 'Farewell') {
+    if (matchedSubject && purpose !== 'HUMOR') {
       let core = pickRandom(DYNAMIC_RESPONSES.subject_cores).replace('[SUBJECT]', matchedSubject);
       response += `\nوبالنسبة لـ ${matchedSubject}، ${core} تحب أشرحلك الجزئية دي ولا عندك سؤال محدد فيها؟`;
     }
 
-    return response || 'حبيبي يا بطل! أنا معاك، قل لي بس إزاي أقدر أساعدك؟';
+    return response || 'أنا معاك يا بطل! قل لي بس إزاي أقدر أساعدك؟';
   }
 
   function isVeryUnclearMessage(text) {
