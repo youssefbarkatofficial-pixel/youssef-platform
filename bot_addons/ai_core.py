@@ -95,6 +95,18 @@ except Exception as _enh5_err:
     print(f"[SMART_BRAIN_INFO] Enhancements V5 not loaded (optional): {_enh5_err}")
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# Safe import of Enhancement Layer V6 (ADDITIVE, optional)
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+_HAS_ENHANCEMENTS_V6 = False
+_SmartEnhancementsV6 = None
+try:
+    from bot_addons.smart_enhancements_v6 import SmartEnhancementsV6 as _SEv6
+    _SmartEnhancementsV6 = _SEv6
+    _HAS_ENHANCEMENTS_V6 = True
+except Exception as _enh6_err:
+    print(f"[SMART_BRAIN_INFO] Enhancements V6 not loaded (optional): {_enh6_err}")
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # Safe import of sklearn (with auto-install fallback)
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 _HAS_SKLEARN = False
@@ -341,6 +353,7 @@ class SmartBotBrain:
         self._enhancements_v3 = None  # Enhancement layer V3 (optional)
         self._enhancements_v4 = None  # Enhancement layer V4 (optional)
         self._enhancements_v5 = None  # Enhancement layer V5 (optional)
+        self._enhancements_v6 = None  # Enhancement layer V6 (optional)
         self._v4_layers = None  # V4 analysis layers for current message
         self._v5_tags = None  # V5 pseudo-reasoning tags
 
@@ -382,6 +395,13 @@ class SmartBotBrain:
             except Exception as enh5_e:
                 print(f"[SMART_BRAIN_INFO] Enhancements V5 init skipped: {enh5_e}")
                 self._enhancements_v5 = None
+            # Load enhancements V6 safely (optional layer)
+            try:
+                if _HAS_ENHANCEMENTS_V6 and _SmartEnhancementsV6:
+                    self._enhancements_v6 = _SmartEnhancementsV6()
+            except Exception as enh6_e:
+                print(f"[SMART_BRAIN_INFO] Enhancements V6 init skipped: {enh6_e}")
+                self._enhancements_v6 = None
             self._ready = True
             print("[SMART_BRAIN] ✅ SmartBotBrain initialized successfully")
         except Exception as e:
@@ -674,6 +694,13 @@ class SmartBotBrain:
                     response, intent_id, user_id, self._v5_tags)
             except Exception:
                 pass
+        # V6 enhancements (post-processing: strategy, panic mode, micro-explanations, temperature)
+        if self._enhancements_v6 and self._v4_layers and self._v5_tags:
+            try:
+                response = self._enhancements_v6.post_process(
+                    response, intent_id, self._v4_layers, self._v5_tags, user_id)
+            except Exception:
+                pass
         return response
 
     def get_response(self, text, user_id=None):
@@ -706,6 +733,7 @@ class SmartBotBrain:
             enh_v3 = self._enhancements_v3  # may be None
             enh_v4 = self._enhancements_v4  # may be None
             enh_v5 = self._enhancements_v5  # may be None
+            enh_v6 = self._enhancements_v6  # may be None
 
             # ━━ [V4 Pre-processing: 51/52-LayerAnalysis, 60-Personality] ━━
             self._v4_layers = None
@@ -870,6 +898,13 @@ class SmartBotBrain:
             else:
                 # Use fallback matching
                 tfidf_match, tfidf_score = self._match_fallback(normalized)
+
+            # ━━ [V6 Pre-processing: 95-IntentWeighting, 105-Temperature] ━━
+            if enh_v6:
+                try:
+                    tfidf_score = enh_v6.pre_process(tfidf_score, normalized, self._v4_layers or {}, user_id)
+                except Exception:
+                    pass
 
             # If TF-IDF found a match, check if social quick also found one
             # and pick the better one
