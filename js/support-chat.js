@@ -192,30 +192,47 @@
     saveSelfLearning(memory);
   }
 
-  function evaluateResponseQuality(responseText, userMessage, purpose) {
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // 🧠 ANSWER QUALITY SCORER
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  function evaluateResponseQuality(responseText, userMessage, purpose, thoughtProcess = {}) {
     let score = 100;
     if (!responseText || responseText.length < 5) return 0;
     
-    // Core check
-    if (typeof isHumanLike === 'function' && !isHumanLike(responseText)) score -= 80;
-    
-    // Penalty for fallbacks when asking detailed questions
-    if (userMessage.length > 20 && responseText.includes('تذكرة')) score -= 30;
-    
-    // Emotion and warmth bonus
-    if (responseText.includes('بطل') || responseText.includes('عاش') || responseText.includes('يا') || responseText.includes('💪')) score += 10;
-    
-    // Vocabulary Bonus for Educational
-    if (purpose === 'EDUCATIONAL_EXPLANATION' && typeof DYNAMIC_VOCAB !== 'undefined') {
-      const containsVocab = Object.values(DYNAMIC_VOCAB).flat().some(v => responseText.includes(v));
-      if (containsVocab) score += 20;
+    // 1. Relevance (الارتباط بالسؤال)
+    const keywords = userMessage.split(/\s+/).filter(w => w.length > 3);
+    const hasRelevance = keywords.some(w => responseText.includes(w)) || 
+                         (thoughtProcess.extractedData && thoughtProcess.extractedData.subjects && thoughtProcess.extractedData.subjects[0] && responseText.includes(thoughtProcess.extractedData.subjects[0]));
+    if (!hasRelevance && purpose === 'EDUCATIONAL_EXPLANATION') {
+      score -= 30; // Strong penalty if we drift off topic
     }
 
-    // Repetition check (anti-robot behavior)
+    // 2. Clarity (الوضوح)
+    if (responseText.length > 300 && !responseText.includes('\n') && !responseText.includes('•')) {
+      score -= 20; // Text wall penalty
+    }
+
+    // 3. Naturalness (الطبيعية)
+    if (/(بص|عشان كده|وللتوضيح|خد بالك|يا صاحبي|يا بطل|تعالى|على فكرة)/.test(responseText)) {
+      score += 15;
+    } else {
+      score -= 10; // Sounds a bit robotic
+    }
+
+    // 4. Usefulness (الفائدة)
+    if (purpose === 'EDUCATIONAL_EXPLANATION' && responseText.length < 30) {
+      score -= 40; // Too short to be educational
+    }
+
+    // 5. Anti-Repetition (عدم التكرار)
     const history = typeof getBotHistory === 'function' ? getBotHistory() : [];
-    if (history.includes(responseText)) score -= 60;
+    if (history.slice(-5).includes(responseText)) {
+      score -= 60; // Huge penalty for repeating exact same response recently
+    }
     
-    return Math.max(0, Math.min(100, score));
+    const finalScore = Math.max(0, Math.min(100, score));
+    console.log(`[QUALITY SCORER] Score: ${finalScore} | Purpose: ${purpose}`);
+    return finalScore;
   }
 
   function loadContextMemory() {
@@ -289,22 +306,11 @@
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     
     // 1. UNDERSTAND & MULTI-STEP THINKING
+    let bestResponse = { text: '', score: -1, tag: 'unknown' };
+    const normalized = normalizeText(userMessage);
     const thoughtProcess = multiStepThinkEngine(normalized, userMessage);
-    let purpose = thoughtProcess.purpose;
-
-    // 🧠 DEEP CONTEXT ENGINE (Resolve context for follow-ups)
-    let contextSubject = null;
-    if (purpose === 'FOLLOW_UP') {
-      contextSubject = resolveContext(normalized);
-      if (contextSubject) {
-        // Transform this into an educational query using the injected context
-        thoughtProcess.extractedData.subjects.push(contextSubject);
-        purpose = 'EDUCATIONAL_EXPLANATION';
-        // Artificially inject the subject into the message for downstream engines
-        userMessage = userMessage + ' ' + contextSubject;
-        normalized = normalized + ' ' + contextSubject;
-      }
-    }
+    const purpose = thoughtProcess.purpose || 'SOCIAL_CONNECTION';
+    const isConfused = analyzeStudentConfusion(normalized);
 
     // 4. Conversation Drops (Tracked before pushing new user context)
     const currentContext = loadContextMemory();
@@ -320,14 +326,8 @@
     }
     
     pushContext('user', userMessage, purpose, thoughtProcess.extractedData.subjects);
-    
-    // 🧠 STUDENT UNDERSTANDING DETECTOR (Analyze)
-    let isConfused = analyzeStudentConfusion(normalized);
-    
-    // 2. REFLECTION ENGINE (Generate multiple variants, pick best)
-    let bestResponse = { text: '', score: -1, tag: 'fallback' };
 
-    for (let attempt = 0; attempt < 3; attempt++) {
+    for (let attempt = 1; attempt <= 5; attempt++) {
       let candidateText = '';
       let candidateTag = 'fallback';
 
@@ -336,7 +336,7 @@
         candidateText = errorRecoverySystem(normalized, userMessage, thoughtProcess);
         candidateTag = 'clarification';
         bestResponse = { text: candidateText, score: 100, tag: candidateTag };
-        break; // Stop execution to wait for user clarification
+        break; 
       } else {
         // 🧠 INTENT FUSION ENGINE (Handles composite messages)
         const fused = executeIntentFusionEngine(thoughtProcess, normalized, userMessage);
@@ -387,7 +387,9 @@
       candidateText = applySmartFollowUp(candidateText, candidateTag, thoughtProcess.extractedData.goal, thoughtProcess.extractedData.subjects);
 
       // REFLECT & SCORE
-      let score = evaluateResponseQuality(candidateText, userMessage, purpose);
+      let score = evaluateResponseQuality(candidateText, userMessage, purpose, thoughtProcess);
+      
+      console.log(`[QUALITY SCORER] Attempt ${attempt} Score: ${score}`);
       
       if (score > bestResponse.score) {
         bestResponse = { text: candidateText, score: score, tag: candidateTag };
@@ -395,6 +397,12 @@
       
       // If we hit a very high score or perfect logic, stop generating
       if (bestResponse.score >= 90) break;
+    }
+
+    if (bestResponse.score < 65) {
+      console.log(`[QUALITY SCORER] Best score (${bestResponse.score}) is below threshold (65). Triggering Error Recovery...`);
+      bestResponse.text = errorRecoverySystem(normalized, userMessage, thoughtProcess);
+      bestResponse.tag = 'clarification';
     }
 
     let finalResponseText = bestResponse.text;
