@@ -614,43 +614,79 @@
     };
   }
 
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // 🔥 THE NEW DYNAMIC CONVERSATIONAL ENGINE
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  const DYNAMIC_VOCAB = {
+    greetings: ['صباح', 'مسا', 'اهلا', 'مرحبا', 'ازيك', 'عامل', 'اخبار', 'هاي', 'هلو', 'مورنينج', 'سلام', 'تحياتي', 'كيفك'],
+    thanks: ['شكرا', 'تسلم', 'عاش', 'حبيبي', 'بطل', 'جزاك', 'متشكر', 'ميرسي', 'تمام', 'اوك', 'حلو', 'جميل'],
+    frustration: ['مش فاهم', 'صعب', 'وحش', 'معقد', 'متلخبط', 'تايه', 'معرفش', 'غبي', 'صعبة', 'مش قادر'],
+    subjects: ['نيل', 'قناة السويس', 'تاريخ', 'جغرافيا', 'محمد علي', 'ديمقراطية', 'حضارة', 'خريطة', 'مناخ', 'زراعة', 'بيئة', 'اقتصاد'],
+    inquiry: ['ايه', 'ازاي', 'ليه', 'فين', 'امتى', 'مين', 'اشرح']
+  };
+
+  const DYNAMIC_RESPONSES = {
+    greeting_intros: ['يا هلا بك!', 'منورنا يا بطل 🌟', 'صباح الفل والنشاط 💪', 'أهلاً بيك 😄', 'يا مرحب!', 'نورت البوصلة ✨', 'يا مية مسا!'],
+    greeting_outros: ['عامل إيه النهاردة؟', 'أقدر أساعدك في إيه دلوقتي؟', 'جاهز نكسر الدنيا في المذاكرة؟', 'تحب نبدأ في إيه؟', 'طمني عليك، أخبارك إيه؟'],
+    thanks_cores: ['على إيه بس، إحنا هنا عشانك!', 'عيني ليك يا بطل!', 'تحت أمرك في أي وقت 💪', 'بالتوفيق دايماً يا رب!', 'ده واجبي، المهم تكون مستفيد 💯'],
+    frustration_cores: ['ولا يهمك خالص، كلنا بنتلخبط في الأول.', 'طبيعي تحس بكده، بس أنا معاك خطوة بخطوة.', 'مفيش حاجة صعبة، هنبسطها مع بعض.', 'ماتقلقش، الموضوع أبسط مما تتخيل.'],
+    frustration_outros: ['قولي بس إيه اللي مش واضح؟', 'تحب أشرحلك من الأول بطريقة تانية؟', 'تفتكر المشكلة فين بالظبط؟', 'خلينا ناخدها حتة حتة، إيه رأيك؟'],
+    subject_cores: ['موضوع [SUBJECT] ده من أهم المواضيع عندنا.', 'حلو إنك بتسأل عن [SUBJECT].', 'بص يا سيدي، [SUBJECT] ده قصته قصة ومهم جداً.', 'عظيم! خلينا نتكلم عن [SUBJECT].']
+  };
+
+  function pickRandom(arr) {
+    return arr[Math.floor(Math.random() * arr.length)];
+  }
+
   function getSmartResponse(text) {
     const normalized = normalizeText(text);
-    if (!normalized) return null;
+    if (!normalized || normalized.length < 2) return null;
 
-    if (/ط¹ط§ظ…ظ„ ط§ظٹظ‡|ط§ط²ظٹظƒ|ط§ظٹظ‡ ط§ط®ط¨ط§ط±ظƒ|ظˆط¶ط¹ظƒ ط§ظٹظ‡|طµط¨ط§ط­ ط§ظ„ط®ظٹط±|ظ…ط³ط§ط، ط§ظ„ط®ظٹط±/.test(normalized)) {
-      return { text: 'ط§ظ„ط­ظ…ط¯ ظ„ظ„ظ‡ ظٹط§ ط¨ط·ظ„طŒ ط±ط¨ظ†ط§ ظ…ط¹ط§ظƒ. ظ‚ظ„ظ‘ظٹ ط¥ظٹظ‡ ط§ظ„ظ…ط·ظ„ظˆط¨ ظˆط£ظ†ط§ ط£ط¸ط¨ط·ظ„ظƒ ط§ظ„ط±ط¯.' };
+    const words = normalized.split(/\s+/);
+    let matchedIntent = 'general';
+    let matchedSubject = null;
+
+    // 1. Detect dynamic entities (Subjects)
+    for (const w of words) {
+      if (w.length < 3) continue;
+      const subj = DYNAMIC_VOCAB.subjects.find(s => s.includes(w) || w.includes(s));
+      if (subj) matchedSubject = subj;
     }
-    if (/ط§ظ†طھ ظ…ظٹظ†|ظ…ظٹظ† ط§ظ†طھ|ط§ظ†طھ ظ…ظٹظ†/.test(normalized)) {
-      return { text: 'ط£ظ†ط§ ط§ظ„ط¨ظˆطµظ„ط© ط¨طھط§ط¹طھظƒ ظپظٹ ط§ظ„ظ…ظ†طµط©طŒ طµط§ظٹط¹ ط§ظ„ط±ط¯ظˆط¯ ظˆط¯ط§ظٹظ…ظ‹ط§ ظ…ط¹ط§ظƒ ظپظٹ ط§ظ„ظ…ط°ط§ظƒط±ط© ظˆط§ظ„ط¯ط¹ظ….' };
+    
+    // 2. Detect Intents using flexible matching (not rigid regex)
+    const isGreeting = DYNAMIC_VOCAB.greetings.some(g => normalized.includes(g));
+    const isThanks = DYNAMIC_VOCAB.thanks.some(g => normalized.includes(g)) && words.length < 4;
+    const isFrustrated = DYNAMIC_VOCAB.frustration.some(g => normalized.includes(g));
+
+    if (isGreeting && !matchedSubject) matchedIntent = 'greeting';
+    else if (isThanks) matchedIntent = 'thanks';
+    else if (isFrustrated) matchedIntent = 'frustration';
+    else if (matchedSubject) matchedIntent = 'subject';
+
+    let response = '';
+
+    // 3. Compose response dynamically like a human
+    if (matchedIntent === 'greeting') {
+      response = `${pickRandom(DYNAMIC_RESPONSES.greeting_intros)} ${pickRandom(DYNAMIC_RESPONSES.greeting_outros)}`;
+      return { text: response, tag: 'dynamic_chat' };
     }
-    if (/ظ…ط´ ظ‚ط§ط¯ط±.*ط°ط§ظƒط±|ظ…ط´ ظ‚ط§ط¯ط±.*ط§ظ„ط°ط§ظƒط±|ظ…ط¹ط±ظپط´|ظ…ط§ط¹ط±ظپط´|ظ…ط´ ط¹ط±ظپ|ظ…ط´ ظپط§ظ‡ظ…|ظ…ط´ ط¹ط§ط±ظپ\b/.test(normalized)) {
-      return { text: 'ظˆظ„ط§ ظٹظ‡ظ…ظƒطŒ ظƒظ„ظ†ط§ ط¨ظ†ظ…ط± ط¨ط¯ظ‡. ظ‚ط³ظ‘ظ… ط§ظ„ظ…ط°ط§ظƒط±ط© ط¹ظ„ظ‰ ط£ط¬ط²ط§ط، طµط؛ظٹط±ط© ظˆط£ط¨ط¯ط£ ط¨ط­ط§ط¬ط© ط¨ط³ظٹط·ط©طŒ ظˆط£ظ†ط§ ط£ط³ط§ظ†ط¯ظƒ ط®ط·ظˆط© ط¨ط®ط·ظˆط©.' };
+    
+    if (matchedIntent === 'thanks') {
+      response = `${pickRandom(DYNAMIC_RESPONSES.thanks_cores)} لو احتجت حاجة تاني أنا موجود.`;
+      return { text: response, tag: 'dynamic_chat' };
     }
-    if (/ط®ط§ظٹظپ.*ط§ظ„ط§ظ…طھط­ط§ظ†|ط®ط§ظٹظپ ظ…ظ† ط§ظ„ط§ظ…طھط­ط§ظ†|ظ‚ظ„ظ‚ط§ظ†.*ط§ظ„ط§ظ…طھط­ط§ظ†/.test(normalized)) {
-      return { text: 'ط§ظ„ط®ظˆظپ ط¯ظ‡ ط·ط¨ظٹط¹ظٹطŒ ط¨ط³ ظ„ظ…ط§ طھظƒظˆظ† ظ…ظ†ط¸ظ… ظˆط¨طھط±ط§ط¬ط¹ طµط­ ظ‡طھظ„ط§ظ‚ظٹ ظ†ظپط³ظƒ ظ…ط±طھط§ط­. ظ‚ظˆظ„ظ‘ظٹ ط§ظ†طھ ظ…ط­طھط§ط¬ طھط°ط§ظƒط± ظپظٹ ط¥ظٹظ‡ ط¨ط§ظ„ط¸ط¨ط·.' };
+
+    if (matchedIntent === 'frustration') {
+      response = `${pickRandom(DYNAMIC_RESPONSES.frustration_cores)} ${pickRandom(DYNAMIC_RESPONSES.frustration_outros)}`;
+      return { text: response, tag: 'dynamic_chat' };
     }
-    if (/ط§ظ†ط§ ظپط§ط´ظ„|ط§ظ†ط§ ظپط´ظ„|ط§ظ†ط§ ظˆط­ط´|ظ…ط´ ظ‡ظ‚ط¯ط±/.test(normalized)) {
-      return { text: 'ظ…ط§ طھظ‚ظˆظ„ط´ ظƒط¯ظ‡طŒ ط§ظ„ظ„ظٹ ظٹظ‚ط¹ط¯ ظٹط­ط§ظˆظ„ ظ‡ظˆ ط§ظ„ظ„ظٹ ظٹظƒط³ط¨. ط£ظ†ط§ ظ‡ظ†ط§ ط£ط³ط§ط¹ط¯ظƒ ط¨ظƒظ„ ظˆظ‚طھ ظˆطھظ‚ط¯ط± طھط·ظˆط± ظ†ظپط³ظƒ ظ…ظ† ط¯ظ„ظˆظ‚طھظٹ.' };
+
+    if (matchedIntent === 'subject' && matchedSubject) {
+      let core = pickRandom(DYNAMIC_RESPONSES.subject_cores).replace('[SUBJECT]', matchedSubject);
+      response = `${core} تحب أشرحلك الجزئية دي ولا عندك سؤال محدد فيها؟`;
+      return { text: response, tag: 'dynamic_chat' };
     }
-    if (/ط¹ط§ظˆط².*ط­ط¯.*ظٹط³ط§ط¹ط¯ظ†ظٹ|ط¹ط§ظٹط².*ط­ط¯.*ظٹط³ط§ط¹ط¯ظ†ظٹ|ط¹ط§ظٹط² ط­ط¯ ظٹط³ط§ط¹ط¯ظ†ظٹ|ط¹ط§ظٹط² ظ…ط³ط§ط¹ط¯ط©/.test(normalized)) {
-      return { text: 'طھظ…ط§ظ… ظٹط§ ط¬ظ…ظٹظ„طŒ ط§ط¨ط¹طھظ„ظٹ ط¨ط§ظ„طµط±ط§ط­ط© ط§ظ„ظ…ط´ظƒظ„ط© ط£ظˆ ط§ظ„ظƒظˆط±ط³ ط§ظ„ظ„ظٹ ظ…ط¹ط·ظ„ ظ…ط¹ط§ظƒطŒ ظˆط£ظ†ط§ ظ‡ط¯ظٹظƒ ط­ظ„ ط¨ط§ظ„ظ…طµط±ظٹ ظˆط§ظ„ط¹ط±ط¨ظٹ.' };
-    }
-    if (/ط§ظ†طھ ط°ظƒظٹ|ظƒظˆظٹط³|ظ…ظ…طھط§ط²/.test(normalized)) {
-      return { text: 'ط¨ط­ط§ظˆظ„ ط£ظƒظˆظ† ظƒظˆظٹط³ ط¯ظ„ظˆظ‚طھظٹطŒ ط¨ط³ ط§ظ„ظ„ظٹ ظپط¹ظ„ط§ظ‹ ط°ظƒظٹ ظ‡ظˆ ط§ظ„ظ„ظٹ ط¨ظٹطھط¹ط¨ ظˆظٹط¨ط°ظ„ ظ…ط¬ظ‡ظˆط¯.' };
-    }
-    if (/ط´ظƒط±ط§|ظ…طھط´ظƒط±|ظ…ظٹط±ط³ظٹ|طھط³ظ„ظ…|ط¬ط²ط§ظƒ ط§ظ„ظ„ظ‡|ط¬ط²ط§ظƒ ط§ظ„ظ„ظ‡ ط®ظٹط±/.test(normalized)) {
-      return { text: 'ط¹ظ„ظ‰ ط¹ظٹظ†ظٹ ظٹط§ ط¨ط·ظ„طŒ ط±ط¨ظ†ط§ ظٹط®ظ„ظٹظƒ. ظ„ظˆ ط¹ظ†ط¯ظƒ ط³ط¤ط§ظ„ ط؛ط±ظٹط¨ ط£ظˆ ظ…ط´ ظˆط§ط¶ط­طŒ ظ‡ط§ط¨طµ ط¹ظ„ظٹظ‡ ط¨ط³ط±ط¹ط© ظˆط£ط­ط§ظˆظ„ ط£ط±ط¯ ط¹ظ„ظٹظƒ طµط­.' };
-    }
-    if (/ط¨ط­ط¨ظƒ/.test(normalized)) {
-      return { text: 'ظˆط£ظ†ط§ ط¨ط­ط¨ ط§ظ„ط·ظ„ط¨ط© ط§ظ„ط´ط§ط·ط±ط© ط§ظ„ظ„ظٹ ط¨طھط¬طھظ‡ط¯طŒ ظˆط§ط­ظ†ط§ ظ…ط¹ ط¨ط¹ط¶ ظ‡ظ†ظƒط³ط± ط§ظ„ط¯ظ†ظٹط§.' };
-    }
-    if (/ط§ظ†طھ ط؛ط¨ظٹ|ط§ظ†طھ ط§ط­ظ…ظ‚|ظ…ط´ ط°ظƒظٹ|ط§ط­ظ…ظ‚|طھط§ظپظ‡/.test(normalized)) {
-      return { text: 'ظٹط§ ط¹ظ… ظ…ط´ ظ„ط§ط²ظ… ظ†ط®ط´ ظپظٹ ط§ظ„ظƒظ„ط§ظ… ط¯ظ‡طŒ ط®ظ„ظٹظ†ظٹ ط£ظپظ‡ظ…ط§ظƒ ط¨ط´ظƒظ„ ط£ط¨ط³ط· ظˆط£ط¸ط¨ط·ظ„ظƒ ط§ظ„ط±ط¯ ط§ظ„ظ„ظٹ طھط­طھط§ط¬ظ‡.' };
-    }
-    if (/ط­ظ„ظˆ|ط¬ظ…ظٹظ„|ط¸ط±ظٹظپ/.test(normalized)) {
-      return { text: 'ط§ظ„ط­ظ…ط¯ ظ„ظ„ظ‡طŒ ط®ظ„ظٹظ†ظٹ ط£ظƒظ…ظ„ ظ…ط¹ط§ظƒ ط¹ظ„ظ‰ ظ†ظپط³ ط§ظ„ظ…ظˆط¬ط© ظˆظ†ط¸ط¨ط· ظ„ظƒ ط­ظ„ ظٹط³ط§ط¹ط¯ظƒ.' };
-    }
+
     return null;
   }
 
