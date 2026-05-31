@@ -1440,6 +1440,11 @@
       modified += '\n\n(عشان توضح الفكرة أكتر، تخيل إن الموضوع ده عامل زي قصة أو تطبيق عملي في حياتنا..)';
     }
     
+    // Adaptive Teaching: Advanced Insight
+    if (internalPlan.advancedExplanation) {
+      modified += '\n\n💡 **وبما إن مستواك ممتاز وبتفهمها وهي طايرة، خليني أضيفلك بُعد أعمق:** في الحقيقة الموضوع ده بيرتبط بشكل كبير بتفاصيل أعمق في المنهج هتفهمها أكتر قدام، لأن الأحداث دي كلها بتسمّع في بعضها!';
+    }
+    
     return modified;
   }
 
@@ -1453,7 +1458,9 @@
       needsExplanation: false,
       needsShortening: false,
       needsExample: false,
-      needsEncouragement: false
+      needsEncouragement: false,
+      advancedExplanation: false,
+      studentTier: 'Intermediate'
     };
 
     const goal = thoughtProcess.extractedData.goal || 'GENERAL';
@@ -1485,13 +1492,27 @@
 
     plan.whatUserWants = `Goal: ${goal}, Emotion: ${emotion}`;
 
-    // 🧠 PROFILE BUILDER INTEGRATION
+    // 🧠 PROFILE BUILDER INTEGRATION & ADAPTIVE TEACHING
     const profile = getStudentProfile();
     if (profile) {
-      if (profile.understandingLevel < 30) {
+      // Classify Tier
+      let studentTier = 'Intermediate';
+      if (profile.understandingLevel < 40 || (profile.writingStyle && profile.writingStyle.shortMessages > 5 && profile.understandingLevel < 50)) {
+        studentTier = 'Beginner';
+      } else if (profile.understandingLevel > 70) {
+        studentTier = 'Advanced';
+      }
+
+      plan.studentTier = studentTier;
+
+      // Adaptive Teaching Logic
+      if (studentTier === 'Beginner') {
         plan.needsShortening = true;
         plan.needsEncouragement = true;
         plan.lowUnderstanding = true;
+        plan.bestApproach = 'Extreme simplification for struggling/beginner student';
+      } else if (studentTier === 'Advanced' && purpose === 'EDUCATIONAL_EXPLANATION') {
+        plan.advancedExplanation = true;
       }
 
       if (thoughtProcess.extractedData.subjects && thoughtProcess.extractedData.subjects.length > 0) {
