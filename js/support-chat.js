@@ -380,6 +380,9 @@
         candidateText = simplifyResponse(candidateText);
       }
 
+      // 🧠 KNOWLEDGE GRAPH BUILDER
+      candidateText = applyKnowledgeGraph(candidateText, thoughtProcess.extractedData.subjects, candidateTag);
+
       // 🧠 SELF QUESTIONING ENGINE (QA)
       candidateText = selfQuestioningEngine(candidateText, normalized, thoughtProcess.internalPlan, candidateTag);
 
@@ -1650,6 +1653,55 @@
     // 5. Before and After (قبل وبعد)
     if (/(قبل|بعد|حالياً|الآن|زمان|أصبح)/.test(modified) && !modified.includes('الوضع قبل وبعد')) {
       modified = modified.replace(/^/, "عشان الصورة توضح، خلينا نبص على الوضع (قبل وبعد):\n");
+    }
+
+    return modified;
+  }
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // 🧠 KNOWLEDGE GRAPH BUILDER
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  const KNOWLEDGE_GRAPH = {
+    'محمد علي': { 
+       related: ['تطوير الجيش', 'النهضة الصناعية', 'التعليم'], 
+       linkText: 'وعشان تبقى الصورة كاملة، خد بالك إن ده كان السبب الأساسي في الاهتمام بـ' 
+    },
+    'تطوير الجيش': { 
+       related: ['الصناعة', 'الزراعة', 'محمد علي'], 
+       linkText: 'لأن بناء جيش قوي كان محتاج بالضرورة الاهتمام بـ' 
+    },
+    'حرب أكتوبر': { 
+       related: ['استرداد سيناء', 'خط بارليف', 'معاهدة السلام'], 
+       linkText: 'وده اللي مهد الطريق بشكل مباشر لـ' 
+    },
+    'تضاريس مصر': {
+       related: ['نهر النيل', 'الزراعة', 'توزيع السكان'],
+       linkText: 'والتضاريس دي هي اللي أثرت بشكل مباشر على'
+    },
+    'الحملة الفرنسية': {
+       related: ['المجمع العلمي', 'حجر رشيد', 'الروح القومية'],
+       linkText: 'ورغم إنها كانت حملة عسكرية، إلا إن نتيجتها الحقيقية ظهرت في'
+    }
+  };
+
+  function applyKnowledgeGraph(candidateText, subjects, tag) {
+    if (!candidateText || tag !== 'educational' || !subjects || subjects.length === 0) return candidateText;
+
+    const mainSubject = subjects[0];
+    let modified = candidateText;
+
+    // Check if the subject exists in the Knowledge Graph
+    for (const [node, data] of Object.entries(KNOWLEDGE_GRAPH)) {
+      if (mainSubject.includes(node) || node.includes(mainSubject)) {
+        // Find a related concept that isn't already mentioned in the text
+        const unmentioned = data.related.find(r => !modified.includes(r));
+        
+        if (unmentioned) {
+          console.log(`[KNOWLEDGE GRAPH] Bridging ${node} -> ${unmentioned}`);
+          modified += `\n\n💡 **(ربط منهجي):** وبما إننا فتحنا كلام عن ${node}، ${data.linkText} (${unmentioned})، لأن الأحداث التاريخية والجغرافية دايماً مترتبة على بعضها.`;
+          break; // Inject only one bridge to avoid clutter
+        }
+      }
     }
 
     return modified;
