@@ -372,8 +372,8 @@
       // 🧠 GOAL DETECTION ENGINE (FORMATTING)
       candidateText = applyGoalBasedFormatting(candidateText, thoughtProcess.extractedData.goal, thoughtProcess.internalPlan);
 
-      // 🧠 EMOTION DETECTION ENGINE (TONE)
-      candidateText = applyEmotionalTone(candidateText, thoughtProcess.extractedData.emotion, thoughtProcess.internalPlan);
+      // 🎭 NATURAL CONVERSATION ENGINE (PERSONA)
+      candidateText = applyPersonaEngine(candidateText, thoughtProcess.extractedData.abstractConcept, purpose, thoughtProcess.internalPlan);
 
       // 🧠 STUDENT UNDERSTANDING DETECTOR (SIMPLIFY)
       if ((isConfused || thoughtProcess.internalPlan.isStrugglingTopic || thoughtProcess.internalPlan.lowUnderstanding) && candidateTag === 'educational') {
@@ -1574,44 +1574,52 @@
     return 'NEUTRAL';
   }
 
-  function applyEmotionalTone(text, emotion, internalPlan = {}) {
-    if (!text) return text;
+  function applyPersonaEngine(text, abstractConcept, purpose, internalPlan) {
+    if (!text || text.length < 5) return text;
+
+    let modified = text;
+    let persona = 'FRIEND'; // Default social fallback
+
+    if (purpose === 'EDUCATIONAL_EXPLANATION' || purpose === 'INFORMATION_SEEKING' || purpose === 'FOLLOW_UP') {
+      persona = 'TEACHER';
+    }
     
-    let activeEmotion = emotion;
-    if (activeEmotion === 'NEUTRAL' && internalPlan.needsEncouragement) {
-      activeEmotion = 'FRUSTRATION'; // default to empathy if plan requires encouragement
+    // Explicit overrides
+    if (abstractConcept === 'CONCEPT_MOTIVATION') {
+      persona = 'COACH';
+    } else if (purpose === 'COMPLAINT' || abstractConcept === 'CONCEPT_FRUSTRATION') {
+      persona = 'SUPPORT';
+    } else if (abstractConcept === 'CONCEPT_HUMOR' || abstractConcept === 'CONCEPT_VENTING' || abstractConcept === 'CONCEPT_GREETING' || abstractConcept === 'CONCEPT_APPRECIATION') {
+      persona = 'FRIEND';
     }
 
-    if (activeEmotion === 'NEUTRAL') return text;
-    
-    // Avoid double prefixing
-    if (text.includes('حقك عليا') || text.includes('خد نفس عميق') || text.includes('عاش جداً') || text.includes('يا سيدي على الروقان') || text.includes('إحنا قدها')) {
-      return text;
+    console.log(`[PERSONA ENGINE] Routing as: ${persona} (Concept: ${abstractConcept}, Purpose: ${purpose})`);
+
+    // Only apply prefix if not already heavily styled
+    if (!modified.includes('بص يا') && !modified.includes('🔥') && !modified.includes('يا صاحبي')) {
+      switch (persona) {
+        case 'TEACHER':
+          if (text.length > 50 && !modified.includes('عشان نفهم ده صح')) {
+            modified = 'بص يا بطل ركز معايا في دي:\n\n' + modified;
+          }
+          break;
+        case 'COACH':
+          modified = '🔥 مفيش حاجة اسمها مستحيل! قوم كسر الدنيا يا بطل:\n\n' + modified;
+          break;
+        case 'SUPPORT':
+          modified = '🛠️ حقك عليا لو في حاجة ضايقتك، إحنا هنا عشان نسهل عليك كل حاجة:\n\n' + modified;
+          break;
+        case 'FRIEND':
+          if (abstractConcept === 'CONCEPT_VENTING' || abstractConcept === 'CONCEPT_CONFUSION') {
+            modified = 'يا صاحبي أنا حاسس بيك جداً والله، ولا يهمك خالص فضفض براحتك..\n\n' + modified;
+          } else if (abstractConcept === 'CONCEPT_HUMOR') {
+            modified = '😂😂 يا سيدي على الروقان..\n\n' + modified;
+          }
+          break;
+      }
     }
 
-    let prefix = '';
-    switch (activeEmotion) {
-      case 'FRUSTRATION':
-        prefix = 'عارف إنك ممكن تكون محبط شوية، بس إحنا قدها والأبطال مبيستسلموش..\n\n';
-        break;
-      case 'ANXIETY':
-        prefix = 'خد نفس عميق كده، مفيش داعي للتوتر خالص، أنا معاك خطوة بخطوة..\n\n';
-        break;
-      case 'EXCITEMENT':
-        prefix = 'عاش جداً! حماسك ده هو اللي هيوصلك للمركز الأول، يالا بينا..\n\n';
-        break;
-      case 'JOY':
-        prefix = 'يا سيدي على الروقان! فرحني معاك دايماً كده..\n\n';
-        break;
-      case 'BOREDOM':
-        prefix = 'حاسس بيك إنك مكسل شوية، خلينا ننشط كده وناخدها واحدة واحدة من غير تعقيد..\n\n';
-        break;
-      case 'ANGER':
-        prefix = 'حقك عليا لو في حاجة معصباك، أنا هنا عشان أساعدك وأسهل عليك كل حاجة..\n\n';
-        break;
-    }
-
-    return prefix + text;
+    return modified;
   }
 
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1964,7 +1972,10 @@
     CONCEPT_CONFUSION: ['انا تايه', 'مش فاهم', 'مش مستوعب', 'حاسس اني ضايع', 'مش مجمع', 'هنجت', 'الدنيا لفت', 'فصلت', 'مخي قفل', 'معقد', 'مش راكبة', 'تايه', 'وقفت معايا'],
     CONCEPT_FRUSTRATION: ['زهقت', 'مش شغال', 'بايظ', 'عطلان', 'انا تعبت', 'قرفت', 'خربان', 'يأس', 'مخنوق', 'زفت', 'واقع'],
     CONCEPT_APPRECIATION: ['شكرا', 'تسلم', 'عاش', 'حبيبي', 'الف شكر', 'الله ينور', 'جزاك', 'متشكر', 'تسلم ايدك', 'عظمة'],
-    CONCEPT_GREETING: ['اهلا', 'ازيك', 'عامل ايه', 'السلام عليكم', 'صباح الفل', 'مرحبا', 'يا هلا', 'هاي', 'هلو', 'اخبارك', 'كيفك', 'طمني']
+    CONCEPT_GREETING: ['اهلا', 'ازيك', 'عامل ايه', 'السلام عليكم', 'صباح الفل', 'مرحبا', 'يا هلا', 'هاي', 'هلو', 'اخبارك', 'كيفك', 'طمني'],
+    CONCEPT_VENTING: ['انا مخنوق', 'الدنيا مقفلة', 'خايف من النتيجة', 'فقدت الشغف', 'مكتئب', 'حزين', 'مش قادر اكمل'],
+    CONCEPT_MOTIVATION: ['عايز اذاكر', 'شجعني', 'ازاي ابقى شاطر', 'نفسي اقفل', 'طموح', 'هدف'],
+    CONCEPT_HUMOR: ['نكتة', 'ضحكني', 'قولي حاجة تضحك', 'افشخني ضحك', 'حاجة تضحك', 'هزر']
   };
 
   function analyzeMeaningFirst(normalized) {
