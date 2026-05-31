@@ -691,12 +691,24 @@
   };
 
   const DYNAMIC_RESPONSES = {
-    greeting_intros: ['يا هلا بك!', 'منورنا يا بطل 🌟', 'صباح الفل والنشاط 💪', 'أهلاً بيك 😄', 'يا مرحب!', 'نورت البوصلة ✨', 'يا مية مسا!'],
-    greeting_outros: ['عامل إيه النهاردة؟', 'أقدر أساعدك في إيه دلوقتي؟', 'جاهز نكسر الدنيا في المذاكرة؟', 'تحب نبدأ في إيه؟', 'طمني عليك، أخبارك إيه؟'],
-    thanks_cores: ['على إيه بس، إحنا هنا عشانك!', 'عيني ليك يا بطل!', 'تحت أمرك في أي وقت 💪', 'بالتوفيق دايماً يا رب!', 'ده واجبي، المهم تكون مستفيد 💯'],
-    frustration_cores: ['ولا يهمك خالص، كلنا بنتلخبط في الأول.', 'طبيعي تحس بكده، بس أنا معاك خطوة بخطوة.', 'مفيش حاجة صعبة، هنبسطها مع بعض.', 'ماتقلقش، الموضوع أبسط مما تتخيل.'],
-    frustration_outros: ['قولي بس إيه اللي مش واضح؟', 'تحب أشرحلك من الأول بطريقة تانية؟', 'تفتكر المشكلة فين بالظبط؟', 'خلينا ناخدها حتة حتة، إيه رأيك؟'],
-    subject_cores: ['موضوع [SUBJECT] ده من أهم المواضيع عندنا.', 'حلو إنك بتسأل عن [SUBJECT].', 'بص يا سيدي، [SUBJECT] ده قصته قصة ومهم جداً.', 'عظيم! خلينا نتكلم عن [SUBJECT].']
+    greetings: ['يا هلا بك!', 'منورنا يا بطل 🌟', 'صباح الفل والنشاط 💪', 'أهلاً بيك 😄', 'يا مرحب!', 'نورت البوصلة ✨', 'يا مية مسا!'],
+    emotions: {
+      positive: ['عظيم جداً!', 'شاطر ومكمل!', 'دي الروح المطلوبة 💪', 'فخور بيك جداً.'],
+      empathy: ['ولا يهمك خالص، كلنا بنتلخبط في الأول.', 'طبيعي تحس بكده، بس أنا معاك خطوة بخطوة.', 'مفيش حاجة صعبة، هنبسطها مع بعض.', 'ماتقلقش، الموضوع أبسط مما تتخيل.'],
+      humor: ['هههههه 😂 ربنا يسعدك يا بطل،', 'يا سيدي ولا يهمك 😂،', 'ضحكتني والله 😂،', 'عسل يا بطل 😂،']
+    },
+    cores: {
+      thanks: ['على إيه بس، إحنا هنا عشانك!', 'عيني ليك يا بطل!', 'تحت أمرك في أي وقت 💪', 'بالتوفيق دايماً يا رب!', 'ده واجبي، المهم تكون مستفيد 💯'],
+      identity: ['أنا البوصلة بتاعتك هنا في المنصة، صايع ردود وموجود دايماً عشان أسهل عليك المذاكرة 💪', 'أنا المساعد الذكي بتاعك، موجود هنا لخدمتك في أي وقت.', 'أنا البوصلة، مهمتي أرد على كل أسئلتك وأساعدك تذاكر أحسن.'],
+      farewell: ['في رعاية الله يا بطل، مستنيك ترجعلي تاني في أي وقت 👋', 'مع السلامة، وماتنساش تذاكر كويس!', 'باي باي، هتوحشني لحد ما ترجع 👋'],
+      subject: ['موضوع [SUBJECT] ده من أهم المواضيع عندنا.', 'حلو إنك بتسأل عن [SUBJECT].', 'بص يا سيدي، [SUBJECT] ده قصته قصة ومهم جداً.', 'عظيم! خلينا نتكلم عن [SUBJECT].']
+    },
+    follow_ups: {
+      general: ['أقدر أساعدك في إيه دلوقتي؟', 'تحب نبدأ في إيه؟', 'قولي، في إيه في المنهج أقدر أساعدك فيه؟'],
+      empathy: ['قولي بس إيه اللي مش واضح؟', 'تحب أشرحلك من الأول بطريقة تانية؟', 'تفتكر المشكلة فين بالظبط؟', 'خلينا ناخدها حتة حتة، إيه رأيك؟'],
+      subject: ['تحب أشرحلك الجزئية دي ولا عندك سؤال محدد فيها؟', 'عندك استفسار معين في الجزء ده؟', 'في حاجة معينة واقفة معاك هنا؟'],
+      action: ['يلا بينا نرجع نكسر الدنيا في المذاكرة؟', 'تحب نفتح درس جديد ولا نراجع؟']
+    }
   };
 
   function pickRandom(arr) {
@@ -779,8 +791,9 @@
   }
 
   function generateSocialResponse(normalized, purpose) {
-    let response = '';
+    let responseParts = [];
     const words = normalized.split(/\s+/);
+    
     let matchedSubject = null;
     for (const w of words) {
       if (w.length < 3) continue;
@@ -788,30 +801,39 @@
       if (subj) matchedSubject = subj;
     }
 
+    // Dynamic Response Builder Pipeline
     if (purpose === 'SOCIAL_CONNECTION') {
       if (isFuzzyMatch(normalized, [...DYNAMIC_VOCAB.greetings, 'طمني', 'اخبارك', 'بطل', 'عامل ايه'])) {
-        response = `${pickRandom(DYNAMIC_RESPONSES.greeting_intros)} ${pickRandom(DYNAMIC_RESPONSES.greeting_outros)}`;
+        responseParts.push(pickRandom(DYNAMIC_RESPONSES.greetings));
+        if (Math.random() > 0.5) responseParts.push(pickRandom(DYNAMIC_RESPONSES.emotions.positive));
+        responseParts.push(pickRandom(DYNAMIC_RESPONSES.follow_ups.general));
       } else if (isFuzzyMatch(normalized, ['سلام', 'باي', 'تصبح'])) {
-        response = 'في رعاية الله يا بطل، مستنيك ترجعلي تاني في أي وقت 👋';
+        responseParts.push(pickRandom(DYNAMIC_RESPONSES.cores.farewell));
       } else if (isFuzzyMatch(normalized, ['انت مين', 'شغال', 'عمرك'])) {
-        response = 'أنا البوصلة بتاعتك هنا في المنصة، صايع ردود وموجود دايماً عشان أسهل عليك المذاكرة 💪 تحب تسأل عن إيه؟';
+        responseParts.push(pickRandom(DYNAMIC_RESPONSES.cores.identity));
+        responseParts.push(pickRandom(DYNAMIC_RESPONSES.follow_ups.general));
       } else {
-        response = `${pickRandom(DYNAMIC_RESPONSES.thanks_cores)} لو احتجت أي مساعدة في المنهج أنا في الخدمة.`;
+        responseParts.push(pickRandom(DYNAMIC_RESPONSES.cores.thanks));
+        if (Math.random() > 0.5) responseParts.push('لو احتجت أي مساعدة أنا في الخدمة.');
       }
     }
     else if (purpose === 'EMOTIONAL_SUPPORT') {
-      response = `${pickRandom(DYNAMIC_RESPONSES.frustration_cores)} ${pickRandom(DYNAMIC_RESPONSES.frustration_outros)}`;
+      responseParts.push(pickRandom(DYNAMIC_RESPONSES.emotions.empathy));
+      responseParts.push(pickRandom(DYNAMIC_RESPONSES.follow_ups.empathy));
     }
     else if (purpose === 'HUMOR') {
-      response = 'هههههه 😂 ربنا يسعدك يا بطل، يلا بينا نرجع نكسر الدنيا في المذاكرة؟';
+      responseParts.push(pickRandom(DYNAMIC_RESPONSES.emotions.humor));
+      responseParts.push(pickRandom(DYNAMIC_RESPONSES.follow_ups.action));
     }
 
     if (matchedSubject && purpose !== 'HUMOR') {
-      let core = pickRandom(DYNAMIC_RESPONSES.subject_cores).replace('[SUBJECT]', matchedSubject);
-      response += `\nوبالنسبة لـ ${matchedSubject}، ${core} تحب أشرحلك الجزئية دي ولا عندك سؤال محدد فيها؟`;
+      let core = pickRandom(DYNAMIC_RESPONSES.cores.subject).replace('[SUBJECT]', matchedSubject);
+      responseParts.push(`\nوبالنسبة لـ ${matchedSubject}، ${core}`);
+      responseParts.push(pickRandom(DYNAMIC_RESPONSES.follow_ups.subject));
     }
 
-    return response || 'أنا معاك يا بطل! قل لي بس إزاي أقدر أساعدك؟';
+    // Join the built parts dynamically
+    return responseParts.join(' ') || 'أنا معاك يا بطل! قل لي بس إزاي أقدر أساعدك؟';
   }
 
   function isVeryUnclearMessage(text) {
