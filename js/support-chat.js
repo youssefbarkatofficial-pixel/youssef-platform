@@ -340,23 +340,33 @@
         candidateTag = 'clarification';
         bestResponse = { text: candidateText, score: 100, tag: candidateTag };
         break; // No need to reflect on clarification
-      }
-      else if (['HUMOR', 'SOCIAL_CONNECTION', 'EMOTIONAL_SUPPORT'].includes(purpose)) {
-        const socialResponse = generateSocialResponse(normalized, purpose);
-        candidateText = composeFinalResponse({ text: socialResponse, tag: 'social' }, userMessage, analyzeStudentIntent(userMessage));
-        candidateTag = 'social';
-      }
-      else if (purpose === 'FOLLOW_UP') {
-        candidateText = executeContextEngine(normalized, userMessage);
-        candidateTag = 'follow_up';
-      }
-      else if (['EDUCATIONAL_EXPLANATION', 'INFORMATION_SEEKING', 'ASSISTANCE', 'COMPLAINT'].includes(purpose)) {
-        candidateText = executeEducationalIntentEngine(normalized, userMessage);
-        candidateTag = 'educational';
-      }
-      else {
-        candidateText = executeFallbackEngine(normalized, userMessage);
-        candidateTag = 'fallback';
+      } else {
+        // 🧠 INTENT FUSION ENGINE (Handles composite messages)
+        const fused = executeIntentFusionEngine(thoughtProcess, normalized, userMessage);
+        
+        if (fused && fused.text) {
+          candidateText = fused.text;
+          candidateTag = fused.tag;
+        } else {
+          // Standard Single-Intent Routing
+          if (['HUMOR', 'SOCIAL_CONNECTION', 'EMOTIONAL_SUPPORT'].includes(purpose)) {
+            const socialResponse = generateSocialResponse(normalized, purpose);
+            candidateText = composeFinalResponse({ text: socialResponse, tag: 'social' }, userMessage, analyzeStudentIntent(userMessage));
+            candidateTag = 'social';
+          }
+          else if (purpose === 'FOLLOW_UP') {
+            candidateText = executeContextEngine(normalized, userMessage);
+            candidateTag = 'follow_up';
+          }
+          else if (['EDUCATIONAL_EXPLANATION', 'INFORMATION_SEEKING', 'ASSISTANCE', 'COMPLAINT'].includes(purpose)) {
+            candidateText = executeEducationalIntentEngine(normalized, userMessage);
+            candidateTag = 'educational';
+          }
+          else {
+            candidateText = executeFallbackEngine(normalized, userMessage);
+            candidateTag = 'fallback';
+          }
+        }
       }
 
       // 🧠 STUDENT UNDERSTANDING DETECTOR (SIMPLIFY)
@@ -385,6 +395,59 @@
     pushContext('bot', finalResponseText, purpose, thoughtProcess.extractedData.subjects);
 
     return finalResponseText;
+  }
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // 🧠 INTENT FUSION ENGINE
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  function executeIntentFusionEngine(thoughtProcess, normalized, userMessage) {
+    const purposes = thoughtProcess.interpretations || [];
+    // If it's a simple single intent, skip fusion to save processing and maintain focused responses
+    if (purposes.length <= 1) return null;
+
+    let responseParts = [];
+    let tags = [];
+
+    // 1. Social / Greeting (Always comes first)
+    if (purposes.includes('SOCIAL_CONNECTION') || isFuzzyMatch(normalized, DYNAMIC_VOCAB.greetings)) {
+      responseParts.push(pickRandom(DYNAMIC_RESPONSES.greetings));
+      tags.push('social');
+    }
+
+    // 2. Humor (Acknowledge joke)
+    if (purposes.includes('HUMOR') || isFuzzyMatch(normalized, DYNAMIC_VOCAB.humor)) {
+      responseParts.push(pickRandom(DYNAMIC_RESPONSES.emotions.humor));
+      tags.push('humor');
+    }
+
+    // 3. Emotional / Empathy (Complaint or Stress)
+    if (purposes.includes('EMOTIONAL_SUPPORT') || purposes.includes('COMPLAINT') || isFuzzyMatch(normalized, DYNAMIC_VOCAB.complaint)) {
+      responseParts.push(pickRandom(DYNAMIC_RESPONSES.emotions.empathy));
+      tags.push('empathy');
+    }
+
+    // 4. Educational / Follow up / Help (The meat of the response)
+    let eduText = null;
+    if (purposes.includes('EDUCATIONAL_EXPLANATION') || purposes.includes('FOLLOW_UP') || purposes.includes('ASSISTANCE') || thoughtProcess.extractedData.subjects.length > 0) {
+      eduText = executeEducationalIntentEngine(normalized, userMessage);
+      if (eduText && !eduText.includes('مفهمتش قصدك')) {
+         // To make it naturally flow from the social parts
+         if (responseParts.length > 0) {
+            responseParts.push('وبخصوص طلبك، ' + eduText);
+         } else {
+            responseParts.push(eduText);
+         }
+         tags.push('educational');
+      }
+    }
+
+    // If fusion didn't actually combine anything, fallback to standard routing
+    if (responseParts.length <= 1) return null;
+
+    return {
+      text: responseParts.join(' '),
+      tag: tags.includes('educational') ? 'educational' : 'social'
+    };
   }
 
   function executeEducationalIntentEngine(normalized, userMessage) {
