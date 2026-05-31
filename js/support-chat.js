@@ -658,23 +658,53 @@
     return applyAntiRepetition(response, 'fallback');
   }
 
-  const TYPO_MAP = {
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // 🕵️‍♂️ STUDENT MISTAKE DECODER (Pre-processing)
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  const ADVANCED_TYPO_MAP = {
     'كمبيوتر': 'كمبيوتر',
     'اشترك': 'اشتراك',
     'اشتركم': 'اشتراك',
     'الكراس': 'الكورس',
     'البصورةه': 'الباسورد',
-    'مش عارف': 'مش عارف',
+    'الباصورد': 'الباسورد',
+    'الباسود': 'الباسورد',
     'مش عارفه': 'مش عارف',
-    'مش شغالة': 'مش شغالة',
     'مش شغاله': 'مش شغالة',
-    'الفيديو': 'الفيديو',
     'المنسه': 'المنصة',
     'البلاتفورم': 'المنصة',
-    'منصة': 'المنصة',
-    'مش عارف': 'مش عارف',
-    'معرفش': 'مش عارف'
+    'منصه': 'المنصة',
+    'معرفش': 'مش عارف',
+    'مفهمتش': 'مش فاهم',
+    'مشفاهم': 'مش فاهم',
+    'مشبيفتح': 'مش بيفتح',
+    'مابيفتحش': 'مش بيفتح',
+    'مبيفتحش': 'مش بيفتح',
+    'مشعارف': 'مش عارف',
+    'يعم': 'يا عم',
+    'يسطا': 'يا صاحبي',
+    'ياعم': 'يا عم',
+    'امتا': 'امتى',
+    'ازاى': 'ازاي',
+    'عوز': 'عايز',
+    'عيز': 'عايز'
   };
+
+  function decodeStudentMistakes(rawText) {
+    if (!rawText) return '';
+    let decoded = rawText;
+
+    // 1. Fix commonly attached prefixes (مش، مب، ماب)
+    decoded = decoded.replace(/\b(مش|مب|ماب)(?=[أ-ي])/g, '$1 ');
+
+    // 2. Fix slang and typos using advanced map
+    Object.keys(ADVANCED_TYPO_MAP).forEach(wrong => {
+      const right = ADVANCED_TYPO_MAP[wrong];
+      decoded = decoded.replace(new RegExp(`\\b${wrong}\\b`, 'g'), right);
+    });
+
+    return decoded;
+  }
 
     const STORAGE_FALLBACK = {};
   function safeGetItem(storage, key) {
@@ -782,6 +812,9 @@
       .replace(/[\u000B\u000C\u001F]/g, ' ')
       .trim();
 
+    // Apply the mistake decoder before normalization
+    normalized = decodeStudentMistakes(normalized);
+
     // remove Arabic diacritics and normalize common letter variants
     try {
       normalized = normalized
@@ -795,11 +828,6 @@
     } catch (e) {
       normalized = normalized.replace(/[^a-z0-9\s]/gi, ' ').replace(/\s+/g, ' ').trim();
     }
-
-    Object.keys(TYPO_MAP).forEach(wrong => {
-      const right = TYPO_MAP[wrong];
-      normalized = normalized.replace(new RegExp(`\\b${wrong}\\b`, 'g'), right);
-    });
 
     return normalized;
   }
@@ -1469,7 +1497,9 @@
     const words = normalizedStr.split(/\s+/);
     for (let target of targetArray) {
       if (normalizedStr.includes(target)) return true;
+      
       if (!target.includes(' ')) {
+        // Single word target
         for (let word of words) {
           if (word.length < 3) continue;
           let dist = levenshteinDistance(word, target);
@@ -1477,9 +1507,28 @@
           if (dist <= allowed) return true;
         }
       } else {
-        if (Math.abs(normalizedStr.length - target.length) < 6) {
-          if (levenshteinDistance(normalizedStr, target) <= 2) return true;
+        // Bag of words logic for multi-word targets (order independent)
+        const targetWords = target.split(/\s+/);
+        let allFound = true;
+        
+        for (let tWord of targetWords) {
+          if (tWord.length < 3) continue;
+          let foundThisWord = false;
+          for (let word of words) {
+            let dist = levenshteinDistance(word, tWord);
+            let allowed = tWord.length <= 4 ? 1 : 2;
+            if (dist <= allowed || word.includes(tWord)) {
+              foundThisWord = true;
+              break;
+            }
+          }
+          if (!foundThisWord) {
+            allFound = false;
+            break;
+          }
         }
+        
+        if (allFound) return true;
       }
     }
     return false;
