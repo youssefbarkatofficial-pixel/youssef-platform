@@ -107,6 +107,18 @@ except Exception as _enh6_err:
     print(f"[SMART_BRAIN_INFO] Enhancements V6 not loaded (optional): {_enh6_err}")
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# Safe import of Enhancement Layer V7 (ADDITIVE, optional)
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+_HAS_ENHANCEMENTS_V7 = False
+_SmartEnhancementsV7 = None
+try:
+    from bot_addons.smart_enhancements_v7 import SmartEnhancementsV7 as _SEv7
+    _SmartEnhancementsV7 = _SEv7
+    _HAS_ENHANCEMENTS_V7 = True
+except Exception as _enh7_err:
+    print(f"[SMART_BRAIN_INFO] Enhancements V7 not loaded (optional): {_enh7_err}")
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # Safe import of sklearn (with auto-install fallback)
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 _HAS_SKLEARN = False
@@ -354,6 +366,7 @@ class SmartBotBrain:
         self._enhancements_v4 = None  # Enhancement layer V4 (optional)
         self._enhancements_v5 = None  # Enhancement layer V5 (optional)
         self._enhancements_v6 = None  # Enhancement layer V6 (optional)
+        self._enhancements_v7 = None  # Enhancement layer V7 (optional)
         self._v4_layers = None  # V4 analysis layers for current message
         self._v5_tags = None  # V5 pseudo-reasoning tags
 
@@ -402,6 +415,13 @@ class SmartBotBrain:
             except Exception as enh6_e:
                 print(f"[SMART_BRAIN_INFO] Enhancements V6 init skipped: {enh6_e}")
                 self._enhancements_v6 = None
+            # Load enhancements V7 safely (optional layer)
+            try:
+                if _HAS_ENHANCEMENTS_V7 and _SmartEnhancementsV7:
+                    self._enhancements_v7 = _SmartEnhancementsV7()
+            except Exception as enh7_e:
+                print(f"[SMART_BRAIN_INFO] Enhancements V7 init skipped: {enh7_e}")
+                self._enhancements_v7 = None
             self._ready = True
             print("[SMART_BRAIN] ✅ SmartBotBrain initialized successfully")
         except Exception as e:
@@ -701,6 +721,13 @@ class SmartBotBrain:
                     response, intent_id, self._v4_layers, self._v5_tags, user_id)
             except Exception:
                 pass
+        # V7 enhancements (post-processing: memory updates, learning illusion)
+        if self._enhancements_v7 and self._v4_layers and self._v5_tags:
+            try:
+                response = self._enhancements_v7.post_process(
+                    response, intent_id, self._v4_layers, self._v5_tags, user_id)
+            except Exception:
+                pass
         return response
 
     def get_response(self, text, user_id=None):
@@ -734,6 +761,7 @@ class SmartBotBrain:
             enh_v4 = self._enhancements_v4  # may be None
             enh_v5 = self._enhancements_v5  # may be None
             enh_v6 = self._enhancements_v6  # may be None
+            enh_v7 = self._enhancements_v7  # may be None
 
             # ━━ [V4 Pre-processing: 51/52-LayerAnalysis, 60-Personality] ━━
             self._v4_layers = None
@@ -751,6 +779,17 @@ class SmartBotBrain:
                     self._v5_tags = enh_v5.pre_process(normalized, user_id, last_ctx)
                 except Exception:
                     self._v5_tags = None
+
+            # ━━ [V7 Pre-processing: 111-Memory, 113-SessionRecovery] ━━
+            if enh_v7 and self._v4_layers and self._v5_tags:
+                try:
+                    recovery_msg = enh_v7.pre_process(normalized, self._v4_layers, self._v5_tags, user_id)
+                    if recovery_msg:
+                        if user_id:
+                            self._set_context(user_id, text, recovery_msg, "v7_recovery")
+                        return recovery_msg
+                except Exception:
+                    pass
 
             # ━━ [V3 Pre-processing: 44-HeavySlang, 32-Keywords, 29-HiddenIntent, 34-Frustration, 40-Fragments] ━━
             if enh_v3:
