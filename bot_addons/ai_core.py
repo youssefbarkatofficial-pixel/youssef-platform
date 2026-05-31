@@ -83,6 +83,18 @@ except Exception as _enh4_err:
     print(f"[SMART_BRAIN_INFO] Enhancements V4 not loaded (optional): {_enh4_err}")
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# Safe import of Enhancement Layer V5 (ADDITIVE, optional)
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+_HAS_ENHANCEMENTS_V5 = False
+_SmartEnhancementsV5 = None
+try:
+    from bot_addons.smart_enhancements_v5 import SmartEnhancementsV5 as _SEv5
+    _SmartEnhancementsV5 = _SEv5
+    _HAS_ENHANCEMENTS_V5 = True
+except Exception as _enh5_err:
+    print(f"[SMART_BRAIN_INFO] Enhancements V5 not loaded (optional): {_enh5_err}")
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # Safe import of sklearn (with auto-install fallback)
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 _HAS_SKLEARN = False
@@ -328,7 +340,9 @@ class SmartBotBrain:
         self._enhancements_v2 = None  # Enhancement layer V2 (optional)
         self._enhancements_v3 = None  # Enhancement layer V3 (optional)
         self._enhancements_v4 = None  # Enhancement layer V4 (optional)
+        self._enhancements_v5 = None  # Enhancement layer V5 (optional)
         self._v4_layers = None  # V4 analysis layers for current message
+        self._v5_tags = None  # V5 pseudo-reasoning tags
 
         try:
             self._load_data()
@@ -361,6 +375,13 @@ class SmartBotBrain:
             except Exception as enh4_e:
                 print(f"[SMART_BRAIN_INFO] Enhancements V4 init skipped: {enh4_e}")
                 self._enhancements_v4 = None
+            # Load enhancements V5 safely (optional layer)
+            try:
+                if _HAS_ENHANCEMENTS_V5 and _SmartEnhancementsV5:
+                    self._enhancements_v5 = _SmartEnhancementsV5()
+            except Exception as enh5_e:
+                print(f"[SMART_BRAIN_INFO] Enhancements V5 init skipped: {enh5_e}")
+                self._enhancements_v5 = None
             self._ready = True
             print("[SMART_BRAIN] ✅ SmartBotBrain initialized successfully")
         except Exception as e:
@@ -646,6 +667,13 @@ class SmartBotBrain:
                     response, intent_id, user_id, self._v4_layers)
             except Exception:
                 pass
+        # V5 enhancements (post-processing: style, pseudo-LLM, facts, topic switch)
+        if self._enhancements_v5 and self._v5_tags:
+            try:
+                response = self._enhancements_v5.post_process(
+                    response, intent_id, user_id, self._v5_tags)
+            except Exception:
+                pass
         return response
 
     def get_response(self, text, user_id=None):
@@ -677,6 +705,7 @@ class SmartBotBrain:
             enh_v2 = self._enhancements_v2  # may be None
             enh_v3 = self._enhancements_v3  # may be None
             enh_v4 = self._enhancements_v4  # may be None
+            enh_v5 = self._enhancements_v5  # may be None
 
             # ━━ [V4 Pre-processing: 51/52-LayerAnalysis, 60-Personality] ━━
             self._v4_layers = None
@@ -685,6 +714,15 @@ class SmartBotBrain:
                     self._v4_layers = enh_v4.pre_process(normalized, user_id)
                 except Exception:
                     self._v4_layers = None
+
+            # ━━ [V5 Pre-processing: 71/78-PseudoReasoning] ━━
+            self._v5_tags = None
+            if enh_v5:
+                try:
+                    last_ctx = self._get_context(user_id) if user_id else None
+                    self._v5_tags = enh_v5.pre_process(normalized, user_id, last_ctx)
+                except Exception:
+                    self._v5_tags = None
 
             # ━━ [V3 Pre-processing: 44-HeavySlang, 32-Keywords, 29-HiddenIntent, 34-Frustration, 40-Fragments] ━━
             if enh_v3:
@@ -900,6 +938,21 @@ class SmartBotBrain:
                         if user_id:
                             self._set_context(user_id, text, clarification, "smart_clarify")
                         return clarification
+                except Exception:
+                    pass
+
+            # ━━ [V5-72/74/75] Semantic cluster + dynamic intent matching ━━
+            if enh_v5 and self._v5_tags:
+                try:
+                    dyn_intent, dyn_id = enh_v5.dynamic_match(
+                        normalized, self._v5_tags, self._intents)
+                    if dyn_intent:
+                        templates = dyn_intent.get("response_templates", [""])
+                        response = random.choice(templates)
+                        response = self._enhance_response(response, dyn_id, user_id, normalized)
+                        if user_id:
+                            self._set_context(user_id, text, response, dyn_id)
+                        return response
                 except Exception:
                     pass
 
