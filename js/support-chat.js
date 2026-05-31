@@ -145,10 +145,38 @@
     return Math.max(0, Math.min(100, score));
   }
 
+  function loadContextMemory() {
+    try {
+      const mem = sessionStorage.getItem('pf_context_memory');
+      return mem ? JSON.parse(mem) : [];
+    } catch(e) { return []; }
+  }
+
+  function saveContextMemory(history) {
+    if (history.length > 40) history = history.slice(-40);
+    safeSetItem(sessionStorage, 'pf_context_memory', JSON.stringify(history));
+  }
+
+  function pushContext(role, text, purpose, subjects = []) {
+    const memory = loadContextMemory();
+    memory.push({ role, text, purpose, subjects, timestamp: Date.now() });
+    saveContextMemory(memory);
+  }
+
+  function resolveContext(normalizedMessage) {
+    const memory = loadContextMemory();
+    for (let i = memory.length - 1; i >= 0; i--) {
+      if (memory[i].subjects && memory[i].subjects.length > 0) {
+        return memory[i].subjects[0];
+      }
+    }
+    return null;
+  }
+
   // Bot response logic is active and uses the platform-aware Arabic assistant engine.
   const BOT_RESPONSES_DISABLED = false;
   function getTemporarySafeBotReply(userMessage) {
-    const normalized = normalizeText(userMessage);
+    let normalized = normalizeText(userMessage);
     if (!normalized) return executeFallbackEngine(normalized, userMessage);
 
     if (isCheatingRequest(userMessage)) {
@@ -161,7 +189,23 @@
     
     // 1. UNDERSTAND & MULTI-STEP THINKING
     const thoughtProcess = multiStepThinkEngine(normalized);
-    const purpose = thoughtProcess.purpose;
+    let purpose = thoughtProcess.purpose;
+
+    // 🧠 DEEP CONTEXT ENGINE (Resolve context for follow-ups)
+    let contextSubject = null;
+    if (purpose === 'FOLLOW_UP') {
+      contextSubject = resolveContext(normalized);
+      if (contextSubject) {
+        // Transform this into an educational query using the injected context
+        thoughtProcess.extractedData.subjects.push(contextSubject);
+        purpose = 'EDUCATIONAL_EXPLANATION';
+        // Artificially inject the subject into the message for downstream engines
+        userMessage = userMessage + ' ' + contextSubject;
+        normalized = normalized + ' ' + contextSubject;
+      }
+    }
+    
+    pushContext('user', userMessage, purpose, thoughtProcess.extractedData.subjects);
     
     // 2. REFLECTION ENGINE (Generate multiple variants, pick best)
     let bestResponse = { text: '', score: -1, tag: 'fallback' };
@@ -212,8 +256,9 @@
     let finalResponseText = bestResponse.text;
     let responseTag = bestResponse.tag;
 
-    // 4. SELF LEARNING MEMORY (Analyze and record conversation)
+    // 4. SELF LEARNING MEMORY & CONTEXT (Analyze and record conversation)
     analyzeAndLearnFromMessage(userMessage, responseTag);
+    pushContext('bot', finalResponseText, purpose, thoughtProcess.extractedData.subjects);
 
     return finalResponseText;
   }
@@ -975,8 +1020,10 @@
     if (isJoking) thoughtProcess.interpretations.push('HUMOR');
 
     // 3. DEDUCE TRUE INTENT (Priority Logic)
-    // If user says "hello I have a complaint", COMPLAINT > SOCIAL_CONNECTION
-    if (thoughtProcess.interpretations.includes('COMPLAINT')) thoughtProcess.purpose = 'COMPLAINT';
+    // If it's very short and contains follow up words, or explicitly asks "why?" with no context, it's a FOLLOW_UP
+    if (isFollowUp && normalized.length < 25 && !hasEduKeywords) thoughtProcess.purpose = 'FOLLOW_UP';
+    else if (isAsking && normalized.length < 15 && !hasEduKeywords) thoughtProcess.purpose = 'FOLLOW_UP';
+    else if (thoughtProcess.interpretations.includes('COMPLAINT')) thoughtProcess.purpose = 'COMPLAINT';
     else if (thoughtProcess.interpretations.includes('EMOTIONAL_SUPPORT')) thoughtProcess.purpose = 'EMOTIONAL_SUPPORT';
     else if (thoughtProcess.interpretations.includes('EDUCATIONAL_EXPLANATION')) thoughtProcess.purpose = 'EDUCATIONAL_EXPLANATION';
     else if (thoughtProcess.interpretations.includes('HUMOR')) thoughtProcess.purpose = 'HUMOR';
