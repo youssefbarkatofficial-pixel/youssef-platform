@@ -527,8 +527,14 @@
           pipelineContext.candidateTag = 'educational';
         }
         else {
-          pipelineContext.candidateText = executeFallbackEngine(pipelineContext.normalized, userMessage, thoughtProcess);
-          pipelineContext.candidateTag = 'fallback';
+          const emergencyResponse = emergencyRetrievalEngine(pipelineContext.normalized, userMessage);
+          if (emergencyResponse) {
+            pipelineContext.candidateText = emergencyResponse.text;
+            pipelineContext.candidateTag = emergencyResponse.tag;
+          } else {
+            pipelineContext.candidateText = executeFallbackEngine(pipelineContext.normalized, userMessage, thoughtProcess);
+            pipelineContext.candidateTag = 'fallback';
+          }
         }
       }
     }
@@ -655,7 +661,11 @@
     const expansionResponse = offlineKnowledgeResearcher(normalized, userMessage);
     if (expansionResponse) return expansionResponse;
 
-    return executeFallbackEngine(normalized, userMessage);
+    // 🚨 EMERGENCY RETRIEVAL
+    const emergencyReply = emergencyRetrievalEngine(normalized, userMessage);
+    if (emergencyReply) return emergencyReply;
+
+    return { text: executeFallbackEngine(normalized, userMessage), tag: 'fallback' };
   }
 
   function applyMiniTeacherMode(responseObj) {
@@ -808,6 +818,58 @@
     const followUp = getFollowUpReply(userMessage);
     if (followUp && followUp.text) return composeFinalResponse(followUp, userMessage, analyzeStudentIntent(userMessage));
     return executeEducationalIntentEngine(normalized, userMessage);
+  }
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // 🚨 EMERGENCY RETRIEVAL ENGINE (Retrieval Before Failure)
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  function emergencyRetrievalEngine(normalized, userMessage) {
+    console.log('[EMERGENCY RETRIEVAL ENGINE] Scanning all knowledge bases for partial matches...');
+    
+    // 1. Scan KNOWLEDGE_REASONING_BASE
+    for (const [topic, data] of Object.entries(KNOWLEDGE_REASONING_BASE)) {
+      if (normalized.includes(topic) || Object.values(data).some(v => v.includes(normalized))) {
+        return {
+          text: `أنا مش متأكد إن كان ده اللي تقصده بالظبط، بس لو تقصد (${topic})، فالمعلومة اللي عندي بتقول:\n${data.explanation}\n\nهل ده اللي بتدور عليه؟`,
+          tag: 'clarification'
+        };
+      }
+    }
+
+    // 2. Scan OFFLINE_KNOWLEDGE_BASE (Full Text Scan)
+    for (const item of OFFLINE_KNOWLEDGE_BASE) {
+      if (normalized.includes(item.topic) || item.definition.includes(normalized) || item.simplification.includes(normalized)) {
+        return {
+          text: `حاولت أفهم قصدك بالظبط، ولو سؤالك مرتبط بـ (${item.topic})، خليني أبسطهالك:\n${item.simplification}\n\nلو تقصد حاجة تانية ياريت توضحلي أكتر!`,
+          tag: 'clarification'
+        };
+      }
+    }
+
+    // 3. Scan KNOWLEDGE_GRAPH
+    for (const [topic, data] of Object.entries(KNOWLEDGE_GRAPH)) {
+      if (normalized.includes(topic) || data.related.some(r => r.includes(normalized) || normalized.includes(r))) {
+        return {
+          text: `الكلام ده بيفكرني بـ (${topic}) واللي ليه علاقة بـ (${data.related.join(' و ')}).\nلو حابب نتكلم في النقطة دي، أنا جاهز!`,
+          tag: 'clarification'
+        };
+      }
+    }
+
+    // 4. Memory Association (Last Topic)
+    let memory = loadHumanMemory();
+    if (memory.lastTopics && memory.lastTopics.length > 0) {
+      const lastTopic = memory.lastTopics[memory.lastTopics.length - 1];
+      if (normalized.length < 15) {
+         return {
+           text: `هل سؤالك ده له علاقة بـ (${lastTopic}) اللي كنا بنتكلم فيه من شوية؟ لو أيوة، ياريت توضح سؤالك عشان أجاوبك بدقة.`,
+           tag: 'clarification'
+         };
+      }
+    }
+
+    console.log('[EMERGENCY RETRIEVAL ENGINE] Total Failure. Yielding to Fallback.');
+    return null;
   }
 
   function executeFallbackEngine(normalized, userMessage, thoughtProcess = {}) {
