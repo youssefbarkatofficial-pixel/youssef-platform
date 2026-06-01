@@ -1,4 +1,4 @@
-// Upgraded Support chat widget ("ط§ظ„ط¨ظˆطµظ„ط©") - lightweight, private, and smarter
+// Upgraded Support chat widget ("البوصلة") - lightweight, private, and smarter
 (function(){
   const BASE_HISTORY_KEY = 'pf_support_chat_history_v2';
   const BASE_TICKETS_KEY = 'pf_support_tickets_v1';
@@ -395,6 +395,8 @@
     let text = `أنا معاك يا بطل، بس حابب أتأكد.. تقصد `;
     text += options.join(' ولا ') + '؟';
     return text;
+  }
+
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // 🧠 BRAIN METRICS ENGINE
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -424,168 +426,316 @@
     } catch(e) {}
   }
 
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // 🧠 THE COGNITIVE GRAPH ENGINE (LEVEL BOSS)
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  const TOPIC_CLUSTERS = {
+    "MAPS": { keywords: ["خريطة", "خرائط", "جهات", "شمال", "جنوب", "شرق", "غرب", "مقياس رسم", "احداثيات", "خطوط", "طول", "دوائر", "عرض", "رسمة", "مكان"], subject: "الخرائط" },
+    "FRENCH_CAMPAIGN": { keywords: ["حملة", "فرنسية", "نابليون", "كليبر", "مينو", "ثورة القاهرة", "رشيد", "ابوقير"], subject: "الحملة الفرنسية" },
+    "MOHAMED_ALI": { keywords: ["محمد علي", "مؤسس مصر", "جيش", "المذبحة", "القلعة", "مصر الحديثة", "محتكر"], subject: "محمد علي" },
+    "TERRAIN": { keywords: ["تضاريس", "جبال", "هضاب", "صحراء", "نيل", "وديان"], subject: "تضاريس مصر" },
+    "CLIMATE": { keywords: ["مناخ", "حرارة", "شتاء", "صيف", "مطر", "رياح", "جو"], subject: "مناخ مصر" }
+  };
+
+  function extractCognitiveGraph(normalized) {
+    const graph = { emotions: {}, topics: {}, needs: {}, confidence: 0 };
+
+    // Weighted Emotions
+    if (/(مضايق|مخنوق|تعبت|يائس|زفت|طهقت|رعب|خايف|قلقان|مرعوب|كارثه|بموت)/.test(normalized)) graph.emotions.ANXIETY = 0.9;
+    else if (/(صعب|معقد|توتر)/.test(normalized)) graph.emotions.ANXIETY = 0.5;
+
+    if (/(مش فاهم|ضعت|ايه ده|وضح|مفهمتش|مش مستوعب|لخبطه|تايه)/.test(normalized)) graph.emotions.FRUSTRATION = 0.85;
+    
+    // Fuzzy Topic Extraction
+    const words = normalized.split(' ');
+    for (const [clusterKey, clusterData] of Object.entries(TOPIC_CLUSTERS)) {
+      let matchCount = 0;
+      clusterData.keywords.forEach(kw => { if (normalized.includes(kw)) matchCount++; });
+      if (matchCount > 0) {
+        graph.topics[clusterKey] = Math.min(0.5 + (matchCount * 0.2), 0.95);
+        graph.extractedSubject = clusterData.subject;
+      }
+    }
+
+    // Weighted Needs
+    if (graph.emotions.ANXIETY > 0 || graph.emotions.FRUSTRATION > 0) graph.needs.MOTIVATION = 0.9;
+    if (Object.keys(graph.topics).length > 0) graph.needs.EXPLANATION = 0.85;
+    if (/(صباح|عامل ايه|اخبارك|فينك|ازيك|طمني|سلام|هاي|مرحبا)/.test(normalized)) graph.needs.SOCIAL = 0.8;
+    if (/(بايظ|مش شغال|مش بيفتح|عطلان|مشكله)/.test(normalized)) graph.needs.SUPPORT = 0.9;
+
+    // Calculate Overall Confidence
+    const maxEmotion = Math.max(...Object.values(graph.emotions), 0);
+    const maxTopic = Math.max(...Object.values(graph.topics), 0);
+    const maxNeed = Math.max(...Object.values(graph.needs), 0);
+    
+    graph.confidence = (maxEmotion + maxTopic + maxNeed) / (Object.keys(graph).length > 0 ? 3 : 1);
+    if (graph.needs.SOCIAL || graph.needs.SUPPORT) graph.confidence = Math.max(graph.confidence, 0.8);
+    
+    return graph;
+  }
+
+  function updateHumanMemoryGraph(graph) {
+    let memory = loadHumanMemory();
+    if (!memory.weak_topics) memory.weak_topics = {};
+    if (!memory.exam_anxiety) memory.exam_anxiety = 0;
+
+    // Auto-learn weak topics from frustration
+    if (graph.emotions.FRUSTRATION > 0.6) {
+      for (const topic of Object.keys(graph.topics)) {
+        memory.weak_topics[topic] = (memory.weak_topics[topic] || 0) + 0.3;
+      }
+    }
+
+    // Auto-learn anxiety
+    if (graph.emotions.ANXIETY > 0.7) memory.exam_anxiety = Math.min(memory.exam_anxiety + 0.2, 1.0);
+    else memory.exam_anxiety = Math.max(memory.exam_anxiety - 0.05, 0); // Decay
+
+    saveHumanMemory(memory);
+    return memory;
+  }
+
+  // 🧠 LEARNING SESSION ENGINE (Cognitive State)
+  function loadLearningSession() {
+    try { return JSON.parse(localStorage.getItem('pf_learning_session') || '{}'); } catch(e) { return {}; }
+  }
+
+  function saveLearningSession(session) {
+    localStorage.setItem('pf_learning_session', JSON.stringify(session));
+  }
+
+  function updateCognitiveState(graph, normalized) {
+    let session = loadLearningSession();
+    
+    // Initialize session if empty or expired (2 hours)
+    if (!session.last_active || (Date.now() - session.last_active > 2 * 60 * 60 * 1000)) {
+      session = {
+        current_goal: 'IDLE',
+        current_obstacle: 'NONE',
+        learning_phase: 'DISCOVERY', // DISCOVERY, PROBLEM_IDENTIFICATION, ACTIVE_LEARNING, REINFORCEMENT, TESTING
+        student_confidence: 0,
+        active_topic: null,
+        last_active: Date.now()
+      };
+    }
+    session.last_active = Date.now();
+
+    // 1. Determine Topic & State
+    const topTopic = Object.keys(graph.topics).reduce((a, b) => graph.topics[a] > graph.topics[b] ? a : b, null);
+    if (topTopic) {
+      if (session.active_topic !== topTopic) {
+        session.active_topic = topTopic;
+        session.learning_phase = 'PROBLEM_IDENTIFICATION';
+        session.current_goal = 'UNDERSTAND_BASICS';
+        session.student_confidence = 0;
+      }
+    }
+
+    // 2. Identify Obstacles
+    if (graph.emotions.FRUSTRATION > 0.5 || graph.emotions.ANXIETY > 0.5) {
+      session.current_obstacle = 'CONFUSION';
+      session.student_confidence = Math.max(0, session.student_confidence - 10);
+    }
+
+    // 3. Phase Transitions based on User Input
+    if (/(فهمت|اه|تمام|كمل|اللي بعده|شكرا|صح|ايوه)/.test(normalized)) {
+      session.student_confidence += 25;
+      session.current_obstacle = 'NONE';
+      
+      if (session.learning_phase === 'PROBLEM_IDENTIFICATION') {
+        session.learning_phase = 'ACTIVE_LEARNING';
+        session.current_goal = 'SOLVE_QUESTIONS';
+      } else if (session.learning_phase === 'ACTIVE_LEARNING' && session.student_confidence > 50) {
+        session.learning_phase = 'REINFORCEMENT';
+        session.current_goal = 'REVISION';
+      }
+    } else if (/(سؤال|اختبرني|امتحان|اسالني)/.test(normalized)) {
+      session.learning_phase = 'TESTING';
+      session.current_goal = 'VALIDATE_KNOWLEDGE';
+    } else if (session.current_obstacle === 'CONFUSION') {
+      session.learning_phase = 'PROBLEM_IDENTIFICATION'; // regress
+      session.current_goal = 'BREAK_DOWN_CONCEPT';
+    }
+
+    saveLearningSession(session);
+    return session;
+  }
+
+  function assembleDynamicResponse(graph, memoryGraph, session, userMessage, pipelineContext) {
+    const memoryBrain = loadImprovementBrain();
+    if (!memoryBrain.diversity_tracker) memoryBrain.diversity_tracker = {};
+    
+    function getDiversePart(options) {
+      options.sort((a, b) => (memoryBrain.diversity_tracker[a] || 0) - (memoryBrain.diversity_tracker[b] || 0));
+      const chosen = options[0]; 
+      memoryBrain.diversity_tracker[chosen] = (memoryBrain.diversity_tracker[chosen] || 0) + 1;
+      return chosen;
+    }
+
+    let parts = { emotion: "", context: "", knowledge: "", guidance: "", followup: "" };
+    
+    // Confidence Engine Check
+    if (graph.confidence < 0.4 && Object.keys(graph.emotions).length === 0 && !graph.needs.SOCIAL && !graph.needs.SUPPORT && !session.active_topic) {
+      pipelineContext.candidateTag = 'clarification';
+      return getDiversePart([
+        "حاسس إن كلامك ناقص تفصيلة، تقصد إيه بالظبط؟",
+        "ممكن توضحلي أكتر عشان مش عايز أجاوبك في سياق غلط؟"
+      ]);
+    }
+
+    // Dynamic Personality Engine
+    const isAnxious = graph.emotions.ANXIETY > 0.7 || memoryGraph.exam_anxiety > 0.6;
+    const isFrustrated = graph.emotions.FRUSTRATION > 0.7;
+
+    // 1. Emotional Layer
+    if (isAnxious) {
+      parts.emotion = getDiversePart([
+        "أنا حاسس بيك جداً، بس صدقني القلق ده طبيعي جداً وهيروح بمجرد ما تبدأ.",
+        "يا بطل، الخوف من الامتحان ده معناه إنك مهتم، متخليش التوتر يسيطر عليك أنا معاك.",
+        "طمني بس، كل حاجة بتتحل بالراحة، ركز معايا وهنظبط الدنيا."
+      ]);
+    } else if (isFrustrated) {
+      parts.emotion = getDiversePart([
+        "ولا يهمك خالص، طبيعي بعض الأجزاء تكون غلسة في الأول.",
+        "حقك تتضايق، المنهج ساعات بيلخبط بس هنفكه دلوقتي."
+      ]);
+    } else if (graph.needs.SOCIAL) {
+      parts.emotion = getDiversePart([
+        "أهلاً بيك يا بطل، نورتني!",
+        "يا هلا بيك يا صاحبي، طمني عليك؟"
+      ]);
+    }
+
+    // 2. Context & Knowledge Layer (Driven by Learning Phase)
+    const topTopic = Object.keys(graph.topics).reduce((a, b) => graph.topics[a] > graph.topics[b] ? a : b, null) || session.active_topic;
+    
+    if (topTopic) {
+      const subject = graph.extractedSubject || TOPIC_CLUSTERS[topTopic].subject;
+      
+      let rawKnowledge = executeEducationalIntentEngine(subject, userMessage) || "";
+      rawKnowledge = rawKnowledge.replace(/^(بص يا سيدي|شوف يا بطل).+?:/g, '').trim() || `تفاصيل "${subject}" دي مشروحة بالتفصيل جوة الكورس.`;
+      
+      // Phase-based modifications
+      if (session.learning_phase === 'PROBLEM_IDENTIFICATION') {
+        parts.context = getDiversePart([
+          `عشان نحل عقدة "${subject}"، لازم نبدأ بالأساسيات.`,
+          `أنا فاكر إن جزئية "${subject}" دي كانت معقداك، هنمشي فيها خطوة خطوة:`
+        ]);
+        parts.knowledge = rawKnowledge;
+        parts.guidance = "عشان أبسطهالك، تخيلها كأنها قصة صغيرة.";
+        parts.followup = getDiversePart([
+          "لحد هنا، النقطة دي واضحة ولا نعيدها بطريقة تانية؟",
+          "إيه رأيك، الأساس كده اتفهم؟"
+        ]);
+      } else if (session.learning_phase === 'ACTIVE_LEARNING') {
+        parts.context = getDiversePart([
+          "عاش! ممتاز إنك فهمت الأساس.",
+          "الله ينور، بما إنك لقطت الجزء الأول، ندخل في التطبيق."
+        ]);
+        parts.knowledge = rawKnowledge;
+        parts.guidance = "دلوقتي دور التطبيق العملي والممارسة.";
+        parts.followup = "تحب أديك سؤال تطبيق مباشر على اللي قلناه ده؟";
+      } else if (session.learning_phase === 'REINFORCEMENT') {
+        parts.emotion = "عاش يا بطل! انت كده فرمت الدرس ده.";
+        parts.context = `كده انت قفلت على موضوع "${subject}" تماماً.`;
+        parts.guidance = "راجع عليه بس سريعا قبل ما تنام عشان يثبت في دماغك.";
+        parts.followup = "ندخل في موضوع جديد ولا بتدور على حاجة تانية؟";
+      } else if (session.learning_phase === 'TESTING') {
+        parts.emotion = "توكلنا على الله.";
+        parts.context = `هسألك سؤال في "${subject}" وعايزك تجاوب بثقة.`;
+        parts.knowledge = ""; // Knowledge is hidden in testing phase
+        parts.guidance = "ركز كويس قبل ما تختار.";
+        parts.followup = "جاهز تسمع السؤال ولا محتاج دقيقة مراجعة؟";
+      }
+      
+      pipelineContext.candidateTag = 'educational';
+    } else if (graph.needs.SUPPORT) {
+      parts.knowledge = "الدعم الفني شغالين على حل المشكلة دي فوراً، متقلقش من أي عطل تقني.";
+      pipelineContext.candidateTag = 'support';
+    } else if (graph.needs.SOCIAL) {
+      pipelineContext.candidateTag = 'social';
+      parts.followup = getDiversePart([
+        "جاهز نفرم منهج الدراسات ولا لسه بتسخن؟",
+        "محتاجني أساعدك في درس معين ولا بتسلم بس؟"
+      ]);
+    }
+
+    // 5. Self-Diagnostics (Fallback patching)
+    if (!parts.emotion && (graph.emotions.ANXIETY || graph.emotions.FRUSTRATION)) {
+       parts.emotion = "متشيلش هم، أنا في ضهرك.";
+    }
+    if (graph.needs.EXPLANATION && !parts.knowledge && session.learning_phase !== 'TESTING') {
+       parts.knowledge = "الموضوع أبسط مما تتخيل بس محتاج نفتح درس جديد سوا.";
+    }
+
+    saveImprovementBrain(memoryBrain);
+    return [parts.emotion, parts.context, parts.knowledge, parts.guidance, parts.followup].filter(x => x).join(' ');
+  }
+
   // Bot response logic is active and uses the platform-aware Arabic assistant engine.
   const BOT_RESPONSES_DISABLED = false;
   function getTemporarySafeBotReply(userMessage) {
     let pipelineContext = {
       userMessage: userMessage,
       normalized: '',
-      intent: 'UNKNOWN',
-      purpose: 'UNKNOWN',
-      emotion: 'UNKNOWN',
-      context: null,
-      memory: null,
-      microInferences: [],
-      plannedResponseMode: 'STANDARD',
-      candidateText: '',
       candidateTag: 'fallback',
       finalText: '',
-      score: 0
+      score: 0,
+      graph: null
     };
 
     // Stage 1: Normalize
     pipelineContext.normalized = normalizeText(userMessage) || 'كلمة_فارغة';
     console.log("✅ [Stage 1: Normalize] Executed");
 
-    // Stage 2: Intent Detection
-    if (isCheatingRequest(userMessage)) {
-      pipelineContext.intent = 'CHEATING';
-    } else {
-      pipelineContext.intent = analyzeStudentIntent(userMessage);
-    }
-    console.log("✅ [Stage 2: Intent Detection] Executed");
-
-    // Stage 3: Purpose Detection
-    const thoughtProcess = multiStepThinkEngine(pipelineContext.normalized, userMessage);
-    pipelineContext.purpose = thoughtProcess.purpose || 'SOCIAL_CONNECTION';
-    console.log("✅ [Stage 3: Purpose Detection] Executed");
-
-    // Stage 4: Emotion Detection
-    pipelineContext.emotion = thoughtProcess.extractedData.emotion || 'NEUTRAL';
-    const isConfused = analyzeStudentConfusion(pipelineContext.normalized);
-    console.log("✅ [Stage 4: Emotion Detection] Executed");
-
-    // Stage 5: Context Analysis
-    const currentContext = loadContextMemory();
-    pipelineContext.context = currentContext;
-    const isFirstMessageInSession = currentContext.length === 0 || ((Date.now() - currentContext[currentContext.length - 1].timestamp) > 60 * 60 * 1000);
+    // Stage 1.5: REFERENCE RESOLUTION ENGINE
+    const referenceWords = ['هو', 'هي', 'دي', 'ده', 'كده', 'ليه', 'ازاي', 'عنه', 'عنها', 'طب واللي قبله', 'طب واللي بعده', 'مين', 'عمل ايه'];
+    const words = pipelineContext.normalized.split(' ');
+    const hasReference = referenceWords.some(w => words.includes(w) || pipelineContext.normalized.includes(w));
     
-    if (currentContext.length > 0) {
-      const lastInteraction = currentContext[currentContext.length - 1];
-      if (lastInteraction.role === 'bot' && (Date.now() - lastInteraction.timestamp) > 30 * 60 * 1000) {
-        const droppedText = lastInteraction.text;
-        const brainMem = loadImprovementBrain();
-        if (!brainMem.conversation_drops[droppedText]) brainMem.conversation_drops[droppedText] = 0;
-        brainMem.conversation_drops[droppedText]++;
-        saveImprovementBrain(brainMem);
+    if (hasReference && pipelineContext.normalized.length < 50) {
+      const memory = loadHumanMemory();
+      if (memory.lastTopics && memory.lastTopics.length > 0) {
+        const lastTopic = memory.lastTopics[memory.lastTopics.length - 1];
+        pipelineContext.normalized = pipelineContext.normalized + ' ' + lastTopic;
+        console.log(`[REFERENCE RESOLUTION] Resolved to: ${pipelineContext.normalized}`);
       }
     }
-    console.log("✅ [Stage 5: Context Analysis] Executed");
+    console.log("✅ [Stage 1.5: Reference Resolution] Executed");
 
-    // Stage 6: Memory Analysis
-    const platformFacts = getPlatformFacts();
-    pipelineContext.memory = humanMemoryEngine(pipelineContext.normalized, thoughtProcess.extractedData.abstractConcept, thoughtProcess.extractedData.subjects, platformFacts.dbUser, userMessage);
-    console.log("✅ [Stage 6: Memory Analysis] Executed");
+    // Stage 2: MULTI-INTENT GRAPH EXTRACTION
+    const graph = extractCognitiveGraph(pipelineContext.normalized);
+    pipelineContext.graph = graph;
+    console.log("✅ [Stage 2: Cognitive Graph] Extracted:", graph);
 
-    // Stage 7: Reasoning Layer
-    pipelineContext.microInferences = thoughtProcess.microInferences || [];
-    console.log("✅ [Stage 7: Reasoning Layer] Executed");
+    // Stage 3: HUMAN MEMORY GRAPH (Auto-Learning)
+    const memoryGraph = updateHumanMemoryGraph(graph);
+    console.log("✅ [Stage 3: Human Memory Graph] Updated:", memoryGraph);
 
-    // Stage 8: Response Planning
-    if (pipelineContext.intent === 'CHEATING') {
-      pipelineContext.plannedResponseMode = 'ANTI_CHEAT';
-    } else if (pipelineContext.purpose === 'AMBIGUOUS') {
-      pipelineContext.plannedResponseMode = 'CLARIFICATION';
-    } else {
-      pipelineContext.plannedResponseMode = 'FUSION_OR_STANDARD';
-    }
-    console.log("✅ [Stage 8: Response Planning] Executed");
+    // Stage 3.5: LEARNING SESSION ENGINE
+    const session = updateCognitiveState(graph, pipelineContext.normalized);
+    console.log("✅ [Stage 3.5: Learning Session Engine] State:", session);
 
-    // Stage 9: Response Generation
-    if (pipelineContext.plannedResponseMode === 'ANTI_CHEAT') {
-      pipelineContext.candidateText = 'مقدرش أساعدك فى ده، الأستاذ يوسف بركات لو لمحني هيمرجحني 😂';
-      pipelineContext.candidateTag = 'social';
-    } else if (pipelineContext.plannedResponseMode === 'CLARIFICATION') {
-      pipelineContext.candidateText = resolveAmbiguity(thoughtProcess, userMessage);
-      pipelineContext.candidateTag = 'clarification';
-    } else {
-      const fused = executeIntentFusionEngine(thoughtProcess, pipelineContext.normalized, userMessage);
-      if (fused && fused.text) {
-        pipelineContext.candidateText = fused.text;
-        pipelineContext.candidateTag = fused.tag;
-      } else {
-        if (['HUMOR', 'SOCIAL_CONNECTION', 'EMOTIONAL_SUPPORT'].includes(pipelineContext.purpose)) {
-          pipelineContext.candidateText = composeFinalResponse({ text: generateSocialResponse(pipelineContext.normalized, pipelineContext.purpose), tag: 'social' }, userMessage, pipelineContext.intent);
-          pipelineContext.candidateTag = 'social';
-        }
-        else if (pipelineContext.purpose === 'FOLLOW_UP') {
-          pipelineContext.candidateText = executeContextEngine(pipelineContext.normalized, userMessage);
-          pipelineContext.candidateTag = 'follow_up';
-        }
-        else if (['EDUCATIONAL_EXPLANATION', 'INFORMATION_SEEKING', 'ASSISTANCE', 'COMPLAINT'].includes(pipelineContext.purpose)) {
-          pipelineContext.candidateText = executeEducationalIntentEngine(pipelineContext.normalized, userMessage);
-          pipelineContext.candidateTag = 'educational';
-        }
-        else {
-          const emergencyResponse = emergencyRetrievalEngine(pipelineContext.normalized, userMessage);
-          if (emergencyResponse) {
-            pipelineContext.candidateText = emergencyResponse.text;
-            pipelineContext.candidateTag = emergencyResponse.tag;
-          } else {
-            pipelineContext.candidateText = executeFallbackEngine(pipelineContext.normalized, userMessage, thoughtProcess);
-            pipelineContext.candidateTag = 'fallback';
-          }
-        }
-      }
-    }
+    // Stage 4: DYNAMIC RESPONSE ASSEMBLY
+    pipelineContext.candidateText = assembleDynamicResponse(graph, memoryGraph, session, userMessage, pipelineContext);
+    console.log("✅ [Stage 4: Dynamic Assembly] Generated");
+
+    // Final Polish
+    const isFirstMessage = !memoryGraph.recent_topics || memoryGraph.recent_topics.length === 0;
+    pipelineContext.candidateText = injectHumanMemory(pipelineContext.candidateText, isFirstMessage);
     
-    // Stage 9: Apply Formatting and Extensions (Anti-Fake AI Layer logic)
-    const isTeacherMode = pipelineContext.candidateText.includes('تبسيط سريع:') || pipelineContext.candidateText.includes('عشان أبسطهالك:');
+    // Log Metrics for reporting
+    logBrainMetrics({
+      userMessage,
+      intent: Object.keys(graph.topics).length > 0 ? 'EDUCATIONAL' : (graph.needs.SOCIAL ? 'SOCIAL' : 'SUPPORT'),
+      purpose: Object.keys(graph.needs).join(','),
+      emotion: Object.keys(graph.emotions).join(','),
+      plannedResponseMode: 'COGNITIVE_GRAPH',
+      score: graph.confidence * 100,
+      context: [], memory: true
+    }, { confidence: graph.confidence * 100, extractedData: { subjects: [graph.extractedSubject] } });
 
-    if (isTeacherMode) {
-      console.log("⚠️ [ANTI FAKE AI LAYER] Skipped destructive formatting engines (Text is already structured as Teacher Mode)");
-    } else {
-      pipelineContext.candidateText = applyReasoningTemplates(pipelineContext.candidateText, pipelineContext.candidateTag);
-      pipelineContext.candidateText = applyGoalBasedFormatting(pipelineContext.candidateText, thoughtProcess.extractedData.goal, thoughtProcess.internalPlan);
-      pipelineContext.candidateText = applyPersonaEngine(pipelineContext.candidateText, thoughtProcess.extractedData.abstractConcept, pipelineContext.purpose, thoughtProcess.internalPlan);
-      pipelineContext.candidateText = applyMicroReasoning(pipelineContext.candidateText, pipelineContext.microInferences);
-      
-      if ((isConfused || thoughtProcess.internalPlan.isStrugglingTopic || thoughtProcess.internalPlan.lowUnderstanding) && pipelineContext.candidateTag === 'educational') {
-        pipelineContext.candidateText = simplifyResponse(pipelineContext.candidateText);
-      }
-      
-      pipelineContext.candidateText = applyKnowledgeGraph(pipelineContext.candidateText, thoughtProcess.extractedData.subjects, pipelineContext.candidateTag);
-      pipelineContext.candidateText = selfQuestioningEngine(pipelineContext.candidateText, pipelineContext.normalized, thoughtProcess.internalPlan, pipelineContext.candidateTag);
-      pipelineContext.candidateText = applySmartFollowUp(pipelineContext.candidateText, pipelineContext.candidateTag, thoughtProcess.extractedData.goal, thoughtProcess.extractedData.subjects);
-    }
-
-    // These layers are non-destructive and apply correctly everywhere
-    pipelineContext.candidateText = applyKnowledgeReasoningLayer(pipelineContext.candidateText, thoughtProcess.extractedData.subjects, pipelineContext.candidateTag);
-    pipelineContext.candidateText = injectHumanMemory(pipelineContext.candidateText, isFirstMessageInSession);
-    pipelineContext.candidateText = applyCompanionLayer(pipelineContext.candidateText, pipelineContext.purpose);
-    console.log("✅ [Stage 9: Response Generation] Executed");
-
-    // Stage 10: Quality Review
-    pipelineContext.score = evaluateResponseQuality(pipelineContext.candidateText, userMessage, pipelineContext.purpose, thoughtProcess);
-    
-    if (pipelineContext.score < 65 && pipelineContext.plannedResponseMode !== 'ANTI_CHEAT') {
-      console.log(`[QUALITY SCORER] Score (${pipelineContext.score}) is low. Triggering Error Recovery...`);
-      pipelineContext.candidateText = errorRecoverySystem(pipelineContext.normalized, userMessage, thoughtProcess);
-      pipelineContext.candidateTag = 'clarification';
-    }
-    
-    pipelineContext.finalText = applySelfCriticEngine(pipelineContext.candidateText, userMessage, pipelineContext.purpose, thoughtProcess);
-    console.log("✅ [Stage 10: Quality Review] Executed");
-    
-    pushContext('user', userMessage, pipelineContext.purpose, thoughtProcess.extractedData.subjects);
-    analyzeAndLearnFromMessage(userMessage, pipelineContext.candidateTag);
-    monitorConversationFlow(userMessage, pipelineContext.candidateTag, pipelineContext.purpose, isConfused);
-    generateImprovementReport();
-    pushContext('bot', pipelineContext.finalText, pipelineContext.purpose, thoughtProcess.extractedData.subjects);
-
-    logBrainMetrics(pipelineContext, thoughtProcess);
-
-    return pipelineContext.finalText;
+    return pipelineContext.candidateText;
   }
 
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
