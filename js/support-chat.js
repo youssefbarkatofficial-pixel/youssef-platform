@@ -533,19 +533,27 @@
       }
     }
     
-    // Apply Formatting and Extensions
-    pipelineContext.candidateText = applyReasoningTemplates(pipelineContext.candidateText, pipelineContext.candidateTag);
-    pipelineContext.candidateText = applyGoalBasedFormatting(pipelineContext.candidateText, thoughtProcess.extractedData.goal, thoughtProcess.internalPlan);
-    pipelineContext.candidateText = applyPersonaEngine(pipelineContext.candidateText, thoughtProcess.extractedData.abstractConcept, pipelineContext.purpose, thoughtProcess.internalPlan);
-    pipelineContext.candidateText = applyMicroReasoning(pipelineContext.candidateText, pipelineContext.microInferences);
-    
-    if ((isConfused || thoughtProcess.internalPlan.isStrugglingTopic || thoughtProcess.internalPlan.lowUnderstanding) && pipelineContext.candidateTag === 'educational') {
-      pipelineContext.candidateText = simplifyResponse(pipelineContext.candidateText);
+    // Stage 9: Apply Formatting and Extensions (Anti-Fake AI Layer logic)
+    const isTeacherMode = pipelineContext.candidateText.includes('تبسيط سريع:') || pipelineContext.candidateText.includes('عشان أبسطهالك:');
+
+    if (isTeacherMode) {
+      console.log("⚠️ [ANTI FAKE AI LAYER] Skipped destructive formatting engines (Text is already structured as Teacher Mode)");
+    } else {
+      pipelineContext.candidateText = applyReasoningTemplates(pipelineContext.candidateText, pipelineContext.candidateTag);
+      pipelineContext.candidateText = applyGoalBasedFormatting(pipelineContext.candidateText, thoughtProcess.extractedData.goal, thoughtProcess.internalPlan);
+      pipelineContext.candidateText = applyPersonaEngine(pipelineContext.candidateText, thoughtProcess.extractedData.abstractConcept, pipelineContext.purpose, thoughtProcess.internalPlan);
+      pipelineContext.candidateText = applyMicroReasoning(pipelineContext.candidateText, pipelineContext.microInferences);
+      
+      if ((isConfused || thoughtProcess.internalPlan.isStrugglingTopic || thoughtProcess.internalPlan.lowUnderstanding) && pipelineContext.candidateTag === 'educational') {
+        pipelineContext.candidateText = simplifyResponse(pipelineContext.candidateText);
+      }
+      
+      pipelineContext.candidateText = applyKnowledgeGraph(pipelineContext.candidateText, thoughtProcess.extractedData.subjects, pipelineContext.candidateTag);
+      pipelineContext.candidateText = selfQuestioningEngine(pipelineContext.candidateText, pipelineContext.normalized, thoughtProcess.internalPlan, pipelineContext.candidateTag);
+      pipelineContext.candidateText = applySmartFollowUp(pipelineContext.candidateText, pipelineContext.candidateTag, thoughtProcess.extractedData.goal, thoughtProcess.extractedData.subjects);
     }
-    
-    pipelineContext.candidateText = applyKnowledgeGraph(pipelineContext.candidateText, thoughtProcess.extractedData.subjects, pipelineContext.candidateTag);
-    pipelineContext.candidateText = selfQuestioningEngine(pipelineContext.candidateText, pipelineContext.normalized, thoughtProcess.internalPlan, pipelineContext.candidateTag);
-    pipelineContext.candidateText = applySmartFollowUp(pipelineContext.candidateText, pipelineContext.candidateTag, thoughtProcess.extractedData.goal, thoughtProcess.extractedData.subjects);
+
+    // These layers are non-destructive and apply correctly everywhere
     pipelineContext.candidateText = injectHumanMemory(pipelineContext.candidateText, isFirstMessageInSession);
     pipelineContext.candidateText = applyCompanionLayer(pipelineContext.candidateText, pipelineContext.purpose);
     console.log("✅ [Stage 9: Response Generation] Executed");
