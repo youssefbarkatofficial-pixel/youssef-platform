@@ -505,62 +505,7 @@
     localStorage.setItem('pf_learning_session', JSON.stringify(session));
   }
 
-  function updateCognitiveState(graph, normalized) {
-    let session = loadLearningSession();
-    
-    // Initialize session if empty or expired (2 hours)
-    if (!session.last_active || (Date.now() - session.last_active > 2 * 60 * 60 * 1000)) {
-      session = {
-        current_goal: 'IDLE',
-        current_obstacle: 'NONE',
-        learning_phase: 'DISCOVERY', // DISCOVERY, PROBLEM_IDENTIFICATION, ACTIVE_LEARNING, REINFORCEMENT, TESTING
-        student_confidence: 0,
-        active_topic: null,
-        last_active: Date.now()
-      };
-    }
-    session.last_active = Date.now();
-
-    // 1. Determine Topic & State
-    const topTopic = Object.keys(graph.topics).reduce((a, b) => graph.topics[a] > graph.topics[b] ? a : b, null);
-    if (topTopic) {
-      if (session.active_topic !== topTopic) {
-        session.active_topic = topTopic;
-        session.learning_phase = 'PROBLEM_IDENTIFICATION';
-        session.current_goal = 'UNDERSTAND_BASICS';
-        session.student_confidence = 0;
-      }
-    }
-
-    // 2. Identify Obstacles
-    if (graph.emotions.FRUSTRATION > 0.5 || graph.emotions.ANXIETY > 0.5) {
-      session.current_obstacle = 'CONFUSION';
-      session.student_confidence = Math.max(0, session.student_confidence - 10);
-    }
-
-    // 3. Phase Transitions based on User Input
-    if (/(فهمت|اه|تمام|كمل|اللي بعده|شكرا|صح|ايوه)/.test(normalized)) {
-      session.student_confidence += 25;
-      session.current_obstacle = 'NONE';
-      
-      if (session.learning_phase === 'PROBLEM_IDENTIFICATION') {
-        session.learning_phase = 'ACTIVE_LEARNING';
-        session.current_goal = 'SOLVE_QUESTIONS';
-      } else if (session.learning_phase === 'ACTIVE_LEARNING' && session.student_confidence > 50) {
-        session.learning_phase = 'REINFORCEMENT';
-        session.current_goal = 'REVISION';
-      }
-    } else if (/(سؤال|اختبرني|امتحان|اسالني)/.test(normalized)) {
-      session.learning_phase = 'TESTING';
-      session.current_goal = 'VALIDATE_KNOWLEDGE';
-    } else if (session.current_obstacle === 'CONFUSION') {
-      session.learning_phase = 'PROBLEM_IDENTIFICATION'; // regress
-      session.current_goal = 'BREAK_DOWN_CONCEPT';
-    }
-
-    saveLearningSession(session);
-    return session;
-  }
+  // (Old updateCognitiveState replaced by Phase 1 Dialogue Manager in getTemporarySafeBotReply)
 
   function assembleDynamicResponse(graph, memoryGraph, session, userMessage, pipelineContext) {
     const memoryBrain = loadImprovementBrain();
@@ -673,6 +618,26 @@
     return [parts.emotion, parts.context, parts.knowledge, parts.guidance, parts.followup].filter(x => x).join(' ');
   }
 
+  function detectIntentScored(normalized) {
+    const scores = { GREETING: 0, ASK_EXPLANATION: 0, READY_FOR_TEST: 0, AGREEMENT: 0, DISAGREEMENT: 0 };
+    
+    if (/(ايوه|اه|تمام|كمل|صح|فهمت|مظبوط)/.test(normalized)) scores.AGREEMENT += 1;
+    if (/(مش فاهم|اشرحلي|يعني ايه|مش عارف|وضح|مفهمتش|شرح|لخبطة|متلخبط|فهمني|ايه ده)/.test(normalized)) scores.ASK_EXPLANATION += 3;
+    if (/(ازيك|عامل ايه|اخبارك|فينك|صباح|مساء|هاي|مرحبا|سلام|كيفك)/.test(normalized)) scores.GREETING += 2;
+    if (/(سؤال|اختبرني|امتحان|اسالني|جاهز|اسأل)/.test(normalized)) scores.READY_FOR_TEST += 2;
+    if (/(لا|غلط|مش صح)/.test(normalized)) scores.DISAGREEMENT += 2;
+    
+    let maxIntent = 'TOPIC_SELECTION';
+    let maxScore = 0;
+    for (let intent in scores) {
+        if (scores[intent] > maxScore) {
+            maxScore = scores[intent];
+            maxIntent = intent;
+        }
+    }
+    return maxIntent;
+  }
+
   // Bot response logic is active and uses the platform-aware Arabic assistant engine.
   const BOT_RESPONSES_DISABLED = false;
   function getTemporarySafeBotReply(userMessage) {
@@ -685,42 +650,99 @@
       graph: null
     };
 
-    // Stage 1: Normalize
     pipelineContext.normalized = normalizeText(userMessage) || 'كلمة_فارغة';
     console.log("✅ [Stage 1: Normalize] Executed");
 
-    // Stage 1.5: REFERENCE RESOLUTION ENGINE
-    const referenceWords = ['هو', 'هي', 'دي', 'ده', 'كده', 'ليه', 'ازاي', 'عنه', 'عنها', 'طب واللي قبله', 'طب واللي بعده', 'مين', 'عمل ايه'];
-    const words = pipelineContext.normalized.split(' ');
-    const hasReference = referenceWords.some(w => words.includes(w) || pipelineContext.normalized.includes(w));
-    
-    if (hasReference && pipelineContext.normalized.length < 50) {
-      const memory = loadHumanMemory();
-      if (memory.lastTopics && memory.lastTopics.length > 0) {
-        const lastTopic = memory.lastTopics[memory.lastTopics.length - 1];
-        pipelineContext.normalized = pipelineContext.normalized + ' ' + lastTopic;
-        console.log(`[REFERENCE RESOLUTION] Resolved to: ${pipelineContext.normalized}`);
-      }
-    }
-    console.log("✅ [Stage 1.5: Reference Resolution] Executed");
+    // 1. INTENT ENGINE (Layer 1)
+    const intent = detectIntentScored(pipelineContext.normalized);
+    pipelineContext.intent = intent;
+    console.log("✅ [Stage 2: Intent Engine] Intent:", intent);
 
-    // Stage 2: MULTI-INTENT GRAPH EXTRACTION
+    // 2. SESSION MEMORY & DIALOGUE MANAGER
+    let session = loadLearningSession();
+    if (!session.last_active || (Date.now() - session.last_active > 2 * 60 * 60 * 1000)) {
+      session = { current_goal: 'IDLE', current_obstacle: 'NONE', learning_phase: 'DISCOVERY', student_confidence: 0, active_topic: null, pending_action: 'NONE', last_bot_intent: 'NONE', last_active: Date.now() };
+    }
+    session.last_active = Date.now();
+
+    // 3. SMALL TALK LAYER (Session Lock Break)
+    if (intent === 'GREETING') {
+       session.pending_action = 'NONE';
+       saveLearningSession(session);
+       return "الحمد لله تمام 😊.. عايز مساعدة في التاريخ ولا الجغرافيا ولا عندك سؤال تقني؟";
+    }
+
+    // 4. PENDING ACTION HANDLER
+    if (session.pending_action === 'AWAITING_LEARNING_MODE') {
+       session.pending_action = 'NONE';
+       if (intent === 'READY_FOR_TEST' || pipelineContext.normalized.includes('اختبار') || pipelineContext.normalized.includes('3')) {
+           session.learning_phase = 'TESTING';
+           saveLearningSession(session);
+           return "ممتاز 🔥! يلا نبدأ الاختبار. هسألك سؤال وعايزك تجاوب بثقة!";
+       } else if (intent === 'ASK_EXPLANATION' || pipelineContext.normalized.includes('شرح') || pipelineContext.normalized.includes('1')) {
+           session.learning_phase = 'PROBLEM_IDENTIFICATION';
+           saveLearningSession(session);
+           return "توكلنا على الله. ركز معايا في الشرح ده وهبسطهالك خالص.";
+       } else if (pipelineContext.normalized.includes('تدريب') || pipelineContext.normalized.includes('2')) {
+           session.learning_phase = 'ACTIVE_LEARNING';
+           saveLearningSession(session);
+           return "يلا بينا نتدرب سوا. هطرح عليك فكرة وتطبق عليها.";
+       }
+    }
+
+    // 5. COGNITIVE GRAPH
     const graph = extractCognitiveGraph(pipelineContext.normalized);
     pipelineContext.graph = graph;
-    console.log("✅ [Stage 2: Cognitive Graph] Extracted:", graph);
+    const topTopic = Object.keys(graph.topics).reduce((a, b) => graph.topics[a] > graph.topics[b] ? a : b, null);
 
-    // Stage 3: HUMAN MEMORY GRAPH (Auto-Learning)
+    // 6. TOPIC MENU & RESET (Clarification Layer)
+    if (topTopic) {
+        // Clarification Layer for short messages containing just the topic name
+        if (pipelineContext.normalized.split(' ').length <= 3 && intent === 'TOPIC_SELECTION' && session.active_topic !== topTopic) {
+           const subjectName = TOPIC_CLUSTERS[topTopic].subject;
+           session.active_topic = topTopic;
+           session.pending_action = 'AWAITING_LEARNING_MODE';
+           saveLearningSession(session);
+           return `ممتاز 👍 تقصد درس "${subjectName}".\nعايز إيه بالظبط؟\n1- شرح سريع\n2- أسئلة وتدريب\n3- اختبار`;
+        }
+
+        // Topic Reset
+        if (session.active_topic !== topTopic) {
+           session.active_topic = topTopic;
+           session.learning_phase = 'PROBLEM_IDENTIFICATION';
+           session.student_confidence = 0;
+           session.pending_action = 'NONE';
+        }
+    }
+
+    // Update Phase based on Intent (Replacing old State Machine logic)
+    if (intent === 'ASK_EXPLANATION') {
+        session.learning_phase = 'PROBLEM_IDENTIFICATION';
+        session.pending_action = 'NONE';
+    } else if (intent === 'READY_FOR_TEST') {
+        session.learning_phase = 'TESTING';
+        session.pending_action = 'NONE';
+    } else if (intent === 'AGREEMENT') {
+        session.student_confidence += 25;
+        session.current_obstacle = 'NONE';
+        if (session.learning_phase === 'PROBLEM_IDENTIFICATION') {
+            session.learning_phase = 'ACTIVE_LEARNING';
+        } else if (session.learning_phase === 'ACTIVE_LEARNING' && session.student_confidence > 50) {
+            session.learning_phase = 'REINFORCEMENT';
+        }
+    } else if (graph.emotions.FRUSTRATION > 0.5) {
+        session.current_obstacle = 'CONFUSION';
+        session.student_confidence = Math.max(0, session.student_confidence - 10);
+        session.learning_phase = 'PROBLEM_IDENTIFICATION';
+    }
+
+    saveLearningSession(session);
+
     const memoryGraph = updateHumanMemoryGraph(graph);
-    console.log("✅ [Stage 3: Human Memory Graph] Updated:", memoryGraph);
 
-    // Stage 3.5: LEARNING SESSION ENGINE
-    const session = updateCognitiveState(graph, pipelineContext.normalized);
-    console.log("✅ [Stage 3.5: Learning Session Engine] State:", session);
-
-    // Stage 4: DYNAMIC RESPONSE ASSEMBLY
+    // 7. DYNAMIC RESPONSE ASSEMBLY
     pipelineContext.candidateText = assembleDynamicResponse(graph, memoryGraph, session, userMessage, pipelineContext);
-    console.log("✅ [Stage 4: Dynamic Assembly] Generated");
-
+    
     // Final Polish
     const isFirstMessage = !memoryGraph.recent_topics || memoryGraph.recent_topics.length === 0;
     pipelineContext.candidateText = injectHumanMemory(pipelineContext.candidateText, isFirstMessage);
@@ -728,7 +750,7 @@
     // Log Metrics for reporting
     logBrainMetrics({
       userMessage,
-      intent: Object.keys(graph.topics).length > 0 ? 'EDUCATIONAL' : (graph.needs.SOCIAL ? 'SOCIAL' : 'SUPPORT'),
+      intent: intent,
       purpose: Object.keys(graph.needs).join(','),
       emotion: Object.keys(graph.emotions).join(','),
       plannedResponseMode: 'COGNITIVE_GRAPH',
