@@ -1,5 +1,6 @@
 // Upgraded Support chat widget ("البوصلة") - lightweight, private, and smarter
 (function(){
+  console.log("SUPPORT_CHAT_BUILD_20260601_0630");
   const BASE_HISTORY_KEY = 'pf_support_chat_history_v2';
   const BASE_TICKETS_KEY = 'pf_support_tickets_v1';
   const CUSTOM_ANSWERS_KEY = 'pf_custom_answers_v1';
