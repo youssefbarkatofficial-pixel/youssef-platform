@@ -554,6 +554,7 @@
     }
 
     // These layers are non-destructive and apply correctly everywhere
+    pipelineContext.candidateText = applyKnowledgeReasoningLayer(pipelineContext.candidateText, thoughtProcess.extractedData.subjects, pipelineContext.candidateTag);
     pipelineContext.candidateText = injectHumanMemory(pipelineContext.candidateText, isFirstMessageInSession);
     pipelineContext.candidateText = applyCompanionLayer(pipelineContext.candidateText, pipelineContext.purpose);
     console.log("✅ [Stage 9: Response Generation] Executed");
@@ -2022,6 +2023,51 @@
     }
 
     return modified;
+  }
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // 🧠 KNOWLEDGE REASONING LAYER
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  const KNOWLEDGE_REASONING_BASE = {
+    'محمد علي': {
+      explanation: 'محمد علي مكنش مجرد حاكم عادي، كان عنده مشروع كامل عشان يبني "دولة كبرى" قوية ومستقلة.',
+      connection: 'طموحاته دي ارتبطت بشكل مباشر بضعف الدولة العثمانية في الوقت ده.',
+      inference: 'لو فكرنا فيها، هنستنتج إن القوة العسكرية كانت هي الأساس، وبدونها مكنش هيقدر يبني أي حاجة تانية.',
+      cause_effect: 'عشان كده، كان اهتمامه بالتعليم والصناعة (نتيجة طبيعية) لحاجته لجيش قوي يعتمد على كفاءات وسلاح مصري.'
+    },
+    'الحملة الفرنسية': {
+      explanation: 'الحملة الفرنسية مكنتش مجرد غزو عسكري تقليدي، دي كانت حملة عسكرية وعلمية في نفس الوقت.',
+      connection: 'وده ظهر بوضوح في المجمع العلمي اللي أسسه نابليون عشان يدرس كل حاجة في مصر.',
+      inference: 'نستنتج من ده إن هدف فرنسا الحقيقي كان تحويل مصر لمستعمرة فرنسية طويلة الأمد، مش مجرد ممر تجاري.',
+      cause_effect: 'وبسبب الوجود العلمي ده، كانت النتيجة الأهم هي فك رموز حجر رشيد اللي فتحلنا باب لمعرفة تاريخنا القديم.'
+    },
+    'تضاريس مصر': {
+      explanation: 'تضاريس مصر مش مجرد أشكال على الخريطة، دي هي اللي بتشكل حياة المصريين من آلاف السنين.',
+      connection: 'نهر النيل والصحراء هما اللي رسموا حدود تركز السكان في الوادي والدلتا.',
+      inference: 'يعني نقدر نستنتج إن الجغرافيا في مصر بتفرض نفسها على الاقتصاد وتوزيع الناس والمشاريع.',
+      cause_effect: 'ولأن الوادي ضيق جداً مقارنة بمساحة مصر، ده أدى لتكدس سكاني وازدحام كبير بنحاول نعالجه بإنشاء مدن جديدة.'
+    }
+  };
+
+  function applyKnowledgeReasoningLayer(candidateText, subjects, tag) {
+    if (!candidateText || tag !== 'educational' || !subjects || subjects.length === 0) return candidateText;
+
+    const mainSubject = subjects[0];
+    
+    let reasoningBlock = null;
+    for (const [key, data] of Object.entries(KNOWLEDGE_REASONING_BASE)) {
+      if (mainSubject.includes(key) || key.includes(mainSubject)) {
+        reasoningBlock = data;
+        break;
+      }
+    }
+
+    if (!reasoningBlock) return candidateText;
+
+    const reasoningText = `\n\n**💡 (تحليل استنتاجي):**\n- **التفسير:** ${reasoningBlock.explanation}\n- **الربط:** ${reasoningBlock.connection}\n- **الاستنتاج:** ${reasoningBlock.inference}\n- **السبب والنتيجة:** ${reasoningBlock.cause_effect}`;
+
+    console.log(`[KNOWLEDGE REASONING LAYER] Injected Reasoning for: ${mainSubject}`);
+    return candidateText + reasoningText;
   }
 
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
