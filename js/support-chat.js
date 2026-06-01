@@ -395,6 +395,33 @@
     let text = `أنا معاك يا بطل، بس حابب أتأكد.. تقصد `;
     text += options.join(' ولا ') + '؟';
     return text;
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // 🧠 BRAIN METRICS ENGINE
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  function logBrainMetrics(pipelineContext, thoughtProcess) {
+    const metrics = {
+      "Input": pipelineContext.userMessage,
+      "Intent": pipelineContext.intent,
+      "Purpose": pipelineContext.purpose,
+      "Emotion": pipelineContext.emotion,
+      "Confidence": (thoughtProcess.confidence || 0) + "%",
+      "Context Used": pipelineContext.context && pipelineContext.context.length > 0 ? "Yes" : "No",
+      "Memory Used": pipelineContext.memory ? "Yes" : "No",
+      "Strategy": pipelineContext.plannedResponseMode,
+      "Self-Critic Score": pipelineContext.score + "/100"
+    };
+
+    console.groupCollapsed(`🧠 [BRAIN METRICS] ${pipelineContext.purpose}`);
+    console.table(metrics);
+    console.groupEnd();
+
+    // Save to localStorage for debugging persistence
+    try {
+      let savedMetrics = JSON.parse(localStorage.getItem('pf_brain_metrics') || '[]');
+      savedMetrics.push({ timestamp: new Date().toISOString(), ...metrics });
+      if (savedMetrics.length > 50) savedMetrics.shift();
+      localStorage.setItem('pf_brain_metrics', JSON.stringify(savedMetrics));
+    } catch(e) {}
   }
 
   // Bot response logic is active and uses the platform-aware Arabic assistant engine.
@@ -540,6 +567,8 @@
     monitorConversationFlow(userMessage, pipelineContext.candidateTag, pipelineContext.purpose, isConfused);
     generateImprovementReport();
     pushContext('bot', pipelineContext.finalText, pipelineContext.purpose, thoughtProcess.extractedData.subjects);
+
+    logBrainMetrics(pipelineContext, thoughtProcess);
 
     return pipelineContext.finalText;
   }
