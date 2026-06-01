@@ -520,22 +520,33 @@
 
   function executeEducationalIntentEngine(normalized, userMessage) {
     const rule = ruleAnswerFor(userMessage);
-    if (rule && rule.text) return composeFinalResponse(rule, userMessage, analyzeStudentIntent(userMessage));
+    if (rule && rule.text) return applyMiniTeacherMode(composeFinalResponse(rule, userMessage, analyzeStudentIntent(userMessage)));
 
     const platformReply = getPlatformReply(userMessage);
-    if (platformReply && platformReply.text) return composeFinalResponse(platformReply, userMessage, analyzeStudentIntent(userMessage));
+    if (platformReply && platformReply.text) return applyMiniTeacherMode(composeFinalResponse(platformReply, userMessage, analyzeStudentIntent(userMessage)));
 
     const known = getKnownResponses(userMessage);
-    if (known && known.text) return composeFinalResponse(known, userMessage, analyzeStudentIntent(userMessage));
+    if (known && known.text) return applyMiniTeacherMode(composeFinalResponse(known, userMessage, analyzeStudentIntent(userMessage)));
 
     const contentBased = getContentBasedResponse(userMessage);
-    if (contentBased && contentBased.text) return composeFinalResponse(contentBased, userMessage, analyzeStudentIntent(userMessage));
+    if (contentBased && contentBased.text) return applyMiniTeacherMode(composeFinalResponse(contentBased, userMessage, analyzeStudentIntent(userMessage)));
 
-    // 🧠 OFFLINE KNOWLEDGE RESEARCHER (Last resort before fallback)
+    // 🧠 OFFLINE KNOWLEDGE RESEARCHER (TEACHER MODE)
     const expansionResponse = offlineKnowledgeResearcher(normalized, userMessage);
     if (expansionResponse) return expansionResponse;
 
     return executeFallbackEngine(normalized, userMessage);
+  }
+
+  function applyMiniTeacherMode(responseObj) {
+    if (!responseObj || !responseObj.text) return responseObj;
+    const text = responseObj.text;
+    // Don't apply if it's already an expansion or a fallback or very short
+    if (text.length > 40 && responseObj.tag === 'educational' && !text.includes('خليني أشرحلك')) {
+      const miniWrap = `${text}\n\n**تبسيط سريع:** لو فهمت دي، هترتاح جداً في المذاكرة.\n**نصيحة حفظ:** اربط المعلومة دي بكلمة تفكرك بيها في الامتحان.\nجاهز أسألك فيها ولا نكمل شرح؟`;
+      return { text: miniWrap, tag: 'educational' };
+    }
+    return responseObj;
   }
 
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -545,22 +556,38 @@
     {
       topic: 'الحملة الفرنسية',
       keywords: ['فرنسا', 'حملة', 'نابليون', 'كليبر', 'مينو', 'رشيد'],
-      content: 'الحملة الفرنسية على مصر (1798-1801) بقيادة نابليون بونابرت كان هدفها قطع طريق التجارة على إنجلترا للهند، وتأسيس إمبراطورية فرنسية في الشرق. فشلت الحملة عسكرياً بسبب صمود الشعب المصري وثوراته، ومقاومة المماليك والعثمانيين، وتدمير الأسطول الفرنسي في موقعة أبي قير البحرية. من أهم نتائجها العلمية: فك رموز حجر رشيد، وكتاب وصف مصر.'
+      definition: 'الحملة الفرنسية على مصر (1798-1801) بقيادة نابليون بونابرت كان هدفها قطع طريق التجارة على إنجلترا للهند، وتأسيس إمبراطورية فرنسية في الشرق.',
+      simplification: 'عشان أبسطهالك: دي كانت محاولة من فرنسا عشان تضرب انجلترا عن طريق السيطرة على مصر وتعمل لنفسها مستعمرة.',
+      example: 'أبرز أحداثها: ثورة القاهرة الأولى وموقعة أبي قير البحرية اللي دمرت أسطول فرنسا.',
+      memorizationPoint: 'احفظ النقطة دي كويس: (فك رموز حجر رشيد) هو أهم نتيجة علمية للحملة.',
+      question: 'بعد ما شرحتلك.. جاهز أسألك في الحملة الفرنسية؟'
     },
     {
       topic: 'محمد علي',
       keywords: ['محمد علي', 'مذبحة القلعة', 'الاحتكار', 'مؤسس'],
-      content: 'محمد علي باشا يعتبر مؤسس مصر الحديثة. تولى الحكم عام 1805 باختيار الزعامة الشعبية بقيادة عمر مكرم. تخلص من المماليك في مذبحة القلعة (1811) لينفرد بالحكم. بنى جيشاً قوياً واهتم بالزراعة (نظام الاحتكار) والصناعة والتعليم وأرسل بعثات لأوروبا.'
+      definition: 'محمد علي باشا هو مؤسس مصر الحديثة. تولى الحكم عام 1805 باختيار الزعامة الشعبية، وانفرد بالحكم بعد مذبحة القلعة.',
+      simplification: 'ببساطة: الراجل ده استلم مصر وهي ضعيفة، وبنى جيش قوي واهتم بالزراعة والصناعة عشان يعمل دولة قوية خاصة بيه.',
+      example: 'من إنجازاته: تطبيق نظام (الاحتكار) عشان يتحكم في الاقتصاد وإرسال بعثات علمية لأوروبا.',
+      memorizationPoint: 'ركز في دي بتيجي في الامتحان: (عمر مكرم) هو زعيم المقاومة الشعبية اللي اختار محمد علي للحكم.',
+      question: 'تفتكر بقى.. إيه هي مذبحة القلعة اللي عملها محمد علي؟'
     },
     {
       topic: 'تضاريس مصر',
       keywords: ['تضاريس', 'جبال', 'هضاب', 'الصحراء', 'وادي النيل'],
-      content: 'تنقسم تضاريس مصر لـ 4 أقسام رئيسية: 1. وادي النيل والدلتا ومنخفض الفيوم (وهي أخصب الأراضي الزراعية). 2. الصحراء الغربية (أكبر مساحة وفيها هضاب مرمريكا والعبابدة). 3. الصحراء الشرقية (جبلية وفيها سلسلة جبال البحر الأحمر). 4. شبه جزيرة سيناء.'
+      definition: 'تنقسم تضاريس مصر لـ 4 أقسام رئيسية: وادي النيل والدلتا، الصحراء الغربية، الصحراء الشرقية، وشبه جزيرة سيناء.',
+      simplification: 'بمعنى أصح: مصر متقسمة 4 حتت، حتة زراعية (الوادي والدلتا)، وحتة صحراء كبيرة (الغربية)، وحتة جبال (الشرقية)، وسيناء في الشرق.',
+      example: 'مثال للتضاريس: سلسلة جبال البحر الأحمر في الصحراء الشرقية وهضبة مرمريكا في الغربية.',
+      memorizationPoint: 'احفظها صم: (الصحراء الغربية) هي أكبر قسم تضاريسي في مصر.',
+      question: 'مستعد للسؤال؟ لو قولتلك فين تقع هضبة الجلف الكبير هتقولي فين؟'
     },
     {
       topic: 'الفراعنة',
       keywords: ['فرعون', 'الدولة القديمة', 'الهكسوس', 'أحمس', 'تاريخ قديم', 'الاهرامات'],
-      content: 'تاريخ مصر الفرعوني ينقسم لعدة عصور: الدولة القديمة (عصر بناة الأهرامات)، الدولة الوسطى (عصر الرخاء الاقتصادي)، والدولة الحديثة (عصر المجد الحربي). الهكسوس احتلو مصر في عصر الاضمحلال الثاني، لكن أحمس طردهم.'
+      definition: 'تاريخ مصر الفرعوني ينقسم لعدة عصور: الدولة القديمة (عصر بناة الأهرامات)، الدولة الوسطى (الرخاء الاقتصادي)، والدولة الحديثة (المجد الحربي).',
+      simplification: 'عشان متتلخبطش: تاريخ مصر عامل زي 3 محطات أساسية؛ محطة بنوا فيها الأهرامات، ومحطة اهتموا فيها بالزراعة والتجارة، ومحطة بقوا فيها جيش قوي وحاربوا.',
+      example: 'زي ما الملك أحمس طرد الهكسوس في نهاية عصر الاضمحلال الثاني عشان يأمن البلد.',
+      memorizationPoint: 'نقطة الامتحان هنا: (الملك مينا) هو موحد القطرين ومؤسس الأسرة الأولى.',
+      question: 'ها يا بطل.. مين هو مؤسس الدولة الحديثة وصاحب المجد الحربي؟'
     }
   ];
 
@@ -614,13 +641,14 @@
   }
 
   function offlineKnowledgeResearcher(normalized, userMessage) {
-    let findings = [];
+    let matchedItem = null;
     let courseLink = '';
     
     // 1. Search Offline Base
     for (let item of OFFLINE_KNOWLEDGE_BASE) {
       if (item.keywords.some(k => normalized.includes(k) || userMessage.includes(k))) {
-        findings.push(item.content);
+        matchedItem = item;
+        break; // Take the first matched one for structured explanation
       }
     }
 
@@ -636,12 +664,18 @@
       }
     }
 
-    if (findings.length === 0 && !courseLink) return null;
+    if (!matchedItem && !courseLink) return null;
 
     let finalResponse = '';
     
-    if (findings.length > 0) {
-      finalResponse = `بحثت لك في ملخصات المنصة وجمعت لك الخلاصة دي:\n\n${findings.join('\n\n')}`;
+    if (matchedItem) {
+      finalResponse = `خليني أشرحلك ( ${matchedItem.topic} ) في 5 خطوات سريعة:\n\n`;
+      finalResponse += `**1. التعريف الأساسي:**\n${matchedItem.definition}\n\n`;
+      finalResponse += `**2. تبسيط:**\n${matchedItem.simplification}\n\n`;
+      finalResponse += `**3. مثال توضيحي:**\n${matchedItem.example}\n\n`;
+      finalResponse += `**4. نقطة في الامتحان:**\n${matchedItem.memorizationPoint}\n\n`;
+      finalResponse += `**5. سؤال ليك:**\n${matchedItem.question}`;
+      
       if (courseLink) finalResponse += `\n\n${courseLink}`;
     } else {
       finalResponse = `أنا دورتلك في الكورسات بتاعتنا ولقيت إن الموضوع اللي بتسأل عنه موجود.. ${courseLink}\nأرجوك افتح صفحة الكورسات وابدأ ذاكره!`;
