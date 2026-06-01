@@ -400,26 +400,47 @@
   // Bot response logic is active and uses the platform-aware Arabic assistant engine.
   const BOT_RESPONSES_DISABLED = false;
   function getTemporarySafeBotReply(userMessage) {
-    let normalized = normalizeText(userMessage);
-    if (!normalized) return executeFallbackEngine(normalized, userMessage);
+    let pipelineContext = {
+      userMessage: userMessage,
+      normalized: '',
+      intent: 'UNKNOWN',
+      purpose: 'UNKNOWN',
+      emotion: 'UNKNOWN',
+      context: null,
+      memory: null,
+      microInferences: [],
+      plannedResponseMode: 'STANDARD',
+      candidateText: '',
+      candidateTag: 'fallback',
+      finalText: '',
+      score: 0
+    };
 
+    // Stage 1: Normalize
+    pipelineContext.normalized = normalizeText(userMessage) || 'كلمة_فارغة';
+    console.log("✅ [Stage 1: Normalize] Executed");
+
+    // Stage 2: Intent Detection
     if (isCheatingRequest(userMessage)) {
-      return 'مقدرش أساعدك فى ده، الأستاذ يوسف بركات لو لمحني هيمرجحني 😂';
+      pipelineContext.intent = 'CHEATING';
+    } else {
+      pipelineContext.intent = analyzeStudentIntent(userMessage);
     }
+    console.log("✅ [Stage 2: Intent Detection] Executed");
 
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 🧠 COGNITIVE LAYER V2: UNDERSTAND -> THINK -> REFLECT -> RESPOND
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    
-    // 1. UNDERSTAND & MULTI-STEP THINKING
-    let bestResponse = { text: '', score: -1, tag: 'unknown' };
-    const normalized = normalizeText(userMessage);
-    const thoughtProcess = multiStepThinkEngine(normalized, userMessage);
-    const purpose = thoughtProcess.purpose || 'SOCIAL_CONNECTION';
-    const isConfused = analyzeStudentConfusion(normalized);
+    // Stage 3: Purpose Detection
+    const thoughtProcess = multiStepThinkEngine(pipelineContext.normalized, userMessage);
+    pipelineContext.purpose = thoughtProcess.purpose || 'SOCIAL_CONNECTION';
+    console.log("✅ [Stage 3: Purpose Detection] Executed");
 
-    // 4. Conversation Drops (Tracked before pushing new user context)
+    // Stage 4: Emotion Detection
+    pipelineContext.emotion = thoughtProcess.extractedData.emotion || 'NEUTRAL';
+    const isConfused = analyzeStudentConfusion(pipelineContext.normalized);
+    console.log("✅ [Stage 4: Emotion Detection] Executed");
+
+    // Stage 5: Context Analysis
     const currentContext = loadContextMemory();
+    pipelineContext.context = currentContext;
     const isFirstMessageInSession = currentContext.length === 0 || ((Date.now() - currentContext[currentContext.length - 1].timestamp) > 60 * 60 * 1000);
     
     if (currentContext.length > 0) {
@@ -432,121 +453,95 @@
         saveImprovementBrain(brainMem);
       }
     }
-    
-    // 🧠 HUMAN CONVERSATION MEMORY ENGINE (Track User Identity & Preferences)
+    console.log("✅ [Stage 5: Context Analysis] Executed");
+
+    // Stage 6: Memory Analysis
     const platformFacts = getPlatformFacts();
-    humanMemoryEngine(normalized, thoughtProcess.extractedData.abstractConcept, thoughtProcess.extractedData.subjects, platformFacts.dbUser, userMessage);
+    pipelineContext.memory = humanMemoryEngine(pipelineContext.normalized, thoughtProcess.extractedData.abstractConcept, thoughtProcess.extractedData.subjects, platformFacts.dbUser, userMessage);
+    console.log("✅ [Stage 6: Memory Analysis] Executed");
 
-    pushContext('user', userMessage, purpose, thoughtProcess.extractedData.subjects);
+    // Stage 7: Reasoning Layer
+    pipelineContext.microInferences = thoughtProcess.microInferences || [];
+    console.log("✅ [Stage 7: Reasoning Layer] Executed");
 
-    for (let attempt = 1; attempt <= 5; attempt++) {
-      let candidateText = '';
-      let candidateTag = 'fallback';
+    // Stage 8: Response Planning
+    if (pipelineContext.intent === 'CHEATING') {
+      pipelineContext.plannedResponseMode = 'ANTI_CHEAT';
+    } else if (pipelineContext.purpose === 'AMBIGUOUS') {
+      pipelineContext.plannedResponseMode = 'CLARIFICATION';
+    } else {
+      pipelineContext.plannedResponseMode = 'FUSION_OR_STANDARD';
+    }
+    console.log("✅ [Stage 8: Response Planning] Executed");
 
-      // ROUTE & GENERATE
-      if (purpose === 'AMBIGUOUS') {
-        candidateText = resolveAmbiguity(thoughtProcess, userMessage);
-        candidateTag = 'clarification';
-        bestResponse = { text: candidateText, score: 100, tag: candidateTag };
-        break; 
-      } else if (purpose === 'CLARIFICATION' || thoughtProcess.confidence < 40) {
-        candidateText = errorRecoverySystem(normalized, userMessage, thoughtProcess);
-        candidateTag = 'clarification';
-        bestResponse = { text: candidateText, score: 100, tag: candidateTag };
-        break; 
+    // Stage 9: Response Generation
+    if (pipelineContext.plannedResponseMode === 'ANTI_CHEAT') {
+      pipelineContext.candidateText = 'مقدرش أساعدك فى ده، الأستاذ يوسف بركات لو لمحني هيمرجحني 😂';
+      pipelineContext.candidateTag = 'social';
+    } else if (pipelineContext.plannedResponseMode === 'CLARIFICATION') {
+      pipelineContext.candidateText = resolveAmbiguity(thoughtProcess, userMessage);
+      pipelineContext.candidateTag = 'clarification';
+    } else {
+      const fused = executeIntentFusionEngine(thoughtProcess, pipelineContext.normalized, userMessage);
+      if (fused && fused.text) {
+        pipelineContext.candidateText = fused.text;
+        pipelineContext.candidateTag = fused.tag;
       } else {
-        // 🧠 INTENT FUSION ENGINE (Handles composite messages)
-        const fused = executeIntentFusionEngine(thoughtProcess, normalized, userMessage);
-        
-        if (fused && fused.text) {
-          candidateText = fused.text;
-          candidateTag = fused.tag;
-        } else {
-          // Standard Single-Intent Routing
-          if (['HUMOR', 'SOCIAL_CONNECTION', 'EMOTIONAL_SUPPORT'].includes(purpose)) {
-            const socialResponse = generateSocialResponse(normalized, purpose);
-            candidateText = composeFinalResponse({ text: socialResponse, tag: 'social' }, userMessage, analyzeStudentIntent(userMessage));
-            candidateTag = 'social';
-          }
-          else if (purpose === 'FOLLOW_UP') {
-            candidateText = executeContextEngine(normalized, userMessage);
-            candidateTag = 'follow_up';
-          }
-          else if (['EDUCATIONAL_EXPLANATION', 'INFORMATION_SEEKING', 'ASSISTANCE', 'COMPLAINT'].includes(purpose)) {
-            candidateText = executeEducationalIntentEngine(normalized, userMessage);
-            candidateTag = 'educational';
-          }
-          else {
-            candidateText = executeFallbackEngine(normalized, userMessage, thoughtProcess);
-            candidateTag = 'fallback';
-          }
+        if (['HUMOR', 'SOCIAL_CONNECTION', 'EMOTIONAL_SUPPORT'].includes(pipelineContext.purpose)) {
+          pipelineContext.candidateText = composeFinalResponse({ text: generateSocialResponse(pipelineContext.normalized, pipelineContext.purpose), tag: 'social' }, userMessage, pipelineContext.intent);
+          pipelineContext.candidateTag = 'social';
+        }
+        else if (pipelineContext.purpose === 'FOLLOW_UP') {
+          pipelineContext.candidateText = executeContextEngine(pipelineContext.normalized, userMessage);
+          pipelineContext.candidateTag = 'follow_up';
+        }
+        else if (['EDUCATIONAL_EXPLANATION', 'INFORMATION_SEEKING', 'ASSISTANCE', 'COMPLAINT'].includes(pipelineContext.purpose)) {
+          pipelineContext.candidateText = executeEducationalIntentEngine(pipelineContext.normalized, userMessage);
+          pipelineContext.candidateTag = 'educational';
+        }
+        else {
+          pipelineContext.candidateText = executeFallbackEngine(pipelineContext.normalized, userMessage, thoughtProcess);
+          pipelineContext.candidateTag = 'fallback';
         }
       }
-
-      // 🧠 REASONING TEMPLATES ENGINE
-      candidateText = applyReasoningTemplates(candidateText, candidateTag);
-
-      // 🧠 GOAL DETECTION ENGINE (FORMATTING)
-      candidateText = applyGoalBasedFormatting(candidateText, thoughtProcess.extractedData.goal, thoughtProcess.internalPlan);
-
-      // 🎭 NATURAL CONVERSATION ENGINE (PERSONA)
-      candidateText = applyPersonaEngine(candidateText, thoughtProcess.extractedData.abstractConcept, purpose, thoughtProcess.internalPlan);
-
-      // ⚡ MICRO REASONING ENGINE
-      candidateText = applyMicroReasoning(candidateText, thoughtProcess.microInferences);
-
-      // 🧠 STUDENT UNDERSTANDING DETECTOR (SIMPLIFY)
-      if ((isConfused || thoughtProcess.internalPlan.isStrugglingTopic || thoughtProcess.internalPlan.lowUnderstanding) && candidateTag === 'educational') {
-        candidateText = simplifyResponse(candidateText);
-      }
-
-      // 🧠 KNOWLEDGE GRAPH BUILDER
-      candidateText = applyKnowledgeGraph(candidateText, thoughtProcess.extractedData.subjects, candidateTag);
-
-      // 🧠 SELF QUESTIONING ENGINE (QA)
-      candidateText = selfQuestioningEngine(candidateText, normalized, thoughtProcess.internalPlan, candidateTag);
-
-      // 🧠 SMART FOLLOW-UP ENGINE
-      candidateText = applySmartFollowUp(candidateText, candidateTag, thoughtProcess.extractedData.goal, thoughtProcess.extractedData.subjects);
-
-      // REFLECT & SCORE
-      let score = evaluateResponseQuality(candidateText, userMessage, purpose, thoughtProcess);
-      
-      console.log(`[QUALITY SCORER] Attempt ${attempt} Score: ${score}`);
-      
-      if (score > bestResponse.score) {
-        bestResponse = { text: candidateText, score: score, tag: candidateTag };
-      }
-      
-      // If we hit a very high score or perfect logic, stop generating
-      if (bestResponse.score >= 90) break;
     }
-
-    if (bestResponse.score < 65) {
-      console.log(`[QUALITY SCORER] Best score (${bestResponse.score}) is below threshold (65). Triggering Error Recovery...`);
-      bestResponse.text = errorRecoverySystem(normalized, userMessage, thoughtProcess);
-      bestResponse.tag = 'clarification';
+    
+    // Apply Formatting and Extensions
+    pipelineContext.candidateText = applyReasoningTemplates(pipelineContext.candidateText, pipelineContext.candidateTag);
+    pipelineContext.candidateText = applyGoalBasedFormatting(pipelineContext.candidateText, thoughtProcess.extractedData.goal, thoughtProcess.internalPlan);
+    pipelineContext.candidateText = applyPersonaEngine(pipelineContext.candidateText, thoughtProcess.extractedData.abstractConcept, pipelineContext.purpose, thoughtProcess.internalPlan);
+    pipelineContext.candidateText = applyMicroReasoning(pipelineContext.candidateText, pipelineContext.microInferences);
+    
+    if ((isConfused || thoughtProcess.internalPlan.isStrugglingTopic || thoughtProcess.internalPlan.lowUnderstanding) && pipelineContext.candidateTag === 'educational') {
+      pipelineContext.candidateText = simplifyResponse(pipelineContext.candidateText);
     }
+    
+    pipelineContext.candidateText = applyKnowledgeGraph(pipelineContext.candidateText, thoughtProcess.extractedData.subjects, pipelineContext.candidateTag);
+    pipelineContext.candidateText = selfQuestioningEngine(pipelineContext.candidateText, pipelineContext.normalized, thoughtProcess.internalPlan, pipelineContext.candidateTag);
+    pipelineContext.candidateText = applySmartFollowUp(pipelineContext.candidateText, pipelineContext.candidateTag, thoughtProcess.extractedData.goal, thoughtProcess.extractedData.subjects);
+    pipelineContext.candidateText = injectHumanMemory(pipelineContext.candidateText, isFirstMessageInSession);
+    pipelineContext.candidateText = applyCompanionLayer(pipelineContext.candidateText, pipelineContext.purpose);
+    console.log("✅ [Stage 9: Response Generation] Executed");
 
-    let finalResponseText = bestResponse.text;
-    let responseTag = bestResponse.tag;
+    // Stage 10: Quality Review
+    pipelineContext.score = evaluateResponseQuality(pipelineContext.candidateText, userMessage, pipelineContext.purpose, thoughtProcess);
+    
+    if (pipelineContext.score < 65 && pipelineContext.plannedResponseMode !== 'ANTI_CHEAT') {
+      console.log(`[QUALITY SCORER] Score (${pipelineContext.score}) is low. Triggering Error Recovery...`);
+      pipelineContext.candidateText = errorRecoverySystem(pipelineContext.normalized, userMessage, thoughtProcess);
+      pipelineContext.candidateTag = 'clarification';
+    }
+    
+    pipelineContext.finalText = applySelfCriticEngine(pipelineContext.candidateText, userMessage, pipelineContext.purpose, thoughtProcess);
+    console.log("✅ [Stage 10: Quality Review] Executed");
+    
+    pushContext('user', userMessage, pipelineContext.purpose, thoughtProcess.extractedData.subjects);
+    analyzeAndLearnFromMessage(userMessage, pipelineContext.candidateTag);
+    monitorConversationFlow(userMessage, pipelineContext.candidateTag, pipelineContext.purpose, isConfused);
+    generateImprovementReport();
+    pushContext('bot', pipelineContext.finalText, pipelineContext.purpose, thoughtProcess.extractedData.subjects);
 
-    // 🧠 HUMAN CONVERSATION MEMORY ENGINE (Inject subtle memory)
-    finalResponseText = injectHumanMemory(finalResponseText, isFirstMessageInSession);
-
-    // 🤝 AI COMPANION LAYER
-    finalResponseText = applyCompanionLayer(finalResponseText, purpose);
-
-    // 🧐 AI SELF CRITIC ENGINE
-    finalResponseText = applySelfCriticEngine(finalResponseText, userMessage, purpose, thoughtProcess);
-
-    // 4. SELF LEARNING MEMORY & CONTEXT (Analyze and record conversation)
-    analyzeAndLearnFromMessage(userMessage, responseTag);
-    monitorConversationFlow(userMessage, responseTag, purpose, isConfused);
-    generateImprovementReport(); // Auto generate suggestions silently
-    pushContext('bot', finalResponseText, purpose, thoughtProcess.extractedData.subjects);
-
-    return finalResponseText;
+    return pipelineContext.finalText;
   }
 
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
