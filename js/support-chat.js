@@ -235,6 +235,60 @@
     return finalScore;
   }
 
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // 🧐 AI SELF CRITIC ENGINE
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  function applySelfCriticEngine(candidateText, userMessage, purpose, thoughtProcess) {
+    if (!candidateText) return candidateText;
+    let refinedText = candidateText;
+    let flawsFound = [];
+
+    // 1. Natural Check
+    if (!/(بص|عشان|خد بالك|يا صاحبي|يا بطل|تعالى|على فكرة|أهلاً|يا هلا|طبعاً|خليني)/.test(refinedText) && refinedText.length > 20 && purpose !== 'SOCIAL_CONNECTION' && purpose !== 'CLARIFICATION') {
+      refinedText = 'بص يا بطل عشان تكون في الصورة.. ' + refinedText;
+      flawsFound.push('Not Natural -> Added Intro');
+    }
+
+    // 2. Relevance Check (Educational but too short)
+    if (purpose === 'EDUCATIONAL_EXPLANATION' && refinedText.length < 50 && !refinedText.includes('خليني أشرحلك')) {
+      refinedText += '\n\nده اللي قدرت أجمعهولك حالاً، بس لو محتاج تفصيل أكتر قولي!';
+      flawsFound.push('Too Short/Lacks Relevance -> Added Apology/Extension');
+    }
+
+    // 3. Repetition Check (Removing duplicated sentences)
+    const sentences = refinedText.split(/([.?!؟\n]+)/);
+    let uniqueSentences = [];
+    for (let i = 0; i < sentences.length; i++) {
+      let s = sentences[i].trim();
+      // Only check real sentences for exact duplicates to prevent stripping out legitimate parts
+      if (s.length > 15 && uniqueSentences.some(us => us === s)) {
+        flawsFound.push('Repetition -> Removed Duplicated Sentence');
+        if (sentences[i+1] && /^[.?!؟\n]+$/.test(sentences[i+1])) i++; // skip punctuation
+        continue;
+      }
+      uniqueSentences.push(sentences[i]);
+    }
+    refinedText = uniqueSentences.join('');
+
+    // 4. Ambiguity Check (Abrupt endings)
+    if (refinedText.length < 15 && purpose !== 'SOCIAL_CONNECTION' && purpose !== 'FOLLOW_UP') {
+      refinedText += '.. قصدك حاجة معينة أقدر أساعدك فيها؟';
+      flawsFound.push('Ambiguous/Abrupt -> Added Clarification Question');
+    }
+
+    // 5. Optimization (Adding emojis if missing)
+    if (refinedText.length > 30 && !/[\u{1F300}-\u{1F9FF}]/u.test(refinedText)) {
+      refinedText += ' 💡';
+      flawsFound.push('Lacks Warmth -> Added Emoji');
+    }
+
+    if (flawsFound.length > 0) {
+      console.log(`[AI SELF CRITIC] Triggered. Flaws Fixed:`, flawsFound);
+    }
+
+    return refinedText;
+  }
+
   function loadContextMemory() {
     try {
       const mem = sessionStorage.getItem('pf_context_memory');
@@ -452,6 +506,9 @@
 
     // 🧠 HUMAN CONVERSATION MEMORY ENGINE (Inject subtle memory)
     finalResponseText = injectHumanMemory(finalResponseText, isFirstMessageInSession);
+
+    // 🧐 AI SELF CRITIC ENGINE
+    finalResponseText = applySelfCriticEngine(finalResponseText, userMessage, purpose, thoughtProcess);
 
     // 4. SELF LEARNING MEMORY & CONTEXT (Analyze and record conversation)
     analyzeAndLearnFromMessage(userMessage, responseTag);
