@@ -236,6 +236,33 @@
   }
 
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // 🤝 AI COMPANION LAYER
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  const COMPANION_MESSAGES = [
+    'ملحوظة صغيرة: عاش يا بطل، كمل مذاكرة وأنا معاك.',
+    'على فكرة، مبسوط جداً إنك بتسأل كتير، ده معناه إنك عايز تفهم بجد.',
+    'خليك فاكر حلمك، كل دقيقة بتذاكرها بتقربك خطوة.',
+    'الله ينور عليك، تركيزك عالي النهاردة!',
+    'أنا فخور بيك إنك بتحاول تفهم وتسأل.. كمل يا بطل!'
+  ];
+
+  function applyCompanionLayer(candidateText, purpose) {
+    if (!candidateText || purpose === 'SOCIAL_CONNECTION' || purpose === 'CLARIFICATION') return candidateText;
+    
+    let messagesSinceLastCompanion = parseInt(sessionStorage.getItem('pf_companion_cooldown') || '0');
+    messagesSinceLastCompanion++;
+    
+    if (messagesSinceLastCompanion >= 4) {
+      let msg = pickRandom(COMPANION_MESSAGES);
+      sessionStorage.setItem('pf_companion_cooldown', '0');
+      return candidateText + '\n\n' + msg;
+    } else {
+      sessionStorage.setItem('pf_companion_cooldown', messagesSinceLastCompanion.toString());
+      return candidateText;
+    }
+  }
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // 🧐 AI SELF CRITIC ENGINE
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   function applySelfCriticEngine(candidateText, userMessage, purpose, thoughtProcess) {
@@ -506,6 +533,9 @@
 
     // 🧠 HUMAN CONVERSATION MEMORY ENGINE (Inject subtle memory)
     finalResponseText = injectHumanMemory(finalResponseText, isFirstMessageInSession);
+
+    // 🤝 AI COMPANION LAYER
+    finalResponseText = applyCompanionLayer(finalResponseText, purpose);
 
     // 🧐 AI SELF CRITIC ENGINE
     finalResponseText = applySelfCriticEngine(finalResponseText, userMessage, purpose, thoughtProcess);
