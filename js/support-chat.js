@@ -2528,44 +2528,33 @@
         renderHistory();
         return;
       }
-      
-      let replyText = getTemporarySafeBotReply(text);
+      // GEMINI-FIRST: AI is the primary responder. Local bot is fallback ONLY.
+      let replyText = null;
 
-      const fallbackPhrases = [
-          'عشان أقدر أساعدك', 
-          'مش متأكد تقصد إيه', 
-          'حاولت أفهم قصدك', 
-          'حاسس إني تهت',
-          'الكلام دخل في بعضه', 
-          'محتاج تفاصيل أكتر', 
-          'تقصد إيه بالظبط', 
-          'أنا لقطت إن كلامك',
-          'مش قادر أحدد', 
-          'ناقصه شوية تفاصيل', 
-          'تاريخ ولا جغرافيا',
-          'كلامك كبير عليا',
-          'تفتكر إيه أهمية ده',
-          'متقلقش، كل حاجة هتبقى تمام'
-      ];
+      // Only skip Gemini for pure technical support keywords
+      const isTechSupport = /(بايظ|مش شغال|عطلان|دفع|اشتراك|تسجيل|باسورد|حساب|موقع|مشكلة فنية)/.test(text);
 
-      const isWeakConfidence = fallbackPhrases.some(phrase => replyText.includes(phrase));
-
-      if (window.askGeminiDirectly && (isWeakConfidence || !/(بايظ|مش شغال|عطلان|مشكلة|دفع|اشتراك|تسجيل|باسورد|حساب|موقع)/.test(text))) {
-          console.log('[GEMINI DEV FALLBACK] Escalating to AI...');
+      if (!isTechSupport && window.askGeminiDirectly) {
+          console.log('[GEMINI PRIMARY] Sending to AI first...');
           addTyping();
           try {
              const aiResponse = await window.askGeminiDirectly(text);
              if (!aiResponse.fallback && aiResponse.reply) {
                  replyText = aiResponse.reply;
+                 console.log('[GEMINI SUCCESS] Got AI response.');
              } else {
-                 console.log('[LLM ERROR] AI Fallback failed:', aiResponse.reason);
+                 console.warn('[GEMINI FAILED] Reason:', aiResponse.reason, '- falling back to local bot.');
              }
           } catch(e) {
-             console.log('[LLM ERROR]', e);
+             console.error('[GEMINI ERROR]', e);
           }
           removeTyping();
-      } else {
-          console.log('[LOCAL BOT HIT] Local engine handled the query.');
+      }
+
+      // Fallback: Use local bot ONLY if Gemini didn't respond
+      if (!replyText) {
+          replyText = getTemporarySafeBotReply(text);
+          console.log('[LOCAL BOT FALLBACK] Using local engine.');
       }
 
       // Enrich context and learn from interaction

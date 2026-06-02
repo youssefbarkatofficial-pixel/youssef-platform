@@ -83,15 +83,7 @@ window.DISABLE_DIRECT_GEMINI = false; // Emergency kill switch
             return { fallback: true, reply: null, reason: "cooldown_active" };
         }
 
-        // Hard Limit: Hourly usage
-        const hourlyUsage = getHourlyUsage();
-        if (hourlyUsage.count >= MAX_REQUESTS_PER_HOUR) {
-            console.error(`DEVELOPMENT ONLY: Hourly limit reached (${MAX_REQUESTS_PER_HOUR} requests/hour).`);
-            return { fallback: true, reply: null, reason: "hourly_limit_reached" };
-        }
-
         lastRequestTime = now;
-        incrementHourlyUsage(hourlyUsage);
 
         const models = ["gemini-2.5-flash", "gemini-2.5-pro", "gemini-2.0-flash"];
         let systemInstructionText = "أنت المساعد الذكي (البوصلة) في منصة الأستاذ يوسف بركات لتعليم التاريخ والجغرافيا للثانوية العامة والإعدادية بمصر. مهمتك: الإجابة بشكل مباشر، علمي، ومختصر ومبسط على أسئلة الطالب. لا تسأل الطالب عما يقصده بل اشرح المعلومة فوراً بناءً على استنتاجك الأقرب للواقع. تكلم بلطف وتشجيع.";
