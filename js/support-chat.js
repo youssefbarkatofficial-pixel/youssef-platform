@@ -2531,12 +2531,27 @@
       
       let replyText = getTemporarySafeBotReply(text);
 
-      const isWeakConfidence = replyText.includes('عشان أقدر أساعدك') || 
-                               replyText.includes('مش متأكد تقصد إيه') ||
-                               replyText.includes('حاولت أفهم قصدك');
+      const fallbackPhrases = [
+          'عشان أقدر أساعدك', 
+          'مش متأكد تقصد إيه', 
+          'حاولت أفهم قصدك', 
+          'حاسس إني تهت',
+          'الكلام دخل في بعضه', 
+          'محتاج تفاصيل أكتر', 
+          'تقصد إيه بالظبط', 
+          'أنا لقطت إن كلامك',
+          'مش قادر أحدد', 
+          'ناقصه شوية تفاصيل', 
+          'تاريخ ولا جغرافيا',
+          'كلامك كبير عليا',
+          'تفتكر إيه أهمية ده',
+          'متقلقش، كل حاجة هتبقى تمام'
+      ];
 
-      if (isWeakConfidence && window.askGeminiDirectly) {
-          console.log('[GEMINI DEV FALLBACK] Local bot weak confidence. Escalating to AI...');
+      const isWeakConfidence = fallbackPhrases.some(phrase => replyText.includes(phrase));
+
+      if (window.askGeminiDirectly && (isWeakConfidence || !/(بايظ|مش شغال|عطلان|مشكلة|دفع|اشتراك|تسجيل|باسورد|حساب|موقع)/.test(text))) {
+          console.log('[GEMINI DEV FALLBACK] Escalating to AI...');
           addTyping();
           try {
              const aiResponse = await window.askGeminiDirectly(text);
