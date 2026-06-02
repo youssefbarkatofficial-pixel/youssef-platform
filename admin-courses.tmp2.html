@@ -1,9 +1,9 @@
-๏ปฟ<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ุฅุฏุงุฑุฉ ุงูููุฑุณุงุช - ููุญุฉ ุงูุฅุฏุงุฑุฉ</title>
+    <title>ลฯวัษ วแ฿ๆัำวส - แๆอษ วแลฯวัษ</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/dashboard.css">
@@ -33,32 +33,32 @@
 
     <header class="navbar glass-panel" style="border-bottom-color: var(--royal-gold);">
         <a href="index.html" class="nav-brand">
-            <div class="logo-circle" style="color: #fff; background: var(--royal-gold);">ู</div>
-            <span class="nav-brand-text text-gold">ููุญุฉ ุงูุฅุฏุงุฑุฉ - ููุณู ุจุฑูุงุช</span>
+            <div class="logo-circle" style="color: #fff; background: var(--royal-gold);">ํ</div>
+            <span class="nav-brand-text text-gold">แๆอษ วแลฯวัษ - ํๆำÝ ศั฿วส</span>
         </a>
         <div class="nav-actions">
-            <a href="#" id="logoutBtn" class="btn btn-outline" style="border-color: #e74c3c; color: #e74c3c; padding: 8px 15px; border-radius: 20px;">ุฎุฑูุฌ <i class="fas fa-sign-out-alt"></i></a>
+            <a href="#" id="logoutBtn" class="btn btn-outline" style="border-color: #e74c3c; color: #e74c3c; padding: 8px 15px; border-radius: 20px;">ฮัๆฬ <i class="fas fa-sign-out-alt"></i></a>
         </div>
     </header>
 
     <div class="dashboard-layout">
         <aside class="sidebar" id="sidebar" style="border-left-color: var(--royal-gold);">
             <ul class="sidebar-nav" style="margin-top: 20px;">
-                <li><a href="admin-dashboard.html"><i class="fas fa-chart-line"></i> ุงูุฅุญุตุงุฆูุงุช ุงูุนุงู…ุฉ</a></li>
-                <li><a href="admin-students.html"><i class="fas fa-users"></i> ุฅุฏุงุฑุฉ ุงูุทูุงุจ</a></li>
-                <li><a href="admin-students-details.html"><i class="fas fa-user-graduate"></i> ุฅุญุตุงุฆูุงุช ุงูุทูุงุจ (ุชูุตููู)</a></li>
-                <li><a href="admin-courses.html" class="active"><i class="fas fa-book-open"></i> ุฅุฏุงุฑุฉ ุงูููุฑุณุงุช</a></li>
-                <li><a href="admin-upload.html"><i class="fas fa-bolt"></i> ุงูุฑูุน ุงูุณุฑูุน</a></li>
-                <li><a href="admin-payments.html"><i class="fas fa-money-check-alt"></i> ู…ุฑุงุฌุนุฉ ุงูู…ุฏููุนุงุช</a></li>
-                <li><a href="admin-notifications.html"><i class="fas fa-bell"></i> ุฅุฑุณุงู ุงูุฅุดุนุงุฑุงุช</a></li>
-                <li><a href="admin-settings.html"><i class="fas fa-cog"></i> ุฅุนุฏุงุฏุงุช ุงูู…ูุตุฉ</a></li>
+                <li><a href="admin-dashboard.html"><i class="fas fa-chart-line"></i> วแลอีวฦํวส วแฺวใษ</a></li>
+                <li><a href="admin-students.html"><i class="fas fa-users"></i> ลฯวัษ วแุแวศ</a></li>
+                <li><a href="admin-students-details.html"><i class="fas fa-user-graduate"></i> ลอีวฦํวส วแุแวศ (สÝีํแํ)</a></li>
+                <li><a href="admin-courses.html" class="active"><i class="fas fa-book-open"></i> ลฯวัษ วแ฿ๆัำวส</a></li>
+                <li><a href="admin-upload.html"><i class="fas fa-bolt"></i> วแัÝฺ วแำัํฺ</a></li>
+                <li><a href="admin-payments.html"><i class="fas fa-money-check-alt"></i> ใัวฬฺษ วแใฯÝๆฺวส</a></li>
+                <li><a href="admin-notifications.html"><i class="fas fa-bell"></i> ลัำวแ วแลิฺวัวส</a></li>
+                <li><a href="admin-settings.html"><i class="fas fa-cog"></i> ลฺฯวฯวส วแใไีษ</a></li>
             </ul>
         </aside>
 
         <main class="main-content">
             <div class="page-header">
-                <h1 class="page-title">ุฅุฏุงุฑุฉ ุงูููุฑุณุงุช</h1>
-                <button class="btn btn-gold" id="btnAddNewCourse"><i class="fas fa-plus mr-2"></i> ุฅุถุงูุฉ ููุฑุณ ุฌุฏูุฏ</button>
+                <h1 class="page-title">ลฯวัษ วแ฿ๆัำวส</h1>
+                <button class="btn btn-gold" id="btnAddNewCourse"><i class="fas fa-plus mr-2"></i> ลึวÝษ ฿ๆัำ ฬฯํฯ</button>
             </div>
 
             <div class="glass-panel dash-panel">
@@ -66,12 +66,12 @@
                     <table class="admin-table" id="coursesTable">
                         <thead>
                             <tr>
-                                <th>ุตูุฑุฉ</th>
-                                <th>ุงุณู… ุงูููุฑุณ</th>
-                                <th>ุงูุตู</th>
-                                <th>ุงูุณุนุฑ</th>
-                                <th>ุงูุญุงูุฉ</th>
-                                <th>ุฅุฌุฑุงุกุงุช</th>
+                                <th>ีๆัษ</th>
+                                <th>วำใ วแ฿ๆัำ</th>
+                                <th>วแีÝ</th>
+                                <th>วแำฺั</th>
+                                <th>วแอวแษ</th>
+                                <th>ลฬัวมวส</th>
                             </tr>
                         </thead>
                         <tbody id="coursesTableBody"></tbody>
@@ -85,54 +85,54 @@
     <div id="fullCourseEditor" class="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000; overflow-y: auto; padding: 40px 0;">
         <div class="glass-panel" style="width: 95%; max-width: 900px; margin: 0 auto; padding: 30px; position: relative;">
             <button id="closeFullEditor" style="position: absolute; top: 20px; right: 20px; background: transparent; border: none; color: #fff; font-size: 1.8rem; cursor: pointer;"><i class="fas fa-times"></i></button>
-            <h2 class="text-gold mb-2" id="editorTitle">ุชุนุฏูู ุงูููุฑุณ</h2>
+            <h2 class="text-gold mb-2" id="editorTitle">สฺฯํแ วแ฿ๆัำ</h2>
             
             <input type="hidden" id="fcId">
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
                 <div class="form-group">
-                    <label>ุนููุงู ุงูููุฑุณ</label>
+                    <label>ฺไๆวไ วแ฿ๆัำ</label>
                     <input type="text" id="fcTitle" class="form-control" oninput="markUnsaved()">
                 </div>
                 <div class="form-group">
-                    <label>ุงูุณุนุฑ (ุฌ.ู…)</label>
+                    <label>วแำฺั (ฬ.ใ)</label>
                     <input type="number" id="fcPrice" class="form-control" oninput="markUnsaved()">
                 </div>
                 <div class="form-group" style="grid-column: 1/-1;">
-                    <label>ูุตู ุงูููุฑุณ</label>
+                    <label>ๆีÝ วแ฿ๆัำ</label>
                     <textarea id="fcDesc" class="form-control" rows="3" oninput="markUnsaved()"></textarea>
                 </div>
             </div>
 
-            <h2 style="color: var(--accent-cyan); margin-top: 40px; border-bottom: 2px solid rgba(255,255,255,0.1); padding-bottom: 10px;">ุฅุฏุงุฑุฉ ุงูู…ุญุชููุงุช</h2>
+            <h2 style="color: var(--accent-cyan); margin-top: 40px; border-bottom: 2px solid rgba(255,255,255,0.1); padding-bottom: 10px;">ลฯวัษ วแใอสๆํวส</h2>
             
             <!-- Lectures Section -->
             <div class="section-header">
-                <h3 style="color: var(--text-primary);"><i class="fas fa-play-circle text-gold mr-2"></i> ุงูู…ุญุงุถุฑุงุช (ูุงููุญุฏุงุช)</h3>
-                <button class="btn btn-outline" style="padding: 5px 15px;" onclick="addContentItem('lectures')"><i class="fas fa-plus"></i> ุฅุถุงูุฉ ู…ุญุงุถุฑุฉ</button>
+                <h3 style="color: var(--text-primary);"><i class="fas fa-play-circle text-gold mr-2"></i> วแใอวึัวส (ๆวแๆอฯวส)</h3>
+                <button class="btn btn-outline" style="padding: 5px 15px;" onclick="addContentItem('lectures')"><i class="fas fa-plus"></i> ลึวÝษ ใอวึัษ</button>
             </div>
             <div id="fcLecturesList"></div>
 
             <!-- Homeworks Section -->
             <div class="section-header">
-                <h3 style="color: var(--text-primary);"><i class="fas fa-tasks text-gold mr-2"></i> ุงููุงุฌุจุงุช</h3>
-                <button class="btn btn-outline" style="padding: 5px 15px;" onclick="addContentItem('homeworks')"><i class="fas fa-plus"></i> ุฅุถุงูุฉ ูุงุฌุจ</button>
+                <h3 style="color: var(--text-primary);"><i class="fas fa-tasks text-gold mr-2"></i> วแๆวฬศวส</h3>
+                <button class="btn btn-outline" style="padding: 5px 15px;" onclick="addContentItem('homeworks')"><i class="fas fa-plus"></i> ลึวÝษ ๆวฬศ</button>
             </div>
             <div id="fcHomeworksList"></div>
 
             <!-- Exams Section -->
             <div class="section-header">
-                <h3 style="color: var(--text-primary);"><i class="fas fa-clipboard-list text-gold mr-2"></i> ุงูุงู…ุชุญุงูุงุช</h3>
-                <button class="btn btn-outline" style="padding: 5px 15px;" onclick="addContentItem('exams')"><i class="fas fa-plus"></i> ุฅุถุงูุฉ ุงู…ุชุญุงู</button>
+                <h3 style="color: var(--text-primary);"><i class="fas fa-clipboard-list text-gold mr-2"></i> วแวใสอวไวส</h3>
+                <button class="btn btn-outline" style="padding: 5px 15px;" onclick="addContentItem('exams')"><i class="fas fa-plus"></i> ลึวÝษ วใสอวไ</button>
             </div>
             <div id="fcExamsList"></div>
             <!-- Custom Sections -->
             <div id="fcCustomSectionsContainer"></div>
             <div style="margin-top: 20px; text-align: center;">
-                <button class="btn btn-outline" style="border-color: var(--accent-cyan); color: var(--accent-cyan);" onclick="addCustomSection()"><i class="fas fa-folder-plus"></i> ุฅุถุงูุฉ ูุณู… ู…ุฎุตุต</button>
+                <button class="btn btn-outline" style="border-color: var(--accent-cyan); color: var(--accent-cyan);" onclick="addCustomSection()"><i class="fas fa-folder-plus"></i> ลึวÝษ Þำใ ใฮีี</button>
             </div>
 
             <div style="margin-top: 40px; text-align: left;">
-                <button class="btn btn-gold btn-large" id="btnSaveFullCourse"><i class="fas fa-save mr-2"></i> ุญูุธ ุงูุชุนุฏููุงุช</button>
+                <button class="btn btn-gold btn-large" id="btnSaveFullCourse"><i class="fas fa-save mr-2"></i> อÝู วแสฺฯํแวส</button>
             </div>
         </div>
     </div>
@@ -141,10 +141,10 @@
     <div id="confirmSaveModal" class="confirm-modal">
         <div class="confirm-modal-content">
             <i class="fas fa-question-circle text-gold" style="font-size: 4rem; margin-bottom: 20px;"></i>
-            <h3>ูู ุฃูุช ู…ุชุฃูุฏ ู…ู ุญูุธ ูุฐู ุงูุชุนุฏููุงุชุ</h3>
+            <h3>ๅแ รไส ใสร฿ฯ ใไ อÝู ๅะๅ วแสฺฯํแวสฟ</h3>
             <div class="confirm-modal-actions">
-                <button class="btn btn-green" id="btnConfirmSaveYes" style="flex: 1;">ูุนู…ุ ุงุญูุธ</button>
-                <button class="btn btn-outline" id="btnConfirmSaveNo" style="flex: 1;">ูุงุ ุชุฑุงุฌุน</button>
+                <button class="btn btn-green" id="btnConfirmSaveYes" style="flex: 1;">ไฺใก วอÝู</button>
+                <button class="btn btn-outline" id="btnConfirmSaveNo" style="flex: 1;">แวก สัวฬฺ</button>
             </div>
         </div>
     </div>
@@ -153,11 +153,11 @@
     <div id="confirmExitModal" class="confirm-modal">
         <div class="confirm-modal-content">
             <i class="fas fa-exclamation-triangle text-orange" style="font-size: 4rem; margin-bottom: 20px; color: #e67e22;"></i>
-            <h3 style="margin-bottom: 10px;">ูุฏูู ุชุนุฏููุงุช ูู… ูุชู… ุญูุธูุง!</h3>
-            <p style="color: rgba(255,255,255,0.7); margin-bottom: 20px;">ูู ุชุฑูุฏ ุงุณุชูู…ุงู ุงูุชุนุฏูู ุฃู… ุฅูุบุงุก ุงูุชุนุฏููุงุช ูุงูุฎุฑูุฌุ</p>
+            <h3 style="margin-bottom: 10px;">แฯํ฿ สฺฯํแวส แใ ํสใ อÝูๅว!</h3>
+            <p style="color: rgba(255,255,255,0.7); margin-bottom: 20px;">ๅแ สัํฯ วำส฿ใวแ วแสฺฯํแ รใ ลแÛวม วแสฺฯํแวส ๆวแฮัๆฬฟ</p>
             <div class="confirm-modal-actions">
-                <button class="btn btn-outline" id="btnExitDiscard" style="flex: 1; border-color: #e74c3c; color: #e74c3c;">ุฑูุถ ุงูุชุนุฏูู ูุงูุฎุฑูุฌ</button>
-                <button class="btn btn-green" id="btnExitResume" style="flex: 1;">ุงุณุชูู…ุงู ุงูุชุนุฏูู</button>
+                <button class="btn btn-outline" id="btnExitDiscard" style="flex: 1; border-color: #e74c3c; color: #e74c3c;">ัÝึ วแสฺฯํแ ๆวแฮัๆฬ</button>
+                <button class="btn btn-green" id="btnExitResume" style="flex: 1;">วำส฿ใวแ วแสฺฯํแ</button>
             </div>
         </div>
     </div>
@@ -169,7 +169,7 @@
                 let tempContents = { lectures: [], homeworks: [], exams: [], trainings: [], customSections: [] };
 
         window.addCustomSection = function() {
-            const name = prompt('ุฃุฏุฎู ุงุณู… ุงููุณู… ุงูุฌุฏูุฏ:');
+            const name = prompt('รฯฮแ วำใ วแÞำใ วแฬฯํฯ:');
             if(name) {
                 if(!tempContents.customSections) tempContents.customSections = [];
                 tempContents.customSections.push({ id: 'sec_' + Date.now(), name: name, items: [] });
@@ -179,7 +179,7 @@
         };
 
         window.removeCustomSection = function(index) {
-            if(confirm('ูู ุฃูุช ู…ุชุฃูุฏ ู…ู ุญุฐู ูุฐุง ุงููุณู… ููู ู…ุญุชููุงุชูุ')) {
+            if(confirm('ๅแ รไส ใสร฿ฯ ใไ อะÝ ๅะว วแÞำใ ๆ฿แ ใอสๆํวสๅฟ')) {
                 tempContents.customSections.splice(index, 1);
                 markUnsaved();
                 renderContentLists();
@@ -187,13 +187,13 @@
         };
 
         window.addCustomItem = function(sectionIndex) {
-            tempContents.customSections[sectionIndex].items.push({ title: 'ุนูุตุฑ ุฌุฏูุฏ', type: 'file' });
+            tempContents.customSections[sectionIndex].items.push({ title: 'ฺไีั ฬฯํฯ', type: 'file' });
             markUnsaved();
             renderContentLists();
         };
 
         window.removeCustomItem = function(sectionIndex, itemIndex) {
-            if(confirm('ุญุฐู ูุฐุง ุงูุนูุตุฑุ')) {
+            if(confirm('อะÝ ๅะว วแฺไีัฟ')) {
                 tempContents.customSections[sectionIndex].items.splice(itemIndex, 1);
                 markUnsaved();
                 renderContentLists();
@@ -218,7 +218,7 @@
                     <div class="section-header">
                         <h3 style="color: var(--accent-cyan);"><i class="fas fa-folder-open mr-2"></i> +sec.name+</h3>
                         <div>
-                            <button class="btn btn-outline" style="padding: 5px 10px; font-size: 0.8rem;" onclick="addCustomItem(+sIdx+)"><i class="fas fa-plus"></i> ุฅุถุงูุฉ ุนูุตุฑ</button>
+                            <button class="btn btn-outline" style="padding: 5px 10px; font-size: 0.8rem;" onclick="addCustomItem(+sIdx+)"><i class="fas fa-plus"></i> ลึวÝษ ฺไีั</button>
                             <button class="btn btn-outline" style="padding: 5px 10px; font-size: 0.8rem; color: #e74c3c; border-color: #e74c3c;" onclick="removeCustomSection(+sIdx+)"><i class="fas fa-trash"></i></button>
                         </div>
                     </div>
@@ -228,7 +228,7 @@
                 
                 const listDiv = document.getElementById('customSectionList_' + sIdx);
                 if(sec.items.length === 0) {
-                    listDiv.innerHTML = '<p style="color: rgba(255,255,255,0.4); text-align: center; padding: 10px;">ูุง ููุฌุฏ ู…ุญุชูู ูู ูุฐุง ุงููุณู….</p>';
+                    listDiv.innerHTML = '<p style="color: rgba(255,255,255,0.4); text-align: center; padding: 10px;">แว ํๆฬฯ ใอสๆ์ Ýํ ๅะว วแÞำใ.</p>';
                 } else {
                     sec.items.forEach((item, iIdx) => {
                         const itemDiv = document.createElement('div');
@@ -258,21 +258,21 @@
                 const tr = document.createElement('tr');
                 
                 let visibilityBtn = c.hidden ? 
-                    `<button class="btn btn-outline" style="padding: 5px; font-size: 0.8rem;" onclick="toggleCourseVisibility('${c.id}')" title="ุฅุธูุงุฑ"><i class="fas fa-eye-slash text-orange"></i></button>` :
-                    `<button class="btn btn-outline" style="padding: 5px; font-size: 0.8rem;" onclick="toggleCourseVisibility('${c.id}')" title="ุฅุฎูุงุก"><i class="fas fa-eye text-cyan"></i></button>`;
+                    `<button class="btn btn-outline" style="padding: 5px; font-size: 0.8rem;" onclick="toggleCourseVisibility('${c.id}')" title="ลูๅวั"><i class="fas fa-eye-slash text-orange"></i></button>` :
+                    `<button class="btn btn-outline" style="padding: 5px; font-size: 0.8rem;" onclick="toggleCourseVisibility('${c.id}')" title="ลฮÝวม"><i class="fas fa-eye text-cyan"></i></button>`;
                 
                 let finishBtn = c.finished ?
-                    `<button class="btn btn-outline" style="padding: 5px; font-size: 0.8rem; border-color: #e74c3c; color: #e74c3c;" onclick="toggleCourseFinish('${c.id}')" title="ุฅูุบุงุก ุงูุงูุชูุงุก"><i class="fas fa-calendar-times"></i></button>` :
-                    `<button class="btn btn-outline" style="padding: 5px; font-size: 0.8rem;" onclick="toggleCourseFinish('${c.id}')" title="ุชุญุฏูุฏ ูู…ูุชูู"><i class="fas fa-calendar-check text-green"></i></button>`;
+                    `<button class="btn btn-outline" style="padding: 5px; font-size: 0.8rem; border-color: #e74c3c; color: #e74c3c;" onclick="toggleCourseFinish('${c.id}')" title="ลแÛวม วแวไสๅวม"><i class="fas fa-calendar-times"></i></button>` :
+                    `<button class="btn btn-outline" style="padding: 5px; font-size: 0.8rem;" onclick="toggleCourseFinish('${c.id}')" title="สอฯํฯ ฿ใไสๅํ"><i class="fas fa-calendar-check text-green"></i></button>`;
 
                 tr.innerHTML = `
                     <td><img src="${c.image}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px; ${c.finished ? 'filter: grayscale(1); opacity: 0.5;' : ''}"></td>
                     <td style="${c.finished ? 'text-decoration: line-through; opacity: 0.5;' : ''}">${c.title}</td>
                     <td><span class="badge" style="background: rgba(255,255,255,0.1);">${c.grade}</span></td>
-                    <td>${c.price} ุฌ.ู…</td>
-                    <td>${c.hidden ? '<span class="badge" style="background: rgba(231, 76, 60, 0.2); color: #e74c3c;">ู…ุฎูู</span>' : (c.finished ? '<span class="badge" style="background: rgba(149, 165, 166, 0.2); color: #95a5a6;">ู…ูุชูู</span>' : '<span class="badge" style="background: rgba(46, 204, 113, 0.2); color: #2ecc71;">ู…ุนูู</span>')}</td>
+                    <td>${c.price} ฬ.ใ</td>
+                    <td>${c.hidden ? '<span class="badge" style="background: rgba(231, 76, 60, 0.2); color: #e74c3c;">ใฮÝํ</span>' : (c.finished ? '<span class="badge" style="background: rgba(149, 165, 166, 0.2); color: #95a5a6;">ใไสๅํ</span>' : '<span class="badge" style="background: rgba(46, 204, 113, 0.2); color: #2ecc71;">ใฺแไ</span>')}</td>
                     <td style="display: flex; gap: 5px;">
-                        <button class="btn btn-green" style="padding: 5px 10px; font-size: 0.8rem;" onclick="openCourseEditor('${c.id}')"><i class="fas fa-edit"></i> ุชุนุฏูู</button>
+                        <button class="btn btn-green" style="padding: 5px 10px; font-size: 0.8rem;" onclick="openCourseEditor('${c.id}')"><i class="fas fa-edit"></i> สฺฯํแ</button>
                         ${visibilityBtn}
                         ${finishBtn}
                     </td>
@@ -306,7 +306,7 @@
                 listEl.innerHTML = '';
                 
                 if (tempContents[type].length === 0) {
-                    listEl.innerHTML = `<p style="color: rgba(255,255,255,0.4); text-align: center; padding: 10px;">ูุง ููุฌุฏ ู…ุญุชูู. ุงุถุบุท ุฅุถุงูุฉ.</p>`;
+                    listEl.innerHTML = `<p style="color: rgba(255,255,255,0.4); text-align: center; padding: 10px;">แว ํๆฬฯ ใอสๆ์. วึÛุ ลึวÝษ.</p>`;
                     return;
                 }
                 
@@ -339,7 +339,7 @@
                             </div>
                         </div>
                         <div class="content-item-actions">
-                            <button onclick="removeContentItem('${type}', ${index})" title="ุญุฐู"><i class="fas fa-trash"></i></button>
+                            <button onclick="removeContentItem('${type}', ${index})" title="อะÝ"><i class="fas fa-trash"></i></button>
                         </div>
                     `;
                     listEl.appendChild(div);
@@ -357,13 +357,13 @@
             if (type === 'homeworks') defType = 'task';
             if (type === 'exams') defType = 'quiz';
             
-            tempContents[type].push({ title: 'ู…ุญุชูู ุฌุฏูุฏ', type: defType });
+            tempContents[type].push({ title: 'ใอสๆ์ ฬฯํฯ', type: defType });
             markUnsaved();
             renderContentLists();
         };
 
         window.removeContentItem = function(type, index) {
-            if(confirm('ูู ุฃูุช ู…ุชุฃูุฏ ู…ู ุญุฐู ูุฐุง ุงูุนูุตุฑุ (ูุฌุจ ุญูุธ ุงูุชุนุฏููุงุช ูุชุฃููุฏ ุงูุญุฐู)')) {
+            if(confirm('ๅแ รไส ใสร฿ฯ ใไ อะÝ ๅะว วแฺไีัฟ (ํฬศ อÝู วแสฺฯํแวส แสร฿ํฯ วแอะÝ)')) {
                 tempContents[type].splice(index, 1);
                 markUnsaved();
                 renderContentLists();
@@ -375,7 +375,7 @@
             if (id) {
                 const c = adminCourses.find(x => x.id === id);
                 currentEditingCourse = c;
-                document.getElementById('editorTitle').textContent = 'ุชุนุฏูู ุงูููุฑุณ: ' + c.title;
+                document.getElementById('editorTitle').textContent = 'สฺฯํแ วแ฿ๆัำ: ' + c.title;
                 document.getElementById('fcId').value = c.id;
                 document.getElementById('fcTitle').value = c.title;
                 document.getElementById('fcPrice').value = c.price;
@@ -391,7 +391,7 @@
                 }
             } else {
                 currentEditingCourse = null;
-                document.getElementById('editorTitle').textContent = 'ุฅุถุงูุฉ ููุฑุณ ุฌุฏูุฏ';
+                document.getElementById('editorTitle').textContent = 'ลึวÝษ ฿ๆัำ ฬฯํฯ';
                 document.getElementById('fcId').value = '';
                 document.getElementById('fcTitle').value = '';
                 document.getElementById('fcPrice').value = '';
@@ -408,7 +408,7 @@
             if (hasUnsavedChanges) {
                 const exitModal = document.getElementById('confirmExitModal');
                 exitModal.style.display = 'flex';
-                // Focus on "ุงุณุชูู…ุงู ุงูุชุนุฏูู" (Resume) as requested
+                // Focus on "วำส฿ใวแ วแสฺฯํแ" (Resume) as requested
                 document.getElementById('btnExitResume').focus();
             } else {
                 document.getElementById('fullCourseEditor').style.display = 'none';
@@ -429,7 +429,7 @@
         document.getElementById('btnSaveFullCourse').addEventListener('click', () => {
             const saveModal = document.getElementById('confirmSaveModal');
             saveModal.style.display = 'flex';
-            // Focus on "ูุง" (No) as requested by user
+            // Focus on "แว" (No) as requested by user
             document.getElementById('btnConfirmSaveNo').focus();
         });
 
@@ -446,7 +446,7 @@
             const desc = document.getElementById('fcDesc').value.trim();
             
             if(!title || !price) {
-                alert('ุงูุฑุฌุงุก ุฅุฏุฎุงู ุงูุนููุงู ูุงูุณุนุฑ');
+                alert('วแัฬวม ลฯฮวแ วแฺไๆวไ ๆวแำฺั');
                 document.getElementById('confirmSaveModal').style.display = 'none';
                 return;
             }
@@ -476,8 +476,8 @@
             document.getElementById('confirmSaveModal').style.display = 'none';
             document.getElementById('fullCourseEditor').style.display = 'none';
             renderCoursesTable();
-            if(window.showToast) window.showToast('ุชู… ุงูุญูุธ ุจูุฌุงุญ!', 'success');
-            else alert('ุชู… ุงูุญูุธ ุจูุฌุงุญ');
+            if(window.showToast) window.showToast('สใ วแอÝู ศไฬวอ!', 'success');
+            else alert('สใ วแอÝู ศไฬวอ');
         });
 
         document.getElementById('btnAddNewCourse').addEventListener('click', () => {
@@ -504,7 +504,7 @@
             renderCoursesTable();
         });
     </script>
-    <script src="js/support-chat.js"></script>
+    <script src="js/support-chat.js?v=3.0"></script>
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
@@ -514,6 +514,7 @@
     <script src="js/firebase-service.js"></script>
 </body>
 </html>
+
 
 
 
