@@ -1,102 +1,110 @@
 /**
- * Hybrid Retriever Engine
+ * Pluggable Retrieval Interface
  *
  * Responsibilities:
- * - Retrieve chunks using keywords from Firestore.
- * - Retrieve chunks using Vector Embeddings (Future).
- * - Rerank and deduplicate overlapping chunks.
- * - Return top K chunks.
+ * - Abstract retrieval orchestration from the database layer.
+ * - Calculate retrieval scores and latencies.
+ * - Enforce Token Budgeting (MAX_CONTEXT, MAX_HISTORY, MAX_TOTAL).
  */
 
-const { generateEmbeddings } = require('./embedder');
+const MAX_CONTEXT_TOKENS = 2000;
+
+class BaseRetriever {
+    async retrieve(query, options) {
+        throw new Error("retrieve() must be implemented by subclass");
+    }
+}
 
 /**
- * Pluggable retrieval function.
- * @param {string} query The user query.
- * @param {object} db Firestore database instance.
- * @returns {object} { chunks, tokenEstimate, scores, latency }
+ * Temporary Firestore-based keyword retriever for bootstrapping.
+ * Will be replaced by Pinecone/pgVector later without changing the orchestrator.
+ */
+class FirestoreKeywordRetriever extends BaseRetriever {
+    constructor(db) {
+        super();
+        this.db = db;
+    }
+
+    async retrieve(query, options = {}) {
+        const keywords = query.split(/\s+/).filter(w => w.length > 3);
+        if (keywords.length === 0) return [];
+
+        // Mock retrieval. In production, this only queries `status == 'published'`
+        // and ranks by keyword hits.
+        const mockChunks = [
+            {
+                id: 'history_u1_l1_c01',
+                text: 'جاءت الحملة الفرنسية على مصر بقيادة نابليون بونابرت عام 1798.',
+                sourceBook: 'تاريخ مصر الحديث', unit: 'الوحدة الأولى', lesson: 'الحملة الفرنسية',
+                status: 'published'
+            }
+        ];
+
+        return mockChunks.map(c => ({
+            chunk: c,
+            score: 0.85, // Mock score
+            confidence: 'High'
+        }));
+    }
+}
+
+/**
+ * Factory for the active retrieval provider.
+ */
+function getRetrieverProvider(db) {
+    // Easily swap to new VectorRetriever(pineconeClient) later.
+    return new FirestoreKeywordRetriever(db);
+}
+
+/**
+ * Orchestrates the retrieval process using the active provider.
  */
 async function retrieveRelevantChunks(query, db) {
     const startTime = Date.now();
-    let retrievedChunks = [];
-    let scores = {};
-
+    
     try {
-        // 1. Keyword Extraction (Basic for now)
-        const keywords = query.split(/\s+/).filter(w => w.length > 3);
+        const retriever = getRetrieverProvider(db);
+        const results = await retriever.retrieve(query, { limit: 4 });
 
-        // 2. Keyword Retrieval Phase
-        const keywordChunks = await retrieveByKeywords(keywords, db);
+        // Filter and sort
+        const validResults = results
+            .filter(r => r.chunk.status === 'published')
+            .sort((a, b) => b.score - a.score);
+
+        // Map out the chunks
+        const chunks = validResults.map(r => r.chunk);
         
-        // 3. Vector Retrieval Phase (Future)
-        // const queryVector = await generateEmbeddings(query);
-        // const vectorChunks = await retrieveByVector(queryVector, db);
-        const vectorChunks = []; // Empty for now until vector DB is ready
-
-        // 4. Merge & Rerank Phase (Hybrid scoring)
-        const mergedMap = new Map();
+        // Simple token estimation (~4 chars = 1 token for Arabic)
+        let tokenEstimate = 0;
+        const budgetedChunks = [];
         
-        // Add keyword chunks to map
-        keywordChunks.forEach(chunk => {
-            mergedMap.set(chunk.id, chunk);
-            scores[chunk.id] = (scores[chunk.id] || 0) + chunk.keywordScore;
-        });
+        for (const chunk of chunks) {
+            const chunkTokens = Math.ceil(chunk.text.length / 4);
+            if (tokenEstimate + chunkTokens > MAX_CONTEXT_TOKENS) {
+                console.warn("Max context token budget reached. Dropping remaining chunks.");
+                break;
+            }
+            tokenEstimate += chunkTokens;
+            budgetedChunks.push(chunk);
+        }
 
-        // Add vector chunks to map
-        vectorChunks.forEach(chunk => {
-            mergedMap.set(chunk.id, chunk);
-            scores[chunk.id] = (scores[chunk.id] || 0) + chunk.vectorScore;
-        });
-
-        // Convert back to array and sort by combined score
-        retrievedChunks = Array.from(mergedMap.values()).sort((a, b) => {
-            return (scores[b.id] || 0) - (scores[a.id] || 0);
-        });
-
-        // 5. Top-K Selection (Limit to top 3-5 to prevent context overflow)
-        retrievedChunks = retrievedChunks.slice(0, 4);
-
-        // Calculate rough token estimate (assuming ~4 chars per token for Arabic/English mix)
-        const tokenEstimate = Math.ceil(retrievedChunks.reduce((acc, c) => acc + c.text.length, 0) / 4);
+        const avgConfidence = validResults.length > 0 ? validResults[0].confidence : 'Low';
 
         return {
-            chunks: retrievedChunks,
-            scores: scores,
+            chunks: budgetedChunks,
+            scores: validResults.reduce((acc, r) => ({ ...acc, [r.chunk.id]: r.score }), {}),
+            confidence: avgConfidence,
             tokenEstimate: tokenEstimate,
             latency: Date.now() - startTime
         };
 
     } catch (error) {
-        console.error("Retrieval Engine Error:", error);
-        return { chunks: [], scores: {}, tokenEstimate: 0, latency: Date.now() - startTime };
+        console.error("Retrieval Abstraction Error:", error);
+        return { chunks: [], scores: {}, confidence: 'Error', tokenEstimate: 0, latency: Date.now() - startTime };
     }
 }
 
-/**
- * Keyword-based retrieval from Firestore.
- */
-async function retrieveByKeywords(keywords, db) {
-    if (!keywords || keywords.length === 0 || !db) return [];
-    
-    // TEMPORARY MOCK: In a real scenario, this queries the `rag_chunks` collection.
-    // e.g., db.collection('rag_chunks').where('keywords', 'array-contains-any', keywords).limit(20).get()
-    
-    console.log("Mocking keyword retrieval for:", keywords);
-    
-    // Mocking a retrieved chunk for testing the pipeline
-    return [
-        {
-            id: 'mock_chunk_1',
-            sourceBook: 'تاريخ مصر الحديث',
-            unit: 'الوحدة الأولى',
-            lesson: 'الحملة الفرنسية',
-            page: '12',
-            text: 'جاءت الحملة الفرنسية على مصر بقيادة نابليون بونابرت عام 1798. كان هدفها قطع طريق التجارة على إنجلترا وتأسيس إمبراطورية فرنسية في الشرق.',
-            keywordScore: 0.8
-        }
-    ];
-}
-
 module.exports = {
-    retrieveRelevantChunks
+    retrieveRelevantChunks,
+    getRetrieverProvider
 };

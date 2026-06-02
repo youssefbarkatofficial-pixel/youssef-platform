@@ -73,29 +73,59 @@ exports.askAlBouslaLLM = functions.https.onCall(async (data, context) => {
         // --- 5. RAG Pipeline Execution ---
         const { retrieveRelevantChunks } = require('./rag/retriever');
         const { buildEducationalPrompt } = require('./rag/prompt-builder');
+        const { validateAndFormatResponse } = require('./rag/validation');
+        const { getCachedResponse, setCachedResponse, logQueryToMemory } = require('./rag/cache');
 
-        // Note: db should be the admin.firestore() instance
         const db = admin.firestore();
         
+        // Check Cache first
+        const cacheHit = await getCachedResponse(message, db, history ? history.length : 0);
+        if (cacheHit) {
+             return { reply: cacheHit.generatedReply, debug: { cache: true } };
+        }
+
         // Step 1: Retrieve context
         const retrievalResult = await retrieveRelevantChunks(message, db);
+        const chunkIds = retrievalResult.chunks.map(c => c.id);
         
+        // Log query to memory for future optimization
+        await logQueryToMemory(message, chunkIds, retrievalResult.confidence, db);
+
         // Step 2: Build Safe Prompt
         const safePrompt = buildEducationalPrompt(message, retrievalResult.chunks, history);
 
         // Step 3: Mock LLM Generation (Pending actual Gemini integration)
-        // In the future, send `safePrompt` to Gemini and get `llmReply`.
-        const mockLlmReply = "هذه إجابة تجريبية بناءً على النصوص المستخرجة: " + (retrievalResult.chunks[0]?.text.substring(0, 50) || "لا توجد نصوص") + "...";
+        const llmStartTime = Date.now();
+        let rawLlmReply = "هذه إجابة تجريبية تفترض أن: " + (retrievalResult.chunks[0]?.text.substring(0, 50) || "لا يوجد نص") + "...";
+        const llmLatency = Date.now() - llmStartTime;
 
-        // --- 6. Debug / Telemetry Payload ---
-        // This debug payload is essential for tuning retrieval quality.
+        // Step 4: Strict Validation Boundary
+        const safeReply = validateAndFormatResponse(rawLlmReply, retrievalResult.chunks, retrievalResult.confidence);
+        const fallbackTriggered = safeReply.includes("لا يتوفر لدي سياق تعليمي");
+
+        // Set Cache if valid
+        if (!fallbackTriggered) {
+             await setCachedResponse(message, safeReply, chunkIds, db, history ? history.length : 0);
+        }
+
+        // --- 6. Observability & Telemetry Logs ---
+        const telemetry = {
+            query: message,
+            retrievalLatency: retrievalResult.latency,
+            llmLatency: llmLatency,
+            matchedChunkIds: chunkIds,
+            retrievalConfidence: retrievalResult.confidence,
+            tokenUsageEstimate: retrievalResult.tokenEstimate,
+            cacheHit: false,
+            fallbackTriggered: fallbackTriggered
+        };
+        console.log("RAG Telemetry:", telemetry);
+
         return {
-            reply: mockLlmReply,
+            reply: safeReply,
             debug: {
+                telemetry: telemetry,
                 retrievedChunks: retrievalResult.chunks,
-                scores: retrievalResult.scores,
-                tokenEstimate: retrievalResult.tokenEstimate,
-                latency: retrievalResult.latency,
                 promptUsed: safePrompt
             }
         };

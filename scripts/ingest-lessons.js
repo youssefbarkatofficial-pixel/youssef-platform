@@ -1,15 +1,11 @@
 /**
- * Future Data Ingestion Script
- *
- * Usage:
- * node ingest-lessons.js ./data/history_lesson_1.json
+ * Idempotent Data Ingestion Script (Placeholder for Curriculum V1)
  *
  * Responsibilities:
- * - Load educational content (JSON, TXT, etc.).
- * - Parse structure into sections.
- * - Call chunkEducationalContent() from rag/chunker.js.
- * - Generate vector embeddings via rag/embedder.js (Future).
- * - Upload chunk documents to Firestore `rag_chunks` collection.
+ * - Load educational curriculum.
+ * - Call chunkEducationalContent() to generate hashed, deterministic chunks.
+ * - Upload to `rag_chunks` (Content) and `rag_vectors` (Embeddings) safely.
+ * - Ensure idempotency: re-running on the same file updates existing docs instead of duplicating.
  */
 
 const fs = require('fs');
@@ -22,24 +18,34 @@ const path = require('path');
 // const db = admin.firestore();
 
 async function ingestFile(filePath) {
-    console.log(`Starting ingestion for: ${filePath}`);
+    console.log(`Starting idempotent ingestion for: ${filePath}`);
     
     // 1. Load File
     // const content = fs.readFileSync(path.resolve(filePath), 'utf-8');
     // const data = JSON.parse(content);
     
-    // 2. Loop through sections
-    // const metadata = { sourceBook: data.book, unit: data.unit, lesson: data.lesson };
+    // 2. Generate chunks with strict metadata
+    // const metadata = { 
+    //    sourceBook: data.book, unit: data.unit, lesson: data.lesson,
+    //    curriculumVersion: data.version || 'v1.0', status: 'staged' // Upload as staged initially
+    // };
     // const chunks = chunkEducationalContent(data.text, metadata);
     
-    // 3. Process each chunk
+    // 3. Process each chunk (Idempotent Upload)
     // for (let chunk of chunks) {
-    //     // Optional: chunk.vector = await generateEmbeddings(chunk.text);
-    //     console.log(`Uploading chunk ${chunk.chunkIndex}...`);
-    //     await db.collection('rag_chunks').doc(chunk.id).set(chunk);
+    //     console.log(`Uploading chunk ${chunk.id} (Hash: ${chunk.contentHash})...`);
+    //     
+    //     // Save raw content to rag_chunks (Uses deterministic ID so it updates, not duplicates)
+    //     await db.collection('rag_chunks').doc(chunk.id).set(chunk, { merge: true });
+    //     
+    //     // Save vectors separately to keep rag_chunks lightweight
+    //     // const vector = await generateEmbeddings(chunk.text);
+    //     // await db.collection('rag_vectors').doc(chunk.id).set({
+    //     //      chunkId: chunk.id, vector: vector, updatedAt: new Date()
+    //     // }, { merge: true });
     // }
     
-    console.log("Ingestion script scaffolded. Ready for future implementation.");
+    console.log("Ingestion script scaffolded. Ready for safe idempotent staging uploads.");
 }
 
 const targetFile = process.argv[2];
