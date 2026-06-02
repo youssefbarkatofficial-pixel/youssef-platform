@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>Bawsala Bot - Ultimate Quality & Stress Test</title>
+  <style>
+    body { font-family: Tahoma, Arial, sans-serif; padding: 40px; background: #f4f7f6; color: #333; line-height: 1.6; }
+    h1, h2, h3 { color: #193d80; }
+    .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+    .btn { padding: 12px 24px; background: #193d80; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; margin-top: 10px; font-weight: bold; }
+    .btn:hover { background: #0b1d43; }
+    .report { white-space: pre-wrap; font-family: monospace; background: #222; color: #0f0; padding: 20px; border-radius: 8px; max-height: 500px; overflow-y: auto; }
+    .failed { border-right: 5px solid #e74c3c; background: #fdf2f0; }
+    .partial { border-right: 5px solid #f39c12; background: #fdfbf0; }
+    .passed { border-right: 5px solid #2ecc71; background: #f0fdf4; }
+    .item { margin-bottom: 15px; padding: 15px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .stress-scenario { border: 2px solid #34495e; padding: 15px; border-radius: 8px; margin-bottom: 20px; background: #fff; }
+    .bot-reply { color: #2c3e50; font-weight: bold; padding: 10px; background: #ecf0f1; border-radius: 5px; display: inline-block; width: 100%; box-sizing: border-box; }
+    .red-flag { color: #c0392b; font-weight: bold; }
+  </style>
+</head>
+<body>
+
+  <h1>🧪 محرك التقييم الحقيقي: Bawsala Bot</h1>
+  <p>يقوم هذا المحرك باختبار (الفهم والجودة والمشاعر والسياق) عبر 200 رسالة فوضوية و5 سيناريوهات ضغط متسلسلة.</p>
+  
+  <button id="runTestsBtn" class="btn">🚀 بدء التشريح والاختبار الآن</button>
+
+  <div id="resultsArea" style="display:none;">
+    <h2>📊 ملخص الأداء العام</h2>
+    <div id="summary" class="card" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;"></div>
+
+    <h2>🔥 نتائج Conversation Stress Tests</h2>
+    <div id="stressResults" class="card"></div>
+
+    <h2>⚠️ أقبح 20 رداً (Top 20 Worst Isolated Responses)</h2>
+    <div id="worst" class="card"></div>
+
+    <button id="downloadBtn" class="btn" style="background:#e67e22;">📥 تحميل التقرير النهائي (Markdown)</button>
+    <button id="semanticBtn" class="btn" style="background:#9b59b6;">🧠 تحميل تقرير فهم المعنى (Semantic Report)</button>
+  </div>
+
+  <script src="js/support-chat.js"></script>
+  <script>
+    const ROBOTIC_RED_FLAGS = [
+      "كيف يمكنني مساعدتك",
+      "هل تحتاج مساعدة",
+      "يرجى توضيح السؤال",
+      "أنا هنا لمساعدتك",
+      "أهلاً بك في المنصة"
+    ];
+
+    const TEST_CATEGORIES = {
+      chat: [
+        "صباح الخير يا باشا", "ازيك يا يوسف", "هاي", "باي", "انا ماشي", "شكرا يا غالي", "انت مين؟",
+        "تصبح على خير", "عامل ايه يا بطل", "مساء الفل", "يا ريت ترد بسرعة", "انا بحبك اوي",
+        "ازيك يا هندسة", "تسلم ايدك", "ايه الاخبار", "اهلا بيك", "الف شكر", "يا سيدي متشكرين",
+        "سلاموز", "انت بوت ولا انسان"
+      ],
+      education: [
+        "ايه هي تضاريس مصر؟", "مين هو محمد علي؟", "اشرحلي الحملة الفرنسية", "ايه أهمية نهر النيل؟",
+        "كلمني عن الزراعة في مصر", "يعني ايه ديمقراطية؟", "كم عدد المحافظات الساحلية؟", "ايه هي خطوط الطول؟",
+        "دوائر العرض بتعمل ايه؟", "اشرحلي العصر القبطي", "ثورة 1919 حصلت ليه؟", "متى كانت حرب اكتوبر؟",
+        "كلمني عن الاقتصاد المصري", "يعني ايه مواطنة؟", "ايه حقوق الطفل؟", "اهمية السد العالي؟",
+        "اسباب التلوث؟", "مين بنى الاهرامات؟", "انجازات محمد علي في الجيش؟", "اسباب الحملة الفرنسية؟"
+      ],
+      real_chaos: [
+        "يعم انا تايه", "هو يعني ايه ده", "طب لي", "مفهمتش", "احا مش فاهم حاجه", "امتحاني بكره",
+        "يبوصله", "الدراسات رخمه", "منصه", "الكراس", "البصورةه", "مشعارف احل", "ياعم انجز",
+        "عوز اشترك", "امتا الامتحان", "انا ضايع في المنهج", "يسطا انا تعبت", "تعبت من المذاكرة",
+        "مشبيفتح", "مابيفتحش", "المنسه بايظه", "كمبيوتر", "خايف اسقط", "خايفه", "فاشل",
+        "طهقت", "ملل", "مكسل اذاكر", "مخنوق", "زفت", "غبي", "مش داخله دماغي", "عقدتي جغرافيا",
+        "الخريطه معقده", "الامتحان بكرة ورعب", "عايز اقفل", "درجتي زفت", "قفلت الامتحان الحمدلله",
+        "قفلت الامتحان", "انا الاول"
+      ]
+    };
+
+    const CONVERSATION_SCENARIOS = [
+      {
+        name: "سيناريو 1: الاحتفاظ بالسياق (محمد علي + إحباط)",
+        messages: [
+          { input: "مين هو محمد علي؟" },
+          { input: "هو بنى جيش قوي ليه؟" },
+          { input: "يعم انا خايف من الامتحان وحاسس اني هسقط", expectEmpathy: true },
+          { input: "المهم نرجع لموضوعنا.. هو اعتمد على مين في الجيش؟", checkContext: true },
+          { input: "شكرا جدا ليك انا فهمت" }
+        ]
+      },
+      {
+        name: "سيناريو 2: اختبار الذاكرة العشوائية",
+        messages: [
+          { input: "صباح الفل" },
+          { input: "اشرحلي تضاريس مصر" },
+          { input: "طب وهي مالها ومال تركز السكان؟", checkContext: true },
+          { input: "على فكرة المنصة دي مش شغالة", expectFix: true },
+          { input: "خلاص اشتغلت" }
+        ]
+      },
+      {
+        name: "سيناريو 3: التشتيت المتعمد (Chaos)",
+        messages: [
+          { input: "احا" },
+          { input: "مش فاهم حاجه" },
+          { input: "عن الحملة الفرنسية" },
+          { input: "طب لي بونابرت مشي؟", checkContext: true },
+          { input: "باي" }
+        ]
+      }
+    ];
+
+    const SEMANTIC_VARIATIONS = {
+      "محمد علي": [
+        "مين هو محمد علي؟",
+        "الراجل ده كان مين؟",
+        "طب ومحمد علي عمل ايه؟",
+        "هو اللي بنى الجيش؟",
+        "احكيلي عنه",
+        "طب ده جه امتى؟",
+        "الراجل بتاع مصر الحديثة",
+        "مش فاكر اسمه بس اللي عمل جيش",
+        "محمدا علي",
+        "عايز اعرف عن محمد على",
+        "بتاع المذبحة صح؟",
+        "هو مؤسس مصر الحديثه؟",
+        "يعم قولي محمد علي مين",
+        "باشا مصر",
+        "محمدعلي"
+      ],
+      "تضاريس مصر": [
+        "ايه هي تضاريس مصر؟",
+        "جغرافية البلد دي عامله ازاي؟",
+        "يعني ايه تضاريس؟",
+        "التضاريس بتاعة مصر",
+        "تداريس مسر",
+        "الجبال والهضاب اللي في مصر",
+        "اشرحلي التضاريس",
+        "الصحراء الشرقية والغربية والنيل",
+        "شكل الأرض في مصر",
+        "التضاريس رخمه فهمهالي",
+        "تضاريس",
+        "يعني ايه تضريس",
+        "الوديان في مصر",
+        "خريطة مصر تضاريسيا",
+        "اراضي مصر"
+      ]
+    };
+
+    let cases = [];
+    ['chat', 'education', 'real_chaos'].forEach(cat => {
+      TEST_CATEGORIES[cat].forEach(input => cases.push({ input, category: cat }));
+      TEST_CATEGORIES[cat].forEach(input => cases.push({ input: input + ' ' + (Math.random()>0.5?'ياعم':'خالص'), category: cat }));
+      TEST_CATEGORIES[cat].forEach(input => cases.push({ input: 'بقولك ' + input, category: cat }));
+    });
+    cases = cases.slice(0, 200); // 200 cases strictly
+
+    let finalMdReport = '';
+    let semanticMdReport = '';
+
+    document.getElementById('runTestsBtn').addEventListener('click', () => {
+      document.getElementById('runTestsBtn').innerText = '⏳ جاري التشريح الشامل (قد يستغرق بضع ثوان)...';
+      setTimeout(runAllTests, 500);
+    });
+
+    function checkQualityMetrics(botReply, userMessage, metrics, isStressTest = false) {
+      let relevance = 10, naturalness = 10, humanScore = 10, continuity = 10, usefulness = 10;
+      let reasons = [];
+
+      let intent = metrics.Intent || 'UNKNOWN';
+      let emotion = metrics.Emotion || 'NEUTRAL';
+      let strategy = metrics.Strategy || 'UNKNOWN';
+
+      // 1. Red Flags Check
+      let hasRedFlag = false;
+      ROBOTIC_RED_FLAGS.forEach(flag => {
+        if (botReply.includes(flag)) {
+          naturalness -= 4; humanScore -= 4; hasRedFlag = true;
+          reasons.push('احتوى على Robotic Red Flag (' + flag + ')');
+        }
+      });
+
+      // 2. Fallback Penalty
+      if (strategy === 'fallback') {
+        relevance -= 8; usefulness -= 8; continuity -= 5;
+        reasons.push('المحرك استسلم للرد الجاهز (Fallback)');
+      }
+
+      // 3. Empathy Penalty (Very Strict)
+      if ((emotion === 'ANXIETY' || emotion === 'FRUSTRATION') && strategy !== 'fallback') {
+        const empatheticWords = ['حاسس بيك', 'ولا يهمك', 'طمني', 'بطل', 'استمر', 'متخافش', 'مش مقياس', 'عارف'];
+        const isEmpathetic = empatheticWords.some(w => botReply.includes(w));
+        if (!isEmpathetic) {
+          humanScore -= 5; usefulness -= 3;
+          reasons.push('تجاهل مشاعر الطالب السلبية (انعدام التعاطف)');
+        }
+      }
+
+      // 4. Formatting spam (Overuse of bold / emojis)
+      if (botReply.includes('**') && userMessage.length < 20 && strategy === 'social') {
+        naturalness -= 4;
+        reasons.push('استخدام تنسيقات معقدة في محادثة بسيطة');
+      }
+
+      // 5. Length Check (Ignoring the user)
+      if (userMessage.length > 30 && botReply.length < 15 && strategy !== 'clarification') {
+        relevance -= 3; humanScore -= 3;
+        reasons.push('الرد أقصر من اللازم وتجاهل نصف كلام المستخدم');
+      }
+
+      // Clamp
+      relevance = Math.max(0, relevance); naturalness = Math.max(0, naturalness);
+      humanScore = Math.max(0, humanScore); continuity = Math.max(0, continuity);
+      usefulness = Math.max(0, usefulness);
+
+      let overall = (relevance + naturalness + humanScore + continuity + usefulness) / 5;
+      let status = overall >= 8 ? 'Passed' : overall >= 5 ? 'Partial' : 'Failed';
+
+      return { scores: { relevance, naturalness, humanScore, continuity, usefulness, overall }, status, reasons, hasRedFlag };
+    }
+
+    function runAllTests() {
+      let isolatedResults = [];
+      let stressResults = [];
+
+      // 1. ISOLATED TESTS (Memory Wiped)
+      cases.forEach(tc => {
+        localStorage.setItem('pf_brain_metrics', '[]');
+        localStorage.setItem('bot_human_memory', '{"lastTopics":[]}');
+        
+        let replyText = getTemporarySafeBotReply(tc.input) || '';
+        let metricsList = JSON.parse(localStorage.getItem('pf_brain_metrics') || '[]');
+        let metrics = metricsList[metricsList.length - 1] || {};
+
+        let evaluation = checkQualityMetrics(replyText, tc.input, metrics);
+        
+        isolatedResults.push({
+          input: tc.input, category: tc.category, output: replyText,
+          intent: metrics.Intent, purpose: metrics.Purpose, strategy: metrics.Strategy,
+          ...evaluation
+        });
+      });
+
+      // 2. CONVERSATION STRESS TESTS (Memory Kept)
+      CONVERSATION_SCENARIOS.forEach(scenario => {
+        localStorage.setItem('pf_brain_metrics', '[]');
+        localStorage.setItem('bot_human_memory', '{"lastTopics":[]}');
+        localStorage.setItem('pf_student_profile', '{}');
+        
+        let scenarioLog = [];
+        let scenarioPassed = true;
+        let contextLostAt = -1;
+
+        scenario.messages.forEach((msg, idx) => {
+          let replyText = getTemporarySafeBotReply(msg.input) || '';
+          let metricsList = JSON.parse(localStorage.getItem('pf_brain_metrics') || '[]');
+          let metrics = metricsList[metricsList.length - 1] || {};
+
+          let evaluation = checkQualityMetrics(replyText, msg.input, metrics, true);
+          
+          if (msg.checkContext && (!metrics.MemoryUsed || metrics.Strategy === 'fallback')) {
+             contextLostAt = idx + 1;
+             scenarioPassed = false;
+          }
+
+          if (msg.expectEmpathy && evaluation.status === 'Failed') {
+             scenarioPassed = false;
+          }
+
+          scenarioLog.push({
+            input: msg.input, output: replyText, status: evaluation.status, contextLost: (contextLostAt === idx + 1)
+          });
+        });
+
+        stressResults.push({ name: scenario.name, log: scenarioLog, passed: scenarioPassed, contextLostAt });
+      });
+
+      // 3. SEMANTIC UNDERSTANDING TEST
+      let semanticLog = [];
+      for (const [topic, variants] of Object.entries(SEMANTIC_VARIATIONS)) {
+        let topicSuccess = 0;
+        let variantLog = [];
+        
+        variants.forEach(variant => {
+          localStorage.setItem('pf_brain_metrics', '[]');
+          localStorage.setItem('bot_human_memory', '{"lastTopics":[]}');
+          
+          let replyText = getTemporarySafeBotReply(variant) || '';
+          let metricsList = JSON.parse(localStorage.getItem('pf_brain_metrics') || '[]');
+          let metrics = metricsList[metricsList.length - 1] || {};
+          
+          let extractedIntent = metrics.Intent || 'UNKNOWN';
+          // Check if it successfully triggered an educational path and avoided Fallback
+          let isSuccess = (extractedIntent === 'EDUCATIONAL' && metrics.Strategy !== 'fallback');
+          
+          if (isSuccess) topicSuccess++;
+          
+          variantLog.push({
+            input: variant,
+            intent: extractedIntent,
+            strategy: metrics.Strategy || 'UNKNOWN',
+            isSuccess,
+            botReply: replyText
+          });
+        });
+        
+        semanticLog.push({ topic, total: variants.length, success: topicSuccess, variants: variantLog });
+      }
+
+      // Prepare UI Output
+      isolatedResults.sort((a, b) => a.scores.overall - b.scores.overall);
+      let worst20 = isolatedResults.slice(0, 20);
+
+      renderResults(isolatedResults, worst20, stressResults, semanticLog);
+    }
+
+    function renderResults(isolated, worst, stress, semanticLog) {
+      document.getElementById('resultsArea').style.display = 'block';
+      document.getElementById('runTestsBtn').style.display = 'none';
+
+      let passed = isolated.filter(r => r.status === 'Passed').length;
+      let partial = isolated.filter(r => r.status === 'Partial').length;
+      let failed = isolated.filter(r => r.status === 'Failed').length;
+
+      document.getElementById('summary').innerHTML = `
+        <div>
+          <h3>📈 Isolated Tests (200 Cases)</h3>
+          <p style="color:green; font-weight:bold;">✅ Passed: ${passed}</p>
+          <p style="color:orange; font-weight:bold;">⚠️ Partial: ${partial}</p>
+          <p style="color:red; font-weight:bold;">❌ Failed: ${failed}</p>
+        </div>
+        <div>
+          <h3>🧠 Conversation Stress Tests</h3>
+          ${stress.map(s => `<p>${s.passed ? '✅' : '❌'} ${s.name} ${s.contextLostAt !== -1 ? '(Context Lost at Msg '+s.contextLostAt+')' : ''}</p>`).join('')}
+        </div>
+        <div>
+          <h3>🧠 Semantic Understanding Tests</h3>
+          ${semanticLog.map(s => `<p>الموضوع (${s.topic}): نجح في فهم ${s.success} صيغة من أصل ${s.total}</p>`).join('')}
+        </div>
+      `;
+
+      let md = `# تقرير الجودة الشامل للبوصلة (Quality & Stress Test)\n\n`;
+      md += `## 1. ملخص الأداء للرسائل الفردية (200 رسالة)\n- ✅ نجاح: ${passed}\n- ⚠️ جزئي: ${partial}\n- ❌ فشل: ${failed}\n\n`;
+
+      md += `## 2. اختبار المحادثات المتسلسلة (Conversation Stress Tests)\n`;
+      let stressHtml = '';
+      stress.forEach(s => {
+        md += `### ${s.passed ? '✅' : '❌'} ${s.name}\n`;
+        stressHtml += `<div class="stress-scenario ${s.passed ? 'passed' : 'failed'}">
+          <h3>${s.passed ? '✅' : '❌'} ${s.name}</h3>`;
+        s.log.forEach((l, i) => {
+          md += `${i+1}. **User:** ${l.input}\n`;
+          md += `   **Bot:** ${l.output.replace(/\\n/g, ' ')}\n`;
+          if (l.contextLost) md += `   ⚠️ **فقد البوت السياق هنا!**\n`;
+          
+          stressHtml += `<p><strong>🧑‍🎓 الطالب (${i+1}):</strong> ${l.input}</p>`;
+          stressHtml += `<p class="bot-reply">🤖 البوصلة: ${l.output}</p>`;
+          if (l.contextLost) stressHtml += `<p style="color:red; font-weight:bold;">⚠️ البوت فقد سياق المحادثة في هذه الرسالة!</p>`;
+        });
+        md += `\n`;
+        stressHtml += `</div>`;
+      });
+      document.getElementById('stressResults').innerHTML = stressHtml;
+
+      md += `## 3. أقبح 20 رداً من أصل 200 (Worst Responses)\n\n`;
+      let worstHtml = '';
+      worst.forEach((w, i) => {
+        let reasonText = w.reasons.length > 0 ? w.reasons.join('، ') : 'رد ضعيف عام';
+        
+        worstHtml += `
+          <div class="item ${w.status === 'Failed' ? 'failed' : 'partial'}">
+            <p><strong>(${i+1}) الطالب:</strong> ${w.input}</p>
+            <p><strong>التصنيف:</strong> ${w.category}</p>
+            <p><strong>الدرجة (Overall):</strong> ${w.scores.overall.toFixed(1)}/10</p>
+            <p><strong>سبب الفشل:</strong> <span style="color:red">${reasonText}</span></p>
+            <p class="bot-reply">🤖 البوصلة: ${w.output}</p>
+          </div>
+        `;
+
+        md += `### ${i+1}. رسالة الطالب: "${w.input}"\n`;
+        md += `- **التصنيف:** ${w.category}\n`;
+        md += `- **الدرجة:** ${w.scores.overall.toFixed(1)}/10\n`;
+        md += `- **سبب الفشل:** ${reasonText}\n`;
+        md += `- **رد البوت:**\n> ${w.output.replace(/\\n/g, '\n> ')}\n\n`;
+      });
+
+      document.getElementById('worst').innerHTML = worstHtml;
+      finalMdReport = md;
+
+      // Generate Semantic Report
+      let semMd = `# تقرير الفهم الدلالي (Semantic Understanding Report)\n\n`;
+      semMd += `هذا التقرير يختبر قدرة البوصلة على فهم (نفس المعنى) بصيغ مختلفة جداً (تتضمن عامية، نقص كلمات، وأخطاء إملائية).\n\n`;
+      
+      semanticLog.forEach(s => {
+        semMd += `## الموضوع الأصلي: [${s.topic}]\n`;
+        semMd += `**النتيجة:** فهم البوت ${s.success} صيغة من أصل ${s.total}\n\n`;
+        
+        s.variants.forEach(v => {
+          semMd += `- **User:** "${v.input}"\n`;
+          semMd += `  **Status:** ${v.isSuccess ? '✅ نجح في الفهم' : '❌ فشل (Fallback/Misinterpreted)'}\n`;
+          semMd += `  **Bot Reply:** ${v.botReply.substring(0, 80).replace(/\\n/g, ' ')}...\n\n`;
+        });
+        semMd += `---\n\n`;
+      });
+      semanticMdReport = semMd;
+    }
+
+    document.getElementById('downloadBtn').addEventListener('click', () => {
+      const blob = new Blob([finalMdReport], { type: 'text/markdown' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'bawsala_ultimate_test_report.md';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    });
+
+    document.getElementById('semanticBtn').addEventListener('click', () => {
+      const blob = new Blob([semanticMdReport], { type: 'text/markdown' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'semantic_understanding_report.md';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    });
+  </script>
+</body>
+</html>

@@ -1,20 +1,23 @@
 // Upgraded Support chat widget ("البوصلة") - lightweight, private, and smarter
 (function(){
-  console.log("SUPPORT_CHAT_BUILD_20260601_0630");
+  console.log("SUPPORT_CHAT_BUILD_20260602_MINIMAL_TUTOR");
   const BASE_HISTORY_KEY = 'pf_support_chat_history_v2';
   const BASE_TICKETS_KEY = 'pf_support_tickets_v1';
   const CUSTOM_ANSWERS_KEY = 'pf_custom_answers_v1';
   const GUEST_SESSION_ID_KEY = 'pf_support_chat_guest_id';
   const LOGIN_WELCOME_KEY = 'pfJustLoggedIn';
-  const WELCOME = 'أنا البوصلة بتاعتك، أقدر أساعدك إزاي يا جميل؟';
+  const WELCOME = 'أنا البوصلة بتاعتك، أقدر أساعدك إزاي؟';
+  const ESCALATION_SUGGESTION = 'لو مستعجل على حل المشكلة اكتب مشكلة والدعم هيتواصل معاك في أقرب وقت 🙏';
+  let complaintCaptureMode = false;
+  let escalationSuggested = false;
+  const chatContext = { lastTopic: null, lastIssue: null, lastQuestion: null, lastCourse: null };
 
-  // Helper utilities
   function nowTs(){ return Date.now(); }
   function fmtTimestamp(ts){
     const d = new Date(ts);
     const time = d.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit', hour12: false });
     const date = d.toLocaleDateString('ar-EG', { day: '2-digit', month: 'short', year: 'numeric' });
-    return `${time} • ${date}`;
+    return time + ' • ' + date;
   }
 
   function getGuestSessionId(){
@@ -48,2019 +51,249 @@
 
   function getStorageKey(prefix) {
     const ctx = getUserContext();
-    return `${prefix}_${ctx.type}_${ctx.id}`;
+    return prefix + '_' + ctx.type + '_' + ctx.id;
   }
 
-  const TRAINING_KEY = 'pf_ai_training_v1';
-  const ADMIN_LEARNING_KEY = 'pf_admin_learning_v1';
-  const PLATFORM_CONTENT_KEY = 'pf_platform_content_v1';
-  const chatContext = { lastTopic: null, lastIssue: null, lastQuestion: null, lastCourse: null };
-  const ESCALATION_SUGGESTION = 'لو مستعجل على حل المشكلة اكتب مشكلة والدعم هيتواصل معاك في أقرب وقت 🙏';
-  let complaintCaptureMode = false;
-  let escalationSuggested = false;
-
-  const SELF_LEARNING_KEY = 'pf_self_learning_v1';
-  function loadSelfLearning() {
-    try { return JSON.parse(localStorage.getItem(SELF_LEARNING_KEY) || '{"unknown_questions":{}, "slang_words":{}, "successful_patterns":{}, "pending_review":[]}'); } 
-    catch(e) { return {"unknown_questions":{}, "slang_words":{}, "successful_patterns":{}, "pending_review":[]}; }
-  }
-  function saveSelfLearning(data) {
-    safeSetItem(localStorage, SELF_LEARNING_KEY, JSON.stringify(data));
-  }
-
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // 🧠 SELF IMPROVEMENT BRAIN
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  const IMPROVEMENT_BRAIN_KEY = 'pf_improvement_brain_v2';
-  
-  function loadImprovementBrain() {
-    try { 
-      return JSON.parse(localStorage.getItem(IMPROVEMENT_BRAIN_KEY) || '{"ununderstood":{}, "frequent_questions":{}, "conversation_drops":{}, "caused_confusion":{}, "suggestions":[]}'); 
-    } catch(e) { 
-      return {"ununderstood":{}, "frequent_questions":{}, "conversation_drops":{}, "caused_confusion":{}, "suggestions":[]}; 
-    }
-  }
-
-  function saveImprovementBrain(data) {
-    safeSetItem(localStorage, IMPROVEMENT_BRAIN_KEY, JSON.stringify(data));
-  }
-
-  function monitorConversationFlow(userMsg, botReplyTag, purpose, isConfused) {
-    const memory = loadImprovementBrain();
-    const normalized = normalizeText(userMsg);
-
-    // 1. Ununderstood (Fallback)
-    if (botReplyTag === 'fallback' || purpose === 'UNKNOWN_PURPOSE') {
-      if (!memory.ununderstood[normalized]) memory.ununderstood[normalized] = 0;
-      memory.ununderstood[normalized]++;
-    } else {
-      // 2. Frequent Questions (Successfully handled)
-      if (purpose === 'EDUCATIONAL_EXPLANATION' || purpose === 'ASSISTANCE') {
-        if (!memory.frequent_questions[normalized]) memory.frequent_questions[normalized] = 0;
-        memory.frequent_questions[normalized]++;
-      }
-    }
-
-    // 3. Caused Confusion (If the user is confused now, the PREVIOUS bot message caused it)
-    if (isConfused) {
-      const context = loadContextMemory();
-      let lastBotMsg = null;
-      for (let i = context.length - 1; i >= 0; i--) {
-        if (context[i].role === 'bot') {
-          lastBotMsg = context[i].text;
-          break;
-        }
-      }
-      if (lastBotMsg) {
-        if (!memory.caused_confusion[lastBotMsg]) memory.caused_confusion[lastBotMsg] = 0;
-        memory.caused_confusion[lastBotMsg]++;
-      }
-    }
-
-    saveImprovementBrain(memory);
-  }
-
-  function generateImprovementReport() {
-    const memory = loadImprovementBrain();
-    
-    // Auto-suggest new intents based on highly frequent ununderstood messages
-    Object.keys(memory.ununderstood).forEach(msg => {
-      if (memory.ununderstood[msg] >= 3 && !memory.suggestions.some(s => s.text === msg && s.type === 'new_intent')) {
-        memory.suggestions.push({ type: 'new_intent', text: msg, reason: 'تكرر عدم فهم هذه الرسالة', date: Date.now() });
-      }
-    });
-
-    // Auto-suggest simplifying a response if it caused confusion multiple times
-    Object.keys(memory.caused_confusion).forEach(msg => {
-      if (memory.caused_confusion[msg] >= 2 && !memory.suggestions.some(s => s.text === msg && s.type === 'needs_simplification')) {
-        memory.suggestions.push({ type: 'needs_simplification', text: msg, reason: 'هذا الرد تسبب في ارتباك الطالب أكثر من مرة', date: Date.now() });
-      }
-    });
-
-    saveImprovementBrain(memory);
-    return memory.suggestions;
-  }
-
-  function analyzeAndLearnFromMessage(userMessage, finalResponseTag) {
-    const normalized = normalizeText(userMessage);
-    const memory = loadSelfLearning();
-
-    if (finalResponseTag === 'fallback') {
-      // 1. Record Unknown Questions
-      if (!memory.unknown_questions[normalized]) memory.unknown_questions[normalized] = 0;
-      memory.unknown_questions[normalized]++;
-
-      if (memory.unknown_questions[normalized] >= 3) {
-        if (!memory.pending_review.some(p => p.type === 'missing_answer' && p.text === normalized)) {
-          memory.pending_review.push({ type: 'missing_answer', text: normalized, count: memory.unknown_questions[normalized], date: Date.now() });
-        }
-      }
-
-      // 2. Identify Potential Slang or Typos
-      const words = normalized.split(/\s+/);
-      const knownVocab = Object.values(DYNAMIC_VOCAB).flat();
-      
-      words.forEach(word => {
-        if (word.length < 3) return;
-        let isKnown = false;
-        for (const known of knownVocab) {
-          if (typeof levenshteinDistance === 'function' && levenshteinDistance(word, known) <= 1) {
-            isKnown = true;
-            break;
-          }
-        }
-        
-        if (!isKnown) {
-          if (!memory.slang_words[word]) memory.slang_words[word] = 0;
-          memory.slang_words[word]++;
-          if (memory.slang_words[word] >= 3) {
-            if (!memory.pending_review.some(p => p.type === 'slang_or_typo' && p.word === word)) {
-              memory.pending_review.push({ type: 'slang_or_typo', word: word, count: memory.slang_words[word], context: normalized, date: Date.now() });
-            }
-          }
-        }
-      });
-    } else {
-      // 3. Learn successful interaction patterns
-      if (!memory.successful_patterns[normalized]) memory.successful_patterns[normalized] = 0;
-      memory.successful_patterns[normalized]++;
-      if (memory.successful_patterns[normalized] >= 5) {
-         if (!memory.pending_review.some(p => p.type === 'successful_style' && p.text === normalized)) {
-           memory.pending_review.push({ type: 'successful_style', text: normalized, count: memory.successful_patterns[normalized], date: Date.now() });
-         }
-      }
-    }
-    saveSelfLearning(memory);
-  }
-
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // 🧠 ANSWER QUALITY SCORER
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  function evaluateResponseQuality(responseText, userMessage, purpose, thoughtProcess = {}) {
-    let score = 100;
-    if (!responseText || responseText.length < 5) return 0;
-    
-    // 1. Relevance (الارتباط بالسؤال)
-    const keywords = userMessage.split(/\s+/).filter(w => w.length > 3);
-    const hasRelevance = keywords.some(w => responseText.includes(w)) || 
-                         (thoughtProcess.extractedData && thoughtProcess.extractedData.subjects && thoughtProcess.extractedData.subjects[0] && responseText.includes(thoughtProcess.extractedData.subjects[0]));
-    if (!hasRelevance && purpose === 'EDUCATIONAL_EXPLANATION') {
-      score -= 30; // Strong penalty if we drift off topic
-    }
-
-    // 2. Clarity (الوضوح)
-    if (responseText.length > 300 && !responseText.includes('\n') && !responseText.includes('•')) {
-      score -= 20; // Text wall penalty
-    }
-
-    // 3. Naturalness (الطبيعية)
-    if (/(بص|عشان كده|وللتوضيح|خد بالك|يا صاحبي|يا بطل|تعالى|على فكرة)/.test(responseText)) {
-      score += 15;
-    } else {
-      score -= 10; // Sounds a bit robotic
-    }
-
-    // 4. Usefulness (الفائدة)
-    if (purpose === 'EDUCATIONAL_EXPLANATION' && responseText.length < 30) {
-      score -= 40; // Too short to be educational
-    }
-
-    // 5. Anti-Repetition (عدم التكرار)
-    const history = typeof getBotHistory === 'function' ? getBotHistory() : [];
-    if (history.slice(-5).includes(responseText)) {
-      score -= 60; // Huge penalty for repeating exact same response recently
-    }
-    
-    const finalScore = Math.max(0, Math.min(100, score));
-    console.log(`[QUALITY SCORER] Score: ${finalScore} | Purpose: ${purpose}`);
-    return finalScore;
-  }
-
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // 🤝 AI COMPANION LAYER
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  const COMPANION_MESSAGES = [
-    'ملحوظة صغيرة: عاش يا بطل، كمل مذاكرة وأنا معاك.',
-    'على فكرة، مبسوط جداً إنك بتسأل كتير، ده معناه إنك عايز تفهم بجد.',
-    'خليك فاكر حلمك، كل دقيقة بتذاكرها بتقربك خطوة.',
-    'الله ينور عليك، تركيزك عالي النهاردة!',
-    'أنا فخور بيك إنك بتحاول تفهم وتسأل.. كمل يا بطل!'
-  ];
-
-  function applyCompanionLayer(candidateText, purpose) {
-    if (!candidateText || purpose === 'SOCIAL_CONNECTION' || purpose === 'CLARIFICATION') return candidateText;
-    
-    let messagesSinceLastCompanion = parseInt(sessionStorage.getItem('pf_companion_cooldown') || '0');
-    messagesSinceLastCompanion++;
-    
-    if (messagesSinceLastCompanion >= 4) {
-      let msg = pickRandom(COMPANION_MESSAGES);
-      sessionStorage.setItem('pf_companion_cooldown', '0');
-      return candidateText + '\n\n' + msg;
-    } else {
-      sessionStorage.setItem('pf_companion_cooldown', messagesSinceLastCompanion.toString());
-      return candidateText;
-    }
-  }
-
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // 🧐 AI SELF CRITIC ENGINE
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  function applySelfCriticEngine(candidateText, userMessage, purpose, thoughtProcess) {
-    if (!candidateText) return candidateText;
-    let refinedText = candidateText;
-    let flawsFound = [];
-
-    // 1. Natural Check
-    if (!/(بص|عشان|خد بالك|يا صاحبي|يا بطل|تعالى|على فكرة|أهلاً|يا هلا|طبعاً|خليني)/.test(refinedText) && refinedText.length > 20 && purpose !== 'SOCIAL_CONNECTION' && purpose !== 'CLARIFICATION') {
-      refinedText = 'بص يا بطل عشان تكون في الصورة.. ' + refinedText;
-      flawsFound.push('Not Natural -> Added Intro');
-    }
-
-    // 2. Relevance Check (Educational but too short)
-    if (purpose === 'EDUCATIONAL_EXPLANATION' && refinedText.length < 50 && !refinedText.includes('خليني أشرحلك')) {
-      refinedText += '\n\nده اللي قدرت أجمعهولك حالاً، بس لو محتاج تفصيل أكتر قولي!';
-      flawsFound.push('Too Short/Lacks Relevance -> Added Apology/Extension');
-    }
-
-    // 3. Repetition Check (Removing duplicated sentences)
-    const sentences = refinedText.split(/([.?!؟\n]+)/);
-    let uniqueSentences = [];
-    for (let i = 0; i < sentences.length; i++) {
-      let s = sentences[i].trim();
-      // Only check real sentences for exact duplicates to prevent stripping out legitimate parts
-      if (s.length > 15 && uniqueSentences.some(us => us === s)) {
-        flawsFound.push('Repetition -> Removed Duplicated Sentence');
-        if (sentences[i+1] && /^[.?!؟\n]+$/.test(sentences[i+1])) i++; // skip punctuation
-        continue;
-      }
-      uniqueSentences.push(sentences[i]);
-    }
-    refinedText = uniqueSentences.join('');
-
-    // 4. Ambiguity Check (Abrupt endings)
-    if (refinedText.length < 15 && purpose !== 'SOCIAL_CONNECTION' && purpose !== 'FOLLOW_UP') {
-      refinedText += '.. قصدك حاجة معينة أقدر أساعدك فيها؟';
-      flawsFound.push('Ambiguous/Abrupt -> Added Clarification Question');
-    }
-
-    // 5. Optimization (Adding emojis if missing)
-    if (refinedText.length > 30 && !/[\u{1F300}-\u{1F9FF}]/u.test(refinedText)) {
-      refinedText += ' 💡';
-      flawsFound.push('Lacks Warmth -> Added Emoji');
-    }
-
-    if (flawsFound.length > 0) {
-      console.log(`[AI SELF CRITIC] Triggered. Flaws Fixed:`, flawsFound);
-    }
-
-    return refinedText;
-  }
-
-  function loadContextMemory() {
-    try {
-      const mem = sessionStorage.getItem('pf_context_memory');
-      return mem ? JSON.parse(mem) : [];
-    } catch(e) { return []; }
-  }
-
-  function saveContextMemory(history) {
-    if (history.length > 40) history = history.slice(-40);
-    safeSetItem(sessionStorage, 'pf_context_memory', JSON.stringify(history));
-  }
-
-  function pushContext(role, text, purpose, subjects = []) {
-    const memory = loadContextMemory();
-    memory.push({ role, text, purpose, subjects, timestamp: Date.now() });
-    saveContextMemory(memory);
-  }
-
-  function resolveContext(normalizedMessage) {
-    const memory = loadContextMemory();
-    for (let i = memory.length - 1; i >= 0; i--) {
-      if (memory[i].subjects && memory[i].subjects.length > 0) {
-        return memory[i].subjects[0];
-      }
-    }
-    return null;
-  }
-
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // 🧠 STUDENT UNDERSTANDING DETECTOR
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  function analyzeStudentConfusion(normalized) {
-    const confusionWords = ['صعبة', 'معقد', 'تايه', 'ضايع', 'مش فاهم', 'مش مستوعب', 'مفهمتش', 'مش واضح'];
-    return confusionWords.some(w => normalized.includes(w));
-  }
-
-  function simplifyResponse(originalText) {
-    if (!originalText || originalText.length < 50) return originalText;
-
-    // Trim long responses down to 1-2 sentences.
-    const sentences = originalText.split(/(?<=[.?!])\s+/);
-    let trimmed = sentences.slice(0, 2).join(' ').trim();
-
-    // Remove any personality hooks that might contradict the simplification
-    trimmed = trimmed.replace(/بص يا سيدي ركز معايا\.\.|سؤال ممتاز جداً! خليني أوضحلك\.\.|سؤالك في محله يا بطل! شوف يا سيدي\.\./g, '');
-
-    const simplifiers = [
-      'الموضوع أسهل مما تتخيل، خليني ألخصهولك في جملة:',
-      'بص يا بطل، عشان متتوهش مني، الفكرة ببساطة هي:',
-      'عشان نسهلها خالص، ركز في دي بس:'
-    ];
-    const prefix = simplifiers[Math.floor(Math.random() * simplifiers.length)];
-    
-    return `${prefix}\n\n${trimmed}\n\nعشان تقرب الصورة أكتر، اعتبرها زي قصة بسيطة بنمشيها خطوة خطوة، ولو في جزء معين لسه صعب قولي!`;
-  }
-
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // 🧠 AMBIGUITY RESOLVER SYSTEM
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  function resolveAmbiguity(thoughtProcess, userMessage) {
-    const interpretations = thoughtProcess.interpretations || [];
-    let options = [];
-    
-    if (interpretations.includes('EDUCATIONAL_EXPLANATION')) options.push('سؤال في المنهج');
-    if (interpretations.includes('COMPLAINT')) options.push('مشكلة تقنية في المنصة');
-    if (interpretations.includes('ASSISTANCE')) options.push('محتاج مساعدة عامة');
-    if (interpretations.includes('SOCIAL_CONNECTION')) options.push('بندردش شوية');
-    if (interpretations.includes('EMOTIONAL_SUPPORT')) options.push('مضغوط وعايز تفضفض');
-
-    // Keep max 2 options to not overwhelm user
-    options = options.slice(0, 2);
-
-    if (options.length < 2) {
-      return "يا بطل كلامك كبير عليا شوية، تقصد إيه بالظبط عشان أقدر أساعدك صح؟";
-    }
-
-    let text = `أنا معاك يا بطل، بس حابب أتأكد.. تقصد `;
-    text += options.join(' ولا ') + '؟';
-    return text;
-  }
-
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // 🧠 BRAIN METRICS ENGINE
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  function logBrainMetrics(pipelineContext, thoughtProcess) {
-    const metrics = {
-      "Input": pipelineContext.userMessage,
-      "Intent": pipelineContext.intent,
-      "Purpose": pipelineContext.purpose,
-      "Emotion": pipelineContext.emotion,
-      "Confidence": (thoughtProcess.confidence || 0) + "%",
-      "Context Used": pipelineContext.context && pipelineContext.context.length > 0 ? "Yes" : "No",
-      "Memory Used": pipelineContext.memory ? "Yes" : "No",
-      "Strategy": pipelineContext.plannedResponseMode,
-      "Self-Critic Score": pipelineContext.score + "/100"
-    };
-
-    console.groupCollapsed(`🧠 [BRAIN METRICS] ${pipelineContext.purpose}`);
-    console.table(metrics);
-    console.groupEnd();
-
-    // Save to localStorage for debugging persistence
-    try {
-      let savedMetrics = JSON.parse(localStorage.getItem('pf_brain_metrics') || '[]');
-      savedMetrics.push({ timestamp: new Date().toISOString(), ...metrics });
-      if (savedMetrics.length > 50) savedMetrics.shift();
-      localStorage.setItem('pf_brain_metrics', JSON.stringify(savedMetrics));
-    } catch(e) {}
-  }
-
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // 🧠 SEMANTIC KNOWLEDGE GRAPH (replaces flat TOPIC_CLUSTERS)
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  const KNOWLEDGE_GRAPH = {
-    "MAPS": {
-      subject: "الخرائط", keywords: ["خريطة", "خرائط", "جهات", "شمال", "جنوب", "شرق", "غرب", "مقياس رسم", "احداثيات", "خطوط", "طول", "دوائر", "عرض", "رسمة", "مكان"],
-      concepts: [
-        { id: "map_def", label: "تعريف الخريطة", prereqs: [], difficulty: 1 },
-        { id: "map_directions", label: "الجهات الأصلية والفرعية", prereqs: ["map_def"], difficulty: 1 },
-        { id: "map_scale", label: "مقياس الرسم", prereqs: ["map_def"], difficulty: 2 },
-        { id: "map_coords", label: "خطوط الطول ودوائر العرض", prereqs: ["map_directions"], difficulty: 3 },
-        { id: "map_types", label: "أنواع الخرائط", prereqs: ["map_def", "map_scale"], difficulty: 2 }
-      ],
-      relatedTopics: ["TERRAIN", "CLIMATE"]
-    },
-    "FRENCH_CAMPAIGN": {
-      subject: "الحملة الفرنسية", keywords: ["حملة", "فرنسية", "نابليون", "كليبر", "مينو", "ثورة القاهرة", "رشيد", "ابوقير"],
-      concepts: [
-        { id: "fc_reasons", label: "أسباب الحملة الفرنسية", prereqs: [], difficulty: 1 },
-        { id: "fc_napoleon", label: "نابليون وقيادة الحملة", prereqs: ["fc_reasons"], difficulty: 2 },
-        { id: "fc_battles", label: "المعارك (أبو قير - الأهرام)", prereqs: ["fc_napoleon"], difficulty: 2 },
-        { id: "fc_resistance", label: "المقاومة الشعبية وثورة القاهرة", prereqs: ["fc_battles"], difficulty: 3 },
-        { id: "fc_results", label: "نتائج الحملة وحجر رشيد", prereqs: ["fc_resistance"], difficulty: 2 },
-        { id: "fc_withdrawal", label: "انسحاب الفرنسيين", prereqs: ["fc_results"], difficulty: 2 }
-      ],
-      relatedTopics: ["MOHAMED_ALI"]
-    },
-    "MOHAMED_ALI": {
-      subject: "محمد علي", keywords: ["محمد علي", "مؤسس مصر", "جيش", "المذبحة", "القلعة", "مصر الحديثة", "محتكر"],
-      concepts: [
-        { id: "ma_rise", label: "وصول محمد علي للحكم", prereqs: [], difficulty: 1 },
-        { id: "ma_mamluks", label: "مذبحة القلعة والقضاء على المماليك", prereqs: ["ma_rise"], difficulty: 2 },
-        { id: "ma_army", label: "بناء الجيش الحديث", prereqs: ["ma_mamluks"], difficulty: 2 },
-        { id: "ma_economy", label: "نظام الاحتكار والاقتصاد", prereqs: ["ma_rise"], difficulty: 3 },
-        { id: "ma_education", label: "التعليم والبعثات", prereqs: ["ma_army"], difficulty: 2 },
-        { id: "ma_legacy", label: "إرث محمد علي ومصر الحديثة", prereqs: ["ma_army", "ma_economy", "ma_education"], difficulty: 3 }
-      ],
-      relatedTopics: ["FRENCH_CAMPAIGN"]
-    },
-    "TERRAIN": {
-      subject: "تضاريس مصر", keywords: ["تضاريس", "جبال", "هضاب", "صحراء", "نيل", "وديان"],
-      concepts: [
-        { id: "t_nile", label: "وادي النيل والدلتا", prereqs: [], difficulty: 1 },
-        { id: "t_western", label: "الصحراء الغربية", prereqs: ["t_nile"], difficulty: 2 },
-        { id: "t_eastern", label: "الصحراء الشرقية", prereqs: ["t_nile"], difficulty: 2 },
-        { id: "t_sinai", label: "شبه جزيرة سيناء", prereqs: [], difficulty: 2 }
-      ],
-      relatedTopics: ["CLIMATE", "MAPS"]
-    },
-    "CLIMATE": {
-      subject: "مناخ مصر", keywords: ["مناخ", "حرارة", "شتاء", "صيف", "مطر", "رياح", "جو"],
-      concepts: [
-        { id: "c_factors", label: "العوامل المؤثرة في المناخ", prereqs: [], difficulty: 1 },
-        { id: "c_regions", label: "أقاليم مصر المناخية", prereqs: ["c_factors"], difficulty: 2 },
-        { id: "c_impact", label: "تأثير المناخ على النشاط البشري", prereqs: ["c_regions"], difficulty: 3 }
-      ],
-      relatedTopics: ["TERRAIN"]
-    }
-  };
-
-  // Backward compat: create TOPIC_CLUSTERS view from graph
-  const TOPIC_CLUSTERS = {};
-  for (const k in KNOWLEDGE_GRAPH) {
-    if (KNOWLEDGE_GRAPH.hasOwnProperty(k)) {
-      TOPIC_CLUSTERS[k] = { keywords: KNOWLEDGE_GRAPH[k].keywords, subject: KNOWLEDGE_GRAPH[k].subject };
-    }
-  }
-
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // 📚 MULTI-TURN LEARNING TRACKER
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  function loadLearningTracker(mem) {
-    return mem._learningTracker || { taughtConcepts: [], understoodConcepts: [], currentConceptIndex: 0, failedAttempts: {}, teachingMethod: 'standard', lastConceptTaught: null };
-  }
-  function getNextConcept(topicKey, tracker) {
-    const topic = KNOWLEDGE_GRAPH[topicKey];
-    if (!topic) return null;
-    const concepts = topic.concepts;
-    // Find first concept whose prereqs are all understood
-    for (const c of concepts) {
-      if (tracker.understoodConcepts.includes(c.id)) continue;
-      const prereqsMet = c.prereqs.every(p => tracker.understoodConcepts.includes(p));
-      if (prereqsMet) return c;
-    }
-    return null; // All understood or stuck
-  }
-  function markConceptTaught(tracker, conceptId) {
-    if (!tracker.taughtConcepts.includes(conceptId)) tracker.taughtConcepts.push(conceptId);
-    tracker.lastConceptTaught = conceptId;
-  }
-  function markConceptUnderstood(tracker, conceptId) {
-    if (!tracker.understoodConcepts.includes(conceptId)) tracker.understoodConcepts.push(conceptId);
-  }
-  function getTopicProgress(topicKey, tracker) {
-    const topic = KNOWLEDGE_GRAPH[topicKey];
-    if (!topic) return { total: 0, understood: 0, percent: 0 };
-    const total = topic.concepts.length;
-    const understood = topic.concepts.filter(c => tracker.understoodConcepts.includes(c.id)).length;
-    return { total, understood, percent: Math.round((understood / total) * 100) };
-  }
-
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // 🎓 PEDAGOGICAL PLANNER
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  function buildTeachingPlan(topicKey, tracker, mood, confidence) {
-    const plan = {
-      learningObjective: null,
-      conceptToTeach: null,
-      prerequisiteCheck: false,
-      teachingMethod: 'direct',    // direct, analogy, story, question_first, example_first
-      cognitiveLoadTarget: 'medium', // low, medium, high
-      expectedReaction: 'understanding',
-      fallbackPlan: 'simplify',
-      microGoals: [],              // what this single message should achieve
-      transitionHint: null         // what comes next
-    };
-
-    const nextConcept = getNextConcept(topicKey, tracker);
-    if (!nextConcept) {
-      plan.learningObjective = 'مراجعة شاملة';
-      plan.teachingMethod = 'question_first';
-      plan.microGoals = ['review_all'];
-      return plan;
-    }
-
-    plan.conceptToTeach = nextConcept;
-    plan.learningObjective = nextConcept.label;
-
-    // Check if prereqs need verification
-    if (nextConcept.prereqs.length > 0) {
-      const untaughtPrereqs = nextConcept.prereqs.filter(p => !tracker.understoodConcepts.includes(p));
-      if (untaughtPrereqs.length > 0) {
-        plan.prerequisiteCheck = true;
-        plan.microGoals.push('verify_prerequisite');
-      }
-    }
-
-    // Teaching method based on mood + difficulty + failure history
-    const failures = tracker.failedAttempts[nextConcept.id] || 0;
-    if (mood === 'confused' || failures > 0) {
-      plan.teachingMethod = failures > 1 ? 'story' : 'analogy';
-      plan.cognitiveLoadTarget = 'low';
-      plan.expectedReaction = 'partial_confusion';
-      plan.fallbackPlan = 'break_down_further';
-    } else if (mood === 'confident' && confidence > 60) {
-      plan.teachingMethod = 'question_first';
-      plan.cognitiveLoadTarget = 'high';
-      plan.expectedReaction = 'engagement';
-    } else if (mood === 'bored') {
-      plan.teachingMethod = 'example_first';
-      plan.cognitiveLoadTarget = 'medium';
-    }
-
-    // Micro-goals for this message
-    plan.microGoals.push('introduce_concept');
-    if (plan.cognitiveLoadTarget !== 'low') plan.microGoals.push('give_detail');
-    plan.microGoals.push('check_understanding');
-
-    // What comes after this concept
-    const topic = KNOWLEDGE_GRAPH[topicKey];
-    if (topic) {
-      const remaining = topic.concepts.filter(c => !tracker.understoodConcepts.includes(c.id) && c.id !== nextConcept.id);
-      if (remaining.length > 0) plan.transitionHint = remaining[0].label;
-    }
-
-    return plan;
-  }
-
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // 🚀 INITIATIVE ENGINE (Proactive Conversation Steering)
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  function checkInitiative(mem, thought, pressure) {
-    const initiative = {
-      shouldSteer: false,
-      steerAction: null,   // 'change_pace', 'recall_context', 'surprise_question', 'suggest_related', 'progress_report', 'break_suggestion'
-      reason: null
-    };
-
-    const turns = mem.turns;
-    const botTurns = turns.filter(t => t.role === 'bot');
-    const userTurns = turns.filter(t => t.role === 'user');
-    const recentUserTexts = userTurns.slice(-3).map(t => t.text);
-
-    // 1. Engagement detection: short consecutive user messages = disengagement
-    if (recentUserTexts.length >= 3 && recentUserTexts.every(t => t.length < 8)) {
-      initiative.shouldSteer = true;
-      initiative.steerAction = 'change_pace';
-      initiative.reason = 'ردود المستخدم قصيرة جداً — ممكن يكون زهق أو مش مركز';
-      return initiative;
-    }
-
-    // 2. Stuck detection: same topic, >6 messages, low confidence
-    if (mem.messageCount > 6 && thought.confidenceLevel < 30 && mem.currentTopic) {
-      initiative.shouldSteer = true;
-      initiative.steerAction = 'suggest_related';
-      initiative.reason = 'الطالب عالق — هقترح موضوع متعلق أسهل';
-      return initiative;
-    }
-
-    // 3. Progress milestone: student understood multiple concepts
-    if (mem.currentTopic && mem._learningTracker) {
-      const progress = getTopicProgress(mem.currentTopic, mem._learningTracker);
-      if (progress.percent >= 60 && progress.percent < 100 && botTurns.length > 0 && botTurns[botTurns.length - 1].goal !== 'progress_report') {
-        initiative.shouldSteer = true;
-        initiative.steerAction = 'progress_report';
-        initiative.reason = 'الطالب وصل لـ ' + progress.percent + '% — هشجعه بتقرير تقدم';
-        return initiative;
-      }
-    }
-
-    // 4. Pressure relief: if pressure was high for 4+ turns
-    if (pressure.level > 60 && pressure.consecutiveTeaching >= 3) {
-      initiative.shouldSteer = true;
-      initiative.steerAction = 'break_suggestion';
-      initiative.reason = 'الضغط مرتفع لفترة طويلة — هقترح استراحة أو تغيير';
-      return initiative;
-    }
-
-    return initiative;
-  }
-
-  function extractCognitiveGraph(normalized) {
-    const graph = { emotions: {}, topics: {}, needs: {}, confidence: 0 };
-
-    // Weighted Emotions
-    if (/(مضايق|مخنوق|تعبت|يائس|زفت|طهقت|رعب|خايف|قلقان|مرعوب|كارثه|بموت)/.test(normalized)) graph.emotions.ANXIETY = 0.9;
-    else if (/(صعب|معقد|توتر)/.test(normalized)) graph.emotions.ANXIETY = 0.5;
-
-    if (/(مش فاهم|ضعت|ايه ده|وضح|مفهمتش|مش مستوعب|لخبطه|تايه)/.test(normalized)) graph.emotions.FRUSTRATION = 0.85;
-    
-    // Fuzzy Topic Extraction
-    const words = normalized.split(' ');
-    for (const [clusterKey, clusterData] of Object.entries(TOPIC_CLUSTERS)) {
-      let matchCount = 0;
-      clusterData.keywords.forEach(kw => { if (normalized.includes(kw)) matchCount++; });
-      if (matchCount > 0) {
-        graph.topics[clusterKey] = Math.min(0.5 + (matchCount * 0.2), 0.95);
-        graph.extractedSubject = clusterData.subject;
-      }
-    }
-
-    // Weighted Needs
-    if (graph.emotions.ANXIETY > 0 || graph.emotions.FRUSTRATION > 0) graph.needs.MOTIVATION = 0.9;
-    if (Object.keys(graph.topics).length > 0) graph.needs.EXPLANATION = 0.85;
-    if (/(صباح|عامل ايه|اخبارك|فينك|ازيك|طمني|سلام|هاي|مرحبا)/.test(normalized)) graph.needs.SOCIAL = 0.8;
-    if (/(بايظ|مش شغال|مش بيفتح|عطلان|مشكله)/.test(normalized)) graph.needs.SUPPORT = 0.9;
-
-    // Calculate Overall Confidence
-    const maxEmotion = Math.max(...Object.values(graph.emotions), 0);
-    const maxTopic = Math.max(...Object.values(graph.topics), 0);
-    const maxNeed = Math.max(...Object.values(graph.needs), 0);
-    
-    graph.confidence = (maxEmotion + maxTopic + maxNeed) / (Object.keys(graph).length > 0 ? 3 : 1);
-    if (graph.needs.SOCIAL || graph.needs.SUPPORT) graph.confidence = Math.max(graph.confidence, 0.8);
-    
-    return graph;
-  }
-
-  function updateHumanMemoryGraph(graph) {
-    let memory = loadHumanMemory();
-    if (!memory.weak_topics) memory.weak_topics = {};
-    if (!memory.exam_anxiety) memory.exam_anxiety = 0;
-
-    // Auto-learn weak topics from frustration
-    if (graph.emotions.FRUSTRATION > 0.6) {
-      for (const topic of Object.keys(graph.topics)) {
-        memory.weak_topics[topic] = (memory.weak_topics[topic] || 0) + 0.3;
-      }
-    }
-
-    // Auto-learn anxiety
-    if (graph.emotions.ANXIETY > 0.7) memory.exam_anxiety = Math.min(memory.exam_anxiety + 0.2, 1.0);
-    else memory.exam_anxiety = Math.max(memory.exam_anxiety - 0.05, 0); // Decay
-
-    saveHumanMemory(memory);
-    return memory;
-  }
-
-  // 🧠 LEARNING SESSION ENGINE (Cognitive State)
-  function loadLearningSession() {
-    try { return JSON.parse(localStorage.getItem('pf_learning_session') || '{}'); } catch(e) { return {}; }
-  }
-
-  function saveLearningSession(session) {
-    localStorage.setItem('pf_learning_session', JSON.stringify(session));
-  }
-
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // 🧠 DIALOGUE BRAIN — Behavior Simulation Engine
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  // ── Layer 1: Conversational Memory ──
-  function loadDialogueMemory() {
-    try { return JSON.parse(sessionStorage.getItem('pf_dialogue_memory') || 'null') || createFreshMemory(); }
-    catch(e) { return createFreshMemory(); }
-  }
-  function saveDialogueMemory(mem) { safeSetItem(sessionStorage, 'pf_dialogue_memory', JSON.stringify(mem)); }
-  function createFreshMemory() {
-    return {
-      turns: [],               // [{role,text,thought,ts}]
-      currentTopic: null,      // string key e.g. 'MOHAMED_ALI'
-      currentSubject: null,    // human name e.g. 'محمد علي'
-      phase: 'IDLE',           // IDLE, TOPIC_OFFERED, EXPLAINING, PRACTICING, TESTING, REVIEWING
-      pendingAction: null,     // what the bot asked & is waiting for
-      studentMood: { confusion: 0, confidence: 50, frustration: 0, curiosity: 0, boredom: 0 },
-      messageCount: 0,
-      lastBotGoal: null
-    };
-  }
-
-  // ── Layer 2: Emotional Interpretation ──
-  function interpretEmotion(normalized, mem) {
-    const mood = { ...mem.studentMood };
-
-    // Confusion signals (wide net — not just "مش فاهم")
-    if (/(مش فاهم|تايه|ضايع|ضعت|لخبط|متلخبط|معقد|صعب|مش واضح|مش مستوعب|مفهمتش|ايه ده|ازاي كده|مش عارف|فهمني|وضح|ايه الحل)/.test(normalized)) {
-      mood.confusion = Math.min(100, mood.confusion + 35);
-      mood.confidence = Math.max(0, mood.confidence - 20);
-    }
-    // Frustration / distress
-    if (/(مضايق|مخنوق|تعبت|يائس|زفت|طهقت|خايف|قلقان|رعب|كارثه|بموت|مش طايق|زهقت|ملل)/.test(normalized)) {
-      mood.frustration = Math.min(100, mood.frustration + 30);
-      mood.confidence = Math.max(0, mood.confidence - 15);
-    }
-    // Boredom
-    if (/(ملل|زهقت|مش عايز|بلاش|طويل|كتير|مش طايق)/.test(normalized)) {
-      mood.boredom = Math.min(100, mood.boredom + 25);
-    }
-    // Positive / understanding signals
-    if (/(فهمت|تمام|اه|ايوه|صح|كمل|ماشي|اللي بعده|شكرا|عاش|جامد|حلو|ممتاز|مظبوط)/.test(normalized)) {
-      mood.confidence = Math.min(100, mood.confidence + 20);
-      mood.confusion = Math.max(0, mood.confusion - 15);
-      mood.frustration = Math.max(0, mood.frustration - 10);
-      mood.boredom = Math.max(0, mood.boredom - 10);
-    }
-    // Curiosity
-    if (/(ليه|ازاي|يعني ايه|طب وايه|وبعدين|ومين|وامتى)/.test(normalized)) {
-      mood.curiosity = Math.min(100, mood.curiosity + 20);
-    }
-
-    // Natural decay towards neutral over time
-    mood.confusion = Math.max(0, mood.confusion - 3);
-    mood.frustration = Math.max(0, mood.frustration - 3);
-    mood.boredom = Math.max(0, mood.boredom - 2);
-    mood.curiosity = Math.max(0, mood.curiosity - 2);
-
-    return mood;
-  }
-
-  // ── Layer 3: Message Classification (not just intent — behavioral) ──
-  function classifyMessage(normalized, mem) {
-    const classification = {
-      type: 'unknown',        // social, educational, technical, emotional, contextual_reply
-      educationalIntent: null, // explain, quiz, review, summarize, compare, solve
-      topicKey: null,
-      topicSubject: null,
-      isShortReply: normalized.split(/\s+/).length <= 3,
-      rawSignals: {}
-    };
-
-    // Social detection
-    const socialScore = (/(ازيك|عامل ايه|اخبارك|فينك|صباح|مساء|هاي|مرحبا|سلام|كيفك|اهلا|يسعدك|صباحك|بقولك عامل ايه)/.test(normalized)) ? 1 : 0;
-    // Technical detection
-    const techScore = (/(بايظ|مش شغال|مش بيفتح|عطلان|مشكله|مشكلة|error|خطأ|باج|bug)/.test(normalized)) ? 1 : 0;
-    // Emotional-only (venting, not asking for content)
-    const emotionalScore = (/(مضايق|مخنوق|تعبت|يائس|زفت|طهقت|خايف|قلقان|بموت|مش طايق)/.test(normalized) && !/(اشرح|وضح|فهمني|درس)/.test(normalized)) ? 1 : 0;
-
-    // Topic detection
-    for (const [key, data] of Object.entries(TOPIC_CLUSTERS)) {
-      let hits = 0;
-      data.keywords.forEach(kw => { if (normalized.includes(kw)) hits++; });
-      if (hits > 0) {
-        classification.topicKey = key;
-        classification.topicSubject = data.subject;
-      }
-    }
-
-    // Educational intent sub-classification
-    if (/(اشرحلي|شرح|فهمني|وضح|مش فاهم|تايه|ضايع|يعني ايه)/.test(normalized)) classification.educationalIntent = 'explain';
-    else if (/(اختبرني|اسالني|سؤال|اسأل|امتحن)/.test(normalized)) classification.educationalIntent = 'quiz';
-    else if (/(مراجعة|راجع|لخص|ملخص)/.test(normalized)) classification.educationalIntent = 'review';
-    else if (/(قارن|الفرق|ايه الفرق)/.test(normalized)) classification.educationalIntent = 'compare';
-
-    // Contextual reply detection — short messages that respond to the bot's last question
-    const isContextualReply = classification.isShortReply && mem.pendingAction &&
-      (/(جاهز|اه|ايوه|يلا|تمام|ماشي|1|2|3|شرح|اختبار|تدريب|مراجعة)/.test(normalized));
-
-    // Determine dominant type
-    if (isContextualReply) classification.type = 'contextual_reply';
-    else if (socialScore > 0 && !classification.topicKey && !classification.educationalIntent) classification.type = 'social';
-    else if (techScore > 0) classification.type = 'technical';
-    else if (emotionalScore > 0 && !classification.topicKey) classification.type = 'emotional';
-    else if (classification.topicKey || classification.educationalIntent) classification.type = 'educational';
-    else if (classification.isShortReply && mem.pendingAction) classification.type = 'contextual_reply';
-    else classification.type = 'unknown';
-
-    return classification;
-  }
-
-  // ── Layer 4: Internal Thought Builder ──
-  function buildThought(classification, mood, mem, normalized) {
-    const thought = {
-      detectedMood: 'neutral',
-      educationalIntent: classification.educationalIntent,
-      conversationGoal: 'clarify',  // default
-      topic: classification.topicSubject || mem.currentSubject,
-      topicKey: classification.topicKey || mem.currentTopic,
-      confidenceLevel: mood.confidence,
-      messageType: classification.type,
-      isNewTopic: classification.topicKey && classification.topicKey !== mem.currentTopic,
-      isTopicOnlyMessage: classification.isShortReply && classification.topicKey && !classification.educationalIntent,
-      pendingAction: mem.pendingAction,
-      phase: mem.phase,
-      reasoning: []
-    };
-
-    // Determine dominant mood
-    if (mood.confusion > 40) thought.detectedMood = 'confused';
-    else if (mood.frustration > 40) thought.detectedMood = 'frustrated';
-    else if (mood.boredom > 40) thought.detectedMood = 'bored';
-    else if (mood.curiosity > 30) thought.detectedMood = 'curious';
-    else if (mood.confidence > 60) thought.detectedMood = 'confident';
-
-    // Determine conversation goal based on thought (not regex)
-    if (classification.type === 'social') {
-      thought.conversationGoal = 'connect';
-      thought.reasoning.push('الطالب بيسلم أو بيتكلم كلام اجتماعي — هرد بشكل طبيعي');
-    } else if (classification.type === 'emotional') {
-      thought.conversationGoal = 'reassure';
-      thought.reasoning.push('الطالب متضايق أو قلقان — هطمنه الأول قبل أي حاجة');
-    } else if (classification.type === 'technical') {
-      thought.conversationGoal = 'support';
-      thought.reasoning.push('الطالب عنده مشكلة تقنية — هوجهه للدعم');
-    } else if (classification.type === 'contextual_reply') {
-      // Resolve based on what the bot asked
-      thought.conversationGoal = resolveContextualGoal(normalized, mem);
-      thought.reasoning.push('الطالب بيرد على سؤالي السابق — هفسر رده في السياق');
-    } else if (classification.type === 'educational') {
-      if (thought.isTopicOnlyMessage) {
-        thought.conversationGoal = 'offer_menu';
-        thought.reasoning.push('الطالب ذكر موضوع بس — هعرض عليه يختار نوع المساعدة');
-      } else if (thought.detectedMood === 'confused' || classification.educationalIntent === 'explain') {
-        thought.conversationGoal = 'simplify';
-        thought.reasoning.push('الطالب محتاج تبسيط — هشرحله ببساطة وبدون ضغط');
-      } else if (classification.educationalIntent === 'quiz') {
-        thought.conversationGoal = 'challenge';
-        thought.reasoning.push('الطالب عايز يتختبر — هسأله سؤال');
-      } else if (classification.educationalIntent === 'review') {
-        thought.conversationGoal = 'summarize';
-        thought.reasoning.push('الطالب عايز مراجعة — هلخصله');
-      } else if (thought.detectedMood === 'confident') {
-        thought.conversationGoal = 'advance';
-        thought.reasoning.push('الطالب واثق — هتقدم معاه للمستوى التالي');
-      } else {
-        thought.conversationGoal = 'teach';
-        thought.reasoning.push('الطالب بيسأل سؤال عادي — هجاوبه');
-      }
-    } else {
-      // Unknown — ask gently
-      thought.conversationGoal = 'clarify';
-      thought.reasoning.push('مش متأكد من قصد الطالب — هسأله بأدب');
-    }
-
-    // Mood-based overrides
-    if (thought.detectedMood === 'frustrated' && thought.conversationGoal === 'teach') {
-      thought.conversationGoal = 'simplify';
-      thought.reasoning.push('الطالب محبط — هبسط بدل ما أكمل شرح عادي');
-    }
-    if (thought.detectedMood === 'bored' && thought.conversationGoal === 'teach') {
-      thought.conversationGoal = 'challenge';
-      thought.reasoning.push('الطالب زهق — هحاول أشغله بسؤال بدل شرح طويل');
-    }
-
-    console.log('🧠 [THOUGHT]', JSON.stringify(thought, null, 2));
-    return thought;
-  }
-
-  function resolveContextualGoal(normalized, mem) {
-    if (!mem.pendingAction) return 'clarify';
-    if (mem.pendingAction === 'AWAITING_LEARNING_MODE') {
-      if (/(شرح|1|فهمني|وضح)/.test(normalized)) return 'teach';
-      if (/(تدريب|2|اسئلة)/.test(normalized)) return 'practice';
-      if (/(اختبار|3|اختبرني|جاهز)/.test(normalized)) return 'challenge';
-      if (/(مراجعة|4|لخص)/.test(normalized)) return 'summarize';
-      return 'teach'; // default if unclear
-    }
-    if (mem.pendingAction === 'AWAITING_ANSWER') {
-      return 'evaluate_answer';
-    }
-    if (mem.pendingAction === 'AWAITING_CONFIRMATION') {
-      if (/(اه|ايوه|تمام|يلا|ماشي|جاهز)/.test(normalized)) return 'advance';
-      if (/(لا|مش|اعيد|تاني)/.test(normalized)) return 'simplify';
-      return 'advance';
-    }
-    return 'clarify';
-  }
-
-  // ── Behavior Profile Generator ──
-  function buildBehaviorProfile(thought, mem) {
-    const mood = thought.detectedMood;
-    const confidence = thought.confidenceLevel;
-    const msgCount = mem.messageCount;
-
-    const profile = {
-      sentencePacing: 'normal',     // slow, normal, fast
-      infoDensity: 'medium',        // minimal, medium, rich
-      emotionalIntensity: 'normal', // cold, normal, warm, intense
-      shouldInterrupt: false,       // stop mid-explanation to check in?
-      explanationDepth: 'standard', // shallow, standard, deep
-      shouldQuestion: false,        // end with a question?
-      questionType: 'open',         // open, yesno, choice
-      rhythm: 'steady',            // cautious, steady, energetic
-      shouldExample: false,
-      shouldMotivate: false,
-      shouldComfort: false,
-      maxSentences: 4
-    };
-
-    // ── Mood-driven adjustments ──
-    if (mood === 'confused') {
-      profile.sentencePacing = 'slow';
-      profile.infoDensity = 'minimal';
-      profile.emotionalIntensity = 'warm';
-      profile.shouldInterrupt = true;
-      profile.explanationDepth = 'shallow';
-      profile.shouldQuestion = true;
-      profile.questionType = 'yesno';
-      profile.rhythm = 'cautious';
-      profile.shouldComfort = true;
-      profile.maxSentences = 3;
-    } else if (mood === 'frustrated') {
-      profile.sentencePacing = 'slow';
-      profile.infoDensity = 'minimal';
-      profile.emotionalIntensity = 'intense';
-      profile.shouldInterrupt = true;
-      profile.explanationDepth = 'shallow';
-      profile.shouldQuestion = true;
-      profile.questionType = 'yesno';
-      profile.rhythm = 'cautious';
-      profile.shouldComfort = true;
-      profile.shouldMotivate = true;
-      profile.maxSentences = 3;
-    } else if (mood === 'confident') {
-      profile.sentencePacing = 'fast';
-      profile.infoDensity = 'rich';
-      profile.emotionalIntensity = 'normal';
-      profile.explanationDepth = 'deep';
-      profile.shouldQuestion = true;
-      profile.questionType = 'open';
-      profile.rhythm = 'energetic';
-      profile.maxSentences = 5;
-    } else if (mood === 'bored') {
-      profile.sentencePacing = 'fast';
-      profile.infoDensity = 'minimal';
-      profile.emotionalIntensity = 'normal';
-      profile.explanationDepth = 'shallow';
-      profile.shouldQuestion = true;
-      profile.questionType = 'choice';
-      profile.rhythm = 'energetic';
-      profile.maxSentences = 2;
-    } else if (mood === 'curious') {
-      profile.infoDensity = 'rich';
-      profile.explanationDepth = 'deep';
-      profile.shouldExample = true;
-      profile.shouldQuestion = true;
-      profile.questionType = 'open';
-      profile.maxSentences = 5;
-    }
-
-    // ── Goal-driven adjustments ──
-    if (thought.conversationGoal === 'challenge') {
-      profile.emotionalIntensity = 'cold';
-      profile.shouldComfort = false;
-      profile.infoDensity = 'minimal';
-      profile.rhythm = 'energetic';
-      profile.shouldQuestion = true;
-      profile.questionType = 'open';
-    }
-    if (thought.conversationGoal === 'reassure') {
-      profile.emotionalIntensity = 'intense';
-      profile.infoDensity = 'minimal';
-      profile.shouldComfort = true;
-      profile.shouldMotivate = true;
-      profile.maxSentences = 3;
-    }
-
-    // ── Conversation pressure (too many messages without progress) ──
-    if (msgCount > 8 && confidence < 40) {
-      profile.shouldInterrupt = true;
-      profile.infoDensity = 'minimal';
-      profile.shouldComfort = true;
-    }
-
-    console.log('📊 [BEHAVIOR PROFILE]', JSON.stringify(profile));
-    return profile;
-  }
-
-  // ── Behavioral Language Generator ──
-  function composeResponse(thought, mem, normalized, userMessage, decision, profile, teachingPlan, tracker) {
-    let sentences = [];
-    let newPendingAction = null;
-    let newPhase = mem.phase;
-    const subj = thought.topic || mem.currentSubject;
-    const goal = decision ? decision.primaryGoal : thought.conversationGoal;
-
-    // ━━━━ GENERATE response from DECISION (goal-driven, not state-driven) ━━━━
-    
-    // Check Initiative Steering first
-    if (decision && decision.primaryGoal === 'steer_conversation') {
-      if (decision.strategy === 'change_pace') {
-        sentences.push('حاسس إننا بنجري؟ تحب نوقف شوية وندردش أو أسألك عن حاجة سريعة؟');
-      } else if (decision.strategy === 'suggest_related') {
-        const tKey = thought.topicKey || mem.currentTopic;
-        const related = (KNOWLEDGE_GRAPH[tKey] && KNOWLEDGE_GRAPH[tKey].relatedTopics && KNOWLEDGE_GRAPH[tKey].relatedTopics[0]) ? KNOWLEDGE_GRAPH[tKey].relatedTopics[0] : 'موضوع تاني';
-        const relatedSubject = KNOWLEDGE_GRAPH[related] ? KNOWLEDGE_GRAPH[related].subject : related;
-        sentences.push(`واضح إن الجزء ده غلس شوية. إيه رأيك نسيبه ونبص على ${relatedSubject}؟`);
-      } else if (decision.strategy === 'progress_report') {
-        sentences.push(`على فكرة، إنت ممتاز! خلصت أجزاء كتير مهمة في ${subj}. عاش جداً 💪`);
-      } else if (decision.strategy === 'break_suggestion') {
-        sentences.push('إحنا شرحنا حاجات كتير ورا بعض. خد نفسك كده وقولي لما تبقى جاهز نكمل.');
-      } else {
-        sentences.push('تحب نغير الموضوع ونتكلم في حاجة تانية؟');
-      }
-      newPendingAction = 'AWAITING_CONFIRMATION';
-      newPhase = mem.phase;
-    }
-    
-    else if (thought.conversationGoal === 'connect' || goal === 'social_connection') {
-      sentences.push(generateSocialOpener(profile, mem));
-      sentences.push(generateSubjectPrompt(profile, mem));
-      newPhase = mem.currentTopic ? mem.phase : 'IDLE';
-    }
-
-    else if (thought.conversationGoal === 'reassure') {
-      sentences.push(generateComfortSentence(profile, thought));
-      if (profile.shouldMotivate) sentences.push(generateMotivation(profile));
-      if (mem.currentSubject) {
-        sentences.push(generateContextReturn(profile, mem.currentSubject));
-        newPendingAction = 'AWAITING_CONFIRMATION';
-      } else {
-        sentences.push(generateIdlePrompt(profile));
-      }
-    }
-
-    else if (thought.conversationGoal === 'support') {
-      sentences.push('فاهمك يا بطل. الدعم الفني شغالين على المشكلة دي.');
-      sentences.push('لو المشكلة مستعجلة اكتب "مشكلة" والدعم هيتواصل معاك.');
-      newPhase = mem.phase;
-    }
-
-    else if (thought.conversationGoal === 'offer_menu') {
-      sentences.push(`ممتاز 👍 تقصد درس "${subj}".`);
-      sentences.push('عايز إيه بالظبط؟');
-      sentences.push('1- شرح سريع\n2- أسئلة وتدريب\n3- اختبار\n4- مراجعة');
-      newPendingAction = 'AWAITING_LEARNING_MODE';
-      newPhase = 'TOPIC_OFFERED';
-    }
-
-    else if (thought.conversationGoal === 'teach' || thought.conversationGoal === 'simplify') {
-      // Decision-aware: should we actually teach right now?
-      if (decision && !decision.shouldTeachNow) {
-        // Decision says: DON'T teach — comfort and check in instead
-        if (profile.shouldComfort) sentences.push(generateComfortSentence(profile, thought));
-        sentences.push(generateInterruptionCheck(profile));
-        newPendingAction = 'AWAITING_CONFIRMATION';
-        newPhase = 'EXPLAINING';
-      } else {
-        // Opening — shaped by decision strategy, not mood
-        if (profile.shouldComfort) sentences.push(generateComfortSentence(profile, thought));
-        
-        // Use Pedagogical Planner if available
-        if (teachingPlan && teachingPlan.conceptToTeach) {
-          sentences.push(`تعالى نتكلم عن ${teachingPlan.learningObjective}.`);
-          
-          if (teachingPlan.microGoals.includes('verify_prerequisite')) {
-            const tKey = thought.topicKey || mem.currentTopic;
-            const topicData = KNOWLEDGE_GRAPH[tKey];
-            let prereqLabel = 'الدرس اللي فات';
-            if (topicData && topicData.concepts) {
-              const prereqId = teachingPlan.conceptToTeach.prereqs[0];
-              const prereqConcept = topicData.concepts.find(c => c.id === prereqId);
-              if (prereqConcept) prereqLabel = prereqConcept.label;
-            }
-            sentences.push(`بس الأول، فاكر الجزء بتاع ${prereqLabel}؟`);
-            newPendingAction = 'AWAITING_ANSWER';
-          } else {
-            // Deliver actual knowledge based on method
-            if (teachingPlan.teachingMethod === 'question_first') {
-              sentences.push('تفتكر إيه أهمية ده؟ فكر كده ثانية.');
-            } else if (teachingPlan.teachingMethod === 'analogy') {
-              sentences.push('عشان تتخيلها، الموضوع شبه ' + (subj === 'محمد علي' ? 'لما تبني بيت من الأساس' : 'قصة بسيطة جداً') + '.');
-            }
-            
-            // Mark as taught
-            if (tracker) markConceptTaught(tracker, teachingPlan.conceptToTeach.id);
-            // Simulate knowledge text delivery
-            let knowledgeText = fetchKnowledge(subj, userMessage);
-            if (knowledgeText) {
-              sentences.push(shapeKnowledge(knowledgeText, profile));
-            }
-            
-            if (teachingPlan.transitionHint && !profile.shouldInterrupt) {
-              sentences.push(`وبعدها هندخل على ${teachingPlan.transitionHint}.`);
-            }
-          }
-        } else {
-          // Fallback teaching opener
-          sentences.push(generateTeachingOpener(profile, subj));
-          let knowledgeText = fetchKnowledge(subj, userMessage);
-          if (knowledgeText) {
-            knowledgeText = shapeKnowledge(knowledgeText, profile);
-            sentences.push(knowledgeText);
-          } else if (subj) {
-            sentences.push(generateKnowledgeFallback(profile, subj));
-          }
-          if (profile.shouldExample && subj) {
-            sentences.push(generateExample(subj));
-          }
-        }
-
-        // Interruption point — decision controls when to check in
-        if (profile.shouldInterrupt) {
-          sentences.push(generateInterruptionCheck(profile));
-          newPendingAction = 'AWAITING_CONFIRMATION';
-        } else if (profile.shouldQuestion && newPendingAction !== 'AWAITING_ANSWER') {
-          sentences.push(generateFollowUp(profile, subj));
-          newPendingAction = 'AWAITING_CONFIRMATION';
-        }
-        newPhase = 'EXPLAINING';
-      }
-    }
-
-    else if (thought.conversationGoal === 'practice') {
-      sentences.push(generatePracticeIntro(profile, subj));
-      let eduResult = fetchKnowledge(subj, userMessage);
-      if (eduResult) sentences.push(shapeKnowledge(eduResult, profile));
-      newPhase = 'PRACTICING';
-      newPendingAction = 'AWAITING_ANSWER';
-    }
-
-    else if (thought.conversationGoal === 'challenge') {
-      sentences.push(generateChallengeOpener(profile));
-      if (subj) sentences.push(`هسألك سؤال في "${subj}" وعايزك تجاوب بثقة.`);
-      const knowledge = (typeof OFFLINE_KNOWLEDGE_BASE !== 'undefined') ? OFFLINE_KNOWLEDGE_BASE.find(k => subj && k.topic.includes(subj)) : null;
-      if (knowledge && knowledge.question) {
-        sentences.push(knowledge.question);
-      } else {
-        sentences.push('جاهز تسمع السؤال؟');
-      }
-      newPhase = 'TESTING';
-      newPendingAction = 'AWAITING_ANSWER';
-    }
-
-    else if (thought.conversationGoal === 'summarize') {
-      sentences.push(`خليني ألخصلك "${subj || 'اللي اتكلمنا فيه'}" بسرعة.`);
-      let eduResult = fetchKnowledge(subj, userMessage);
-      if (eduResult) sentences.push(shapeKnowledge(eduResult, { ...profile, infoDensity: 'minimal', explanationDepth: 'shallow' }));
-      sentences.push(generateFollowUp(profile, subj));
-      newPhase = 'REVIEWING';
-      newPendingAction = 'AWAITING_CONFIRMATION';
-    }
-
-    else if (thought.conversationGoal === 'advance') {
-      sentences.push(generateAdvanceResponse(profile, mem, subj));
-      newPendingAction = 'AWAITING_LEARNING_MODE';
-    }
-
-    else if (thought.conversationGoal === 'evaluate_answer') {
-      sentences.push(generateEvaluation(profile));
-      sentences.push(generateFollowUp(profile, subj));
-      newPendingAction = 'AWAITING_LEARNING_MODE';
-      newPhase = mem.phase;
-    }
-
-    else if (thought.conversationGoal === 'clarify') {
-      if (mem.currentSubject) {
-        sentences.push(`أنا معاك في "${mem.currentSubject}". تقصد إيه بالظبط؟`);
-        sentences.push('شرح، اختبار، ولا حاجة تانية؟');
-        newPendingAction = 'AWAITING_LEARNING_MODE';
-      } else {
-        sentences.push(generateClarificationRequest(profile));
-      }
-    }
-
-    // ── Trim to max sentences ──
-    sentences = sentences.filter(s => s && s.trim());
-    if (sentences.length > profile.maxSentences + 1) {
-      sentences = sentences.slice(0, profile.maxSentences + 1);
-    }
-
-    // ── Apply pacing ──
-    const responseText = applyPacing(sentences, profile);
-
-    // ── Update memory ──
-    if (thought.topicKey) { mem.currentTopic = thought.topicKey; mem.currentSubject = thought.topic; }
-    mem.phase = newPhase;
-    mem.pendingAction = newPendingAction;
-    mem.lastBotGoal = thought.conversationGoal;
-    mem.messageCount++;
-    mem.turns.push({ role: 'user', text: userMessage, ts: Date.now() });
-    mem.turns.push({ role: 'bot', text: responseText, goal: thought.conversationGoal, ts: Date.now() });
-    if (mem.turns.length > 40) mem.turns = mem.turns.slice(-40);
-    saveDialogueMemory(mem);
-
-    console.log('🧠 [DIALOGUE BRAIN] Goal:', thought.conversationGoal, '| Mood:', thought.detectedMood, '| Phase:', newPhase, '| Pacing:', profile.sentencePacing);
-    return responseText;
-  }
-
-  // ━━━━ Language Generation Functions (NOT templates — built from profile) ━━━━
-
-  function generateSocialOpener(profile, mem) {
-    const greetings = ['الحمد لله', 'تمام', 'كويس'];
-    const g = greetings[mem.messageCount % greetings.length];
-    const emoji = profile.rhythm === 'energetic' ? ' 😄' : ' 😊';
-    let s = g + emoji;
-    if (mem.currentSubject && profile.rhythm !== 'cautious') s += ` .. لسه فاكرك من درس "${mem.currentSubject}"`;
-    else s += ' وأنت عامل إيه؟';
-    return s;
-  }
-
-  function generateSubjectPrompt(profile, mem) {
-    if (mem.currentSubject) return `نكمل في "${mem.currentSubject}" ولا عايز حاجة تانية؟`;
-    return 'عايز مساعدة في التاريخ ولا الجغرافيا ولا عندك سؤال تقني؟';
-  }
-
-  function generateComfortSentence(profile, thought) {
-    // Build comfort dynamically from intensity
-    if (profile.emotionalIntensity === 'intense') {
-      return thought.detectedMood === 'frustrated'
-        ? 'أنا حاسس بيك ومن حقك تتضايق، بس أنا معاك ومش هسيبك.'
-        : 'اطمن خالص، أنا موجود عشان أساعدك مش عشان أضغط عليك.';
-    }
-    return thought.detectedMood === 'frustrated'
-      ? 'ولا يهمك، هنعدي الجزء ده سوا.'
-      : 'متقلقش، كل حاجة هتبقى تمام.';
-  }
-
-  function generateMotivation(profile) {
-    if (profile.emotionalIntensity === 'intense') return 'وفاكر إن كل دقيقة بتذاكرها بتفرق معاك في النتيجة.';
-    return 'خطوة خطوة وهتلاقي الموضوع سهل.';
-  }
-
-  function generateContextReturn(profile, subject) {
-    if (profile.sentencePacing === 'slow') return `عايز نرجع لـ"${subject}" بالراحة ولا نعمل حاجة تانية؟`;
-    return `نكمل "${subject}" ولا نغير الموضوع؟`;
-  }
-
-  function generateIdlePrompt(profile) {
-    return profile.sentencePacing === 'slow' ? 'قولي لما تبقى جاهز.' : 'قولي عايز إيه.';
-  }
-
-  function generateTeachingOpener(profile, subj) {
-    if (profile.rhythm === 'cautious') return `خلينا نمشي في "${subj || 'الموضوع'}" خطوة خطوة وبالراحة.`;
-    if (profile.rhythm === 'energetic') return `يلا ندخل في "${subj || 'الموضوع'}" على طول!`;
-    return `تعالى نتكلم عن "${subj || 'الموضوع'}".`;
-  }
-
-  function fetchKnowledge(subj, userMessage) {
-    if (!subj) return '';
-    try {
-      const eduResult = executeEducationalIntentEngine(subj, userMessage);
-      if (typeof eduResult === 'object' && eduResult && eduResult.text) return eduResult.text;
-      if (typeof eduResult === 'string') return eduResult;
-    } catch(e) {}
-    return '';
-  }
-
-  function shapeKnowledge(text, profile) {
-    if (!text || text.length < 5) return text;
-    // Clean old intros
-    text = text.replace(/^(بص يا سيدي|شوف يا بطل|سؤال ممتاز).+?[:.]/g, '').trim();
-
-    const sentences = text.split(/(?<=[.؟!])\s+/);
-
-    // Density control
-    if (profile.infoDensity === 'minimal') {
-      return sentences.slice(0, 1).join(' ');
-    } else if (profile.infoDensity === 'medium' || profile.explanationDepth === 'standard') {
-      return sentences.slice(0, 3).join(' ');
-    }
-    // rich — return all but cap at 5
-    return sentences.slice(0, 5).join(' ');
-  }
-
-  function generateExample(subj) {
-    return `وعشان الصورة توضح أكتر، خد المثال ده في "${subj}"..`;
-  }
-
-  function generateKnowledgeFallback(profile, subj) {
-    if (profile.sentencePacing === 'slow') return `الموضوع ده مشروح جوة الكورس بالتفصيل، بس خليني أقولك الفكرة الأساسية عن "${subj}".`;
-    return `خليني أقولك أهم نقطة في "${subj}".`;
-  }
-
-  function generateInterruptionCheck(profile) {
-    if (profile.questionType === 'yesno') return 'لحد هنا واضح؟';
-    return 'كمل ولا نقف؟';
-  }
-
-  function generateFollowUp(profile, subj) {
-    if (profile.questionType === 'yesno') return 'فاهم كده؟';
-    if (profile.questionType === 'choice') return `عايز سؤال في "${subj || 'الموضوع'}" ولا نكمل شرح؟`;
-    return 'تحب نكمل ولا نعمل حاجة تانية؟';
-  }
-
-  function generatePracticeIntro(profile, subj) {
-    if (profile.rhythm === 'energetic') return `يلا نتدرب على "${subj || 'الدرس'}" فوراً!`;
-    return `هنتدرب على "${subj || 'الدرس'}" سوا، جاهز؟`;
-  }
-
-  function generateChallengeOpener(profile) {
-    if (profile.rhythm === 'energetic') return 'يلا نشوف مستواك! 🔥';
-    return 'توكلنا على الله.';
-  }
-
-  function generateAdvanceResponse(profile, mem, subj) {
-    let s = '';
-    if (profile.rhythm === 'energetic') s = 'عاش! 💪 ';
-    else s = 'ممتاز. ';
-    if (mem.phase === 'EXPLAINING') s += 'تحب أسألك سؤال تطبيقي ولا نكمل شرح؟';
-    else if (mem.phase === 'TESTING' || mem.phase === 'PRACTICING') s += `عايز سؤال تاني في "${subj || 'الدرس'}" ولا ندخل في موضوع جديد؟`;
-    else s += 'عايز نعمل إيه دلوقتي؟';
-    return s;
-  }
-
-  function generateEvaluation(profile) {
-    if (profile.rhythm === 'energetic') return 'إجابة جامدة! 👏';
-    return 'كويس كده.';
-  }
-
-  function generateClarificationRequest(profile) {
-    if (profile.sentencePacing === 'slow') return 'أنا معاك يا بطل. قولي بالظبط عايز إيه وأنا هساعدك.';
-    return 'ممكن توضحلي أكتر؟ عايز مساعدة في درس معين؟';
-  }
-
-  // ── Pacing Engine (controls the rhythm of the final output) ──
-  function applyPacing(sentences, profile) {
-    if (profile.sentencePacing === 'slow') {
-      // More breathing room between sentences
-      return sentences.join('\n\n');
-    } else if (profile.sentencePacing === 'fast') {
-      // Compact — less whitespace
-      return sentences.join('\n');
-    }
-    // normal
-    return sentences.join('\n\n');
-  }
-
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // 🧠 COGNITIVE PRESSURE MODEL
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  function loadCognitivePressure(mem) {
-    return mem._pressure || { level: 30, trend: 'stable', consecutiveTeaching: 0, consecutiveQuestions: 0, lastShift: 0 };
-  }
-  function updateCognitivePressure(pressure, decision, thought) {
-    // Teaching adds pressure
-    if (decision.shouldTeachNow) pressure.consecutiveTeaching++;
-    else pressure.consecutiveTeaching = 0;
-    // Questions add a little pressure
-    if (decision.shouldProbeKnowledge) pressure.consecutiveQuestions++;
-    else pressure.consecutiveQuestions = 0;
-
-    // Compute new level
-    if (decision.shouldTeachNow) pressure.level = Math.min(100, pressure.level + 12);
-    if (decision.shouldProbeKnowledge) pressure.level = Math.min(100, pressure.level + 8);
-    if (decision.primaryGoal === 'reduce_confusion' || decision.primaryGoal === 'emotional_support') pressure.level = Math.max(0, pressure.level - 20);
-    if (decision.primaryGoal === 'social_connection') pressure.level = Math.max(0, pressure.level - 30);
-    // Natural decay
-    pressure.level = Math.max(0, pressure.level - 3);
-
-    // Trend
-    if (pressure.level > 70) pressure.trend = 'overloaded';
-    else if (pressure.level > 45) pressure.trend = 'building';
-    else if (pressure.level < 20) pressure.trend = 'low';
-    else pressure.trend = 'stable';
-
-    pressure.lastShift = Date.now();
-    return pressure;
-  }
-
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // 🎯 DIALOGUE DECISION ENGINE
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  function makeDialogueDecision(thought, mem, pressure) {
-    const decision = {
-      primaryGoal: null,
-      secondaryGoal: null,
-      strategy: null,
-      pressureLevel: pressure.level,
-      shouldTeachNow: false,
-      shouldProbeKnowledge: false,
-      shouldComfortFirst: false,
-      shouldSwitchTone: false,
-      shouldReduceLoad: false,
-      shouldRecoverContext: false,
-      shouldChallenge: false,
-      explanationApproach: 'standard',   // minimal, standard, deep, analogy
-      questionStyle: 'none',             // none, yesno, guided, open, challenge
-      reasoning: []
-    };
-
-    const mood = thought.detectedMood;
-    const goal = thought.conversationGoal;
-    const phase = mem.phase;
-    const conf = thought.confidenceLevel;
-    const recentTurns = mem.turns.slice(-6);
-    const lastBotGoals = recentTurns.filter(t => t.role === 'bot').map(t => t.goal);
-    const repeatedGoal = lastBotGoals.length >= 2 && lastBotGoals.every(g => g === lastBotGoals[0]);
-
-    // ── Step 1: Is the student overwhelmed? ──
-    if (pressure.trend === 'overloaded' || (mood === 'confused' && conf < 25)) {
-      decision.primaryGoal = 'reduce_confusion';
-      decision.shouldReduceLoad = true;
-      decision.shouldComfortFirst = true;
-      decision.shouldTeachNow = false;
-      decision.shouldProbeKnowledge = false;
-      decision.explanationApproach = 'minimal';
-      decision.questionStyle = 'yesno';
-      decision.strategy = 'pause_and_check';
-      decision.reasoning.push('الطالب فوق طاقته — لازم نوقف الشرح ونطمنه ونسأله سؤال بسيط');
-      return decision;
-    }
-
-    // ── Step 2: Is the student emotionally distressed? ──
-    if (mood === 'frustrated' || mood === 'confused') {
-      decision.primaryGoal = 'emotional_support';
-      decision.secondaryGoal = goal === 'teach' || goal === 'simplify' ? 'gentle_teaching' : null;
-      decision.shouldComfortFirst = true;
-      decision.shouldTeachNow = (conf > 20);
-      decision.shouldReduceLoad = true;
-      decision.explanationApproach = 'analogy';
-      decision.questionStyle = 'yesno';
-      decision.strategy = 'comfort_then_simplify';
-      decision.reasoning.push('الطالب محتاج دعم نفسي — هطمنه الأول وبعدين أبسط لو يقدر يستوعب');
-      return decision;
-    }
-
-    // ── Step 3: Is the student bored or disengaged? ──
-    if (mood === 'bored' || (repeatedGoal && lastBotGoals[0] === 'teach')) {
-      decision.primaryGoal = 'break_monotony';
-      decision.shouldChallenge = true;
-      decision.shouldTeachNow = false;
-      decision.shouldProbeKnowledge = true;
-      decision.questionStyle = 'challenge';
-      decision.strategy = 'surprise_challenge';
-      decision.reasoning.push('الطالب زهق أو الحوار بقى رتيب — هغير الإيقاع بتحدي مفاجئ');
-      return decision;
-    }
-
-    // ── Step 4: Is the student confident and ready? ──
-    if (mood === 'confident' && conf > 60) {
-      decision.primaryGoal = 'advance_knowledge';
-      decision.shouldTeachNow = true;
-      decision.shouldProbeKnowledge = true;
-      decision.explanationApproach = 'deep';
-      decision.questionStyle = 'open';
-      decision.strategy = 'push_forward';
-      decision.reasoning.push('الطالب واثق — هتعمق معاه وأسأله أسئلة مفتوحة');
-      return decision;
-    }
-
-    // ── Step 5: Is this a social / non-educational moment? ──
-    if (goal === 'connect' || goal === 'support') {
-      decision.primaryGoal = 'social_connection';
-      decision.strategy = 'be_human';
-      decision.shouldTeachNow = false;
-      decision.shouldProbeKnowledge = false;
-      decision.reasoning.push('الطالب بيتكلم كلام عادي — هرد كإنسان طبيعي');
-      return decision;
-    }
-
-    // ── Step 6: Is the student responding to a pending action? ──
-    if (goal === 'offer_menu') {
-      decision.primaryGoal = 'clarify_intent';
-      decision.strategy = 'present_options';
-      decision.reasoning.push('الطالب ذكر موضوع بس — هعرض عليه يختار');
-      return decision;
-    }
-
-    // ── Step 7: Context recovery needed? ──
-    if (!thought.topic && !mem.currentSubject && goal !== 'connect') {
-      decision.primaryGoal = 'recover_context';
-      decision.shouldRecoverContext = true;
-      decision.strategy = 'gentle_probe';
-      decision.questionStyle = 'guided';
-      decision.reasoning.push('مفيش موضوع واضح — هسأله بلطف عايز إيه');
-      return decision;
-    }
-
-    // ── Step 8: Default — teach with adaptive approach ──
-    decision.primaryGoal = 'deliver_knowledge';
-    decision.shouldTeachNow = true;
-    decision.explanationApproach = conf < 40 ? 'analogy' : 'standard';
-    decision.shouldProbeKnowledge = pressure.consecutiveTeaching >= 2;
-    decision.questionStyle = pressure.consecutiveTeaching >= 2 ? 'guided' : 'none';
-    decision.strategy = 'steady_teaching';
-    if (pressure.consecutiveTeaching >= 2) {
-      decision.reasoning.push('شرحت كتير متتابع — هسأل سؤال عشان أتأكد إنه فاهم');
-    } else {
-      decision.reasoning.push('حالة عادية — هشرح بشكل متزن');
-    }
-
-    // Override: if contextual reply (student answering bot's question)
-    if (thought.conversationGoal === 'evaluate_answer' || thought.conversationGoal === 'advance' || thought.conversationGoal === 'practice' || thought.conversationGoal === 'challenge' || thought.conversationGoal === 'summarize') {
-      decision.primaryGoal = thought.conversationGoal;
-      decision.strategy = 'follow_flow';
-      decision.reasoning.push('الطالب رد على سؤالي — هكمل في نفس السياق');
-    }
-
-    return decision;
-  }
-
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // 🔄 REASONING LOOP (Now with Initiative & Planning)
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  function reasoningLoop(thought, mem) {
-    const pressure = loadCognitivePressure(mem);
-    const tracker = loadLearningTracker(mem);
-    const topicKey = thought.topicKey || mem.currentTopic;
-
-    let decision = null;
-    let teachingPlan = null;
-
-    // Step 1: Check Initiative (Proactive Steering)
-    const initiative = checkInitiative(mem, thought, pressure);
-    if (initiative.shouldSteer) {
-      decision = {
-        primaryGoal: 'steer_conversation',
-        strategy: initiative.steerAction,
-        shouldTeachNow: false,
-        shouldProbeKnowledge: false,
-        shouldComfortFirst: false,
-        pressureLevel: pressure.level,
-        reasoning: ['[PROACTIVE INITIATIVE] ' + initiative.reason]
-      };
-    } else {
-      // Step 2: Make initial reactive decision
-      decision = makeDialogueDecision(thought, mem, pressure);
-    }
-
-    // Step 3: Safety check — is teaching right now actually helpful?
-    if (decision.shouldTeachNow && thought.detectedMood === 'confused' && pressure.level > 50) {
-      decision.shouldTeachNow = false;
-      decision.shouldComfortFirst = true;
-      decision.explanationApproach = 'minimal';
-      decision.reasoning.push('[OVERRIDE] الضغط مرتفع والطالب مرتبك — ألغيت الشرح وهطمنه الأول');
-    }
-
-    // Step 4: Prevent repetition — did we do the same thing 3 times?
-    const recentGoals = mem.turns.filter(t => t.role === 'bot').slice(-3).map(t => t.goal);
-    if (recentGoals.length >= 3 && recentGoals.every(g => g === decision.primaryGoal)) {
-      decision.shouldSwitchTone = true;
-      if (decision.primaryGoal === 'deliver_knowledge') {
-        decision.primaryGoal = 'break_monotony';
-        decision.shouldProbeKnowledge = true;
-        decision.shouldTeachNow = false;
-        decision.strategy = 'surprise_challenge';
-        decision.reasoning.push('[OVERRIDE] نفس الهدف 3 مرات متتالية — هغير الإيقاع');
-      }
-    }
-
-    // Step 5: Pedagogical Planning (if teaching)
-    if (decision.shouldTeachNow && topicKey) {
-      teachingPlan = buildTeachingPlan(topicKey, tracker, thought.detectedMood, thought.confidenceLevel);
-      decision.reasoning.push('[PEDAGOGY] هدف التدريس: ' + teachingPlan.learningObjective);
-      // Sync plan to decision
-      if (teachingPlan.cognitiveLoadTarget === 'low') decision.explanationApproach = 'minimal';
-      if (teachingPlan.teachingMethod === 'analogy') decision.explanationApproach = 'analogy';
-      if (teachingPlan.teachingMethod === 'deep') decision.explanationApproach = 'deep';
-    }
-
-    // Step 6: Update models
-    const newPressure = updateCognitivePressure(Object.assign({}, pressure), decision, thought);
-    mem._pressure = newPressure;
-    mem._learningTracker = tracker; // state mutations happen inside the response composer
-
-    // Step 7: Build behavior profile FROM DECISION
-    const profile = buildBehaviorProfileFromDecision(decision, thought, mem);
-
-    console.log('🎯 [DECISION]', JSON.stringify(decision));
-    if (teachingPlan) console.log('🎓 [PLAN]', JSON.stringify(teachingPlan));
-    console.log('📊 [PRESSURE]', JSON.stringify(newPressure));
-    console.log('📚 [TRACKER]', JSON.stringify(tracker));
-
-    return { decision, profile, teachingPlan, tracker };
-  }
-
-  // ── Build Behavior Profile from Decision (not mood) ──
-  function buildBehaviorProfileFromDecision(decision, thought, mem) {
-    const profile = {
-      sentencePacing: 'normal',
-      infoDensity: 'medium',
-      emotionalIntensity: 'normal',
-      shouldInterrupt: false,
-      explanationDepth: 'standard',
-      shouldQuestion: false,
-      questionType: 'open',
-      rhythm: 'steady',
-      shouldExample: false,
-      shouldMotivate: false,
-      shouldComfort: decision.shouldComfortFirst,
-      maxSentences: 4
-    };
-
-    // Pacing from strategy
-    if (decision.strategy === 'pause_and_check' || decision.strategy === 'comfort_then_simplify') {
-      profile.sentencePacing = 'slow';
-      profile.rhythm = 'cautious';
-      profile.maxSentences = 3;
-    } else if (decision.strategy === 'push_forward' || decision.strategy === 'surprise_challenge') {
-      profile.sentencePacing = 'fast';
-      profile.rhythm = 'energetic';
-    }
-
-    // Info density from decision
-    if (decision.shouldReduceLoad || decision.explanationApproach === 'minimal') {
-      profile.infoDensity = 'minimal';
-      profile.explanationDepth = 'shallow';
-    } else if (decision.explanationApproach === 'deep') {
-      profile.infoDensity = 'rich';
-      profile.explanationDepth = 'deep';
-      profile.shouldExample = true;
-      profile.maxSentences = 5;
-    } else if (decision.explanationApproach === 'analogy') {
-      profile.infoDensity = 'medium';
-      profile.explanationDepth = 'standard';
-      profile.shouldExample = true;
-    }
-
-    // Emotional intensity from decision
-    if (decision.shouldComfortFirst) {
-      profile.emotionalIntensity = decision.primaryGoal === 'emotional_support' ? 'intense' : 'warm';
-      profile.shouldMotivate = true;
-    }
-    if (decision.shouldChallenge) {
-      profile.emotionalIntensity = 'cold';
-      profile.shouldComfort = false;
-    }
-
-    // Question style from decision
-    if (decision.questionStyle !== 'none') {
-      profile.shouldQuestion = true;
-      profile.questionType = decision.questionStyle === 'challenge' ? 'open' : decision.questionStyle;
-    }
-    if (decision.shouldProbeKnowledge) {
-      profile.shouldInterrupt = true;
-      profile.shouldQuestion = true;
-    }
-
-    // Pressure-based overrides
-    if (decision.pressureLevel > 70) {
-      profile.maxSentences = Math.min(profile.maxSentences, 3);
-      profile.infoDensity = 'minimal';
-    }
-    if (decision.pressureLevel < 15 && !decision.shouldChallenge) {
-      profile.maxSentences = Math.max(profile.maxSentences, 4);
-    }
-
-    return profile;
-  }
-
-  // ── Main Entry Point ──
-  const BOT_RESPONSES_DISABLED = false;
-  function getTemporarySafeBotReply(userMessage) {
-    const normalized = normalizeText(userMessage) || 'كلمة_فارغة';
-
-    // Load conversational memory
-    let mem = loadDialogueMemory();
-
-    // Layer 1: Emotional Interpretation
-    mem.studentMood = interpretEmotion(normalized, mem);
-
-    // Layer 2: Message Classification
-    const classification = classifyMessage(normalized, mem);
-
-    // Layer 3: Internal Thought Builder
-    const thought = buildThought(classification, mem.studentMood, mem, normalized);
-
-    // Layer 4: REASONING LOOP → DIALOGUE DECISION
-    const { decision, profile, teachingPlan, tracker } = reasoningLoop(thought, mem);
-
-    // Layer 5: Response Composer (driven by DECISION, not mood)
-    const response = composeResponse(thought, mem, normalized, userMessage, decision, profile, teachingPlan, tracker);
-
-    // Log brain metrics
-    logBrainMetrics({
-      userMessage,
-      intent: decision.primaryGoal,
-      purpose: decision.strategy,
-      emotion: thought.detectedMood,
-      plannedResponseMode: 'DIALOGUE_DECISION_ENGINE',
-      score: thought.confidenceLevel,
-      context: decision.reasoning, memory: true
-    }, { confidence: thought.confidenceLevel, extractedData: { subjects: [thought.topic] } });
-
-    return response;
-  }
-
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // 🧠 INTENT FUSION ENGINE
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  function executeIntentFusionEngine(thoughtProcess, normalized, userMessage) {
-    const purposes = thoughtProcess.interpretations || [];
-    // If it's a simple single intent, skip fusion to save processing and maintain focused responses
-    if (purposes.length <= 1) return null;
-
-    let responseParts = [];
-    let tags = [];
-
-    // 1. Social / Greeting (Always comes first)
-    if (thoughtProcess.extractedData.islamicGreeting && thoughtProcess.extractedData.islamicGreeting.level > 1) {
-      responseParts.push(thoughtProcess.extractedData.islamicGreeting.reply + '، أهلاً بيك يا بطل!');
-      tags.push('social');
-    } else if (purposes.includes('SOCIAL_CONNECTION') || isFuzzyMatch(normalized, DYNAMIC_VOCAB.greetings)) {
-      responseParts.push(pickRandom(DYNAMIC_RESPONSES.greetings));
-      tags.push('social');
-    }
-
-    // 2. Humor (Acknowledge joke)
-    if (purposes.includes('HUMOR') || isFuzzyMatch(normalized, DYNAMIC_VOCAB.humor)) {
-      responseParts.push(pickRandom(DYNAMIC_RESPONSES.emotions.humor));
-      tags.push('humor');
-    }
-
-    // 3. Emotional / Empathy (Complaint or Stress)
-    if (purposes.includes('EMOTIONAL_SUPPORT') || purposes.includes('COMPLAINT') || isFuzzyMatch(normalized, DYNAMIC_VOCAB.complaint)) {
-      responseParts.push(pickRandom(DYNAMIC_RESPONSES.emotions.empathy));
-      tags.push('empathy');
-    }
-
-    // 4. Educational / Follow up / Help (The meat of the response)
-    let eduText = null;
-    if (purposes.includes('EDUCATIONAL_EXPLANATION') || purposes.includes('FOLLOW_UP') || purposes.includes('ASSISTANCE') || thoughtProcess.extractedData.subjects.length > 0) {
-      eduText = executeEducationalIntentEngine(normalized, userMessage);
-      if (eduText && !eduText.includes('مفهمتش قصدك')) {
-         // To make it naturally flow from the social parts
-         if (responseParts.length > 0) {
-            responseParts.push('وبخصوص طلبك، ' + eduText);
-         } else {
-            responseParts.push(eduText);
-         }
-         tags.push('educational');
-      }
-    }
-
-    // If fusion didn't actually combine anything, fallback to standard routing
-    if (responseParts.length <= 1) return null;
-
-    return {
-      text: responseParts.join(' '),
-      tag: tags.includes('educational') ? 'educational' : 'social'
-    };
-  }
-
-  function executeEducationalIntentEngine(normalized, userMessage) {
-    const rule = ruleAnswerFor(userMessage);
-    if (rule && rule.text) return applyMiniTeacherMode(composeFinalResponse(rule, userMessage, analyzeStudentIntent(userMessage)));
-
-    const platformReply = getPlatformReply(userMessage);
-    if (platformReply && platformReply.text) return applyMiniTeacherMode(composeFinalResponse(platformReply, userMessage, analyzeStudentIntent(userMessage)));
-
-    const known = getKnownResponses(userMessage);
-    if (known && known.text) return applyMiniTeacherMode(composeFinalResponse(known, userMessage, analyzeStudentIntent(userMessage)));
-
-    const contentBased = getContentBasedResponse(userMessage);
-    if (contentBased && contentBased.text) return applyMiniTeacherMode(composeFinalResponse(contentBased, userMessage, analyzeStudentIntent(userMessage)));
-
-    // 🧠 OFFLINE KNOWLEDGE RESEARCHER (TEACHER MODE)
-    const expansionResponse = offlineKnowledgeResearcher(normalized, userMessage);
-    if (expansionResponse) return expansionResponse;
-
-    // 🚨 EMERGENCY RETRIEVAL
-    const emergencyReply = emergencyRetrievalEngine(normalized, userMessage);
-    if (emergencyReply) return emergencyReply;
-
-    return { text: executeFallbackEngine(normalized, userMessage), tag: 'fallback' };
-  }
-
-  function applyMiniTeacherMode(responseObj) {
-    if (!responseObj || !responseObj.text) return responseObj;
-    const text = responseObj.text;
-    // Don't apply if it's already an expansion or a fallback or very short
-    if (text.length > 40 && responseObj.tag === 'educational' && !text.includes('خليني أشرحلك')) {
-      const miniWrap = `${text}\n\n**تبسيط سريع:** لو فهمت دي، هترتاح جداً في المذاكرة.\n**نصيحة حفظ:** اربط المعلومة دي بكلمة تفكرك بيها في الامتحان.\nجاهز أسألك فيها ولا نكمل شرح؟`;
-      return { text: miniWrap, tag: 'educational' };
-    }
-    return responseObj;
-  }
-
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // 📚 OFFLINE KNOWLEDGE RESEARCHER
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  const OFFLINE_KNOWLEDGE_BASE = [
-    {
-      topic: 'الحملة الفرنسية',
-      keywords: ['فرنسا', 'حملة', 'نابليون', 'كليبر', 'مينو', 'رشيد'],
-      definition: 'الحملة الفرنسية على مصر (1798-1801) بقيادة نابليون بونابرت كان هدفها قطع طريق التجارة على إنجلترا للهند، وتأسيس إمبراطورية فرنسية في الشرق.',
-      simplification: 'عشان أبسطهالك: دي كانت محاولة من فرنسا عشان تضرب انجلترا عن طريق السيطرة على مصر وتعمل لنفسها مستعمرة.',
-      example: 'أبرز أحداثها: ثورة القاهرة الأولى وموقعة أبي قير البحرية اللي دمرت أسطول فرنسا.',
-      memorizationPoint: 'احفظ النقطة دي كويس: (فك رموز حجر رشيد) هو أهم نتيجة علمية للحملة.',
-      question: 'بعد ما شرحتلك.. جاهز أسألك في الحملة الفرنسية؟'
-    },
-    {
-      topic: 'محمد علي',
-      keywords: ['محمد علي', 'مذبحة القلعة', 'الاحتكار', 'مؤسس'],
-      definition: 'محمد علي باشا هو مؤسس مصر الحديثة. تولى الحكم عام 1805 باختيار الزعامة الشعبية، وانفرد بالحكم بعد مذبحة القلعة.',
-      simplification: 'ببساطة: الراجل ده استلم مصر وهي ضعيفة، وبنى جيش قوي واهتم بالزراعة والصناعة عشان يعمل دولة قوية خاصة بيه.',
-      example: 'من إنجازاته: تطبيق نظام (الاحتكار) عشان يتحكم في الاقتصاد وإرسال بعثات علمية لأوروبا.',
-      memorizationPoint: 'ركز في دي بتيجي في الامتحان: (عمر مكرم) هو زعيم المقاومة الشعبية اللي اختار محمد علي للحكم.',
-      question: 'تفتكر بقى.. إيه هي مذبحة القلعة اللي عملها محمد علي؟'
-    },
-    {
-      topic: 'تضاريس مصر',
-      keywords: ['تضاريس', 'جبال', 'هضاب', 'الصحراء', 'وادي النيل'],
-      definition: 'تنقسم تضاريس مصر لـ 4 أقسام رئيسية: وادي النيل والدلتا، الصحراء الغربية، الصحراء الشرقية، وشبه جزيرة سيناء.',
-      simplification: 'بمعنى أصح: مصر متقسمة 4 حتت، حتة زراعية (الوادي والدلتا)، وحتة صحراء كبيرة (الغربية)، وحتة جبال (الشرقية)، وسيناء في الشرق.',
-      example: 'مثال للتضاريس: سلسلة جبال البحر الأحمر في الصحراء الشرقية وهضبة مرمريكا في الغربية.',
-      memorizationPoint: 'احفظها صم: (الصحراء الغربية) هي أكبر قسم تضاريسي في مصر.',
-      question: 'مستعد للسؤال؟ لو قولتلك فين تقع هضبة الجلف الكبير هتقولي فين؟'
-    },
-    {
-      topic: 'الفراعنة',
-      keywords: ['فرعون', 'الدولة القديمة', 'الهكسوس', 'أحمس', 'تاريخ قديم', 'الاهرامات'],
-      definition: 'تاريخ مصر الفرعوني ينقسم لعدة عصور: الدولة القديمة (عصر بناة الأهرامات)، الدولة الوسطى (الرخاء الاقتصادي)، والدولة الحديثة (المجد الحربي).',
-      simplification: 'عشان متتلخبطش: تاريخ مصر عامل زي 3 محطات أساسية؛ محطة بنوا فيها الأهرامات، ومحطة اهتموا فيها بالزراعة والتجارة، ومحطة بقوا فيها جيش قوي وحاربوا.',
-      example: 'زي ما الملك أحمس طرد الهكسوس في نهاية عصر الاضمحلال الثاني عشان يأمن البلد.',
-      memorizationPoint: 'نقطة الامتحان هنا: (الملك مينا) هو موحد القطرين ومؤسس الأسرة الأولى.',
-      question: 'ها يا بطل.. مين هو مؤسس الدولة الحديثة وصاحب المجد الحربي؟'
-    }
-  ];
-
-  function searchPlatformKnowledge(normalized) {
-    try {
-      let adminCourses = JSON.parse(localStorage.getItem('adminCourses') || '[]');
-      if (!adminCourses || adminCourses.length === 0) return null;
-
-      const words = normalized.split(/\s+/).filter(w => w.length >= 3);
-      if (words.length === 0) return null;
-
-      // Filter out common stop words to avoid false positives
-      const stopWords = ['انا', 'عايز', 'مش', 'فاهم', 'فين', 'اشرحلي', 'طب', 'ايه', 'ازاي', 'عن', 'بتاع', 'بتاعة'];
-      const queryWords = words.filter(w => !stopWords.includes(w));
-
-      if (queryWords.length === 0) return null;
-
-      for (let course of adminCourses) {
-        // 1. Check Course Title
-        for (let qw of queryWords) {
-          if (course.title && course.title.includes(qw)) {
-            return { type: 'course', courseTitle: course.title, courseId: course.id };
-          }
-        }
-        
-        // 2. Check Units and Lessons
-        if (course.units && Array.isArray(course.units)) {
-          for (let unit of course.units) {
-            for (let qw of queryWords) {
-              if (unit.title && unit.title.includes(qw)) {
-                return { type: 'unit', courseTitle: course.title, unitTitle: unit.title, courseId: course.id };
-              }
-            }
-            if (unit.lessons && Array.isArray(unit.lessons)) {
-              for (let lesson of unit.lessons) {
-                for (let qw of queryWords) {
-                  if (lesson.title && lesson.title.includes(qw)) {
-                    return { type: 'lesson', courseTitle: course.title, unitTitle: unit.title, lessonTitle: lesson.title, courseId: course.id };
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-      return null;
-    } catch(e) {
-      console.error("Knowledge Expansion Error:", e);
-      return null;
-    }
-  }
-
-  function offlineKnowledgeResearcher(normalized, userMessage) {
-    let matchedItem = null;
-    let courseLink = '';
-    
-    // 1. Search Offline Base
-    for (let item of OFFLINE_KNOWLEDGE_BASE) {
-      if (item.keywords.some(k => normalized.includes(k) || userMessage.includes(k))) {
-        matchedItem = item;
-        break; // Take the first matched one for structured explanation
-      }
-    }
-
-    // 2. Search Admin Courses
-    const courseFinding = searchPlatformKnowledge(normalized);
-    if (courseFinding) {
-      if (courseFinding.type === 'lesson') {
-        courseLink = `وللعلم، تفاصيل الدرس ده مشروحة كاملة في كورس (${courseFinding.courseTitle})، وحدة (${courseFinding.unitTitle})، درس (${courseFinding.lessonTitle}).`;
-      } else if (courseFinding.type === 'unit') {
-        courseLink = `ولو حابب تذاكر الموضوع ده بتركيز، هتلاقيه في كورس (${courseFinding.courseTitle}) وتحديداً في وحدة (${courseFinding.unitTitle}).`;
-      } else {
-        courseLink = `ولو حابب تذاكر الموضوع ده بتركيز، هتلاقيه في كورس (${courseFinding.courseTitle}).`;
-      }
-    }
-
-    if (!matchedItem && !courseLink) return null;
-
-    let finalResponse = '';
-    
-    if (matchedItem) {
-      finalResponse = `خليني أشرحلك ( ${matchedItem.topic} ) في 5 خطوات سريعة:\n\n`;
-      finalResponse += `**1. التعريف الأساسي:**\n${matchedItem.definition}\n\n`;
-      finalResponse += `**2. تبسيط:**\n${matchedItem.simplification}\n\n`;
-      finalResponse += `**3. مثال توضيحي:**\n${matchedItem.example}\n\n`;
-      finalResponse += `**4. نقطة في الامتحان:**\n${matchedItem.memorizationPoint}\n\n`;
-      finalResponse += `**5. سؤال ليك:**\n${matchedItem.question}`;
-      
-      if (courseLink) finalResponse += `\n\n${courseLink}`;
-    } else {
-      finalResponse = `أنا دورتلك في الكورسات بتاعتنا ولقيت إن الموضوع اللي بتسأل عنه موجود.. ${courseLink}\nأرجوك افتح صفحة الكورسات وابدأ ذاكره!`;
-    }
-
-    return composeFinalResponse({ text: finalResponse, tag: 'educational' }, userMessage, 'knowledge_expansion');
-  }
-
-  function executeContextEngine(normalized, userMessage) {
-    const followUp = getFollowUpReply(userMessage);
-    if (followUp && followUp.text) return composeFinalResponse(followUp, userMessage, analyzeStudentIntent(userMessage));
-    return executeEducationalIntentEngine(normalized, userMessage);
-  }
-
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // 🚨 EMERGENCY RETRIEVAL ENGINE (Retrieval Before Failure)
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  function emergencyRetrievalEngine(normalized, userMessage) {
-    console.log('[EMERGENCY RETRIEVAL ENGINE] Scanning all knowledge bases for partial matches...');
-    
-    // 1. Scan KNOWLEDGE_REASONING_BASE
-    for (const [topic, data] of Object.entries(KNOWLEDGE_REASONING_BASE)) {
-      if (normalized.includes(topic) || Object.values(data).some(v => v.includes(normalized))) {
-        return {
-          text: `أنا مش متأكد إن كان ده اللي تقصده بالظبط، بس لو تقصد (${topic})، فالمعلومة اللي عندي بتقول:\n${data.explanation}\n\nهل ده اللي بتدور عليه؟`,
-          tag: 'clarification'
-        };
-      }
-    }
-
-    // 2. Scan OFFLINE_KNOWLEDGE_BASE (Full Text Scan)
-    for (const item of OFFLINE_KNOWLEDGE_BASE) {
-      if (normalized.includes(item.topic) || item.definition.includes(normalized) || item.simplification.includes(normalized)) {
-        return {
-          text: `حاولت أفهم قصدك بالظبط، ولو سؤالك مرتبط بـ (${item.topic})، خليني أبسطهالك:\n${item.simplification}\n\nلو تقصد حاجة تانية ياريت توضحلي أكتر!`,
-          tag: 'clarification'
-        };
-      }
-    }
-
-    // 3. Scan KNOWLEDGE_GRAPH
-    for (const [topic, data] of Object.entries(KNOWLEDGE_GRAPH)) {
-      if (normalized.includes(topic) || data.related.some(r => r.includes(normalized) || normalized.includes(r))) {
-        return {
-          text: `الكلام ده بيفكرني بـ (${topic}) واللي ليه علاقة بـ (${data.related.join(' و ')}).\nلو حابب نتكلم في النقطة دي، أنا جاهز!`,
-          tag: 'clarification'
-        };
-      }
-    }
-
-    // 4. Memory Association (Last Topic)
-    let memory = loadHumanMemory();
-    if (memory.lastTopics && memory.lastTopics.length > 0) {
-      const lastTopic = memory.lastTopics[memory.lastTopics.length - 1];
-      if (normalized.length < 15) {
-         return {
-           text: `هل سؤالك ده له علاقة بـ (${lastTopic}) اللي كنا بنتكلم فيه من شوية؟ لو أيوة، ياريت توضح سؤالك عشان أجاوبك بدقة.`,
-           tag: 'clarification'
-         };
-      }
-    }
-
-    console.log('[EMERGENCY RETRIEVAL ENGINE] Total Failure. Yielding to Fallback.');
-    return null;
-  }
-
-  function executeFallbackEngine(normalized, userMessage, thoughtProcess = {}) {
-    let response = getFallbackResponse(userMessage, thoughtProcess).text;
-    return applyAntiRepetition(response, 'fallback');
-  }
-
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // 🕵️‍♂️ STUDENT MISTAKE DECODER (Pre-processing)
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   const ADVANCED_TYPO_MAP = {
-    'كمبيوتر': 'كمبيوتر',
-    'اشترك': 'اشتراك',
-    'اشتركم': 'اشتراك',
-    'الكراس': 'الكورس',
-    'البصورةه': 'الباسورد',
-    'الباصورد': 'الباسورد',
-    'الباسود': 'الباسورد',
-    'مش عارفه': 'مش عارف',
-    'مش شغاله': 'مش شغالة',
-    'المنسه': 'المنصة',
-    'البلاتفورم': 'المنصة',
-    'منصه': 'المنصة',
-    'معرفش': 'مش عارف',
-    'مفهمتش': 'مش فاهم',
-    'مشفاهم': 'مش فاهم',
-    'مشبيفتح': 'مش بيفتح',
-    'مابيفتحش': 'مش بيفتح',
-    'مبيفتحش': 'مش بيفتح',
-    'مشعارف': 'مش عارف',
-    'يعم': 'يا عم',
-    'يسطا': 'يا صاحبي',
-    'ياعم': 'يا عم',
-    'امتا': 'امتى',
-    'ازاى': 'ازاي',
-    'عوز': 'عايز',
-    'عيز': 'عايز'
+    'كمبيوتر': 'كمبيوتر', 'اشترك': 'اشتراك', 'اشتركم': 'اشتراك', 'الكراس': 'الكورس',
+    'البصورةه': 'الباسورد', 'الباصورد': 'الباسورد', 'الباسود': 'الباسورد', 'مش عارفه': 'مش عارف',
+    'مش شغاله': 'مش شغالة', 'المنسه': 'المنصة', 'البلاتفورم': 'المنصة', 'منصه': 'المنصة',
+    'معرفش': 'مش عارف', 'مفهمتش': 'مش فاهم', 'مشفاهم': 'مش فاهم', 'مشبيفتح': 'مش بيفتح',
+    'مابيفتحش': 'مش بيفتح', 'مبيفتحش': 'مش بيفتح', 'مشعارف': 'مش عارف', 'يعم': 'يا عم',
+    'يسطا': 'يا صاحبي', 'ياعم': 'يا عم', 'امتا': 'امتى', 'ازاى': 'ازاي', 'عوز': 'عايز', 'عيز': 'عايز'
   };
 
   function decodeStudentMistakes(rawText) {
     if (!rawText) return '';
     let decoded = rawText;
-
-    // 1. Fix commonly attached prefixes (مش، مب، ماب)
     decoded = decoded.replace(/\b(مش|مب|ماب)(?=[أ-ي])/g, '$1 ');
-
-    // 2. Fix slang and typos using advanced map
     Object.keys(ADVANCED_TYPO_MAP).forEach(wrong => {
       const right = ADVANCED_TYPO_MAP[wrong];
       decoded = decoded.replace(new RegExp(`\\b${wrong}\\b`, 'g'), right);
     });
-
     return decoded;
   }
+
+  function normalizeText(text) {
+    if (!text || typeof text !== 'string') return '';
+    let normalized = text.toLowerCase().replace(/[\u000B\u000C\u001F]/g, ' ').trim();
+    normalized = decodeStudentMistakes(normalized);
+    try {
+      normalized = normalized
+        .replace(/[إأآا]/g, 'ا')
+        .replace(/ى/g, 'ي')
+        .replace(/ة/g, 'ه')
+        .replace(/[ؤئ]/g, 'ء')
+        .replace(/[^0-9A-Za-z\u0600-\u06FF\s،\.,\?\!\-]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+    } catch (e) {
+      normalized = normalized.replace(/[^a-z0-9\s]/gi, ' ').replace(/\s+/g, ' ').trim();
+    }
+    return normalized;
+  }
+
+  // =========================================================
+  // THE NEW 4-LAYER NATURAL TUTOR ARCHITECTURE
+  // =========================================================
+  
+  // =========================================================
+  // THE NEW STATEFUL DIALOGUE ARCHITECTURE (CURSOR & MODES)
+  // =========================================================
+
+  // 1. STATE MANAGEMENT
+  function getMemory() {
+      try {
+          const mem = JSON.parse(sessionStorage.getItem('pf_tutor_memory')) || {};
+          if (!mem.state) {
+              mem.state = {
+                  flow: 'idle', // idle, subject_selection, teaching, quiz, support
+                  topic: null,
+                  lesson: null,
+                  pendingQuestion: null,
+                  stack: []
+              };
+          }
+          return mem;
+      } catch (e) {
+          return { state: { flow: 'idle', topic: null, lesson: null, pendingQuestion: null, stack: [] } };
+      }
+  }
+
+  function saveMemory(mem) {
+      sessionStorage.setItem('pf_tutor_memory', JSON.stringify(mem));
+  }
+
+  // 2. HARD SEPARATION & PRIORITY SYSTEM
+  function processInput(rawText) {
+      const normalized = normalizeText(rawText);
+      const mem = getMemory();
+
+      // INTERRUPT SYSTEM: Detect hard technical issues anytime to escape to support
+      if (/(بايظ|مش شغال|عطلان|مشكلة|دفع|اشتراك|تسجيل|منصة|باسورد|حساب|موقع|اختفى|صفحة)/.test(normalized)) {
+          if (mem.state.flow !== 'support') {
+              mem.state.stack.push(mem.state.flow);
+              mem.state.flow = 'support';
+              mem.state.pendingQuestion = null;
+          }
+          saveMemory(mem);
+          return "الواضح إن دي مشكلة تقنية. لو مستعجل على حل المشكلة اكتب مشكلة والدعم هيتواصل معاك في أقرب وقت 🙏";
+      }
+
+      // PENDING RESOLUTION SYSTEM: IGNORE INTENTS if there's a pending question
+      if (mem.state.pendingQuestion) {
+          return resolvePendingAnswer(normalized, mem);
+      }
+
+      // INTENT ROUTING (Only if no pending question)
+      if (/(ازيك|عامل ايه|صباح|مساء|هاي|مرحبا|سلام|كيفك|اهلا|بقولك عامل ايه)/.test(normalized)) {
+          return "الحمد لله تمام. تحب أساعدك في إيه دلوقتي؟";
+      }
+
+      if (/(تاريخ)/.test(normalized)) {
+          mem.state.flow = 'teaching';
+          mem.state.topic = 'تاريخ';
+          mem.state.pendingQuestion = 'ask_teach_or_quiz';
+          saveMemory(mem);
+          return "تمام، تاريخ. تحب شرح ولا أسئلة؟";
+      }
+
+      if (/(جغرافيا)/.test(normalized)) {
+          mem.state.flow = 'teaching';
+          mem.state.topic = 'جغرافيا';
+          mem.state.pendingQuestion = 'ask_teach_or_quiz';
+          saveMemory(mem);
+          return "تمام، جغرافيا. تحب شرح ولا أسئلة؟";
+      }
+
+      if (/(شرح|فاهم|درس|سؤال|يعني ايه|ازاي|ليه|محمد علي)/.test(normalized)) {
+          mem.state.pendingQuestion = 'ask_subject';
+          saveMemory(mem);
+          return "تاريخ ولا جغرافيا؟";
+      }
+
+      // Fallback
+      return "عشان أقدر أساعدك، تحب تذاكر تاريخ ولا جغرافيا؟";
+  }
+
+  function resolvePendingAnswer(normalized, mem) {
+      const q = mem.state.pendingQuestion;
+      mem.state.pendingQuestion = null; // Clear it, we are resolving it
+
+      if (q === 'ask_subject') {
+          if (/(تاريخ)/.test(normalized)) {
+              mem.state.topic = 'تاريخ';
+              mem.state.flow = 'teaching';
+              mem.state.pendingQuestion = 'ask_teach_or_quiz';
+              saveMemory(mem);
+              return "شرح ولا أسئلة؟";
+          } else if (/(جغرافيا)/.test(normalized)) {
+              mem.state.topic = 'جغرافيا';
+              mem.state.flow = 'teaching';
+              mem.state.pendingQuestion = 'ask_teach_or_quiz';
+              saveMemory(mem);
+              return "شرح ولا أسئلة؟";
+          } else {
+              mem.state.pendingQuestion = 'ask_subject';
+              saveMemory(mem);
+              return "معلش، حددلي بس تاريخ ولا جغرافيا؟";
+          }
+      }
+
+      if (q === 'ask_teach_or_quiz') {
+          if (/(شرح)/.test(normalized)) {
+              mem.state.flow = 'teaching';
+              saveMemory(mem);
+              return `يلا نبدأ شرح ${mem.state.topic}. أنهي درس واقف قدامك؟`;
+          } else if (/(اسئلة|أسئلة|سؤال|امتحان)/.test(normalized)) {
+              mem.state.flow = 'quiz';
+              saveMemory(mem);
+              return `جاهز لأسئلة الـ ${mem.state.topic}؟ السؤال الأول بيقول...`;
+          } else {
+              mem.state.pendingQuestion = 'ask_teach_or_quiz';
+              saveMemory(mem);
+              return "شرح ولا أسئلة؟";
+          }
+      }
+
+      if (q === 'return_from_support') {
+          if (/(اه|ايوه|نعم|يلا|جاهز)/.test(normalized)) {
+              const prevFlow = mem.state.stack.pop() || 'idle';
+              mem.state.flow = prevFlow;
+              saveMemory(mem);
+              return "تمام، نكمل اللي كنا بنعمله.";
+          } else {
+              mem.state.flow = 'idle';
+              saveMemory(mem);
+              return "براحتك، لو احتجت حاجة أنا موجود.";
+          }
+      }
+
+      saveMemory(mem);
+      return "مش متأكد تقصد إيه. تحب نبدأ من الأول تاريخ ولا جغرافيا؟";
+  }
+
+  function getTemporarySafeBotReply(text) {
+      // Small logic to recover from tech support if issue is "resolved" (mocked via a keyword for now)
+      const normalized = normalizeText(text);
+      const mem = getMemory();
+      if (mem.state.flow === 'support' && /(شكرا|خلاص|تمام|اتحلت)/.test(normalized)) {
+           if (mem.state.stack.length > 0) {
+               mem.state.pendingQuestion = 'return_from_support';
+               saveMemory(mem);
+               return "العفو. تحب نرجع للشرح اللي كنا فيه؟";
+           } else {
+               mem.state.flow = 'idle';
+               saveMemory(mem);
+               return "العفو! تحت أمرك.";
+           }
+      }
+
+      return processInput(text);
+  }
+
+  // Placeholder for missing legacy functions that might be called inside uiLogic
+  function getPlatformFacts() {
+    const user = getCurrentUser();
+    let courses = [];
+    try {
+      const localAdminCourses = localStorage.getItem('adminCourses');
+      if (localAdminCourses) {
+        courses = JSON.parse(localAdminCourses);
+      }
+    } catch(e) {}
+    
+    return {
+      hasCourses: courses.length > 0,
+      courseCount: courses.length,
+      courseTitlesString: courses.map(c => c.title).join('، '),
+      progressPercent: 0,
+      videosWatched: 0,
+      homeworkCompleted: 0,
+      homeworkTotal: 0,
+      notificationCount: 0,
+      contentHints: []
+    };
+  }
+
+  function getAdminLearnedResponse(text) { return null; }
+  function getTrainedResponse(text) { return null; }
+  function checkAntiCheatContext(text) { return { isCheat: false }; }
+  function getContextAwareResponse(text) { return null; }
+  function getContentBasedResponse(text) { return null; }
+  function isVeryUnclearMessage(text) { return false; }
+  function getFallbackResponse(text) { return { text: getTemporarySafeBotReply(text) }; }
+  function learnInteraction(q, r) {}
+  function enrichChatContext(text, reply, meta) {}
+  function learnFromAdmin(q, r, c) {}
+  function analyzePlatformContent() {}
+  function loadTraining() { return {}; }
+  function loadAdminLearning() { return {}; }
+  function getSmartSearch(q) { return Promise.resolve([]); }
+  function syncHistoryToFirebase(h) {}
+  function syncTicketToFirebase(t) {}
+  function isElementBroken(el) { return false; }
+
 
     const STORAGE_FALLBACK = {};
   function safeGetItem(storage, key) {

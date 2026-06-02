@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script>
+window.onerror = function(message, source, lineno, colno, error) {
+    var errObj = {msg: message, src: source, line: lineno, col: colno};
+    // attempt to write to a local file using a tiny local server? No.
+    // just change document title so we can read it
+    document.title = JSON.stringify(errObj);
+};
+</script>
+<script src="js/support-chat.js"></script>
+<script>
+window.onload = function() {
+    if (document.title === "") document.title = "NO_ERROR";
+};
+</script>
+</head>
+<body></body>
+</html>

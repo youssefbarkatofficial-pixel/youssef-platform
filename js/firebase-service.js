@@ -618,6 +618,40 @@ window.FirebaseService = (function () {
         console.log('✅ انتهت المزامنة!');
     }
 
+    // ============================================================
+    // AI LLM INTEGRATION (FUTURE PREPARATION)
+    // ============================================================
+    
+    /**
+     * Call the Firebase Cloud Function for LLM proxy.
+     * This is infrastructure setup only. Do not hook to UI yet.
+     */
+    async function askSmartBotCloud(message, history = []) {
+        if (!isFirebaseReady()) {
+            console.warn("Firebase not ready. Cannot call askSmartBotCloud.");
+            return { reply: "الاتصال بالخوادم غير متاح حالياً." };
+        }
+        
+        try {
+            const askAlBouslaLLM = window.firebase.functions().httpsCallable('askAlBouslaLLM');
+            
+            // Add a timeout fallback in case of slow functions
+            const timeoutPromise = new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('Cloud Function timeout')), 15000)
+            );
+            
+            const result = await Promise.race([
+                askAlBouslaLLM({ message, history }),
+                timeoutPromise
+            ]);
+
+            return result.data;
+        } catch (error) {
+            console.error('[AI CLOUD ERROR]', error);
+            return { reply: "عذراً، أواجه صعوبة في معالجة رسالتك عبر الخوادم الآن." };
+        }
+    }
+
     // Aliases used by pages (getUser, getCourse)
     async function getUser(phone) {
         return getStudentByPhone(phone);
@@ -657,7 +691,8 @@ window.FirebaseService = (function () {
         saveSettings,
         getSettings,
         syncLocalToFirestore,
-        getCachedCourses: getCoursesFromStorage
+        getCachedCourses: getCoursesFromStorage,
+        askSmartBotCloud
     };
 
 })();
