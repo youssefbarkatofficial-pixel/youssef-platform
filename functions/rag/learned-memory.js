@@ -32,7 +32,7 @@ async function searchLearnedMemory(query, db) {
 /**
  * Saves a grounded, high-confidence response to learned memory.
  */
-async function saveToLearnedMemory(query, answer, matchedChunkIds, confidence, db) {
+async function saveToLearnedMemory(query, answer, matchedChunkIds, confidence, provider, db) {
     if (confidence !== 'High') {
         console.log("Skipping learned memory save: Confidence not High.");
         return;
@@ -50,6 +50,7 @@ async function saveToLearnedMemory(query, answer, matchedChunkIds, confidence, d
         generatedAnswer: answer,
         matchedChunkIds: matchedChunkIds,
         retrievalConfidence: confidence,
+        provider: provider || "unknown",
         source: "gemini_verified",
         curriculumVersion: "v1.0", // Extract dynamically in production
         usageCount: 1,

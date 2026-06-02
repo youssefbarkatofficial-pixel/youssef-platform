@@ -75,7 +75,7 @@ exports.askAlBouslaLLM = functions.https.onCall(async (data, context) => {
         const { buildEducationalPrompt } = require('./rag/prompt-builder');
         const { validateAndFormatResponse } = require('./rag/validation');
         const { getCachedResponse, setCachedResponse, logQueryToMemory } = require('./rag/cache');
-        const { callGemini } = require('./rag/gemini');
+        const { callLLM } = require('./providers/index');
         const { checkQuota, incrementQuota } = require('./rag/quota');
         const { searchLearnedMemory, saveToLearnedMemory } = require('./rag/learned-memory');
 
@@ -105,6 +105,7 @@ exports.askAlBouslaLLM = functions.https.onCall(async (data, context) => {
         let learnedHit = false;
         let fallbackTriggered = false;
         let hallucinationRejected = false;
+        let llmProviderUsed = null;
 
         // Step 2: Check Controlled Learning Loop Memory
         const learnedMemory = await searchLearnedMemory(message, db);
@@ -114,35 +115,37 @@ exports.askAlBouslaLLM = functions.https.onCall(async (data, context) => {
             safeReply = learnedMemory.generatedAnswer;
             learnedHit = true;
         } else {
-            // Step 3: Build Safe Prompt & Call Gemini
+            // Step 3: Build Safe Prompt & Call LLM
             const safePrompt = buildEducationalPrompt(message, retrievalResult.chunks, history);
             
             const llmStartTime = Date.now();
-            const geminiResult = await callGemini(safePrompt);
+            const llmResult = await callLLM(safePrompt);
             llmLatency = Date.now() - llmStartTime;
             
-            if (geminiResult.fallback) {
-                return { reply: null, fallback: true, debug: { reason: geminiResult.reason } };
+            if (llmResult.fallback) {
+                return { reply: null, fallback: true, debug: { reason: llmResult.reason } };
             }
             
             llmUsed = true;
+            llmProviderUsed = llmResult.provider;
             await incrementQuota(userId, db);
 
             // Step 4: Strict Validation Boundary
-            safeReply = validateAndFormatResponse(geminiResult.reply, retrievalResult.chunks, retrievalResult.confidence);
-            fallbackTriggered = safeReply.includes("لا يتوفر لدي سياق تعليمي");
-            hallucinationRejected = fallbackTriggered; // If the validation rejected it, it became the fallback string
+            safeReply = validateAndFormatResponse(llmResult.reply, retrievalResult.chunks, retrievalResult.confidence);
+            fallbackTriggered = safeReply.includes("لا يتوفر لدي سياق تعليمي") || safeReply.includes("غير مدعومة");
+            hallucinationRejected = safeReply.includes("غير مدعومة"); // Explicitly marking grounding rejections
             
             // Step 5: Save to Optimizations (Cache & Learning Loop)
             if (!fallbackTriggered) {
                 await setCachedResponse(message, safeReply, chunkIds, db, history ? history.length : 0);
-                await saveToLearnedMemory(message, safeReply, chunkIds, retrievalResult.confidence, db);
+                await saveToLearnedMemory(message, safeReply, chunkIds, retrievalResult.confidence, llmProviderUsed, db);
             }
         }
 
         // --- 6. Observability & Telemetry Logs ---
         const telemetry = {
             llmUsed: llmUsed,
+            provider: llmProviderUsed,
             retrievalHit: chunkIds.length > 0,
             cacheHit: false,
             learnedMemoryHit: learnedHit,
