@@ -715,266 +715,389 @@
     return 'clarify';
   }
 
-  // ── Layer 5: Dynamic Response Composer ──
+  // ── Behavior Profile Generator ──
+  function buildBehaviorProfile(thought, mem) {
+    const mood = thought.detectedMood;
+    const confidence = thought.confidenceLevel;
+    const msgCount = mem.messageCount;
+
+    const profile = {
+      sentencePacing: 'normal',     // slow, normal, fast
+      infoDensity: 'medium',        // minimal, medium, rich
+      emotionalIntensity: 'normal', // cold, normal, warm, intense
+      shouldInterrupt: false,       // stop mid-explanation to check in?
+      explanationDepth: 'standard', // shallow, standard, deep
+      shouldQuestion: false,        // end with a question?
+      questionType: 'open',         // open, yesno, choice
+      rhythm: 'steady',            // cautious, steady, energetic
+      shouldExample: false,
+      shouldMotivate: false,
+      shouldComfort: false,
+      maxSentences: 4
+    };
+
+    // ── Mood-driven adjustments ──
+    if (mood === 'confused') {
+      profile.sentencePacing = 'slow';
+      profile.infoDensity = 'minimal';
+      profile.emotionalIntensity = 'warm';
+      profile.shouldInterrupt = true;
+      profile.explanationDepth = 'shallow';
+      profile.shouldQuestion = true;
+      profile.questionType = 'yesno';
+      profile.rhythm = 'cautious';
+      profile.shouldComfort = true;
+      profile.maxSentences = 3;
+    } else if (mood === 'frustrated') {
+      profile.sentencePacing = 'slow';
+      profile.infoDensity = 'minimal';
+      profile.emotionalIntensity = 'intense';
+      profile.shouldInterrupt = true;
+      profile.explanationDepth = 'shallow';
+      profile.shouldQuestion = true;
+      profile.questionType = 'yesno';
+      profile.rhythm = 'cautious';
+      profile.shouldComfort = true;
+      profile.shouldMotivate = true;
+      profile.maxSentences = 3;
+    } else if (mood === 'confident') {
+      profile.sentencePacing = 'fast';
+      profile.infoDensity = 'rich';
+      profile.emotionalIntensity = 'normal';
+      profile.explanationDepth = 'deep';
+      profile.shouldQuestion = true;
+      profile.questionType = 'open';
+      profile.rhythm = 'energetic';
+      profile.maxSentences = 5;
+    } else if (mood === 'bored') {
+      profile.sentencePacing = 'fast';
+      profile.infoDensity = 'minimal';
+      profile.emotionalIntensity = 'normal';
+      profile.explanationDepth = 'shallow';
+      profile.shouldQuestion = true;
+      profile.questionType = 'choice';
+      profile.rhythm = 'energetic';
+      profile.maxSentences = 2;
+    } else if (mood === 'curious') {
+      profile.infoDensity = 'rich';
+      profile.explanationDepth = 'deep';
+      profile.shouldExample = true;
+      profile.shouldQuestion = true;
+      profile.questionType = 'open';
+      profile.maxSentences = 5;
+    }
+
+    // ── Goal-driven adjustments ──
+    if (thought.conversationGoal === 'challenge') {
+      profile.emotionalIntensity = 'cold';
+      profile.shouldComfort = false;
+      profile.infoDensity = 'minimal';
+      profile.rhythm = 'energetic';
+      profile.shouldQuestion = true;
+      profile.questionType = 'open';
+    }
+    if (thought.conversationGoal === 'reassure') {
+      profile.emotionalIntensity = 'intense';
+      profile.infoDensity = 'minimal';
+      profile.shouldComfort = true;
+      profile.shouldMotivate = true;
+      profile.maxSentences = 3;
+    }
+
+    // ── Conversation pressure (too many messages without progress) ──
+    if (msgCount > 8 && confidence < 40) {
+      profile.shouldInterrupt = true;
+      profile.infoDensity = 'minimal';
+      profile.shouldComfort = true;
+    }
+
+    console.log('📊 [BEHAVIOR PROFILE]', JSON.stringify(profile));
+    return profile;
+  }
+
+  // ── Behavioral Language Generator ──
   function composeResponse(thought, mem, normalized, userMessage) {
-    const tone = decideTone(thought);
-    const parts = [];
+    const profile = buildBehaviorProfile(thought, mem);
+    let sentences = [];
     let newPendingAction = null;
     let newPhase = mem.phase;
+    const subj = thought.topic || mem.currentSubject;
 
-    // ── Social ──
+    // ━━━━ GENERATE opening (comfort / greeting / energy) ━━━━
     if (thought.conversationGoal === 'connect') {
-      parts.push(pickTone(tone, [
-        'الحمد لله تمام 😊 وأنت عامل إيه؟',
-        'أهلاً بيك يا بطل! نورت البوصلة 😄',
-        'يا هلا بيك يا صاحبي! عايز نذاكر ولا بتسلم بس؟ 😊'
-      ]));
-      parts.push(pickTone(tone, [
-        'عايز مساعدة في التاريخ ولا الجغرافيا ولا عندك سؤال تقني؟',
-        'محتاج حاجة ولا بتعدي علينا؟ 😄'
-      ]));
+      sentences.push(generateSocialOpener(profile, mem));
+      sentences.push(generateSubjectPrompt(profile, mem));
       newPhase = mem.currentTopic ? mem.phase : 'IDLE';
     }
 
-    // ── Emotional support ──
     else if (thought.conversationGoal === 'reassure') {
-      if (thought.detectedMood === 'frustrated') {
-        parts.push(pickTone(tone, [
-          'أنا حاسس بيك جداً، ومن حقك تتضايق.',
-          'طبيعي جداً تحس كده، بس أنا معاك.',
-          'ولا يهمك خالص، حقك تزعل بس متوقفش.'
-        ]));
-      } else {
-        parts.push(pickTone(tone, [
-          'اطمن يا بطل، كل حاجة بتتحل بالراحة.',
-          'متشيلش هم، أنا في ضهرك.',
-          'صدقني القلق ده طبيعي وبيروح لما تبدأ تذاكر.'
-        ]));
-      }
+      sentences.push(generateComfortSentence(profile, thought));
+      if (profile.shouldMotivate) sentences.push(generateMotivation(profile));
       if (mem.currentSubject) {
-        parts.push(`عايز نرجع لموضوع "${mem.currentSubject}" بالراحة ولا نعمل حاجة تانية؟`);
+        sentences.push(generateContextReturn(profile, mem.currentSubject));
         newPendingAction = 'AWAITING_CONFIRMATION';
       } else {
-        parts.push('قولي لما تبقى جاهز وأنا هنا.');
+        sentences.push(generateIdlePrompt(profile));
       }
     }
 
-    // ── Technical support ──
     else if (thought.conversationGoal === 'support') {
-      parts.push('فاهمك يا بطل. الدعم الفني شغالين على المشكلة دي.');
-      parts.push('لو المشكلة مستعجلة اكتب "مشكلة" والدعم هيتواصل معاك.');
-      newPhase = mem.phase; // don't disrupt educational state
+      sentences.push('فاهمك يا بطل. الدعم الفني شغالين على المشكلة دي.');
+      sentences.push('لو المشكلة مستعجلة اكتب "مشكلة" والدعم هيتواصل معاك.');
+      newPhase = mem.phase;
     }
 
-    // ── Topic Menu (when student just says a topic name) ──
     else if (thought.conversationGoal === 'offer_menu') {
-      const subj = thought.topic;
-      parts.push(`ممتاز 👍 تقصد درس "${subj}".`);
-      parts.push('عايز إيه بالظبط؟');
-      parts.push('1- شرح سريع\n2- أسئلة وتدريب\n3- اختبار\n4- مراجعة');
+      sentences.push(`ممتاز 👍 تقصد درس "${subj}".`);
+      sentences.push('عايز إيه بالظبط؟');
+      sentences.push('1- شرح سريع\n2- أسئلة وتدريب\n3- اختبار\n4- مراجعة');
       newPendingAction = 'AWAITING_LEARNING_MODE';
       newPhase = 'TOPIC_OFFERED';
     }
 
-    // ── Teaching / Explaining ──
     else if (thought.conversationGoal === 'teach' || thought.conversationGoal === 'simplify') {
-      const subj = thought.topic || mem.currentSubject;
-      let knowledgeText = '';
-      if (subj) {
-        const eduResult = executeEducationalIntentEngine(subj, userMessage);
-        if (typeof eduResult === 'object' && eduResult && eduResult.text) knowledgeText = eduResult.text;
-        else if (typeof eduResult === 'string') knowledgeText = eduResult;
-      }
+      // Opening — shaped by mood, not selected from array
+      if (profile.shouldComfort) sentences.push(generateComfortSentence(profile, thought));
+      sentences.push(generateTeachingOpener(profile, subj));
 
-      // Mood-aware intro
-      if (thought.detectedMood === 'confused') {
-        parts.push(pickTone(tone, [
-          'أنا فاهم إنك تايه شوية، خليني أبسطهالك.',
-          'متقلقش، هنمشي فيها خطوة خطوة.',
-          'طبيعي الجزء ده يلخبط، بس تعالى نفككه سوا.'
-        ]));
-      } else if (thought.detectedMood === 'frustrated') {
-        parts.push(pickTone(tone, [
-          'أعرف إن الموضوع غلسة، بس هنعديه.',
-          'حقك تتضايق بس ركز معايا دقيقة واحدة بس.'
-        ]));
-      } else {
-        parts.push(pickTone(tone, [
-          'يلا بينا نشرح الجزء ده.',
-          'ركز معايا كويس.',
-          'تعالى ندخل في الموضوع.'
-        ]));
-      }
-
-      if (knowledgeText && knowledgeText.length > 10) {
-        // Clean up any hardcoded intros from old engine
-        knowledgeText = knowledgeText.replace(/^(بص يا سيدي|شوف يا بطل|سؤال ممتاز).+?[:.]/g, '').trim();
-        if (thought.conversationGoal === 'simplify' && knowledgeText.length > 150) {
-          // Trim to first 2 sentences for simplified mode
-          const sentences = knowledgeText.split(/(?<=[.؟!])\s+/);
-          knowledgeText = sentences.slice(0, 2).join(' ');
-        }
-        parts.push(knowledgeText);
+      // Knowledge — shaped by density and depth
+      let knowledgeText = fetchKnowledge(subj, userMessage);
+      if (knowledgeText) {
+        knowledgeText = shapeKnowledge(knowledgeText, profile);
+        sentences.push(knowledgeText);
       } else if (subj) {
-        parts.push(`الموضوع ده مشروح بالتفصيل جوة الكورس، بس خليني أقولك الفكرة الأساسية عن "${subj}".`);
+        sentences.push(generateKnowledgeFallback(profile, subj));
       }
 
-      // Follow-up based on mood
-      if (thought.detectedMood === 'confused') {
-        parts.push(pickTone(tone, [
-          'لحد هنا واضح ولا نعيد بطريقة تانية؟',
-          'فاهم كده ولا محتاج أبسط أكتر؟'
-        ]));
+      // Example — only if profile says so
+      if (profile.shouldExample && subj) {
+        sentences.push(generateExample(subj));
+      }
+
+      // Interruption point — check in with student
+      if (profile.shouldInterrupt) {
+        sentences.push(generateInterruptionCheck(profile));
         newPendingAction = 'AWAITING_CONFIRMATION';
-      } else {
-        parts.push(pickTone(tone, [
-          'تحب أسألك سؤال على اللي قلناه؟',
-          'نكمل ولا نقف هنا شوية؟'
-        ]));
+      } else if (profile.shouldQuestion) {
+        sentences.push(generateFollowUp(profile, subj));
         newPendingAction = 'AWAITING_CONFIRMATION';
       }
       newPhase = 'EXPLAINING';
     }
 
-    // ── Practice mode ──
     else if (thought.conversationGoal === 'practice') {
-      const subj = thought.topic || mem.currentSubject;
-      parts.push(pickTone(tone, [
-        `يلا بينا نتدرب على "${subj || 'الدرس'}" سوا.`,
-        'هطرح عليك فكرة وتطبق عليها.'
-      ]));
-      // Fetch a practice question if possible
-      const eduResult = executeEducationalIntentEngine(subj || '', userMessage);
-      if (typeof eduResult === 'object' && eduResult && eduResult.text) {
-        parts.push(eduResult.text);
-      }
+      sentences.push(generatePracticeIntro(profile, subj));
+      let eduResult = fetchKnowledge(subj, userMessage);
+      if (eduResult) sentences.push(shapeKnowledge(eduResult, profile));
       newPhase = 'PRACTICING';
       newPendingAction = 'AWAITING_ANSWER';
     }
 
-    // ── Challenge / Quiz ──
     else if (thought.conversationGoal === 'challenge') {
-      const subj = thought.topic || mem.currentSubject;
-      parts.push(pickTone(tone, [
-        'توكلنا على الله 🔥',
-        'يلا نشوف مستواك!',
-        'جاهز؟ ركز معايا كويس.'
-      ]));
-      if (subj) {
-        parts.push(`هسألك سؤال في "${subj}" وعايزك تجاوب بثقة.`);
-      }
-      // Try to generate a question from the knowledge base
-      const knowledge = OFFLINE_KNOWLEDGE_BASE ? OFFLINE_KNOWLEDGE_BASE.find(k => subj && k.topic.includes(subj)) : null;
+      sentences.push(generateChallengeOpener(profile));
+      if (subj) sentences.push(`هسألك سؤال في "${subj}" وعايزك تجاوب بثقة.`);
+      const knowledge = (typeof OFFLINE_KNOWLEDGE_BASE !== 'undefined') ? OFFLINE_KNOWLEDGE_BASE.find(k => subj && k.topic.includes(subj)) : null;
       if (knowledge && knowledge.question) {
-        parts.push(knowledge.question);
+        sentences.push(knowledge.question);
       } else {
-        parts.push('جاهز تسمع السؤال؟');
+        sentences.push('جاهز تسمع السؤال؟');
       }
       newPhase = 'TESTING';
       newPendingAction = 'AWAITING_ANSWER';
     }
 
-    // ── Summarize / Review ──
     else if (thought.conversationGoal === 'summarize') {
-      const subj = thought.topic || mem.currentSubject;
-      parts.push(`خليني ألخصلك "${subj || 'اللي اتكلمنا فيه'}" بسرعة.`);
-      const eduResult = executeEducationalIntentEngine(subj || '', userMessage);
-      if (typeof eduResult === 'object' && eduResult && eduResult.text) {
-        parts.push(eduResult.text);
-      }
-      parts.push('عايز تتعمق أكتر ولا كده كفاية؟');
+      sentences.push(`خليني ألخصلك "${subj || 'اللي اتكلمنا فيه'}" بسرعة.`);
+      let eduResult = fetchKnowledge(subj, userMessage);
+      if (eduResult) sentences.push(shapeKnowledge(eduResult, { ...profile, infoDensity: 'minimal', explanationDepth: 'shallow' }));
+      sentences.push(generateFollowUp(profile, subj));
       newPhase = 'REVIEWING';
       newPendingAction = 'AWAITING_CONFIRMATION';
     }
 
-    // ── Advance (continue to next step) ──
     else if (thought.conversationGoal === 'advance') {
-      const subj = thought.topic || mem.currentSubject;
-      if (mem.phase === 'EXPLAINING') {
-        parts.push(pickTone(tone, [
-          'عاش! ممتاز إنك فهمت 💪',
-          'الله ينور عليك!'
-        ]));
-        parts.push('تحب أسألك سؤال تطبيقي ولا نكمل شرح؟');
-        newPendingAction = 'AWAITING_LEARNING_MODE';
-      } else if (mem.phase === 'TESTING' || mem.phase === 'PRACTICING') {
-        parts.push(pickTone(tone, [
-          'يا بطل! كده تمام 👏',
-          'ممتاز، كمل كده!'
-        ]));
-        parts.push(`عايز سؤال تاني في "${subj || 'الدرس'}" ولا ندخل في موضوع جديد؟`);
-        newPendingAction = 'AWAITING_LEARNING_MODE';
-      } else {
-        parts.push('عايز نعمل إيه دلوقتي؟ شرح، اختبار، ولا مراجعة؟');
-        newPendingAction = 'AWAITING_LEARNING_MODE';
-      }
+      sentences.push(generateAdvanceResponse(profile, mem, subj));
+      newPendingAction = 'AWAITING_LEARNING_MODE';
     }
 
-    // ── Evaluate answer ──
     else if (thought.conversationGoal === 'evaluate_answer') {
-      // Simple positive reinforcement — later can be smarter
-      parts.push(pickTone(tone, [
-        'إجابة كويسة! 👏',
-        'ممتاز يا بطل!',
-        'عاش! كده صح.'
-      ]));
-      parts.push('عايز سؤال تاني ولا نكمل شرح؟');
+      sentences.push(generateEvaluation(profile));
+      sentences.push(generateFollowUp(profile, subj));
       newPendingAction = 'AWAITING_LEARNING_MODE';
       newPhase = mem.phase;
     }
 
-    // ── Clarify (fallback — don't know what user wants) ──
     else if (thought.conversationGoal === 'clarify') {
       if (mem.currentSubject) {
-        parts.push(`أنا معاك في "${mem.currentSubject}". تقصد إيه بالظبط؟`);
-        parts.push('شرح، اختبار، ولا حاجة تانية؟');
+        sentences.push(`أنا معاك في "${mem.currentSubject}". تقصد إيه بالظبط؟`);
+        sentences.push('شرح، اختبار، ولا حاجة تانية؟');
         newPendingAction = 'AWAITING_LEARNING_MODE';
       } else {
-        parts.push(pickTone(tone, [
-          'أنا معاك يا بطل. قولي بالظبط عايز إيه وأنا هساعدك.',
-          'ممكن توضحلي أكتر؟ عايز مساعدة في درس معين؟'
-        ]));
+        sentences.push(generateClarificationRequest(profile));
       }
     }
 
-    // Update memory
-    mem.studentMood = interpretEmotion(normalized, mem); // already computed but re-assign for safety
-    if (thought.topicKey) {
-      mem.currentTopic = thought.topicKey;
-      mem.currentSubject = thought.topic;
+    // ── Trim to max sentences ──
+    sentences = sentences.filter(s => s && s.trim());
+    if (sentences.length > profile.maxSentences + 1) {
+      sentences = sentences.slice(0, profile.maxSentences + 1);
     }
+
+    // ── Apply pacing ──
+    const responseText = applyPacing(sentences, profile);
+
+    // ── Update memory ──
+    if (thought.topicKey) { mem.currentTopic = thought.topicKey; mem.currentSubject = thought.topic; }
     mem.phase = newPhase;
     mem.pendingAction = newPendingAction;
     mem.lastBotGoal = thought.conversationGoal;
     mem.messageCount++;
-
-    const responseText = parts.filter(p => p && p.trim()).join('\n\n');
-
-    // Record turn
     mem.turns.push({ role: 'user', text: userMessage, ts: Date.now() });
     mem.turns.push({ role: 'bot', text: responseText, goal: thought.conversationGoal, ts: Date.now() });
     if (mem.turns.length > 40) mem.turns = mem.turns.slice(-40);
-
     saveDialogueMemory(mem);
 
-    console.log('🧠 [DIALOGUE BRAIN] Goal:', thought.conversationGoal, '| Mood:', thought.detectedMood, '| Phase:', newPhase);
+    console.log('🧠 [DIALOGUE BRAIN] Goal:', thought.conversationGoal, '| Mood:', thought.detectedMood, '| Phase:', newPhase, '| Pacing:', profile.sentencePacing);
     return responseText;
   }
 
-  // ── Tone Engine ──
-  function decideTone(thought) {
-    if (thought.detectedMood === 'frustrated' || thought.detectedMood === 'confused') return 'gentle';
-    if (thought.detectedMood === 'confident') return 'energetic';
-    if (thought.detectedMood === 'bored') return 'playful';
-    return 'warm';
+  // ━━━━ Language Generation Functions (NOT templates — built from profile) ━━━━
+
+  function generateSocialOpener(profile, mem) {
+    const greetings = ['الحمد لله', 'تمام', 'كويس'];
+    const g = greetings[mem.messageCount % greetings.length];
+    const emoji = profile.rhythm === 'energetic' ? ' 😄' : ' 😊';
+    let s = g + emoji;
+    if (mem.currentSubject && profile.rhythm !== 'cautious') s += ` .. لسه فاكرك من درس "${mem.currentSubject}"`;
+    else s += ' وأنت عامل إيه؟';
+    return s;
   }
-  function pickTone(tone, options) {
-    // Rotate through options to avoid repetition
-    const key = options[0].substring(0, 10);
-    let idx = parseInt(sessionStorage.getItem('pf_tone_' + key) || '0');
-    idx = idx % options.length;
-    sessionStorage.setItem('pf_tone_' + key, (idx + 1).toString());
-    return options[idx];
+
+  function generateSubjectPrompt(profile, mem) {
+    if (mem.currentSubject) return `نكمل في "${mem.currentSubject}" ولا عايز حاجة تانية؟`;
+    return 'عايز مساعدة في التاريخ ولا الجغرافيا ولا عندك سؤال تقني؟';
+  }
+
+  function generateComfortSentence(profile, thought) {
+    // Build comfort dynamically from intensity
+    if (profile.emotionalIntensity === 'intense') {
+      return thought.detectedMood === 'frustrated'
+        ? 'أنا حاسس بيك ومن حقك تتضايق، بس أنا معاك ومش هسيبك.'
+        : 'اطمن خالص، أنا موجود عشان أساعدك مش عشان أضغط عليك.';
+    }
+    return thought.detectedMood === 'frustrated'
+      ? 'ولا يهمك، هنعدي الجزء ده سوا.'
+      : 'متقلقش، كل حاجة هتبقى تمام.';
+  }
+
+  function generateMotivation(profile) {
+    if (profile.emotionalIntensity === 'intense') return 'وفاكر إن كل دقيقة بتذاكرها بتفرق معاك في النتيجة.';
+    return 'خطوة خطوة وهتلاقي الموضوع سهل.';
+  }
+
+  function generateContextReturn(profile, subject) {
+    if (profile.sentencePacing === 'slow') return `عايز نرجع لـ"${subject}" بالراحة ولا نعمل حاجة تانية؟`;
+    return `نكمل "${subject}" ولا نغير الموضوع؟`;
+  }
+
+  function generateIdlePrompt(profile) {
+    return profile.sentencePacing === 'slow' ? 'قولي لما تبقى جاهز.' : 'قولي عايز إيه.';
+  }
+
+  function generateTeachingOpener(profile, subj) {
+    if (profile.rhythm === 'cautious') return `خلينا نمشي في "${subj || 'الموضوع'}" خطوة خطوة وبالراحة.`;
+    if (profile.rhythm === 'energetic') return `يلا ندخل في "${subj || 'الموضوع'}" على طول!`;
+    return `تعالى نتكلم عن "${subj || 'الموضوع'}".`;
+  }
+
+  function fetchKnowledge(subj, userMessage) {
+    if (!subj) return '';
+    try {
+      const eduResult = executeEducationalIntentEngine(subj, userMessage);
+      if (typeof eduResult === 'object' && eduResult && eduResult.text) return eduResult.text;
+      if (typeof eduResult === 'string') return eduResult;
+    } catch(e) {}
+    return '';
+  }
+
+  function shapeKnowledge(text, profile) {
+    if (!text || text.length < 5) return text;
+    // Clean old intros
+    text = text.replace(/^(بص يا سيدي|شوف يا بطل|سؤال ممتاز).+?[:.]/g, '').trim();
+
+    const sentences = text.split(/(?<=[.؟!])\s+/);
+
+    // Density control
+    if (profile.infoDensity === 'minimal') {
+      return sentences.slice(0, 1).join(' ');
+    } else if (profile.infoDensity === 'medium' || profile.explanationDepth === 'standard') {
+      return sentences.slice(0, 3).join(' ');
+    }
+    // rich — return all but cap at 5
+    return sentences.slice(0, 5).join(' ');
+  }
+
+  function generateExample(subj) {
+    return `وعشان الصورة توضح أكتر، خد المثال ده في "${subj}"..`;
+  }
+
+  function generateKnowledgeFallback(profile, subj) {
+    if (profile.sentencePacing === 'slow') return `الموضوع ده مشروح جوة الكورس بالتفصيل، بس خليني أقولك الفكرة الأساسية عن "${subj}".`;
+    return `خليني أقولك أهم نقطة في "${subj}".`;
+  }
+
+  function generateInterruptionCheck(profile) {
+    if (profile.questionType === 'yesno') return 'لحد هنا واضح؟';
+    return 'كمل ولا نقف؟';
+  }
+
+  function generateFollowUp(profile, subj) {
+    if (profile.questionType === 'yesno') return 'فاهم كده؟';
+    if (profile.questionType === 'choice') return `عايز سؤال في "${subj || 'الموضوع'}" ولا نكمل شرح؟`;
+    return 'تحب نكمل ولا نعمل حاجة تانية؟';
+  }
+
+  function generatePracticeIntro(profile, subj) {
+    if (profile.rhythm === 'energetic') return `يلا نتدرب على "${subj || 'الدرس'}" فوراً!`;
+    return `هنتدرب على "${subj || 'الدرس'}" سوا، جاهز؟`;
+  }
+
+  function generateChallengeOpener(profile) {
+    if (profile.rhythm === 'energetic') return 'يلا نشوف مستواك! 🔥';
+    return 'توكلنا على الله.';
+  }
+
+  function generateAdvanceResponse(profile, mem, subj) {
+    let s = '';
+    if (profile.rhythm === 'energetic') s = 'عاش! 💪 ';
+    else s = 'ممتاز. ';
+    if (mem.phase === 'EXPLAINING') s += 'تحب أسألك سؤال تطبيقي ولا نكمل شرح؟';
+    else if (mem.phase === 'TESTING' || mem.phase === 'PRACTICING') s += `عايز سؤال تاني في "${subj || 'الدرس'}" ولا ندخل في موضوع جديد؟`;
+    else s += 'عايز نعمل إيه دلوقتي؟';
+    return s;
+  }
+
+  function generateEvaluation(profile) {
+    if (profile.rhythm === 'energetic') return 'إجابة جامدة! 👏';
+    return 'كويس كده.';
+  }
+
+  function generateClarificationRequest(profile) {
+    if (profile.sentencePacing === 'slow') return 'أنا معاك يا بطل. قولي بالظبط عايز إيه وأنا هساعدك.';
+    return 'ممكن توضحلي أكتر؟ عايز مساعدة في درس معين؟';
+  }
+
+  // ── Pacing Engine (controls the rhythm of the final output) ──
+  function applyPacing(sentences, profile) {
+    if (profile.sentencePacing === 'slow') {
+      // More breathing room between sentences
+      return sentences.join('\n\n');
+    } else if (profile.sentencePacing === 'fast') {
+      // Compact — less whitespace
+      return sentences.join('\n');
+    }
+    // normal
+    return sentences.join('\n\n');
   }
 
   // ── Main Entry Point ──
