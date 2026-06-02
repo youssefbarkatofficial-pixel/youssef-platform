@@ -75,58 +75,90 @@ exports.askAlBouslaLLM = functions.https.onCall(async (data, context) => {
         const { buildEducationalPrompt } = require('./rag/prompt-builder');
         const { validateAndFormatResponse } = require('./rag/validation');
         const { getCachedResponse, setCachedResponse, logQueryToMemory } = require('./rag/cache');
+        const { callGemini } = require('./rag/gemini');
+        const { checkQuota, incrementQuota } = require('./rag/quota');
+        const { searchLearnedMemory, saveToLearnedMemory } = require('./rag/learned-memory');
 
         const db = admin.firestore();
+        const userId = context?.auth?.uid || 'anonymous';
         
-        // Check Cache first
-        const cacheHit = await getCachedResponse(message, db, history ? history.length : 0);
-        if (cacheHit) {
-             return { reply: cacheHit.generatedReply, debug: { cache: true } };
+        // Quota Protection
+        if (!(await checkQuota(userId, db))) {
+            return { reply: null, fallback: true, debug: { reason: "quota_exceeded" } };
         }
 
-        // Step 1: Retrieve context
+        // Check Short-TTL Cache first
+        const cacheHit = await getCachedResponse(message, db, history ? history.length : 0);
+        if (cacheHit) {
+             return { reply: cacheHit.generatedReply, debug: { cacheHit: true, llmUsed: false } };
+        }
+
+        // Step 1: Retrieve context (Official Published Curriculum)
         const retrievalResult = await retrieveRelevantChunks(message, db);
         const chunkIds = retrievalResult.chunks.map(c => c.id);
         
-        // Log query to memory for future optimization
         await logQueryToMemory(message, chunkIds, retrievalResult.confidence, db);
 
-        // Step 2: Build Safe Prompt
-        const safePrompt = buildEducationalPrompt(message, retrievalResult.chunks, history);
+        let safeReply;
+        let llmLatency = 0;
+        let llmUsed = false;
+        let learnedHit = false;
+        let fallbackTriggered = false;
+        let hallucinationRejected = false;
 
-        // Step 3: Mock LLM Generation (Pending actual Gemini integration)
-        const llmStartTime = Date.now();
-        let rawLlmReply = "هذه إجابة تجريبية تفترض أن: " + (retrievalResult.chunks[0]?.text.substring(0, 50) || "لا يوجد نص") + "...";
-        const llmLatency = Date.now() - llmStartTime;
+        // Step 2: Check Controlled Learning Loop Memory
+        const learnedMemory = await searchLearnedMemory(message, db);
+        
+        if (learnedMemory && retrievalResult.confidence === 'High') {
+            // Memory Hit (Only use if we also successfully retrieved the supporting chunks right now)
+            safeReply = learnedMemory.generatedAnswer;
+            learnedHit = true;
+        } else {
+            // Step 3: Build Safe Prompt & Call Gemini
+            const safePrompt = buildEducationalPrompt(message, retrievalResult.chunks, history);
+            
+            const llmStartTime = Date.now();
+            const geminiResult = await callGemini(safePrompt);
+            llmLatency = Date.now() - llmStartTime;
+            
+            if (geminiResult.fallback) {
+                return { reply: null, fallback: true, debug: { reason: geminiResult.reason } };
+            }
+            
+            llmUsed = true;
+            await incrementQuota(userId, db);
 
-        // Step 4: Strict Validation Boundary
-        const safeReply = validateAndFormatResponse(rawLlmReply, retrievalResult.chunks, retrievalResult.confidence);
-        const fallbackTriggered = safeReply.includes("لا يتوفر لدي سياق تعليمي");
-
-        // Set Cache if valid
-        if (!fallbackTriggered) {
-             await setCachedResponse(message, safeReply, chunkIds, db, history ? history.length : 0);
+            // Step 4: Strict Validation Boundary
+            safeReply = validateAndFormatResponse(geminiResult.reply, retrievalResult.chunks, retrievalResult.confidence);
+            fallbackTriggered = safeReply.includes("لا يتوفر لدي سياق تعليمي");
+            hallucinationRejected = fallbackTriggered; // If the validation rejected it, it became the fallback string
+            
+            // Step 5: Save to Optimizations (Cache & Learning Loop)
+            if (!fallbackTriggered) {
+                await setCachedResponse(message, safeReply, chunkIds, db, history ? history.length : 0);
+                await saveToLearnedMemory(message, safeReply, chunkIds, retrievalResult.confidence, db);
+            }
         }
 
         // --- 6. Observability & Telemetry Logs ---
         const telemetry = {
-            query: message,
-            retrievalLatency: retrievalResult.latency,
-            llmLatency: llmLatency,
-            matchedChunkIds: chunkIds,
-            retrievalConfidence: retrievalResult.confidence,
-            tokenUsageEstimate: retrievalResult.tokenEstimate,
+            llmUsed: llmUsed,
+            retrievalHit: chunkIds.length > 0,
             cacheHit: false,
-            fallbackTriggered: fallbackTriggered
+            learnedMemoryHit: learnedHit,
+            groundingPassed: !hallucinationRejected,
+            hallucinationRejected: hallucinationRejected,
+            tokenCostEstimate: retrievalResult.tokenEstimate,
+            fallbackReason: fallbackTriggered ? "grounding_failed" : null,
+            retrievalLatency: retrievalResult.latency,
+            llmLatency: llmLatency
         };
         console.log("RAG Telemetry:", telemetry);
 
         return {
             reply: safeReply,
             debug: {
-                telemetry: telemetry,
-                retrievedChunks: retrievalResult.chunks,
-                promptUsed: safePrompt
+                telemetry: telemetry
             }
         };
 
