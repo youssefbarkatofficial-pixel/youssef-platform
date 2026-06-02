@@ -2503,7 +2503,7 @@
     renderHistory(false); // optimistic
     // generate reply
     addTyping(); 
-    setTimeout(()=>{
+    setTimeout(async ()=>{
       removeTyping(); 
       if (isBotPausedByAdmin) return; // Wait for admin to reply manually
       
@@ -2528,7 +2528,30 @@
         renderHistory();
         return;
       }
-      const replyText = getTemporarySafeBotReply(text);
+      
+      let replyText = getTemporarySafeBotReply(text);
+
+      const isWeakConfidence = replyText.includes('عشان أقدر أساعدك') || 
+                               replyText.includes('مش متأكد تقصد إيه') ||
+                               replyText.includes('حاولت أفهم قصدك');
+
+      if (isWeakConfidence && window.askGeminiDirectly) {
+          console.log('[GEMINI DEV FALLBACK] Local bot weak confidence. Escalating to AI...');
+          addTyping();
+          try {
+             const aiResponse = await window.askGeminiDirectly(text);
+             if (!aiResponse.fallback && aiResponse.reply) {
+                 replyText = aiResponse.reply;
+             } else {
+                 console.log('[LLM ERROR] AI Fallback failed:', aiResponse.reason);
+             }
+          } catch(e) {
+             console.log('[LLM ERROR]', e);
+          }
+          removeTyping();
+      } else {
+          console.log('[LOCAL BOT HIT] Local engine handled the query.');
+      }
 
       // Enrich context and learn from interaction
       learnFromResponse(text, replyText);

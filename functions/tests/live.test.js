@@ -93,7 +93,7 @@ Tutor:
     try {
         const { GoogleGenerativeAI } = require("@google/generative-ai");
         const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-        const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
         startTime = Date.now();
         const result = await model.generateContent("Say hello in Arabic");
         let isolatedLatency = Date.now() - startTime;
