@@ -1038,8 +1038,10 @@
       if (decision.strategy === 'change_pace') {
         sentences.push('حاسس إننا بنجري؟ تحب نوقف شوية وندردش أو أسألك عن حاجة سريعة؟');
       } else if (decision.strategy === 'suggest_related') {
-        const related = KNOWLEDGE_GRAPH[thought.topicKey]?.relatedTopics[0] || 'موضوع تاني';
-        sentences.push(`واضح إن الجزء ده غلس شوية. إيه رأيك نسيبه ونبص على ${KNOWLEDGE_GRAPH[related]?.subject || related}؟`);
+        const tKey = thought.topicKey || mem.currentTopic;
+        const related = (KNOWLEDGE_GRAPH[tKey] && KNOWLEDGE_GRAPH[tKey].relatedTopics && KNOWLEDGE_GRAPH[tKey].relatedTopics[0]) ? KNOWLEDGE_GRAPH[tKey].relatedTopics[0] : 'موضوع تاني';
+        const relatedSubject = KNOWLEDGE_GRAPH[related] ? KNOWLEDGE_GRAPH[related].subject : related;
+        sentences.push(`واضح إن الجزء ده غلس شوية. إيه رأيك نسيبه ونبص على ${relatedSubject}؟`);
       } else if (decision.strategy === 'progress_report') {
         sentences.push(`على فكرة، إنت ممتاز! خلصت أجزاء كتير مهمة في ${subj}. عاش جداً 💪`);
       } else if (decision.strategy === 'break_suggestion') {
@@ -1099,7 +1101,15 @@
           sentences.push(`تعالى نتكلم عن ${teachingPlan.learningObjective}.`);
           
           if (teachingPlan.microGoals.includes('verify_prerequisite')) {
-            sentences.push(`بس الأول، فاكر الجزء بتاع ${KNOWLEDGE_GRAPH[thought.topicKey].concepts.find(c => c.id === teachingPlan.conceptToTeach.prereqs[0])?.label || 'الدرس اللي فات'}؟`);
+            const tKey = thought.topicKey || mem.currentTopic;
+            const topicData = KNOWLEDGE_GRAPH[tKey];
+            let prereqLabel = 'الدرس اللي فات';
+            if (topicData && topicData.concepts) {
+              const prereqId = teachingPlan.conceptToTeach.prereqs[0];
+              const prereqConcept = topicData.concepts.find(c => c.id === prereqId);
+              if (prereqConcept) prereqLabel = prereqConcept.label;
+            }
+            sentences.push(`بس الأول، فاكر الجزء بتاع ${prereqLabel}؟`);
             newPendingAction = 'AWAITING_ANSWER';
           } else {
             // Deliver actual knowledge based on method
