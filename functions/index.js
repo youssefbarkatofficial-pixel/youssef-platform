@@ -115,6 +115,14 @@ exports.askAlBouslaLLM = functions.https.onCall(async (data, context) => {
             safeReply = learnedMemory.generatedAnswer;
             learnedHit = true;
         } else {
+            // Check confidence before calling LLM to save quota
+            if (retrievalResult.confidence === 'Low' || chunkIds.length === 0) {
+                return { 
+                    reply: "عفواً، لا يتوفر لدي سياق تعليمي موثق للإجابة على هذا السؤال حالياً.", 
+                    debug: { reason: "weak_retrieval_confidence", fallbackTriggered: true } 
+                };
+            }
+
             // Step 3: Build Safe Prompt & Call LLM
             const safePrompt = buildEducationalPrompt(message, retrievalResult.chunks, history);
             
