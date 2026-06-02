@@ -816,15 +816,15 @@
   }
 
   // ── Behavioral Language Generator ──
-  function composeResponse(thought, mem, normalized, userMessage) {
-    const profile = buildBehaviorProfile(thought, mem);
+  function composeResponse(thought, mem, normalized, userMessage, decision, profile) {
     let sentences = [];
     let newPendingAction = null;
     let newPhase = mem.phase;
     const subj = thought.topic || mem.currentSubject;
+    const goal = decision ? decision.primaryGoal : thought.conversationGoal;
 
-    // ━━━━ GENERATE opening (comfort / greeting / energy) ━━━━
-    if (thought.conversationGoal === 'connect') {
+    // ━━━━ GENERATE response from DECISION (goal-driven, not state-driven) ━━━━
+    if (thought.conversationGoal === 'connect' || goal === 'social_connection') {
       sentences.push(generateSocialOpener(profile, mem));
       sentences.push(generateSubjectPrompt(profile, mem));
       newPhase = mem.currentTopic ? mem.phase : 'IDLE';
@@ -856,33 +856,42 @@
     }
 
     else if (thought.conversationGoal === 'teach' || thought.conversationGoal === 'simplify') {
-      // Opening — shaped by mood, not selected from array
-      if (profile.shouldComfort) sentences.push(generateComfortSentence(profile, thought));
-      sentences.push(generateTeachingOpener(profile, subj));
-
-      // Knowledge — shaped by density and depth
-      let knowledgeText = fetchKnowledge(subj, userMessage);
-      if (knowledgeText) {
-        knowledgeText = shapeKnowledge(knowledgeText, profile);
-        sentences.push(knowledgeText);
-      } else if (subj) {
-        sentences.push(generateKnowledgeFallback(profile, subj));
-      }
-
-      // Example — only if profile says so
-      if (profile.shouldExample && subj) {
-        sentences.push(generateExample(subj));
-      }
-
-      // Interruption point — check in with student
-      if (profile.shouldInterrupt) {
+      // Decision-aware: should we actually teach right now?
+      if (decision && !decision.shouldTeachNow) {
+        // Decision says: DON'T teach — comfort and check in instead
+        if (profile.shouldComfort) sentences.push(generateComfortSentence(profile, thought));
         sentences.push(generateInterruptionCheck(profile));
         newPendingAction = 'AWAITING_CONFIRMATION';
-      } else if (profile.shouldQuestion) {
-        sentences.push(generateFollowUp(profile, subj));
-        newPendingAction = 'AWAITING_CONFIRMATION';
+        newPhase = 'EXPLAINING';
+      } else {
+        // Opening — shaped by decision strategy, not mood
+        if (profile.shouldComfort) sentences.push(generateComfortSentence(profile, thought));
+        sentences.push(generateTeachingOpener(profile, subj));
+
+        // Knowledge — shaped by density and depth from decision
+        let knowledgeText = fetchKnowledge(subj, userMessage);
+        if (knowledgeText) {
+          knowledgeText = shapeKnowledge(knowledgeText, profile);
+          sentences.push(knowledgeText);
+        } else if (subj) {
+          sentences.push(generateKnowledgeFallback(profile, subj));
+        }
+
+        // Example — only if decision's approach is 'analogy' or 'deep'
+        if (profile.shouldExample && subj) {
+          sentences.push(generateExample(subj));
+        }
+
+        // Interruption point — decision controls when to check in
+        if (profile.shouldInterrupt) {
+          sentences.push(generateInterruptionCheck(profile));
+          newPendingAction = 'AWAITING_CONFIRMATION';
+        } else if (profile.shouldQuestion) {
+          sentences.push(generateFollowUp(profile, subj));
+          newPendingAction = 'AWAITING_CONFIRMATION';
+        }
+        newPhase = 'EXPLAINING';
       }
-      newPhase = 'EXPLAINING';
     }
 
     else if (thought.conversationGoal === 'practice') {
@@ -1100,6 +1109,287 @@
     return sentences.join('\n\n');
   }
 
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // 🧠 COGNITIVE PRESSURE MODEL
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  function loadCognitivePressure(mem) {
+    return mem._pressure || { level: 30, trend: 'stable', consecutiveTeaching: 0, consecutiveQuestions: 0, lastShift: 0 };
+  }
+  function updateCognitivePressure(pressure, decision, thought) {
+    // Teaching adds pressure
+    if (decision.shouldTeachNow) pressure.consecutiveTeaching++;
+    else pressure.consecutiveTeaching = 0;
+    // Questions add a little pressure
+    if (decision.shouldProbeKnowledge) pressure.consecutiveQuestions++;
+    else pressure.consecutiveQuestions = 0;
+
+    // Compute new level
+    if (decision.shouldTeachNow) pressure.level = Math.min(100, pressure.level + 12);
+    if (decision.shouldProbeKnowledge) pressure.level = Math.min(100, pressure.level + 8);
+    if (decision.primaryGoal === 'reduce_confusion' || decision.primaryGoal === 'emotional_support') pressure.level = Math.max(0, pressure.level - 20);
+    if (decision.primaryGoal === 'social_connection') pressure.level = Math.max(0, pressure.level - 30);
+    // Natural decay
+    pressure.level = Math.max(0, pressure.level - 3);
+
+    // Trend
+    if (pressure.level > 70) pressure.trend = 'overloaded';
+    else if (pressure.level > 45) pressure.trend = 'building';
+    else if (pressure.level < 20) pressure.trend = 'low';
+    else pressure.trend = 'stable';
+
+    pressure.lastShift = Date.now();
+    return pressure;
+  }
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // 🎯 DIALOGUE DECISION ENGINE
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  function makeDialogueDecision(thought, mem, pressure) {
+    const decision = {
+      primaryGoal: null,
+      secondaryGoal: null,
+      strategy: null,
+      pressureLevel: pressure.level,
+      shouldTeachNow: false,
+      shouldProbeKnowledge: false,
+      shouldComfortFirst: false,
+      shouldSwitchTone: false,
+      shouldReduceLoad: false,
+      shouldRecoverContext: false,
+      shouldChallenge: false,
+      explanationApproach: 'standard',   // minimal, standard, deep, analogy
+      questionStyle: 'none',             // none, yesno, guided, open, challenge
+      reasoning: []
+    };
+
+    const mood = thought.detectedMood;
+    const goal = thought.conversationGoal;
+    const phase = mem.phase;
+    const conf = thought.confidenceLevel;
+    const recentTurns = mem.turns.slice(-6);
+    const lastBotGoals = recentTurns.filter(t => t.role === 'bot').map(t => t.goal);
+    const repeatedGoal = lastBotGoals.length >= 2 && lastBotGoals.every(g => g === lastBotGoals[0]);
+
+    // ── Step 1: Is the student overwhelmed? ──
+    if (pressure.trend === 'overloaded' || (mood === 'confused' && conf < 25)) {
+      decision.primaryGoal = 'reduce_confusion';
+      decision.shouldReduceLoad = true;
+      decision.shouldComfortFirst = true;
+      decision.shouldTeachNow = false;
+      decision.shouldProbeKnowledge = false;
+      decision.explanationApproach = 'minimal';
+      decision.questionStyle = 'yesno';
+      decision.strategy = 'pause_and_check';
+      decision.reasoning.push('الطالب فوق طاقته — لازم نوقف الشرح ونطمنه ونسأله سؤال بسيط');
+      return decision;
+    }
+
+    // ── Step 2: Is the student emotionally distressed? ──
+    if (mood === 'frustrated' || mood === 'confused') {
+      decision.primaryGoal = 'emotional_support';
+      decision.secondaryGoal = goal === 'teach' || goal === 'simplify' ? 'gentle_teaching' : null;
+      decision.shouldComfortFirst = true;
+      decision.shouldTeachNow = (conf > 20);
+      decision.shouldReduceLoad = true;
+      decision.explanationApproach = 'analogy';
+      decision.questionStyle = 'yesno';
+      decision.strategy = 'comfort_then_simplify';
+      decision.reasoning.push('الطالب محتاج دعم نفسي — هطمنه الأول وبعدين أبسط لو يقدر يستوعب');
+      return decision;
+    }
+
+    // ── Step 3: Is the student bored or disengaged? ──
+    if (mood === 'bored' || (repeatedGoal && lastBotGoals[0] === 'teach')) {
+      decision.primaryGoal = 'break_monotony';
+      decision.shouldChallenge = true;
+      decision.shouldTeachNow = false;
+      decision.shouldProbeKnowledge = true;
+      decision.questionStyle = 'challenge';
+      decision.strategy = 'surprise_challenge';
+      decision.reasoning.push('الطالب زهق أو الحوار بقى رتيب — هغير الإيقاع بتحدي مفاجئ');
+      return decision;
+    }
+
+    // ── Step 4: Is the student confident and ready? ──
+    if (mood === 'confident' && conf > 60) {
+      decision.primaryGoal = 'advance_knowledge';
+      decision.shouldTeachNow = true;
+      decision.shouldProbeKnowledge = true;
+      decision.explanationApproach = 'deep';
+      decision.questionStyle = 'open';
+      decision.strategy = 'push_forward';
+      decision.reasoning.push('الطالب واثق — هتعمق معاه وأسأله أسئلة مفتوحة');
+      return decision;
+    }
+
+    // ── Step 5: Is this a social / non-educational moment? ──
+    if (goal === 'connect' || goal === 'support') {
+      decision.primaryGoal = 'social_connection';
+      decision.strategy = 'be_human';
+      decision.shouldTeachNow = false;
+      decision.shouldProbeKnowledge = false;
+      decision.reasoning.push('الطالب بيتكلم كلام عادي — هرد كإنسان طبيعي');
+      return decision;
+    }
+
+    // ── Step 6: Is the student responding to a pending action? ──
+    if (goal === 'offer_menu') {
+      decision.primaryGoal = 'clarify_intent';
+      decision.strategy = 'present_options';
+      decision.reasoning.push('الطالب ذكر موضوع بس — هعرض عليه يختار');
+      return decision;
+    }
+
+    // ── Step 7: Context recovery needed? ──
+    if (!thought.topic && !mem.currentSubject && goal !== 'connect') {
+      decision.primaryGoal = 'recover_context';
+      decision.shouldRecoverContext = true;
+      decision.strategy = 'gentle_probe';
+      decision.questionStyle = 'guided';
+      decision.reasoning.push('مفيش موضوع واضح — هسأله بلطف عايز إيه');
+      return decision;
+    }
+
+    // ── Step 8: Default — teach with adaptive approach ──
+    decision.primaryGoal = 'deliver_knowledge';
+    decision.shouldTeachNow = true;
+    decision.explanationApproach = conf < 40 ? 'analogy' : 'standard';
+    decision.shouldProbeKnowledge = pressure.consecutiveTeaching >= 2;
+    decision.questionStyle = pressure.consecutiveTeaching >= 2 ? 'guided' : 'none';
+    decision.strategy = 'steady_teaching';
+    if (pressure.consecutiveTeaching >= 2) {
+      decision.reasoning.push('شرحت كتير متتابع — هسأل سؤال عشان أتأكد إنه فاهم');
+    } else {
+      decision.reasoning.push('حالة عادية — هشرح بشكل متزن');
+    }
+
+    // Override: if contextual reply (student answering bot's question)
+    if (thought.conversationGoal === 'evaluate_answer' || thought.conversationGoal === 'advance' || thought.conversationGoal === 'practice' || thought.conversationGoal === 'challenge' || thought.conversationGoal === 'summarize') {
+      decision.primaryGoal = thought.conversationGoal;
+      decision.strategy = 'follow_flow';
+      decision.reasoning.push('الطالب رد على سؤالي — هكمل في نفس السياق');
+    }
+
+    return decision;
+  }
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // 🔄 REASONING LOOP
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  function reasoningLoop(thought, mem) {
+    const pressure = loadCognitivePressure(mem);
+
+    // Step 1: Make initial decision
+    let decision = makeDialogueDecision(thought, mem, pressure);
+
+    // Step 2: Safety check — is teaching right now actually helpful?
+    if (decision.shouldTeachNow && thought.detectedMood === 'confused' && pressure.level > 50) {
+      decision.shouldTeachNow = false;
+      decision.shouldComfortFirst = true;
+      decision.explanationApproach = 'minimal';
+      decision.reasoning.push('[OVERRIDE] الضغط مرتفع والطالب مرتبك — ألغيت الشرح وهطمنه الأول');
+    }
+
+    // Step 3: Prevent repetition — did we do the same thing 3 times?
+    const recentGoals = mem.turns.filter(t => t.role === 'bot').slice(-3).map(t => t.goal);
+    if (recentGoals.length >= 3 && recentGoals.every(g => g === decision.primaryGoal)) {
+      decision.shouldSwitchTone = true;
+      if (decision.primaryGoal === 'deliver_knowledge') {
+        decision.primaryGoal = 'break_monotony';
+        decision.shouldProbeKnowledge = true;
+        decision.shouldTeachNow = false;
+        decision.strategy = 'surprise_challenge';
+        decision.reasoning.push('[OVERRIDE] نفس الهدف 3 مرات متتالية — هغير الإيقاع');
+      }
+    }
+
+    // Step 4: Update pressure model
+    const newPressure = updateCognitivePressure({ ...pressure }, decision, thought);
+    mem._pressure = newPressure;
+
+    // Step 5: Build behavior profile FROM DECISION (not from mood directly)
+    const profile = buildBehaviorProfileFromDecision(decision, thought, mem);
+
+    console.log('🎯 [DECISION]', JSON.stringify(decision));
+    console.log('📊 [PRESSURE]', JSON.stringify(newPressure));
+
+    return { decision, profile };
+  }
+
+  // ── Build Behavior Profile from Decision (not mood) ──
+  function buildBehaviorProfileFromDecision(decision, thought, mem) {
+    const profile = {
+      sentencePacing: 'normal',
+      infoDensity: 'medium',
+      emotionalIntensity: 'normal',
+      shouldInterrupt: false,
+      explanationDepth: 'standard',
+      shouldQuestion: false,
+      questionType: 'open',
+      rhythm: 'steady',
+      shouldExample: false,
+      shouldMotivate: false,
+      shouldComfort: decision.shouldComfortFirst,
+      maxSentences: 4
+    };
+
+    // Pacing from strategy
+    if (decision.strategy === 'pause_and_check' || decision.strategy === 'comfort_then_simplify') {
+      profile.sentencePacing = 'slow';
+      profile.rhythm = 'cautious';
+      profile.maxSentences = 3;
+    } else if (decision.strategy === 'push_forward' || decision.strategy === 'surprise_challenge') {
+      profile.sentencePacing = 'fast';
+      profile.rhythm = 'energetic';
+    }
+
+    // Info density from decision
+    if (decision.shouldReduceLoad || decision.explanationApproach === 'minimal') {
+      profile.infoDensity = 'minimal';
+      profile.explanationDepth = 'shallow';
+    } else if (decision.explanationApproach === 'deep') {
+      profile.infoDensity = 'rich';
+      profile.explanationDepth = 'deep';
+      profile.shouldExample = true;
+      profile.maxSentences = 5;
+    } else if (decision.explanationApproach === 'analogy') {
+      profile.infoDensity = 'medium';
+      profile.explanationDepth = 'standard';
+      profile.shouldExample = true;
+    }
+
+    // Emotional intensity from decision
+    if (decision.shouldComfortFirst) {
+      profile.emotionalIntensity = decision.primaryGoal === 'emotional_support' ? 'intense' : 'warm';
+      profile.shouldMotivate = true;
+    }
+    if (decision.shouldChallenge) {
+      profile.emotionalIntensity = 'cold';
+      profile.shouldComfort = false;
+    }
+
+    // Question style from decision
+    if (decision.questionStyle !== 'none') {
+      profile.shouldQuestion = true;
+      profile.questionType = decision.questionStyle === 'challenge' ? 'open' : decision.questionStyle;
+    }
+    if (decision.shouldProbeKnowledge) {
+      profile.shouldInterrupt = true;
+      profile.shouldQuestion = true;
+    }
+
+    // Pressure-based overrides
+    if (decision.pressureLevel > 70) {
+      profile.maxSentences = Math.min(profile.maxSentences, 3);
+      profile.infoDensity = 'minimal';
+    }
+    if (decision.pressureLevel < 15 && !decision.shouldChallenge) {
+      profile.maxSentences = Math.max(profile.maxSentences, 4);
+    }
+
+    return profile;
+  }
+
   // ── Main Entry Point ──
   const BOT_RESPONSES_DISABLED = false;
   function getTemporarySafeBotReply(userMessage) {
@@ -1108,27 +1398,30 @@
     // Load conversational memory
     let mem = loadDialogueMemory();
 
-    // Layer 2: Emotional Interpretation
+    // Layer 1: Emotional Interpretation
     mem.studentMood = interpretEmotion(normalized, mem);
 
-    // Layer 3: Message Classification
+    // Layer 2: Message Classification
     const classification = classifyMessage(normalized, mem);
 
-    // Layer 4: Internal Thought Builder
+    // Layer 3: Internal Thought Builder
     const thought = buildThought(classification, mem.studentMood, mem, normalized);
 
-    // Layer 5: Dynamic Response Composer
-    const response = composeResponse(thought, mem, normalized, userMessage);
+    // Layer 4: REASONING LOOP → DIALOGUE DECISION
+    const { decision, profile } = reasoningLoop(thought, mem);
+
+    // Layer 5: Response Composer (driven by DECISION, not mood)
+    const response = composeResponse(thought, mem, normalized, userMessage, decision, profile);
 
     // Log brain metrics
     logBrainMetrics({
       userMessage,
-      intent: thought.conversationGoal,
-      purpose: thought.messageType,
+      intent: decision.primaryGoal,
+      purpose: decision.strategy,
       emotion: thought.detectedMood,
-      plannedResponseMode: 'DIALOGUE_BRAIN',
+      plannedResponseMode: 'DIALOGUE_DECISION_ENGINE',
       score: thought.confidenceLevel,
-      context: thought.reasoning, memory: true
+      context: decision.reasoning, memory: true
     }, { confidence: thought.confidenceLevel, extractedData: { subjects: [thought.topic] } });
 
     return response;
