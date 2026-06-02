@@ -428,16 +428,224 @@
   }
 
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // 🧠 THE COGNITIVE GRAPH ENGINE (LEVEL BOSS)
+  // 🧠 SEMANTIC KNOWLEDGE GRAPH (replaces flat TOPIC_CLUSTERS)
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  const TOPIC_CLUSTERS = {
-    "MAPS": { keywords: ["خريطة", "خرائط", "جهات", "شمال", "جنوب", "شرق", "غرب", "مقياس رسم", "احداثيات", "خطوط", "طول", "دوائر", "عرض", "رسمة", "مكان"], subject: "الخرائط" },
-    "FRENCH_CAMPAIGN": { keywords: ["حملة", "فرنسية", "نابليون", "كليبر", "مينو", "ثورة القاهرة", "رشيد", "ابوقير"], subject: "الحملة الفرنسية" },
-    "MOHAMED_ALI": { keywords: ["محمد علي", "مؤسس مصر", "جيش", "المذبحة", "القلعة", "مصر الحديثة", "محتكر"], subject: "محمد علي" },
-    "TERRAIN": { keywords: ["تضاريس", "جبال", "هضاب", "صحراء", "نيل", "وديان"], subject: "تضاريس مصر" },
-    "CLIMATE": { keywords: ["مناخ", "حرارة", "شتاء", "صيف", "مطر", "رياح", "جو"], subject: "مناخ مصر" }
+  const KNOWLEDGE_GRAPH = {
+    "MAPS": {
+      subject: "الخرائط", keywords: ["خريطة", "خرائط", "جهات", "شمال", "جنوب", "شرق", "غرب", "مقياس رسم", "احداثيات", "خطوط", "طول", "دوائر", "عرض", "رسمة", "مكان"],
+      concepts: [
+        { id: "map_def", label: "تعريف الخريطة", prereqs: [], difficulty: 1 },
+        { id: "map_directions", label: "الجهات الأصلية والفرعية", prereqs: ["map_def"], difficulty: 1 },
+        { id: "map_scale", label: "مقياس الرسم", prereqs: ["map_def"], difficulty: 2 },
+        { id: "map_coords", label: "خطوط الطول ودوائر العرض", prereqs: ["map_directions"], difficulty: 3 },
+        { id: "map_types", label: "أنواع الخرائط", prereqs: ["map_def", "map_scale"], difficulty: 2 }
+      ],
+      relatedTopics: ["TERRAIN", "CLIMATE"]
+    },
+    "FRENCH_CAMPAIGN": {
+      subject: "الحملة الفرنسية", keywords: ["حملة", "فرنسية", "نابليون", "كليبر", "مينو", "ثورة القاهرة", "رشيد", "ابوقير"],
+      concepts: [
+        { id: "fc_reasons", label: "أسباب الحملة الفرنسية", prereqs: [], difficulty: 1 },
+        { id: "fc_napoleon", label: "نابليون وقيادة الحملة", prereqs: ["fc_reasons"], difficulty: 2 },
+        { id: "fc_battles", label: "المعارك (أبو قير - الأهرام)", prereqs: ["fc_napoleon"], difficulty: 2 },
+        { id: "fc_resistance", label: "المقاومة الشعبية وثورة القاهرة", prereqs: ["fc_battles"], difficulty: 3 },
+        { id: "fc_results", label: "نتائج الحملة وحجر رشيد", prereqs: ["fc_resistance"], difficulty: 2 },
+        { id: "fc_withdrawal", label: "انسحاب الفرنسيين", prereqs: ["fc_results"], difficulty: 2 }
+      ],
+      relatedTopics: ["MOHAMED_ALI"]
+    },
+    "MOHAMED_ALI": {
+      subject: "محمد علي", keywords: ["محمد علي", "مؤسس مصر", "جيش", "المذبحة", "القلعة", "مصر الحديثة", "محتكر"],
+      concepts: [
+        { id: "ma_rise", label: "وصول محمد علي للحكم", prereqs: [], difficulty: 1 },
+        { id: "ma_mamluks", label: "مذبحة القلعة والقضاء على المماليك", prereqs: ["ma_rise"], difficulty: 2 },
+        { id: "ma_army", label: "بناء الجيش الحديث", prereqs: ["ma_mamluks"], difficulty: 2 },
+        { id: "ma_economy", label: "نظام الاحتكار والاقتصاد", prereqs: ["ma_rise"], difficulty: 3 },
+        { id: "ma_education", label: "التعليم والبعثات", prereqs: ["ma_army"], difficulty: 2 },
+        { id: "ma_legacy", label: "إرث محمد علي ومصر الحديثة", prereqs: ["ma_army", "ma_economy", "ma_education"], difficulty: 3 }
+      ],
+      relatedTopics: ["FRENCH_CAMPAIGN"]
+    },
+    "TERRAIN": {
+      subject: "تضاريس مصر", keywords: ["تضاريس", "جبال", "هضاب", "صحراء", "نيل", "وديان"],
+      concepts: [
+        { id: "t_nile", label: "وادي النيل والدلتا", prereqs: [], difficulty: 1 },
+        { id: "t_western", label: "الصحراء الغربية", prereqs: ["t_nile"], difficulty: 2 },
+        { id: "t_eastern", label: "الصحراء الشرقية", prereqs: ["t_nile"], difficulty: 2 },
+        { id: "t_sinai", label: "شبه جزيرة سيناء", prereqs: [], difficulty: 2 }
+      ],
+      relatedTopics: ["CLIMATE", "MAPS"]
+    },
+    "CLIMATE": {
+      subject: "مناخ مصر", keywords: ["مناخ", "حرارة", "شتاء", "صيف", "مطر", "رياح", "جو"],
+      concepts: [
+        { id: "c_factors", label: "العوامل المؤثرة في المناخ", prereqs: [], difficulty: 1 },
+        { id: "c_regions", label: "أقاليم مصر المناخية", prereqs: ["c_factors"], difficulty: 2 },
+        { id: "c_impact", label: "تأثير المناخ على النشاط البشري", prereqs: ["c_regions"], difficulty: 3 }
+      ],
+      relatedTopics: ["TERRAIN"]
+    }
   };
+
+  // Backward compat: create TOPIC_CLUSTERS view from graph
+  const TOPIC_CLUSTERS = {};
+  for (const [k, v] of Object.entries(KNOWLEDGE_GRAPH)) {
+    TOPIC_CLUSTERS[k] = { keywords: v.keywords, subject: v.subject };
+  }
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // 📚 MULTI-TURN LEARNING TRACKER
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  function loadLearningTracker(mem) {
+    return mem._learningTracker || { taughtConcepts: [], understoodConcepts: [], currentConceptIndex: 0, failedAttempts: {}, teachingMethod: 'standard', lastConceptTaught: null };
+  }
+  function getNextConcept(topicKey, tracker) {
+    const topic = KNOWLEDGE_GRAPH[topicKey];
+    if (!topic) return null;
+    const concepts = topic.concepts;
+    // Find first concept whose prereqs are all understood
+    for (const c of concepts) {
+      if (tracker.understoodConcepts.includes(c.id)) continue;
+      const prereqsMet = c.prereqs.every(p => tracker.understoodConcepts.includes(p));
+      if (prereqsMet) return c;
+    }
+    return null; // All understood or stuck
+  }
+  function markConceptTaught(tracker, conceptId) {
+    if (!tracker.taughtConcepts.includes(conceptId)) tracker.taughtConcepts.push(conceptId);
+    tracker.lastConceptTaught = conceptId;
+  }
+  function markConceptUnderstood(tracker, conceptId) {
+    if (!tracker.understoodConcepts.includes(conceptId)) tracker.understoodConcepts.push(conceptId);
+  }
+  function getTopicProgress(topicKey, tracker) {
+    const topic = KNOWLEDGE_GRAPH[topicKey];
+    if (!topic) return { total: 0, understood: 0, percent: 0 };
+    const total = topic.concepts.length;
+    const understood = topic.concepts.filter(c => tracker.understoodConcepts.includes(c.id)).length;
+    return { total, understood, percent: Math.round((understood / total) * 100) };
+  }
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // 🎓 PEDAGOGICAL PLANNER
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  function buildTeachingPlan(topicKey, tracker, mood, confidence) {
+    const plan = {
+      learningObjective: null,
+      conceptToTeach: null,
+      prerequisiteCheck: false,
+      teachingMethod: 'direct',    // direct, analogy, story, question_first, example_first
+      cognitiveLoadTarget: 'medium', // low, medium, high
+      expectedReaction: 'understanding',
+      fallbackPlan: 'simplify',
+      microGoals: [],              // what this single message should achieve
+      transitionHint: null         // what comes next
+    };
+
+    const nextConcept = getNextConcept(topicKey, tracker);
+    if (!nextConcept) {
+      plan.learningObjective = 'مراجعة شاملة';
+      plan.teachingMethod = 'question_first';
+      plan.microGoals = ['review_all'];
+      return plan;
+    }
+
+    plan.conceptToTeach = nextConcept;
+    plan.learningObjective = nextConcept.label;
+
+    // Check if prereqs need verification
+    if (nextConcept.prereqs.length > 0) {
+      const untaughtPrereqs = nextConcept.prereqs.filter(p => !tracker.understoodConcepts.includes(p));
+      if (untaughtPrereqs.length > 0) {
+        plan.prerequisiteCheck = true;
+        plan.microGoals.push('verify_prerequisite');
+      }
+    }
+
+    // Teaching method based on mood + difficulty + failure history
+    const failures = tracker.failedAttempts[nextConcept.id] || 0;
+    if (mood === 'confused' || failures > 0) {
+      plan.teachingMethod = failures > 1 ? 'story' : 'analogy';
+      plan.cognitiveLoadTarget = 'low';
+      plan.expectedReaction = 'partial_confusion';
+      plan.fallbackPlan = 'break_down_further';
+    } else if (mood === 'confident' && confidence > 60) {
+      plan.teachingMethod = 'question_first';
+      plan.cognitiveLoadTarget = 'high';
+      plan.expectedReaction = 'engagement';
+    } else if (mood === 'bored') {
+      plan.teachingMethod = 'example_first';
+      plan.cognitiveLoadTarget = 'medium';
+    }
+
+    // Micro-goals for this message
+    plan.microGoals.push('introduce_concept');
+    if (plan.cognitiveLoadTarget !== 'low') plan.microGoals.push('give_detail');
+    plan.microGoals.push('check_understanding');
+
+    // What comes after this concept
+    const topic = KNOWLEDGE_GRAPH[topicKey];
+    if (topic) {
+      const remaining = topic.concepts.filter(c => !tracker.understoodConcepts.includes(c.id) && c.id !== nextConcept.id);
+      if (remaining.length > 0) plan.transitionHint = remaining[0].label;
+    }
+
+    return plan;
+  }
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // 🚀 INITIATIVE ENGINE (Proactive Conversation Steering)
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  function checkInitiative(mem, thought, pressure) {
+    const initiative = {
+      shouldSteer: false,
+      steerAction: null,   // 'change_pace', 'recall_context', 'surprise_question', 'suggest_related', 'progress_report', 'break_suggestion'
+      reason: null
+    };
+
+    const turns = mem.turns;
+    const botTurns = turns.filter(t => t.role === 'bot');
+    const userTurns = turns.filter(t => t.role === 'user');
+    const recentUserTexts = userTurns.slice(-3).map(t => t.text);
+
+    // 1. Engagement detection: short consecutive user messages = disengagement
+    if (recentUserTexts.length >= 3 && recentUserTexts.every(t => t.length < 8)) {
+      initiative.shouldSteer = true;
+      initiative.steerAction = 'change_pace';
+      initiative.reason = 'ردود المستخدم قصيرة جداً — ممكن يكون زهق أو مش مركز';
+      return initiative;
+    }
+
+    // 2. Stuck detection: same topic, >6 messages, low confidence
+    if (mem.messageCount > 6 && thought.confidenceLevel < 30 && mem.currentTopic) {
+      initiative.shouldSteer = true;
+      initiative.steerAction = 'suggest_related';
+      initiative.reason = 'الطالب عالق — هقترح موضوع متعلق أسهل';
+      return initiative;
+    }
+
+    // 3. Progress milestone: student understood multiple concepts
+    if (mem.currentTopic && mem._learningTracker) {
+      const progress = getTopicProgress(mem.currentTopic, mem._learningTracker);
+      if (progress.percent >= 60 && progress.percent < 100 && botTurns.length > 0 && botTurns[botTurns.length - 1].goal !== 'progress_report') {
+        initiative.shouldSteer = true;
+        initiative.steerAction = 'progress_report';
+        initiative.reason = 'الطالب وصل لـ ' + progress.percent + '% — هشجعه بتقرير تقدم';
+        return initiative;
+      }
+    }
+
+    // 4. Pressure relief: if pressure was high for 4+ turns
+    if (pressure.level > 60 && pressure.consecutiveTeaching >= 3) {
+      initiative.shouldSteer = true;
+      initiative.steerAction = 'break_suggestion';
+      initiative.reason = 'الضغط مرتفع لفترة طويلة — هقترح استراحة أو تغيير';
+      return initiative;
+    }
+
+    return initiative;
+  }
 
   function extractCognitiveGraph(normalized) {
     const graph = { emotions: {}, topics: {}, needs: {}, confidence: 0 };
@@ -816,7 +1024,7 @@
   }
 
   // ── Behavioral Language Generator ──
-  function composeResponse(thought, mem, normalized, userMessage, decision, profile) {
+  function composeResponse(thought, mem, normalized, userMessage, decision, profile, teachingPlan, tracker) {
     let sentences = [];
     let newPendingAction = null;
     let newPhase = mem.phase;
@@ -824,7 +1032,26 @@
     const goal = decision ? decision.primaryGoal : thought.conversationGoal;
 
     // ━━━━ GENERATE response from DECISION (goal-driven, not state-driven) ━━━━
-    if (thought.conversationGoal === 'connect' || goal === 'social_connection') {
+    
+    // Check Initiative Steering first
+    if (decision && decision.primaryGoal === 'steer_conversation') {
+      if (decision.strategy === 'change_pace') {
+        sentences.push('حاسس إننا بنجري؟ تحب نوقف شوية وندردش أو أسألك عن حاجة سريعة؟');
+      } else if (decision.strategy === 'suggest_related') {
+        const related = KNOWLEDGE_GRAPH[thought.topicKey]?.relatedTopics[0] || 'موضوع تاني';
+        sentences.push(`واضح إن الجزء ده غلس شوية. إيه رأيك نسيبه ونبص على ${KNOWLEDGE_GRAPH[related]?.subject || related}؟`);
+      } else if (decision.strategy === 'progress_report') {
+        sentences.push(`على فكرة، إنت ممتاز! خلصت أجزاء كتير مهمة في ${subj}. عاش جداً 💪`);
+      } else if (decision.strategy === 'break_suggestion') {
+        sentences.push('إحنا شرحنا حاجات كتير ورا بعض. خد نفسك كده وقولي لما تبقى جاهز نكمل.');
+      } else {
+        sentences.push('تحب نغير الموضوع ونتكلم في حاجة تانية؟');
+      }
+      newPendingAction = 'AWAITING_CONFIRMATION';
+      newPhase = mem.phase;
+    }
+    
+    else if (thought.conversationGoal === 'connect' || goal === 'social_connection') {
       sentences.push(generateSocialOpener(profile, mem));
       sentences.push(generateSubjectPrompt(profile, mem));
       newPhase = mem.currentTopic ? mem.phase : 'IDLE';
@@ -866,27 +1093,54 @@
       } else {
         // Opening — shaped by decision strategy, not mood
         if (profile.shouldComfort) sentences.push(generateComfortSentence(profile, thought));
-        sentences.push(generateTeachingOpener(profile, subj));
-
-        // Knowledge — shaped by density and depth from decision
-        let knowledgeText = fetchKnowledge(subj, userMessage);
-        if (knowledgeText) {
-          knowledgeText = shapeKnowledge(knowledgeText, profile);
-          sentences.push(knowledgeText);
-        } else if (subj) {
-          sentences.push(generateKnowledgeFallback(profile, subj));
-        }
-
-        // Example — only if decision's approach is 'analogy' or 'deep'
-        if (profile.shouldExample && subj) {
-          sentences.push(generateExample(subj));
+        
+        // Use Pedagogical Planner if available
+        if (teachingPlan && teachingPlan.conceptToTeach) {
+          sentences.push(`تعالى نتكلم عن ${teachingPlan.learningObjective}.`);
+          
+          if (teachingPlan.microGoals.includes('verify_prerequisite')) {
+            sentences.push(`بس الأول، فاكر الجزء بتاع ${KNOWLEDGE_GRAPH[thought.topicKey].concepts.find(c => c.id === teachingPlan.conceptToTeach.prereqs[0])?.label || 'الدرس اللي فات'}؟`);
+            newPendingAction = 'AWAITING_ANSWER';
+          } else {
+            // Deliver actual knowledge based on method
+            if (teachingPlan.teachingMethod === 'question_first') {
+              sentences.push('تفتكر إيه أهمية ده؟ فكر كده ثانية.');
+            } else if (teachingPlan.teachingMethod === 'analogy') {
+              sentences.push('عشان تتخيلها، الموضوع شبه ' + (subj === 'محمد علي' ? 'لما تبني بيت من الأساس' : 'قصة بسيطة جداً') + '.');
+            }
+            
+            // Mark as taught
+            if (tracker) markConceptTaught(tracker, teachingPlan.conceptToTeach.id);
+            // Simulate knowledge text delivery
+            let knowledgeText = fetchKnowledge(subj, userMessage);
+            if (knowledgeText) {
+              sentences.push(shapeKnowledge(knowledgeText, profile));
+            }
+            
+            if (teachingPlan.transitionHint && !profile.shouldInterrupt) {
+              sentences.push(`وبعدها هندخل على ${teachingPlan.transitionHint}.`);
+            }
+          }
+        } else {
+          // Fallback teaching opener
+          sentences.push(generateTeachingOpener(profile, subj));
+          let knowledgeText = fetchKnowledge(subj, userMessage);
+          if (knowledgeText) {
+            knowledgeText = shapeKnowledge(knowledgeText, profile);
+            sentences.push(knowledgeText);
+          } else if (subj) {
+            sentences.push(generateKnowledgeFallback(profile, subj));
+          }
+          if (profile.shouldExample && subj) {
+            sentences.push(generateExample(subj));
+          }
         }
 
         // Interruption point — decision controls when to check in
         if (profile.shouldInterrupt) {
           sentences.push(generateInterruptionCheck(profile));
           newPendingAction = 'AWAITING_CONFIRMATION';
-        } else if (profile.shouldQuestion) {
+        } else if (profile.shouldQuestion && newPendingAction !== 'AWAITING_ANSWER') {
           sentences.push(generateFollowUp(profile, subj));
           newPendingAction = 'AWAITING_CONFIRMATION';
         }
@@ -1274,15 +1528,34 @@
   }
 
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // 🔄 REASONING LOOP
+  // 🔄 REASONING LOOP (Now with Initiative & Planning)
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   function reasoningLoop(thought, mem) {
     const pressure = loadCognitivePressure(mem);
+    const tracker = loadLearningTracker(mem);
+    const topicKey = thought.topicKey || mem.currentTopic;
 
-    // Step 1: Make initial decision
-    let decision = makeDialogueDecision(thought, mem, pressure);
+    let decision = null;
+    let teachingPlan = null;
 
-    // Step 2: Safety check — is teaching right now actually helpful?
+    // Step 1: Check Initiative (Proactive Steering)
+    const initiative = checkInitiative(mem, thought, pressure);
+    if (initiative.shouldSteer) {
+      decision = {
+        primaryGoal: 'steer_conversation',
+        strategy: initiative.steerAction,
+        shouldTeachNow: false,
+        shouldProbeKnowledge: false,
+        shouldComfortFirst: false,
+        pressureLevel: pressure.level,
+        reasoning: ['[PROACTIVE INITIATIVE] ' + initiative.reason]
+      };
+    } else {
+      // Step 2: Make initial reactive decision
+      decision = makeDialogueDecision(thought, mem, pressure);
+    }
+
+    // Step 3: Safety check — is teaching right now actually helpful?
     if (decision.shouldTeachNow && thought.detectedMood === 'confused' && pressure.level > 50) {
       decision.shouldTeachNow = false;
       decision.shouldComfortFirst = true;
@@ -1290,7 +1563,7 @@
       decision.reasoning.push('[OVERRIDE] الضغط مرتفع والطالب مرتبك — ألغيت الشرح وهطمنه الأول');
     }
 
-    // Step 3: Prevent repetition — did we do the same thing 3 times?
+    // Step 4: Prevent repetition — did we do the same thing 3 times?
     const recentGoals = mem.turns.filter(t => t.role === 'bot').slice(-3).map(t => t.goal);
     if (recentGoals.length >= 3 && recentGoals.every(g => g === decision.primaryGoal)) {
       decision.shouldSwitchTone = true;
@@ -1303,17 +1576,30 @@
       }
     }
 
-    // Step 4: Update pressure model
+    // Step 5: Pedagogical Planning (if teaching)
+    if (decision.shouldTeachNow && topicKey) {
+      teachingPlan = buildTeachingPlan(topicKey, tracker, thought.detectedMood, thought.confidenceLevel);
+      decision.reasoning.push('[PEDAGOGY] هدف التدريس: ' + teachingPlan.learningObjective);
+      // Sync plan to decision
+      if (teachingPlan.cognitiveLoadTarget === 'low') decision.explanationApproach = 'minimal';
+      if (teachingPlan.teachingMethod === 'analogy') decision.explanationApproach = 'analogy';
+      if (teachingPlan.teachingMethod === 'deep') decision.explanationApproach = 'deep';
+    }
+
+    // Step 6: Update models
     const newPressure = updateCognitivePressure({ ...pressure }, decision, thought);
     mem._pressure = newPressure;
+    mem._learningTracker = tracker; // state mutations happen inside the response composer
 
-    // Step 5: Build behavior profile FROM DECISION (not from mood directly)
+    // Step 7: Build behavior profile FROM DECISION
     const profile = buildBehaviorProfileFromDecision(decision, thought, mem);
 
     console.log('🎯 [DECISION]', JSON.stringify(decision));
+    if (teachingPlan) console.log('🎓 [PLAN]', JSON.stringify(teachingPlan));
     console.log('📊 [PRESSURE]', JSON.stringify(newPressure));
+    console.log('📚 [TRACKER]', JSON.stringify(tracker));
 
-    return { decision, profile };
+    return { decision, profile, teachingPlan, tracker };
   }
 
   // ── Build Behavior Profile from Decision (not mood) ──
@@ -1408,10 +1694,10 @@
     const thought = buildThought(classification, mem.studentMood, mem, normalized);
 
     // Layer 4: REASONING LOOP → DIALOGUE DECISION
-    const { decision, profile } = reasoningLoop(thought, mem);
+    const { decision, profile, teachingPlan, tracker } = reasoningLoop(thought, mem);
 
     // Layer 5: Response Composer (driven by DECISION, not mood)
-    const response = composeResponse(thought, mem, normalized, userMessage, decision, profile);
+    const response = composeResponse(thought, mem, normalized, userMessage, decision, profile, teachingPlan, tracker);
 
     // Log brain metrics
     logBrainMetrics({
