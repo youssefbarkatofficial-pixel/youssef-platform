@@ -93,7 +93,7 @@ window.DISABLE_DIRECT_GEMINI = false; // Emergency kill switch
         lastRequestTime = now;
         incrementHourlyUsage(hourlyUsage);
 
-        const models = ["gemini-1.5-flash", "gemini-2.0-flash", "gemini-1.5-flash-8b"];
+        const models = ["gemini-2.5-flash", "gemini-2.5-pro", "gemini-2.0-flash"];
         let systemInstructionText = "أنت المساعد الذكي (البوصلة) في منصة الأستاذ يوسف بركات لتعليم التاريخ والجغرافيا للثانوية العامة والإعدادية بمصر. مهمتك: الإجابة بشكل مباشر، علمي، ومختصر ومبسط على أسئلة الطالب. لا تسأل الطالب عما يقصده بل اشرح المعلومة فوراً بناءً على استنتاجك الأقرب للواقع. تكلم بلطف وتشجيع.";
 
         for (const modelName of models) {
