@@ -505,260 +505,510 @@
     localStorage.setItem('pf_learning_session', JSON.stringify(session));
   }
 
-  // (Old updateCognitiveState replaced by Phase 1 Dialogue Manager in getTemporarySafeBotReply)
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // 🧠 DIALOGUE BRAIN — Behavior Simulation Engine
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  function assembleDynamicResponse(graph, memoryGraph, session, userMessage, pipelineContext) {
-    const memoryBrain = loadImprovementBrain();
-    if (!memoryBrain.diversity_tracker) memoryBrain.diversity_tracker = {};
-    
-    function getDiversePart(options) {
-      options.sort((a, b) => (memoryBrain.diversity_tracker[a] || 0) - (memoryBrain.diversity_tracker[b] || 0));
-      const chosen = options[0]; 
-      memoryBrain.diversity_tracker[chosen] = (memoryBrain.diversity_tracker[chosen] || 0) + 1;
-      return chosen;
-    }
-
-    let parts = { emotion: "", context: "", knowledge: "", guidance: "", followup: "" };
-    
-    // Confidence Engine Check
-    if (graph.confidence < 0.4 && Object.keys(graph.emotions).length === 0 && !graph.needs.SOCIAL && !graph.needs.SUPPORT && !session.active_topic) {
-      pipelineContext.candidateTag = 'clarification';
-      return getDiversePart([
-        "حاسس إن كلامك ناقص تفصيلة، تقصد إيه بالظبط؟",
-        "ممكن توضحلي أكتر عشان مش عايز أجاوبك في سياق غلط؟"
-      ]);
-    }
-
-    // Dynamic Personality Engine
-    const isAnxious = graph.emotions.ANXIETY > 0.7 || memoryGraph.exam_anxiety > 0.6;
-    const isFrustrated = graph.emotions.FRUSTRATION > 0.7;
-
-    // 1. Emotional Layer
-    if (isAnxious) {
-      parts.emotion = getDiversePart([
-        "أنا حاسس بيك جداً، بس صدقني القلق ده طبيعي جداً وهيروح بمجرد ما تبدأ.",
-        "يا بطل، الخوف من الامتحان ده معناه إنك مهتم، متخليش التوتر يسيطر عليك أنا معاك.",
-        "طمني بس، كل حاجة بتتحل بالراحة، ركز معايا وهنظبط الدنيا."
-      ]);
-    } else if (isFrustrated) {
-      parts.emotion = getDiversePart([
-        "ولا يهمك خالص، طبيعي بعض الأجزاء تكون غلسة في الأول.",
-        "حقك تتضايق، المنهج ساعات بيلخبط بس هنفكه دلوقتي."
-      ]);
-    } else if (graph.needs.SOCIAL) {
-      parts.emotion = getDiversePart([
-        "أهلاً بيك يا بطل، نورتني!",
-        "يا هلا بيك يا صاحبي، طمني عليك؟"
-      ]);
-    }
-
-    // 2. Context & Knowledge Layer (Driven by Learning Phase)
-    const topTopic = Object.keys(graph.topics).reduce((a, b) => graph.topics[a] > graph.topics[b] ? a : b, null) || session.active_topic;
-    
-    if (topTopic) {
-      const subject = graph.extractedSubject || TOPIC_CLUSTERS[topTopic].subject;
-      
-      let rawKnowledge = executeEducationalIntentEngine(subject, userMessage) || "";
-      rawKnowledge = rawKnowledge.replace(/^(بص يا سيدي|شوف يا بطل).+?:/g, '').trim() || `تفاصيل "${subject}" دي مشروحة بالتفصيل جوة الكورس.`;
-      
-      // Phase-based modifications
-      if (session.learning_phase === 'PROBLEM_IDENTIFICATION') {
-        parts.context = getDiversePart([
-          `عشان نحل عقدة "${subject}"، لازم نبدأ بالأساسيات.`,
-          `أنا فاكر إن جزئية "${subject}" دي كانت معقداك، هنمشي فيها خطوة خطوة:`
-        ]);
-        parts.knowledge = rawKnowledge;
-        parts.guidance = "عشان أبسطهالك، تخيلها كأنها قصة صغيرة.";
-        parts.followup = getDiversePart([
-          "لحد هنا، النقطة دي واضحة ولا نعيدها بطريقة تانية؟",
-          "إيه رأيك، الأساس كده اتفهم؟"
-        ]);
-      } else if (session.learning_phase === 'ACTIVE_LEARNING') {
-        parts.context = getDiversePart([
-          "عاش! ممتاز إنك فهمت الأساس.",
-          "الله ينور، بما إنك لقطت الجزء الأول، ندخل في التطبيق."
-        ]);
-        parts.knowledge = rawKnowledge;
-        parts.guidance = "دلوقتي دور التطبيق العملي والممارسة.";
-        parts.followup = "تحب أديك سؤال تطبيق مباشر على اللي قلناه ده؟";
-      } else if (session.learning_phase === 'REINFORCEMENT') {
-        parts.emotion = "عاش يا بطل! انت كده فرمت الدرس ده.";
-        parts.context = `كده انت قفلت على موضوع "${subject}" تماماً.`;
-        parts.guidance = "راجع عليه بس سريعا قبل ما تنام عشان يثبت في دماغك.";
-        parts.followup = "ندخل في موضوع جديد ولا بتدور على حاجة تانية؟";
-      } else if (session.learning_phase === 'TESTING') {
-        parts.emotion = "توكلنا على الله.";
-        parts.context = `هسألك سؤال في "${subject}" وعايزك تجاوب بثقة.`;
-        parts.knowledge = ""; // Knowledge is hidden in testing phase
-        parts.guidance = "ركز كويس قبل ما تختار.";
-        parts.followup = "جاهز تسمع السؤال ولا محتاج دقيقة مراجعة؟";
-      }
-      
-      pipelineContext.candidateTag = 'educational';
-    } else if (graph.needs.SUPPORT) {
-      parts.knowledge = "الدعم الفني شغالين على حل المشكلة دي فوراً، متقلقش من أي عطل تقني.";
-      pipelineContext.candidateTag = 'support';
-    } else if (graph.needs.SOCIAL) {
-      pipelineContext.candidateTag = 'social';
-      parts.followup = getDiversePart([
-        "جاهز نفرم منهج الدراسات ولا لسه بتسخن؟",
-        "محتاجني أساعدك في درس معين ولا بتسلم بس؟"
-      ]);
-    }
-
-    // 5. Self-Diagnostics (Fallback patching)
-    if (!parts.emotion && (graph.emotions.ANXIETY || graph.emotions.FRUSTRATION)) {
-       parts.emotion = "متشيلش هم، أنا في ضهرك.";
-    }
-    if (graph.needs.EXPLANATION && !parts.knowledge && session.learning_phase !== 'TESTING') {
-       parts.knowledge = "الموضوع أبسط مما تتخيل بس محتاج نفتح درس جديد سوا.";
-    }
-
-    saveImprovementBrain(memoryBrain);
-    return [parts.emotion, parts.context, parts.knowledge, parts.guidance, parts.followup].filter(x => x).join(' ');
+  // ── Layer 1: Conversational Memory ──
+  function loadDialogueMemory() {
+    try { return JSON.parse(sessionStorage.getItem('pf_dialogue_memory') || 'null') || createFreshMemory(); }
+    catch(e) { return createFreshMemory(); }
+  }
+  function saveDialogueMemory(mem) { safeSetItem(sessionStorage, 'pf_dialogue_memory', JSON.stringify(mem)); }
+  function createFreshMemory() {
+    return {
+      turns: [],               // [{role,text,thought,ts}]
+      currentTopic: null,      // string key e.g. 'MOHAMED_ALI'
+      currentSubject: null,    // human name e.g. 'محمد علي'
+      phase: 'IDLE',           // IDLE, TOPIC_OFFERED, EXPLAINING, PRACTICING, TESTING, REVIEWING
+      pendingAction: null,     // what the bot asked & is waiting for
+      studentMood: { confusion: 0, confidence: 50, frustration: 0, curiosity: 0, boredom: 0 },
+      messageCount: 0,
+      lastBotGoal: null
+    };
   }
 
-  function detectIntentScored(normalized) {
-    const scores = { GREETING: 0, ASK_EXPLANATION: 0, READY_FOR_TEST: 0, AGREEMENT: 0, DISAGREEMENT: 0 };
-    
-    if (/(ايوه|اه|تمام|كمل|صح|فهمت|مظبوط)/.test(normalized)) scores.AGREEMENT += 1;
-    if (/(مش فاهم|اشرحلي|يعني ايه|مش عارف|وضح|مفهمتش|شرح|لخبطة|متلخبط|فهمني|ايه ده)/.test(normalized)) scores.ASK_EXPLANATION += 3;
-    if (/(ازيك|عامل ايه|اخبارك|فينك|صباح|مساء|هاي|مرحبا|سلام|كيفك)/.test(normalized)) scores.GREETING += 2;
-    if (/(سؤال|اختبرني|امتحان|اسالني|جاهز|اسأل)/.test(normalized)) scores.READY_FOR_TEST += 2;
-    if (/(لا|غلط|مش صح)/.test(normalized)) scores.DISAGREEMENT += 2;
-    
-    let maxIntent = 'TOPIC_SELECTION';
-    let maxScore = 0;
-    for (let intent in scores) {
-        if (scores[intent] > maxScore) {
-            maxScore = scores[intent];
-            maxIntent = intent;
-        }
+  // ── Layer 2: Emotional Interpretation ──
+  function interpretEmotion(normalized, mem) {
+    const mood = { ...mem.studentMood };
+
+    // Confusion signals (wide net — not just "مش فاهم")
+    if (/(مش فاهم|تايه|ضايع|ضعت|لخبط|متلخبط|معقد|صعب|مش واضح|مش مستوعب|مفهمتش|ايه ده|ازاي كده|مش عارف|فهمني|وضح|ايه الحل)/.test(normalized)) {
+      mood.confusion = Math.min(100, mood.confusion + 35);
+      mood.confidence = Math.max(0, mood.confidence - 20);
     }
-    return maxIntent;
+    // Frustration / distress
+    if (/(مضايق|مخنوق|تعبت|يائس|زفت|طهقت|خايف|قلقان|رعب|كارثه|بموت|مش طايق|زهقت|ملل)/.test(normalized)) {
+      mood.frustration = Math.min(100, mood.frustration + 30);
+      mood.confidence = Math.max(0, mood.confidence - 15);
+    }
+    // Boredom
+    if (/(ملل|زهقت|مش عايز|بلاش|طويل|كتير|مش طايق)/.test(normalized)) {
+      mood.boredom = Math.min(100, mood.boredom + 25);
+    }
+    // Positive / understanding signals
+    if (/(فهمت|تمام|اه|ايوه|صح|كمل|ماشي|اللي بعده|شكرا|عاش|جامد|حلو|ممتاز|مظبوط)/.test(normalized)) {
+      mood.confidence = Math.min(100, mood.confidence + 20);
+      mood.confusion = Math.max(0, mood.confusion - 15);
+      mood.frustration = Math.max(0, mood.frustration - 10);
+      mood.boredom = Math.max(0, mood.boredom - 10);
+    }
+    // Curiosity
+    if (/(ليه|ازاي|يعني ايه|طب وايه|وبعدين|ومين|وامتى)/.test(normalized)) {
+      mood.curiosity = Math.min(100, mood.curiosity + 20);
+    }
+
+    // Natural decay towards neutral over time
+    mood.confusion = Math.max(0, mood.confusion - 3);
+    mood.frustration = Math.max(0, mood.frustration - 3);
+    mood.boredom = Math.max(0, mood.boredom - 2);
+    mood.curiosity = Math.max(0, mood.curiosity - 2);
+
+    return mood;
   }
 
-  // Bot response logic is active and uses the platform-aware Arabic assistant engine.
-  const BOT_RESPONSES_DISABLED = false;
-  function getTemporarySafeBotReply(userMessage) {
-    let pipelineContext = {
-      userMessage: userMessage,
-      normalized: '',
-      candidateTag: 'fallback',
-      finalText: '',
-      score: 0,
-      graph: null
+  // ── Layer 3: Message Classification (not just intent — behavioral) ──
+  function classifyMessage(normalized, mem) {
+    const classification = {
+      type: 'unknown',        // social, educational, technical, emotional, contextual_reply
+      educationalIntent: null, // explain, quiz, review, summarize, compare, solve
+      topicKey: null,
+      topicSubject: null,
+      isShortReply: normalized.split(/\s+/).length <= 3,
+      rawSignals: {}
     };
 
-    pipelineContext.normalized = normalizeText(userMessage) || 'كلمة_فارغة';
-    console.log("✅ [Stage 1: Normalize] Executed");
+    // Social detection
+    const socialScore = (/(ازيك|عامل ايه|اخبارك|فينك|صباح|مساء|هاي|مرحبا|سلام|كيفك|اهلا|يسعدك|صباحك|بقولك عامل ايه)/.test(normalized)) ? 1 : 0;
+    // Technical detection
+    const techScore = (/(بايظ|مش شغال|مش بيفتح|عطلان|مشكله|مشكلة|error|خطأ|باج|bug)/.test(normalized)) ? 1 : 0;
+    // Emotional-only (venting, not asking for content)
+    const emotionalScore = (/(مضايق|مخنوق|تعبت|يائس|زفت|طهقت|خايف|قلقان|بموت|مش طايق)/.test(normalized) && !/(اشرح|وضح|فهمني|درس)/.test(normalized)) ? 1 : 0;
 
-    // 1. INTENT ENGINE (Layer 1)
-    const intent = detectIntentScored(pipelineContext.normalized);
-    pipelineContext.intent = intent;
-    console.log("✅ [Stage 2: Intent Engine] Intent:", intent);
-
-    // 2. SESSION MEMORY & DIALOGUE MANAGER
-    let session = loadLearningSession();
-    if (!session.last_active || (Date.now() - session.last_active > 2 * 60 * 60 * 1000)) {
-      session = { current_goal: 'IDLE', current_obstacle: 'NONE', learning_phase: 'DISCOVERY', student_confidence: 0, active_topic: null, pending_action: 'NONE', last_bot_intent: 'NONE', last_active: Date.now() };
-    }
-    session.last_active = Date.now();
-
-    // 3. SMALL TALK LAYER (Session Lock Break)
-    if (intent === 'GREETING') {
-       session.pending_action = 'NONE';
-       saveLearningSession(session);
-       return "الحمد لله تمام 😊.. عايز مساعدة في التاريخ ولا الجغرافيا ولا عندك سؤال تقني؟";
+    // Topic detection
+    for (const [key, data] of Object.entries(TOPIC_CLUSTERS)) {
+      let hits = 0;
+      data.keywords.forEach(kw => { if (normalized.includes(kw)) hits++; });
+      if (hits > 0) {
+        classification.topicKey = key;
+        classification.topicSubject = data.subject;
+      }
     }
 
-    // 4. PENDING ACTION HANDLER
-    if (session.pending_action === 'AWAITING_LEARNING_MODE') {
-       session.pending_action = 'NONE';
-       if (intent === 'READY_FOR_TEST' || pipelineContext.normalized.includes('اختبار') || pipelineContext.normalized.includes('3')) {
-           session.learning_phase = 'TESTING';
-           saveLearningSession(session);
-           return "ممتاز 🔥! يلا نبدأ الاختبار. هسألك سؤال وعايزك تجاوب بثقة!";
-       } else if (intent === 'ASK_EXPLANATION' || pipelineContext.normalized.includes('شرح') || pipelineContext.normalized.includes('1')) {
-           session.learning_phase = 'PROBLEM_IDENTIFICATION';
-           saveLearningSession(session);
-           return "توكلنا على الله. ركز معايا في الشرح ده وهبسطهالك خالص.";
-       } else if (pipelineContext.normalized.includes('تدريب') || pipelineContext.normalized.includes('2')) {
-           session.learning_phase = 'ACTIVE_LEARNING';
-           saveLearningSession(session);
-           return "يلا بينا نتدرب سوا. هطرح عليك فكرة وتطبق عليها.";
-       }
+    // Educational intent sub-classification
+    if (/(اشرحلي|شرح|فهمني|وضح|مش فاهم|تايه|ضايع|يعني ايه)/.test(normalized)) classification.educationalIntent = 'explain';
+    else if (/(اختبرني|اسالني|سؤال|اسأل|امتحن)/.test(normalized)) classification.educationalIntent = 'quiz';
+    else if (/(مراجعة|راجع|لخص|ملخص)/.test(normalized)) classification.educationalIntent = 'review';
+    else if (/(قارن|الفرق|ايه الفرق)/.test(normalized)) classification.educationalIntent = 'compare';
+
+    // Contextual reply detection — short messages that respond to the bot's last question
+    const isContextualReply = classification.isShortReply && mem.pendingAction &&
+      (/(جاهز|اه|ايوه|يلا|تمام|ماشي|1|2|3|شرح|اختبار|تدريب|مراجعة)/.test(normalized));
+
+    // Determine dominant type
+    if (isContextualReply) classification.type = 'contextual_reply';
+    else if (socialScore > 0 && !classification.topicKey && !classification.educationalIntent) classification.type = 'social';
+    else if (techScore > 0) classification.type = 'technical';
+    else if (emotionalScore > 0 && !classification.topicKey) classification.type = 'emotional';
+    else if (classification.topicKey || classification.educationalIntent) classification.type = 'educational';
+    else if (classification.isShortReply && mem.pendingAction) classification.type = 'contextual_reply';
+    else classification.type = 'unknown';
+
+    return classification;
+  }
+
+  // ── Layer 4: Internal Thought Builder ──
+  function buildThought(classification, mood, mem, normalized) {
+    const thought = {
+      detectedMood: 'neutral',
+      educationalIntent: classification.educationalIntent,
+      conversationGoal: 'clarify',  // default
+      topic: classification.topicSubject || mem.currentSubject,
+      topicKey: classification.topicKey || mem.currentTopic,
+      confidenceLevel: mood.confidence,
+      messageType: classification.type,
+      isNewTopic: classification.topicKey && classification.topicKey !== mem.currentTopic,
+      isTopicOnlyMessage: classification.isShortReply && classification.topicKey && !classification.educationalIntent,
+      pendingAction: mem.pendingAction,
+      phase: mem.phase,
+      reasoning: []
+    };
+
+    // Determine dominant mood
+    if (mood.confusion > 40) thought.detectedMood = 'confused';
+    else if (mood.frustration > 40) thought.detectedMood = 'frustrated';
+    else if (mood.boredom > 40) thought.detectedMood = 'bored';
+    else if (mood.curiosity > 30) thought.detectedMood = 'curious';
+    else if (mood.confidence > 60) thought.detectedMood = 'confident';
+
+    // Determine conversation goal based on thought (not regex)
+    if (classification.type === 'social') {
+      thought.conversationGoal = 'connect';
+      thought.reasoning.push('الطالب بيسلم أو بيتكلم كلام اجتماعي — هرد بشكل طبيعي');
+    } else if (classification.type === 'emotional') {
+      thought.conversationGoal = 'reassure';
+      thought.reasoning.push('الطالب متضايق أو قلقان — هطمنه الأول قبل أي حاجة');
+    } else if (classification.type === 'technical') {
+      thought.conversationGoal = 'support';
+      thought.reasoning.push('الطالب عنده مشكلة تقنية — هوجهه للدعم');
+    } else if (classification.type === 'contextual_reply') {
+      // Resolve based on what the bot asked
+      thought.conversationGoal = resolveContextualGoal(normalized, mem);
+      thought.reasoning.push('الطالب بيرد على سؤالي السابق — هفسر رده في السياق');
+    } else if (classification.type === 'educational') {
+      if (thought.isTopicOnlyMessage) {
+        thought.conversationGoal = 'offer_menu';
+        thought.reasoning.push('الطالب ذكر موضوع بس — هعرض عليه يختار نوع المساعدة');
+      } else if (thought.detectedMood === 'confused' || classification.educationalIntent === 'explain') {
+        thought.conversationGoal = 'simplify';
+        thought.reasoning.push('الطالب محتاج تبسيط — هشرحله ببساطة وبدون ضغط');
+      } else if (classification.educationalIntent === 'quiz') {
+        thought.conversationGoal = 'challenge';
+        thought.reasoning.push('الطالب عايز يتختبر — هسأله سؤال');
+      } else if (classification.educationalIntent === 'review') {
+        thought.conversationGoal = 'summarize';
+        thought.reasoning.push('الطالب عايز مراجعة — هلخصله');
+      } else if (thought.detectedMood === 'confident') {
+        thought.conversationGoal = 'advance';
+        thought.reasoning.push('الطالب واثق — هتقدم معاه للمستوى التالي');
+      } else {
+        thought.conversationGoal = 'teach';
+        thought.reasoning.push('الطالب بيسأل سؤال عادي — هجاوبه');
+      }
+    } else {
+      // Unknown — ask gently
+      thought.conversationGoal = 'clarify';
+      thought.reasoning.push('مش متأكد من قصد الطالب — هسأله بأدب');
     }
 
-    // 5. COGNITIVE GRAPH
-    const graph = extractCognitiveGraph(pipelineContext.normalized);
-    pipelineContext.graph = graph;
-    const topTopic = Object.keys(graph.topics).reduce((a, b) => graph.topics[a] > graph.topics[b] ? a : b, null);
+    // Mood-based overrides
+    if (thought.detectedMood === 'frustrated' && thought.conversationGoal === 'teach') {
+      thought.conversationGoal = 'simplify';
+      thought.reasoning.push('الطالب محبط — هبسط بدل ما أكمل شرح عادي');
+    }
+    if (thought.detectedMood === 'bored' && thought.conversationGoal === 'teach') {
+      thought.conversationGoal = 'challenge';
+      thought.reasoning.push('الطالب زهق — هحاول أشغله بسؤال بدل شرح طويل');
+    }
 
-    // 6. TOPIC MENU & RESET (Clarification Layer)
-    if (topTopic) {
-        // Clarification Layer for short messages containing just the topic name
-        if (pipelineContext.normalized.split(' ').length <= 3 && intent === 'TOPIC_SELECTION' && session.active_topic !== topTopic) {
-           const subjectName = TOPIC_CLUSTERS[topTopic].subject;
-           session.active_topic = topTopic;
-           session.pending_action = 'AWAITING_LEARNING_MODE';
-           saveLearningSession(session);
-           return `ممتاز 👍 تقصد درس "${subjectName}".\nعايز إيه بالظبط؟\n1- شرح سريع\n2- أسئلة وتدريب\n3- اختبار`;
+    console.log('🧠 [THOUGHT]', JSON.stringify(thought, null, 2));
+    return thought;
+  }
+
+  function resolveContextualGoal(normalized, mem) {
+    if (!mem.pendingAction) return 'clarify';
+    if (mem.pendingAction === 'AWAITING_LEARNING_MODE') {
+      if (/(شرح|1|فهمني|وضح)/.test(normalized)) return 'teach';
+      if (/(تدريب|2|اسئلة)/.test(normalized)) return 'practice';
+      if (/(اختبار|3|اختبرني|جاهز)/.test(normalized)) return 'challenge';
+      if (/(مراجعة|4|لخص)/.test(normalized)) return 'summarize';
+      return 'teach'; // default if unclear
+    }
+    if (mem.pendingAction === 'AWAITING_ANSWER') {
+      return 'evaluate_answer';
+    }
+    if (mem.pendingAction === 'AWAITING_CONFIRMATION') {
+      if (/(اه|ايوه|تمام|يلا|ماشي|جاهز)/.test(normalized)) return 'advance';
+      if (/(لا|مش|اعيد|تاني)/.test(normalized)) return 'simplify';
+      return 'advance';
+    }
+    return 'clarify';
+  }
+
+  // ── Layer 5: Dynamic Response Composer ──
+  function composeResponse(thought, mem, normalized, userMessage) {
+    const tone = decideTone(thought);
+    const parts = [];
+    let newPendingAction = null;
+    let newPhase = mem.phase;
+
+    // ── Social ──
+    if (thought.conversationGoal === 'connect') {
+      parts.push(pickTone(tone, [
+        'الحمد لله تمام 😊 وأنت عامل إيه؟',
+        'أهلاً بيك يا بطل! نورت البوصلة 😄',
+        'يا هلا بيك يا صاحبي! عايز نذاكر ولا بتسلم بس؟ 😊'
+      ]));
+      parts.push(pickTone(tone, [
+        'عايز مساعدة في التاريخ ولا الجغرافيا ولا عندك سؤال تقني؟',
+        'محتاج حاجة ولا بتعدي علينا؟ 😄'
+      ]));
+      newPhase = mem.currentTopic ? mem.phase : 'IDLE';
+    }
+
+    // ── Emotional support ──
+    else if (thought.conversationGoal === 'reassure') {
+      if (thought.detectedMood === 'frustrated') {
+        parts.push(pickTone(tone, [
+          'أنا حاسس بيك جداً، ومن حقك تتضايق.',
+          'طبيعي جداً تحس كده، بس أنا معاك.',
+          'ولا يهمك خالص، حقك تزعل بس متوقفش.'
+        ]));
+      } else {
+        parts.push(pickTone(tone, [
+          'اطمن يا بطل، كل حاجة بتتحل بالراحة.',
+          'متشيلش هم، أنا في ضهرك.',
+          'صدقني القلق ده طبيعي وبيروح لما تبدأ تذاكر.'
+        ]));
+      }
+      if (mem.currentSubject) {
+        parts.push(`عايز نرجع لموضوع "${mem.currentSubject}" بالراحة ولا نعمل حاجة تانية؟`);
+        newPendingAction = 'AWAITING_CONFIRMATION';
+      } else {
+        parts.push('قولي لما تبقى جاهز وأنا هنا.');
+      }
+    }
+
+    // ── Technical support ──
+    else if (thought.conversationGoal === 'support') {
+      parts.push('فاهمك يا بطل. الدعم الفني شغالين على المشكلة دي.');
+      parts.push('لو المشكلة مستعجلة اكتب "مشكلة" والدعم هيتواصل معاك.');
+      newPhase = mem.phase; // don't disrupt educational state
+    }
+
+    // ── Topic Menu (when student just says a topic name) ──
+    else if (thought.conversationGoal === 'offer_menu') {
+      const subj = thought.topic;
+      parts.push(`ممتاز 👍 تقصد درس "${subj}".`);
+      parts.push('عايز إيه بالظبط؟');
+      parts.push('1- شرح سريع\n2- أسئلة وتدريب\n3- اختبار\n4- مراجعة');
+      newPendingAction = 'AWAITING_LEARNING_MODE';
+      newPhase = 'TOPIC_OFFERED';
+    }
+
+    // ── Teaching / Explaining ──
+    else if (thought.conversationGoal === 'teach' || thought.conversationGoal === 'simplify') {
+      const subj = thought.topic || mem.currentSubject;
+      let knowledgeText = '';
+      if (subj) {
+        const eduResult = executeEducationalIntentEngine(subj, userMessage);
+        if (typeof eduResult === 'object' && eduResult && eduResult.text) knowledgeText = eduResult.text;
+        else if (typeof eduResult === 'string') knowledgeText = eduResult;
+      }
+
+      // Mood-aware intro
+      if (thought.detectedMood === 'confused') {
+        parts.push(pickTone(tone, [
+          'أنا فاهم إنك تايه شوية، خليني أبسطهالك.',
+          'متقلقش، هنمشي فيها خطوة خطوة.',
+          'طبيعي الجزء ده يلخبط، بس تعالى نفككه سوا.'
+        ]));
+      } else if (thought.detectedMood === 'frustrated') {
+        parts.push(pickTone(tone, [
+          'أعرف إن الموضوع غلسة، بس هنعديه.',
+          'حقك تتضايق بس ركز معايا دقيقة واحدة بس.'
+        ]));
+      } else {
+        parts.push(pickTone(tone, [
+          'يلا بينا نشرح الجزء ده.',
+          'ركز معايا كويس.',
+          'تعالى ندخل في الموضوع.'
+        ]));
+      }
+
+      if (knowledgeText && knowledgeText.length > 10) {
+        // Clean up any hardcoded intros from old engine
+        knowledgeText = knowledgeText.replace(/^(بص يا سيدي|شوف يا بطل|سؤال ممتاز).+?[:.]/g, '').trim();
+        if (thought.conversationGoal === 'simplify' && knowledgeText.length > 150) {
+          // Trim to first 2 sentences for simplified mode
+          const sentences = knowledgeText.split(/(?<=[.؟!])\s+/);
+          knowledgeText = sentences.slice(0, 2).join(' ');
         }
+        parts.push(knowledgeText);
+      } else if (subj) {
+        parts.push(`الموضوع ده مشروح بالتفصيل جوة الكورس، بس خليني أقولك الفكرة الأساسية عن "${subj}".`);
+      }
 
-        // Topic Reset
-        if (session.active_topic !== topTopic) {
-           session.active_topic = topTopic;
-           session.learning_phase = 'PROBLEM_IDENTIFICATION';
-           session.student_confidence = 0;
-           session.pending_action = 'NONE';
-        }
+      // Follow-up based on mood
+      if (thought.detectedMood === 'confused') {
+        parts.push(pickTone(tone, [
+          'لحد هنا واضح ولا نعيد بطريقة تانية؟',
+          'فاهم كده ولا محتاج أبسط أكتر؟'
+        ]));
+        newPendingAction = 'AWAITING_CONFIRMATION';
+      } else {
+        parts.push(pickTone(tone, [
+          'تحب أسألك سؤال على اللي قلناه؟',
+          'نكمل ولا نقف هنا شوية؟'
+        ]));
+        newPendingAction = 'AWAITING_CONFIRMATION';
+      }
+      newPhase = 'EXPLAINING';
     }
 
-    // Update Phase based on Intent (Replacing old State Machine logic)
-    if (intent === 'ASK_EXPLANATION') {
-        session.learning_phase = 'PROBLEM_IDENTIFICATION';
-        session.pending_action = 'NONE';
-    } else if (intent === 'READY_FOR_TEST') {
-        session.learning_phase = 'TESTING';
-        session.pending_action = 'NONE';
-    } else if (intent === 'AGREEMENT') {
-        session.student_confidence += 25;
-        session.current_obstacle = 'NONE';
-        if (session.learning_phase === 'PROBLEM_IDENTIFICATION') {
-            session.learning_phase = 'ACTIVE_LEARNING';
-        } else if (session.learning_phase === 'ACTIVE_LEARNING' && session.student_confidence > 50) {
-            session.learning_phase = 'REINFORCEMENT';
-        }
-    } else if (graph.emotions.FRUSTRATION > 0.5) {
-        session.current_obstacle = 'CONFUSION';
-        session.student_confidence = Math.max(0, session.student_confidence - 10);
-        session.learning_phase = 'PROBLEM_IDENTIFICATION';
+    // ── Practice mode ──
+    else if (thought.conversationGoal === 'practice') {
+      const subj = thought.topic || mem.currentSubject;
+      parts.push(pickTone(tone, [
+        `يلا بينا نتدرب على "${subj || 'الدرس'}" سوا.`,
+        'هطرح عليك فكرة وتطبق عليها.'
+      ]));
+      // Fetch a practice question if possible
+      const eduResult = executeEducationalIntentEngine(subj || '', userMessage);
+      if (typeof eduResult === 'object' && eduResult && eduResult.text) {
+        parts.push(eduResult.text);
+      }
+      newPhase = 'PRACTICING';
+      newPendingAction = 'AWAITING_ANSWER';
     }
 
-    saveLearningSession(session);
+    // ── Challenge / Quiz ──
+    else if (thought.conversationGoal === 'challenge') {
+      const subj = thought.topic || mem.currentSubject;
+      parts.push(pickTone(tone, [
+        'توكلنا على الله 🔥',
+        'يلا نشوف مستواك!',
+        'جاهز؟ ركز معايا كويس.'
+      ]));
+      if (subj) {
+        parts.push(`هسألك سؤال في "${subj}" وعايزك تجاوب بثقة.`);
+      }
+      // Try to generate a question from the knowledge base
+      const knowledge = OFFLINE_KNOWLEDGE_BASE ? OFFLINE_KNOWLEDGE_BASE.find(k => subj && k.topic.includes(subj)) : null;
+      if (knowledge && knowledge.question) {
+        parts.push(knowledge.question);
+      } else {
+        parts.push('جاهز تسمع السؤال؟');
+      }
+      newPhase = 'TESTING';
+      newPendingAction = 'AWAITING_ANSWER';
+    }
 
-    const memoryGraph = updateHumanMemoryGraph(graph);
+    // ── Summarize / Review ──
+    else if (thought.conversationGoal === 'summarize') {
+      const subj = thought.topic || mem.currentSubject;
+      parts.push(`خليني ألخصلك "${subj || 'اللي اتكلمنا فيه'}" بسرعة.`);
+      const eduResult = executeEducationalIntentEngine(subj || '', userMessage);
+      if (typeof eduResult === 'object' && eduResult && eduResult.text) {
+        parts.push(eduResult.text);
+      }
+      parts.push('عايز تتعمق أكتر ولا كده كفاية؟');
+      newPhase = 'REVIEWING';
+      newPendingAction = 'AWAITING_CONFIRMATION';
+    }
 
-    // 7. DYNAMIC RESPONSE ASSEMBLY
-    pipelineContext.candidateText = assembleDynamicResponse(graph, memoryGraph, session, userMessage, pipelineContext);
-    
-    // Final Polish
-    const isFirstMessage = !memoryGraph.recent_topics || memoryGraph.recent_topics.length === 0;
-    pipelineContext.candidateText = injectHumanMemory(pipelineContext.candidateText, isFirstMessage);
-    
-    // Log Metrics for reporting
+    // ── Advance (continue to next step) ──
+    else if (thought.conversationGoal === 'advance') {
+      const subj = thought.topic || mem.currentSubject;
+      if (mem.phase === 'EXPLAINING') {
+        parts.push(pickTone(tone, [
+          'عاش! ممتاز إنك فهمت 💪',
+          'الله ينور عليك!'
+        ]));
+        parts.push('تحب أسألك سؤال تطبيقي ولا نكمل شرح؟');
+        newPendingAction = 'AWAITING_LEARNING_MODE';
+      } else if (mem.phase === 'TESTING' || mem.phase === 'PRACTICING') {
+        parts.push(pickTone(tone, [
+          'يا بطل! كده تمام 👏',
+          'ممتاز، كمل كده!'
+        ]));
+        parts.push(`عايز سؤال تاني في "${subj || 'الدرس'}" ولا ندخل في موضوع جديد؟`);
+        newPendingAction = 'AWAITING_LEARNING_MODE';
+      } else {
+        parts.push('عايز نعمل إيه دلوقتي؟ شرح، اختبار، ولا مراجعة؟');
+        newPendingAction = 'AWAITING_LEARNING_MODE';
+      }
+    }
+
+    // ── Evaluate answer ──
+    else if (thought.conversationGoal === 'evaluate_answer') {
+      // Simple positive reinforcement — later can be smarter
+      parts.push(pickTone(tone, [
+        'إجابة كويسة! 👏',
+        'ممتاز يا بطل!',
+        'عاش! كده صح.'
+      ]));
+      parts.push('عايز سؤال تاني ولا نكمل شرح؟');
+      newPendingAction = 'AWAITING_LEARNING_MODE';
+      newPhase = mem.phase;
+    }
+
+    // ── Clarify (fallback — don't know what user wants) ──
+    else if (thought.conversationGoal === 'clarify') {
+      if (mem.currentSubject) {
+        parts.push(`أنا معاك في "${mem.currentSubject}". تقصد إيه بالظبط؟`);
+        parts.push('شرح، اختبار، ولا حاجة تانية؟');
+        newPendingAction = 'AWAITING_LEARNING_MODE';
+      } else {
+        parts.push(pickTone(tone, [
+          'أنا معاك يا بطل. قولي بالظبط عايز إيه وأنا هساعدك.',
+          'ممكن توضحلي أكتر؟ عايز مساعدة في درس معين؟'
+        ]));
+      }
+    }
+
+    // Update memory
+    mem.studentMood = interpretEmotion(normalized, mem); // already computed but re-assign for safety
+    if (thought.topicKey) {
+      mem.currentTopic = thought.topicKey;
+      mem.currentSubject = thought.topic;
+    }
+    mem.phase = newPhase;
+    mem.pendingAction = newPendingAction;
+    mem.lastBotGoal = thought.conversationGoal;
+    mem.messageCount++;
+
+    const responseText = parts.filter(p => p && p.trim()).join('\n\n');
+
+    // Record turn
+    mem.turns.push({ role: 'user', text: userMessage, ts: Date.now() });
+    mem.turns.push({ role: 'bot', text: responseText, goal: thought.conversationGoal, ts: Date.now() });
+    if (mem.turns.length > 40) mem.turns = mem.turns.slice(-40);
+
+    saveDialogueMemory(mem);
+
+    console.log('🧠 [DIALOGUE BRAIN] Goal:', thought.conversationGoal, '| Mood:', thought.detectedMood, '| Phase:', newPhase);
+    return responseText;
+  }
+
+  // ── Tone Engine ──
+  function decideTone(thought) {
+    if (thought.detectedMood === 'frustrated' || thought.detectedMood === 'confused') return 'gentle';
+    if (thought.detectedMood === 'confident') return 'energetic';
+    if (thought.detectedMood === 'bored') return 'playful';
+    return 'warm';
+  }
+  function pickTone(tone, options) {
+    // Rotate through options to avoid repetition
+    const key = options[0].substring(0, 10);
+    let idx = parseInt(sessionStorage.getItem('pf_tone_' + key) || '0');
+    idx = idx % options.length;
+    sessionStorage.setItem('pf_tone_' + key, (idx + 1).toString());
+    return options[idx];
+  }
+
+  // ── Main Entry Point ──
+  const BOT_RESPONSES_DISABLED = false;
+  function getTemporarySafeBotReply(userMessage) {
+    const normalized = normalizeText(userMessage) || 'كلمة_فارغة';
+
+    // Load conversational memory
+    let mem = loadDialogueMemory();
+
+    // Layer 2: Emotional Interpretation
+    mem.studentMood = interpretEmotion(normalized, mem);
+
+    // Layer 3: Message Classification
+    const classification = classifyMessage(normalized, mem);
+
+    // Layer 4: Internal Thought Builder
+    const thought = buildThought(classification, mem.studentMood, mem, normalized);
+
+    // Layer 5: Dynamic Response Composer
+    const response = composeResponse(thought, mem, normalized, userMessage);
+
+    // Log brain metrics
     logBrainMetrics({
       userMessage,
-      intent: intent,
-      purpose: Object.keys(graph.needs).join(','),
-      emotion: Object.keys(graph.emotions).join(','),
-      plannedResponseMode: 'COGNITIVE_GRAPH',
-      score: graph.confidence * 100,
-      context: [], memory: true
-    }, { confidence: graph.confidence * 100, extractedData: { subjects: [graph.extractedSubject] } });
+      intent: thought.conversationGoal,
+      purpose: thought.messageType,
+      emotion: thought.detectedMood,
+      plannedResponseMode: 'DIALOGUE_BRAIN',
+      score: thought.confidenceLevel,
+      context: thought.reasoning, memory: true
+    }, { confidence: thought.confidenceLevel, extractedData: { subjects: [thought.topic] } });
 
-    return pipelineContext.candidateText;
+    return response;
   }
 
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
