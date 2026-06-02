@@ -93,42 +93,51 @@ window.DISABLE_DIRECT_GEMINI = false; // Emergency kill switch
         lastRequestTime = now;
         incrementHourlyUsage(hourlyUsage);
 
-        const modelName = "gemini-2.0-flash";
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
+        const models = ["gemini-1.5-flash", "gemini-2.0-flash", "gemini-1.5-flash-8b"];
+        let systemInstructionText = "أنت المساعد الذكي (البوصلة) في منصة الأستاذ يوسف بركات لتعليم التاريخ والجغرافيا للثانوية العامة والإعدادية بمصر. مهمتك: الإجابة بشكل مباشر، علمي، ومختصر ومبسط على أسئلة الطالب. لا تسأل الطالب عما يقصده بل اشرح المعلومة فوراً بناءً على استنتاجك الأقرب للواقع. تكلم بلطف وتشجيع.";
 
-        try {
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    contents: [{ role: "user", parts: [{ text: userMessage }] }],
-                    generationConfig: {
-                        temperature: 0.2,
-                        maxOutputTokens: 200, // Hard Limit: 200 tokens
-                    }
-                })
-            });
+        for (const modelName of models) {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        system_instruction: {
+                            parts: [{ text: systemInstructionText }]
+                        },
+                        contents: [{ role: "user", parts: [{ text: userMessage }] }],
+                        generationConfig: {
+                            temperature: 0.2,
+                            maxOutputTokens: 250, 
+                        }
+                    })
+                });
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                console.error("[DEV MODE GEMINI ERROR]", errorData);
-                return { fallback: true, reply: null, reason: "api_error", details: errorData };
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    console.error(`[DEV MODE GEMINI ERROR] ${modelName} failed:`, errorData);
+                    continue; // Try next model on failure (like 429 Quota Exceeded)
+                }
+
+                const data = await response.json();
+                const replyText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+                if (replyText) {
+                    return {
+                        reply: replyText,
+                        fallback: false,
+                        provider: modelName + "-dev-direct"
+                    };
+                }
+
+            } catch (error) {
+                console.error(`[DEV MODE GEMINI FATAL ERROR] ${modelName}:`, error);
             }
-
-            const data = await response.json();
-            const replyText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-
-            return {
-                reply: replyText,
-                fallback: false,
-                provider: modelName + "-dev-direct"
-            };
-
-        } catch (error) {
-            console.error("[DEV MODE GEMINI FATAL ERROR]", error);
-            return { fallback: true, reply: null, reason: "network_error" };
         }
+
+        return { fallback: true, reply: null, reason: "all_models_failed_or_quota_exceeded" };
     };
 })();
