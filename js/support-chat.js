@@ -490,8 +490,10 @@
 
   // Backward compat: create TOPIC_CLUSTERS view from graph
   const TOPIC_CLUSTERS = {};
-  for (const [k, v] of Object.entries(KNOWLEDGE_GRAPH)) {
-    TOPIC_CLUSTERS[k] = { keywords: v.keywords, subject: v.subject };
+  for (const k in KNOWLEDGE_GRAPH) {
+    if (KNOWLEDGE_GRAPH.hasOwnProperty(k)) {
+      TOPIC_CLUSTERS[k] = { keywords: KNOWLEDGE_GRAPH[k].keywords, subject: KNOWLEDGE_GRAPH[k].subject };
+    }
   }
 
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1597,7 +1599,7 @@
     }
 
     // Step 6: Update models
-    const newPressure = updateCognitivePressure({ ...pressure }, decision, thought);
+    const newPressure = updateCognitivePressure(Object.assign({}, pressure), decision, thought);
     mem._pressure = newPressure;
     mem._learningTracker = tracker; // state mutations happen inside the response composer
 
