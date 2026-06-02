@@ -70,10 +70,34 @@ exports.askAlBouslaLLM = functions.https.onCall(async (data, context) => {
         // Example: const apiKey = process.env.AI_API_KEY || functions.config().ai.api_key;
         // if (!apiKey) throw new Error("API Key not configured");
 
-        // --- 5. Mock Response (Pending LLM Integration) ---
-        // In the future, this is where you'll call Gemini/OpenAI with the normalized history and message.
+        // --- 5. RAG Pipeline Execution ---
+        const { retrieveRelevantChunks } = require('./rag/retriever');
+        const { buildEducationalPrompt } = require('./rag/prompt-builder');
+
+        // Note: db should be the admin.firestore() instance
+        const db = admin.firestore();
+        
+        // Step 1: Retrieve context
+        const retrievalResult = await retrieveRelevantChunks(message, db);
+        
+        // Step 2: Build Safe Prompt
+        const safePrompt = buildEducationalPrompt(message, retrievalResult.chunks, history);
+
+        // Step 3: Mock LLM Generation (Pending actual Gemini integration)
+        // In the future, send `safePrompt` to Gemini and get `llmReply`.
+        const mockLlmReply = "هذه إجابة تجريبية بناءً على النصوص المستخرجة: " + (retrievalResult.chunks[0]?.text.substring(0, 50) || "لا توجد نصوص") + "...";
+
+        // --- 6. Debug / Telemetry Payload ---
+        // This debug payload is essential for tuning retrieval quality.
         return {
-            reply: "أهلاً بك! أنا البوصلة، جاري ربط عقلي بالذكاء الاصطناعي قريباً لمساعدتك في الدراسات بدقة أكبر."
+            reply: mockLlmReply,
+            debug: {
+                retrievedChunks: retrievalResult.chunks,
+                scores: retrievalResult.scores,
+                tokenEstimate: retrievalResult.tokenEstimate,
+                latency: retrievalResult.latency,
+                promptUsed: safePrompt
+            }
         };
 
     } catch (error) {
