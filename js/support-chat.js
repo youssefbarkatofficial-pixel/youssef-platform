@@ -3272,7 +3272,7 @@
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // 🧠 KNOWLEDGE GRAPH BUILDER
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  const KNOWLEDGE_GRAPH = {
+  const LEGACY_KNOWLEDGE_GRAPH = {
     'محمد علي': { 
        related: ['تطوير الجيش', 'النهضة الصناعية', 'التعليم'], 
        linkText: 'وعشان تبقى الصورة كاملة، خد بالك إن ده كان السبب الأساسي في الاهتمام بـ' 
@@ -3302,7 +3302,9 @@
     let modified = candidateText;
 
     // Check if the subject exists in the Knowledge Graph
-    for (const [node, data] of Object.entries(KNOWLEDGE_GRAPH)) {
+    for (const node in LEGACY_KNOWLEDGE_GRAPH) {
+      if (!LEGACY_KNOWLEDGE_GRAPH.hasOwnProperty(node)) continue;
+      const data = LEGACY_KNOWLEDGE_GRAPH[node];
       if (mainSubject.includes(node) || node.includes(mainSubject)) {
         // Find a related concept that isn't already mentioned in the text
         const unmentioned = data.related.find(r => !modified.includes(r));
