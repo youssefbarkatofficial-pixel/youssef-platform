@@ -119,10 +119,34 @@
         </div>
     </header>
 
-    <!-- DEPLOYMENT TEST - DELETE AFTER CONFIRMING -->
-    <div id="deployTestBox" style="background: #FFD700; color: #000; text-align: center; padding: 15px; font-size: 1.2rem; font-weight: bold; z-index: 99999; position: relative;">
-        🟡 اختبار نشر - لو شايف الرسالة دي يبقى التحديثات شغالة! 🟡
+    <div id="deployTestBox" style="background: #FFD700; color: #000; text-align: center; padding: 15px; font-size: 1.1rem; font-weight: bold; z-index: 99999; position: relative;">
+        🟡 اختبار نشر v5 🟡 | <span id="geminiStatus">جاري الفحص...</span>
     </div>
+    <script>
+    // DIAGNOSTIC: Show Gemini status visually
+    setTimeout(function(){
+        var el = document.getElementById('geminiStatus');
+        if (!el) return;
+        if (typeof window.askGeminiDirectly === 'function') {
+            el.textContent = '✅ Gemini متصل! جاري الاختبار...';
+            el.style.color = 'green';
+            window.askGeminiDirectly('قول مرحبا').then(function(res){
+                if (res && res.reply) {
+                    el.textContent = '✅ Gemini شغال! الرد: ' + res.reply.substring(0,60);
+                } else {
+                    el.textContent = '❌ Gemini رد بـ fallback: ' + (res && res.reason || 'unknown');
+                    el.style.color = 'red';
+                }
+            }).catch(function(e){
+                el.textContent = '❌ Gemini error: ' + e.message;
+                el.style.color = 'red';
+            });
+        } else {
+            el.textContent = '❌ askGeminiDirectly مش موجودة! الملف مش اتحمل';
+            el.style.color = 'red';
+        }
+    }, 2000);
+    </script>
 
     <!-- Hero Section -->
     <section class="hero">
