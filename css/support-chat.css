@@ -68,9 +68,9 @@
   position: fixed !important;
   right: 18px;
   bottom: 96px;
-  width: 360px;
+  width: 420px;
   max-width: calc(100% - 28px);
-  height: 520px;
+  height: 600px;
   background: rgba(7,18,44,0.94);
   border-radius: 24px;
   direction: rtl;
@@ -111,7 +111,7 @@
   scroll-behavior:smooth;
 }
 .pf-msg {
-  max-width:80%;
+  max-width:92%;
   padding: 12px 14px;
   border-radius: 20px;
   opacity:0;
@@ -135,6 +135,17 @@
 .pf-msg .pf-msg-inner{
   position:relative;
   white-space: pre-wrap;
+}
+.pf-msg-inner ul {
+  margin: 8px 18px 8px 0;
+  padding: 0;
+}
+.pf-msg-inner li {
+  margin-bottom: 6px;
+}
+.pf-msg-inner strong {
+  font-weight: 700;
+  color: #f1c40f;
 }
 .pf-msg-meta{
   font-size:11px;

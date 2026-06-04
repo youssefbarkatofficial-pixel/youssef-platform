@@ -2427,6 +2427,20 @@
 
   // Rendering helpers
   // Fix common mojibake (double-encoded UTF-8 shown as sequences like 'ط§ظ„')
+  function parseChatMarkdown(text) {
+    if (!text) return '';
+    let html = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    // Bold
+    html = html.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+    // Lists (asterisk or dash at the start of a line)
+    html = html.replace(/^[\*\-]\s+(.*)$/gm, "<li>$1</li>");
+    // Wrap consecutive list items in <ul>
+    html = html.replace(/(<li>.*?<\/li>\n?)+/g, match => `<ul>${match}</ul>`);
+    // Line breaks
+    html = html.replace(/\n/g, "<br>");
+    return html;
+  }
+
   function fixMojibake(s){
     if(!s || typeof s !== 'string') return s;
     try{
@@ -2448,6 +2462,8 @@
     inner.className='pf-msg-inner';
     if (item.html) {
       inner.innerHTML = item.html;
+    } else if (item.who === 'bot') {
+      inner.innerHTML = parseChatMarkdown(fixMojibake(item.text));
     } else {
       inner.textContent = fixMojibake(item.text);
     }
