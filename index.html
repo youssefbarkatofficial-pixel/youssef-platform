@@ -501,6 +501,91 @@
     })();
     </script>
     <script src="js/support-chat.js?v=4.0"></script>
+    <script>
+    /* GEMINI CHAT INTERCEPTOR - Works regardless of support-chat.js version */
+    (function(){
+        if (typeof window.askGeminiDirectly !== 'function') return;
+        console.log('[GEMINI INTERCEPTOR] Active');
+
+        // Fallback phrases from the local bot that should trigger Gemini
+        var fallbacks = ['ممكن توضحلي','تاريخ ولا جغرافيا','حاسس إني تهت','الكلام دخل في بعضه',
+            'محتاج تفاصيل','تقصد إيه بالظبط','مش قادر أحدد','عشان أقدر أساعدك',
+            'شرح ولا أسئلة','أنهي درس واقف','تحب تذاكر','أنا لقطت إن كلامك',
+            'حاولت أفهم','مش متأكد تقصد','كلامك كبير عليا','معلش حددلي',
+            'ناقصه شوية تفاصيل','تفتكر إيه أهمية'];
+
+        function isLocalFallback(text) {
+            for (var i = 0; i < fallbacks.length; i++) {
+                if (text.indexOf(fallbacks[i]) !== -1) return true;
+            }
+            return false;
+        }
+
+        // Store last user message
+        var lastUserMsg = '';
+
+        // Intercept the chat input
+        document.addEventListener('DOMContentLoaded', function(){
+            // Watch for chat input
+            var checkInterval = setInterval(function(){
+                var input = document.getElementById('pfChatInput');
+                var sendBtn = document.getElementById('pfSendBtn');
+                if (!input) return;
+                clearInterval(checkInterval);
+
+                // Capture user message on send
+                input.addEventListener('keydown', function(e){
+                    if (e.key === 'Enter') lastUserMsg = input.value.trim();
+                });
+                if (sendBtn) {
+                    sendBtn.addEventListener('click', function(){
+                        lastUserMsg = input.value.trim();
+                    });
+                }
+                console.log('[GEMINI INTERCEPTOR] Chat input found, watching messages');
+            }, 500);
+
+            // Watch for bot messages appearing in chat
+            setTimeout(function(){
+                var chatBody = document.getElementById('pfChatBody');
+                if (!chatBody) return;
+
+                var observer = new MutationObserver(function(mutations){
+                    mutations.forEach(function(m){
+                        m.addedNodes.forEach(function(node){
+                            if (!node.classList || !node.classList.contains('pf-msg-bot')) return;
+                            var textEl = node.querySelector('.pf-msg-text');
+                            if (!textEl) return;
+                            var botText = textEl.textContent || '';
+
+                            // Check if this is a local fallback response
+                            if (lastUserMsg && isLocalFallback(botText)) {
+                                console.log('[GEMINI INTERCEPTOR] Caught local fallback, replacing with Gemini...');
+                                textEl.textContent = '⏳ جاري التفكير...';
+                                
+                                window.askGeminiDirectly(lastUserMsg).then(function(res){
+                                    if (res && res.reply && !res.fallback) {
+                                        textEl.innerHTML = res.reply.replace(/\n/g, '<br>');
+                                        console.log('[GEMINI INTERCEPTOR] ✅ Replaced with AI response');
+                                    } else {
+                                        textEl.textContent = botText; // restore original
+                                        console.log('[GEMINI INTERCEPTOR] Gemini failed, kept local:', res && res.reason);
+                                    }
+                                }).catch(function(e){
+                                    textEl.textContent = botText;
+                                    console.error('[GEMINI INTERCEPTOR] Error:', e);
+                                });
+                            }
+                        });
+                    });
+                });
+
+                observer.observe(chatBody, { childList: true, subtree: true });
+                console.log('[GEMINI INTERCEPTOR] MutationObserver active on chatBody');
+            }, 3000);
+        });
+    })();
+    </script>
     <script src="js/auth.js?v=2.1"></script>
     <script src="js/owner-editor.js"></script>
     <script src="js/courses-renderer.js"></script>
