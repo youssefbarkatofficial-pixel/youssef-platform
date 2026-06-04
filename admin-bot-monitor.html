@@ -625,6 +625,20 @@
                     tag: 'admin-reply'
                 };
                 
+                // Find the last user question to learn from
+                const reversedHistory = [...currentChatHistory].reverse();
+                const lastUserMsg = reversedHistory.find(m => m.who === 'user' || m.sender === 'user');
+                
+                if (lastUserMsg && lastUserMsg.text) {
+                    const q = lastUserMsg.text.trim();
+                    if (q) {
+                        // Push to global learning
+                        window.firebaseDb.collection('bot_settings').doc('global_learning').set({
+                            [q]: text
+                        }, { merge: true }).catch(console.error);
+                    }
+                }
+
                 currentChatHistory.push(newMsg);
                 
                 window.firebaseDb.collection('bot_chats').doc(currentActivePhone).set({

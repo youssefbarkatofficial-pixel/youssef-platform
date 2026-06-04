@@ -422,6 +422,14 @@
                     learning[normalized].lastUpdated = Date.now();
                     
                     localStorage.setItem(ADMIN_LEARNING_KEY, JSON.stringify(learning));
+
+                    // Push to global learning
+                    if (window.firebaseDb) {
+                        window.firebaseDb.collection('bot_settings').doc('global_learning').set({
+                            [question]: adminResponse
+                        }, { merge: true }).catch(console.error);
+                    }
+
                     console.log('AI learned from admin response for:', question);
                 } catch (e) {
                     console.error('Failed to save AI learning:', e);
