@@ -2479,7 +2479,57 @@
     return el;
   }
 
-  function appendMessage(item, scroll = false){ const box = document.getElementById('pfChatMessages'); const el = mkMsgEl(item); box.appendChild(el); if(scroll){ box.scrollTop = box.scrollHeight; } }
+  function typeWriterHtml(element, speed = 15) {
+    const walk = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, null, false);
+    const textNodes = [];
+    let node;
+    while(node = walk.nextNode()) {
+        if(node.nodeValue.trim() !== '') {
+            textNodes.push({node: node, text: node.nodeValue});
+            node.nodeValue = '';
+        }
+    }
+    
+    let currentIdx = 0;
+    let charIdx = 0;
+    
+    function typeChar() {
+        if (currentIdx >= textNodes.length) return;
+        const current = textNodes[currentIdx];
+        current.node.nodeValue += current.text.charAt(charIdx);
+        charIdx++;
+        if (charIdx >= current.text.length) {
+            currentIdx++;
+            charIdx = 0;
+        }
+        setTimeout(typeChar, speed);
+        const box = document.getElementById('pfChatMessages');
+        if (box) box.scrollTop = box.scrollHeight;
+    }
+    typeChar();
+  }
+
+  function appendMessage(item, scroll = false){ 
+      const box = document.getElementById('pfChatMessages'); 
+      const el = mkMsgEl(item); 
+      box.appendChild(el); 
+      if(scroll){ box.scrollTop = box.scrollHeight; } 
+      
+      if (item.typingEffect) {
+          const inner = el.querySelector('.pf-msg-inner');
+          if (inner) {
+              typeWriterHtml(inner);
+          }
+          item.typingEffect = false;
+          // Clean the flag from history so it doesn't re-type on reload
+          const h = loadHistory();
+          const histItem = h.find(x => x.ts === item.ts && x.who === item.who && x.text === item.text);
+          if (histItem) {
+              histItem.typingEffect = false;
+              saveHistory(h);
+          }
+      }
+  }
 
   function renderHistory(scrollToBottom = false){ const h = loadHistory(); const box = document.getElementById('pfChatMessages'); if(!box) return; const wasAtBottom = box.scrollHeight - box.clientHeight - box.scrollTop < 20; box.innerHTML=''; h.forEach(it=> appendMessage(it)); if(scrollToBottom || wasAtBottom){ box.scrollTop = box.scrollHeight; } }
 
@@ -2580,7 +2630,7 @@
       learnFromResponse(text, replyText);
       enrichChatContext(text, replyText, { timestamp: nowTs() });
       
-      const botMsg = { who:'bot', text: replyText, ts: nowTs(), status:'delivered' };
+      const botMsg = { who:'bot', text: replyText, ts: nowTs(), status:'delivered', typingEffect: true };
       const h2 = loadHistory(); 
       h2.push(botMsg); 
       saveHistory(h2); 
