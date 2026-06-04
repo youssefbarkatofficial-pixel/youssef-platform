@@ -2432,6 +2432,8 @@
     let html = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
     // Bold
     html = html.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+    // Links [text](url)
+    html = html.replace(/\[([^\]]+)\]\(([^\)]+)\)/g, '<a href="$2" target="_blank" style="color: var(--royal-gold); text-decoration: underline;">$1</a>');
     // Lists (asterisk or dash at the start of a line)
     html = html.replace(/^[\*\-]\s+(.*)$/gm, "<li>$1</li>");
     // Wrap consecutive list items in <ul>
