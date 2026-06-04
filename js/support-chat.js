@@ -2554,7 +2554,8 @@
           console.log('[GEMINI PRIMARY] Sending to AI first...');
           addTyping();
           try {
-             const aiResponse = await window.askGeminiDirectly(text);
+             const h2 = loadHistory();
+             const aiResponse = await window.askGeminiDirectly(text, h2);
              if (!aiResponse.fallback && aiResponse.reply) {
                  replyText = aiResponse.reply;
                  console.log('[GEMINI SUCCESS] Got AI response.');

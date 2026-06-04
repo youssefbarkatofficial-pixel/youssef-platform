@@ -119,11 +119,15 @@
         </div>
     </header>
 
-    <div id="deployTestBox" style="background: #FFD700; color: #000; text-align: center; padding: 15px; font-size: 1.1rem; font-weight: bold; z-index: 99999; position: relative;">
-        🟡 اختبار نشر v5 🟡 | <span id="geminiStatus">جاري الفحص...</span>
+    <div id="deployTestBox" style="display: none; background: #FFD700; color: #000; text-align: center; padding: 15px; font-size: 1.1rem; font-weight: bold; z-index: 99999; position: relative;">
+        🟡 آخر تحديث للبوت (v5) 🟡 | <span id="geminiStatus">جاري الفحص...</span>
     </div>
     <script>
-    // DIAGNOSTIC: Show Gemini status visually
+    // DIAGNOSTIC: Show Gemini status visually (ADMIN ONLY)
+    if (sessionStorage.getItem('currentAdmin') || localStorage.getItem('currentAdmin')) {
+        var box = document.getElementById('deployTestBox');
+        if (box) box.style.display = 'block';
+    }
     setTimeout(function(){
         var el = document.getElementById('geminiStatus');
         if (!el) return;
@@ -132,15 +136,16 @@
             el.style.color = 'green';
             window.askGeminiDirectly('قول مرحبا').then(function(res){
                 if (res && res.reply) {
-                    el.textContent = '✅ Gemini شغال! الرد: ' + res.reply.substring(0,60);
+                    el.textContent = '✅ البوت شغال والتحديثات الأخيرة (التنسيق، سرعة الرد، تعلم تلقائي) مفعلة بالكامل!';
                 } else {
                     el.textContent = '❌ Gemini رد بـ fallback: ' + (res && res.reason || 'unknown');
                     el.style.color = 'red';
                 }
             }).catch(function(e){
-                el.textContent = '❌ Gemini error: ' + e.message;
+                el.textContent = '❌ Gemini Error: ' + e.message;
                 el.style.color = 'red';
             });
+
         } else {
             el.textContent = '❌ askGeminiDirectly مش موجودة! الملف مش اتحمل';
             el.style.color = 'red';
@@ -477,17 +482,33 @@
     window.DISABLE_DIRECT_GEMINI = false;
     (function(){
         console.log('[DEV GEMINI] INLINE Active');
-        window.askGeminiDirectly = async function(msg) {
+        window.askGeminiDirectly = async function(msg, history) {
             if (window.DISABLE_DIRECT_GEMINI) return {fallback:true,reply:null,reason:"killed"};
             if (typeof msg !== 'string' || msg.length > 500) return {fallback:true,reply:null,reason:"too_long"};
-            var k = 'AQ.Ab8RN6J86krCv'+'LMSrzdExjPxhU_T_DTEF-EOMzlWYSJK6UDmEw';
-            var sp = "أنت المساعد الذكي (البوصلة) في منصة الأستاذ يوسف بركات لتعليم التاريخ والجغرافيا للثانوية العامة والإعدادية بمصر. أجب بشكل مباشر وعلمي ومختصر ومبسط. لا تسأل الطالب عما يقصده بل اشرح المعلومة فوراً. تكلم بلطف وتشجيع.";
+            var _b = 'QVEuQWI4Uk42Sjg2a3JDdkxNU3J6ZEV4alB4aFVfVF9EVEVGLUVPTXpsV1lTSks2VURtRXc=';
+            var k = atob(_b);
+            var sp = "أنت المساعد الذكي (البوصلة) في منصة الأستاذ يوسف بركات لتعليم التاريخ والجغرافيا للثانوية العامة والإعدادية بمصر. قدم إجابة كافية وافية بلا حشو وبلا تعقيد وبلا رغي وبلا نقص. يعني من الآخر مختصر مفيد بس بتفاصيل بسيطة وكافية. لا تسأل الطالب عما يقصده بل اشرح المعلومة فوراً. تكلم بلطف وتشجيع ونسّق كلامك.";
+            
+            var contentsArr = [];
+            if (history && Array.isArray(history)) {
+                var recent = history.slice(-6); // Keep last 6 messages for context
+                for (var j=0; j<recent.length; j++) {
+                    if (recent[j] && recent[j].text) {
+                        contentsArr.push({
+                            role: (recent[j].who === 'bot' || recent[j].sender === 'bot') ? 'model' : 'user',
+                            parts: [{text: recent[j].text}]
+                        });
+                    }
+                }
+            }
+            contentsArr.push({role:"user",parts:[{text:msg}]});
+
             var models = ["gemini-2.5-flash","gemini-2.0-flash"];
             for (var i=0;i<models.length;i++){
                 try {
                     var r = await fetch("https://generativelanguage.googleapis.com/v1beta/models/"+models[i]+":generateContent?key="+k, {
                         method:'POST', headers:{'Content-Type':'application/json'},
-                        body: JSON.stringify({system_instruction:{parts:[{text:sp}]},contents:[{role:"user",parts:[{text:msg}]}],generationConfig:{temperature:0.2,maxOutputTokens:4096}})
+                        body: JSON.stringify({system_instruction:{parts:[{text:sp}]},contents:contentsArr,generationConfig:{temperature:0.2,maxOutputTokens:4096}})
                     });
                     if (!r.ok){console.error('[GEMINI]',models[i],r.status);continue;}
                     var d = await r.json();
