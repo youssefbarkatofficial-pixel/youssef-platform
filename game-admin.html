@@ -1,0 +1,414 @@
+﻿<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>لوحة تحكم صراع البوصلة 👑</title>
+  
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap');
+    
+    :root {
+      --gold: #D4AF37;
+      --dark-bg: #0A0E1A;
+      --dark-panel: #0F172A;
+      --dark-card: #1E293B;
+      --dark-border: #2A3A5C;
+      --text-white: #F0F4FF;
+      --text-muted: #64748B;
+      --green: #22C55E;
+      --red: #EF4444;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
+    
+    body {
+      background: var(--dark-bg);
+      color: var(--text-white);
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .sidebar {
+      width: 260px;
+      background: var(--dark-panel);
+      border-left: 1px solid var(--dark-border);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sidebar-header {
+      padding: 24px;
+      text-align: center;
+      border-bottom: 1px solid var(--dark-border);
+    }
+    .sidebar-header h2 { color: var(--gold); font-size: 1.4rem; font-weight: 900; }
+    .sidebar-header p { color: var(--text-muted); font-size: 0.8rem; }
+
+    .nav-btn {
+      padding: 16px 24px;
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid var(--dark-border);
+      color: var(--text-muted);
+      text-align: right;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .nav-btn:hover { background: var(--dark-card); color: var(--text-white); }
+    .nav-btn.active { background: rgba(212,175,55,0.1); color: var(--gold); border-left: 4px solid var(--gold); }
+
+    .main-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 30px;
+    }
+
+    .section { display: none; }
+    .section.active { display: block; }
+
+    .page-title {
+      font-size: 1.8rem;
+      color: var(--gold);
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--dark-border);
+      padding-bottom: 12px;
+    }
+
+    /* Cards */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
+    .stat-card {
+      background: var(--dark-panel);
+      border: 1px solid var(--dark-border);
+      border-radius: 16px;
+      padding: 20px;
+      text-align: center;
+    }
+    .stat-card .icon { font-size: 2rem; color: var(--gold); margin-bottom: 12px; }
+    .stat-card .val { font-size: 2rem; font-weight: 900; }
+    .stat-card .lbl { color: var(--text-muted); font-size: 0.9rem; }
+
+    /* Tables */
+    table { width: 100%; border-collapse: collapse; background: var(--dark-panel); border-radius: 12px; overflow: hidden; }
+    th, td { padding: 14px 16px; text-align: right; border-bottom: 1px solid var(--dark-border); }
+    th { background: var(--dark-card); color: var(--gold); font-weight: 700; }
+    tr:hover td { background: var(--dark-card); }
+    
+    .action-btn {
+      padding: 6px 12px;
+      background: var(--dark-card);
+      border: 1px solid var(--dark-border);
+      border-radius: 6px;
+      color: var(--text-white);
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .action-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+    /* Forms */
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; margin-bottom: 8px; color: var(--text-muted); }
+    .form-group input, .form-group select, .form-group textarea {
+      width: 100%; padding: 12px; background: var(--dark-bg);
+      border: 1px solid var(--dark-border); border-radius: 8px;
+      color: white; font-family: inherit;
+    }
+    .form-group input:focus { border-color: var(--gold); outline: none; }
+    
+    .btn-primary {
+      padding: 12px 24px;
+      background: var(--gold);
+      border: none;
+      border-radius: 8px;
+      color: #000;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    /* Modal */
+    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); align-items: center; justify-content: center; z-index: 100; }
+    .modal.active { display: flex; }
+    .modal-content { background: var(--dark-panel); padding: 30px; border-radius: 16px; width: 400px; border: 1px solid var(--gold); }
+    .modal h3 { color: var(--gold); margin-bottom: 20px; }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <h2>👑 لوحة الإدارة</h2>
+      <p>صِراع البوصلة</p>
+    </div>
+    <button class="nav-btn active" onclick="switchTab('dashboard')"><i class="fas fa-chart-pie"></i> إحصائيات عامة</button>
+    <button class="nav-btn" onclick="switchTab('players')"><i class="fas fa-users"></i> اللاعبين</button>
+    <button class="nav-btn" onclick="switchTab('questions')"><i class="fas fa-database"></i> إدارة الأسئلة</button>
+    <button class="nav-btn" onclick="switchTab('settings')"><i class="fas fa-cog"></i> إعدادات اللعبة</button>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    
+    <!-- Dashboard -->
+    <div id="sec-dashboard" class="section active">
+      <h1 class="page-title">نظرة عامة</h1>
+      
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="icon"><i class="fas fa-users"></i></div>
+          <div class="val" id="stat-total-players">0</div>
+          <div class="lbl">إجمالي اللاعبين</div>
+        </div>
+        <div class="stat-card">
+          <div class="icon"><i class="fas fa-gamepad"></i></div>
+          <div class="val" id="stat-total-matches">0</div>
+          <div class="lbl">المباريات الملعوبة</div>
+        </div>
+        <div class="stat-card">
+          <div class="icon"><i class="fas fa-star"></i></div>
+          <div class="val" id="stat-total-xp">0</div>
+          <div class="lbl">إجمالي XP الموزع</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Players -->
+    <div id="sec-players" class="section">
+      <h1 class="page-title">إدارة اللاعبين</h1>
+      <div style="display:flex;gap:10px;margin-bottom:20px;">
+        <input type="text" id="search-player" placeholder="ابحث باسم اللاعب أو البريد..." style="padding:10px;border-radius:8px;border:1px solid var(--dark-border);background:var(--dark-bg);color:white;flex:1;">
+        <select id="filter-grade" style="padding:10px;border-radius:8px;border:1px solid var(--dark-border);background:var(--dark-bg);color:white;">
+          <option value="all">كل الصفوف</option>
+          <option value="7">أول إعدادي</option>
+          <option value="8">ثاني إعدادي</option>
+          <option value="9">ثالث إعدادي</option>
+          <option value="10">أول ثانوي</option>
+        </select>
+        <button class="btn-primary" onclick="loadPlayers()"><i class="fas fa-search"></i> بحث</button>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>الاسم</th>
+            <th>الصف</th>
+            <th>الرتبة</th>
+            <th>XP</th>
+            <th>المباريات</th>
+            <th>إجراءات</th>
+          </tr>
+        </thead>
+        <tbody id="players-table-body">
+          <tr><td colspan="6" style="text-align:center;">جاري التحميل...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Questions -->
+    <div id="sec-questions" class="section">
+      <h1 class="page-title">بنك الأسئلة</h1>
+      <p style="color:var(--text-muted);margin-bottom:20px;">
+        الأسئلة حالياً تقرأ من ملف `js/game-questions.js`. يمكن برمجتها لاحقاً لتقرأ من Firebase.
+      </p>
+      <button class="btn-primary" onclick="alert('في الإصدار القادم سيتم ربط إضافة الأسئلة بقاعدة بيانات Firebase لتسهيل إضافتها من لوحة التحكم بدون تعديل الكود.')">
+        <i class="fas fa-plus"></i> إضافة سؤال جديد (قريباً)
+      </button>
+    </div>
+
+    <!-- Settings -->
+    <div id="sec-settings" class="section">
+      <h1 class="page-title">حساب حارس البوصلة (المالك)</h1>
+      <div class="stat-card" style="text-align:right; max-width:500px;">
+        <h3>تعديل نقاط يوسف بركات</h3>
+        <p style="color:var(--text-muted);margin-bottom:16px;">لإبقاء حسابك دائماً في الصدارة كـ "حارس البوصلة الأعظم"</p>
+        
+        <div class="form-group">
+          <label>الـ UID لحسابك</label>
+          <input type="text" id="owner-uid" placeholder="الصق الـ UID الخاص بك هنا">
+        </div>
+        <div class="form-group">
+          <label>تعيين نقاط XP</label>
+          <input type="number" id="owner-xp" value="999999">
+        </div>
+        <button class="btn-primary" onclick="setOwnerXP()">حفظ النقاط</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Edit Player Modal -->
+  <div class="modal" id="edit-modal">
+    <div class="modal-content">
+      <h3>تعديل اللاعب</h3>
+      <input type="hidden" id="edit-uid">
+      <div class="form-group">
+        <label>الاسم</label>
+        <input type="text" id="edit-name" readonly style="opacity:0.7">
+      </div>
+      <div class="form-group">
+        <label>نقاط XP</label>
+        <input type="number" id="edit-xp">
+      </div>
+      <div class="form-group">
+        <label>الانتصارات</label>
+        <input type="number" id="edit-wins">
+      </div>
+      <div style="display:flex;gap:10px;margin-top:20px;">
+        <button class="btn-primary" style="flex:1" onclick="savePlayerEdit()">حفظ</button>
+        <button class="action-btn" style="flex:1" onclick="document.getElementById('edit-modal').classList.remove('active')">إلغاء</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase Script -->
+  <script src="js/firebase-config.js"></script>
+  <!-- Game Engine (for Ranks) -->
+  <script src="js/game-engine.js"></script>
+
+  <script>
+    // Security Check: Assume authorized if embedded in admin dashboard
+    document.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => {
+        // Load dashboard data directly
+        loadDashboardStats();
+      }, 1000);
+    });
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
+      document.getElementById('sec-' + tabId).classList.add('active');
+      
+      document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+      event.currentTarget.classList.add('active');
+
+      if(tabId === 'players') loadPlayers();
+    }
+
+    async function loadDashboardStats() {
+      if(!window.firebaseDb) return;
+      try {
+        const snap = await window.firebaseDb.collection('users').get();
+        let totalPlayers = snap.size;
+        let totalMatches = 0;
+        let totalXp = 0;
+
+        snap.forEach(doc => {
+          const d = doc.data();
+          totalMatches += (d.gamesPlayed || 0);
+          totalXp += (d.gameXp || 0);
+        });
+
+        document.getElementById('stat-total-players').textContent = totalPlayers;
+        document.getElementById('stat-total-matches').textContent = totalMatches;
+        document.getElementById('stat-total-xp').textContent = totalXp.toLocaleString();
+
+      } catch(e) { console.error(e); }
+    }
+
+    async function loadPlayers() {
+      if(!window.firebaseDb) return;
+      const tbody = document.getElementById('players-table-body');
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">جاري التحميل...</td></tr>';
+      
+      const gradeFilter = document.getElementById('filter-grade').value;
+      const search = document.getElementById('search-player').value.trim().toLowerCase();
+
+      try {
+        let query = window.firebaseDb.collection('users').orderBy('gameXp', 'desc');
+        if (gradeFilter !== 'all') {
+          query = window.firebaseDb.collection('users').where('grade', '==', gradeFilter).orderBy('gameXp', 'desc');
+        }
+
+        const snap = await query.limit(50).get();
+        let html = '';
+        
+        snap.forEach(doc => {
+          const d = doc.data();
+          const name = (d.name || 'مجهول').toLowerCase();
+          
+          if (search && !name.includes(search)) return; // Simple client-side search filter
+
+          const rank = GameEngine.getRank(d.gameXp || 0).name;
+          
+          html += `
+            <tr>
+              <td>${d.name || 'مجهول'}</td>
+              <td>${d.grade || '---'}</td>
+              <td><span style="color:var(--gold)">${rank}</span></td>
+              <td>${d.gameXp || 0}</td>
+              <td>${d.gamesPlayed || 0}</td>
+              <td>
+                <button class="action-btn" onclick="openEditModal('${doc.id}', '${d.name}', ${d.gameXp||0}, ${d.gameWins||0})">تعديل</button>
+              </td>
+            </tr>
+          `;
+        });
+
+        if(html === '') html = '<tr><td colspan="6" style="text-align:center;">لا يوجد لاعبين</td></tr>';
+        tbody.innerHTML = html;
+
+      } catch(e) {
+        console.error(e);
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:red;">حدث خطأ في التحميل</td></tr>';
+      }
+    }
+
+    function openEditModal(uid, name, xp, wins) {
+      document.getElementById('edit-uid').value = uid;
+      document.getElementById('edit-name').value = name;
+      document.getElementById('edit-xp').value = xp;
+      document.getElementById('edit-wins').value = wins;
+      document.getElementById('edit-modal').classList.add('active');
+    }
+
+    async function savePlayerEdit() {
+      const uid = document.getElementById('edit-uid').value;
+      const xp = parseInt(document.getElementById('edit-xp').value) || 0;
+      const wins = parseInt(document.getElementById('edit-wins').value) || 0;
+
+      try {
+        await window.firebaseDb.collection('users').doc(uid).update({
+          gameXp: xp,
+          gameWins: wins
+        });
+        document.getElementById('edit-modal').classList.remove('active');
+        loadPlayers();
+        alert('تم الحفظ بنجاح');
+      } catch(e) {
+        alert('حدث خطأ: ' + e.message);
+      }
+    }
+
+    async function setOwnerXP() {
+      const uid = document.getElementById('owner-uid').value.trim();
+      const xp = parseInt(document.getElementById('owner-xp').value) || 999999;
+      if (!uid) return alert('أدخل الـ UID الخاص بك');
+
+      try {
+        await window.firebaseDb.collection('users').doc(uid).set({
+          gameXp: xp,
+          name: "يوسف بركات",
+          grade: "owner"
+        }, { merge: true });
+        alert('تم تعيين نقاط المالك بنجاح!');
+      } catch(e) {
+        alert('حدث خطأ: ' + e.message);
+      }
+    }
+  </script>
+</body>
+</html>
