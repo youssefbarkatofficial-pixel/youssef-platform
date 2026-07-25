@@ -13,11 +13,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const input = document.getElementById(id);
     if (input && input.parentElement) {
       input.parentElement.style.position = 'relative';
-      const icon = document.createElement('i');
-      icon.className = 'fas fa-eye';
-      // Adjust top position based on whether there's a label. Usually label takes ~25-30px
-      icon.style.cssText = 'position:absolute; left:15px; bottom:12px; cursor:pointer; color:var(--royal-gold); z-index:10; font-size:1.1rem; padding:5px;';
-      icon.addEventListener('click', () => {
+      // Add padding to input so text doesn't overlap eye icon (RTL layout: icon on left)
+      input.style.paddingLeft = '45px';
+      const toggleBtn = document.createElement('span');
+      toggleBtn.innerHTML = '<i class="fas fa-eye"></i>';
+      toggleBtn.style.cssText = 'position:absolute; left:14px; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--royal-gold); z-index:10; font-size:1.1rem; padding:5px; line-height:1; display:flex; align-items:center;';
+      // If there's a label, shift toggle down to align with input
+      const label = input.parentElement.querySelector('label');
+      if (label) {
+        toggleBtn.style.top = 'calc(50% + 14px)';
+      }
+      toggleBtn.addEventListener('click', () => {
+        const icon = toggleBtn.querySelector('i');
         if (input.type === 'password') {
           input.type = 'text';
           icon.classList.replace('fa-eye', 'fa-eye-slash');
@@ -26,9 +33,47 @@ document.addEventListener('DOMContentLoaded', () => {
           icon.classList.replace('fa-eye-slash', 'fa-eye');
         }
       });
-      input.parentElement.appendChild(icon);
+      input.parentElement.appendChild(toggleBtn);
     }
   });
+
+  // === Password Strength Meter ===
+  const pwdInput = document.getElementById('password');
+  const strengthBar = document.getElementById('passwordStrengthBar');
+  const strengthLabel = document.getElementById('passwordStrengthLabel');
+  const strengthContainer = document.getElementById('passwordStrengthContainer');
+  if (pwdInput && strengthBar && strengthLabel && strengthContainer) {
+    function calcPasswordStrength(pwd) {
+      if (!pwd) return { score: 0, label: '—', color: '#888', percent: 0 };
+      let score = 0;
+      if (pwd.length >= 4) score += 1;
+      if (pwd.length >= 6) score += 1;
+      if (pwd.length >= 8) score += 1;
+      if (/[A-Z]/.test(pwd) || /[أ-ي]/.test(pwd)) score += 1;
+      if (/[0-9]/.test(pwd)) score += 1;
+      if (/[!@#$%^&*?_\-+=]/.test(pwd)) score += 1;
+      if (pwd.length >= 12) score += 1;
+      // Map score to levels
+      if (score <= 2) return { score, label: 'ضعيفة', color: '#e74c3c', percent: 25 };
+      if (score <= 4) return { score, label: 'متوسطة', color: '#f1c40f', percent: 55 };
+      return { score, label: 'قوية', color: '#2ecc71', percent: 100 };
+    }
+    pwdInput.addEventListener('input', () => {
+      const val = pwdInput.value;
+      if (val.length > 0) {
+        strengthContainer.style.display = 'block';
+        const result = calcPasswordStrength(val);
+        strengthBar.style.width = result.percent + '%';
+        strengthBar.style.background = result.color;
+        strengthLabel.textContent = result.label;
+        strengthLabel.style.color = result.color;
+      } else {
+        strengthContainer.style.display = 'none';
+        strengthBar.style.width = '0%';
+        strengthLabel.textContent = '—';
+      }
+    });
+  }
 
   const loginPhoneInput = document.getElementById('loginPhone');
   if (loginPhoneInput) {
@@ -240,8 +285,8 @@ document.addEventListener('DOMContentLoaded', () => {
           showRegisterError('كلمة المرور غير متطابقة.');
           return;
         }
-        if (!isStrongPassword(pwd)) {
-          showRegisterError('كلمة المرور ضعيفة. استخدم 8 أحرف على الأقل مع أرقام ورموز.');
+        if (!pwd || pwd.length < 4) {
+          showRegisterError('كلمة المرور يجب أن تكون 4 أحرف على الأقل.');
           return;
         }
         if (!phone || !governorate) {
@@ -946,5 +991,181 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
     });
+  }
+
+  // === First-Time Registration Guidance System ===
+  // Only shows on register page, only once per device
+  if (registerForm && !localStorage.getItem('_regGuideSeen')) {
+    // Inject guidance styles
+    const guideStyle = document.createElement('style');
+    guideStyle.textContent = `
+      .reg-guide-overlay {
+        position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 99998;
+        opacity: 0; transition: opacity 0.3s ease;
+      }
+      .reg-guide-overlay.active { opacity: 1; }
+      .reg-guide-tooltip {
+        position: absolute; z-index: 99999;
+        background: linear-gradient(135deg, #0f1b2d, #1a2744);
+        border: 2px solid var(--royal-gold);
+        border-radius: 16px; padding: 20px 22px;
+        max-width: 340px; width: 90vw;
+        box-shadow: 0 12px 40px rgba(212,166,79,0.25), 0 0 60px rgba(212,166,79,0.08);
+        color: #f5f0e4; font-size: 0.95rem; line-height: 1.7;
+        animation: guidePopIn 0.35s cubic-bezier(.175,.885,.32,1.275);
+      }
+      .reg-guide-tooltip::before {
+        content: ''; position: absolute; width: 14px; height: 14px;
+        background: #1a2744; border: 2px solid var(--royal-gold);
+        transform: rotate(45deg);
+      }
+      .reg-guide-tooltip.arrow-top::before { top: -9px; right: 30px; border-bottom: none; border-left: none; }
+      .reg-guide-tooltip.arrow-bottom::before { bottom: -9px; right: 30px; border-top: none; border-right: none; }
+      .reg-guide-tooltip h4 {
+        color: var(--royal-gold); margin: 0 0 8px; font-size: 1.05rem;
+        display: flex; align-items: center; gap: 8px;
+      }
+      .reg-guide-tooltip p { margin: 0 0 14px; color: rgba(245,240,228,0.85); }
+      .reg-guide-actions { display: flex; gap: 10px; justify-content: flex-end; align-items: center; }
+      .reg-guide-btn {
+        padding: 8px 20px; border-radius: 8px; cursor: pointer; font-weight: 700;
+        font-size: 0.9rem; border: none; transition: all 0.2s ease;
+      }
+      .reg-guide-btn.primary {
+        background: var(--royal-gold); color: #1a1a2e;
+      }
+      .reg-guide-btn.primary:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(212,166,79,0.4); }
+      .reg-guide-btn.skip {
+        background: transparent; color: rgba(255,255,255,0.5); border: 1px solid rgba(255,255,255,0.15);
+      }
+      .reg-guide-btn.skip:hover { color: rgba(255,255,255,0.8); border-color: rgba(255,255,255,0.3); }
+      .reg-guide-progress {
+        display: flex; gap: 5px; align-items: center; flex: 1;
+      }
+      .reg-guide-dot {
+        width: 8px; height: 8px; border-radius: 50%;
+        background: rgba(255,255,255,0.15); transition: all 0.3s;
+      }
+      .reg-guide-dot.active { background: var(--royal-gold); transform: scale(1.3); }
+      .reg-guide-dot.done { background: #2ecc71; }
+      .reg-guide-highlight {
+        position: relative; z-index: 99999;
+        box-shadow: 0 0 0 4px rgba(212,166,79,0.35), 0 0 20px rgba(212,166,79,0.15);
+        border-radius: 12px;
+      }
+      @keyframes guidePopIn {
+        from { opacity: 0; transform: scale(0.85) translateY(10px); }
+        to { opacity: 1; transform: scale(1) translateY(0); }
+      }
+    `;
+    document.head.appendChild(guideStyle);
+
+    const guideSteps = [
+      {
+        target: '#step1 .form-group:first-of-type',
+        title: '\u0623\u0647\u0644\u0627\u064b \u0628\u0643 \u0641\u064a \u0645\u0646\u0635\u0629 \u064a\u0648\u0633\u0641 \u0628\u0631\u0643\u0627\u062a! \ud83c\udf1f',
+        text: '\u0647\u0646\u0628\u062f\u0623 \u0645\u0639\u0627\u0643 \u062e\u0637\u0648\u0629 \u0628\u062e\u0637\u0648\u0629. \u0627\u0643\u062a\u0628 \u0627\u0633\u0645\u0643 \u0627\u0644\u0631\u0628\u0627\u0639\u064a \u0628\u0627\u0644\u0638\u0628\u0637 \u0632\u064a \u0645\u0627 \u0647\u0648 \u0645\u0643\u062a\u0648\u0628 \u0641\u064a \u0628\u0637\u0627\u0642\u0629 \u0627\u0644\u0647\u0648\u064a\u0629 \u0639\u0644\u0634\u0627\u0646 \u0627\u0644\u0645\u062f\u0631\u0633 \u064a\u0642\u062f\u0631 \u064a\u0639\u0631\u0641\u0643.',
+        arrow: 'top'
+      },
+      {
+        target: '#studentPhone',
+        title: '\u0631\u0642\u0645 \u0627\u0644\u0645\u0648\u0628\u0627\u064a\u0644 \u0647\u0648 \u0627\u0633\u0645 \u0627\u0644\u0645\u0633\u062a\u062e\u062f\u0645 \ud83d\udcf1',
+        text: '\u0631\u0642\u0645\u0643 \u062f\u0647 \u0647\u064a\u0643\u0648\u0646 \u0627\u0633\u0645 \u0627\u0644\u0645\u0633\u062a\u062e\u062f\u0645 \u0627\u0644\u0644\u064a \u0647\u062a\u0633\u062c\u0644 \u0628\u064a\u0647 \u062f\u062e\u0648\u0644 \u0643\u0644 \u0645\u0631\u0629\u060c \u0641\u0627\u062a\u0623\u0643\u062f \u0625\u0646\u0647 \u0635\u062d.',
+        arrow: 'top'
+      },
+      {
+        target: '#parentPhone',
+        title: '\u0631\u0642\u0645 \u0648\u0644\u064a \u0627\u0644\u0623\u0645\u0631 \ud83d\udd12',
+        text: '\u0631\u0642\u0645 \u0648\u0644\u064a \u0627\u0644\u0623\u0645\u0631 \u0645\u0647\u0645 \u0644\u0623\u0645\u0627\u0646 \u062d\u0633\u0627\u0628\u0643. \u0644\u0648 \u0646\u0633\u064a\u062a \u0643\u0644\u0645\u0629 \u0627\u0644\u0645\u0631\u0648\u0631\u060c \u0647\u0646\u062a\u062d\u0642\u0642 \u0645\u0646 \u0647\u0648\u064a\u062a\u0643 \u0639\u0646 \u0637\u0631\u064a\u0642\u0647. \u0644\u0627\u0632\u0645 \u064a\u0643\u0648\u0646 \u0631\u0642\u0645 \u0645\u062e\u062a\u0644\u0641 \u0639\u0646 \u0631\u0642\u0645\u0643.',
+        arrow: 'top'
+      },
+      {
+        target: '.step-indicator',
+        title: '\u0627\u0644\u062e\u0637\u0648\u0627\u062a \u0627\u0644\u062b\u0644\u0627\u062b\u0629 \u2728',
+        text: '\u0627\u0644\u062a\u0633\u062c\u064a\u0644 \u0645\u0646 3 \u062e\u0637\u0648\u0627\u062a \u0628\u0633\u064a\u0637\u0629: \u0628\u064a\u0627\u0646\u0627\u062a\u0643 \u0627\u0644\u0634\u062e\u0635\u064a\u0629 \u2192 \u0627\u0644\u0635\u0641 \u0648\u0627\u0644\u0645\u062d\u0627\u0641\u0638\u0629 \u2192 \u0643\u0644\u0645\u0629 \u0627\u0644\u0645\u0631\u0648\u0631. \u0628\u0639\u062f \u0643\u062f\u0647 \u062d\u0633\u0627\u0628\u0643 \u064a\u0643\u0648\u0646 \u062c\u0627\u0647\u0632!',
+        arrow: 'bottom'
+      }
+    ];
+
+    let guideIndex = 0;
+    let overlay = null;
+    let tooltip = null;
+    let prevHighlight = null;
+
+    function removeGuide() {
+      if (overlay) { overlay.remove(); overlay = null; }
+      if (tooltip) { tooltip.remove(); tooltip = null; }
+      if (prevHighlight) { prevHighlight.classList.remove('reg-guide-highlight'); prevHighlight = null; }
+      localStorage.setItem('_regGuideSeen', '1');
+    }
+
+    function showGuideStep(idx) {
+      if (idx >= guideSteps.length) { removeGuide(); return; }
+      const step = guideSteps[idx];
+      const el = document.querySelector(step.target);
+      if (!el) { guideIndex++; showGuideStep(guideIndex); return; }
+
+      // Remove old highlight
+      if (prevHighlight) prevHighlight.classList.remove('reg-guide-highlight');
+
+      // Add overlay
+      if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.className = 'reg-guide-overlay active';
+        document.body.appendChild(overlay);
+      }
+
+      // Highlight target
+      el.classList.add('reg-guide-highlight');
+      prevHighlight = el;
+
+      // Create tooltip
+      if (tooltip) tooltip.remove();
+      tooltip = document.createElement('div');
+      tooltip.className = 'reg-guide-tooltip arrow-' + step.arrow;
+
+      // Progress dots
+      let dotsHtml = '';
+      guideSteps.forEach((_, i) => {
+        let cls = 'reg-guide-dot';
+        if (i < idx) cls += ' done';
+        if (i === idx) cls += ' active';
+        dotsHtml += '<div class="' + cls + '"></div>';
+      });
+
+      tooltip.innerHTML = `
+        <h4><i class="fas fa-lightbulb"></i> ${step.title}</h4>
+        <p>${step.text}</p>
+        <div class="reg-guide-actions">
+          <div class="reg-guide-progress">${dotsHtml}</div>
+          ${idx > 0 ? '' : '<button class="reg-guide-btn skip" id="guideSkip">\u062a\u062e\u0637\u064a</button>'}
+          <button class="reg-guide-btn primary" id="guideNext">${idx < guideSteps.length - 1 ? '\u0627\u0644\u062a\u0627\u0644\u064a' : '\u064a\u0644\u0627 \u0646\u0628\u062f\u0623!'}</button>
+        </div>
+      `;
+      document.body.appendChild(tooltip);
+
+      // Position tooltip near target
+      const rect = el.getBoundingClientRect();
+      const tooltipRect = tooltip.getBoundingClientRect();
+      if (step.arrow === 'top') {
+        tooltip.style.position = 'fixed';
+        tooltip.style.top = (rect.bottom + 12) + 'px';
+        tooltip.style.right = Math.max(10, window.innerWidth - rect.right) + 'px';
+      } else {
+        tooltip.style.position = 'fixed';
+        tooltip.style.top = (rect.top - tooltipRect.height - 12) + 'px';
+        tooltip.style.right = Math.max(10, window.innerWidth - rect.right) + 'px';
+      }
+
+      // Buttons
+      const nextBtn = document.getElementById('guideNext');
+      const skipBtn = document.getElementById('guideSkip');
+      if (nextBtn) nextBtn.addEventListener('click', () => { guideIndex++; showGuideStep(guideIndex); });
+      if (skipBtn) skipBtn.addEventListener('click', removeGuide);
+      overlay.addEventListener('click', removeGuide);
+    }
+
+    // Start after a small delay
+    setTimeout(() => showGuideStep(0), 800);
   }
 });

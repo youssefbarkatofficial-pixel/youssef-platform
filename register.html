@@ -99,11 +99,20 @@
                 </div>
                 <div class="form-group">
                     <label>كلمة المرور</label>
-                    <input type="password" id="password" class="form-control" required>
+                    <input type="password" id="password" class="form-control" style="padding-left:45px;" required>
+                </div>
+                <div id="passwordStrengthContainer" style="margin-bottom:18px; display:none;">
+                    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
+                        <span style="font-size:0.85rem; color:rgba(255,255,255,0.7);">قوة كلمة المرور:</span>
+                        <span id="passwordStrengthLabel" style="font-size:0.85rem; font-weight:700;">—</span>
+                    </div>
+                    <div style="width:100%; height:6px; background:rgba(255,255,255,0.08); border-radius:6px; overflow:hidden;">
+                        <div id="passwordStrengthBar" style="width:0%; height:100%; border-radius:6px; transition:width 0.35s ease, background 0.35s ease;"></div>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label>تأكيد كلمة المرور</label>
-                    <input type="password" id="confirmPassword" class="form-control" required>
+                    <input type="password" id="confirmPassword" class="form-control" style="padding-left:45px;" required>
                 </div>
                 
                 <div style="display: flex; gap: 15px;">
