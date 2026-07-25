@@ -1,0 +1,8 @@
+{
+  "name": "youssef-platform",
+  "version": "1.0.0",
+  "description": "منصة يوسف بركات التعليمية",
+  "scripts": {
+    "build": "echo 'Static site - no build needed'"
+  }
+}
