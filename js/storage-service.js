@@ -141,7 +141,7 @@ window.PlatformStorage = window.PlatformStorage || {
                 <div style="margin-bottom: 24px; text-align:right;">
                     <label for="yearlyGradeSelect" style="display:block; margin-bottom:10px; font-weight:700; color:#d4a64f;">الصف الدراسي الجديد</label>
                     <select id="yearlyGradeSelect" style="width:100%; padding:14px 16px; border-radius:14px; border:1px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.05); color:#ffffff; font-size:1rem;">
-                        ${gradeOptions.map(opt => `<option value="${opt.value}">${opt.label}</option>`).join('')}
+                        ${gradeOptions.map(opt => `<option value="${opt.value}" style="color: #000; background: #fff;">${opt.label}</option>`).join('')}
                     </select>
                 </div>
                 <button id="btnConfirmYearlyUpdate" style="width:100%; padding:16px 20px; border-radius:14px; border:none; background:linear-gradient(135deg,#d4a64f,#ffcc3c); color:#071326; font-size:1rem; font-weight:800; cursor:pointer;">تأكيد وتحديث الصف الدراسي</button>

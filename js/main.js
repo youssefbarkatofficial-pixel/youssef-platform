@@ -802,7 +802,8 @@ document.addEventListener('DOMContentLoaded', () => {
                   { value: 'الصف السادس الابتدائي', label: 'الصف السادس الابتدائي' },
                   { value: 'الصف الأول الإعدادي', label: 'الصف الأول الإعدادي' },
                   { value: 'الصف الثاني الإعدادي', label: 'الصف الثاني الإعدادي' },
-                  { value: 'الصف الثالث الإعدادي', label: 'الصف الثالث الإعدادي' }
+                  { value: 'الصف الثالث الإعدادي', label: 'الصف الثالث الإعدادي' },
+                  { value: 'الصف الأول الثانوي', label: 'الصف الأول الثانوي' }
               ];
 
               window.PlatformStorage.renderYearlyPromotionModal({
