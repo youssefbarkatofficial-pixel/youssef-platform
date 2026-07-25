@@ -8,6 +8,28 @@ document.addEventListener('DOMContentLoaded', () => {
     sessionStorage.setItem('currentStudent', savedStudent);
   }
 
+  // Add password visibility toggles
+  ['loginPassword', 'password', 'confirmPassword', 'fpNewPassword', 'fpConfirmPassword'].forEach(id => {
+    const input = document.getElementById(id);
+    if (input && input.parentElement) {
+      input.parentElement.style.position = 'relative';
+      const icon = document.createElement('i');
+      icon.className = 'fas fa-eye';
+      // Adjust top position based on whether there's a label. Usually label takes ~25-30px
+      icon.style.cssText = 'position:absolute; left:15px; bottom:12px; cursor:pointer; color:var(--royal-gold); z-index:10; font-size:1.1rem; padding:5px;';
+      icon.addEventListener('click', () => {
+        if (input.type === 'password') {
+          input.type = 'text';
+          icon.classList.replace('fa-eye', 'fa-eye-slash');
+        } else {
+          input.type = 'password';
+          icon.classList.replace('fa-eye-slash', 'fa-eye');
+        }
+      });
+      input.parentElement.appendChild(icon);
+    }
+  });
+
   const loginPhoneInput = document.getElementById('loginPhone');
   if (loginPhoneInput) {
     const dropdown = document.createElement('div');
@@ -905,7 +927,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const foreignCountryGroup = document.getElementById('foreignCountryGroup');
   const foreignCountryInput = document.getElementById('foreignCountry');
   if (govSelect) {
-    const govs = ['القاهرة', 'الجيزة', 'الإسكندرية', 'الشرقية', 'الدقهلية', 'الغربية', 'المنوفية', 'البحيرة', 'كفر الشيخ', 'دمياط', 'بورسعيد', 'الإسماعيلية', 'السويس', 'شمال سيناء', 'جنوب سيناء', 'الفيوم', 'بني سويف', 'المنيا', 'أسيوط', 'سوهاج', 'قنا', 'الأقصر', 'أسوان', 'البحر الأحمر', 'الوادي الجديد', 'مطروح'];
+    const govs = ['الإسكندرية', 'الإسماعيلية', 'الأقصر', 'البحر الأحمر', 'البحيرة', 'الجيزة', 'الدقهلية', 'السويس', 'الشرقية', 'الغربية', 'الفيوم', 'القاهرة', 'القليوبية', 'المنوفية', 'المنيا', 'الوادي الجديد', 'أسوان', 'أسيوط', 'بني سويف', 'بورسعيد', 'جنوب سيناء', 'دمياط', 'سوهاج', 'شمال سيناء', 'قنا', 'كفر الشيخ', 'مطروح'];
     govs.forEach(gov => {
       const option = document.createElement('option');
       option.value = gov;

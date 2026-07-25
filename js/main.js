@@ -13,8 +13,17 @@ document.addEventListener('DOMContentLoaded', () => {
                           return;
                       }
                       
-                      const doc = await window.firebaseDb.collection('students').doc(sObj.phone || sObj.uid).get();
-                      if (!doc.exists) {
+                      let exists = false;
+                      if (sObj.uid) {
+                          const doc = await window.firebaseDb.collection('students').doc(sObj.uid).get();
+                          if (doc.exists) exists = true;
+                      }
+                      if (!exists && sObj.phone) {
+                          const snap = await window.firebaseDb.collection('students').where('phone', '==', sObj.phone).limit(1).get();
+                          if (!snap.empty) exists = true;
+                      }
+                      
+                      if (!exists) {
                           sessionStorage.removeItem('currentStudent');
                           localStorage.removeItem('currentStudent');
                           let accs = JSON.parse(localStorage.getItem('savedLocalAccounts') || '[]');
