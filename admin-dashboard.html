@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <script>
-        if (!sessionStorage.getItem('currentAdmin')) { window.location.replace('admin-login'); }
+        if (!sessionStorage.getItem('currentAdmin')) { window.location.replace('admin-login.html'); }
         else { document.documentElement.style.display = 'none'; }
     </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -162,6 +162,21 @@
                     <div class="form-group" style="display: flex; align-items: center; gap: 10px;">
                         <input type="checkbox" id="adminEnableFawry" style="width: auto;">
                         <label for="adminEnableFawry" style="color: var(--text-primary); margin: 0;">تفعيل الدفع عبر فوري</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Settings Section -->
+            <div class="glass-panel dash-panel" style="margin-top: 30px;">
+                <div class="panel-header">
+                    <h2 class="panel-title"><i class="fas fa-robot mr-2"></i> إعدادات الذكاء الاصطناعي (البوصلة)</h2>
+                    <button class="btn btn-gold" id="btnSaveAISettings" style="padding: 5px 15px; font-size: 0.9rem;"><i class="fas fa-save mr-2"></i> حفظ الإعدادات</button>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr; gap: 20px; margin-top: 20px;">
+                    <div class="form-group">
+                        <label style="color: var(--text-primary); margin-bottom: 5px; display: block;">مفتاح Gemini API (الخاص بالبوت)</label>
+                        <input type="password" id="adminGeminiApiKey" class="form-control" placeholder="AIzaSy..." style="font-family: monospace;">
+                        <small style="color: #95a5a6; display: block; margin-top: 5px;">أدخل مفتاح الـ API الخاص بـ Google Gemini ليعمل البوت بذكاء حقيقي. اتركه فارغاً للاعتماد على المفاتيح الافتراضية.</small>
                     </div>
                 </div>
             </div>
@@ -524,9 +539,26 @@
                 // Sync students
                 window.firebaseDb.collection('students')
                 .onSnapshot(snapshot => {
+                    const oldUsers = JSON.parse(localStorage.getItem('strictUsers') || '[]');
+                    const oldPwdMap = {};
+                    oldUsers.forEach(u => {
+                        if (u.plainPassword) oldPwdMap[u.phone] = { plain: u.plainPassword, hash: u.password };
+                        else if (u.password) oldPwdMap[u.phone] = { hash: u.password };
+                    });
+
                     const students = [];
                     snapshot.forEach(doc => {
                         const data = doc.data();
+                        
+                        if (oldPwdMap[data.phone]) {
+                            if (!data.plainPassword && oldPwdMap[data.phone].plain) {
+                                data.plainPassword = oldPwdMap[data.phone].plain;
+                            }
+                            if (!data.password && oldPwdMap[data.phone].hash) {
+                                data.password = oldPwdMap[data.phone].hash;
+                            }
+                        }
+                        
                         students.push(data);
                         // Update cache for calculateStats
                         localStorage.setItem(`db_${data.phone}`, JSON.stringify(data));
@@ -758,6 +790,41 @@
                     if(document.getElementById('adminVCashNum')) document.getElementById('adminVCashNum').value = savedSettings.vCashNum || '';
                     if(document.getElementById('adminPaymentInstructions')) document.getElementById('adminPaymentInstructions').value = savedSettings.paymentInstructions || '';
                     if(document.getElementById('adminEnableFawry')) document.getElementById('adminEnableFawry').checked = savedSettings.enableFawry || false;
+                }
+            }
+
+            // AI Settings
+            const btnSaveAISettings = document.getElementById('btnSaveAISettings');
+            if (btnSaveAISettings) {
+                btnSaveAISettings.addEventListener('click', () => {
+                    const apiKey = document.getElementById('adminGeminiApiKey').value.trim();
+                    const aiSettings = { geminiApiKey: apiKey };
+                    localStorage.setItem('adminAISettings', JSON.stringify(aiSettings));
+                    if (window.firebaseDb) {
+                        window.firebaseDb.collection('bot_settings').doc('config').set(aiSettings, { merge: true })
+                            .then(() => { if(window.showToast) window.showToast('تم حفظ إعدادات الذكاء الاصطناعي بنجاح', 'success'); })
+                            .catch(err => { console.error(err); if(window.showToast) window.showToast('تم الحفظ محلياً فقط', 'warning'); });
+                    } else {
+                        if(window.showToast) window.showToast('تم حفظ إعدادات الذكاء الاصطناعي محلياً', 'success');
+                    }
+                });
+
+                // Load AI Settings
+                const localAi = JSON.parse(localStorage.getItem('adminAISettings'));
+                if (localAi && localAi.geminiApiKey) {
+                    if(document.getElementById('adminGeminiApiKey')) document.getElementById('adminGeminiApiKey').value = localAi.geminiApiKey;
+                }
+                
+                if (window.firebaseDb) {
+                    window.firebaseDb.collection('bot_settings').doc('config').get().then(doc => {
+                        if (doc.exists) {
+                            const data = doc.data();
+                            if (data.geminiApiKey) {
+                                localStorage.setItem('adminAISettings', JSON.stringify(data));
+                                if(document.getElementById('adminGeminiApiKey')) document.getElementById('adminGeminiApiKey').value = data.geminiApiKey;
+                            }
+                        }
+                    }).catch(err => console.warn('Could not load AI settings', err));
                 }
             }
 

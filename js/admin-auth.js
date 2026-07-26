@@ -64,7 +64,7 @@ function checkAdminAuth() {
     const adminStr = sessionStorage.getItem('currentAdmin');
     
     if (!adminStr) {
-        window.location.replace('admin-login');
+        window.location.replace('admin-login.html');
         return null;
     }
 
@@ -89,13 +89,13 @@ function checkAdminAuth() {
     
     if (!isValidLocal) {
         sessionStorage.removeItem('currentAdmin');
-        window.location.replace('admin-login');
+        window.location.replace('admin-login.html');
         return null;
     }
 
     if (admin.role !== 'admin' && admin.role !== 'owner') {
         sessionStorage.removeItem('currentAdmin');
-        window.location.replace('admin-login');
+        window.location.replace('admin-login.html');
         return null;
     }
 
@@ -109,7 +109,7 @@ function checkAdminAuth() {
                     const remoteAdmin = adminDoc.data();
                     if (remoteAdmin.password !== admin.password) {
                         sessionStorage.removeItem('currentAdmin');
-                        window.location.replace('admin-login');
+                        window.location.replace('admin-login.html');
                     }
                 } else {
                     await adminDocRef.set(admin);
@@ -185,7 +185,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (adminLoginForm) {
         // If already logged in, redirect to dashboard
         if (sessionStorage.getItem('currentAdmin')) {
-            window.location.href = 'admin-dashboard';
+            window.location.href = 'admin-dashboard.html';
         }
 
         adminLoginForm.addEventListener('submit', (e) => {
@@ -201,7 +201,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     window.showToast('تم تسجيل الدخول بنجاح. جاري التوجيه...', 'success');
                 }
                 setTimeout(() => {
-                    window.location.href = 'admin-dashboard';
+                    window.location.href = 'admin-dashboard.html';
                 }, 1000);
             } else {
                 if(errorMsg) {

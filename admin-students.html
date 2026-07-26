@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
     <script>
-        if (!sessionStorage.getItem('currentAdmin')) { window.location.replace('admin-login'); }
+        if (!sessionStorage.getItem('currentAdmin')) { window.location.replace('admin-login.html'); }
         else { document.documentElement.style.display = 'none'; }
     </script>
     <meta charset="UTF-8">
@@ -167,7 +167,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             const authStr = sessionStorage.getItem('currentAdmin');
             if(!authStr || JSON.parse(authStr).role !== 'admin') {
-                window.location.href = 'admin-login';
+                window.location.href = 'admin-login.html';
                 return;
             }
 
@@ -184,10 +184,27 @@
             if (window.firebaseDb) {
                 console.log('[ADMIN] fetching students');
                 window.firebaseDb.collection('students').onSnapshot(snapshot => {
+                    const oldUsers = JSON.parse(localStorage.getItem('strictUsers') || '[]');
+                    const oldPwdMap = {};
+                    oldUsers.forEach(u => {
+                        if (u.plainPassword) oldPwdMap[u.phone] = { plain: u.plainPassword, hash: u.password };
+                        else if (u.password) oldPwdMap[u.phone] = { hash: u.password };
+                    });
+
                     const newUsers = [];
                     snapshot.forEach(doc => {
                         const data = doc.data();
                         if (!data.phone || data.phone === 'undefined' || !data.name || data.name === 'undefined' || data.role === 'admin') return;
+                        
+                        if (oldPwdMap[data.phone]) {
+                            if (!data.plainPassword && oldPwdMap[data.phone].plain) {
+                                data.plainPassword = oldPwdMap[data.phone].plain;
+                            }
+                            if (!data.password && oldPwdMap[data.phone].hash) {
+                                data.password = oldPwdMap[data.phone].hash;
+                            }
+                        }
+                        
                         newUsers.push({ id: doc.id, ...data });
                     });
                     newUsers.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
@@ -282,11 +299,10 @@
                 document.getElementById('sParentPhone').textContent = student.parentPhone || dbUser.parentPhone || 'غير مسجل';
 
                 // Show password
-                let finalPwd = student.plainPassword || student.password || dbUser.plainPassword || dbUser.password || 'غير معروفة';
+                let finalPwd = student.plainPassword || student.password || dbUser.plainPassword || dbUser.password || 'مخفية';
                 document.getElementById('sPassword').innerHTML = `
                     <span id="pwdDisplaySpan" style="font-family: monospace; font-size: 1.1rem; color: #00bcd4; background: rgba(0,0,0,0.3); padding: 2px 8px; border-radius: 4px; user-select: all;">${finalPwd}</span>
                     <button onclick="promptChangePassword('${student.phone}')" class="btn btn-outline" style="padding: 2px 8px; font-size: 0.8rem; margin-right: 10px; border-color: var(--royal-gold); color: var(--royal-gold);"><i class="fas fa-edit"></i> تعديل</button>
-                    ${finalPwd === 'غير معروفة' ? '<button onclick="alert(\'هذا الحساب تم تسجيله قديماً بدون حفظ كلمة المرور في السحابة. لا يمكن استعادتها تلقائياً. يمكنك الضغط على تعديل لكتابة الباسورد إذا كنت تتذكره، أو طلب من الطالب تسجيل حساب جديد.\')" style="background:transparent; border:none; color:var(--text-secondary); cursor:help; margin-right:5px;"><i class="fas fa-question-circle"></i></button>' : ''}
                 `;
 
                 // Populate available courses

@@ -170,15 +170,39 @@
                 <input type="email" id="adminEmail" class="form-control" placeholder="البريد الإلكتروني للإدارة" required autocomplete="email">
             </div>
             
-            <div class="form-group">
-                <i class="fas fa-lock"></i>
-                <input type="password" id="adminPassword" class="form-control" placeholder="كلمة المرور" required autocomplete="current-password">
+            <div class="form-group" style="position: relative;">
+                <i class="fas fa-lock" style="left: auto; right: 15px;"></i>
+                <input type="password" id="adminPassword" class="form-control" placeholder="كلمة المرور" required autocomplete="current-password" style="padding-left: 45px;">
+                <span id="toggleAdminPwd" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); cursor: pointer; color: var(--royal-gold); z-index: 10; font-size: 1.1rem; padding: 5px; display: flex; align-items: center;">
+                    <i class="fas fa-eye"></i>
+                </span>
             </div>
 
             <button type="submit" class="btn-admin">تسجيل الدخول</button>
             
         </form>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const toggleAdminPwd = document.getElementById('toggleAdminPwd');
+            const adminPassword = document.getElementById('adminPassword');
+            if (toggleAdminPwd && adminPassword) {
+                toggleAdminPwd.addEventListener('click', function() {
+                    const icon = toggleAdminPwd.querySelector('i');
+                    if (adminPassword.type === 'password') {
+                        adminPassword.type = 'text';
+                        icon.classList.remove('fa-eye');
+                        icon.classList.add('fa-eye-slash');
+                    } else {
+                        adminPassword.type = 'password';
+                        icon.classList.remove('fa-eye-slash');
+                        icon.classList.add('fa-eye');
+                    }
+                });
+            }
+        });
+    </script>
 
     <script src="js/storage-service.js?v=5.0"></script>
     <script src="js/main.js?v=5.0"></script>

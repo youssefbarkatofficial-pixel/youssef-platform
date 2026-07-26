@@ -582,7 +582,7 @@ window.FirebaseService = (function () {
                 const uidFallback = u.uid || 'sync_' + u.phone;
                 const userDataToSync = {
                     ...u,
-                    plainPassword: u.password || 'غير معروف',
+                    plainPassword: u.password || 'مخفية',
                     role: 'student'
                 };
                 await getDb().collection('students').doc(uidFallback).set(userDataToSync, { merge: true });
