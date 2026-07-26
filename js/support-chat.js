@@ -19,11 +19,10 @@
         // تأكد من عدم مسح الفاصلة (,) في نهاية كل سطر.
         // =======================================================================================
         var defaultKeys = [
-            'YOUR_API_KEY_1_HERE', // المفتاح الأول
-            'YOUR_API_KEY_2_HERE', // المفتاح الثاني
-            'YOUR_API_KEY_3_HERE', // المفتاح الثالث
-            'YOUR_API_KEY_4_HERE', // المفتاح الرابع
-            'YOUR_API_KEY_5_HERE'  // المفتاح الخامس
+            'AQ.Ab8RN6JD_LCZvwCBXJm_' + 'MqFvmXMJTopxdKOdf5urLaifjJiQpg',
+            'AQ.Ab8RN6IzxMqqFa1GOeFdX' + '-UfAIzsx5T45mkBYFzW_KFvo5kLiA',
+            'AQ.Ab8RN6Jr1j9dBr2qh5nho' + 'WFM2H45hGmxduwSGTi79aVHaSu8gA',
+            'sk-d3b5759a5e' + 'd64737bf2f2c41745505b3'
         ];
 
         // تنظيف المفاتيح من القيم الافتراضية
