@@ -8,6 +8,93 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/auth.css">
+    <style>
+        /* ====== Password Tips Box ====== */
+        .password-tips-box {
+            background: rgba(212, 166, 79, 0.07);
+            border: 1px solid rgba(212, 166, 79, 0.25);
+            border-radius: 12px;
+            padding: 14px 18px;
+            margin-bottom: 18px;
+        }
+        .password-tips-box .tips-title {
+            font-size: 0.82rem;
+            color: var(--royal-gold);
+            font-weight: 700;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .tips-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 7px;
+        }
+        .tip-item {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.65);
+            transition: color 0.3s;
+        }
+        .tip-item i {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.2);
+            transition: color 0.3s;
+            flex-shrink: 0;
+        }
+        .tip-item.met {
+            color: #2ecc71;
+        }
+        .tip-item.met i {
+            color: #2ecc71;
+        }
+
+        /* ====== Username Info Box ====== */
+        .username-info-box {
+            background: linear-gradient(135deg, rgba(88, 196, 221, 0.08), rgba(88, 196, 221, 0.04));
+            border: 1px solid rgba(88, 196, 221, 0.25);
+            border-radius: 12px;
+            padding: 13px 16px;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .username-info-box .info-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(88, 196, 221, 0.12);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            color: var(--accent-cyan);
+            flex-shrink: 0;
+        }
+        .username-info-box .info-text {
+            font-size: 0.83rem;
+            color: rgba(255, 255, 255, 0.75);
+            line-height: 1.5;
+        }
+        .username-info-box .info-text strong {
+            color: var(--accent-cyan);
+            display: block;
+            font-size: 0.88rem;
+            margin-bottom: 2px;
+        }
+
+        /* ====== Step decorative icons ====== */
+        .step-icon {
+            font-size: 1.8rem;
+            text-align: center;
+            margin-bottom: 12px;
+            opacity: 0.8;
+        }
+    </style>
 </head>
 <body class="auth-page">
     <div class="bg-effects"></div>
@@ -26,8 +113,10 @@
         </div>
         <div id="registerError" class="error-message" style="text-align:center; display:none;"></div>
         <form id="registerForm">
-            <!-- Step 1: Personal Info -->
+
+            <!-- ===== Step 1: Personal Info ===== -->
             <div class="form-step active" id="step1">
+                <div class="step-icon">👤</div>
                 <h3 class="text-gold mb-1 text-center">البيانات الشخصية</h3>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
                     <div class="form-group">
@@ -62,8 +151,9 @@
                 </button>
             </div>
 
-            <!-- Step 2: Academic Info -->
+            <!-- ===== Step 2: Academic Info ===== -->
             <div class="form-step" id="step2">
+                <div class="step-icon">📚</div>
                 <h3 class="text-gold mb-1 text-center">البيانات الدراسية</h3>
                 <div class="form-group">
                     <label>الصف الدراسي</label>
@@ -96,23 +186,27 @@
                 </div>
             </div>
 
-            <!-- Step 3: Password Setup -->
+            <!-- ===== Step 3: Password Setup ===== -->
             <div class="form-step" id="step3">
+                <div class="step-icon">🔐</div>
                 <h3 class="text-gold mb-1 text-center">إعداد كلمة المرور</h3>
-                <div class="form-group text-center" style="margin-bottom:14px;">
-                    <span class="helper-text">
-                        <i class="fas fa-info-circle"></i> اسم المستخدم الخاص بك سيكون رقم الموبايل
-                    </span>
-                </div>
-                <div class="form-group">
-                    <label>كلمة المرور</label>
-                    <div class="password-wrapper">
-                        <input type="password" id="password" class="form-control" placeholder="أدخل كلمة المرور" required>
-                        <button type="button" class="eye-toggle" onclick="togglePwd('password', this)" tabindex="-1">
-                            <i class="fas fa-eye"></i>
-                        </button>
+
+                <!-- Username Info Box -->
+                <div class="username-info-box">
+                    <div class="info-icon"><i class="fas fa-user-circle"></i></div>
+                    <div class="info-text">
+                        <strong>اسم المستخدم الخاص بك</strong>
+                        سيكون رقم الموبايل الذي أدخلته في الخطوة الأولى
                     </div>
                 </div>
+
+                <!-- Password field (auth.js will add eye toggle automatically) -->
+                <div class="form-group">
+                    <label>كلمة المرور</label>
+                    <input type="password" id="password" class="form-control" placeholder="أدخل كلمة المرور" required>
+                </div>
+
+                <!-- Password Strength Bar -->
                 <div id="passwordStrengthContainer" style="margin-bottom:14px; display:none;">
                     <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
                         <span style="font-size:0.82rem; color:rgba(255,255,255,0.6);">قوة كلمة المرور:</span>
@@ -122,14 +216,24 @@
                         <div id="passwordStrengthBar" style="width:0%; height:100%; border-radius:6px; transition:width 0.35s ease, background 0.35s ease;"></div>
                     </div>
                 </div>
+
+                <!-- Password Tips Box -->
+                <div class="password-tips-box" id="passwordTipsBox">
+                    <div class="tips-title">
+                        <i class="fas fa-shield-alt"></i> إرشادات كلمة المرور
+                    </div>
+                    <div class="tips-grid">
+                        <div class="tip-item" id="tip-length"><i class="fas fa-circle-dot"></i> 4 أحرف على الأقل</div>
+                        <div class="tip-item" id="tip-number"><i class="fas fa-circle-dot"></i> يحتوي على رقم</div>
+                        <div class="tip-item" id="tip-letter"><i class="fas fa-circle-dot"></i> يحتوي على حرف</div>
+                        <div class="tip-item" id="tip-strong"><i class="fas fa-circle-dot"></i> 8+ أحرف (ممتاز)</div>
+                    </div>
+                </div>
+
+                <!-- Confirm Password (auth.js will add eye toggle automatically) -->
                 <div class="form-group">
                     <label>تأكيد كلمة المرور</label>
-                    <div class="password-wrapper">
-                        <input type="password" id="confirmPassword" class="form-control" placeholder="أعد كتابة كلمة المرور" required>
-                        <button type="button" class="eye-toggle" onclick="togglePwd('confirmPassword', this)" tabindex="-1">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                    </div>
+                    <input type="password" id="confirmPassword" class="form-control" placeholder="أعد كتابة كلمة المرور" required>
                 </div>
                 
                 <div style="display: flex; gap: 12px; margin-top: 8px;">
@@ -159,20 +263,37 @@
     <script src="js/support-chat.js?v=4.0"></script>
     <script src="js/auth.js"></script>
 
+    <!-- Live password tips checker -->
     <script>
-    function togglePwd(fieldId, btn) {
-        var input = document.getElementById(fieldId);
-        var icon = btn.querySelector('i');
-        if (input.type === 'password') {
-            input.type = 'text';
-            icon.classList.remove('fa-eye');
-            icon.classList.add('fa-eye-slash');
-        } else {
-            input.type = 'password';
-            icon.classList.remove('fa-eye-slash');
-            icon.classList.add('fa-eye');
-        }
-    }
+    (function() {
+        document.addEventListener('DOMContentLoaded', function() {
+            var pwdInput = document.getElementById('password');
+            if (!pwdInput) return;
+            var tipLength = document.getElementById('tip-length');
+            var tipNumber = document.getElementById('tip-number');
+            var tipLetter = document.getElementById('tip-letter');
+            var tipStrong = document.getElementById('tip-strong');
+
+            function updateTips(val) {
+                var setTip = function(el, met) {
+                    if (!el) return;
+                    el.classList.toggle('met', met);
+                    var icon = el.querySelector('i');
+                    if (icon) {
+                        icon.className = met ? 'fas fa-check-circle' : 'fas fa-circle-dot';
+                    }
+                };
+                setTip(tipLength, val.length >= 4);
+                setTip(tipNumber, /[0-9]/.test(val));
+                setTip(tipLetter, /[a-zA-Z\u0600-\u06FF]/.test(val));
+                setTip(tipStrong, val.length >= 8);
+            }
+
+            pwdInput.addEventListener('input', function() {
+                updateTips(this.value);
+            });
+        });
+    })();
     </script>
 </body>
 </html>
