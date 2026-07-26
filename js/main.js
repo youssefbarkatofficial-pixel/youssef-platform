@@ -21,7 +21,15 @@ document.addEventListener('DOMContentLoaded', () => {
                       }
                       if (!exists && sObj.phone) {
                           const snap = await window.firebaseDb.collection('students').where('phone', '==', sObj.phone).limit(1).get();
-                          if (!snap.empty) exists = true;
+                          if (!snap.empty) {
+                              exists = true;
+                          } else {
+                              // Check strictUsers fallback
+                              const localUsers = JSON.parse(localStorage.getItem('strictUsers') || '[]');
+                              if (localUsers.find(u => String(u.phone) === String(sObj.phone))) {
+                                  exists = true;
+                              }
+                          }
                       }
                       
                       if (!exists) {
@@ -1199,8 +1207,8 @@ document.addEventListener('DOMContentLoaded', () => {
               } catch(e) {}
               
               console.warn("Unauthorized Developer Tools access detected.");
-              sessionStorage.removeItem('currentStudent');
-              window.location.href = 'index.html';
+              // sessionStorage.removeItem('currentStudent');
+              // window.location.href = 'index.html';
           }
       }
       return '';
