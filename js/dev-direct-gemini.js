@@ -1,67 +1,192 @@
 /**
  * DEV MODE ONLY — REMOVE BEFORE PRODUCTION
- * Direct Gemini API integration for testing.
- * Owner authorized temporary key embedding.
+ * Direct Gemini & DeepSeek API integration for testing.
+ * Features: Key Rotation, Smart Caching, Dynamic Variations.
  */
 
 window.DISABLE_DIRECT_GEMINI = false;
 
 (function() {
-    console.log('[DEV GEMINI] Initializing... hostname:', window.location.hostname || 'local file');
+    console.log('[DEV GEMINI] Smart Bot Initializing...');
 
+    // ==========================================
+    // 1. CONFIGURATION (Placeholder API Keys)
+    // ==========================================
+    // أضف مفاتيح Gemini الـ 5 هنا (سيتم التبديل بينهم تلقائياً)
+    const GEMINI_KEYS = [
+        "YOUR_GEMINI_KEY_1",
+        "YOUR_GEMINI_KEY_2",
+        "YOUR_GEMINI_KEY_3",
+        "YOUR_GEMINI_KEY_4",
+        "YOUR_GEMINI_KEY_5"
+    ];
+    
+    // أضف مفتاح DeepSeek هنا (سيعمل كاحتياطي أخير)
+    const DEEPSEEK_KEY = "YOUR_DEEPSEEK_KEY";
+    
+    let currentGeminiKeyIndex = 0;
+    const CACHE_KEY = "smart_bot_cache";
+    const SYSTEM_PROMPT = "أنت المساعد الذكي (البوصلة) في منصة الأستاذ يوسف بركات لتعليم التاريخ والجغرافيا للثانوية العامة والإعدادية بمصر. أجب بشكل مباشر وعلمي ومختصر ومبسط. لا تسأل الطالب عما يقصده بل اشرح المعلومة فوراً. تكلم بلطف وتشجيع. لو السؤال مش متعلق بالدراسات قوله بلطف إنك متخصص في التاريخ والجغرافيا بس.";
+
+    // ==========================================
+    // 2. SMART CACHE UTILS
+    // ==========================================
+    function loadCache() {
+        try { return JSON.parse(localStorage.getItem(CACHE_KEY) || '{}'); } 
+        catch (e) { return {}; }
+    }
+    
+    function saveCache(cache) {
+        localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
+    }
+
+    // Creates a unique "fingerprint" for a question to ignore typos/formatting
+    function getFingerprint(text) {
+        return text.replace(/[^\w\s\u0600-\u06FF]/g, '') // إزالة علامات الترقيم
+                   .replace(/[أإآ]/g, 'ا')
+                   .replace(/ة/g, 'ه')
+                   .replace(/ى/g, 'ي')
+                   .replace(/\s+/g, ' ')
+                   .trim()
+                   .toLowerCase();
+    }
+
+    // ==========================================
+    // 3. CREATIVE VARIATIONS (Zero API Token cost)
+    // ==========================================
+    const variations = [
+        (ans) => `أهلاً بيك يا بطل! الإجابة باختصار:\n\n${ans}`,
+        (ans) => `سؤال ممتاز جداً! بص يا سيدي:\n\n${ans}`,
+        (ans) => `${ans}\n\nلو محتاج توضيح أكتر، أنا معاك!`,
+        (ans) => `${ans}\n\nأتمنى تكون الفكرة وضحت، استمر في التفوق! 🌟`,
+        (ans) => `شوف يا سيدي الموضوع بسيط:\n\n${ans}`,
+        (ans) => `${ans}` // The raw answer
+    ];
+
+    function getRandomVariation(answer) {
+        const randomIndex = Math.floor(Math.random() * variations.length);
+        return variations[randomIndex](answer);
+    }
+
+    // ==========================================
+    // 4. MAIN BOT LOGIC
+    // ==========================================
     window.askGeminiDirectly = async function(userMessage) {
-        console.log('[DEV GEMINI] Called with:', userMessage);
+        if (window.DISABLE_DIRECT_GEMINI) return { fallback: true, reply: null, reason: "killed" };
+        if (typeof userMessage !== 'string' || userMessage.length > 500) return { fallback: true, reply: null, reason: "prompt_too_long" };
 
-        if (window.DISABLE_DIRECT_GEMINI) {
-            return { fallback: true, reply: null, reason: "killed" };
-        }
+        const fingerprint = getFingerprint(userMessage);
+        const cache = loadCache();
 
-        if (typeof userMessage !== 'string' || userMessage.length > 500) {
-            return { fallback: true, reply: null, reason: "prompt_too_long" };
-        }
-
-        var apiKey = 'AQ.Ab8RN6J86krCv' + 'LMSrzdExjPxhU_T_DTEF-EOMzlWYSJK6UDmEw';
-        var systemPrompt = "أنت المساعد الذكي (البوصلة) في منصة الأستاذ يوسف بركات لتعليم التاريخ والجغرافيا للثانوية العامة والإعدادية بمصر. أجب بشكل مباشر وعلمي ومختصر ومبسط. لا تسأل الطالب عما يقصده بل اشرح المعلومة فوراً. تكلم بلطف وتشجيع. لو السؤال مش متعلق بالدراسات قوله بلطف إنك متخصص في التاريخ والجغرافيا بس.";
-
-        var models = ["gemini-2.5-flash", "gemini-2.0-flash"];
-
-        for (var i = 0; i < models.length; i++) {
-            var modelName = models[i];
-            var url = "https://generativelanguage.googleapis.com/v1beta/models/" + modelName + ":generateContent?key=" + apiKey;
-            
-            try {
-                console.log('[DEV GEMINI] Trying model:', modelName);
-                var response = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        system_instruction: { parts: [{ text: systemPrompt }] },
-                        contents: [{ role: "user", parts: [{ text: userMessage }] }],
-                        generationConfig: { temperature: 0.2, maxOutputTokens: 300 }
-                    })
-                });
-
-                if (!response.ok) {
-                    var errBody = await response.json();
-                    console.error('[DEV GEMINI] ' + modelName + ' HTTP ' + response.status, errBody);
-                    continue;
+        // --- STEP 1: CHECK SMART CACHE ---
+        let cachedAnswer = cache[fingerprint];
+        if (!cachedAnswer) {
+            // Simple fuzzy search in cache
+            for (let key in cache) {
+                if (key.length > 10 && (key.includes(fingerprint) || fingerprint.includes(key))) {
+                    cachedAnswer = cache[key];
+                    break;
                 }
-
-                var data = await response.json();
-                var text = data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0] && data.candidates[0].content.parts[0].text;
-
-                if (text) {
-                    console.log('[DEV GEMINI] SUCCESS from ' + modelName + ':', text.substring(0, 80) + '...');
-                    return { reply: text, fallback: false, provider: modelName };
-                }
-            } catch (err) {
-                console.error('[DEV GEMINI] ' + modelName + ' NETWORK ERROR:', err);
             }
         }
 
-        console.error('[DEV GEMINI] All models failed.');
-        return { fallback: true, reply: null, reason: "all_failed" };
-    };
+        if (cachedAnswer) {
+            console.log('[DEV GEMINI] 🚀 Answer served from Smart Cache! (0 Tokens spent)');
+            return { reply: getRandomVariation(cachedAnswer), fallback: false, provider: "cache" };
+        }
 
-    console.log('[DEV GEMINI] Ready. window.askGeminiDirectly =', typeof window.askGeminiDirectly);
+        // --- STEP 2: TRY GEMINI KEYS (ROTATION) ---
+        let apiResponseText = null;
+        let providerUsed = null;
+
+        for (let attempt = 0; attempt < GEMINI_KEYS.length; attempt++) {
+            let keyToUse = GEMINI_KEYS[currentGeminiKeyIndex];
+            
+            // Skip unconfigured keys
+            if (!keyToUse || keyToUse.startsWith("YOUR_GEMINI_KEY")) {
+                currentGeminiKeyIndex = (currentGeminiKeyIndex + 1) % GEMINI_KEYS.length;
+                continue;
+            }
+
+            try {
+                console.log(`[DEV GEMINI] Trying Gemini Key Index: ${currentGeminiKeyIndex}`);
+                let url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${keyToUse}`;
+                let response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
+                        contents: [{ role: "user", parts: [{ text: userMessage }] }],
+                        generationConfig: { temperature: 0.4, maxOutputTokens: 300 }
+                    })
+                });
+
+                if (response.ok) {
+                    let data = await response.json();
+                    apiResponseText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                    if (apiResponseText) {
+                        providerUsed = "gemini";
+                        break; // Success!
+                    }
+                } else if (response.status === 429) {
+                    console.warn(`[DEV GEMINI] Key ${currentGeminiKeyIndex} quota exceeded (429). Switching to next key...`);
+                    currentGeminiKeyIndex = (currentGeminiKeyIndex + 1) % GEMINI_KEYS.length;
+                } else {
+                    console.error(`[DEV GEMINI] Error with key ${currentGeminiKeyIndex}: ${response.status}`);
+                    currentGeminiKeyIndex = (currentGeminiKeyIndex + 1) % GEMINI_KEYS.length;
+                }
+            } catch (err) {
+                console.error(`[DEV GEMINI] Network error with Gemini key ${currentGeminiKeyIndex}`, err);
+                currentGeminiKeyIndex = (currentGeminiKeyIndex + 1) % GEMINI_KEYS.length;
+            }
+        }
+
+        // --- STEP 3: FALLBACK TO DEEPSEEK ---
+        if (!apiResponseText && DEEPSEEK_KEY && !DEEPSEEK_KEY.startsWith("YOUR_DEEPSEEK_KEY")) {
+            console.log('[DEV GEMINI] ⚠️ All Gemini keys failed or none valid. Falling back to DeepSeek...');
+            try {
+                let url = "https://api.deepseek.com/chat/completions";
+                let response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${DEEPSEEK_KEY}`
+                    },
+                    body: JSON.stringify({
+                        model: "deepseek-chat",
+                        messages: [
+                            { role: "system", content: SYSTEM_PROMPT },
+                            { role: "user", content: userMessage }
+                        ],
+                        temperature: 0.4,
+                        max_tokens: 300
+                    })
+                });
+
+                if (response.ok) {
+                    let data = await response.json();
+                    apiResponseText = data.choices?.[0]?.message?.content;
+                    if (apiResponseText) {
+                        providerUsed = "deepseek";
+                    }
+                } else {
+                    console.error(`[DEV DEEPSEEK] API Error: ${response.status}`);
+                }
+            } catch (err) {
+                console.error('[DEV DEEPSEEK] Network error:', err);
+            }
+        }
+
+        // --- STEP 4: SAVE TO CACHE & RETURN ---
+        if (apiResponseText) {
+            console.log(`[DEV BOT] Success! Served from: ${providerUsed}`);
+            cache[fingerprint] = apiResponseText;
+            saveCache(cache);
+            return { reply: apiResponseText, fallback: false, provider: providerUsed };
+        }
+
+        // If everything fails
+        console.error('[DEV BOT] All APIs failed entirely.');
+        return { fallback: true, reply: null, reason: "all_providers_failed" };
+    };
 })();
