@@ -52,7 +52,48 @@ window.DISABLE_DIRECT_GEMINI = false;
     }
 
     // ==========================================
-    // 3. CREATIVE VARIATIONS (Zero API Token cost)
+    // 3. OFFLINE KNOWLEDGE BASE (No-Key Fallback)
+    // ==========================================
+    const OFFLINE_KNOWLEDGE = [
+        {
+            keywords: ["من هو", "يوسف بركات", "مين يوسف", "مين الاستاذ", "صاحب المنصة", "مين المستر"],
+            answer: "الأستاذ يوسف بركات هو صانع محتوى تعليمي ومدرس متخصص في التاريخ والجغرافيا للمرحلة الإعدادية والثانوية في مصر. هدفه تبسيط المناهج وتوصيل المعلومة بشكل ممتع وسهل."
+        },
+        {
+            keywords: ["اشترك", "اشتراك", "اسجل ازاي", "طريقة الاشتراك", "ادخل كورس"],
+            answer: "للاشتراك في أي كورس، افتح صفحة 'الكورسات' من القائمة، اختار الكورس المناسب لصفك الدراسي، واضغط على 'اشترك الآن'، ثم اتبع خطوات الدفع الموضحة."
+        },
+        {
+            keywords: ["نسيت", "الباسورد", "كلمة المرور", "الرقم السري", "نسيت كلمة"],
+            answer: "لو نسيت الباسورد، تقدر تضغط على 'نسيت كلمة المرور' في صفحة تسجيل الدخول، وتدخل رقمك ورقم ولي الأمر، وهيوصلك كود التفعيل على الواتساب."
+        },
+        {
+            keywords: ["مشكلة", "عطل", "دعم", "فني", "الدفع", "مش شغال", "مش بيفتح"],
+            answer: "لو واجهتك أي مشكلة تقنية أو مشكلة في الدفع، متقلقش خالص! تقدر تتواصل مع الدعم الفني عبر واتساب على الرقم 01023675235 وهما هيحلوها فوراً."
+        },
+        {
+            keywords: ["اذاكر", "نصيحة", "مش بعرف احفظ", "بنسى", "تاريخ", "جغرافيا"],
+            answer: "أهم نصيحة في التاريخ والجغرافيا هي الفهم قبل الحفظ! اربط الأحداث ببعضها كأنها قصة، واستخدم الخرائط الذهنية. ومتنساش تراجع باستمرار عشان المعلومات تثبت."
+        },
+        {
+            keywords: ["كورسات", "المتاح", "شرح ايه", "بكام", "سعر", "الصفوف"],
+            answer: "المنصة بتقدم كورسات تاريخ وجغرافيا للمرحلة الإعدادية (أولى، تانية، تالتة) والمرحلة الثانوية. تقدر تشوف تفاصيل كل كورس وأسعاره من صفحة 'الكورسات'."
+        }
+    ];
+
+    function searchOfflineKnowledge(text) {
+        const lowerText = text.toLowerCase();
+        for (let item of OFFLINE_KNOWLEDGE) {
+            // Check if any keyword matches
+            if (item.keywords.some(kw => lowerText.includes(kw))) {
+                return item.answer;
+            }
+        }
+        return null;
+    }
+
+    // ==========================================
+    // 4. CREATIVE VARIATIONS (Zero API Token cost)
     // ==========================================
     const variations = [
         (ans) => `أهلاً بيك يا بطل! الإجابة باختصار:\n\n${ans}`,
@@ -69,7 +110,7 @@ window.DISABLE_DIRECT_GEMINI = false;
     }
 
     // ==========================================
-    // 4. MAIN BOT LOGIC
+    // 5. MAIN BOT LOGIC
     // ==========================================
     window.askGeminiDirectly = async function(userMessage) {
         if (window.DISABLE_DIRECT_GEMINI) return { fallback: true, reply: null, reason: "killed" };
@@ -78,7 +119,14 @@ window.DISABLE_DIRECT_GEMINI = false;
         const fingerprint = getFingerprint(userMessage);
         const cache = loadCache();
 
-        // --- STEP 1: CHECK SMART CACHE ---
+        // --- STEP 1: CHECK OFFLINE KNOWLEDGE (NO API NEEDED) ---
+        const offlineAnswer = searchOfflineKnowledge(userMessage);
+        if (offlineAnswer) {
+            console.log('[DEV BOT] 📚 Answer served from Offline Knowledge Base! (0 Tokens spent)');
+            return { reply: getRandomVariation(offlineAnswer), fallback: false, provider: "offline" };
+        }
+
+        // --- STEP 2: CHECK SMART CACHE ---
         let cachedAnswer = cache[fingerprint];
         if (!cachedAnswer) {
             // Simple fuzzy search in cache
@@ -91,11 +139,11 @@ window.DISABLE_DIRECT_GEMINI = false;
         }
 
         if (cachedAnswer) {
-            console.log('[DEV GEMINI] 🚀 Answer served from Smart Cache! (0 Tokens spent)');
+            console.log('[DEV BOT] 🚀 Answer served from Smart Cache! (0 Tokens spent)');
             return { reply: getRandomVariation(cachedAnswer), fallback: false, provider: "cache" };
         }
 
-        // --- STEP 2: TRY GEMINI KEYS (ROTATION) ---
+        // --- STEP 3: TRY GEMINI KEYS (ROTATION) ---
         let apiResponseText = null;
         let providerUsed = null;
 
@@ -185,8 +233,15 @@ window.DISABLE_DIRECT_GEMINI = false;
             return { reply: apiResponseText, fallback: false, provider: providerUsed };
         }
 
-        // If everything fails
+        // --- STEP 5: ULTIMATE FALLBACK (IF APIs FAIL AND NOT IN OFFLINE KB) ---
         console.error('[DEV BOT] All APIs failed entirely.');
-        return { fallback: true, reply: null, reason: "all_providers_failed" };
+        const ultimateFallbackAnswers = [
+            "حالياً بواجه ضغط بسيط في النظام، بس متقلقش أنا معاك! تقدر تسألني سؤال محدد بخصوص الكورسات أو المنصة وهرد عليك فوراً.",
+            "الإنترنت عندي بطيء شوية 😅، ممكن تعيد سؤالك بشكل تاني أو تسألني عن الاشتراكات والكورسات؟",
+            "عفواً يا بطل، مقدرتش أوصل للمعلومة دي حالياً بسبب تحديث في النظام. لو في سؤال تاني يخص المنهج أنا تحت أمرك!"
+        ];
+        const randomFallback = ultimateFallbackAnswers[Math.floor(Math.random() * ultimateFallbackAnswers.length)];
+        
+        return { reply: randomFallback, fallback: true, provider: "ultimate_fallback" };
     };
 })();
