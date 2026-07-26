@@ -922,10 +922,34 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         throw new Error('Firebase not configured');
       } catch (error) {
+        console.warn('Firebase login failed, trying STRICT Local Storage fallback:', error);
+        
+        // Try local storage first!
+        const users = JSON.parse(localStorage.getItem('strictUsers') || '[]');
+        let user = null;
+        if (isEmailInput) {
+          user = users.find(u => u.email && u.email.toLowerCase() === rawId.toLowerCase());
+        } else {
+          user = users.find(u => u.phone === rawId);
+        }
+        
+        if (user && user.password === pwd) {
+          // Local fallback success!
+          sessionStorage.setItem('currentStudent', JSON.stringify(user));
+          sessionStorage.setItem('pfJustLoggedIn', 'true');
+          if (rememberMe) localStorage.setItem('currentStudent', JSON.stringify(user));
+          if (typeof window.pfTransferGuestSupportSessionToAccount === 'function') {
+            window.pfTransferGuestSupportSessionToAccount(user);
+          }
+          try { if (window.audioManager && window.audioManager.play) window.audioManager.play('login'); } catch(e) {}
+          window.location.href = 'dashboard.html';
+          return;
+        }
+
+        // If not found locally, then show Firebase error
         if (window.FirebaseService && window.FirebaseService.isReady()) {
             console.warn('Firebase login rejected:', error);
-                        let userMsg = 'حدث خطأ أثناء الاتصال بالخادم. يرجى المحاولة لاحقاً.';
-            // Map common Firebase auth errors to Arabic
+            let userMsg = 'حدث خطأ أثناء الاتصال بالخادم. يرجى المحاولة لاحقاً.';
             if (error.code === 'custom/user-not-found' || error.code === 'auth/user-not-found') {
                 userMsg = 'هذا الحساب غير مسجل على المنصة، اضغط إنشاء حساب جديد للدخول';
             } else if (error.code === 'auth/invalid-email' || error.code === 'auth/invalid-credential') {
@@ -942,49 +966,11 @@ document.addEventListener('DOMContentLoaded', () => {
             showLoginError(userMsg);
             return;
         }
-        console.warn('Firebase failed/not configured, using STRICT Local Storage fallback.', error);
-        const users = JSON.parse(localStorage.getItem('strictUsers') || '[]');
-        let user = null;
-        if (isEmailInput) {
-          user = users.find(u => u.email && u.email.toLowerCase() === rawId.toLowerCase());
-        } else {
-          user = users.find(u => u.phone === rawId);
-        }
-        if (!user) {
-          showLoginError('لم يتم العثور على حساب بهذا الرقم أو البريد الإلكتروني. يمكنك إنشاء حساب جديد.');
-          return;
-        }
-        if (user.password !== pwd) {
-          showLoginError('كلمة المرور غير صحيحة. حاول مرة أخرى.');
-          return;
-        }
-        sessionStorage.setItem('currentStudent', JSON.stringify(user));
-        sessionStorage.setItem('pfJustLoggedIn', 'true');
-        if (rememberMe) {
-          localStorage.setItem('currentStudent', JSON.stringify(user));
-          let savedAccounts = JSON.parse(localStorage.getItem('savedLocalAccounts') || '[]');
-          savedAccounts = savedAccounts.filter(a => a.phone !== rawId);
-          savedAccounts.push({ phone: rawId, pwd, name: user.name || 'طالب' });
-          localStorage.setItem('savedLocalAccounts', JSON.stringify(savedAccounts));
-        }
-        if (typeof window.pfTransferGuestSupportSessionToAccount === 'function') {
-          window.pfTransferGuestSupportSessionToAccount(user);
-        }
 
-        // استخراج الاسم الأول
-        let firstName = "يا بطل";
-        if (user.fullName) { firstName = user.fullName.split(' ')[0]; }
-        else if (user.name) { firstName = user.name.split(' ')[0]; }
+        showLoginError('لم يتم العثور على حساب بهذا الرقم أو البريد الإلكتروني. يمكنك إنشاء حساب جديد.');
+        return;
+      }
 
-        // فصل المالك
-        if (user.email === "youssef@barakat.com" || user.role === 'admin' || user.isAdmin === true) {
-          console.log('Admin logged in (local)');
-        } else {
-          try { if (window.audioManager && window.audioManager.play) window.audioManager.play('login'); } catch(e) {}
-          // Immediate student-name toast removed; dashboard welcome will handle personalized greeting.
-        }
-
-        window.location.href = 'dashboard.html';
       } finally {
         setButtonState(submitBtn, 'دخول للمنصة', false);
       }
