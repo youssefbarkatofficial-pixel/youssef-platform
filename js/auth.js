@@ -969,8 +969,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         showLoginError('لم يتم العثور على حساب بهذا الرقم أو البريد الإلكتروني. يمكنك إنشاء حساب جديد.');
         return;
-      }
-
       } finally {
         setButtonState(submitBtn, 'دخول للمنصة', false);
       }
