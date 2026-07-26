@@ -1,15 +1,26 @@
 /* ========================
    Auth Pages - Premium Design
    ======================== */
+
+/* Force scroll to work on auth pages (fixes overflow-x:hidden conflict) */
+html:has(body.auth-page) {
+  overflow-y: auto;
+  height: auto;
+}
+
+body.auth-page {
+  overflow-y: auto !important;
+  overflow-x: hidden;
+}
+
 .auth-page {
   min-height: 100vh;
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  padding: 40px 15px 60px;
+  padding: 30px 15px 50px;
   background: radial-gradient(ellipse at 20% 50%, rgba(12, 35, 64, 0.9) 0%, var(--primary-navy) 60%),
               radial-gradient(ellipse at 80% 20%, rgba(212, 166, 79, 0.08) 0%, transparent 50%);
-  overflow-y: auto;
   position: relative;
 }
 
