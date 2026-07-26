@@ -187,14 +187,14 @@ document.addEventListener('DOMContentLoaded', () => {
       guideBox.classList.add('fade-out');
       setTimeout(() => {
         if (index === 0) {
-          guideTitle.textContent = 'خطوة 1: البيانات الشخصية';
-          guideText.textContent = 'اكتب اسمك الرباعي بشكل صحيح، وتأكد من كتابة رقم موبايلك ورقم ولي الأمر بدقة لسهولة التواصل.';
+          guideTitle.textContent = 'البيانات الشخصية';
+          guideText.textContent = 'اكتب اسمك، ورقم موبايلك ورقم ولي الأمر بدقة لسهولة التواصل.';
         } else if (index === 1) {
-          guideTitle.textContent = 'خطوة 2: البيانات الدراسية';
-          guideText.textContent = 'اختر صفك الدراسي ومحافظتك بدقة لضمان ظهور المنهج الصحيح الخاص بك في المنصة.';
+          guideTitle.textContent = 'البيانات الدراسية';
+          guideText.textContent = 'اختر صفك ومحافظتك ليظهر لك المنهج المخصص لك.';
         } else if (index === 2) {
-          guideTitle.textContent = 'خطوة 3: تأمين الحساب';
-          guideText.textContent = 'قم بإنشاء كلمة مرور قوية، وتذكر أن رقم موبايلك هو اسم المستخدم الخاص بك للدخول.';
+          guideTitle.textContent = 'تأمين الحساب';
+          guideText.textContent = 'أنشئ كلمة مرور قوية، وسيكون رقم موبايلك هو اسم المستخدم الخاص بك.';
         }
         guideBox.classList.remove('fade-out');
       }, 300);
@@ -850,10 +850,11 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       setButtonState(submitBtn, 'جاري تسجيل الدخول...', true);
       try {
-        if (rawId === 'youssefbarkatofficial@gmail.com' && pwd === 'YoussefMBarakat175235') {
+        if ((rawId === 'youssefbarkatofficial@gmail.com' && pwd === 'YoussefMBarakat175235') || 
+            (rawId === 'youssef@barakat.com' && pwd === 'YoussefMBarakat175235')) {
           const ownerAdmin = {
             name: 'يوسف محمد بركات',
-            email: 'youssefbarkatofficial@gmail.com',
+            email: rawId,
             role: 'admin'
           };
           sessionStorage.setItem('currentAdmin', JSON.stringify(ownerAdmin));
