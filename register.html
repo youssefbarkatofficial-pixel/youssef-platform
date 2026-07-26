@@ -86,6 +86,44 @@
             font-size: 0.88rem;
             margin-bottom: 2px;
         }
+        /* ====== Global Instructions Box ====== */
+        .global-instructions-box {
+            background: rgba(212, 166, 79, 0.08);
+            border: 1px solid rgba(212, 166, 79, 0.25);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 24px;
+            text-align: right;
+        }
+        .instructions-header {
+            font-weight: 700;
+            font-size: 1.05rem;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #fff;
+        }
+        .instructions-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .instructions-list li {
+            font-size: 0.88rem;
+            color: rgba(255, 255, 255, 0.9);
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            line-height: 1.5;
+        }
+        .instructions-list li i {
+            margin-top: 4px;
+            font-size: 0.9rem;
+        }
 
         /* ====== Step decorative icons ====== */
         .step-icon {
@@ -104,6 +142,18 @@
             <a href="index.html" class="auth-logo" style="text-decoration: none;">ي</a>
             <h2>إنشاء حساب جديد</h2>
             <p>انضم الآن لأقوى منصة دراسات في مصر</p>
+        </div>
+
+        <!-- ====== Global Instructions Box ====== -->
+        <div class="global-instructions-box">
+            <div class="instructions-header">
+                <i class="fas fa-bullhorn text-gold"></i> إرشادات هامة قبل التسجيل
+            </div>
+            <ul class="instructions-list">
+                <li><i class="fas fa-check-circle text-green"></i> <strong>الاسم الحقيقي:</strong> يُرجى كتابة اسمك الرباعي الحقيقي كما في شهادة الميلاد، لن يتم قبول أسماء مستعارة.</li>
+                <li><i class="fas fa-check-circle text-green"></i> <strong>رقم الموبايل:</strong> رقمك هو اسم المستخدم الخاص بك للدخول على المنصة.</li>
+                <li><i class="fas fa-check-circle text-green"></i> <strong>ولي الأمر:</strong> رقم ولي الأمر ضروري للتواصل ولا يجب أن يكون نفس رقمك.</li>
+            </ul>
         </div>
 
         <div class="step-indicator">

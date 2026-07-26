@@ -317,9 +317,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const email = `${phone}@student.youssefbarakat.com`;
         userData.email = email;
         setButtonState(submitBtn, 'جاري إنشاء الحساب...', true);
+        let finalUserData = userData;
         try {
           if (window.FirebaseService && window.FirebaseService.isReady()) {
-            await window.FirebaseService.registerStudent(userData, pwd);
+            finalUserData = await window.FirebaseService.registerStudent(userData, pwd);
           } else {
             throw new Error('Firebase not configured');
           }
@@ -338,8 +339,8 @@ document.addEventListener('DOMContentLoaded', () => {
           setButtonState(submitBtn, 'إنشاء الحساب', false);
         }
         try {
-          if (window.PlatformStorage && userData.phone) {
-            window.PlatformStorage.initializeNewStudent(userData.phone, userData.grade, userData.date);
+          if (window.PlatformStorage && finalUserData.phone) {
+            window.PlatformStorage.initializeNewStudent(finalUserData.phone, finalUserData.grade, finalUserData.date);
           }
         } catch (error) {
           console.warn('PlatformStorage initialization failed after registration', error);
@@ -353,14 +354,14 @@ document.addEventListener('DOMContentLoaded', () => {
           console.warn('Registration celebration failed', error);
         }
         try {
-          sessionStorage.setItem('currentStudent', JSON.stringify(userData));
+          sessionStorage.setItem('currentStudent', JSON.stringify(finalUserData));
         } catch (e) {
           console.warn('sessionStorage setItem failed', e);
         }
         
         try {
           if (typeof window.pfTransferGuestSupportSessionToAccount === 'function') {
-            window.pfTransferGuestSupportSessionToAccount(userData);
+            window.pfTransferGuestSupportSessionToAccount(finalUserData);
           }
         } catch (error) {
           console.warn('Guest session transfer failed', error);
