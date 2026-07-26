@@ -297,7 +297,10 @@
       }
 
       // Fallback
-      return "عشان أقدر أساعدك، تحب تذاكر تاريخ ولا جغرافيا؟";
+      if (sessionStorage.getItem('currentAdmin') || localStorage.getItem('currentAdmin')) {
+          return "⚠️ تنبيه للمسؤول: الذكاء الاصطناعي معطل حالياً لأن مفاتيح الـ API (Gemini) غير موجودة أو انتهت حصتها على هذا المتصفح. برجاء إضافتها من إعدادات الذكاء الاصطناعي في لوحة الإدارة ليعمل البوت بذكاء كامل.";
+      }
+      return "أنا هنا لمساعدتك، بس معلش كلامك مش واضح بالنسبة لي أوي. ممكن توضح سؤالك أو مشكلتك أكتر؟";
   }
 
   function resolvePendingAnswer(normalized, mem) {
