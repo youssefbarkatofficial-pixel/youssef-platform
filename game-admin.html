@@ -1,9 +1,9 @@
-๏ปฟ<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ููุญุฉ ุชุญูู… ุตุฑุงุน ุงูุจูุตูุฉ ๐‘‘</title>
+  <title>แๆอษ สอ฿ใ ีัวฺ วแศๆีแษ ??</title>
   
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -151,13 +151,13 @@
   <!-- Sidebar -->
   <div class="sidebar">
     <div class="sidebar-header">
-      <h2>๐‘‘ ููุญุฉ ุงูุฅุฏุงุฑุฉ</h2>
-      <p>ุตูุฑุงุน ุงูุจูุตูุฉ</p>
+      <h2>?? แๆอษ วแลฯวัษ</h2>
+      <p>ี๖ัวฺ วแศๆีแษ</p>
     </div>
-    <button class="nav-btn active" onclick="switchTab('dashboard')"><i class="fas fa-chart-pie"></i> ุฅุญุตุงุฆูุงุช ุนุงู…ุฉ</button>
-    <button class="nav-btn" onclick="switchTab('players')"><i class="fas fa-users"></i> ุงููุงุนุจูู</button>
-    <button class="nav-btn" onclick="switchTab('questions')"><i class="fas fa-database"></i> ุฅุฏุงุฑุฉ ุงูุฃุณุฆูุฉ</button>
-    <button class="nav-btn" onclick="switchTab('settings')"><i class="fas fa-cog"></i> ุฅุนุฏุงุฏุงุช ุงููุนุจุฉ</button>
+    <button class="nav-btn active" onclick="switchTab('dashboard')"><i class="fas fa-chart-pie"></i> ลอีวฦํวส ฺวใษ</button>
+    <button class="nav-btn" onclick="switchTab('players')"><i class="fas fa-users"></i> วแแวฺศํไ</button>
+    <button class="nav-btn" onclick="switchTab('questions')"><i class="fas fa-database"></i> ลฯวัษ วแรำฦแษ</button>
+    <button class="nav-btn" onclick="switchTab('settings')"><i class="fas fa-cog"></i> ลฺฯวฯวส วแแฺศษ</button>
   </div>
 
   <!-- Main Content -->
@@ -165,86 +165,86 @@
     
     <!-- Dashboard -->
     <div id="sec-dashboard" class="section active">
-      <h1 class="page-title">ูุธุฑุฉ ุนุงู…ุฉ</h1>
+      <h1 class="page-title">ไูัษ ฺวใษ</h1>
       
       <div class="stats-grid">
         <div class="stat-card">
           <div class="icon"><i class="fas fa-users"></i></div>
           <div class="val" id="stat-total-players">0</div>
-          <div class="lbl">ุฅุฌู…ุงูู ุงููุงุนุจูู</div>
+          <div class="lbl">ลฬใวแํ วแแวฺศํไ</div>
         </div>
         <div class="stat-card">
           <div class="icon"><i class="fas fa-gamepad"></i></div>
           <div class="val" id="stat-total-matches">0</div>
-          <div class="lbl">ุงูู…ุจุงุฑูุงุช ุงูู…ูุนูุจุฉ</div>
+          <div class="lbl">วแใศวัํวส วแใแฺๆศษ</div>
         </div>
         <div class="stat-card">
           <div class="icon"><i class="fas fa-star"></i></div>
           <div class="val" id="stat-total-xp">0</div>
-          <div class="lbl">ุฅุฌู…ุงูู XP ุงูู…ูุฒุน</div>
+          <div class="lbl">ลฬใวแํ XP วแใๆาฺ</div>
         </div>
       </div>
     </div>
 
     <!-- Players -->
     <div id="sec-players" class="section">
-      <h1 class="page-title">ุฅุฏุงุฑุฉ ุงููุงุนุจูู</h1>
+      <h1 class="page-title">ลฯวัษ วแแวฺศํไ</h1>
       <div style="display:flex;gap:10px;margin-bottom:20px;">
-        <input type="text" id="search-player" placeholder="ุงุจุญุซ ุจุงุณู… ุงููุงุนุจ ุฃู ุงูุจุฑูุฏ..." style="padding:10px;border-radius:8px;border:1px solid var(--dark-border);background:var(--dark-bg);color:white;flex:1;">
+        <input type="text" id="search-player" placeholder="วศอห ศวำใ วแแวฺศ รๆ วแศัํฯ..." style="padding:10px;border-radius:8px;border:1px solid var(--dark-border);background:var(--dark-bg);color:white;flex:1;">
         <select id="filter-grade" style="padding:10px;border-radius:8px;border:1px solid var(--dark-border);background:var(--dark-bg);color:white;">
-          <option value="all">ูู ุงูุตููู</option>
-          <option value="7">ุฃูู ุฅุนุฏุงุฏู</option>
-          <option value="8">ุซุงูู ุฅุนุฏุงุฏู</option>
-          <option value="9">ุซุงูุซ ุฅุนุฏุงุฏู</option>
-          <option value="10">ุฃูู ุซุงููู</option>
+          <option value="all">฿แ วแีÝๆÝ</option>
+          <option value="7">รๆแ ลฺฯวฯํ</option>
+          <option value="8">หวไํ ลฺฯวฯํ</option>
+          <option value="9">หวแห ลฺฯวฯํ</option>
+          <option value="10">รๆแ หวไๆํ</option>
         </select>
-        <button class="btn-primary" onclick="loadPlayers()"><i class="fas fa-search"></i> ุจุญุซ</button>
+        <button class="btn-primary" onclick="loadPlayers()"><i class="fas fa-search"></i> ศอห</button>
       </div>
 
       <table>
         <thead>
           <tr>
-            <th>ุงูุงุณู…</th>
-            <th>ุงูุตู</th>
-            <th>ุงูุฑุชุจุฉ</th>
+            <th>วแวำใ</th>
+            <th>วแีÝ</th>
+            <th>วแัสศษ</th>
             <th>XP</th>
-            <th>ุงูู…ุจุงุฑูุงุช</th>
-            <th>ุฅุฌุฑุงุกุงุช</th>
+            <th>วแใศวัํวส</th>
+            <th>ลฬัวมวส</th>
           </tr>
         </thead>
         <tbody id="players-table-body">
-          <tr><td colspan="6" style="text-align:center;">ุฌุงุฑู ุงูุชุญู…ูู...</td></tr>
+          <tr><td colspan="6" style="text-align:center;">ฬวัํ วแสอใํแ...</td></tr>
         </tbody>
       </table>
     </div>
 
     <!-- Questions -->
     <div id="sec-questions" class="section">
-      <h1 class="page-title">ุจูู ุงูุฃุณุฆูุฉ</h1>
+      <h1 class="page-title">ศไ฿ วแรำฦแษ</h1>
       <p style="color:var(--text-muted);margin-bottom:20px;">
-        ุงูุฃุณุฆูุฉ ุญุงููุงู ุชูุฑุฃ ู…ู ู…ูู `js/game-questions.js`. ูู…ูู ุจุฑู…ุฌุชูุง ูุงุญูุงู ูุชูุฑุฃ ู…ู Firebase.
+        วแรำฦแษ อวแํว๐ สÞัร ใไ ใแÝ `js/game-questions.js`. ํใ฿ไ ศัใฬสๅว แวอÞว๐ แสÞัร ใไ Firebase.
       </p>
-      <button class="btn-primary" onclick="alert('ูู ุงูุฅุตุฏุงุฑ ุงููุงุฏู… ุณูุชู… ุฑุจุท ุฅุถุงูุฉ ุงูุฃุณุฆูุฉ ุจูุงุนุฏุฉ ุจูุงูุงุช Firebase ูุชุณููู ุฅุถุงูุชูุง ู…ู ููุญุฉ ุงูุชุญูู… ุจุฏูู ุชุนุฏูู ุงูููุฏ.')">
-        <i class="fas fa-plus"></i> ุฅุถุงูุฉ ุณุคุงู ุฌุฏูุฏ (ูุฑูุจุงู)
+      <button class="btn-primary" onclick="alert('Ýํ วแลีฯวั วแÞวฯใ ำํสใ ัศุ ลึวÝษ วแรำฦแษ ศÞวฺฯษ ศํวไวส Firebase แสำๅํแ ลึวÝสๅว ใไ แๆอษ วแสอ฿ใ ศฯๆไ สฺฯํแ วแ฿ๆฯ.')">
+        <i class="fas fa-plus"></i> ลึวÝษ ำฤวแ ฬฯํฯ (Þัํศว๐)
       </button>
     </div>
 
     <!-- Settings -->
     <div id="sec-settings" class="section">
-      <h1 class="page-title">ุญุณุงุจ ุญุงุฑุณ ุงูุจูุตูุฉ (ุงูู…ุงูู)</h1>
+      <h1 class="page-title">อำวศ อวัำ วแศๆีแษ (วแใวแ฿)</h1>
       <div class="stat-card" style="text-align:right; max-width:500px;">
-        <h3>ุชุนุฏูู ููุงุท ููุณู ุจุฑูุงุช</h3>
-        <p style="color:var(--text-muted);margin-bottom:16px;">ูุฅุจูุงุก ุญุณุงุจู ุฏุงุฆู…ุงู ูู ุงูุตุฏุงุฑุฉ ูู€ "ุญุงุฑุณ ุงูุจูุตูุฉ ุงูุฃุนุธู…"</p>
+        <h3>สฺฯํแ ไÞวุ ํๆำÝ ศั฿วส</h3>
+        <p style="color:var(--text-muted);margin-bottom:16px;">แลศÞวม อำวศ฿ ฯวฦใว๐ Ýํ วแีฯวัษ ฿Ü "อวัำ วแศๆีแษ วแรฺูใ"</p>
         
         <div class="form-group">
-          <label>ุงูู€ UID ูุญุณุงุจู</label>
-          <input type="text" id="owner-uid" placeholder="ุงูุตู ุงูู€ UID ุงูุฎุงุต ุจู ููุง">
+          <label>วแÜ UID แอำวศ฿</label>
+          <input type="text" id="owner-uid" placeholder="วแีÞ วแÜ UID วแฮวี ศ฿ ๅไว">
         </div>
         <div class="form-group">
-          <label>ุชุนููู ููุงุท XP</label>
+          <label>สฺํํไ ไÞวุ XP</label>
           <input type="number" id="owner-xp" value="999999">
         </div>
-        <button class="btn-primary" onclick="setOwnerXP()">ุญูุธ ุงูููุงุท</button>
+        <button class="btn-primary" onclick="setOwnerXP()">อÝู วแไÞวุ</button>
       </div>
     </div>
 
@@ -253,31 +253,31 @@
   <!-- Edit Player Modal -->
   <div class="modal" id="edit-modal">
     <div class="modal-content">
-      <h3>ุชุนุฏูู ุงููุงุนุจ</h3>
+      <h3>สฺฯํแ วแแวฺศ</h3>
       <input type="hidden" id="edit-uid">
       <div class="form-group">
-        <label>ุงูุงุณู…</label>
+        <label>วแวำใ</label>
         <input type="text" id="edit-name" readonly style="opacity:0.7">
       </div>
       <div class="form-group">
-        <label>ููุงุท XP</label>
+        <label>ไÞวุ XP</label>
         <input type="number" id="edit-xp">
       </div>
       <div class="form-group">
-        <label>ุงูุงูุชุตุงุฑุงุช</label>
+        <label>วแวไสีวัวส</label>
         <input type="number" id="edit-wins">
       </div>
       <div style="display:flex;gap:10px;margin-top:20px;">
-        <button class="btn-primary" style="flex:1" onclick="savePlayerEdit()">ุญูุธ</button>
-        <button class="action-btn" style="flex:1" onclick="document.getElementById('edit-modal').classList.remove('active')">ุฅูุบุงุก</button>
+        <button class="btn-primary" style="flex:1" onclick="savePlayerEdit()">อÝู</button>
+        <button class="action-btn" style="flex:1" onclick="document.getElementById('edit-modal').classList.remove('active')">ลแÛวม</button>
       </div>
     </div>
   </div>
 
   <!-- Firebase Script -->
-  <script src="js/firebase-config.js"></script>
+  <script src="js/firebase-config.js?v=5.0"></script>
   <!-- Game Engine (for Ranks) -->
-  <script src="js/game-engine.js"></script>
+  <script src="js/game-engine.js?v=5.0"></script>
 
   <script>
     // Security Check: Assume authorized if embedded in admin dashboard
@@ -322,7 +322,7 @@
     async function loadPlayers() {
       if(!window.firebaseDb) return;
       const tbody = document.getElementById('players-table-body');
-      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">ุฌุงุฑู ุงูุชุญู…ูู...</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">ฬวัํ วแสอใํแ...</td></tr>';
       
       const gradeFilter = document.getElementById('filter-grade').value;
       const search = document.getElementById('search-player').value.trim().toLowerCase();
@@ -338,7 +338,7 @@
         
         snap.forEach(doc => {
           const d = doc.data();
-          const name = (d.name || 'ู…ุฌููู').toLowerCase();
+          const name = (d.name || 'ใฬๅๆแ').toLowerCase();
           
           if (search && !name.includes(search)) return; // Simple client-side search filter
 
@@ -346,24 +346,24 @@
           
           html += `
             <tr>
-              <td>${d.name || 'ู…ุฌููู'}</td>
+              <td>${d.name || 'ใฬๅๆแ'}</td>
               <td>${d.grade || '---'}</td>
               <td><span style="color:var(--gold)">${rank}</span></td>
               <td>${d.gameXp || 0}</td>
               <td>${d.gamesPlayed || 0}</td>
               <td>
-                <button class="action-btn" onclick="openEditModal('${doc.id}', '${d.name}', ${d.gameXp||0}, ${d.gameWins||0})">ุชุนุฏูู</button>
+                <button class="action-btn" onclick="openEditModal('${doc.id}', '${d.name}', ${d.gameXp||0}, ${d.gameWins||0})">สฺฯํแ</button>
               </td>
             </tr>
           `;
         });
 
-        if(html === '') html = '<tr><td colspan="6" style="text-align:center;">ูุง ููุฌุฏ ูุงุนุจูู</td></tr>';
+        if(html === '') html = '<tr><td colspan="6" style="text-align:center;">แว ํๆฬฯ แวฺศํไ</td></tr>';
         tbody.innerHTML = html;
 
       } catch(e) {
         console.error(e);
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:red;">ุญุฏุซ ุฎุทุฃ ูู ุงูุชุญู…ูู</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:red;">อฯห ฮุร Ýํ วแสอใํแ</td></tr>';
       }
     }
 
@@ -387,26 +387,26 @@
         });
         document.getElementById('edit-modal').classList.remove('active');
         loadPlayers();
-        alert('ุชู… ุงูุญูุธ ุจูุฌุงุญ');
+        alert('สใ วแอÝู ศไฬวอ');
       } catch(e) {
-        alert('ุญุฏุซ ุฎุทุฃ: ' + e.message);
+        alert('อฯห ฮุร: ' + e.message);
       }
     }
 
     async function setOwnerXP() {
       const uid = document.getElementById('owner-uid').value.trim();
       const xp = parseInt(document.getElementById('owner-xp').value) || 999999;
-      if (!uid) return alert('ุฃุฏุฎู ุงูู€ UID ุงูุฎุงุต ุจู');
+      if (!uid) return alert('รฯฮแ วแÜ UID วแฮวี ศ฿');
 
       try {
         await window.firebaseDb.collection('users').doc(uid).set({
           gameXp: xp,
-          name: "ููุณู ุจุฑูุงุช",
+          name: "ํๆำÝ ศั฿วส",
           grade: "owner"
         }, { merge: true });
-        alert('ุชู… ุชุนููู ููุงุท ุงูู…ุงูู ุจูุฌุงุญ!');
+        alert('สใ สฺํํไ ไÞวุ วแใวแ฿ ศไฬวอ!');
       } catch(e) {
-        alert('ุญุฏุซ ุฎุทุฃ: ' + e.message);
+        alert('อฯห ฮุร: ' + e.message);
       }
     }
   </script>

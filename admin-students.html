@@ -105,6 +105,10 @@
                         <li><strong>نسبة حل الواجبات:</strong> <span id="sHwRate">0%</span></li>
                         <li><strong>متوسط الامتحانات:</strong> <span id="sExamAvg">0/0</span></li>
                         <li style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed rgba(255,255,255,0.2);">
+                            <strong><i class="fas fa-phone text-gold"></i> رقم ولي الأمر:</strong> 
+                            <span id="sParentPhone" dir="ltr">...</span>
+                        </li>
+                        <li style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed rgba(255,255,255,0.2);">
                             <strong><i class="fas fa-key text-gold"></i> كلمة المرور الحالية:</strong> 
                             <span id="sPassword" style="font-family: monospace; font-size: 1.1rem; color: #00bcd4; background: rgba(0,0,0,0.3); padding: 2px 8px; border-radius: 4px; user-select: all;">...</span>
                         </li>
@@ -158,7 +162,7 @@
         </div>
     </div>
 
-    <script src="js/admin-auth.js"></script>
+    <script src="js/admin-auth.js?v=5.0"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const authStr = sessionStorage.getItem('currentAdmin');
@@ -208,10 +212,14 @@
                     let dbUser = JSON.parse(localStorage.getItem(`db_${u.phone}`)) || { courses: [] };
                     const coursesCount = dbUser.courses ? dbUser.courses.length : 0;
                     
-                    // Mock online status randomly for demo, real implementation requires backend heartbeat
-                    const isOnline = Math.random() > 0.5;
+                    // Real online status checking if lastActive exists and is recent
+                    let isOnline = false;
+                    if (dbUser.lastActive || u.lastActive) {
+                        const last = new Date(dbUser.lastActive || u.lastActive);
+                        if ((new Date() - last) < 15 * 60 * 1000) isOnline = true;
+                    }
                     const statusBadge = isOnline ? 
-                        '<span class="badge" style="background: rgba(46, 204, 113, 0.2); color: #2ecc71;">متصل الآن</span>' : 
+                        '<span class="badge" style="background: rgba(46, 204, 113, 0.2); color: #2ecc71;">متصل قريباً</span>' : 
                         '<span class="badge" style="background: rgba(149, 165, 166, 0.2); color: #95a5a6;">غير متصل</span>';
                         
                     const grades = {'prep1':'أولى إعدادي', 'prep2':'تانية إعدادي', 'prep3':'تالتة إعدادي', 'sec1':'أولى ثانوي'};
@@ -253,13 +261,33 @@
 
                 // Set strictly real stats
                 const stats = dbUser.stats || { homeworkCompleted: 0, homeworkTotal: 0, examAverage: 0 };
-                document.getElementById('sLastSeen').textContent = Math.random() > 0.5 ? 'متصل الآن' : 'غير متصل';
+                let isOnline = false;
+                if (dbUser.lastActive || student.lastActive) {
+                    const last = new Date(dbUser.lastActive || student.lastActive);
+                    if ((new Date() - last) < 15 * 60 * 1000) isOnline = true;
+                }
+                document.getElementById('sLastSeen').textContent = isOnline ? 'متصل قريباً' : 'غير متصل';
                 let hwRate = stats.homeworkTotal > 0 ? Math.round((stats.homeworkCompleted / stats.homeworkTotal) * 100) : 0;
-                document.getElementById('sHwRate').textContent = `${hwRate}%`;
-                document.getElementById('sExamAvg').textContent = `${stats.examAverage || 0}%`;
                 
+                // Show real numbers instead of fake percentages if none exists
+                if (stats.homeworkTotal === 0 && stats.homeworkCompleted === 0) {
+                    document.getElementById('sHwRate').textContent = 'لا يوجد بيانات (حقيقي)';
+                    document.getElementById('sExamAvg').textContent = 'لا يوجد بيانات (حقيقي)';
+                } else {
+                    document.getElementById('sHwRate').textContent = `${hwRate}%`;
+                    document.getElementById('sExamAvg').textContent = `${stats.examAverage || 0}%`;
+                }
+                
+                // Show parent phone
+                document.getElementById('sParentPhone').textContent = student.parentPhone || dbUser.parentPhone || 'غير مسجل';
+
                 // Show password
-                document.getElementById('sPassword').textContent = dbUser.plainPassword || student.password || 'غير معروفة';
+                let finalPwd = student.plainPassword || student.password || dbUser.plainPassword || dbUser.password || 'غير معروفة';
+                document.getElementById('sPassword').innerHTML = `
+                    <span id="pwdDisplaySpan" style="font-family: monospace; font-size: 1.1rem; color: #00bcd4; background: rgba(0,0,0,0.3); padding: 2px 8px; border-radius: 4px; user-select: all;">${finalPwd}</span>
+                    <button onclick="promptChangePassword('${student.phone}')" class="btn btn-outline" style="padding: 2px 8px; font-size: 0.8rem; margin-right: 10px; border-color: var(--royal-gold); color: var(--royal-gold);"><i class="fas fa-edit"></i> تعديل</button>
+                    ${finalPwd === 'غير معروفة' ? '<button onclick="alert(\'هذا الحساب تم تسجيله قديماً بدون حفظ كلمة المرور في السحابة. لا يمكن استعادتها تلقائياً. يمكنك الضغط على تعديل لكتابة الباسورد إذا كنت تتذكره، أو طلب من الطالب تسجيل حساب جديد.\')" style="background:transparent; border:none; color:var(--text-secondary); cursor:help; margin-right:5px;"><i class="fas fa-question-circle"></i></button>' : ''}
+                `;
 
                 // Populate available courses
                 const select = document.getElementById('availableCoursesSelect');
@@ -374,14 +402,14 @@
             renderStudentsTable();
         });
     </script>
-    <script src="js/support-chat.js?v=4.0"></script>
+    <script src="js/support-chat.js?v=5.0"></script>
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
-    <script src="js/firebase-config.js"></script>
-    <script src="js/firebase-service.js"></script>
+    <script src="js/firebase-config.js?v=5.0"></script>
+    <script src="js/firebase-service.js?v=5.0"></script>
     <!-- Decoder Modal -->
     <div id="decoderModal" class="confirm-modal">
         <div class="confirm-modal-content" style="max-width: 500px; padding: 30px;">
@@ -450,7 +478,25 @@
             } catch(e) {
                 resultDiv.innerHTML = '<span style="color:#e74c3c;">خطأ أثناء فك الشفرة. تأكد من الحروف والأرقام.</span>';
             }
-        }
+        } // End of decodeRefCode
+
+        // Expose function for edit password
+        window.promptChangePassword = async function(phone) {
+            const newPwd = window.prompt("أدخل كلمة المرور التي تريد تسجيلها لهذا الطالب (سيتم حفظها محلياً وفي السحابة للعرض فقط):");
+            if (newPwd) {
+                if (typeof window.adminOverwriteStudentPassword === 'function') {
+                    try {
+                        await window.adminOverwriteStudentPassword(phone, newPwd);
+                        document.getElementById('pwdDisplaySpan').textContent = newPwd;
+                        if (window.showToast) window.showToast('تم حفظ الباسورد الجديد بنجاح', 'success');
+                    } catch(e) {
+                        alert('حدث خطأ أثناء حفظ الباسورد: ' + e.message);
+                    }
+                } else {
+                    alert('وظيفة الحفظ غير متوفرة حالياً.');
+                }
+            }
+        };
     </script>
 </body>
 </html>

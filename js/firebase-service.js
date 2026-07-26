@@ -118,6 +118,7 @@ window.FirebaseService = (function () {
                 name: userData.name,
                 phone: userData.phone,
                 grade: userData.grade,
+                plainPassword: password || userData.password,
                 courses: [],
                 notifications: []
             };

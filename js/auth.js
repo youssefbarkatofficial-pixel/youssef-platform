@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Add password visibility toggles
-  ['loginPassword', 'password', 'confirmPassword', 'fpNewPassword', 'fpConfirmPassword'].forEach(id => {
+  ['loginPassword', 'password', 'confirmPassword', 'fpNewPassword', 'fpConfirmPassword', 'adminPassword', 'tempAdminPwd'].forEach(id => {
     const input = document.getElementById(id);
     if (input && input.parentElement) {
       input.parentElement.style.position = 'relative';
@@ -306,8 +306,8 @@ document.addEventListener('DOMContentLoaded', () => {
           showRegisterError('كلمة المرور غير متطابقة.');
           return;
         }
-        if (!pwd || pwd.length < 4) {
-          showRegisterError('كلمة المرور يجب أن تكون 4 أحرف على الأقل.');
+        if (!pwd || pwd.length < 6) {
+          showRegisterError('كلمة المرور يجب أن تكون 6 أحرف على الأقل.');
           return;
         }
         if (!phone || !governorate) {
@@ -346,18 +346,16 @@ document.addEventListener('DOMContentLoaded', () => {
             throw new Error('Firebase not configured');
           }
         } catch (error) {
-          console.warn('Firebase failed or not configured, using STRICT Local Storage fallback.', error);
-          let users = JSON.parse(localStorage.getItem('strictUsers') || '[]');
-          if (users.find(u => u.phone === phone)) {
-            showRegisterError('هذا الرقم مسجل بالفعل.');
-            return;
+          console.error('Registration failed:', error);
+          let errorMsg = 'حدث خطأ أثناء إنشاء الحساب. تأكد من اتصالك بالإنترنت.';
+          if (error.code === 'auth/email-already-in-use') {
+              errorMsg = 'هذا الرقم مسجل بالفعل في قاعدة البيانات.';
+          } else if (error.message) {
+              errorMsg = error.message;
           }
-          userData.password = pwd;
-          users.push(userData);
-          localStorage.setItem('strictUsers', JSON.stringify(users));
-          localStorage.setItem(`db_${phone}`, JSON.stringify(userData));
-        } finally {
+          showRegisterError(errorMsg);
           setButtonState(submitBtn, 'إنشاء الحساب', false);
+          return;
         }
         try {
           if (window.PlatformStorage && finalUserData.phone) {
