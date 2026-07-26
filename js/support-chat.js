@@ -2795,19 +2795,49 @@
           }
       }
 
-      // 3) لو السؤال تعليمي أو غير معروف: اكسم Gemini
+      // 3) لو السؤال تعليمي أو غير معروف: RAG أولاً ثم Gemini
       if (!replyText && window.askGeminiDirectly) {
           addTyping();
           try {
-             const h2 = loadHistory();
-             const aiResponse = await window.askGeminiDirectly(text, h2);
-             if (!aiResponse.fallback && aiResponse.reply) {
-                 replyText = aiResponse.reply;
-                 // خزن الرد في الكاش (15 دقيقة)
-                 try { sessionStorage.setItem(_cacheKey, replyText); setTimeout(function(){sessionStorage.removeItem(_cacheKey);}, 900000); } catch(e){}
-                 console.log('[GEMINI SUCCESS] Got AI response.');
-             } else {
-                 console.warn('[GEMINI FAILED]', aiResponse.reason);
+             // --- RAG: فحص ذاكرة البوصلة أولاً ---
+             var ragContext = null;
+             if (window.BousalaTeach) {
+                 try {
+                     var ragResult = await window.BousalaTeach.findLessonContext(text, 3);
+                     if (ragResult.bestScore >= 0.75) {
+                         // تطابق قوي: استخرج الإجابة مباشرة بدون Gemini
+                         var directAns = window.BousalaTeach.extractDirect(text, ragResult.chunks);
+                         if (directAns) {
+                             replyText = '📖 ' + directAns;
+                             try { sessionStorage.setItem(_cacheKey, replyText); setTimeout(function(){sessionStorage.removeItem(_cacheKey);}, 900000); } catch(e){}
+                             console.log('[RAG DIRECT] Answered from lessons, zero tokens!');
+                         }
+                     } else if (ragResult.chunks && ragResult.chunks.length > 0 && ragResult.bestScore >= 0.2) {
+                         // تطابق متوسط: ابعت للـ API بالنص كمرجع إلزامي
+                         ragContext = ragResult.chunks.join('\n---\n');
+                         console.log('[RAG CONTEXT] Found lesson context, sending to Gemini as reference...');
+                     }
+                 } catch(ragErr) {
+                     console.warn('[RAG] Error:', ragErr);
+                 }
+             }
+
+             if (!replyText) {
+                 var h2 = loadHistory();
+                 // لو في سياق من الدروس، ابعته للـ API كمرجع إلزامي
+                 var msgToSend = text;
+                 if (ragContext) {
+                     msgToSend = 'أجب على سؤال الطالب اعتماداً أولاً وأساساً على "المرجع" التالي من منهجنا الدراسي، وبنفس معلوماته حتى لو خالفت معلوماتك العامة. إن لم يكفِ المرجع، أكمل من معرفتك بحذر.\n\n--- المرجع ---\n' + ragContext + '\n--- نهاية المرجع ---\n\nسؤال الطالب: ' + text;
+                 }
+                 var aiResponse = await window.askGeminiDirectly(msgToSend, h2);
+                 if (!aiResponse.fallback && aiResponse.reply) {
+                     replyText = aiResponse.reply;
+                     // خزن الرد في الكاش (15 دقيقة)
+                     try { sessionStorage.setItem(_cacheKey, replyText); setTimeout(function(){sessionStorage.removeItem(_cacheKey);}, 900000); } catch(e){}
+                     console.log('[GEMINI SUCCESS] Got AI response.');
+                 } else {
+                     console.warn('[GEMINI FAILED]', aiResponse.reason);
+                 }
              }
           } catch(e) {
              console.error('[GEMINI ERROR]', e);

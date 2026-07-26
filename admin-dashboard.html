@@ -181,6 +181,52 @@
                 </div>
             </div>
 
+            <!-- ===== تعليم البوصلة RAG ===== -->
+            <div class="glass-panel dash-panel" style="margin-top: 30px;">
+                <div class="panel-header">
+                    <h2 class="panel-title"><i class="fas fa-brain mr-2" style="color:#a855f7"></i> تعليم البوصلة 🧭</h2>
+                    <div style="display:flex;gap:8px;align-items:center;">
+                        <span id="teachLessonsCount" style="color:var(--text-secondary);font-size:0.85rem;">جاري التحميل...</span>
+                        <button id="btnClearLessons" class="btn btn-outline" style="padding:4px 14px;font-size:0.85rem;border-color:#e74c3c;color:#e74c3c;"><i class="fas fa-trash"></i> مسح الكل</button>
+                    </div>
+                </div>
+                <p style="color:var(--text-secondary);font-size:0.9rem;margin:10px 0 15px;">
+                    الصق نص الدرس هنا وسيتذكره البوت ويجاوب منه <b>بدون استهلاك توكنز</b>. كل ما الفقرات أوضح كل ما الإجابات أدق.
+                </p>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+                    <div class="form-group">
+                        <label style="color:var(--text-primary);display:block;margin-bottom:5px;">الصف</label>
+                        <select id="teachGrade" class="form-control" style="background:rgba(7,19,38,0.9);color:#fff;">
+                            <option value="">كل الصفوف</option>
+                            <option>الرابع الابتدائي</option>
+                            <option>الخامس الابتدائي</option>
+                            <option>السادس الابتدائي</option>
+                            <option>الأول الإعدادي</option>
+                            <option>الثاني الإعدادي</option>
+                            <option>الثالث الإعدادي</option>
+                            <option>الأول الثانوي</option>
+                            <option>الثاني الثانوي</option>
+                            <option>الثالث الثانوي</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label style="color:var(--text-primary);display:block;margin-bottom:5px;">الوحدة / الموضوع</label>
+                        <input type="text" id="teachUnit" class="form-control" placeholder="مثال: الوحدة الأولى - موقع مصر">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label style="color:var(--text-primary);display:block;margin-bottom:5px;">نص الدرس</label>
+                    <textarea id="teachInput" rows="10" class="form-control" style="width:100%;resize:vertical;font-size:1rem;line-height:1.7;" placeholder="الصق نص الدرس كاملاً هنا... فقرة فقرة أفضل"></textarea>
+                </div>
+                <div style="display:flex;gap:10px;align-items:center;">
+                    <button id="btnTeachBousala" class="btn btn-gold" style="padding:8px 24px;"><i class="fas fa-brain mr-2"></i> علّم البوصلة</button>
+                    <span id="teachLog" style="color:var(--text-secondary);font-size:0.9rem;"></span>
+                </div>
+
+                <!-- عرض المقاطع المحفوظة -->
+                <div id="teachChunksList" style="margin-top:20px;"></div>
+            </div>
+
             <!-- Course Management Section -->
             <div class="glass-panel dash-panel" style="margin-top: 30px;">
                 <div class="panel-header">
@@ -1117,6 +1163,71 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
     <script src="js/firebase-config.js?v=5.0"></script>
     <script src="js/firebase-service.js?v=5.0"></script>
+    <script src="js/bousala-teach.js?v=1.0"></script>
+    <script>
+    // ===== لوجيك خانة تعليم البوصلة =====
+    (function() {
+      function waitForTeach(cb, tries) {
+        tries = tries || 0;
+        if (window.BousalaTeach && window.firebaseDb) { cb(); }
+        else if (tries < 40) { setTimeout(function(){ waitForTeach(cb, tries+1); }, 300); }
+        else { console.warn('[TEACH] BousalaTeach or Firebase not ready'); }
+      }
+
+      waitForTeach(function() {
+        // عدد المقاطع
+        window.BousalaTeach.getLessonsCount().then(function(n) {
+          var el = document.getElementById('teachLessonsCount');
+          if (el) el.textContent = '🧠 ' + n + ' مقطع محفوظ';
+        });
+
+        // زر تعليم
+        var btnTeach = document.getElementById('btnTeachBousala');
+        if (btnTeach) {
+          btnTeach.addEventListener('click', async function() {
+            var text = (document.getElementById('teachInput') || {}).value;
+            if (!text || !text.trim()) {
+              alert('برجاء كتابة نص الدرس أولاً.');
+              return;
+            }
+            var log = document.getElementById('teachLog');
+            if (log) log.textContent = '⏳ البوصلة بتذاكر...';
+            btnTeach.disabled = true;
+
+            var meta = {
+              grade: (document.getElementById('teachGrade') || {}).value || '',
+              unit: (document.getElementById('teachUnit') || {}).value || ''
+            };
+
+            var result = await window.BousalaTeach.teachBousala(text, meta);
+            if (log) log.textContent = result;
+            document.getElementById('teachInput').value = '';
+            btnTeach.disabled = false;
+
+            // تحديث العداد
+            window.BousalaTeach.getLessonsCount().then(function(n) {
+              var el = document.getElementById('teachLessonsCount');
+              if (el) el.textContent = '🧠 ' + n + ' مقطع محفوظ';
+            });
+          });
+        }
+
+        // زر مسح الكل
+        var btnClear = document.getElementById('btnClearLessons');
+        if (btnClear) {
+          btnClear.addEventListener('click', async function() {
+            if (!confirm('هتمسح كل المقاطع المحفوظة في ذاكرة البوصلة. متأكد؟')) return;
+            var log = document.getElementById('teachLog');
+            if (log) log.textContent = '⏳ جاري المسح...';
+            var r = await window.BousalaTeach.clearAllLessons();
+            if (log) log.textContent = r;
+            var el = document.getElementById('teachLessonsCount');
+            if (el) el.textContent = '🧠 0 مقطع محفوظ';
+          });
+        }
+      });
+    })();
+    </script>
 </body>
 </html>
 
