@@ -7,9 +7,10 @@ document.addEventListener('DOMContentLoaded', () => {
           setTimeout(async () => {
               if (window.firebaseDb) {
                   try {
-                      // If user doesn't exist in DB anymore, kick them out
-                      // Skip for test accounts or admin accounts
-                      if (sObj.isTestAccount || sObj.role === 'admin' || sObj.isAdmin === true) {
+                      // Skip for test accounts, admin accounts, or newly registered users
+                      if (sObj.isTestAccount || sObj.role === 'admin' || sObj.isAdmin === true || sessionStorage.getItem('justRegistered') === 'true') {
+                          // Clean up the flag after skipping once
+                          sessionStorage.removeItem('justRegistered');
                           return;
                       }
                       

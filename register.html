@@ -80,49 +80,34 @@
             color: rgba(255, 255, 255, 0.75);
             line-height: 1.5;
         }
-        .username-info-box .info-text strong {
-            color: var(--accent-cyan);
-            display: block;
-            font-size: 0.88rem;
-            margin-bottom: 2px;
-        }
-        /* ====== Global Instructions Box ====== */
-        .global-instructions-box {
+        /* ====== Dynamic Step Guide ====== */
+        .dynamic-step-guide {
             background: rgba(212, 166, 79, 0.08);
             border: 1px solid rgba(212, 166, 79, 0.25);
             border-radius: 12px;
-            padding: 16px;
+            padding: 14px 18px;
             margin-bottom: 24px;
             text-align: right;
+            transition: opacity 0.3s ease, transform 0.3s ease;
         }
-        .instructions-header {
+        .dynamic-step-guide.fade-out {
+            opacity: 0;
+            transform: translateY(-5px);
+        }
+        .guide-header {
             font-weight: 700;
-            font-size: 1.05rem;
-            margin-bottom: 12px;
+            font-size: 1rem;
+            margin-bottom: 6px;
             display: flex;
             align-items: center;
             gap: 8px;
             color: #fff;
         }
-        .instructions-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        .instructions-list li {
+        .guide-text {
             font-size: 0.88rem;
             color: rgba(255, 255, 255, 0.9);
-            display: flex;
-            align-items: flex-start;
-            gap: 8px;
-            line-height: 1.5;
-        }
-        .instructions-list li i {
-            margin-top: 4px;
-            font-size: 0.9rem;
+            line-height: 1.6;
+            margin: 0;
         }
 
         /* ====== Step decorative icons ====== */
@@ -144,16 +129,14 @@
             <p>انضم الآن لأقوى منصة دراسات في مصر</p>
         </div>
 
-        <!-- ====== Global Instructions Box ====== -->
-        <div class="global-instructions-box">
-            <div class="instructions-header">
-                <i class="fas fa-bullhorn text-gold"></i> إرشادات هامة قبل التسجيل
+        <!-- ====== Dynamic Step Guide ====== -->
+        <div class="dynamic-step-guide" id="dynamicStepGuide">
+            <div class="guide-header">
+                <i class="fas fa-lightbulb text-gold"></i> <span id="guideTitle">خطوة 1: البيانات الشخصية</span>
             </div>
-            <ul class="instructions-list">
-                <li><i class="fas fa-check-circle text-green"></i> <strong>الاسم الحقيقي:</strong> يُرجى كتابة اسمك الرباعي الحقيقي كما في شهادة الميلاد، لن يتم قبول أسماء مستعارة.</li>
-                <li><i class="fas fa-check-circle text-green"></i> <strong>رقم الموبايل:</strong> رقمك هو اسم المستخدم الخاص بك للدخول على المنصة.</li>
-                <li><i class="fas fa-check-circle text-green"></i> <strong>ولي الأمر:</strong> رقم ولي الأمر ضروري للتواصل ولا يجب أن يكون نفس رقمك.</li>
-            </ul>
+            <p class="guide-text" id="guideText">
+                اكتب اسمك الرباعي بشكل صحيح، وتأكد من كتابة رقم موبايلك ورقم ولي الأمر بدقة لسهولة التواصل.
+            </p>
         </div>
 
         <div class="step-indicator">
@@ -268,15 +251,12 @@
                 </div>
 
                 <!-- Password Tips Box -->
-                <div class="password-tips-box" id="passwordTipsBox">
-                    <div class="tips-title">
-                        <i class="fas fa-shield-alt"></i> إرشادات كلمة المرور
-                    </div>
-                    <div class="tips-grid">
-                        <div class="tip-item" id="tip-length"><i class="fas fa-circle-dot"></i> 4 أحرف على الأقل</div>
-                        <div class="tip-item" id="tip-number"><i class="fas fa-circle-dot"></i> يحتوي على رقم</div>
-                        <div class="tip-item" id="tip-letter"><i class="fas fa-circle-dot"></i> يحتوي على حرف</div>
-                        <div class="tip-item" id="tip-strong"><i class="fas fa-circle-dot"></i> 8+ أحرف (ممتاز)</div>
+                <div class="password-tips-box" id="passwordTipsBox" style="margin-bottom: 15px;">
+                    <div class="tips-grid" style="grid-template-columns: 1fr 1fr; margin-top: 0;">
+                        <div class="tip-item" id="tip-length"><i class="fas fa-circle-dot"></i> ٤ حروف فأكثر</div>
+                        <div class="tip-item" id="tip-number"><i class="fas fa-circle-dot"></i> به أرقام</div>
+                        <div class="tip-item" id="tip-letter"><i class="fas fa-circle-dot"></i> به حروف</div>
+                        <div class="tip-item" id="tip-strong"><i class="fas fa-circle-dot"></i> ٨ حروف (قوي)</div>
                     </div>
                 </div>
 

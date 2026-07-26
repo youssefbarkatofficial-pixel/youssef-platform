@@ -178,6 +178,27 @@ document.addEventListener('DOMContentLoaded', () => {
       indicator.classList.toggle('active', i === index);
       indicator.classList.toggle('completed', i < index);
     });
+    
+    // Update Dynamic Step Guide
+    const guideBox = document.getElementById('dynamicStepGuide');
+    const guideTitle = document.getElementById('guideTitle');
+    const guideText = document.getElementById('guideText');
+    if (guideBox && guideTitle && guideText) {
+      guideBox.classList.add('fade-out');
+      setTimeout(() => {
+        if (index === 0) {
+          guideTitle.textContent = 'خطوة 1: البيانات الشخصية';
+          guideText.textContent = 'اكتب اسمك الرباعي بشكل صحيح، وتأكد من كتابة رقم موبايلك ورقم ولي الأمر بدقة لسهولة التواصل.';
+        } else if (index === 1) {
+          guideTitle.textContent = 'خطوة 2: البيانات الدراسية';
+          guideText.textContent = 'اختر صفك الدراسي ومحافظتك بدقة لضمان ظهور المنهج الصحيح الخاص بك في المنصة.';
+        } else if (index === 2) {
+          guideTitle.textContent = 'خطوة 3: تأمين الحساب';
+          guideText.textContent = 'قم بإنشاء كلمة مرور قوية، وتذكر أن رقم موبايلك هو اسم المستخدم الخاص بك للدخول.';
+        }
+        guideBox.classList.remove('fade-out');
+      }, 300);
+    }
   }
 
   function showRegisterError(message) {
@@ -355,6 +376,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         try {
           sessionStorage.setItem('currentStudent', JSON.stringify(finalUserData));
+          sessionStorage.setItem('justRegistered', 'true');
         } catch (e) {
           console.warn('sessionStorage setItem failed', e);
         }
