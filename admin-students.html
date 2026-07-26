@@ -288,8 +288,8 @@
                 
                 // Show real numbers instead of fake percentages if none exists
                 if (stats.homeworkTotal === 0 && stats.homeworkCompleted === 0) {
-                    document.getElementById('sHwRate').textContent = 'لا يوجد بيانات (حقيقي)';
-                    document.getElementById('sExamAvg').textContent = 'لا يوجد بيانات (حقيقي)';
+                    document.getElementById('sHwRate').textContent = 'لا يوجد بيانات';
+                    document.getElementById('sExamAvg').textContent = 'لا يوجد بيانات';
                 } else {
                     document.getElementById('sHwRate').textContent = `${hwRate}%`;
                     document.getElementById('sExamAvg').textContent = `${stats.examAverage || 0}%`;
@@ -510,7 +510,7 @@
                 return;
             }
 
-            const newPwd = window.prompt("أدخل الباسورد الحقيقي الذي تريد تسجيله لهذا الطالب:");
+            const newPwd = window.prompt("أدخل كلمة المرور الجديدة التي تريد تسجيلها لهذا الطالب:");
             if (newPwd) {
                 if (typeof window.adminOverwriteStudentPassword === 'function') {
                     try {
