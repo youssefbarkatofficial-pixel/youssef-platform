@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <script>
@@ -136,7 +136,60 @@
                 </div>
                 <div class="form-group">
                     <label>السعر (ج.م)</label>
-                    <input type="number" id="fcPrice" class="form-control" oninput="markUnsaved()">
+                    <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
+                        <input type="number" id="fcPrice" class="form-control" oninput="markUnsaved()" style="flex: 1; min-width: 100px;">
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <label style="color:var(--text-secondary); display:flex; align-items:center; gap:6px; cursor:pointer;">
+                                <input type="checkbox" id="fcFree" onchange="markUnsaved(); document.getElementById('fcPrice').disabled = this.checked; if(this.checked) { document.getElementById('fcPrice').value='0'; document.getElementById('fcHasDiscount').checked=false; document.getElementById('fcHasDiscount').dispatchEvent(new Event('change')); }"> 
+                                <span>مجاني</span>
+                            </label>
+                            
+                            <label style="color:var(--text-secondary); display:flex; align-items:center; gap:6px; cursor:pointer;">
+                                <input type="checkbox" id="fcHasDiscount" onchange="markUnsaved(); document.getElementById('fcDiscountOptions').style.display = this.checked ? 'block' : 'none'; if(this.checked) { document.getElementById('fcFree').checked=false; document.getElementById('fcPrice').disabled=false; }"> 
+                                <span>تفعيل خصم</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div id="fcDiscountOptions" style="display: none; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; margin-top: 15px; border: 1px solid rgba(255,255,255,0.05);">
+                        <div class="form-group">
+                            <label style="color: var(--text-primary); margin-bottom: 8px; display: block;">السعر بعد الخصم (ج.م)</label>
+                            <input type="number" id="fcDiscountPrice" class="form-control" oninput="markUnsaved()">
+                        </div>
+                        
+                        <div class="form-group" style="margin-bottom: 15px; margin-top: 15px;">
+                            <label style="color:var(--text-primary); display:flex; align-items:center; gap:8px; cursor:pointer;">
+                                <input type="checkbox" id="fcTimerToggle" onchange="markUnsaved(); document.getElementById('fcDiscountTimerOptions').style.display = this.checked ? 'block' : 'none';"> 
+                                <span style="font-weight: bold; color: var(--royal-gold);">تفعيل عداد مؤقت للخصم</span>
+                            </label>
+                        </div>
+                        
+                        <div id="fcDiscountTimerOptions" style="display: none;">
+                            <label style="color: var(--text-secondary); margin-bottom: 12px; display: block; font-size: 0.95rem;">حدد المدة المتبقية لانتهاء الخصم:</label>
+                            <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px;">
+                                <div class="form-group" style="margin-bottom: 0;">
+                                    <label style="color:var(--text-secondary);font-size:0.75rem; text-align: center; display: block; margin-bottom: 5px;">سنة</label>
+                                    <input type="number" id="fcYears" class="form-control" min="0" placeholder="0" style="text-align:center; padding: 8px 4px;" oninput="markUnsaved()">
+                                </div>
+                                <div class="form-group" style="margin-bottom: 0;">
+                                    <label style="color:var(--text-secondary);font-size:0.75rem; text-align: center; display: block; margin-bottom: 5px;">شهر</label>
+                                    <input type="number" id="fcMonths" class="form-control" min="0" placeholder="0" style="text-align:center; padding: 8px 4px;" oninput="markUnsaved()">
+                                </div>
+                                <div class="form-group" style="margin-bottom: 0;">
+                                    <label style="color:var(--text-secondary);font-size:0.75rem; text-align: center; display: block; margin-bottom: 5px;">أسبوع</label>
+                                    <input type="number" id="fcWeeks" class="form-control" min="0" placeholder="0" style="text-align:center; padding: 8px 4px;" oninput="markUnsaved()">
+                                </div>
+                                <div class="form-group" style="margin-bottom: 0;">
+                                    <label style="color:var(--text-secondary);font-size:0.75rem; text-align: center; display: block; margin-bottom: 5px;">يوم</label>
+                                    <input type="number" id="fcDays" class="form-control" min="0" placeholder="0" style="text-align:center; padding: 8px 4px;" oninput="markUnsaved()">
+                                </div>
+                                <div class="form-group" style="margin-bottom: 0;">
+                                    <label style="color:var(--text-secondary);font-size:0.75rem; text-align: center; display: block; margin-bottom: 5px;">ساعة</label>
+                                    <input type="number" id="fcHours" class="form-control" min="0" placeholder="0" style="text-align:center; padding: 8px 4px;" oninput="markUnsaved()">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label>الصف الدراسي</label>
@@ -691,6 +744,43 @@ window.openCourseEditor = function(id = null) {
         document.getElementById('fcTitle').value = c.title;
         document.getElementById('fcPrice').value = c.price;
         document.getElementById('fcDesc').value = c.desc;
+        
+        document.getElementById('fcFree').checked = c.isFree || false;
+        document.getElementById('fcHasDiscount').checked = c.hasDiscount || false;
+        document.getElementById('fcDiscountPrice').value = c.discountPrice || '';
+        
+        if (c.hasDiscount) {
+            document.getElementById('fcDiscountOptions').style.display = 'block';
+            document.getElementById('fcPrice').disabled = false;
+        } else {
+            document.getElementById('fcDiscountOptions').style.display = 'none';
+        }
+        
+        if (c.isFree) document.getElementById('fcPrice').disabled = true;
+        
+        document.getElementById('fcYears').value = '';
+        document.getElementById('fcMonths').value = '';
+        document.getElementById('fcWeeks').value = '';
+        document.getElementById('fcDays').value = '';
+        document.getElementById('fcHours').value = '';
+        
+        if (c.discountExpiry) {
+            document.getElementById('fcTimerToggle').checked = true;
+            document.getElementById('fcDiscountTimerOptions').style.display = 'block';
+            
+            const remainingMs = c.discountExpiry - Date.now();
+            if (remainingMs > 0) {
+                let seconds = Math.floor(remainingMs / 1000);
+                let d = Math.floor(seconds / (3600 * 24));
+                let h = Math.floor((seconds % (3600 * 24)) / 3600);
+                document.getElementById('fcDays').value = d;
+                document.getElementById('fcHours').value = h;
+            }
+        } else {
+            document.getElementById('fcTimerToggle').checked = false;
+            document.getElementById('fcDiscountTimerOptions').style.display = 'none';
+        }
+
         document.getElementById('fcImage').value = c.image || 'https://via.placeholder.com/400x250/071326/D4A64F?text=Course';
         document.getElementById('fcImagePreview').src = c.image || 'https://via.placeholder.com/400x250/071326/D4A64F?text=Course';
         
@@ -701,6 +791,19 @@ window.openCourseEditor = function(id = null) {
         document.getElementById('fcId').value = '';
         document.getElementById('fcTitle').value = '';
         document.getElementById('fcPrice').value = '';
+        document.getElementById('fcPrice').disabled = false;
+        document.getElementById('fcFree').checked = false;
+        document.getElementById('fcHasDiscount').checked = false;
+        document.getElementById('fcDiscountPrice').value = '';
+        document.getElementById('fcDiscountOptions').style.display = 'none';
+        document.getElementById('fcTimerToggle').checked = false;
+        document.getElementById('fcDiscountTimerOptions').style.display = 'none';
+        document.getElementById('fcYears').value = '';
+        document.getElementById('fcMonths').value = '';
+        document.getElementById('fcWeeks').value = '';
+        document.getElementById('fcDays').value = '';
+        document.getElementById('fcHours').value = '';
+        
         if(document.getElementById('fcIsFree')) document.getElementById('fcIsFree').checked = false;
         document.getElementById('fcDesc').value = '';
         document.getElementById('fcImage').value = 'https://via.placeholder.com/400x250/071326/D4A64F?text=Course';
@@ -803,8 +906,13 @@ window.updateItemUrl = function(sIdx, iIdx, type, val) {
             // Allow URL param to open editor immediately from dashboard
             const urlParams = new URLSearchParams(window.location.search);
             const editId = urlParams.get('id');
+            const actionParam = urlParams.get('action');
             if (editId) {
                 setTimeout(() => openCourseEditor(editId), 100);
+                // Clean URL
+                window.history.replaceState({}, document.title, "admin-courses.html");
+            } else if (actionParam === 'add') {
+                setTimeout(() => openCourseEditor(null), 100);
                 // Clean URL
                 window.history.replaceState({}, document.title, "admin-courses.html");
             }
@@ -848,11 +956,32 @@ window.updateItemUrl = function(sIdx, iIdx, type, val) {
                 
                 const title = document.getElementById('fcTitle').value.trim();
                 const price = document.getElementById('fcPrice').value.trim();
+                const isFree = document.getElementById('fcFree').checked;
+                const hasDiscount = document.getElementById('fcHasDiscount').checked;
+                const discountPrice = document.getElementById('fcDiscountPrice').value.trim();
                 const desc = document.getElementById('fcDesc').value.trim();
                 const gradeEl = document.getElementById('fcGrade');
                 const grade = gradeEl ? gradeEl.value : (currentEditingCourse ? (currentEditingCourse.grade || 'prep1') : 'prep1');
                 
-                if (!title || !price) {
+                let discountExpiry = null;
+                if (hasDiscount && document.getElementById('fcTimerToggle').checked) {
+                    const y = parseInt(document.getElementById('fcYears').value) || 0;
+                    const m = parseInt(document.getElementById('fcMonths').value) || 0;
+                    const w = parseInt(document.getElementById('fcWeeks').value) || 0;
+                    const d = parseInt(document.getElementById('fcDays').value) || 0;
+                    const h = parseInt(document.getElementById('fcHours').value) || 0;
+                    
+                    const totalMs = (y * 365 * 24 * 3600 * 1000) +
+                                    (m * 30 * 24 * 3600 * 1000) +
+                                    (w * 7 * 24 * 3600 * 1000) +
+                                    (d * 24 * 3600 * 1000) +
+                                    (h * 3600 * 1000);
+                    if (totalMs > 0) {
+                        discountExpiry = Date.now() + totalMs;
+                    }
+                }
+                
+                if (!title || (!isFree && !price)) {
                     document.getElementById('confirmSaveModal').style.display = 'none';
                     window.showToast('الرجاء إدخال العنوان والسعر', 'error');
                     return;
@@ -894,6 +1023,7 @@ window.updateItemUrl = function(sIdx, iIdx, type, val) {
                             adminCourses.push({
                                 id: courseIdToSave,
                                 title, price, desc, grade,
+                                isFree, hasDiscount, discountPrice, discountExpiry,
                                 image: imageVal,
                                 hidden: currentEditingCourse.hidden || false,
                                 finished: currentEditingCourse.finished || false,
@@ -903,6 +1033,7 @@ window.updateItemUrl = function(sIdx, iIdx, type, val) {
                             adminCourses[idx] = {
                                 id: courseIdToSave,
                                 title, price, desc, grade,
+                                isFree, hasDiscount, discountPrice, discountExpiry,
                                 image: imageVal,
                                 hidden: currentEditingCourse.hidden || false,
                                 finished: currentEditingCourse.finished || false,
@@ -917,6 +1048,7 @@ window.updateItemUrl = function(sIdx, iIdx, type, val) {
                         const newCourse = {
                             id: courseIdToSave,
                             title, price, desc, grade,
+                            isFree, hasDiscount, discountPrice, discountExpiry,
                             image: imageVal,
                             hidden: false,
                             finished: false,

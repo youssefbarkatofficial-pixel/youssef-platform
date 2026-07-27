@@ -54,7 +54,7 @@
                 <div>
                     <h1 class="page-title">نظرة عامة على المنصة</h1>
                 </div>
-                <button id="btnAddCourseTop" class="btn btn-gold" onclick="if(window.openEditor) window.openEditor(null);"><i class="fas fa-plus mr-2"></i> إضافة كورس جديد</button>
+                <button id="btnAddCourseTop" class="btn btn-gold" onclick="window.location.href='admin-courses.html?action=add'"><i class="fas fa-plus mr-2"></i> إضافة كورس جديد</button>
             </div>
 
             <div id="ownerWelcomeBanner" class="glass-panel" style="background: linear-gradient(135deg, rgba(212,166,79,0.2) 0%, rgba(7,19,38,0.95) 100%); border-right: 5px solid var(--royal-gold); border-radius: 16px; padding: 30px; margin-bottom: 30px; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1); display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; transition: all 0.3s ease;">
@@ -1183,7 +1183,7 @@
                 courseEditorModal.style.display = 'none';
             }
 
-            if (addCourseBtn) addCourseBtn.addEventListener('click', () => openEditor(null));
+            // if (addCourseBtn) addCourseBtn.addEventListener('click', () => openEditor(null));
             if (closeCourseEditor) closeCourseEditor.addEventListener('click', closeEditor);
             if (btnCancelCourse) btnCancelCourse.addEventListener('click', closeEditor);
 
