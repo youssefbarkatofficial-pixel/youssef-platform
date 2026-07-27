@@ -762,9 +762,8 @@ document.addEventListener('DOMContentLoaded', () => {
           ytBtn.href = 'https://www.youtube.com/@youssefstudies';
           ytBtn.target = '_blank';
           ytBtn.id = 'ytNavBtn';
-          ytBtn.className = 'btn btn-outline';
-          ytBtn.style.cssText = 'background: rgba(255, 0, 0, 0.1); border: 1px solid rgba(255, 0, 0, 0.5); padding: 8px 15px; border-radius: 20px; margin-right: 5px; display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none;';
-          ytBtn.innerHTML = '<i class="fab fa-youtube mobile-icon" style="color: #ff0000; font-size: 1.3rem;"></i><span class="desktop-text" style="color: #ffffff; font-weight: 600; white-space: nowrap;">قناة اليوتيوب</span>';
+          ytBtn.className = 'btn btn-youtube';
+          ytBtn.innerHTML = '<i class="fab fa-youtube mobile-icon"></i><span class="desktop-text">قناة اليوتيوب</span>';
           
           const mobileBtn = navActionsContainer.querySelector('.mobile-menu-btn');
           if (mobileBtn) navActionsContainer.insertBefore(ytBtn, mobileBtn);

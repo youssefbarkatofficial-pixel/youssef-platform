@@ -219,6 +219,36 @@ h6 {
   box-shadow: 0 0 15px rgba(212, 166, 79, 0.3);
 }
 
+.btn-youtube {
+  background: #e62117;
+  border: 1px solid #e62117;
+  color: #ffffff !important;
+  padding: 8px 15px;
+  border-radius: 20px;
+  margin-right: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+.btn-youtube i {
+  color: #ffffff;
+  font-size: 1.3rem;
+}
+.btn-youtube span {
+  font-weight: 600;
+  white-space: nowrap;
+}
+.btn-youtube:hover {
+  background: #cc0000;
+  border-color: #cc0000;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(230, 33, 23, 0.4);
+  color: #ffffff !important;
+}
+
 @keyframes shine {
   0% {
     left: -100%;
