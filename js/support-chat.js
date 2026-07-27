@@ -2814,22 +2814,18 @@
              if (window.BousalaTeach) {
                  try {
                      var ragResult = await window.BousalaTeach.findLessonContext(text, 3);
-                     if (ragResult.bestScore >= 0.25) {
+                     if (ragResult.bestScore >= 0.75) {
                          // تطابق قوي: استخرج الإجابة مباشرة بدون Gemini
                          var directAns = window.BousalaTeach.extractDirect(text, ragResult.chunks);
                          if (directAns) {
                              replyText = '📖 ' + directAns;
                              try { sessionStorage.setItem(_cacheKey, replyText); setTimeout(function(){sessionStorage.removeItem(_cacheKey);}, 900000); } catch(e){}
-                             console.log('[RAG DIRECT] Answered from lessons, zero tokens! Score:', ragResult.bestScore);
-                         } else {
-                             // لو مستخرجش اجابة مباشرة قوية، بس لسه في سياق كويس
-                             ragContext = ragResult.chunks.join('\n---\n');
-                             console.log('[RAG CONTEXT] Found lesson context, sending to Gemini as reference. Score:', ragResult.bestScore);
+                             console.log('[RAG DIRECT] Answered from lessons, zero tokens!');
                          }
-                     } else if (ragResult.chunks && ragResult.chunks.length > 0 && ragResult.bestScore >= 0.1) {
+                     } else if (ragResult.chunks && ragResult.chunks.length > 0 && ragResult.bestScore >= 0.2) {
                          // تطابق متوسط: ابعت للـ API بالنص كمرجع إلزامي
                          ragContext = ragResult.chunks.join('\n---\n');
-                         console.log('[RAG CONTEXT] Found low lesson context, sending to Gemini as reference. Score:', ragResult.bestScore);
+                         console.log('[RAG CONTEXT] Found lesson context, sending to Gemini as reference...');
                      }
                  } catch(ragErr) {
                      console.warn('[RAG] Error:', ragErr);
