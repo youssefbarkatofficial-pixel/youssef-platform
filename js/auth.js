@@ -1,4 +1,4 @@
-﻿document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', () => {
   const savedAdmin = localStorage.getItem('currentAdmin');
   if (savedAdmin && !sessionStorage.getItem('currentAdmin')) {
     sessionStorage.setItem('currentAdmin', savedAdmin);
@@ -44,19 +44,19 @@
   const strengthContainer = document.getElementById('passwordStrengthContainer');
   if (pwdInput && strengthBar && strengthLabel && strengthContainer) {
     function calcPasswordStrength(pwd) {
-      if (!pwd) return { score: 0, label: 'â€”', color: '#888', percent: 0 };
+      if (!pwd) return { score: 0, label: '—', color: '#888', percent: 0 };
       let score = 0;
       if (pwd.length >= 4) score += 1;
       if (pwd.length >= 6) score += 1;
       if (pwd.length >= 8) score += 1;
-      if (/[A-Z]/.test(pwd) || /[ط£-ظٹ]/.test(pwd)) score += 1;
+      if (/[A-Z]/.test(pwd) || /[أ-ي]/.test(pwd)) score += 1;
       if (/[0-9]/.test(pwd)) score += 1;
       if (/[!@#$%^&*?_\-+=]/.test(pwd)) score += 1;
       if (pwd.length >= 12) score += 1;
       // Map score to levels
-      if (score <= 2) return { score, label: 'ط¶ط¹ظٹظپط©', color: '#e74c3c', percent: 25 };
-      if (score <= 4) return { score, label: 'ظ…طھظˆط³ط·ط©', color: '#f1c40f', percent: 55 };
-      return { score, label: 'ظ‚ظˆظٹط©', color: '#2ecc71', percent: 100 };
+      if (score <= 2) return { score, label: 'ضعيفة', color: '#e74c3c', percent: 25 };
+      if (score <= 4) return { score, label: 'متوسطة', color: '#f1c40f', percent: 55 };
+      return { score, label: 'قوية', color: '#2ecc71', percent: 100 };
     }
     pwdInput.addEventListener('input', () => {
       const val = pwdInput.value;
@@ -70,7 +70,7 @@
       } else {
         strengthContainer.style.display = 'none';
         strengthBar.style.width = '0%';
-        strengthLabel.textContent = 'â€”';
+        strengthLabel.textContent = '—';
       }
     });
   }
@@ -122,7 +122,7 @@
     const heroSubscribeBtn = document.getElementById('heroSubscribeBtn');
     if (heroSubscribeBtn) {
       heroSubscribeBtn.href = 'courses.html';
-      heroSubscribeBtn.innerHTML = 'طھطµظپط­ ظƒظˆط±ط³ط§طھظƒ <i class="fas fa-arrow-left mr-2" style="margin-right: 10px;"></i>';
+      heroSubscribeBtn.innerHTML = 'تصفح كورساتك <i class="fas fa-arrow-left mr-2" style="margin-right: 10px;"></i>';
     }
     const navActions = document.querySelector('.nav-actions');
     if (navActions && !sessionStorage.getItem('currentAdmin')) {
@@ -134,7 +134,7 @@
       profileBtn.href = 'profile.html';
       profileBtn.className = 'btn btn-green';
       profileBtn.style.borderRadius = '20px';
-      profileBtn.innerHTML = '<i class="fas fa-user" style="margin-left: 8px;"></i> ط­ط³ط§ط¨ظٹ';
+      profileBtn.innerHTML = '<i class="fas fa-user" style="margin-left: 8px;"></i> حسابي';
       navActions.appendChild(profileBtn);
       const ytBtn = document.createElement('a');
       ytBtn.href = 'https://www.youtube.com/@youssefstudies';
@@ -142,7 +142,7 @@
       ytBtn.id = 'ytNavBtn';
       ytBtn.className = 'btn btn-outline';
       ytBtn.style.cssText = 'color: #ff0000; border-color: rgba(255,0,0,0.5); padding: 8px 15px; border-radius: 20px; margin-right: 5px;';
-      ytBtn.innerHTML = '<i class="fab fa-youtube" style="margin-left: 5px;"></i> ظ‚ظ†ط§ط© ط§ظ„ظٹظˆطھظٹظˆط¨';
+      ytBtn.innerHTML = '<i class="fab fa-youtube" style="margin-left: 5px;"></i> قناة اليوتيوب';
       navActions.appendChild(ytBtn);
       const bellBtn = document.createElement('a');
       bellBtn.href = '#';
@@ -155,7 +155,7 @@
       logoutBtn.id = 'logoutBtn';
       logoutBtn.className = 'btn btn-outline';
       logoutBtn.style.cssText = 'border-color: #e74c3c; color: #e74c3c; padding: 8px 15px; border-radius: 20px; margin-right: 5px;';
-      logoutBtn.innerHTML = 'ط®ط±ظˆط¬ <i class="fas fa-sign-out-alt" style="margin-right: 5px;"></i>';
+      logoutBtn.innerHTML = 'خروج <i class="fas fa-sign-out-alt" style="margin-right: 5px;"></i>';
       navActions.appendChild(logoutBtn);
       if (mobileBtn) navActions.appendChild(mobileBtn);
     }
@@ -187,14 +187,14 @@
       guideBox.classList.add('fade-out');
       setTimeout(() => {
         if (index === 0) {
-          guideTitle.textContent = 'ط§ظ„ط¨ظٹط§ظ†ط§طھ ط§ظ„ط´ط®طµظٹط©';
-          guideText.textContent = 'ط§ظƒطھط¨ ط§ط³ظ…ظƒطŒ ظˆط±ظ‚ظ… ظ…ظˆط¨ط§ظٹظ„ظƒ ظˆط±ظ‚ظ… ظˆظ„ظٹ ط§ظ„ط£ظ…ط± ط¨ط¯ظ‚ط© ظ„ط³ظ‡ظˆظ„ط© ط§ظ„طھظˆط§طµظ„.';
+          guideTitle.textContent = 'البيانات الشخصية';
+          guideText.textContent = 'اكتب اسمك، ورقم موبايلك ورقم ولي الأمر بدقة لسهولة التواصل.';
         } else if (index === 1) {
-          guideTitle.textContent = 'ط§ظ„ط¨ظٹط§ظ†ط§طھ ط§ظ„ط¯ط±ط§ط³ظٹط©';
-          guideText.textContent = 'ط§ط®طھط± طµظپظƒ ظˆظ…ط­ط§ظپط¸طھظƒ ظ„ظٹط¸ظ‡ط± ظ„ظƒ ط§ظ„ظ…ظ†ظ‡ط¬ ط§ظ„ظ…ط®طµطµ ظ„ظƒ.';
+          guideTitle.textContent = 'البيانات الدراسية';
+          guideText.textContent = 'اختر صفك ومحافظتك ليظهر لك المنهج المخصص لك.';
         } else if (index === 2) {
-          guideTitle.textContent = 'طھط£ظ…ظٹظ† ط§ظ„ط­ط³ط§ط¨';
-          guideText.textContent = 'ط£ظ†ط´ط¦ ظƒظ„ظ…ط© ظ…ط±ظˆط± ظ‚ظˆظٹط©طŒ ظˆط³ظٹظƒظˆظ† ط±ظ‚ظ… ظ…ظˆط¨ط§ظٹظ„ظƒ ظ‡ظˆ ط§ط³ظ… ط§ظ„ظ…ط³طھط®ط¯ظ… ط§ظ„ط®ط§طµ ط¨ظƒ.';
+          guideTitle.textContent = 'تأمين الحساب';
+          guideText.textContent = 'أنشئ كلمة مرور قوية، وسيكون رقم موبايلك هو اسم المستخدم الخاص بك.';
         }
         guideBox.classList.remove('fade-out');
       }, 300);
@@ -230,14 +230,14 @@
     const errorMsg = document.getElementById('phoneError');
     if (!firstName || !lastName || !middleName || !familyName || !studentPhone || !parentPhone) {
       if (errorMsg) {
-        errorMsg.textContent = 'ظٹط¬ط¨ ط¥ظƒظ…ط§ظ„ ط¬ظ…ظٹط¹ ط§ظ„ط­ظ‚ظˆظ„ ط§ظ„ط´ط®طµظٹط© ظ‚ط¨ظ„ ط§ظ„ظ…طھط§ط¨ط¹ط©.';
+        errorMsg.textContent = 'يجب إكمال جميع الحقول الشخصية قبل المتابعة.';
         errorMsg.style.display = 'block';
       }
       return false;
     }
     if (studentPhone === parentPhone) {
       if (errorMsg) {
-        errorMsg.textContent = 'ط±ظ‚ظ… ط§ظ„ط·ط§ظ„ط¨ ظ„ط§ ظٹظ…ظƒظ† ط£ظ† ظٹظƒظˆظ† ظ†ظپط³ ط±ظ‚ظ… ظˆظ„ظٹ ط§ظ„ط£ظ…ط±.';
+        errorMsg.textContent = 'رقم الطالب لا يمكن أن يكون نفس رقم ولي الأمر.';
         errorMsg.style.display = 'block';
       }
       return false;
@@ -251,11 +251,11 @@
     const governorate = document.getElementById('governorate')?.value;
     const foreignCountry = document.getElementById('foreignCountry')?.value.trim();
     if (!grade || !governorate) {
-      showRegisterError('ظ…ظ† ظپط¶ظ„ظƒ ط§ط®طھط± ط§ظ„طµظپ ط§ظ„ط¯ط±ط§ط³ظٹ ظˆط§ظ„ظ…ط­ط§ظپط¸ط© ظ„ظ„ظ…طھط§ط¨ط¹ط©.');
+      showRegisterError('من فضلك اختر الصف الدراسي والمحافظة للمتابعة.');
       return false;
     }
     if (governorate === 'outside' && !foreignCountry) {
-      showRegisterError('ط§ظƒطھط¨ ط§ط³ظ… ط§ظ„ط¯ظˆظ„ط© ط¹ظ†ط¯ ط§ط®طھظٹط§ط± ط®ط§ط±ط¬ ظ…طµط±.');
+      showRegisterError('اكتب اسم الدولة عند اختيار خارج مصر.');
       return false;
     }
     showRegisterError('');
@@ -303,23 +303,23 @@
         const middleName = document.getElementById('middleName')?.value.trim();
         const familyName = document.getElementById('familyName')?.value.trim();
         if (pwd !== confirmPwd) {
-          showRegisterError('ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط± ط؛ظٹط± ظ…طھط·ط§ط¨ظ‚ط©.');
+          showRegisterError('كلمة المرور غير متطابقة.');
           return;
         }
         if (!pwd || pwd.length < 6) {
-          showRegisterError('ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط± ظٹط¬ط¨ ط£ظ† طھظƒظˆظ† 6 ط£ط­ط±ظپ ط¹ظ„ظ‰ ط§ظ„ط£ظ‚ظ„.');
+          showRegisterError('كلمة المرور يجب أن تكون 6 أحرف على الأقل.');
           return;
         }
         if (!phone || !governorate) {
-          showRegisterError('ظٹط±ط¬ظ‰ ط¥ظƒظ…ط§ظ„ ط¬ظ…ظٹط¹ ط¨ظٹط§ظ†ط§طھ ط§ظ„طھط³ط¬ظٹظ„ ظ‚ط¨ظ„ ط§ظ„ط¥ط±ط³ط§ظ„.');
+          showRegisterError('يرجى إكمال جميع بيانات التسجيل قبل الإرسال.');
           return;
         }
         if (governorate === 'outside' && !foreignCountry) {
-          showRegisterError('ط§ظƒطھط¨ ط§ط³ظ… ط§ظ„ط¯ظˆظ„ط© ط¥ظ† ط§ط®طھط±طھ ط®ط§ط±ط¬ ظ…طµط±.');
+          showRegisterError('اكتب اسم الدولة إن اخترت خارج مصر.');
           return;
         }
         if (!firstName || !lastName || !middleName || !familyName) {
-          showRegisterError('ظٹط±ط¬ظ‰ ط¥ظƒظ…ط§ظ„ ط¬ظ…ظٹط¹ ط§ظ„ط­ظ‚ظˆظ„ ط§ظ„ط´ط®طµظٹط©.');
+          showRegisterError('يرجى إكمال جميع الحقول الشخصية.');
           return;
         }
         let govValue = governorate;
@@ -337,7 +337,7 @@
         };
         const email = `${userData.phone}@student.youssefbarakat.com`;
         userData.email = email;
-        setButtonState(submitBtn, 'ط¬ط§ط±ظٹ ط¥ظ†ط´ط§ط، ط§ظ„ط­ط³ط§ط¨...', true);
+        setButtonState(submitBtn, 'جاري إنشاء الحساب...', true);
         let finalUserData = userData;
         try {
           if (window.FirebaseService && window.FirebaseService.isReady()) {
@@ -347,14 +347,14 @@
           }
         } catch (error) {
           console.error('Registration failed:', error);
-          let errorMsg = 'ط­ط¯ط« ط®ط·ط£ ط£ط«ظ†ط§ط، ط¥ظ†ط´ط§ط، ط§ظ„ط­ط³ط§ط¨. طھط£ظƒط¯ ظ…ظ† ط§طھطµط§ظ„ظƒ ط¨ط§ظ„ط¥ظ†طھط±ظ†طھ.';
+          let errorMsg = 'حدث خطأ أثناء إنشاء الحساب. تأكد من اتصالك بالإنترنت.';
           if (error.code === 'auth/email-already-in-use') {
-              errorMsg = 'ظ‡ط°ط§ ط§ظ„ط±ظ‚ظ… ظ…ط³ط¬ظ„ ط¨ط§ظ„ظپط¹ظ„ ظپظٹ ظ‚ط§ط¹ط¯ط© ط§ظ„ط¨ظٹط§ظ†ط§طھ.';
+              errorMsg = 'هذا الرقم مسجل بالفعل في قاعدة البيانات.';
           } else if (error.message) {
               errorMsg = error.message;
           }
           showRegisterError(errorMsg);
-          setButtonState(submitBtn, 'ط¥ظ†ط´ط§ط، ط§ظ„ط­ط³ط§ط¨', false);
+          setButtonState(submitBtn, 'إنشاء الحساب', false);
           return;
         }
         try {
@@ -367,7 +367,7 @@
         try {
           if (window.showToast) {
             if (window.triggerConfetti) window.triggerConfetti();
-            window.showToast('ظ…ط¨ط±ظˆظƒ ط§ظ†ط¶ظ…ط§ظ…ظƒ ظ„ط£ظ‚ظˆظ‰ ظ…ظ†طµط© ط¯ط±ط§ط³ط§طھ ظپظٹ ظ…طµط±!\nط±ط­ظ„طھظƒ ظ†ط­ظˆ ط§ظ„طھظپظˆظ‚ طھط¨ط¯ط£ ط§ظ„ط¢ظ† ظٹط§ ط¨ط·ظ„.', 'majestic', { title: 'ًںژ‰ ط£ظ‡ظ„ط§ ط¨ظƒ ظپظٹ ط¨ظٹطھظƒ ط§ظ„ط«ط§ظ†ظٹ', duration: 0, closeBtn: true, isMajestic: true });
+            window.showToast('مبروك انضمامك لأقوى منصة دراسات في مصر!\nرحلتك نحو التفوق تبدأ الآن يا بطل.', 'majestic', { title: '🎉 أهلا بك في بيتك الثاني', duration: 0, closeBtn: true, isMajestic: true });
           }
         } catch (error) {
           console.warn('Registration celebration failed', error);
@@ -407,7 +407,7 @@
         if (el && /^\d+$/.test(local) && !el.value) el.value = local;
       }
       if (prefillPhone || prefillEmail) {
-        if (window.showToast) window.showToast('ظ†ظ…ظˆط°ط¬ ط§ظ„طھط³ط¬ظٹظ„ ظ…ظ…ظ„ظˆط، ط¬ط²ط¦ظٹط§ ظ„طھط³ظ‡ظٹظ„ ط¥طھظ…ط§ظ… ط§ظ„ط­ط³ط§ط¨', 'info', { duration: 4000 });
+        if (window.showToast) window.showToast('نموذج التسجيل مملوء جزئيا لتسهيل إتمام الحساب', 'info', { duration: 4000 });
       }
     } catch (e) {
       console.warn('prefill registration failed', e);
@@ -530,7 +530,7 @@
     let remaining = seconds;
     fpResendBtn.disabled = true;
     fpResendBtn.style.opacity = '0.7';
-    fpResendBtn.textContent = `ط¥ط¹ط§ط¯ط© ط§ظ„ط¥ط±ط³ط§ظ„ ط¨ط¹ط¯ ${remaining}s`;
+    fpResendBtn.textContent = `إعادة الإرسال بعد ${remaining}s`;
     if (resendTimer) clearInterval(resendTimer);
     resendTimer = setInterval(() => {
       remaining -= 1;
@@ -539,15 +539,15 @@
         resendTimer = null;
         fpResendBtn.disabled = false;
         fpResendBtn.style.opacity = '1';
-        fpResendBtn.textContent = 'ط¥ط¹ط§ط¯ط© ط¥ط±ط³ط§ظ„ ط§ظ„ظƒظˆط¯';
+        fpResendBtn.textContent = 'إعادة إرسال الكود';
         return;
       }
-      fpResendBtn.textContent = `ط¥ط¹ط§ط¯ط© ط§ظ„ط¥ط±ط³ط§ظ„ ط¨ط¹ط¯ ${remaining}s`;
+      fpResendBtn.textContent = `إعادة الإرسال بعد ${remaining}s`;
     }, 1000);
   }
 
   function isStrongPassword(password) {
-    return typeof password === 'string' && password.length >= 8 && /[A-Zط£-ظٹ]/.test(password) && /[0-9]/.test(password) && /[!@#\$%\^&\*\?]/.test(password);
+    return typeof password === 'string' && password.length >= 8 && /[A-Zأ-ي]/.test(password) && /[0-9]/.test(password) && /[!@#\$%\^&\*\?]/.test(password);
   }
 
   async function createAndSendResetToken(studentPhone, parentPhone) {
@@ -555,14 +555,14 @@
     const existing = loadResetToken(studentPhone);
     const now = Date.now();
     if (existing && existing.lockUntil && now < existing.lockUntil) {
-      throw new Error('ظ„ظ‚ط¯ طھظ… ط­ط¸ط± ظ…ط­ط§ظˆظ„ط§طھ ط§ظ„ط§ط³طھط¹ط§ط¯ط© ظ…ط¤ظ‚طھط§. ط­ط§ظˆظ„ ظپظٹ ظˆظ‚طھ ظ„ط§ط­ظ‚.');
+      throw new Error('لقد تم حظر محاولات الاستعادة مؤقتا. حاول في وقت لاحق.');
     }
     if (existing && existing.resendCooldownExpiresAt && now < existing.resendCooldownExpiresAt) {
       const wait = Math.ceil((existing.resendCooldownExpiresAt - now) / 1000);
-      throw new Error(`ط§ظ†طھط¸ط± ${wait} ط«ط§ظ†ظٹط© ط«ظ… ط£ط¹ط¯ ط§ظ„ظ…ط­ط§ظˆظ„ط©.`);
+      throw new Error(`انتظر ${wait} ثانية ثم أعد المحاولة.`);
     }
     if (existing && existing.requestCount >= 3 && now - existing.createdAt < 1000 * 60 * 60) {
-      throw new Error('طھظ… ط§ظ„ظˆطµظˆظ„ ط¥ظ„ظ‰ ط§ظ„ط­ط¯ ط§ظ„ط£ظ‚طµظ‰ ظ„ط·ظ„ط¨ط§طھ ط¥ط¹ط§ط¯ط© طھط¹ظٹظٹظ† ظƒظ„ظ…ط© ط§ظ„ط³ط±. ط­ط§ظˆظ„ ظ…ط±ط© ط£ط®ط±ظ‰ ط¨ط¹ط¯ ط³ط§ط¹ط©.');
+      throw new Error('تم الوصول إلى الحد الأقصى لطلبات إعادة تعيين كلمة السر. حاول مرة أخرى بعد ساعة.');
     }
     if (existing) {
       existing.used = true;
@@ -646,7 +646,7 @@
         const loginPhoneEl = document.getElementById('loginPhone');
         const rawId = loginPhoneEl ? loginPhoneEl.value.trim() : '';
         if (!rawId) {
-          showForgotStatus('ظ…ظ† ظپط¶ظ„ظƒ ط§ظƒطھط¨ ط±ظ‚ظ… ط§ظ„ظ…ظˆط¨ط§ظٹظ„ ظپظٹ ط®ط§ظ†ط© طھط³ط¬ظٹظ„ ط§ظ„ط¯ط®ظˆظ„ ط£ظˆظ„ط§ظ‹.', 'error');
+          showForgotStatus('من فضلك اكتب رقم الموبايل في خانة تسجيل الدخول أولاً.', 'error');
           if (loginPhoneEl) loginPhoneEl.focus();
           return;
         }
@@ -679,12 +679,12 @@
         }
 
         if (!foundUser) {
-          showForgotStatus('ظ„ظ… ظٹطھظ… ط§ظ„ط¹ط«ظˆط± ط¹ظ„ظ‰ ط­ط³ط§ط¨ ط¨ظ‡ط°ط§ ط§ظ„ط±ظ‚ظ…. طھط­ظ‚ظ‚ ظ…ظ† ط¥ط¯ط®ط§ظ„ظƒ.', 'error');
+          showForgotStatus('لم يتم العثور على حساب بهذا الرقم. تحقق من إدخالك.', 'error');
           return;
         }
 
         // Ask for parent phone via secure prompt
-        const promptMsg = 'ظ„طھط£ظƒظٹط¯ ظ‡ظˆظٹطھظƒطŒ ط§ظ„ط±ط¬ط§ط، ط¥ط¯ط®ط§ظ„ ط±ظ‚ظ… ظ‡ط§طھظپ ظˆظ„ظٹ ط§ظ„ط£ظ…ط± ط§ظ„ظ…ط³ط¬ظ„ ظپظٹ ط­ط³ط§ط¨ظƒ:';
+        const promptMsg = 'لتأكيد هويتك، الرجاء إدخال رقم هاتف ولي الأمر المسجل في حسابك:';
         const enteredParent = window.prompt(promptMsg, '');
         if (enteredParent === null) {
           // user cancelled
@@ -694,31 +694,31 @@
         // Validate parent phone
         const storedParent = foundUser.parentPhone || foundUser.parent || '';
         if (!storedParent) {
-          showForgotStatus('ظ„ط§ ظٹظˆط¬ط¯ ط±ظ‚ظ… ظˆظ„ظٹ ط£ظ…ط± ظ…ط®ط²ظ† ظ„ظ‡ط°ط§ ط§ظ„ط­ط³ط§ط¨. طھظˆط§طµظ„ ظ…ط¹ ط§ظ„ط¯ط¹ظ….', 'error');
+          showForgotStatus('لا يوجد رقم ولي أمر مخزن لهذا الحساب. تواصل مع الدعم.', 'error');
           return;
         }
         if (!arePhonesSame(enteredParent, storedParent)) {
-          window.alert('ط¹ط°ط±ط§ظ‹طŒ ط±ظ‚ظ… ظˆظ„ظٹ ط§ظ„ط£ظ…ط± ط؛ظٹط± طµط­ظٹط­. ظ„ط§ ظٹظ…ظƒظ† ط§ط³طھط¹ط§ط¯ط© ط§ظ„ط­ط³ط§ط¨!');
+          window.alert('عذراً، رقم ولي الأمر غير صحيح. لا يمكن استعادة الحساب!');
           return;
         }
 
         // Confirm and open WhatsApp to support number
-        const confirmMsg = 'طھظ… طھط£ظƒظٹط¯ ط§ظ„ظ‡ظˆظٹط© ط¨ظ†ط¬ط§ط­. ط³ظٹطھظ… طھظˆط¬ظٹظ‡ظƒ ط§ظ„ط¢ظ† ط¥ظ„ظ‰ ط§ظ„ظˆط§طھط³ط§ط¨ ظ„ظپطھط­ ظ…ط­ط§ط¯ط«ط© ظ…ط¹ ط§ظ„ط¯ط¹ظ… ط§ظ„ظپظ†ظٹ ظ„ظ„ظ…ظ†طµط© ظ„ط¥ط±ط³ط§ظ„ ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط± ط§ظ„ط¬ط¯ظٹط¯ط© ظ„ظƒ. ظ‡ظ„ طھط±ظٹط¯ ط§ظ„ظ…طھط§ط¨ط¹ط©طں';
+        const confirmMsg = 'تم تأكيد الهوية بنجاح. سيتم توجيهك الآن إلى الواتساب لفتح محادثة مع الدعم الفني للمنصة لإرسال كلمة المرور الجديدة لك. هل تريد المتابعة؟';
         const proceed = window.confirm(confirmMsg);
         if (!proceed) return;
 
         // Build message
-        const studentName = foundUser.fullName || foundUser.name || foundUser.email || foundUser.phone || 'ط·ط§ظ„ط¨';
+        const studentName = foundUser.fullName || foundUser.name || foundUser.email || foundUser.phone || 'طالب';
         const studentPhone = foundUser.phone || rawId;
         const supportNumber = '201023675235';
-        const msg = `ظ…ط±ط­ط¨ط§ظ‹ ظ…ظ†طµط© ظٹظˆط³ظپ ط¨ط±ظƒط§طھ ط§ظ„طھط¹ظ„ظٹظ…ظٹط©طŒ ط£ظ†ط§ ط§ظ„ط·ط§ظ„ط¨: ${studentName}طŒ ظˆط±ظ‚ظ… ظ‡ط§طھظپظٹ: ${studentPhone}. ظ„ظ‚ط¯ ظ‚ظ…طھ ط¨طھط£ظƒظٹط¯ ظ‡ظˆظٹطھظٹ ط¨ط±ظ‚ظ… ظˆظ„ظٹ ط£ظ…ط±ظٹ ط¨ظ†ط¬ط§ط­طŒ ظˆط£ط±ظٹط¯ ط§ظ„ط­طµظˆظ„ ط¹ظ„ظ‰ ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط± ط§ظ„ط®ط§طµط© ط¨ط­ط³ط§ط¨ظٹ ظ„طھط³ط¬ظٹظ„ ط§ظ„ط¯ط®ظˆظ„.`;
+        const msg = `مرحباً منصة يوسف بركات التعليمية، أنا الطالب: ${studentName}، ورقم هاتفي: ${studentPhone}. لقد قمت بتأكيد هويتي برقم ولي أمري بنجاح، وأريد الحصول على كلمة المرور الخاصة بحسابي لتسجيل الدخول.`;
         const url = `https://wa.me/${supportNumber}?text=${encodeURIComponent(msg)}`;
         // Use location.href to avoid popup blockers (navigate in same tab)
         window.location.href = url;
 
       } catch (err) {
         console.error('forgot password flow failed', err);
-        showForgotStatus('ط­ط¯ط« ط®ط·ط£ ط£ط«ظ†ط§ط، ط¹ظ…ظ„ظٹط© ط§ط³طھط¹ط§ط¯ط© ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط±. ط­ط§ظˆظ„ ظ…ط±ط© ط£ط®ط±ظ‰ ظ„ط§ط­ظ‚ط§ظ‹.', 'error');
+        showForgotStatus('حدث خطأ أثناء عملية استعادة كلمة المرور. حاول مرة أخرى لاحقاً.', 'error');
       }
     });
     forgotPasswordModal.addEventListener('click', (e) => {
@@ -732,26 +732,26 @@
       const parentPhone = document.getElementById('fpParentPhone')?.value.trim();
       if (!studentPhone || !parentPhone) return;
       try {
-        setForgotButtonState('ط¬ط§ط±ظٹ ط¥ط¹ط§ط¯ط© ط§ظ„ط¥ط±ط³ط§ظ„...', true);
+        setForgotButtonState('جاري إعادة الإرسال...', true);
         const matchedUser = await validateParentBinding(studentPhone, parentPhone);
         if (!matchedUser) {
           if (fpParentError) fpParentError.style.display = 'block';
-          showForgotStatus('ط§ظ„ط±ظ‚ظ… ط؛ظٹط± طµط­ظٹط­ طھط£ظƒط¯ ظ…ظ† ط±ظ‚ظ… ظˆظ„ظٹ ط§ظ„ط£ظ…ط± ط§ظ„ظ…ط±طھط¨ط· ط¨ط§ظ„ط­ط³ط§ط¨ ًں™ڈ', 'error');
-          setForgotButtonState('ط¥ط±ط³ط§ظ„ ط§ظ„ظƒظˆط¯ ط¹ط¨ط± ظˆط§طھط³ط§ط¨', false);
+          showForgotStatus('الرقم غير صحيح تأكد من رقم ولي الأمر المرتبط بالحساب 🙏', 'error');
+          setForgotButtonState('إرسال الكود عبر واتساب', false);
           return;
         }
         if (fpParentError) fpParentError.style.display = 'none';
         const { otpCode } = await createAndSendResetToken(studentPhone, parentPhone);
         const formattedParent = formatEgyptPhone(parentPhone);
-        const message = `ظƒظˆط¯ ط§ط³طھط¹ط§ط¯ط© ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط± ط§ظ„ط®ط§طµ ط¨ظ…ظ†طµط© ظٹظˆط³ظپ ط¨ط±ظƒط§طھ ظ‡ظˆ:%0A${otpCode}%0A%0Aâڑ ï¸ڈ ظ„ط§ طھط´ط§ط±ظƒ ظ‡ط°ط§ ط§ظ„ظƒظˆط¯ ظ…ط¹ ط£ظٹ ط´ط®طµ ط­ظپط§ط¸ط§ ط¹ظ„ظ‰ ط£ظ…ط§ظ† ط­ط³ط§ط¨ظƒ.%0Aط§ظ„ظƒظˆط¯ طµط§ظ„ط­ ظ„ظ…ط¯ط© 10 ط¯ظ‚ط§ط¦ظ‚ ظپظ‚ط·.`;
+        const message = `كود استعادة كلمة المرور الخاص بمنصة يوسف بركات هو:%0A${otpCode}%0A%0A⚠️ لا تشارك هذا الكود مع أي شخص حفاظا على أمان حسابك.%0Aالكود صالح لمدة 10 دقائق فقط.`;
         window.open(`https://wa.me/${formattedParent}?text=${message}`, '_blank');
-        showForgotStatus('طھظ… ط¥ط¹ط§ط¯ط© ط¥ط±ط³ط§ظ„ ط§ظ„ظƒظˆط¯ ط¹ط¨ط± ظˆط§طھط³ط§ط¨. ط§ظپط­طµ ط±ط³ط§ظ„ط© ظˆظ„ظٹ ط§ظ„ط£ظ…ط±.', 'info');
+        showForgotStatus('تم إعادة إرسال الكود عبر واتساب. افحص رسالة ولي الأمر.', 'info');
         if (fpResendBtn) fpResendBtn.style.display = 'inline-flex';
         startResendCooldown(60);
       } catch (error) {
-        showForgotStatus(error.message || 'ط­ط¯ط« ط®ط·ط£ ط£ط«ظ†ط§ط، ط¥ط¹ط§ط¯ط© ط§ظ„ط¥ط±ط³ط§ظ„.', 'error');
+        showForgotStatus(error.message || 'حدث خطأ أثناء إعادة الإرسال.', 'error');
       } finally {
-        setForgotButtonState('طھط£ظƒظٹط¯ ط§ظ„ظƒظˆط¯ ظˆطھط­ط¯ظٹط« ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط±', false);
+        setForgotButtonState('تأكيد الكود وتحديث كلمة المرور', false);
       }
     });
   }
@@ -766,29 +766,29 @@
       const confirmPasswordInput = document.getElementById('fpConfirmPassword');
       if (!fpStep2 || fpStep2.style.display === 'none') {
         try {
-          setForgotButtonState('ط¬ط§ط±ظٹ ط¥ظ†ط´ط§ط، ط§ظ„ظƒظˆط¯...', true);
+          setForgotButtonState('جاري إنشاء الكود...', true);
           const matchedUser = await validateParentBinding(studentPhone, parentPhone);
           if (!matchedUser) {
             if (fpParentError) fpParentError.style.display = 'block';
-            showForgotStatus('ط§ظ„ط±ظ‚ظ… ط؛ظٹط± طµط­ظٹط­ طھط£ظƒط¯ ظ…ظ† ط±ظ‚ظ… ظˆظ„ظٹ ط§ظ„ط£ظ…ط± ط§ظ„ظ…ط±طھط¨ط· ط¨ط§ظ„ط­ط³ط§ط¨ ًں™ڈ', 'error');
+            showForgotStatus('الرقم غير صحيح تأكد من رقم ولي الأمر المرتبط بالحساب 🙏', 'error');
             return;
           }
           if (fpParentError) fpParentError.style.display = 'none';
           const { otpCode } = await createAndSendResetToken(studentPhone, parentPhone);
           const formattedParent = formatEgyptPhone(parentPhone);
-          const message = `ظƒظˆط¯ ط§ط³طھط¹ط§ط¯ط© ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط± ط§ظ„ط®ط§طµ ط¨ظ…ظ†طµط© ظٹظˆط³ظپ ط¨ط±ظƒط§طھ ظ‡ظˆ:%0A${otpCode}%0A%0Aâڑ ï¸ڈ ظ„ط§ طھط´ط§ط±ظƒ ظ‡ط°ط§ ط§ظ„ظƒظˆط¯ ظ…ط¹ ط£ظٹ ط´ط®طµ ط­ظپط§ط¸ط§ ط¹ظ„ظ‰ ط£ظ…ط§ظ† ط­ط³ط§ط¨ظƒ.%0Aط§ظ„ظƒظˆط¯ طµط§ظ„ط­ ظ„ظ…ط¯ط© 10 ط¯ظ‚ط§ط¦ظ‚ ظپظ‚ط·.`;
+          const message = `كود استعادة كلمة المرور الخاص بمنصة يوسف بركات هو:%0A${otpCode}%0A%0A⚠️ لا تشارك هذا الكود مع أي شخص حفاظا على أمان حسابك.%0Aالكود صالح لمدة 10 دقائق فقط.`;
           window.open(`https://wa.me/${formattedParent}?text=${message}`, '_blank');
           fpStep2.style.display = 'block';
           if (fpResendBtn) fpResendBtn.style.display = 'inline-flex';
-          fpSubmitBtn.textContent = 'طھط£ظƒظٹط¯ ط§ظ„ظƒظˆط¯ ظˆطھط­ط¯ظٹط« ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط±';
-          showForgotStatus('طھظ… ط¥ط±ط³ط§ظ„ ط§ظ„ظƒظˆط¯ ط¹ط¨ط± ظˆط§طھط³ط§ط¨. ظپط¶ظ„ط§ ط§ظƒطھط¨ ط§ظ„ظƒظˆط¯ ط«ظ… ط§ط®طھط± ظƒظ„ظ…ط© ظ…ط±ظˆط± ط¬ط¯ظٹط¯ط©.', 'info');
+          fpSubmitBtn.textContent = 'تأكيد الكود وتحديث كلمة المرور';
+          showForgotStatus('تم إرسال الكود عبر واتساب. فضلا اكتب الكود ثم اختر كلمة مرور جديدة.', 'info');
           startResendCooldown(60);
           return;
         } catch (error) {
-          showForgotStatus(error.message || 'ط­ط¯ط« ط®ط·ط£ ط£ط«ظ†ط§ط، ط¥ط±ط³ط§ظ„ ط§ظ„ظƒظˆط¯.', 'error');
+          showForgotStatus(error.message || 'حدث خطأ أثناء إرسال الكود.', 'error');
           return;
         } finally {
-          setForgotButtonState('طھط£ظƒظٹط¯ ط§ظ„ظƒظˆط¯ ظˆطھط­ط¯ظٹط« ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط±', false);
+          setForgotButtonState('تأكيد الكود وتحديث كلمة المرور', false);
         }
       }
       const otpCode = otpInput?.value.trim();
@@ -797,37 +797,37 @@
       if (fpPasswordError) fpPasswordError.style.display = 'none';
       if (newPassword !== confirmPassword || !isStrongPassword(newPassword)) {
         if (fpPasswordError) fpPasswordError.style.display = 'block';
-        showForgotStatus('ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط± ط؛ظٹط± ظ…طھط·ط§ط¨ظ‚ط© ط£ظˆ ط¶ط¹ظٹظپط©. ط§ط³طھط®ط¯ظ… 8 ط£ط­ط±ظپ ط¹ظ„ظ‰ ط§ظ„ط£ظ‚ظ„ ظ…ط¹ ط£ط±ظ‚ط§ظ… ظˆط±ظ…ظˆط².', 'error');
+        showForgotStatus('كلمة المرور غير متطابقة أو ضعيفة. استخدم 8 أحرف على الأقل مع أرقام ورموز.', 'error');
         return;
       }
       try {
-        setForgotButtonState('ط¬ط§ط±ظٹ ط§ظ„طھط­ظ‚ظ‚...', true);
+        setForgotButtonState('جاري التحقق...', true);
         const result = await verifyResetToken(studentPhone, otpCode);
         if (!result.valid) {
-          showForgotStatus('ط§ظ„ظƒظˆط¯ ط؛ظٹط± طµط­ظٹط­ ط£ظˆ ط§ظ†طھظ‡طھ طµظ„ط§ط­ظٹطھظ‡ ًں™ڈ', 'error');
+          showForgotStatus('الكود غير صحيح أو انتهت صلاحيته 🙏', 'error');
           return;
         }
         const strictUsers = JSON.parse(localStorage.getItem('strictUsers') || '[]');
         const normalizedStudent = normalizePhoneValue(studentPhone);
         const userIndex = strictUsers.findIndex(u => normalizePhoneValue(u.phone) === normalizedStudent);
         if (userIndex === -1) {
-          showForgotStatus('ظ„ظ… ظٹطھظ… ط§ظ„ط¹ط«ظˆط± ط¹ظ„ظ‰ ط§ظ„ط­ط³ط§ط¨ ط§ظ„ظ…ط±طھط¨ط· ط¨ظ‡ط°ط§ ط§ظ„ط±ظ‚ظ….', 'error');
+          showForgotStatus('لم يتم العثور على الحساب المرتبط بهذا الرقم.', 'error');
           return;
         }
         strictUsers[userIndex].password = newPassword;
         localStorage.setItem('strictUsers', JSON.stringify(strictUsers));
         localStorage.removeItem(`pwdReset_${normalizePhoneValue(studentPhone)}`);
-        showForgotStatus('طھظ… طھط؛ظٹظٹط± ظƒظ„ظ…ط© ط§ظ„ط³ط± ط¨ظ†ط¬ط§ط­ âœ…', 'info');
-        if (window.showToast) window.showToast('طھظ… طھط؛ظٹظٹط± ظƒظ„ظ…ط© ط§ظ„ط³ط± ط¨ظ†ط¬ط§ط­ âœ…', 'success');
+        showForgotStatus('تم تغيير كلمة السر بنجاح ✅', 'info');
+        if (window.showToast) window.showToast('تم تغيير كلمة السر بنجاح ✅', 'success');
         setTimeout(() => {
           if (forgotPasswordModal) forgotPasswordModal.style.display = 'none';
         }, 1200);
         forgotPasswordForm.reset();
         if (fpStep2) fpStep2.style.display = 'none';
         if (fpResendBtn) fpResendBtn.style.display = 'none';
-        if (fpSubmitBtn) fpSubmitBtn.textContent = 'ط¥ط±ط³ط§ظ„ ط§ظ„ظƒظˆط¯ ط¹ط¨ط± ظˆط§طھط³ط§ط¨';
+        if (fpSubmitBtn) fpSubmitBtn.textContent = 'إرسال الكود عبر واتساب';
       } finally {
-        setForgotButtonState('طھط£ظƒظٹط¯ ط§ظ„ظƒظˆط¯ ظˆطھط­ط¯ظٹط« ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط±', false);
+        setForgotButtonState('تأكيد الكود وتحديث كلمة المرور', false);
       }
     });
   }
@@ -843,15 +843,15 @@
       const isEmailInput = rawId?.includes('@');
       const rememberMe = document.getElementById('rememberMe') ? document.getElementById('rememberMe').checked : false;
       if (!rawId || !pwd) {
-        showLoginError('ظ…ظ† ظپط¶ظ„ظƒ ط§ظƒطھط¨ ط±ظ‚ظ… ط§ظ„ظ…ظˆط¨ط§ظٹظ„ ط£ظˆ ط§ظ„ط¨ط±ظٹط¯ ط§ظ„ط¥ظ„ظƒطھط±ظˆظ†ظٹ ظˆظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط±.');
+        showLoginError('من فضلك اكتب رقم الموبايل أو البريد الإلكتروني وكلمة المرور.');
         return;
       }
-      setButtonState(submitBtn, 'ط¬ط§ط±ظٹ طھط³ط¬ظٹظ„ ط§ظ„ط¯ط®ظˆظ„...', true);
+      setButtonState(submitBtn, 'جاري تسجيل الدخول...', true);
       try {
         if ((rawId === 'youssefbarkatofficial@gmail.com' && pwd === 'YoussefMBarakat175235') || 
             (rawId === 'youssef@barakat.com' && pwd === 'YoussefMBarakat175235')) {
           const ownerAdmin = {
-            name: 'ظٹظˆط³ظپ ظ…ط­ظ…ط¯ ط¨ط±ظƒط§طھ',
+            name: 'يوسف محمد بركات',
             email: rawId,
             role: 'admin'
           };
@@ -860,15 +860,15 @@
             localStorage.setItem('currentAdmin', JSON.stringify(ownerAdmin));
             let savedAccounts = JSON.parse(localStorage.getItem('savedLocalAccounts') || '[]');
             savedAccounts = savedAccounts.filter(a => a.phone !== rawId);
-            savedAccounts.push({ phone: rawId, pwd, name: 'ط§ظ„ظ…ط§ظ„ظƒ - ط§ظ„ط¥ط¯ط§ط±ط©' });
+            savedAccounts.push({ phone: rawId, pwd, name: 'المالك - الإدارة' });
             localStorage.setItem('savedLocalAccounts', JSON.stringify(savedAccounts));
           }
-          if (window.showToast) window.showToast('ط£ظ‡ظ„ط§ ط¨ظƒ ظٹط§ طµط§ظ†ط¹ ط§ظ„ظ…ط¬ط¯ ظپظٹ ظ…ظ…ظ„ظƒطھظƒ.\nظ…ظ†طµطھظƒ ط¬ط§ظ‡ط²ط© ظ„ط¥ط¨ط¯ط§ط¹ظƒ ط§ظ„ظٹظˆظ…ظٹ.', 'majestic', { title: 'ًں‘‘ ظ…ط±ط­ط¨ط§ ط¨ظƒ ظٹط§ ط£ط³طھط§ط° ظٹظˆط³ظپ', duration: 1500 });
+          if (window.showToast) window.showToast('أهلا بك يا صانع المجد في مملكتك.\nمنصتك جاهزة لإبداعك اليومي.', 'majestic', { title: '👑 مرحبا بك يا أستاذ يوسف', duration: 1500 });
           setTimeout(() => { window.location.href = 'admin-dashboard.html'; }, 1500);
           return;
         } else if (rawId === 'youssefda3m@gmail.com' && pwd === 'Da3mYoussef@36') {
           const supportStudent = {
-            name: 'ط§ظ„ط¯ط¹ظ… ط§ظ„ظپظ†ظٹ',
+            name: 'الدعم الفني',
             email: 'youssefda3m@gmail.com',
             phone: 'support_000',
             grade: 'prep2',
@@ -881,13 +881,13 @@
             localStorage.setItem('currentStudent', JSON.stringify(supportStudent));
             let savedAccounts = JSON.parse(localStorage.getItem('savedLocalAccounts') || '[]');
             savedAccounts = savedAccounts.filter(a => a.phone !== rawId);
-            savedAccounts.push({ phone: rawId, pwd, name: 'ط§ظ„ط¯ط¹ظ… ط§ظ„ظپظ†ظٹ' });
+            savedAccounts.push({ phone: rawId, pwd, name: 'الدعم الفني' });
             localStorage.setItem('savedLocalAccounts', JSON.stringify(savedAccounts));
           }
           if (typeof window.pfTransferGuestSupportSessionToAccount === 'function') {
             window.pfTransferGuestSupportSessionToAccount(supportStudent);
           }
-          if (window.showToast) window.showToast('طھظ… طھط³ط¬ظٹظ„ ط§ظ„ط¯ط®ظˆظ„ ط¨ط­ط³ط§ط¨ ط§ظ„ط¯ط¹ظ… ط§ظ„ظپظ†ظٹ ط§ظ„طھط¬ط±ظٹط¨ظٹ.', 'info');
+          if (window.showToast) window.showToast('تم تسجيل الدخول بحساب الدعم الفني التجريبي.', 'info');
           setTimeout(() => { window.location.href = 'dashboard.html'; }, 1000);
           return;
         }
@@ -907,8 +907,8 @@
                 window.location.href = 'dashboard.html';
                 return;
               } else if (user && user.role !== 'student') {
-                showLoginError('ظ‡ط°ط§ ط§ظ„ط­ط³ط§ط¨ ط؛ظٹط± ظ…ط®طµطµ ظ„ظ„ط·ظ„ط§ط¨.');
-                setButtonState(submitBtn, 'طھط³ط¬ظٹظ„ ط§ظ„ط¯ط®ظˆظ„', false);
+                showLoginError('هذا الحساب غير مخصص للطلاب.');
+                setButtonState(submitBtn, 'تسجيل الدخول', false);
                 return;
               }
           } catch(error) {
@@ -928,33 +928,33 @@
                           window.location.href = 'dashboard.html';
                           return;
                       } else {
-                          showLoginError("طھظ… ط§ظ„ط¯ط®ظˆظ„ ط¨ظ†ط¬ط§ط­ ظˆظ„ظƒظ† طھط¹ط°ط± ط¬ظ„ط¨ ط¨ظٹط§ظ†ط§طھ ط§ظ„ط·ط§ظ„ط¨ ط£ظˆ ط§ظ„ط­ط³ط§ط¨ ظ„ظٹط³ ظ„ط·ط§ظ„ط¨.");
-                          setButtonState(submitBtn, 'طھط³ط¬ظٹظ„ ط§ظ„ط¯ط®ظˆظ„', false);
+                          showLoginError("تم الدخول بنجاح ولكن تعذر جلب بيانات الطالب أو الحساب ليس لطالب.");
+                          setButtonState(submitBtn, 'تسجيل الدخول', false);
                           return;
                       }
                   } else {
                       showLoginError(rescue.msg);
-                      setButtonState(submitBtn, 'طھط³ط¬ظٹظ„ ط§ظ„ط¯ط®ظˆظ„', false);
+                      setButtonState(submitBtn, 'تسجيل الدخول', false);
                       return;
                   }
               }
 
-              let userMsg = 'ط­ط¯ط« ط®ط·ط£ ط£ط«ظ†ط§ط، ط§ظ„ط§طھطµط§ظ„ ط¨ط§ظ„ط®ط§ط¯ظ…. ظٹط±ط¬ظ‰ ط§ظ„ظ…ط­ط§ظˆظ„ط© ظ„ط§ط­ظ‚ط§ظ‹.';
+              let userMsg = 'حدث خطأ أثناء الاتصال بالخادم. يرجى المحاولة لاحقاً.';
               if (error.code === 'custom/user-not-found' || error.code === 'auth/user-not-found') {
-                  userMsg = 'ظ‡ط°ط§ ط§ظ„ط­ط³ط§ط¨ ط؛ظٹط± ظ…ط³ط¬ظ„ ط¹ظ„ظ‰ ط§ظ„ظ…ظ†طµط©طŒ ط§ط¶ط؛ط· ط¥ظ†ط´ط§ط، ط­ط³ط§ط¨ ط¬ط¯ظٹط¯ ظ„ظ„ط¯ط®ظˆظ„';
+                  userMsg = 'هذا الحساب غير مسجل على المنصة، اضغط إنشاء حساب جديد للدخول';
               } else if (error.code === 'auth/invalid-email' || error.code === 'auth/invalid-credential') {
-                  userMsg = 'ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط± ط؛ظٹط± طµط­ظٹط­ط©. ظٹط±ط¬ظ‰ ط§ظ„طھط£ظƒط¯ ظˆط§ظ„ظ…ط­ط§ظˆظ„ط© ظ…ط±ط© ط£ط®ط±ظ‰.';
+                  userMsg = 'كلمة المرور غير صحيحة. يرجى التأكد والمحاولة مرة أخرى.';
               } else if (error.code === 'auth/wrong-password') {
-                  userMsg = 'ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط± ط§ظ„طھظٹ ط£ط¯ط®ظ„طھظ‡ط§ ط®ط§ط·ط¦ط©. ط§ظ„ط±ط¬ط§ط، ط§ظ„طھط£ظƒط¯ ظ…ظ†ظ‡ط§ ظˆط§ظ„ظ…ط­ط§ظˆظ„ط© ظ…ط¬ط¯ط¯ط§ظ‹.';
+                  userMsg = 'كلمة المرور التي أدخلتها خاطئة. الرجاء التأكد منها والمحاولة مجدداً.';
               } else if (error.code === 'auth/too-many-requests') {
-                  userMsg = 'ظ„ظ‚ط¯ ط­ط§ظˆظ„طھ ط§ظ„ط¯ط®ظˆظ„ ظ…ط±ط§طھ ظƒط«ظٹط±ط© ط¬ط¯ط§ظ‹. ظٹط±ط¬ظ‰ ط§ظ„ط§ظ†طھط¸ط§ط± ظ‚ظ„ظٹظ„ط§ظ‹ ط«ظ… ط§ظ„ظ…ط­ط§ظˆظ„ط©.';
+                  userMsg = 'لقد حاولت الدخول مرات كثيرة جداً. يرجى الانتظار قليلاً ثم المحاولة.';
               } else if (error.code === 'auth/network-request-failed') {
-                  userMsg = 'ظٹظˆط¬ط¯ ظ…ط´ظƒظ„ط© ظپظٹ ط§طھطµط§ظ„ظƒ ط¨ط§ظ„ط¥ظ†طھط±ظ†طھ. ظٹط±ط¬ظ‰ ط§ظ„طھط£ظƒط¯ ظ…ظ† ط§طھطµط§ظ„ظƒ ظˆط§ظ„ظ…ط­ط§ظˆظ„ط© ظ…ط±ط© ط£ط®ط±ظ‰.';
+                  userMsg = 'يوجد مشكلة في اتصالك بالإنترنت. يرجى التأكد من اتصالك والمحاولة مرة أخرى.';
               } else if (error.message) {
                   userMsg = error.message;
               }
               showLoginError(userMsg);
-              setButtonState(submitBtn, 'طھط³ط¬ظٹظ„ ط§ظ„ط¯ط®ظˆظ„', false);
+              setButtonState(submitBtn, 'تسجيل الدخول', false);
               return;
           }
         } else {
@@ -987,28 +987,28 @@
         // If not found locally, then show Firebase error
         if (window.FirebaseService && window.FirebaseService.isReady()) {
             console.warn('Firebase login rejected:', error);
-            let userMsg = 'ط­ط¯ط« ط®ط·ط£ ط£ط«ظ†ط§ط، ط§ظ„ط§طھطµط§ظ„ ط¨ط§ظ„ط®ط§ط¯ظ…. ظٹط±ط¬ظ‰ ط§ظ„ظ…ط­ط§ظˆظ„ط© ظ„ط§ط­ظ‚ط§ظ‹.';
+            let userMsg = 'حدث خطأ أثناء الاتصال بالخادم. يرجى المحاولة لاحقاً.';
             if (error.code === 'custom/user-not-found' || error.code === 'auth/user-not-found') {
-                userMsg = 'ظ‡ط°ط§ ط§ظ„ط­ط³ط§ط¨ ط؛ظٹط± ظ…ط³ط¬ظ„ ط¹ظ„ظ‰ ط§ظ„ظ…ظ†طµط©طŒ ط§ط¶ط؛ط· ط¥ظ†ط´ط§ط، ط­ط³ط§ط¨ ط¬ط¯ظٹط¯ ظ„ظ„ط¯ط®ظˆظ„';
+                userMsg = 'هذا الحساب غير مسجل على المنصة، اضغط إنشاء حساب جديد للدخول';
             } else if (error.code === 'auth/invalid-email' || error.code === 'auth/invalid-credential') {
-                userMsg = 'ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط± ط؛ظٹط± طµط­ظٹط­ط©. ظٹط±ط¬ظ‰ ط§ظ„طھط£ظƒط¯ ظˆط§ظ„ظ…ط­ط§ظˆظ„ط© ظ…ط±ط© ط£ط®ط±ظ‰.';
+                userMsg = 'كلمة المرور غير صحيحة. يرجى التأكد والمحاولة مرة أخرى.';
             } else if (error.code === 'auth/wrong-password') {
-                userMsg = 'ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط± ط§ظ„طھظٹ ط£ط¯ط®ظ„طھظ‡ط§ ط®ط§ط·ط¦ط©. ط§ظ„ط±ط¬ط§ط، ط§ظ„طھط£ظƒط¯ ظ…ظ†ظ‡ط§ ظˆط§ظ„ظ…ط­ط§ظˆظ„ط© ظ…ط¬ط¯ط¯ط§ظ‹.';
+                userMsg = 'كلمة المرور التي أدخلتها خاطئة. الرجاء التأكد منها والمحاولة مجدداً.';
             } else if (error.code === 'auth/too-many-requests') {
-                userMsg = 'ظ„ظ‚ط¯ ط­ط§ظˆظ„طھ ط§ظ„ط¯ط®ظˆظ„ ظ…ط±ط§طھ ظƒط«ظٹط±ط© ط¬ط¯ط§ظ‹. ظٹط±ط¬ظ‰ ط§ظ„ط§ظ†طھط¸ط§ط± ظ‚ظ„ظٹظ„ط§ظ‹ ط«ظ… ط§ظ„ظ…ط­ط§ظˆظ„ط©.';
+                userMsg = 'لقد حاولت الدخول مرات كثيرة جداً. يرجى الانتظار قليلاً ثم المحاولة.';
             } else if (error.code === 'auth/network-request-failed') {
-                userMsg = 'طھط£ظƒط¯ ظ…ظ† ط§طھطµط§ظ„ظƒ ط¨ط§ظ„ط¥ظ†طھط±ظ†طھ ظˆط­ط§ظˆظ„ ظ…ط±ط© ط£ط®ط±ظ‰.';
-            } else if (error.message && error.message.includes('طھظ… ظ…ط³ط­ ظ‡ط°ط§ ط§ظ„ط­ط³ط§ط¨')) {
+                userMsg = 'تأكد من اتصالك بالإنترنت وحاول مرة أخرى.';
+            } else if (error.message && error.message.includes('تم مسح هذا الحساب')) {
                 userMsg = error.message;
             }
             showLoginError(userMsg);
             return;
         }
 
-        showLoginError('ظ„ظ… ظٹطھظ… ط§ظ„ط¹ط«ظˆط± ط¹ظ„ظ‰ ط­ط³ط§ط¨ ط¨ظ‡ط°ط§ ط§ظ„ط±ظ‚ظ… ط£ظˆ ط§ظ„ط¨ط±ظٹط¯ ط§ظ„ط¥ظ„ظƒطھط±ظˆظ†ظٹ. ظٹظ…ظƒظ†ظƒ ط¥ظ†ط´ط§ط، ط­ط³ط§ط¨ ط¬ط¯ظٹط¯.');
+        showLoginError('لم يتم العثور على حساب بهذا الرقم أو البريد الإلكتروني. يمكنك إنشاء حساب جديد.');
         return;
       } finally {
-        setButtonState(submitBtn, 'ط¯ط®ظˆظ„ ظ„ظ„ظ…ظ†طµط©', false);
+        setButtonState(submitBtn, 'دخول للمنصة', false);
       }
     });
   }
@@ -1017,7 +1017,7 @@
   const foreignCountryGroup = document.getElementById('foreignCountryGroup');
   const foreignCountryInput = document.getElementById('foreignCountry');
   if (govSelect) {
-    const govs = ['ط§ظ„ط¥ط³ظƒظ†ط¯ط±ظٹط©', 'ط§ظ„ط¥ط³ظ…ط§ط¹ظٹظ„ظٹط©', 'ط§ظ„ط£ظ‚طµط±', 'ط§ظ„ط¨ط­ط± ط§ظ„ط£ط­ظ…ط±', 'ط§ظ„ط¨ط­ظٹط±ط©', 'ط§ظ„ط¬ظٹط²ط©', 'ط§ظ„ط¯ظ‚ظ‡ظ„ظٹط©', 'ط§ظ„ط³ظˆظٹط³', 'ط§ظ„ط´ط±ظ‚ظٹط©', 'ط§ظ„ط؛ط±ط¨ظٹط©', 'ط§ظ„ظپظٹظˆظ…', 'ط§ظ„ظ‚ط§ظ‡ط±ط©', 'ط§ظ„ظ‚ظ„ظٹظˆط¨ظٹط©', 'ط§ظ„ظ…ظ†ظˆظپظٹط©', 'ط§ظ„ظ…ظ†ظٹط§', 'ط§ظ„ظˆط§ط¯ظٹ ط§ظ„ط¬ط¯ظٹط¯', 'ط£ط³ظˆط§ظ†', 'ط£ط³ظٹظˆط·', 'ط¨ظ†ظٹ ط³ظˆظٹظپ', 'ط¨ظˆط±ط³ط¹ظٹط¯', 'ط¬ظ†ظˆط¨ ط³ظٹظ†ط§ط،', 'ط¯ظ…ظٹط§ط·', 'ط³ظˆظ‡ط§ط¬', 'ط´ظ…ط§ظ„ ط³ظٹظ†ط§ط،', 'ظ‚ظ†ط§', 'ظƒظپط± ط§ظ„ط´ظٹط®', 'ظ…ط·ط±ظˆط­'];
+    const govs = ['الإسكندرية', 'الإسماعيلية', 'الأقصر', 'البحر الأحمر', 'البحيرة', 'الجيزة', 'الدقهلية', 'السويس', 'الشرقية', 'الغربية', 'الفيوم', 'القاهرة', 'القليوبية', 'المنوفية', 'المنيا', 'الوادي الجديد', 'أسوان', 'أسيوط', 'بني سويف', 'بورسعيد', 'جنوب سيناء', 'دمياط', 'سوهاج', 'شمال سيناء', 'قنا', 'كفر الشيخ', 'مطروح'];
     govs.forEach(gov => {
       const option = document.createElement('option');
       option.value = gov;
@@ -1037,4 +1037,5 @@
       }
     });
   }
+
 });
