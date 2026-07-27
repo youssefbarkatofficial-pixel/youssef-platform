@@ -12,6 +12,16 @@
                 customKey = adminAi.geminiApiKey;
             }
         } catch(e) {}
+        
+        if (!customKey && window.firebaseDb) {
+            try {
+                const doc = await window.firebaseDb.collection('bot_settings').doc('config').get();
+                if (doc.exists && doc.data().geminiApiKey) {
+                    customKey = doc.data().geminiApiKey;
+                    try { localStorage.setItem('adminAISettings', JSON.stringify({ geminiApiKey: customKey })); } catch(e){}
+                }
+            } catch(e) { console.warn('Could not fetch API key from DB', e); }
+        }
 
         // --- مفاتيح محمية ---
         var _r = function(s){return s.split('').map(function(c,i){return String.fromCharCode(c.charCodeAt(0)^(7+i%5));}).join('');};
