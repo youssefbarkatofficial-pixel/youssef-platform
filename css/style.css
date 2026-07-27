@@ -625,6 +625,7 @@ img, video {
     font-size: 0.75rem !important;
     border-radius: 15px !important;
     line-height: 1.2;
+    white-space: nowrap !important;
   }
 
   #themeToggle {
