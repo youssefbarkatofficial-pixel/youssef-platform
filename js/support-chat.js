@@ -23,13 +23,10 @@
             } catch(e) { console.warn('Could not fetch API key from DB', e); }
         }
 
-        // --- مفاتيح محمية ---
+        // --- مفاتيح محمية (دعم Groq و Gemini) ---
         var _r = function(s){return s.split('').map(function(c,i){return String.fromCharCode(c.charCodeAt(0)^(7+i%5));}).join('');};
         var defaultKeys = [
-            _r("@8\x7f\x7bF.LK\x1e@\\B\x1c\x1f\\\\\x1a\x1fGGL\x13~AB\x17XC[_\x16DBN_\x10{_GEK\x1d\x1c\x1f"),
-            _r("@8\x7f\x7bF.LK\x1e@\\B\x1c\x1fM^c_EFY\x1a\x1b\x1bH\x1eCFG\x15TE\x11\x16T\x13\x12V\x14LD"),
-            _r("@8\x7f\x7bF.LK\x1e@\\B\x1c\x1fMF\x19\x1dF\x1f_\x1dEHE\x12GF\x1cFL\x14HD\x13_A\x13_@\x17\x14"),
-            _r("r|\x10\x1a_8W[YWJZTW_[\x0bZXJPTU\x0cWZWYQ\x0f")
+            _r("`{bUyrbq~lPlL_cca0cEpIzH\\@lph8AQNp{sK^LIjccY?Bmybc3cxn_6") // Groq Key
         ];
         // اختر المفتاح الصحيح من localStorage لو الأدمن حاطه يدوياً
         defaultKeys = defaultKeys.filter(function(k){return k&&k.length>10;});
@@ -70,33 +67,56 @@
         var sp = 'أنت المساعد الذكي (البوصلة) في منصة الأستاذ يوسف بركات لتعليم الدراسات الاجتماعية للمرحلة الإعدادية والثانوية بمصر. ' + userContext + ' قدم إجابة كافية وافية بلغة ودودة ومباشرة وتجنب المبالغة. لا تستخدم الكلمات الإنجليزية الكثيرة. مميزات المنصة: أسرع منصة تعليمية، شرح مبسط، متابعة مستمرة. صاحب المنصة يوسف بركات (01023675235) إذا طلب الطالب التحدث مع الإدارة أعطه هذا الرقم أو رقم الدعم الفني الموجود في الأسفل. يمكنك كتابة روابط منصات التواصل: قناة اليوتيوب (https://www.youtube.com/@youssefbarakat) أو صفحة الفيسبوك (https://www.facebook.com/youseffbarkat) أو الواتساب (https://wa.me/201023675235). يجب كتابة الروابط بصيغة Markdown مثل [قناة الأستاذ يوسف بركات](الرابط). تأكد أن تكون الروابط قابلة للضغط ككلمات ملونة.' + learningContext;
         
         var contentsArr = [];
+        var groqMessages = [{role: 'system', content: sp}];
+        
         if (history && Array.isArray(history)) {
             var recent = history.slice(-6);
             for (var j=0; j<recent.length; j++) {
                 if (recent[j] && recent[j].text) {
-                    contentsArr.push({
-                        role: (recent[j].who === 'bot' || recent[j].sender === 'bot') ? 'model' : 'user',
-                        parts: [{text: recent[j].text}]
-                    });
+                    var role = (recent[j].who === 'bot' || recent[j].sender === 'bot') ? 'model' : 'user';
+                    var groqRole = (recent[j].who === 'bot' || recent[j].sender === 'bot') ? 'assistant' : 'user';
+                    contentsArr.push({role: role, parts: [{text: recent[j].text}]});
+                    groqMessages.push({role: groqRole, content: recent[j].text});
                 }
             }
         }
         contentsArr.push({role:'user',parts:[{text:msg}]});
+        groqMessages.push({role:'user', content: msg});
 
-        var models = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
         for (var keyIndex = 0; keyIndex < _keys.length; keyIndex++) {
             var k = _keys[keyIndex];
-            for (var i=0;i<models.length;i++){
-                try {
-                    var r = await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+models[i]+':generateContent?key='+k, {
-                        method:'POST', headers:{'Content-Type':'application/json'},
-                        body: JSON.stringify({system_instruction:{parts:[{text:sp}]},contents:contentsArr,generationConfig:{temperature:0.2,maxOutputTokens:4096}})
-                    });
-                    if (!r.ok){continue;}
-                    var d = await r.json();
-                    var t = d.candidates && d.candidates[0] && d.candidates[0].content && d.candidates[0].content.parts && d.candidates[0].content.parts[0] && d.candidates[0].content.parts[0].text;
-                    if (t) {return {reply:t,fallback:false,provider:models[i]};}
-                } catch(e){}
+            if (!k) continue;
+            
+            if (k.startsWith('gsk_')) {
+                // محرك Groq
+                var models = ['llama-3.3-70b-versatile', 'llama3-8b-8192'];
+                for (var i=0;i<models.length;i++){
+                    try {
+                        var r = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+                            method:'POST', headers:{'Content-Type':'application/json', 'Authorization': 'Bearer ' + k},
+                            body: JSON.stringify({model: models[i], messages: groqMessages, temperature: 0.2, max_tokens: 4096})
+                        });
+                        if (!r.ok) continue;
+                        var d = await r.json();
+                        var t = d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content;
+                        if (t) return {reply:t,fallback:false,provider:'groq-'+models[i]};
+                    } catch(e){}
+                }
+            } else {
+                // محرك Gemini
+                var models = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
+                for (var i=0;i<models.length;i++){
+                    try {
+                        var r = await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+models[i]+':generateContent?key='+k, {
+                            method:'POST', headers:{'Content-Type':'application/json'},
+                            body: JSON.stringify({system_instruction:{parts:[{text:sp}]},contents:contentsArr,generationConfig:{temperature:0.2,maxOutputTokens:4096}})
+                        });
+                        if (!r.ok) continue;
+                        var d = await r.json();
+                        var t = d.candidates && d.candidates[0] && d.candidates[0].content && d.candidates[0].content.parts && d.candidates[0].content.parts[0] && d.candidates[0].content.parts[0].text;
+                        if (t) return {reply:t,fallback:false,provider:'gemini-'+models[i]};
+                    } catch(e){}
+                }
             }
         }
         return {fallback:true,reply:null,reason:'all_failed'};
