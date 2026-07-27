@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <script>
@@ -221,6 +221,8 @@
                             <label>الإجابة الصحيحة أو التوضيح</label>
                             <input type="text" id="correctAnswer" class="form-control" placeholder="مثال: أ" required>
                         </div>
+                        <button type="button" id="btnGenerateRubric" class="btn btn-outline" style="margin-bottom: 15px; border-color: #9b59b6; color: #9b59b6; display: none;"><i class="fas fa-magic mr-2"></i> توليد تقييم ذكي بالذكاء الاصطناعي</button>
+                        <div id="rubricPreviewContainer" style="display: none; margin-bottom: 15px; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px; font-size: 0.9rem; color: #d4af37; white-space: pre-wrap;"></div>
                         <button type="button" id="btnAddExamQuestion" class="btn btn-outline" style="margin-bottom: 15px;"><i class="fas fa-plus mr-2"></i> إضافة سؤال للامتحان</button>
                         <div id="examQuestionsList" style="display: grid; gap: 10px; margin-bottom: 20px;"></div>
                         <hr style="border-color:rgba(255,255,255,0.1); margin: 20px 0;">
@@ -353,12 +355,61 @@
 
             // Question type toggle
             const questionTypeSelect = document.getElementById('questionType');
+            const btnGenerateRubric = document.getElementById('btnGenerateRubric');
+            const rubricPreviewContainer = document.getElementById('rubricPreviewContainer');
+            let currentGeneratedRubric = null;
+
             if(questionTypeSelect) {
                 questionTypeSelect.addEventListener('change', (e) => {
-                    if(e.target.value === 'choose') {
+                    const val = e.target.value;
+                    if(val === 'choose') {
                         document.getElementById('chooseOptionsGroup').style.display = 'block';
                     } else {
                         document.getElementById('chooseOptionsGroup').style.display = 'none';
+                    }
+
+                    // Show rubric generator for essay questions
+                    const isEssay = ['explain', 'result', 'prove', 'relation', 'whatif', 'meaning'].includes(val);
+                    if(isEssay && btnGenerateRubric) {
+                        btnGenerateRubric.style.display = 'inline-block';
+                    } else if (btnGenerateRubric) {
+                        btnGenerateRubric.style.display = 'none';
+                        rubricPreviewContainer.style.display = 'none';
+                        currentGeneratedRubric = null;
+                    }
+                });
+            }
+
+            if(btnGenerateRubric) {
+                btnGenerateRubric.addEventListener('click', async () => {
+                    const qText = document.getElementById('questionText').value;
+                    const qAnswer = document.getElementById('correctAnswer').value;
+                    if(!qText || !qAnswer) {
+                        alert('يجب كتابة السؤال والإجابة النموذجية أولاً قبل توليد التقييم.');
+                        return;
+                    }
+
+                    if(!window.BousalaRubricGenerator) {
+                        alert('وحدة الذكاء الاصطناعي لتوليد التقييم غير متوفرة.');
+                        return;
+                    }
+
+                    btnGenerateRubric.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> جاري التوليد...';
+                    btnGenerateRubric.disabled = true;
+
+                    try {
+                        const rubric = await window.BousalaRubricGenerator.generateRubricFromModelAnswer(qText, qAnswer);
+                        currentGeneratedRubric = rubric;
+                        
+                        rubricPreviewContainer.innerHTML = '<strong>معايير التقييم المولدة:</strong><br>' + 
+                            rubric.criteria.map(c => `- ${c.concept} (${c.weight * 100}%)`).join('<br>');
+                        rubricPreviewContainer.style.display = 'block';
+                    } catch(err) {
+                        console.error('Rubric Generation Error:', err);
+                        alert('حدث خطأ أثناء توليد التقييم: ' + err.message);
+                    } finally {
+                        btnGenerateRubric.innerHTML = '<i class="fas fa-magic mr-2"></i> توليد تقييم ذكي بالذكاء الاصطناعي';
+                        btnGenerateRubric.disabled = false;
                     }
                 });
             }
@@ -457,6 +508,11 @@
                         };
                     }
 
+                    // Attach the dynamically generated rubric if any
+                    if (currentGeneratedRubric) {
+                        qObj.rubric = currentGeneratedRubric;
+                    }
+
                     // Enrich question with lightweight metadata for local grading (non-destructive)
                     try {
                         if(window.PF_Grader && typeof window.PF_Grader.enrichQuestion === 'function') {
@@ -474,6 +530,11 @@
                         document.getElementById('optC').value = '';
                         document.getElementById('optD').value = '';
                     }
+                    
+                    // Reset Rubric UI
+                    currentGeneratedRubric = null;
+                    rubricPreviewContainer.style.display = 'none';
+                    rubricPreviewContainer.innerHTML = '';
                 });
             }
 
@@ -702,6 +763,7 @@
             }
         });
     </script>
+    <script src="js/bousala-rubric-generator.js?v=1.0"></script>
     <script src="js/bousala-teach.js?v=1.0"></script><script src="js/support-chat.js?v=5.0"></script>
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>

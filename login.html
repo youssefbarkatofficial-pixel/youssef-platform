@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+ï»¿<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>íæÓÝ ÈÑßÇÊ</title>
+    <title>ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/auth.css">
@@ -13,83 +13,83 @@
     
     <div class="glass-panel auth-container">
         <div class="auth-header">
-            <a href="index.html" class="auth-logo" style="text-decoration: none;">í</a>
-            <h2>ÊÓÌíá ÇáÏÎæá</h2>
-            <p>ÃåáÇð Èß ãÌÏÏÇð Ýí ãäÕÊß</p>
+            <a href="index.html" class="auth-logo" style="text-decoration: none;">ï¿½</a>
+            <h2>ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</h2>
+            <p>ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½</p>
         </div>
         
         <form id="loginForm">
             <div class="form-group">
-                <label>ÑÞã ÇáãæÈÇíá Ãæ ÇáÈÑíÏ ÇáÅáßÊÑæäí</label>
-                <input type="text" id="loginPhone" class="form-control" placeholder="ÃÏÎá ÑÞã ÇáãæÈÇíá Ãæ ÇáÈÑíÏ ÇáÅáßÊÑæäí" required>
+                <label>ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</label>
+                <input type="text" id="loginPhone" class="form-control" placeholder="ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½" required>
             </div>
             <div class="form-group">
-                <label>ßáãÉ ÇáãÑæÑ</label>
-                <input type="password" id="loginPassword" class="form-control" placeholder="ÃÏÎá ßáãÉ ÇáãÑæÑ" required>
+                <label>ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</label>
+                <input type="password" id="loginPassword" class="form-control" placeholder="ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½" required>
             </div>
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; gap:10px; flex-wrap:wrap;">
                 <label style="display: flex; align-items: center; gap: 8px; color: rgba(255,255,255,0.85); font-weight: 600;">
                     <input type="checkbox" id="rememberMe" style="width:16px; height:16px; accent: var(--royal-gold);" />
-                    ÊÐßÑäí Úáì åÐÇ ÇáÌåÇÒ
+                    ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
                 </label>
-                <a href="#" id="forgotPasswordLink" onclick="document.getElementById('forgotPasswordModal').style.display='flex'; return false;" style="color: var(--accent-cyan); font-weight: 700;">äÓíÊ ßáãÉ ÇáãÑæÑ¿</a>
+                <a href="#" id="forgotPasswordLink" onclick="document.getElementById('forgotPasswordModal').style.display='flex'; return false;" style="color: var(--accent-cyan); font-weight: 700;">ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ñ¿</a>
             </div>
             <div id="loginError" class="error-message"></div>
-            <button type="submit" class="btn btn-green btn-block">ÏÎæá ááãäÕÉ</button>
+            <button type="submit" class="btn btn-green btn-block">ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</button>
         </form>
 
         <div id="forgotPasswordModal" class="modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 10000; justify-content: center; align-items: center; padding: 20px;">
             <div class="glass-panel" style="max-width: 520px; width: 100%; padding: 30px; position: relative; border-radius: 20px;">
                 <button onclick="document.getElementById('forgotPasswordModal').style.display='none'" style="position: absolute; top: 18px; right: 18px; background: transparent; border: none; color: var(--text-primary); font-size: 1.4rem; cursor: pointer;"><i class="fas fa-times"></i></button>
-                <h2 style="margin-bottom: 20px; color: var(--royal-gold);">ÇÓÊÚÇÏÉ ßáãÉ ÇáãÑæÑ</h2>
-                <p style="margin-bottom: 20px; color: var(--text-secondary);">ÇßÊÈ ÑÞã æáí ÇáÃãÑ ÇáãÑÊÈØ ÈÍÓÇÈß æåíÊã ÅÑÓÇá ßæÏ ÊÃßíÏ áÊÛííÑ ßáãÉ ÇáÓÑ.</p>
+                <h2 style="margin-bottom: 20px; color: var(--royal-gold);">ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</h2>
+                <p style="margin-bottom: 20px; color: var(--text-secondary);">ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½.</p>
                 <div id="fpStatusText" style="display:none; margin-bottom: 20px; padding: 12px 14px; border-radius: 16px; font-size: 0.95rem; line-height:1.5;"></div>
                 <form id="forgotPasswordForm">
                     <div class="form-group">
-                        <label>ÑÞã ÇáØÇáÈ</label>
-                        <input type="tel" id="fpStudentPhone" class="form-control" placeholder="ÑÞã ÇáØÇáÈ" required>
+                        <label>ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</label>
+                        <input type="tel" id="fpStudentPhone" class="form-control" placeholder="ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½" required>
                     </div>
                     <div class="form-group">
-                        <label>ÑÞã æáí ÇáÃãÑ</label>
-                        <input type="tel" id="fpParentPhone" class="form-control" placeholder="ÑÞã æáí ÇáÃãÑ" required>
-                        <span id="fpParentError" class="error-message" style="display:none;">ÇáÑÞã ÛíÑ ãØÇÈÞ áæáí ÇáÃãÑ ÇáãÓÌá.</span>
+                        <label>ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½</label>
+                        <input type="tel" id="fpParentPhone" class="form-control" placeholder="ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½" required>
+                        <span id="fpParentError" class="error-message" style="display:none;">ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.</span>
                     </div>
                     <div id="fpStep2" style="display:none;">
                         <div class="form-group">
-                            <label>ÃÏÎá ßæÏ ÇáÊÍÞÞ</label>
+                            <label>ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</label>
                             <input type="text" id="fpOtpCode" class="form-control" placeholder="xxxxx" maxlength="5">
                         </div>
                         <div class="form-group" style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
-                            <button type="button" id="fpResendBtn" class="btn btn-outline" style="display:none; padding: 10px 14px; min-width:150px;">ÅÚÇÏÉ ÅÑÓÇá ÇáßæÏ</button>
-                            <span id="fpOtpHelp" style="flex:1 1 100%; color: rgba(255,255,255,0.72); font-size: 0.92rem;">ÇáßæÏ ÕÇáÍ áãÏÉ 10 ÏÞÇÆÞ æáÇ íÊã ãÔÇÑßÊå ãÚ Ãí ÔÎÕ.</span>
+                            <button type="button" id="fpResendBtn" class="btn btn-outline" style="display:none; padding: 10px 14px; min-width:150px;">ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½</button>
+                            <span id="fpOtpHelp" style="flex:1 1 100%; color: rgba(255,255,255,0.72); font-size: 0.92rem;">ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ 10 ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½.</span>
                         </div>
                         <div class="form-group">
-                            <label>ßáãÉ ÇáãÑæÑ ÇáÌÏíÏÉ</label>
-                            <input type="password" id="fpNewPassword" class="form-control" placeholder="ßáãÉ ÇáãÑæÑ ÇáÌÏíÏÉ">
+                            <label>ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</label>
+                            <input type="password" id="fpNewPassword" class="form-control" placeholder="ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½">
                         </div>
                         <div class="form-group">
-                            <label>ÊÃßíÏ ßáãÉ ÇáãÑæÑ ÇáÌÏíÏÉ</label>
-                            <input type="password" id="fpConfirmPassword" class="form-control" placeholder="ÊÃßíÏ ßáãÉ ÇáãÑæÑ ÇáÌÏíÏÉ">
-                            <span id="fpPasswordError" class="error-message" style="display:none;">íÌÈ Ãä ÊÊØÇÈÞ ßáãÇÊ ÇáãÑæÑ æÃä Êßæä ÞæíÉ.</span>
+                            <label>ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</label>
+                            <input type="password" id="fpConfirmPassword" class="form-control" placeholder="ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½">
+                            <span id="fpPasswordError" class="error-message" style="display:none;">ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½.</span>
                         </div>
                     </div>
                     <div style="display:flex; justify-content: space-between; gap: 10px; margin-top: 20px;">
-                        <button type="button" class="btn btn-outline" onclick="document.getElementById('forgotPasswordModal').style.display='none'">ÅáÛÇÁ</button>
-                        <button type="submit" id="fpSubmitBtn" class="btn btn-green">ÅÑÓÇá ÇáßæÏ ÚÈÑ æÇÊÓÇÈ</button>
+                        <button type="button" class="btn btn-outline" onclick="document.getElementById('forgotPasswordModal').style.display='none'">ï¿½ï¿½ï¿½ï¿½ï¿½</button>
+                        <button type="submit" id="fpSubmitBtn" class="btn btn-green">ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</button>
                     </div>
                 </form>
             </div>
         </div>
         
         <div class="auth-footer mt-2">
-            <p>áíÓ áÏíß ÍÓÇÈ¿ <a href="register.html">ÅäÔÇÁ ÍÓÇÈ ÌÏíÏ</a></p>
+            <p>ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½È¿ <a href="register.html">ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½</a></p>
         </div>
     </div>
 
     <script src="js/storage-service.js?v=5.0"></script>
     <script src="js/main.js?v=5.0"></script>
     <script src="js/support-chat.js?v=5.0"></script>
-    <script src="js/auth.js?v=5.0"></script>
+    <script src="js/bousala-phone-fix.js?v=1.0"></script>`r`n    <script src="js/auth.js?v=5.0"></script>
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>

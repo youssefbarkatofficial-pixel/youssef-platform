@@ -167,61 +167,96 @@ window.FirebaseService = (function () {
     /**
      * تسجيل الدخول
      */
-    async function loginStudent(phone, password) {
+    async function loginStudent(phoneOrEmail, password) {
         if (!isFirebaseReady()) throw new Error('Firebase not ready');
         await getAuth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-        const email = `${phone}@student.youssefbarakat.com`;
 
-        // Check if email exists in Firebase Auth to give a helpful "user not found" error
-        try {
-            const methods = await getAuth().fetchSignInMethodsForEmail(email);
-            if (methods.length === 0) {
-                const userError = new Error('هذا الحساب غير مسجل على المنصة، اضغط إنشاء حساب جديد للدخول');
-                userError.code = 'custom/user-not-found';
-                throw userError;
+        // توحيد صيغة الرقم إذا كانت وحدة الإنقاذ محملة
+        const normalizedInput = (window.BousalaPhoneFix && !phoneOrEmail.includes('@'))
+            ? window.BousalaPhoneFix.normPhone(phoneOrEmail)
+            : phoneOrEmail;
+        
+        let emailsToTry = [];
+        if (normalizedInput.includes('@')) {
+            // أدخل إيميل كامل — جربه أولاً ثم جرب إضافة اللاحقة
+            emailsToTry.push(normalizedInput);
+            emailsToTry.push(`${normalizedInput}@student.youssefbarakat.com`);
+        } else {
+            // رقم موبايل — حوّله إلى إيميل صناعي
+            emailsToTry.push(`${normalizedInput}@student.youssefbarakat.com`);
+            // وللأمان جرب الرقم الأصلي أيضاً لحالة القديم
+            if (normalizedInput !== phoneOrEmail) {
+                emailsToTry.push(`${phoneOrEmail}@student.youssefbarakat.com`);
             }
-        } catch(e) {
-            if (e.code === 'custom/user-not-found') throw e;
-            // Ignore if fetchSignInMethodsForEmail fails and let it proceed
         }
 
-        // Check if student actually exists in Firestore first to give a helpful error
-        try {
-            const querySnapshot = await getDb().collection('students').where('phone', '==', phone).limit(1).get();
-            if (querySnapshot.empty) {
-                const userError = new Error('هذا الحساب غير مسجل على المنصة، اضغط إنشاء حساب جديد للدخول');
-                userError.code = 'custom/user-not-found';
-                throw userError;
+        let userCredential = null;
+        let lastError = null;
+
+        for (const email of emailsToTry) {
+            try {
+                userCredential = await getAuth().signInWithEmailAndPassword(email, password);
+                break; 
+            } catch (error) {
+                lastError = error;
             }
-        } catch(e) {
-            if(e.code === 'custom/user-not-found') throw e;
-            // Ignore other firestore errors and let auth try
         }
 
-        const userCredential = await getAuth().signInWithEmailAndPassword(email, password);
+        if (!userCredential) {
+            if (lastError && (lastError.code === 'auth/user-not-found' || lastError.code === 'auth/invalid-credential' || lastError.code === 'auth/wrong-password')) {
+                const userError = new Error('بيانات الدخول غير صحيحة، إما رقم الموبايل/الإيميل غير مسجل أو كلمة السر خاطئة.');
+                userError.code = 'auth/invalid-credential';
+                throw userError;
+            }
+            throw lastError;
+        }
+
         const uid = userCredential.user.uid;
+        const authUser = userCredential.user;
 
         let doc = null;
         try {
             doc = await getDb().collection('students').doc(uid).get();
         } catch(e) {
-            console.warn('Failed to fetch student document', e);
+            console.warn('[LOGIN] Failed to fetch student document from Firestore:', e);
         }
 
         let userData;
         if (!doc || !doc.exists) {
-            console.warn('[LOGIN] Student document missing, this account was deleted by admin.');
-            // Sign them out of Firebase Auth
-            try { await getAuth().signOut(); } catch(e) {}
-            // Optionally try to delete their Firebase Auth account since their data is gone
-            try { await userCredential.user.delete(); } catch(e) {}
-            
-            throw new Error('تم مسح هذا الحساب نهائياً من قبل الإدارة. يرجى إنشاء حساب جديد.');
+            // ⚠️ الملف مش موجود في Firestore — لكن لا نحذف الحساب!
+            // السبب يمكن أن يكون: مشكلة شبكة مؤقتة، تأخر Firestore، أو ملف لم يُحفظ وقت التسجيل
+            console.warn('[LOGIN] Firestore doc missing for uid:', uid, '— attempting self-healing rebuild.');
+
+            // محاولة إعادة بناء الملف من بيانات Auth المتوفرة
+            const rebuildData = {
+                uid: uid,
+                email: authUser.email,
+                phone: normalizedInput,
+                role: 'student',
+                name: authUser.displayName || normalizedInput,
+                courses: [],
+                notifications: [],
+                createdAt: new Date().toISOString(),
+                rebuiltAt: new Date().toISOString()
+            };
+
+            try {
+                await getDb().collection('students').doc(uid).set(rebuildData, { merge: true });
+                console.info('[LOGIN] Self-healed Firestore doc for uid:', uid);
+                userData = rebuildData;
+            } catch(rebuildErr) {
+                console.error('[LOGIN] Could not rebuild Firestore doc:', rebuildErr);
+                // في أسوأ الأحوال: دعه يدخل بالبيانات الأساسية من Auth دون حذف حسابه
+                userData = rebuildData;
+            }
         } else {
             userData = doc.data();
         }
 
-        cacheStudentData(phone, userData);
+        // تأكد إن role موجود
+        if (!userData.role) userData.role = 'student';
+
+        cacheStudentData(normalizedInput, userData);
         return userData;
     }
 

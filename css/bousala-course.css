@@ -1,0 +1,23 @@
+.bcourse { display:flex; gap:16px; direction:rtl; font-family:inherit; }
+.bc-side { width:290px; flex-shrink:0; background:var(--bg-secondary, #1a2744); border:1px solid rgba(255,255,255,0.1); border-radius:14px; overflow:hidden; }
+.bc-head { padding:14px; border-bottom:1px solid rgba(255,255,255,0.05); color: var(--royal-gold); }
+.bc-bar { height:8px; background:rgba(255,255,255,0.1); border-radius:9px; margin:8px 0 4px; }
+.bc-bar i { display:block; height:100%; width:0; background:#2ecc71; border-radius:9px; transition:width .4s; }
+.bc-sec { padding:10px 14px; background:rgba(0,0,0,0.2); font-weight:700; font-size:14px; color:var(--text-primary); }
+.bc-les { display:flex; justify-content:space-between; width:100%; padding:11px 14px; border:0; background:none; cursor:pointer; text-align:right; font-size:14px; color:rgba(255,255,255,0.7); transition: 0.2s; }
+.bc-les:hover { background:rgba(255,255,255,0.05); }
+.bc-les.active { background:rgba(88, 196, 221, 0.1); border-right:3px solid var(--accent-cyan); font-weight:700; color:var(--accent-cyan); }
+.bc-check { color:#2ecc71; font-weight: bold; }
+.bc-main { flex:1; background:var(--bg-secondary, #1a2744); border:1px solid rgba(255,255,255,0.1); border-radius:14px; padding:18px; color:var(--text-primary); }
+.bc-video { position:relative; padding-top:56.25%; border-radius:12px; overflow:hidden; background:#000; margin:10px 0; }
+.bc-video iframe, .bc-video video { position:absolute; inset:0; width:100%; height:100%; }
+.bc-files { margin:12px 0; }
+.bc-file { display:inline-block; margin:6px 0 0 8px; padding:8px 14px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:9px; text-decoration:none; color:var(--accent-cyan); transition:0.2s; }
+.bc-file:hover { background:rgba(255,255,255,0.1); }
+.bc-quiz { padding:12px 22px; background:var(--royal-gold); color:#000; border:0; border-radius:10px; cursor:pointer; font-size:15px; font-weight:bold; transition:0.2s; }
+.bc-quiz:hover { filter:brightness(1.1); }
+.bc-nav { display:flex; gap:10px; justify-content:space-between; margin-top:14px; }
+.bc-nav button { padding:9px 16px; border:1px solid rgba(255,255,255,0.2); background:transparent; color:var(--text-primary); border-radius:9px; cursor:pointer; transition:0.2s; }
+.bc-nav button:hover { background:rgba(255,255,255,0.1); }
+.bc-done { background:#2ecc71 !important; color:#000 !important; border:0 !important; font-weight:bold; }
+@media(max-width:800px){ .bcourse { flex-direction:column; } .bc-side { width:100%; } }

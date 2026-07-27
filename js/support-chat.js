@@ -2835,6 +2835,22 @@
                      // خزن الرد في الكاش (15 دقيقة)
                      try { sessionStorage.setItem(_cacheKey, replyText); setTimeout(function(){sessionStorage.removeItem(_cacheKey);}, 900000); } catch(e){}
                      console.log('[GEMINI SUCCESS] Got AI response.');
+                     
+                     // --- التعلم الذاتي المستمر (Permanent Learning) ---
+                     // لو جاب إجابة جديدة من المفتاح، بنحفظ السؤال والإجابة في ذاكرة البوصلة عشان لو اتسأل تاني يجاوبها ببلاش
+                     if (window.BousalaTeach && window.BousalaTeach.teachBousala && !ragContext) {
+                         // بنتعلم بس لو مكانش في ragContext (يعني المفتاح جاب معلومة جديدة فعلاً مش معتمدة على درس موجود)
+                         setTimeout(async function() {
+                             try {
+                                 var learnText = "سؤال الطالب: " + text + "\nإجابة البوصلة: " + replyText;
+                                 var meta = { grade: 'تعلم ذاتي', unit: 'أسئلة الطلاب' };
+                                 await window.BousalaTeach.teachBousala(learnText, meta);
+                                 console.log('[SELF-LEARNING] Bousala learned a new QA pair!');
+                             } catch(e) {
+                                 console.warn('[SELF-LEARNING ERROR]', e);
+                             }
+                         }, 1000); // تأخير ثانية عشان ميأثرش على سرعة الرد للمستخدم
+                     }
                  } else {
                      console.warn('[GEMINI FAILED]', aiResponse.reason);
                  }

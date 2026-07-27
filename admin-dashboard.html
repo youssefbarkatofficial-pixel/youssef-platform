@@ -104,6 +104,13 @@
                     </div>
                     <div class="dash-card-icon" style="color: #f1c40f; background: rgba(241, 196, 15, 0.1);"><i class="fas fa-clock"></i></div>
                 </div>
+                <div class="glass-panel dash-card" style="border-color: #e67e22; cursor: pointer;" onclick="document.getElementById('manualReviewsPanel').scrollIntoView({behavior: 'smooth'})">
+                    <div class="dash-card-info">
+                        <h3>تحتاج مراجعة يدوية</h3>
+                        <span class="value text-orange" id="adminNeedsReviewCount">0</span>
+                    </div>
+                    <div class="dash-card-icon" style="color: #e67e22; background: rgba(230, 126, 34, 0.1);"><i class="fas fa-clipboard-check"></i></div>
+                </div>
                 <div class="glass-panel dash-card" style="border-color: var(--royal-gold); position: relative;">
                     <div class="dash-card-info">
                         <h3>الإيرادات (الكلية)</h3>
@@ -139,6 +146,32 @@
                         </thead>
                         <tbody id="paymentsTableBody">
                             <!-- Dynamic Payment Requests go here -->
+                        </tbody>
+                    </table>
+                </div>
+            <!-- Manual Reviews Panel -->
+            <div class="glass-panel dash-panel" id="manualReviewsPanel" style="margin-top: 30px;">
+                <div class="panel-header">
+                    <h2 class="panel-title"><i class="fas fa-clipboard-check mr-2"></i> المراجعات اليدوية للامتحانات</h2>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn btn-outline" id="btnRefreshReviews" style="padding: 5px 15px; font-size: 0.9rem;" onclick="window.loadManualReviews && window.loadManualReviews()"><i class="fas fa-sync-alt"></i> تحديث</button>
+                    </div>
+                </div>
+                
+                <div style="overflow-x: auto;">
+                    <table class="admin-table" id="reviewsTable">
+                        <thead>
+                            <tr>
+                                <th>اسم الطالب</th>
+                                <th>رقم الموبايل</th>
+                                <th>الكورس / الامتحان</th>
+                                <th>السؤال</th>
+                                <th>درجة الآلة</th>
+                                <th>إجراء</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reviewsTableBody">
+                            <tr><td colspan="6" style="text-align:center;color:rgba(255,255,255,0.5);">لا توجد مراجعات معلقة حالياً</td></tr>
                         </tbody>
                     </table>
                 </div>

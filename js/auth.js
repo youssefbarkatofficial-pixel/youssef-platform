@@ -328,14 +328,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         const userData = {
           name: [firstName, lastName, middleName, familyName].filter(Boolean).join(' '),
-          phone,
+          phone: window.BousalaPhoneFix ? window.BousalaPhoneFix.normPhone(phone) : phone,
           parentPhone: document.getElementById('parentPhone')?.value.trim(),
           grade: document.getElementById('grade')?.value,
           gov: govValue,
           date: new Date().toISOString(),
           role: 'student'
         };
-        const email = `${phone}@student.youssefbarakat.com`;
+        const email = `${userData.phone}@student.youssefbarakat.com`;
         userData.email = email;
         setButtonState(submitBtn, 'جاري إنشاء الحساب...', true);
         let finalUserData = userData;
@@ -894,33 +894,72 @@ document.addEventListener('DOMContentLoaded', () => {
         const phone = rawId;
         const email = isEmailInput ? rawId : `${phone}@student.youssefbarakat.com`;
         if (window.FirebaseService && window.FirebaseService.isReady()) {
-          const user = await window.FirebaseService.loginStudent(phone, pwd);
-          if (user && user.role === 'student') {
-            sessionStorage.setItem('currentStudent', JSON.stringify(user));
-            sessionStorage.setItem('pfJustLoggedIn', 'true');
-            if (rememberMe) localStorage.setItem('currentStudent', JSON.stringify(user));
-            if (typeof window.pfTransferGuestSupportSessionToAccount === 'function') {
-              window.pfTransferGuestSupportSessionToAccount(user);
-            }
+          try {
+              const user = await window.FirebaseService.loginStudent(phone, pwd);
+              if (user && user.role === 'student') {
+                sessionStorage.setItem('currentStudent', JSON.stringify(user));
+                sessionStorage.setItem('pfJustLoggedIn', 'true');
+                if (rememberMe) localStorage.setItem('currentStudent', JSON.stringify(user));
+                if (typeof window.pfTransferGuestSupportSessionToAccount === 'function') {
+                  window.pfTransferGuestSupportSessionToAccount(user);
+                }
+                try { if (window.audioManager && window.audioManager.play) window.audioManager.play('login'); } catch(e) {}
+                window.location.href = 'dashboard.html';
+                return;
+              } else if (user && user.role !== 'student') {
+                showLoginError('هذا الحساب غير مخصص للطلاب.');
+                setButtonState(submitBtn, 'تسجيل الدخول', false);
+                return;
+              }
+          } catch(error) {
+              console.warn('Firebase login rejected, trying rescue layer:', error);
+              if (window.BousalaPhoneFix) {
+                  const rescue = await window.BousalaPhoneFix.rescueLogin(phone, pwd);
+                  if (rescue.ok) {
+                      const rescuedUser = await window.FirebaseService.getStudentByPhone(rescue.normPhone);
+                      if (rescuedUser && rescuedUser.role === 'student') {
+                          sessionStorage.setItem('currentStudent', JSON.stringify(rescuedUser));
+                          sessionStorage.setItem('pfJustLoggedIn', 'true');
+                          if (rememberMe) localStorage.setItem('currentStudent', JSON.stringify(rescuedUser));
+                          if (typeof window.pfTransferGuestSupportSessionToAccount === 'function') {
+                              window.pfTransferGuestSupportSessionToAccount(rescuedUser);
+                          }
+                          try { if (window.audioManager && window.audioManager.play) window.audioManager.play('login'); } catch(e) {}
+                          window.location.href = 'dashboard.html';
+                          return;
+                      } else {
+                          showLoginError("تم الدخول بنجاح ولكن تعذر جلب بيانات الطالب أو الحساب ليس لطالب.");
+                          setButtonState(submitBtn, 'تسجيل الدخول', false);
+                          return;
+                      }
+                  } else {
+                      showLoginError(rescue.msg);
+                      setButtonState(submitBtn, 'تسجيل الدخول', false);
+                      return;
+                  }
+              }
 
-            let firstName = "يا بطل";
-            if (user.fullName) { firstName = user.fullName.split(' ')[0]; }
-            else if (user.name) { firstName = user.name.split(' ')[0]; }
-
-            if (user.email === "youssef@barakat.com" || user.role === 'admin' || user.isAdmin === true) {
-              console.log('Admin logged in');
-            } else {
-              try { if (window.audioManager && window.audioManager.play) window.audioManager.play('login'); } catch(e) {}
-            }
-
-            window.location.href = 'dashboard.html';
-            return;
+              let userMsg = 'حدث خطأ أثناء الاتصال بالخادم. يرجى المحاولة لاحقاً.';
+              if (error.code === 'custom/user-not-found' || error.code === 'auth/user-not-found') {
+                  userMsg = 'هذا الحساب غير مسجل على المنصة، اضغط إنشاء حساب جديد للدخول';
+              } else if (error.code === 'auth/invalid-email' || error.code === 'auth/invalid-credential') {
+                  userMsg = 'كلمة المرور غير صحيحة. يرجى التأكد والمحاولة مرة أخرى.';
+              } else if (error.code === 'auth/wrong-password') {
+                  userMsg = 'كلمة المرور التي أدخلتها خاطئة. الرجاء التأكد منها والمحاولة مجدداً.';
+              } else if (error.code === 'auth/too-many-requests') {
+                  userMsg = 'لقد حاولت الدخول مرات كثيرة جداً. يرجى الانتظار قليلاً ثم المحاولة.';
+              } else if (error.code === 'auth/network-request-failed') {
+                  userMsg = 'يوجد مشكلة في اتصالك بالإنترنت. يرجى التأكد من اتصالك والمحاولة مرة أخرى.';
+              } else if (error.message) {
+                  userMsg = error.message;
+              }
+              showLoginError(userMsg);
+              setButtonState(submitBtn, 'تسجيل الدخول', false);
+              return;
           }
-          showLoginError('ليس لديك صلاحية وصول كطالب.');
-          return;
-        }
+        } else {
         throw new Error('Firebase not configured');
-      } catch (error) {
+      } } catch (error) {
         console.warn('Firebase login failed, trying STRICT Local Storage fallback:', error);
         
         // Try local storage first!

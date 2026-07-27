@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -931,6 +931,34 @@
                 });
             }
 
+            // Mount Bousala Course Viewer (Independent Module)
+            (async function() {
+                try {
+                    if (!document.getElementById('bousalaCourseStyle')) {
+                        const style = document.createElement('link');
+                        style.id = 'bousalaCourseStyle';
+                        style.rel = 'stylesheet';
+                        style.href = 'css/bousala-course.css';
+                        document.head.appendChild(style);
+                    }
+                    
+                    let bCourseArea = document.getElementById('bousala-course-area');
+                    if (!bCourseArea) {
+                        bCourseArea = document.createElement('div');
+                        bCourseArea.id = 'bousala-course-area';
+                        bCourseArea.style.cssText = 'margin-top: 20px; margin-bottom: 40px;';
+                        if (sectionsContainer && sectionsContainer.parentElement) {
+                            sectionsContainer.parentElement.insertBefore(bCourseArea, sectionsContainer);
+                        }
+                    }
+                    
+                    const { mountCourse } = await import('./js/bousala-course.js');
+                    mountCourse('bousala-course-area', course, normalizedContents.sections, userStr, markItemCompleted, (item) => {
+                        if (window.openExamModal) window.openExamModal(course.id, item);
+                    });
+                } catch(e) { console.error('Failed to mount Bousala Course Viewer', e); }
+            })();
+
             // Add exam modal UI — Full Featured (Timer, Auto-Submit, Strict Mode, Encouragement, Attempts)
             (function(){
                 const examModalHtml = `
@@ -1014,7 +1042,7 @@
                     resultBox.style.display = 'none'; resultBox.innerHTML = '';
                     submitBtn.disabled = false; submitBtn.innerHTML = 'تسليم الإجابات';
 
-                    function doSubmit(autoSubmit) {
+                    async function doSubmit(autoSubmit) {
                         _stopTimer();
                         const studentStr = sessionStorage.getItem('currentStudent');
                         if(!studentStr){ alert('يجب تسجيل الدخول لتسليم الإجابة'); return; }
@@ -1031,18 +1059,65 @@
                             answers.push({ q, answer: val });
                         });
 
-                        const results = answers.map(item => {
+                        submitBtn.disabled = true;
+                        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري التصحيح...';
+
+                        // Import Bousala Grader
+                        let BousalaGrader = null;
+                        try {
+                            BousalaGrader = await import('./js/bousala-grader.js');
+                        } catch(e) { console.warn('BousalaGrader failed to load, falling back to PF_Grader', e); }
+
+                        // Helper for Gemini
+                        const callAI = async (prompt) => {
+                            if (!window.geminiChatSession && window.initGeminiChat) await window.initGeminiChat();
+                            if (!window.geminiChatSession) throw new Error("Gemini not ready");
+                            const res = await window.geminiChatSession.sendMessage(prompt);
+                            return res.response.text();
+                        };
+
+                        const results = [];
+                        for (const item of answers) {
+                            let r = null;
                             try {
-                                if(window.PF_Grader && typeof window.PF_Grader.scoreAnswer === 'function') {
-                                    const res = window.PF_Grader.scoreAnswer(item.answer, item.q.answer, item.q.type || 'explain');
-                                    return { question: item.q.text, rawAnswer: item.answer, score: res.score || 0, feedback: res.feedback || (res.score === 1 ? 'إجابة صحيحة تمامًا ✅' : 'راجع الإجابة') };
+                                if (BousalaGrader) {
+                                    if (item.q.type === 'explain') {
+                                        const rubric = item.q.rubric || [];
+                                        if (rubric.length === 0) {
+                                            // Fallback if no rubric exists (legacy questions)
+                                            rubric.push({ concept: item.q.answer, weight: 1 });
+                                        }
+                                        const res = await BousalaGrader.gradeEssayFair(
+                                            item.answer, rubric, item.q.maxScore || 1, item.q.answer, callAI
+                                        );
+                                        r = { score: res.score, feedback: res.feedback.join(' | '), needsReview: res.needsReview, method: res.method };
+                                    } else {
+                                        const opts = { choices: item.q.options ? Object.values(item.q.options) : null, altAnswers: item.q.altAnswers };
+                                        const res = BousalaGrader.gradeObjective(item.answer, item.q.answer, opts);
+                                        r = { score: res.score, feedback: res.why, needsReview: false, method: "آلي" };
+                                    }
                                 }
-                            } catch(e) {}
-                            const correct = (item.q.answer || '').toString().trim().toLowerCase();
-                            const given = String(item.answer || '').trim().toLowerCase();
-                            const ok = given !== '' && given === correct;
-                            return { question: item.q.text, rawAnswer: item.answer, score: ok ? 1 : 0, feedback: ok ? 'إجابة صحيحة ✅' : ('إجابة غير صحيحة ❌ — الإجابة الصحيحة: ' + item.q.answer) };
-                        });
+                            } catch(e) { console.error('Bousala grading failed for item, using fallback', e); }
+
+                            if (!r) {
+                                // Fallback System
+                                try {
+                                    if(window.PF_Grader && typeof window.PF_Grader.scoreAnswer === 'function') {
+                                        const res = window.PF_Grader.scoreAnswer(item.answer, item.q.answer, item.q.type || 'explain');
+                                        r = { score: res.score || 0, feedback: res.feedback || (res.score === 1 ? 'إجابة صحيحة تمامًا ✅' : 'راجع الإجابة'), needsReview: false };
+                                    }
+                                } catch(e) {}
+                            }
+
+                            if (!r) {
+                                const correct = (item.q.answer || '').toString().trim().toLowerCase();
+                                const given = String(item.answer || '').trim().toLowerCase();
+                                const ok = given !== '' && given === correct;
+                                r = { score: ok ? 1 : 0, feedback: ok ? 'إجابة صحيحة ✅' : ('إجابة غير صحيحة ❌ — الإجابة الصحيحة: ' + item.q.answer), needsReview: false };
+                            }
+
+                            results.push({ question: item.q.text, rawAnswer: item.answer, score: r.score, feedback: r.feedback, needsReview: !!r.needsReview, method: r.method || "قديم" });
+                        }
 
                         const total = results.reduce((s, r) => s + (r.score || 0), 0);
                         const percent = Math.round((total / (results.length || 1)) * 100);
