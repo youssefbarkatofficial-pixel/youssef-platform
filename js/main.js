@@ -1,3 +1,76 @@
+// ============================================================
+//  دالة عرض المرحلة الدراسية — مشتركة بين كل صفحات المنصة
+//  تقبل كود المرحلة (prep1, sec2...) أو النص الكامل
+// ============================================================
+window.GRADE_MAP = {
+    'prep1':  'الصف الأول الإعدادي',
+    'prep2':  'الصف الثاني الإعدادي',
+    'prep3':  'الصف الثالث الإعدادي',
+    'sec1':   'الصف الأول الثانوي',
+    'sec2':   'الصف الثاني الثانوي',
+    'sec3':   'الصف الثالث الثانوي',
+    // قيم إضافية قد يكتبها بعض الطلبة أو تُخزَّن من modal الترقية
+    'الصف الأول الإعدادي':   'الصف الأول الإعدادي',
+    'الصف الثاني الإعدادي':  'الصف الثاني الإعدادي',
+    'الصف الثالث الإعدادي':  'الصف الثالث الإعدادي',
+    'أولى إعدادي':  'الصف الأول الإعدادي',
+    'تانية إعدادي': 'الصف الثاني الإعدادي',
+    'تالتة إعدادي': 'الصف الثالث الإعدادي',
+    'الصف الأول الثانوي':  'الصف الأول الثانوي',
+    'الصف الثاني الثانوي': 'الصف الثاني الثانوي',
+    'الصف الثالث الثانوي': 'الصف الثالث الثانوي',
+    'أولى ثانوي':  'الصف الأول الثانوي',
+    'تانية ثانوي': 'الصف الثاني الثانوي',
+    'تالتة ثانوي': 'الصف الثالث الثانوي',
+    'الصف السادس الابتدائي': 'الصف السادس الابتدائي',
+};
+
+/**
+ * يُحوّل كود أو نص المرحلة الدراسية إلى اسم عربي واضح.
+ * @param {string} grade - كود المرحلة أو نصها
+ * @param {string} [fallback='طالب'] - النص الاحتياطي
+ * @returns {string}
+ */
+window.getGradeLabel = function(grade, fallback) {
+    if (!grade) return fallback || 'طالب';
+    // محاولة المطابقة المباشرة أولاً
+    if (window.GRADE_MAP[grade]) return window.GRADE_MAP[grade];
+    // محاولة مطابقة غير حساسة لحالة الأحرف (للإنجليزية)
+    const lower = String(grade).toLowerCase().trim();
+    for (const key of Object.keys(window.GRADE_MAP)) {
+        if (key.toLowerCase() === lower) return window.GRADE_MAP[key];
+    }
+    // لو النص يشبه اسم مرحلة دراسية مباشرة ارجعه كما هو
+    if (grade.includes('الصف') || grade.includes('إعدادي') || grade.includes('ثانوي') || grade.includes('ابتدائي')) {
+        return grade;
+    }
+    return fallback || grade || 'طالب';
+};
+
+/**
+ * يرجع المرحلة الفعلية للطالب بعد أخذ التحديث السنوي بعين الاعتبار.
+ * يبحث في sessionStorage ثم dbUser (localStorage) ثم PlatformStorage.
+ * @param {object} sessionUser - بيانات الطالب من sessionStorage
+ * @returns {string} كود أو نص المرحلة
+ */
+window.getEffectiveStudentGrade = function(sessionUser) {
+    if (!sessionUser) return '';
+    // 1) تحقق من PlatformStorage (أدق مصدر بعد الترقية السنوية)
+    if (window.PlatformStorage && sessionUser.phone) {
+        const state = window.PlatformStorage.getStoredState(sessionUser.phone);
+        if (state && state.grade) return state.grade;
+    }
+    // 2) تحقق من dbUser في localStorage
+    if (sessionUser.phone) {
+        try {
+            const dbUser = JSON.parse(localStorage.getItem(`db_${sessionUser.phone}`) || '{}');
+            if (dbUser && dbUser.grade) return dbUser.grade;
+        } catch(e) {}
+    }
+    // 3) القيمة في sessionStorage
+    return sessionUser.grade || '';
+};
+
 document.addEventListener('DOMContentLoaded', () => {
   // --- Global Safety Check: Auto-logout deleted accounts ---
   const checkStudentStr = sessionStorage.getItem('currentStudent') || localStorage.getItem('currentStudent');

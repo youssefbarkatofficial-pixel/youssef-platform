@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>���������� - ���� �����</title>
+    <title>الامتحانات - منصة يوسف بركات</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/dashboard.css">
@@ -63,14 +63,14 @@
 <body>
     <div class="bg-effects"></div>
 
-    <header class="navbar glass-panel" >
+    <header class="navbar glass-panel">
         <a href="index.html" class="nav-brand">
-            <div class="logo-circle" style="width: 40px; height: 40px; font-size: 1.2rem;">�</div>
-            <span class="nav-brand-text">���� ���� �����</span>
+            <div class="logo-circle" style="width: 40px; height: 40px; font-size: 1.2rem;">ي</div>
+            <span class="nav-brand-text">منصة يوسف بركات</span>
         </a>
         <div class="nav-actions">
             <a href="#" class="btn btn-outline" style="padding: 8px 15px; border-radius: 20px;"><i class="fas fa-bell"></i></a>
-            <a href="#" id="logoutBtn" class="btn btn-outline" style="border-color: #e74c3c; color: #e74c3c; padding: 8px 15px; border-radius: 20px;">���� <i class="fas fa-sign-out-alt"></i></a>
+            <a href="#" id="logoutBtn" class="btn btn-outline" style="border-color: #e74c3c; color: #e74c3c; padding: 8px 15px; border-radius: 20px;">خروج <i class="fas fa-sign-out-alt"></i></a>
             <div class="mobile-menu-btn"><i class="fas fa-bars"></i></div>
         </div>
     </header>
@@ -79,26 +79,26 @@
         <aside class="sidebar" id="sidebar">
             <div class="user-profile-mini">
                 <div class="avatar" style="overflow: hidden;">
-                    <img id="userAvatarImg" src="https://via.placeholder.com/80/071326/D4A64F?text=%D8%B7%D8%A7%D9%84%D8%A8" style="width: 100%; height: 100%; object-fit: cover;">
+                    <img id="userAvatarImg" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Ccircle cx='40' cy='40' r='40' fill='%23071326'/%3E%3Ccircle cx='40' cy='30' r='16' fill='%23D4A64F'/%3E%3Cellipse cx='40' cy='70' rx='24' ry='18' fill='%23D4A64F'/%3E%3C/svg%3E" style="width: 100%; height: 100%; object-fit: cover;">
                 </div>
-                <h4 id="userNameDisplay">����</h4>
-                <p id="userGradeDisplay">���� �������</p>
+                <h4 id="userNameDisplay">طالب</h4>
+                <p id="userGradeDisplay">الصف الدراسي</p>
             </div>
             <ul class="sidebar-nav">
-                <li><a href="dashboard.html"><i class="fas fa-home"></i> ���� ������</a></li>
-                <li><a href="profile.html"><i class="fas fa-user"></i> �����</a></li>
-                <li><a href="courses.html"><i class="fas fa-plus-circle"></i> ������ �� ������</a></li>
-                <li><a href="my-courses.html"><i class="fas fa-video"></i> �������</a></li>
-                <li><a href="homeworks.html"><i class="fas fa-tasks"></i> ��������</a></li>
-                <li><a href="exams.html" class="active"><i class="fas fa-clipboard-list"></i> ����������</a></li>
-                <li><a href="stats.html"><i class="fas fa-chart-line"></i> ����������</a></li>
-                <li><a href="settings.html"><i class="fas fa-cog"></i> ���������</a></li>
+                <li><a href="dashboard.html"><i class="fas fa-home"></i> لوحة التحكم</a></li>
+                <li><a href="profile.html"><i class="fas fa-user"></i> حسابي</a></li>
+                <li><a href="courses.html"><i class="fas fa-plus-circle"></i> اشتراك في كورسات</a></li>
+                <li><a href="my-courses.html"><i class="fas fa-video"></i> كورساتي</a></li>
+                <li><a href="homeworks.html"><i class="fas fa-tasks"></i> الواجبات</a></li>
+                <li><a href="exams.html" class="active"><i class="fas fa-clipboard-list"></i> الامتحانات</a></li>
+                <li><a href="stats.html"><i class="fas fa-chart-line"></i> الإحصائيات</a></li>
+                <li><a href="settings.html"><i class="fas fa-cog"></i> الإعدادات</a></li>
             </ul>
         </aside>
 
         <main class="main-content">
             <div class="page-header">
-                <h1 class="page-title"><i class="fas fa-clipboard-list mr-2 text-gold"></i> ���������</h1>
+                <h1 class="page-title"><i class="fas fa-clipboard-list mr-2 text-gold"></i> الامتحانات</h1>
             </div>
 
             <div class="glass-panel dash-panel" style="min-height: 400px;">
@@ -108,9 +108,9 @@
 
                 <div id="noExamState" style="display: none; text-align: center; padding: 50px 20px;">
                     <i class="fas fa-book-reader text-gold" style="font-size: 4rem; margin-bottom: 20px; opacity: 0.5;"></i>
-                    <h2 style="color: var(--soft-white); margin-bottom: 10px;">�� ���� ������ ����� ���� ���</h2>
-                    <p style="color: rgba(255,255,255,0.7); margin-bottom: 20px;">����� �� �������� ����� ����� �� ���������� ������ ���</p>
-                    <a href="courses.html" class="btn btn-gold btn-large">������ ��������</a>
+                    <h2 style="color: var(--soft-white); margin-bottom: 10px;">لا توجد امتحانات بعد</h2>
+                    <p style="color: rgba(255,255,255,0.7); margin-bottom: 20px;">اشترك في الكورسات أولاً للوصول إلى الامتحانات الخاصة بها</p>
+                    <a href="courses.html" class="btn btn-gold btn-large">تصفح الكورسات</a>
                 </div>
             </div>
         </main>
@@ -128,9 +128,15 @@
             }
             
             let user = JSON.parse(userStr);
-            document.getElementById('userNameDisplay').textContent = user.name;
-            const grades = {'prep1':'���� ������', 'prep2':'����� ������', 'prep3':'����� ������', 'sec1':'���� �����'};
-            document.getElementById('userGradeDisplay').textContent = grades[user.grade] || '����';
+            const nameEl = document.getElementById('userNameDisplay');
+            const gradeEl = document.getElementById('userGradeDisplay');
+            if(nameEl) nameEl.textContent = user.name;
+            if(gradeEl) {
+                const effectiveGrade = (window.getEffectiveStudentGrade && window.getGradeLabel)
+                    ? window.getGradeLabel(window.getEffectiveStudentGrade(user))
+                    : (user.grade || 'طالب');
+                gradeEl.textContent = effectiveGrade || 'طالب';
+            }
             
             let dbUser = JSON.parse(localStorage.getItem(`db_${user.phone}`)) || { courses: [] };
             const container = document.getElementById('examListContainer');
@@ -154,26 +160,17 @@
                                     <i class="fas fa-star text-gold" style="font-size: 1.5rem;"></i>
                                     <h3 style="margin: 0; color: var(--text-primary);">${c.title}</h3>
                                 </div>
-                                <button class="btn btn-outline toggle-btn">���� ��������� <i class="fas fa-chevron-down ml-2" style="margin-right: 8px;"></i></button>
+                                <button class="btn btn-outline toggle-btn">عرض الامتحانات <i class="fas fa-chevron-down ml-2" style="margin-right: 8px;"></i></button>
                             </div>
                             <div class="course-exam-body">
                                 <div class="exam-category">
-                                    <h4 style="color: #2ecc71;"><i class="fas fa-check-circle"></i> ���������� ��������</h4>
-                                    <div class="exam-item">
-                                        <span style="font-weight: bold;">������ ���� ��� ������ ������</span>
-                                        <span class="badge" style="background: rgba(46, 204, 113, 0.2); color: #2ecc71;">������: 19/20</span>
-                                    </div>
+                                    <h4 style="color: #2ecc71;"><i class="fas fa-check-circle"></i> الامتحانات المكتملة</h4>
+                                    <div class="empty-message">لا توجد امتحانات مكتملة بعد</div>
                                 </div>
                                 
                                 <div class="exam-category">
-                                    <h4 style="color: #e74c3c;"><i class="fas fa-exclamation-circle"></i> �������� ������ (�� ������)</h4>
-                                    <!-- Dynamic Missing State -->
-                                    <div class="empty-message" style="color: #2ecc71; border: 1px dashed #2ecc71;">���� ���� ���� ������ ����! ??</div>
-                                </div>
-
-                                <div class="exam-category">
-                                    <h4 style="color: var(--accent-cyan);"><i class="fas fa-clock"></i> �������� ��������</h4>
-                                    <div class="empty-message">�� ���� ��� �������� �������� ��� ����</div>
+                                    <h4 style="color: var(--accent-cyan);"><i class="fas fa-clock"></i> الامتحانات المتاحة</h4>
+                                    <div class="empty-message">لا توجد امتحانات متاحة الآن</div>
                                 </div>
                             </div>
                         `;
@@ -182,9 +179,9 @@
                         toggleBtn.addEventListener('click', () => {
                             row.classList.toggle('active');
                             if(row.classList.contains('active')) {
-                                toggleBtn.innerHTML = `���� ��������� <i class="fas fa-chevron-up ml-2" style="margin-right: 8px;"></i>`;
+                                toggleBtn.innerHTML = `إخفاء الامتحانات <i class="fas fa-chevron-up ml-2" style="margin-right: 8px;"></i>`;
                             } else {
-                                toggleBtn.innerHTML = `���� ��������� <i class="fas fa-chevron-down ml-2" style="margin-right: 8px;"></i>`;
+                                toggleBtn.innerHTML = `عرض الامتحانات <i class="fas fa-chevron-down ml-2" style="margin-right: 8px;"></i>`;
                             }
                         });
                         
@@ -207,9 +204,3 @@
     <script src="js/profile-guard.js?v=1.0"></script>
 </body>
 </html>
-
-
-
-
-
-

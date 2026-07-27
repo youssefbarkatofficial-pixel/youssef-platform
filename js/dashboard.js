@@ -15,13 +15,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     if(userNameEl) userNameEl.textContent = user.name;
     if(userGradeEl) {
-        const grades = {
-            'prep1': 'الصف الأول الإعدادي',
-            'prep2': 'الصف الثاني الإعدادي',
-            'prep3': 'الصف الثالث الإعدادي',
-            'sec1': 'الصف الأول الثانوي'
-        };
-        userGradeEl.textContent = grades[user.grade] || 'طالب';
+        // استخدام الدوال المشتركة من main.js للحصول على المرحلة الفعلية المحدّثة
+        const effectiveGrade = (window.getEffectiveStudentGrade && window.getGradeLabel)
+            ? window.getGradeLabel(window.getEffectiveStudentGrade(user))
+            : (user.grade || 'طالب');
+        userGradeEl.textContent = effectiveGrade || 'طالب';
     }
 
     // Load Profile Picture if exists
