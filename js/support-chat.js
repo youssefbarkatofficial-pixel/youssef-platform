@@ -2823,13 +2823,13 @@
              }
 
              if (!replyText) {
-                 var h2 = loadHistory();
+                 var aiHist = loadHistory();
                  // لو في سياق من الدروس، ابعته للـ API كمرجع إلزامي
                  var msgToSend = text;
                  if (ragContext) {
                      msgToSend = 'أجب على سؤال الطالب اعتماداً أولاً وأساساً على "المرجع" التالي من منهجنا الدراسي، وبنفس معلوماته حتى لو خالفت معلوماتك العامة. إن لم يكفِ المرجع، أكمل من معرفتك بحذر.\n\n--- المرجع ---\n' + ragContext + '\n--- نهاية المرجع ---\n\nسؤال الطالب: ' + text;
                  }
-                 var aiResponse = await window.askGeminiDirectly(msgToSend, h2);
+                 var aiResponse = await window.askGeminiDirectly(msgToSend, aiHist);
                  if (!aiResponse.fallback && aiResponse.reply) {
                      replyText = aiResponse.reply;
                      // خزن الرد في الكاش (15 دقيقة)
@@ -2872,9 +2872,9 @@
       enrichChatContext(text, replyText, { timestamp: nowTs() });
       
       const botMsg = { who:'bot', text: replyText, ts: nowTs(), status:'delivered', typingEffect: true };
-      const h2 = loadHistory(); 
-      h2.push(botMsg); 
-      saveHistory(h2); 
+      const finalHist = loadHistory(); 
+      finalHist.push(botMsg); 
+      saveHistory(finalHist); 
       renderHistory();
     }, 700 + Math.random()*900);
   }
