@@ -203,11 +203,48 @@
 
         <!-- Admin Main Content -->
         <main class="main-content">
-            <div class="page-header">
+            <div class="page-header" style="display:flex; justify-content:space-between; align-items:center;">
                 <div>
                     <h1 class="page-title"><i class="fas fa-compass text-gold"></i> بوت البوصلة (الدعم الفني)</h1>
                 </div>
+                <div>
+                    <button class="btn btn-outline" style="border-color: var(--royal-gold); color: var(--royal-gold);" onclick="document.getElementById('intentsModal').style.display='flex'">
+                        <i class="fas fa-brain"></i> تغذية البوصلة (Intents)
+                    </button>
+                </div>
             </div>
+
+            <!-- Modal for Intents Upload -->
+            <div id="intentsModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999; align-items:center; justify-content:center;">
+                <div style="background:var(--bg-secondary); padding:20px; border-radius:12px; width:90%; max-width:600px; border:1px solid var(--royal-gold);">
+                    <h3 style="color:var(--royal-gold); margin-top:0;">إضافة الألف سؤال للبوصلة (صيغة JSON)</h3>
+                    <p style="font-size:0.9rem; color:var(--text-secondary);">ألصق كود JSON الذي يحتوي على التصنيفات والأسئلة بصيغها المتعددة.</p>
+                    <textarea id="intentsJsonInput" rows="15" style="width:100%; background:var(--input-bg); color:var(--text-primary); border:1px solid var(--border-color); border-radius:8px; padding:10px; font-family:monospace;" placeholder='{"bot_name":"البوصلة","core_questions":[]}'></textarea>
+                    <div style="margin-top:15px; display:flex; justify-content:flex-end; gap:10px;">
+                        <button class="btn" style="background:#e74c3c; color:#fff;" onclick="document.getElementById('intentsModal').style.display='none'">إلغاء</button>
+                        <button class="btn" style="background:var(--royal-gold); color:#000;" onclick="saveIntents()">حفظ الداتا</button>
+                    </div>
+                </div>
+            </div>
+
+            <script>
+                function saveIntents() {
+                    if (!window.BousalaIntents) {
+                        alert("محرك النوايا غير متوفر!");
+                        return;
+                    }
+                    var val = document.getElementById('intentsJsonInput').value;
+                    if (!val) return;
+                    var res = window.BousalaIntents.saveIntentsData(val);
+                    if (res.success) {
+                        alert("تم تغذية البوصلة بنجاح! إجمالي الأسئلة: " + res.count);
+                        document.getElementById('intentsModal').style.display='none';
+                        document.getElementById('intentsJsonInput').value = '';
+                    } else {
+                        alert("خطأ في حفظ البيانات: " + res.error);
+                    }
+                }
+            </script>
 
             <div class="compass-container">
                 <!-- Tickets List -->
