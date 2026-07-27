@@ -242,9 +242,60 @@
                             <option>الثالث الثانوي</option>
                         </select>
                     </div>
-                    <div class="form-group">
-                        <label style="color:var(--text-primary);display:block;margin-bottom:5px;">الوحدة / الموضوع</label>
-                        <input type="text" id="teachUnit" class="form-control" placeholder="مثال: الوحدة الأولى - موقع مصر">
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label style="color:var(--text-primary);display:block;margin-bottom:5px;">تصنيف الدرس (الوحدة / الموضوع)</label>
+                        <div style="display:flex;gap:10px;flex-wrap:wrap; align-items: center;">
+                            <input type="text" class="form-control" value="درس" readonly style="width: 80px; text-align: center; background: rgba(7,19,38,0.9); color: #ccc; cursor: not-allowed;">
+                            
+                            <select id="teachLessonOrder" class="form-control" style="width: auto; background:rgba(7,19,38,0.9);color:#fff;">
+                                <option value="">ترتيب الدرس؟</option>
+                                <option>الأول</option>
+                                <option>الثاني</option>
+                                <option>الثالث</option>
+                                <option>الرابع</option>
+                                <option>الخامس</option>
+                                <option>السادس</option>
+                                <option>السابع</option>
+                                <option>الثامن</option>
+                                <option>التاسع</option>
+                                <option>العاشر</option>
+                            </select>
+                            
+                            <select id="teachUnitOrder" class="form-control" style="width: auto; background:rgba(7,19,38,0.9);color:#fff;">
+                                <option value="">ترتيب الوحدة؟</option>
+                                <option>الأولى</option>
+                                <option>الثانية</option>
+                                <option>الثالثة</option>
+                                <option>الرابعة</option>
+                                <option>الخامسة</option>
+                                <option>السادسة</option>
+                                <option>السابعة</option>
+                                <option>الثامنة</option>
+                                <option>التاسعة</option>
+                                <option>العاشرة</option>
+                            </select>
+
+                            <select id="teachTerm" class="form-control" style="width: auto; background:rgba(7,19,38,0.9);color:#fff;">
+                                <option value="">أي ترم؟</option>
+                                <option>الأول</option>
+                                <option>الثاني</option>
+                            </select>
+
+                            <input type="text" id="teachYear" class="form-control" placeholder="السنة الدراسية (مثال: 2025/2026)" style="width: 200px;">
+                        </div>
+
+                        <div style="display:flex; gap: 15px; margin-top: 15px; align-items: center; background: rgba(255,255,255,0.02); padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
+                            <label style="color:var(--text-primary); display:flex; align-items:center; gap:5px; cursor: pointer;">
+                                <input type="checkbox" id="teachTypeTraining"> تدريب
+                            </label>
+                            <label style="color:var(--text-primary); display:flex; align-items:center; gap:5px; cursor: pointer;">
+                                <input type="checkbox" id="teachTypeHomework"> واجب
+                            </label>
+                            <label style="color:var(--text-primary); display:flex; align-items:center; gap:5px; cursor: pointer;">
+                                <input type="checkbox" id="teachTypeOther" onchange="document.getElementById('teachTypeOtherInput').style.display = this.checked ? 'block' : 'none';"> أخرى
+                            </label>
+                            <input type="text" id="teachTypeOtherInput" class="form-control" placeholder="اكتب نوع الأخرى..." style="display:none; width: 180px; padding: 4px 10px; font-size: 0.9rem; height: 30px;">
+                        </div>
                     </div>
                 </div>
                 <div class="form-group">
@@ -1227,9 +1278,31 @@
             if (log) log.textContent = '⏳ البوصلة بتذاكر...';
             btnTeach.disabled = true;
 
+            var unitStrParts = [];
+            var lessonOrder = (document.getElementById('teachLessonOrder') || {}).value || '';
+            var unitOrder = (document.getElementById('teachUnitOrder') || {}).value || '';
+            var term = (document.getElementById('teachTerm') || {}).value || '';
+            var year = (document.getElementById('teachYear') || {}).value || '';
+            
+            if (lessonOrder) unitStrParts.push("الدرس " + lessonOrder);
+            if (unitOrder) unitStrParts.push("الوحدة " + unitOrder);
+            if (term) unitStrParts.push("الترم " + term);
+            if (year) unitStrParts.push("السنة الدراسية " + year);
+            
+            var types = [];
+            if (document.getElementById('teachTypeTraining') && document.getElementById('teachTypeTraining').checked) types.push("تدريب");
+            if (document.getElementById('teachTypeHomework') && document.getElementById('teachTypeHomework').checked) types.push("واجب");
+            if (document.getElementById('teachTypeOther') && document.getElementById('teachTypeOther').checked) {
+                var otherVal = (document.getElementById('teachTypeOtherInput') || {}).value || '';
+                if (otherVal) types.push(otherVal);
+            }
+            if (types.length > 0) unitStrParts.push("(" + types.join(" و ") + ")");
+
+            var finalUnit = unitStrParts.join(" - ");
+
             var meta = {
               grade: (document.getElementById('teachGrade') || {}).value || '',
-              unit: (document.getElementById('teachUnit') || {}).value || ''
+              unit: finalUnit
             };
 
             var result = await window.BousalaTeach.teachBousala(text, meta);
