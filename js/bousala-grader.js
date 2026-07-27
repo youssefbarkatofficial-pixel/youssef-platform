@@ -130,25 +130,25 @@ export async function gradeEssayFair(studentAns, rubric, maxScore,
 
   try {
     const prompt =
-`أنت مصحح امتحانات دراسات اجتماعية عادل ودقيق. صحح إجابة الطالب.
+`أنت مصحح امتحانات دراسات اجتماعية عادل، ناصف، وحازم. صحح إجابة الطالب.
 قواعد إلزامية:
 - الدرجة من ${maxScore} ويجوز أنصاف الدرجات.
-- قيّم المعنى لا الحفظ الحرفي، واقبل المرادفات وأسلوب الطالب.
-- لا تحاسب على الإملاء إلا إن غيّر المعنى.
-- المعلومة المنفية أو المعكوسة لا تحتسب.
-- أعد JSON فقط: {"score": رقم, "reason": "سبب من سطرين بالعربية"}
+- قيّم الفهم والمعنى ولا تشترط الحفظ الحرفي، اقبل المرادفات.
+- لا توزع درجات مجانية: إذا كانت الإجابة تحتوي على كلمات صحيحة لكن في سياق خاطئ أو عشوائي، فالدرجة صفر.
+- لا تحاسب على الأخطاء الإملائية إلا إذا غيّرت المعنى تماماً.
+- المعلومة المنفية أو المعكوسة تُعتبر خاطئة.
+- أعد JSON فقط بهذا التنسيق: {"score": رقم, "reason": "سبب من سطرين بالعربية يشرح لماذا استحق هذه الدرجة بدقة"}
 
-الإجابة النموذجية: ${modelAnswer}
-العناصر المطلوبة: ${rubric.map(r => r.concept).join("، ")}
+الإجابة النموذجية (للقياس عليها): ${modelAnswer}
+العناصر الأساسية المطلوبة: ${rubric.map(r => r.concept).join("، ")}
 إجابة الطالب: ${studentAns}`;
 
     const raw = await callAI(prompt);
     const ai = JSON.parse(raw.match(/\{[\s\S]*\}/)[0]);
-    const aiScore = Math.min(maxScore, Math.max(0, Number(ai.score)));
-    // العدالة: الطالب ياخد الأعلى بين التقديرين الآلي والذكي
-    const final = Math.max(local.score, aiScore);
-    return { score: final, method: "ذكاء اصطناعي",
-             feedback: [...local.feedback, `🤖 ${ai.reason}`],
+    const finalScore = Math.min(maxScore, Math.max(0, Number(ai.score)));
+    
+    return { score: finalScore, method: "ذكاء اصطناعي",
+             feedback: [...local.feedback, `🤖 (رأي الذكاء الاصطناعي): ${ai.reason}`],
              needsReview: false };
   } catch {
     // فشل المفتاح؟ عمر الطالب ما يتظلم: تتعلّم للمراجعة اليدوية
