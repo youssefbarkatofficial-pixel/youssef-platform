@@ -173,7 +173,7 @@
       }
     }
 
-    return bestScore >= 0.5 ? best.trim() : null;
+    return bestScore >= 0.25 ? best.trim() : null;
   }
 
   // ===================== حذف كل الدروس =====================
