@@ -510,95 +510,77 @@ img, video {
 
 /* Base Responsive */
 @media (max-width: 992px) {
-  /* Navbar / Drawer Menu */
-  .nav-links {
-    position: fixed;
-    top: 0;
-    right: -100%;
-    width: clamp(250px, 75vw, 320px);
-    height: 100vh;
-    background: var(--secondary-navy);
-    flex-direction: column;
-    padding: 100px 30px;
-    transition: all 0.4s cubic-bezier(0.77, 0, 0.175, 1);
-    border-left: 1px solid var(--glass-border);
-    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
-    z-index: 999;
-    overflow-y: auto;
-  }
-  .nav-links.active {
-    right: 0;
-  }
-  .mobile-menu-btn {
-    display: block;
-    z-index: 1000;
-  }
+  /* Navbar */
   .navbar {
-    padding: 0.8rem clamp(15px, 5vw, 30px);
-  }
-}
-
-.mobile-icon { display: none; }
-.desktop-text { display: inline-block; }
-
-@media (max-width: 768px) {
-  /* Navbar Actions */
-  .nav-actions {
-    gap: 4px;
+    flex-wrap: wrap;
+    padding: 0.5rem 2%;
+    justify-content: space-between;
   }
   
   .nav-brand {
-    gap: 8px;
+    gap: 5px;
   }
+  
+  .nav-brand-text {
+    font-size: 1.1rem;
+  }
+  
+  .logo-circle {
+    width: 35px;
+    height: 35px;
+    font-size: 1rem;
+  }
+
+  .nav-actions {
+    gap: 5px;
+  }
+  
   .nav-actions .btn {
-    padding: 6px 12px;
-    font-size: 0.9rem;
-  }
-  /* Show extra buttons on mobile as circular icons */
-  .mobile-icon { display: inline-block; margin: 0; font-size: 1.1rem; }
-  .desktop-text { display: none; }
-  .nav-actions .btn:not(.mobile-menu-btn):not(#themeToggle) {
-    display: flex !important;
-    padding: 0 !important;
-    width: 36px !important;
-    height: 36px !important;
-    justify-content: center !important;
-    align-items: center !important;
-    border-radius: 50% !important;
-  }
-  .nav-actions .btn .fa-youtube { margin: 0 !important; font-size: 1.2rem !important; }
-  
-  /* Make login icon specifically green on mobile for better UX */
-  .nav-actions .open-login {
-    color: #2ecc71 !important;
-    border-color: #2ecc71 !important;
-  }
-  
-  /* Reset cloned buttons in sidebar */
-  .mobile-injected-actions .btn {
-    width: 100% !important;
-    border-radius: 99px !important;
-    justify-content: center !important;
-    padding: 12px 24px !important;
+    padding: 4px 10px !important;
+    font-size: 0.8rem !important;
+    border-radius: 20px !important;
     height: auto !important;
   }
-  .mobile-injected-actions .btn .mobile-icon { display: inline-block; margin: 0 0 0 8px; }
-  .mobile-injected-actions .btn .desktop-text { display: inline-block; margin: 0 !important; }
-  .mobile-injected-actions .btn .fa-youtube { margin: 0 0 0 8px !important; font-size: 1.2rem !important; }
-
-  .logo-circle {
-    width: 40px;
-    height: 40px;
-    font-size: 1.2rem;
+  
+  .nav-actions .btn#themeToggle {
+    width: 30px !important;
+    height: 30px !important;
+    padding: 0 !important;
+    font-size: 1rem !important;
   }
 
-  /* Show brand text on smaller screens as requested */
-  .nav-brand-text {
-    display: inline-block;
-    font-size: 1.05rem;
+  .desktop-text { display: inline-block !important; }
+  .mobile-icon { display: none !important; }
+
+  /* Make nav-links a horizontally scrollable bar on a new row */
+  .nav-links {
+    width: 100%;
+    order: 3;
+    display: flex;
+    overflow-x: auto;
+    overflow-y: hidden;
     white-space: nowrap;
+    gap: 15px;
+    padding: 10px 5px 5px;
+    margin-top: 5px;
+    border-top: 1px solid rgba(255,255,255,0.05);
+    scrollbar-width: none; /* Firefox */
+  }
+  
+  .nav-links::-webkit-scrollbar {
+    display: none; /* Chrome/Safari */
+  }
+  
+  .nav-links a {
+    font-size: 0.95rem;
   }
 
+  .mobile-menu-btn {
+    display: none !important;
+  }
+}
+
+@media (max-width: 768px) {
   /* Footers */
   .footer-content {
     grid-template-columns: 1fr;
@@ -616,18 +598,11 @@ img, video {
 }
 
 @media (max-width: 480px) {
-  /* Ultra small screens (320px - 425px) */
-  .btn:not(.nav-actions .btn):not(.close-modal) {
+  /* Ultra small screens */
+  .btn:not(.nav-actions .btn):not(.close-modal):not(.notif-filter-btn) {
     width: 100%;
     text-align: center;
     margin-bottom: 10px;
-  }
-  .nav-actions .btn {
-    width: auto;
-    margin-bottom: 0;
-  }
-  .nav-actions {
-    gap: 5px;
   }
   /* Typography tweaks */
   .heading-luxury {

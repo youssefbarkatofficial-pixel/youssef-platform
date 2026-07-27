@@ -803,41 +803,9 @@ document.addEventListener('DOMContentLoaded', () => {
       }
   });
 
-  // --- Mobile Drawer Navigation Injection ---
-  setTimeout(() => {
-      const navLinksUl = document.querySelector('.nav-links');
-      const navActionsContainer = document.querySelector('.nav-actions');
-      if (navLinksUl && navActionsContainer && window.innerWidth <= 768) {
-          // Check if already injected
-          if (!navLinksUl.querySelector('.mobile-injected-actions')) {
-              const actionGroupLi = document.createElement('li');
-              actionGroupLi.className = 'mobile-injected-actions';
-              actionGroupLi.style.cssText = 'display:flex; flex-direction:column; gap:10px; margin-bottom: 15px;';
-              
-              // Clone all buttons except mobile menu and theme toggle
-              const btnsToClone = navActionsContainer.querySelectorAll('.btn:not(.mobile-menu-btn):not(#themeToggle)');
-              btnsToClone.forEach(btn => {
-                  const clonedBtn = btn.cloneNode(true);
-                  // Remove outline class if it's there to make it look like a solid menu item or keep it to stand out
-                  clonedBtn.style.display = 'flex';
-                  clonedBtn.style.justifyContent = 'center';
-                  clonedBtn.style.width = '100%';
-                  clonedBtn.style.textAlign = 'center';
-                  // Remove inline margin top if any
-                  clonedBtn.style.margin = '0';
-                  actionGroupLi.appendChild(clonedBtn);
-              });
-              
-              const divider = document.createElement('li');
-              divider.className = 'mobile-injected-actions';
-              divider.innerHTML = '<hr style="border-color: rgba(255,255,255,0.1); margin: 0 0 15px 0;">';
-              
-              // Insert at the VERY TOP of the drawer menu!
-              navLinksUl.insertBefore(divider, navLinksUl.firstChild);
-              navLinksUl.insertBefore(actionGroupLi, navLinksUl.firstChild);
-          }
-      }
-  }, 600); // give time for ytBtn and bellBtn to load
+  // --- Mobile Navigation Handled by CSS (Horizontal Scroll) ---
+  // Buttons remain in the header.
+
 
   // --- Dynamic Navbar Standardization for Students ---
   const currentStudentStr = sessionStorage.getItem('currentStudent');
