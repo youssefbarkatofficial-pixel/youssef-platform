@@ -73,7 +73,7 @@
         }
         contentsArr.push({role:'user',parts:[{text:msg}]});
 
-        var models = ['gemini-2.5-flash','gemini-2.0-flash'];
+        var models = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
         for (var keyIndex = 0; keyIndex < _keys.length; keyIndex++) {
             var k = _keys[keyIndex];
             for (var i=0;i<models.length;i++){
