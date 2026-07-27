@@ -377,50 +377,69 @@
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                 <div class="form-group">
+                <div class="form-group">
                     <label style="color: var(--text-primary); margin-bottom: 5px; display: block;">السعر (ج.م)</label>
-                    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                        <input type="number" id="editCoursePrice" class="form-control" placeholder="مثال: 150" required style="flex:1;">
-                        <label style="color:var(--text-secondary); display:flex; align-items:center; gap:5px; white-space:nowrap; cursor:pointer;">
-                            <input type="checkbox" id="editCourseFree" onchange="document.getElementById('editCoursePrice').disabled = this.checked; if(this.checked) { document.getElementById('editCoursePrice').value='0'; document.getElementById('editCourseHasDiscount').checked=false; document.getElementById('editCourseHasDiscount').dispatchEvent(new Event('change')); }"> مجاني
-                        </label>
-                        <label style="color:var(--text-secondary); display:flex; align-items:center; gap:5px; white-space:nowrap; cursor:pointer;">
-                            <input type="checkbox" id="editCourseHasDiscount" onchange="document.getElementById('discountOptions').style.display = this.checked ? 'block' : 'none'; if(this.checked) { document.getElementById('editCourseFree').checked=false; document.getElementById('editCoursePrice').disabled=false; }"> خصم
-                        </label>
+                    <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
+                        <input type="number" id="editCoursePrice" class="form-control" placeholder="مثال: 150" required style="flex: 1; min-width: 150px;">
+                        
+                        <div style="display: flex; gap: 15px; align-items: center;">
+                            <label style="color:var(--text-secondary); display:flex; align-items:center; gap:6px; cursor:pointer;">
+                                <input type="checkbox" id="editCourseFree" onchange="document.getElementById('editCoursePrice').disabled = this.checked; if(this.checked) { document.getElementById('editCoursePrice').value='0'; document.getElementById('editCourseHasDiscount').checked=false; document.getElementById('editCourseHasDiscount').dispatchEvent(new Event('change')); }"> 
+                                <span>مجاني</span>
+                            </label>
+                            
+                            <label style="color:var(--text-secondary); display:flex; align-items:center; gap:6px; cursor:pointer;">
+                                <input type="checkbox" id="editCourseHasDiscount" onchange="document.getElementById('discountOptions').style.display = this.checked ? 'block' : 'none'; if(this.checked) { document.getElementById('editCourseFree').checked=false; document.getElementById('editCoursePrice').disabled=false; }"> 
+                                <span>تفعيل خصم</span>
+                            </label>
+                        </div>
                     </div>
                 </div>
                 
-                <div class="form-group">
-                    <label style="color: var(--text-primary); margin-bottom: 5px; display: block;">الصف الدراسي</label>
-                    <select id="editCourseGrade" class="form-control" required>
-                        <option value="prep1">أولى إعدادي</option>
-                        <option value="prep2">تانية إعدادي</option>
-                        <option value="prep3">تالتة إعدادي</option>
-                        <option value="sec1">أولى ثانوي</option>
-                    </select>
-                </div>
-            </div>
-
-            <div id="discountOptions" style="display: none; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; margin-bottom: 15px; border: 1px dashed var(--royal-gold);">
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 10px;">
-                    <div>
-                        <label style="color: var(--text-primary); margin-bottom: 5px; display: block;">السعر بعد الخصم (ج.م)</label>
+                <div id="discountOptions" style="display: none; background: rgba(0,0,0,0.2); padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.05);">
+                    <div class="form-group">
+                        <label style="color: var(--text-primary); margin-bottom: 8px; display: block;">السعر بعد الخصم (ج.م)</label>
                         <input type="number" id="editCourseDiscountPrice" class="form-control" placeholder="مثال: 100">
                     </div>
-                    <div style="display: flex; align-items: flex-end;">
-                        <label style="color:var(--text-secondary); display:flex; align-items:center; gap:5px; cursor:pointer; margin-bottom: 10px;">
-                            <input type="checkbox" id="editCourseTimerToggle" onchange="document.getElementById('discountTimerOptions').style.display = this.checked ? 'flex' : 'none';"> تفعيل عداد مؤقت للخصم
+                    
+                    <div class="form-group" style="margin-bottom: 15px; margin-top: 15px;">
+                        <label style="color:var(--text-primary); display:flex; align-items:center; gap:8px; cursor:pointer;">
+                            <input type="checkbox" id="editCourseTimerToggle" onchange="document.getElementById('discountTimerOptions').style.display = this.checked ? 'block' : 'none';"> 
+                            <span style="font-weight: bold; color: var(--royal-gold);">تفعيل عداد مؤقت للخصم</span>
                         </label>
                     </div>
+                    
+                    <div id="discountTimerOptions" style="display: none;">
+                        <label style="color: var(--text-secondary); margin-bottom: 12px; display: block; font-size: 0.95rem;">حدد المدة المتبقية لانتهاء الخصم:</label>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(60px, 1fr)); gap: 12px;">
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label style="color:var(--text-secondary);font-size:0.85rem; text-align: center; display: block; margin-bottom: 5px;">سنة</label>
+                                <input type="number" id="dtYears" class="form-control" min="0" placeholder="0" style="text-align:center; padding: 10px 5px;">
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label style="color:var(--text-secondary);font-size:0.85rem; text-align: center; display: block; margin-bottom: 5px;">شهر</label>
+                                <input type="number" id="dtMonths" class="form-control" min="0" placeholder="0" style="text-align:center; padding: 10px 5px;">
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label style="color:var(--text-secondary);font-size:0.85rem; text-align: center; display: block; margin-bottom: 5px;">أسبوع</label>
+                                <input type="number" id="dtWeeks" class="form-control" min="0" placeholder="0" style="text-align:center; padding: 10px 5px;">
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label style="color:var(--text-secondary);font-size:0.85rem; text-align: center; display: block; margin-bottom: 5px;">يوم</label>
+                                <input type="number" id="dtDays" class="form-control" min="0" placeholder="0" style="text-align:center; padding: 10px 5px;">
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label style="color:var(--text-secondary);font-size:0.85rem; text-align: center; display: block; margin-bottom: 5px;">ساعة</label>
+                                <input type="number" id="dtHours" class="form-control" min="0" placeholder="0" style="text-align:center; padding: 10px 5px;">
+                            </div>
+                        </div>
+                        <div style="margin-top: 15px; background: rgba(231, 76, 60, 0.1); padding: 12px; border-radius: 8px; border: 1px solid rgba(231, 76, 60, 0.2);">
+                            <small style="color: #e74c3c; display: block; line-height: 1.6; font-size: 0.9rem;">
+                                <i class="fas fa-info-circle mr-1"></i> سيبدأ العداد التنازلي فور حفظ الكورس، وعند انتهاء المدة سيتم إلغاء الخصم تلقائياً.
+                            </small>
+                        </div>
+                    </div>
                 </div>
-                <div id="discountTimerOptions" style="display: none; gap: 10px; flex-wrap: wrap;">
-                    <div style="display: flex; flex-direction: column; align-items: center;"><label style="color:var(--text-secondary);font-size:0.8rem;">سنة</label><input type="number" id="dtYears" class="form-control" min="0" style="width:60px; text-align:center; padding:5px;"></div>
-                    <div style="display: flex; flex-direction: column; align-items: center;"><label style="color:var(--text-secondary);font-size:0.8rem;">شهر</label><input type="number" id="dtMonths" class="form-control" min="0" style="width:60px; text-align:center; padding:5px;"></div>
-                    <div style="display: flex; flex-direction: column; align-items: center;"><label style="color:var(--text-secondary);font-size:0.8rem;">أسبوع</label><input type="number" id="dtWeeks" class="form-control" min="0" style="width:60px; text-align:center; padding:5px;"></div>
-                    <div style="display: flex; flex-direction: column; align-items: center;"><label style="color:var(--text-secondary);font-size:0.8rem;">يوم</label><input type="number" id="dtDays" class="form-control" min="0" style="width:60px; text-align:center; padding:5px;"></div>
-                    <div style="display: flex; flex-direction: column; align-items: center;"><label style="color:var(--text-secondary);font-size:0.8rem;">ساعة</label><input type="number" id="dtHours" class="form-control" min="0" style="width:60px; text-align:center; padding:5px;"></div>
-                    <small style="color: var(--accent-orange); width: 100%; margin-top: 5px;">أدخل المدة المتبقية للخصم. سيبدأ العداد من لحظة الحفظ. إذا أردت مسح المؤقت الغي التفعيل.</small>
-                </div>
-            </div>
             </div>
 
             <div class="form-group">
