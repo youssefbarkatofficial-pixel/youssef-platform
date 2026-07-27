@@ -63,6 +63,23 @@ document.addEventListener('DOMContentLoaded', () => {
         const generalSettings = JSON.parse(localStorage.getItem('generalSettings') || '{}');
         const statusText = generalSettings.courseStatus || 'يبدأ فوراً';
 
+                let priceHTML = `<span class="course-price">${course.price} ج.م</span>`;
+                let countdownHTML = '';
+                
+                if (course.hasDiscount && course.discountPrice) {
+                    if (!course.discountExpiry || course.discountExpiry > Date.now()) {
+                        priceHTML = `
+                        <div style="display:flex; flex-direction:column; align-items:flex-start;">
+                            <span style="text-decoration: line-through; font-size: 0.8rem; color: var(--text-muted); opacity: 0.8;">${course.price} ج.م</span>
+                            <span class="course-price" style="color: #2ecc71; font-size: 1.3rem;">${course.discountPrice} ج.م</span>
+                        </div>`;
+                        
+                        if (course.discountExpiry) {
+                            countdownHTML = `<div class="discount-countdown" data-expiry="${course.discountExpiry}" style="background: rgba(231, 76, 60, 0.1); border: 1px solid rgba(231, 76, 60, 0.3); border-radius: 5px; padding: 5px; margin-top: 10px; margin-bottom: 15px; text-align: center; color: #e74c3c; font-weight: bold; font-size: 0.9rem; animation: pulse 2s infinite;"><i class="fas fa-clock"></i> ينتهي الخصم خلال: <span class="cd-timer">...</span></div>`;
+                        }
+                    }
+                }
+
         return `
         <div class="glass-panel course-card" data-grade="${course.grade}" data-course-id="${course.id}">
             <div class="course-img-wrapper">
@@ -73,9 +90,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 <h3 class="course-title">${course.title}</h3>
                 <p class="course-desc">${course.desc}</p>
                 <div class="course-meta">
-                    <span class="course-price">${course.price} ج.م</span>
+                    ${priceHTML}
                     <span class="course-date"><i class="fas fa-calendar-alt"></i> ${statusText}</span>
                 </div>
+                ${countdownHTML}
                 <div class="course-actions">
                     ${actionBtnHTML}
                     ${detailsBtnHTML}
@@ -283,4 +301,43 @@ document.addEventListener('DOMContentLoaded', () => {
             card.style.transform = '';
         }, 4000);
     }
+
+    // Global Countdown Timer for Discounts
+    setInterval(() => {
+        const countdowns = document.querySelectorAll('.discount-countdown');
+        countdowns.forEach(el => {
+            const expiryStr = el.getAttribute('data-expiry');
+            if (!expiryStr) return;
+            const expiry = parseInt(expiryStr);
+            const remaining = expiry - Date.now();
+            
+            if (remaining <= 0) {
+                el.innerHTML = 'انتهى الخصم';
+                el.style.animation = 'none';
+                el.style.opacity = '0.5';
+                setTimeout(() => {
+                    // Refresh the display slightly after expiration
+                    if(typeof window.renderCourses === 'function') window.renderCourses();
+                }, 2000);
+            } else {
+                let seconds = Math.floor(remaining / 1000);
+                let d = Math.floor(seconds / (3600 * 24));
+                let h = Math.floor((seconds % (3600 * 24)) / 3600);
+                let m = Math.floor((seconds % 3600) / 60);
+                let s = Math.floor(seconds % 60);
+                
+                let parts = [];
+                if (d > 0) parts.push(`${d} يوم`);
+                if (h > 0) parts.push(`${h} ساعة`);
+                if (m > 0) parts.push(`${m} دقيقة`);
+                parts.push(`${s} ثانية`);
+                
+                const timerSpan = el.querySelector('.cd-timer');
+                if (timerSpan) {
+                    timerSpan.textContent = parts.join(' و ');
+                }
+            }
+        });
+    }, 1000);
+
 });

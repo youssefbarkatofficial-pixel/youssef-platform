@@ -392,7 +392,33 @@
             document.getElementById('cdImage').src = course.image;
             document.getElementById('cdTitle').textContent = course.title;
             document.getElementById('cdDesc').textContent = course.desc;
-            document.getElementById('cdPrice').textContent = course.price + ' ج.م';
+            
+            const priceContainer = document.getElementById('cdPrice');
+            if (course.hasDiscount && course.discountPrice && (!course.discountExpiry || course.discountExpiry > Date.now())) {
+                priceContainer.innerHTML = `
+                    <div style="display:flex; flex-direction:column; align-items:flex-start;">
+                        <span style="text-decoration: line-through; font-size: 1rem; color: var(--text-muted); opacity: 0.8;">${course.price} ج.م</span>
+                        <span style="color: #2ecc71; font-size: 2rem;">${course.discountPrice} ج.م</span>
+                    </div>
+                `;
+                if (course.discountExpiry) {
+                    const timerDiv = document.createElement('div');
+                    timerDiv.className = 'discount-countdown';
+                    timerDiv.setAttribute('data-expiry', course.discountExpiry);
+                    timerDiv.style.cssText = 'background: rgba(231, 76, 60, 0.1); border: 1px solid rgba(231, 76, 60, 0.3); border-radius: 5px; padding: 10px; margin-top: 15px; text-align: center; color: #e74c3c; font-weight: bold; font-size: 1rem; animation: pulse 2s infinite; width: 100%;';
+                    timerDiv.innerHTML = '<i class="fas fa-clock"></i> ينتهي الخصم خلال: <span class="cd-timer">...</span>';
+                    // We'll append this after setting the grade, just below the title area.
+                    setTimeout(() => {
+                        const actContainer = document.getElementById('cdActionBtnContainer');
+                        if (actContainer && actContainer.parentElement) {
+                            actContainer.parentElement.insertAdjacentElement('afterend', timerDiv);
+                        }
+                    }, 0);
+                }
+            } else {
+                priceContainer.textContent = course.price + ' ج.م';
+            }
+            
             document.getElementById('cdGrade').textContent = grades[course.grade] || course.grade;
 
 
@@ -1402,9 +1428,48 @@ window.enrollFreeCourse = async function(courseId) {
     
     if(window.showToast) window.showToast('مرحباً بك في الكورس المجاني!', 'success');
     setTimeout(() => {
+    setTimeout(() => {
         window.location.reload();
     }, 1000);
 };
+
+// Global Countdown Timer for Discounts in course details
+setInterval(() => {
+    const countdowns = document.querySelectorAll('.discount-countdown');
+    countdowns.forEach(el => {
+        const expiryStr = el.getAttribute('data-expiry');
+        if (!expiryStr) return;
+        const expiry = parseInt(expiryStr);
+        const remaining = expiry - Date.now();
+        
+        if (remaining <= 0) {
+            el.innerHTML = 'انتهى الخصم';
+            el.style.animation = 'none';
+            el.style.opacity = '0.5';
+            setTimeout(() => {
+                window.location.reload();
+            }, 2000);
+        } else {
+            let seconds = Math.floor(remaining / 1000);
+            let d = Math.floor(seconds / (3600 * 24));
+            let h = Math.floor((seconds % (3600 * 24)) / 3600);
+            let m = Math.floor((seconds % 3600) / 60);
+            let s = Math.floor(seconds % 60);
+            
+            let parts = [];
+            if (d > 0) parts.push(`${d} يوم`);
+            if (h > 0) parts.push(`${h} ساعة`);
+            if (m > 0) parts.push(`${m} دقيقة`);
+            parts.push(`${s} ثانية`);
+            
+            const timerSpan = el.querySelector('.cd-timer');
+            if (timerSpan) {
+                timerSpan.textContent = parts.join(' و ');
+            }
+        }
+    });
+}, 1000);
+
 </script>
 </body>
 </html>

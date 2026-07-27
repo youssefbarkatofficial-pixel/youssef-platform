@@ -378,10 +378,13 @@
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                 <div class="form-group">
                     <label style="color: var(--text-primary); margin-bottom: 5px; display: block;">السعر (ج.م)</label>
-                    <div style="display: flex; gap: 10px; align-items: center;">
-                        <input type="number" id="editCoursePrice" class="form-control" placeholder="مثال: 150" required>
+                    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                        <input type="number" id="editCoursePrice" class="form-control" placeholder="مثال: 150" required style="flex:1;">
                         <label style="color:var(--text-secondary); display:flex; align-items:center; gap:5px; white-space:nowrap; cursor:pointer;">
-                            <input type="checkbox" id="editCourseFree" onchange="document.getElementById('editCoursePrice').disabled = this.checked; if(this.checked) document.getElementById('editCoursePrice').value='0';"> مجاني
+                            <input type="checkbox" id="editCourseFree" onchange="document.getElementById('editCoursePrice').disabled = this.checked; if(this.checked) { document.getElementById('editCoursePrice').value='0'; document.getElementById('editCourseHasDiscount').checked=false; document.getElementById('editCourseHasDiscount').dispatchEvent(new Event('change')); }"> مجاني
+                        </label>
+                        <label style="color:var(--text-secondary); display:flex; align-items:center; gap:5px; white-space:nowrap; cursor:pointer;">
+                            <input type="checkbox" id="editCourseHasDiscount" onchange="document.getElementById('discountOptions').style.display = this.checked ? 'block' : 'none'; if(this.checked) { document.getElementById('editCourseFree').checked=false; document.getElementById('editCoursePrice').disabled=false; }"> خصم
                         </label>
                     </div>
                 </div>
@@ -395,6 +398,29 @@
                         <option value="sec1">أولى ثانوي</option>
                     </select>
                 </div>
+            </div>
+
+            <div id="discountOptions" style="display: none; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; margin-bottom: 15px; border: 1px dashed var(--royal-gold);">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 10px;">
+                    <div>
+                        <label style="color: var(--text-primary); margin-bottom: 5px; display: block;">السعر بعد الخصم (ج.م)</label>
+                        <input type="number" id="editCourseDiscountPrice" class="form-control" placeholder="مثال: 100">
+                    </div>
+                    <div style="display: flex; align-items: flex-end;">
+                        <label style="color:var(--text-secondary); display:flex; align-items:center; gap:5px; cursor:pointer; margin-bottom: 10px;">
+                            <input type="checkbox" id="editCourseTimerToggle" onchange="document.getElementById('discountTimerOptions').style.display = this.checked ? 'flex' : 'none';"> تفعيل عداد مؤقت للخصم
+                        </label>
+                    </div>
+                </div>
+                <div id="discountTimerOptions" style="display: none; gap: 10px; flex-wrap: wrap;">
+                    <div style="display: flex; flex-direction: column; align-items: center;"><label style="color:var(--text-secondary);font-size:0.8rem;">سنة</label><input type="number" id="dtYears" class="form-control" min="0" style="width:60px; text-align:center; padding:5px;"></div>
+                    <div style="display: flex; flex-direction: column; align-items: center;"><label style="color:var(--text-secondary);font-size:0.8rem;">شهر</label><input type="number" id="dtMonths" class="form-control" min="0" style="width:60px; text-align:center; padding:5px;"></div>
+                    <div style="display: flex; flex-direction: column; align-items: center;"><label style="color:var(--text-secondary);font-size:0.8rem;">أسبوع</label><input type="number" id="dtWeeks" class="form-control" min="0" style="width:60px; text-align:center; padding:5px;"></div>
+                    <div style="display: flex; flex-direction: column; align-items: center;"><label style="color:var(--text-secondary);font-size:0.8rem;">يوم</label><input type="number" id="dtDays" class="form-control" min="0" style="width:60px; text-align:center; padding:5px;"></div>
+                    <div style="display: flex; flex-direction: column; align-items: center;"><label style="color:var(--text-secondary);font-size:0.8rem;">ساعة</label><input type="number" id="dtHours" class="form-control" min="0" style="width:60px; text-align:center; padding:5px;"></div>
+                    <small style="color: var(--accent-orange); width: 100%; margin-top: 5px;">أدخل المدة المتبقية للخصم. سيبدأ العداد من لحظة الحفظ. إذا أردت مسح المؤقت الغي التفعيل.</small>
+                </div>
+            </div>
             </div>
 
             <div class="form-group">
@@ -641,7 +667,15 @@
                 approvedPays.forEach(req => {
                     if(!req.archived_revenue) {
                         const course = adminCourses.find(c => c.id === req.courseId);
-                        if (course) totalRev += parseInt(course.price || 0);
+                        if (course) {
+                            let effectivePrice = parseInt(course.price || 0);
+                            if (course.hasDiscount && course.discountPrice) {
+                                if (!course.discountExpiry || course.discountExpiry > Date.now()) {
+                                    effectivePrice = parseInt(course.discountPrice);
+                                }
+                            }
+                            totalRev += effectivePrice;
+                        }
                     }
                 });
                 
@@ -976,6 +1010,42 @@
                         document.getElementById('editCourseGrade').value = course.grade;
                         document.getElementById('editCourseImage').value = course.image;
                         document.getElementById('editCourseImagePreview').src = course.image;
+                        
+                        document.getElementById('editCourseFree').checked = course.isFree || false;
+                        document.getElementById('editCourseHasDiscount').checked = course.hasDiscount || false;
+                        document.getElementById('editCourseDiscountPrice').value = course.discountPrice || '';
+                        
+                        if (course.hasDiscount) {
+                            document.getElementById('discountOptions').style.display = 'block';
+                            document.getElementById('editCoursePrice').disabled = false;
+                        } else {
+                            document.getElementById('discountOptions').style.display = 'none';
+                        }
+                        
+                        if (course.isFree) document.getElementById('editCoursePrice').disabled = true;
+                        
+                        document.getElementById('dtYears').value = '';
+                        document.getElementById('dtMonths').value = '';
+                        document.getElementById('dtWeeks').value = '';
+                        document.getElementById('dtDays').value = '';
+                        document.getElementById('dtHours').value = '';
+                        
+                        if (course.discountExpiry) {
+                            document.getElementById('editCourseTimerToggle').checked = true;
+                            document.getElementById('discountTimerOptions').style.display = 'flex';
+                            
+                            const remainingMs = course.discountExpiry - Date.now();
+                            if (remainingMs > 0) {
+                                let seconds = Math.floor(remainingMs / 1000);
+                                let d = Math.floor(seconds / (3600 * 24));
+                                let h = Math.floor((seconds % (3600 * 24)) / 3600);
+                                document.getElementById('dtDays').value = d;
+                                document.getElementById('dtHours').value = h;
+                            }
+                        } else {
+                            document.getElementById('editCourseTimerToggle').checked = false;
+                            document.getElementById('discountTimerOptions').style.display = 'none';
+                        }
                     }
                 } else {
                     document.getElementById('courseEditorTitle').innerHTML = '<i class="fas fa-plus-circle mr-2"></i> إضافة كورس جديد';
@@ -983,6 +1053,19 @@
                     document.getElementById('editCourseName').value = '';
                     document.getElementById('editCourseDesc').value = '';
                     document.getElementById('editCoursePrice').value = '';
+                    document.getElementById('editCoursePrice').disabled = false;
+                    document.getElementById('editCourseFree').checked = false;
+                    document.getElementById('editCourseHasDiscount').checked = false;
+                    document.getElementById('editCourseDiscountPrice').value = '';
+                    document.getElementById('discountOptions').style.display = 'none';
+                    document.getElementById('editCourseTimerToggle').checked = false;
+                    document.getElementById('discountTimerOptions').style.display = 'none';
+                    document.getElementById('dtYears').value = '';
+                    document.getElementById('dtMonths').value = '';
+                    document.getElementById('dtWeeks').value = '';
+                    document.getElementById('dtDays').value = '';
+                    document.getElementById('dtHours').value = '';
+                    
                     document.getElementById('editCourseGrade').value = 'prep1';
                     document.getElementById('editCourseImage').value = 'https://via.placeholder.com/400x250/071326/D4A64F?text=Course';
                     document.getElementById('editCourseImagePreview').src = 'https://via.placeholder.com/400x250/071326/D4A64F?text=Course';
@@ -1112,11 +1195,43 @@
                     const desc = document.getElementById('editCourseDesc').value.trim();
                     const price = document.getElementById('editCoursePrice').value.trim();
                     const isFree = document.getElementById('editCourseFree') ? document.getElementById('editCourseFree').checked : false;
+                    const hasDiscount = document.getElementById('editCourseHasDiscount') ? document.getElementById('editCourseHasDiscount').checked : false;
+                    const discountPrice = document.getElementById('editCourseDiscountPrice') ? document.getElementById('editCourseDiscountPrice').value.trim() : '';
+                    const isTimerEnabled = document.getElementById('editCourseTimerToggle') ? document.getElementById('editCourseTimerToggle').checked : false;
+                    
+                    let discountExpiry = null;
+                    if (hasDiscount && isTimerEnabled) {
+                        const years = parseInt(document.getElementById('dtYears').value) || 0;
+                        const months = parseInt(document.getElementById('dtMonths').value) || 0;
+                        const weeks = parseInt(document.getElementById('dtWeeks').value) || 0;
+                        const days = parseInt(document.getElementById('dtDays').value) || 0;
+                        const hours = parseInt(document.getElementById('dtHours').value) || 0;
+                        
+                        const totalMs = (years * 365 * 24 * 60 * 60 * 1000) + 
+                                        (months * 30 * 24 * 60 * 60 * 1000) + 
+                                        (weeks * 7 * 24 * 60 * 60 * 1000) + 
+                                        (days * 24 * 60 * 60 * 1000) + 
+                                        (hours * 60 * 60 * 1000);
+                        if (totalMs > 0) {
+                            discountExpiry = Date.now() + totalMs;
+                        } else if (id) {
+                            // If editing and they left inputs blank, keep the old expiry if it exists
+                            const existing = adminCourses.find(c => c.id === id);
+                            if (existing && existing.discountExpiry) {
+                                discountExpiry = existing.discountExpiry;
+                            }
+                        }
+                    }
+
                     const grade = document.getElementById('editCourseGrade').value;
                     const image = document.getElementById('editCourseImage').value || 'https://via.placeholder.com/400x250/071326/D4A64F?text=Course';
                     
                     if(!title || (!price && !isFree)) {
                         alert('الرجاء إدخال اسم الكورس والسعر');
+                        return;
+                    }
+                    if (hasDiscount && !discountPrice) {
+                        alert('الرجاء إدخال السعر بعد الخصم');
                         return;
                     }
                     
@@ -1128,7 +1243,7 @@
                         if(id) {
                             const idx = adminCourses.findIndex(c => c.id === id);
                             if(idx !== -1) {
-                                adminCourses[idx] = { ...adminCourses[idx], title, desc, price: isFree ? '0' : price, isFree, grade, image };
+                                adminCourses[idx] = { ...adminCourses[idx], title, desc, price: isFree ? '0' : price, isFree, hasDiscount, discountPrice, discountExpiry, grade, image };
                                 if (window.FirebaseService && window.FirebaseService.isReady()) {
                                     await window.FirebaseService.saveCourse(adminCourses[idx]);
                                 }
@@ -1136,7 +1251,7 @@
                         } else {
                             const newCourse = {
                                 id: 'c' + Date.now(),
-                                title, desc, price: isFree ? '0' : price, isFree, grade, image,
+                                title, desc, price: isFree ? '0' : price, isFree, hasDiscount, discountPrice, discountExpiry, grade, image,
                                 hidden: false, finished: false,
                                 contents: { lectures: [], homeworks: [], exams: [], trainings: [], customSections: [] }
                             };
