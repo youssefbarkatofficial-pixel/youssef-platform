@@ -132,42 +132,60 @@
                 // إظهار اللودنج لأن الإرسال للسحابة بياخد وقت
                 const submitBtn = e.target.querySelector('button[type="submit"]');
                 const origBtnText = submitBtn.innerHTML;
-                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> جاري الإرسال...';
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> جاري الإرسال... برجاء الانتظار';
                 submitBtn.disabled = true;
 
                 (async () => {
-                    for (const u of users) {
-                        // Grade Filter
-                        if (fGrade !== 'all' && u.grade !== fGrade) continue;
+                    try {
+                        for (const u of users) {
+                            // Grade Filter
+                            if (fGrade !== 'all' && u.grade !== fGrade) continue;
 
-                        let dbUser = await window.firebaseService.getStudentData(u.phone);
-                        let hasCourses = dbUser.courses && dbUser.courses.length > 0;
+                            // الاعتماد على التخزين المحلي للفلترة السريعة بدل سحب كل الطلاب من السحابة عشان منعملش Load
+                            let dbUser = JSON.parse(localStorage.getItem(`db_${u.phone}`)) || { courses: [] };
+                            let hasCourses = dbUser.courses && dbUser.courses.length > 0;
 
-                        // Subscription Filter
-                        if (fSub === 'subscribed' && !hasCourses) continue;
-                        if (fSub === 'unsubscribed' && hasCourses) continue;
+                            // Subscription Filter
+                            if (fSub === 'subscribed' && !hasCourses) continue;
+                            if (fSub === 'unsubscribed' && hasCourses) continue;
 
-                        // Activity Filter
-                        if (fActivity === 'top' && !hasCourses) continue; 
-                        
-                        // إرسال الإشعار وتوثيقه في الفايربيز
-                        await window.firebaseService.addNotificationToStudent(u.phone, {
-                            title: title,
-                            message: body
-                        });
-                        
-                        sentCount++;
+                            // Activity Filter
+                            if (fActivity === 'top' && !hasCourses) continue; 
+                            
+                            // إرسال الإشعار وتوثيقه في الفايربيز
+                            if (window.firebaseService && window.firebaseService.addNotificationToStudent) {
+                                await window.firebaseService.addNotificationToStudent(u.phone, {
+                                    title: title,
+                                    message: body
+                                });
+                            } else {
+                                // Fallback للـ LocalStorage لو السحابة مش متاحة
+                                if (!dbUser.notifications) dbUser.notifications = [];
+                                dbUser.notifications.unshift({
+                                    title: title,
+                                    message: body,
+                                    date: new Date().toISOString(),
+                                    read: false
+                                });
+                                localStorage.setItem(`db_${u.phone}`, JSON.stringify(dbUser));
+                            }
+                            
+                            sentCount++;
+                        }
+
+                        if (window.showToast) {
+                            window.showToast(`تم إرسال الإشعار بنجاح لعدد ${sentCount} طالب`, 'success');
+                        } else {
+                            alert(`تم إرسال الإشعار بنجاح لعدد ${sentCount} طالب`);
+                        }
+                    } catch (err) {
+                        console.error("Error sending notifications:", err);
+                        alert("حدث خطأ أثناء إرسال الإشعارات. يرجى مراجعة الـ Console.");
+                    } finally {
+                        e.target.reset();
+                        submitBtn.innerHTML = origBtnText;
+                        submitBtn.disabled = false;
                     }
-
-                    if (window.showToast) {
-                        window.showToast(`تم إرسال الإشعار بنجاح لعدد ${sentCount} طالب`, 'success');
-                    } else {
-                        alert(`تم إرسال الإشعار بنجاح لعدد ${sentCount} طالب`);
-                    }
-                    
-                    e.target.reset();
-                    submitBtn.innerHTML = origBtnText;
-                    submitBtn.disabled = false;
                 })();
             });
         });
