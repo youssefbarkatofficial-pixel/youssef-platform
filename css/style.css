@@ -599,20 +599,68 @@ img, video {
 
 @media (max-width: 480px) {
   /* Ultra small screens */
+  .navbar {
+    padding: 0.4rem 2%;
+  }
+  
+  .nav-brand-text {
+    font-size: 0.85rem;
+  }
+  
+  .logo-circle {
+    width: 30px;
+    height: 30px;
+    font-size: 0.9rem;
+  }
+
+  .nav-actions {
+    gap: 3px;
+    flex-wrap: nowrap;
+    justify-content: flex-end;
+    flex: 1;
+  }
+  
+  .nav-actions .btn {
+    padding: 4px 6px !important;
+    font-size: 0.7rem !important;
+  }
+
+  /* Hide text of non-essential buttons to save space for Login/Register */
+  #ytNavBtn .desktop-text, 
+  #logoutBtn .desktop-text {
+    display: none !important;
+  }
+  #ytNavBtn .mobile-icon,
+  #logoutBtn .mobile-icon {
+    display: inline-block !important;
+    margin: 0 !important;
+    font-size: 1rem !important;
+  }
+
+  .nav-links {
+    gap: 10px;
+    padding: 8px 2px 2px;
+  }
+  .nav-links a {
+    font-size: 0.85rem;
+  }
+
   .btn:not(.nav-actions .btn):not(.close-modal):not(.notif-filter-btn) {
     width: 100%;
     text-align: center;
     margin-bottom: 10px;
   }
+  
   /* Typography tweaks */
   .heading-luxury {
-    font-size: clamp(2rem, 8vw, 2.5rem);
+    font-size: clamp(1.4rem, 6.5vw, 2.5rem);
+    white-space: nowrap;
   }
   h2 {
-    font-size: clamp(1.5rem, 6vw, 2rem);
+    font-size: clamp(1.3rem, 5.5vw, 2rem);
   }
   h3 {
-    font-size: clamp(1.2rem, 5vw, 1.5rem);
+    font-size: clamp(1.1rem, 4.5vw, 1.5rem);
   }
   /* Modals */
   .modal-content {
