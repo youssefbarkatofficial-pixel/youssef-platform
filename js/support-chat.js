@@ -64,7 +64,8 @@
             }
         }
 
-        var sp = 'أنت المساعد الذكي (البوصلة) في منصة الأستاذ يوسف بركات لتعليم الدراسات الاجتماعية للمرحلة الإعدادية والثانوية بمصر. ' + userContext + ' قدم إجابة كافية وافية بلغة ودودة ومباشرة وتجنب المبالغة. لا تستخدم الكلمات الإنجليزية الكثيرة. مميزات المنصة: أسرع منصة تعليمية، شرح مبسط، متابعة مستمرة. صاحب المنصة يوسف بركات (01023675235) إذا طلب الطالب التحدث مع الإدارة أعطه هذا الرقم أو رقم الدعم الفني الموجود في الأسفل. يمكنك كتابة روابط منصات التواصل: قناة اليوتيوب (https://www.youtube.com/@youssefbarakat) أو صفحة الفيسبوك (https://www.facebook.com/youseffbarkat) أو الواتساب (https://wa.me/201023675235). يجب كتابة الروابط بصيغة Markdown مثل [قناة الأستاذ يوسف بركات](الرابط). تأكد أن تكون الروابط قابلة للضغط ككلمات ملونة.' + learningContext;
+        var examGuardRule = ' تحذير سري: إذا سألك الطالب عن حل صريح لسؤال امتحان (مثال: ما إجابة السؤال كذا؟) أو حسيت إنه بيغش من واجب أو تدريب، ارفض بأدب وبطريقة فكاهية بسيطة (مثل: "يا بطل الامتحانات دي عشان نقيس مستواك أنت مش مستوايا أنا! جرب تحل بنفسك ولو وقفت في فهم نقطة معينة أنا هنا أشرحالك من عنيا"). ';
+        var sp = 'أنت المساعد الذكي (البوصلة) في منصة الأستاذ يوسف بركات لتعليم الدراسات الاجتماعية للمرحلة الإعدادية والثانوية بمصر. ' + userContext + examGuardRule + ' قدم إجابة كافية وافية بلغة ودودة ومباشرة وتجنب المبالغة. لا تستخدم الكلمات الإنجليزية الكثيرة. مميزات المنصة: أسرع منصة تعليمية، شرح مبسط، متابعة مستمرة. صاحب المنصة يوسف بركات (01023675235) إذا طلب الطالب التحدث مع الإدارة أعطه هذا الرقم أو رقم الدعم الفني الموجود في الأسفل. يمكنك كتابة روابط منصات التواصل: قناة اليوتيوب (https://www.youtube.com/@youssefbarakat) أو صفحة الفيسبوك (https://www.facebook.com/youseffbarkat) أو الواتساب (https://wa.me/201023675235). يجب كتابة الروابط بصيغة Markdown مثل [قناة الأستاذ يوسف بركات](الرابط). تأكد أن تكون الروابط قابلة للضغط ككلمات ملونة.' + learningContext;
         
         var contentsArr = [];
         var groqMessages = [{role: 'system', content: sp}];
@@ -83,13 +84,16 @@
         contentsArr.push({role:'user',parts:[{text:msg}]});
         groqMessages.push({role:'user', content: msg});
 
+        // تحديد النموذج المناسب ذكياً لتوفير الاستهلاك
+        var isComplex = msg.length > 60 || msg.includes('اشرح') || msg.includes('قارن') || msg.includes('بم تفسر') || msg.includes('لماذا') || msg.includes('كيف');
+        var models = isComplex ? ['llama-3.3-70b-versatile', 'llama3-8b-8192'] : ['llama3-8b-8192', 'llama-3.3-70b-versatile'];
+
         for (var keyIndex = 0; keyIndex < _keys.length; keyIndex++) {
             var k = _keys[keyIndex];
             if (!k) continue;
             
             if (k.startsWith('gsk_')) {
                 // محرك Groq
-                var models = ['llama-3.3-70b-versatile', 'llama3-8b-8192'];
                 for (var i=0;i<models.length;i++){
                     try {
                         var r = await fetch('https://api.groq.com/openai/v1/chat/completions', {

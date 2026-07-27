@@ -129,6 +129,15 @@ export async function gradeEssayFair(studentAns, rubric, maxScore,
     return { ...local, method: "آلي", needsReview: local.needsAI && !callAI };
 
   try {
+    // ربط نظام التصحيح بنصوص الدروس (RAG)
+    let ragContext = "";
+    if (window.BousalaTeach && window.BousalaTeach.findLessonContext) {
+      const searchResult = await window.BousalaTeach.findLessonContext(modelAnswer, 2);
+      if (searchResult && searchResult.chunks && searchResult.chunks.length > 0) {
+        ragContext = "\nالنص المرجعي من الدرس (استرشد به للتقييم):\n" + searchResult.chunks.join(" ");
+      }
+    }
+
     const prompt =
 `أنت مصحح امتحانات دراسات اجتماعية عادل، ناصف، وحازم. صحح إجابة الطالب.
 قواعد إلزامية:
@@ -141,7 +150,7 @@ export async function gradeEssayFair(studentAns, rubric, maxScore,
 
 الإجابة النموذجية (للقياس عليها): ${modelAnswer}
 العناصر الأساسية المطلوبة: ${rubric.map(r => r.concept).join("، ")}
-إجابة الطالب: ${studentAns}`;
+إجابة الطالب: ${studentAns}${ragContext}`;
 
     const raw = await callAI(prompt);
     const ai = JSON.parse(raw.match(/\{[\s\S]*\}/)[0]);

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <script>
@@ -129,41 +129,46 @@
                 let users = JSON.parse(localStorage.getItem('strictUsers') || '[]');
                 let sentCount = 0;
 
-                users.forEach(u => {
-                    // Grade Filter
-                    if (fGrade !== 'all' && u.grade !== fGrade) return;
+                // إظهار اللودنج لأن الإرسال للسحابة بياخد وقت
+                const submitBtn = e.target.querySelector('button[type="submit"]');
+                const origBtnText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> جاري الإرسال...';
+                submitBtn.disabled = true;
 
-                    let dbUser = JSON.parse(localStorage.getItem(`db_${u.phone}`)) || { courses: [], notifications: [] };
-                    let hasCourses = dbUser.courses && dbUser.courses.length > 0;
+                (async () => {
+                    for (const u of users) {
+                        // Grade Filter
+                        if (fGrade !== 'all' && u.grade !== fGrade) continue;
 
-                    // Subscription Filter
-                    if (fSub === 'subscribed' && !hasCourses) return;
-                    if (fSub === 'unsubscribed' && hasCourses) return;
+                        let dbUser = await window.firebaseService.getStudentData(u.phone);
+                        let hasCourses = dbUser.courses && dbUser.courses.length > 0;
 
-                    // Activity Filter (Mock logic for demo, as actual progress is not fully implemented per user yet)
-                    if (fActivity === 'top' && !hasCourses) return; // Unlikely to be top if no courses
-                    // In a real app, you would check dbUser.stats here for homework completion rate.
+                        // Subscription Filter
+                        if (fSub === 'subscribed' && !hasCourses) continue;
+                        if (fSub === 'unsubscribed' && hasCourses) continue;
+
+                        // Activity Filter
+                        if (fActivity === 'top' && !hasCourses) continue; 
+                        
+                        // إرسال الإشعار وتوثيقه في الفايربيز
+                        await window.firebaseService.addNotificationToStudent(u.phone, {
+                            title: title,
+                            message: body
+                        });
+                        
+                        sentCount++;
+                    }
+
+                    if (window.showToast) {
+                        window.showToast(`تم إرسال الإشعار بنجاح لعدد ${sentCount} طالب`, 'success');
+                    } else {
+                        alert(`تم إرسال الإشعار بنجاح لعدد ${sentCount} طالب`);
+                    }
                     
-                    // If we reach here, user matches filters
-                    if (!dbUser.notifications) dbUser.notifications = [];
-                    dbUser.notifications.unshift({
-                        title: title,
-                        message: body,
-                        date: new Date().toISOString(),
-                        read: false
-                    });
-                    
-                    localStorage.setItem(`db_${u.phone}`, JSON.stringify(dbUser));
-                    sentCount++;
-                });
-
-                if (window.showToast) {
-                    window.showToast(`تم إرسال الإشعار بنجاح لعدد ${sentCount} طالب`, 'success');
-                } else {
-                    alert(`تم إرسال الإشعار بنجاح لعدد ${sentCount} طالب`);
-                }
-                
-                e.target.reset();
+                    e.target.reset();
+                    submitBtn.innerHTML = origBtnText;
+                    submitBtn.disabled = false;
+                })();
             });
         });
     </script>
