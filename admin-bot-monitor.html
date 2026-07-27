@@ -30,45 +30,34 @@
             flex-direction: column;
         }
         .student-item {
-            padding: 15px;
+            padding: 13px 15px;
             border-bottom: 1px solid var(--border-color);
             cursor: pointer;
             transition: all 0.3s ease;
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 12px;
         }
-        .student-item:hover {
-            background: rgba(212, 166, 79, 0.05);
-        }
+        .student-item:hover { background: rgba(212, 166, 79, 0.05); }
         .student-item.active {
             background: rgba(212, 166, 79, 0.15);
             border-right: 4px solid var(--royal-gold);
         }
         .student-avatar {
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            background: rgba(212, 166, 79, 0.2);
-            color: var(--royal-gold);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            object-fit: cover;
+            width: 44px; height: 44px; border-radius: 50%;
+            background: rgba(212, 166, 79, 0.2); color: var(--royal-gold);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem; object-fit: cover; flex-shrink: 0;
         }
-        .student-info {
-            flex: 1;
+        .student-info { flex: 1; min-width: 0; }
+        .student-name { font-weight: bold; color: var(--text-primary); margin-bottom: 2px; font-size: 0.95rem; }
+        .student-phone { font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 2px; }
+        .student-last-msg {
+            font-size: 0.8rem; color: var(--text-secondary);
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
-        .student-name {
-            font-weight: bold;
-            color: var(--text-primary);
-            margin-bottom: 3px;
-        }
-        .student-phone {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-        }
+        .student-time { font-size: 0.72rem; color: var(--royal-gold); flex-shrink: 0; }
+
         .chat-container {
             flex: 2;
             background: var(--bg-secondary);
@@ -414,48 +403,50 @@
             function renderStudentsList() {
                 studentsContainer.innerHTML = '';
                 if (allChats.length === 0) {
-                    studentsContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-secondary);">لا توجد محادثات مسجلة حالياً.</div>';
+                    studentsContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-secondary);"><i class="fas fa-comment-slash" style="font-size:2rem;opacity:0.3;display:block;margin-bottom:10px;"></i>لا توجد محادثات مسجلة حالياً.</div>';
                     return;
                 }
 
                 allChats.forEach(chat => {
                     if (!chat.messages || chat.messages.length === 0) return;
-                    
+
                     const div = document.createElement('div');
                     div.className = `student-item ${currentActivePhone === chat.phoneId ? 'active' : ''}`;
-                    
+
                     const lastMsg = chat.messages[chat.messages.length - 1];
                     const userName = chat.user ? chat.user.name : 'طالب غير معروف';
                     const userPhone = chat.phoneId;
-                    
+                    const isUserMsg = lastMsg.sender === 'user' || lastMsg.who === 'user';
+                    const lastMsgPrefix = isUserMsg ? '' : '↩ ';
+                    const lastMsgText = lastMsg.text || '';
+
                     let avatarHtml = `<div class="student-avatar"><i class="fas fa-user"></i></div>`;
                     let pic = studentProfiles[userPhone] || localStorage.getItem('profilePic_' + userPhone);
                     if (pic) {
                         avatarHtml = `<img src="${pic}" class="student-avatar" style="object-fit:cover;" onerror="this.outerHTML='<div class=\\'student-avatar\\'><i class=\\'fas fa-user\\'></i></div>'" />`;
                     }
-                    
+
+                    const msgTime = new Date(chat.updatedAt || Date.now()).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit', hour12: false });
+
                     div.innerHTML = `
                         ${avatarHtml}
                         <div class="student-info">
                             <div class="student-name">${userName}</div>
                             <div class="student-phone">${userPhone}</div>
-                            <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                                ${lastMsg.text}
-                            </div>
+                            <div class="student-last-msg" title="${lastMsgText}">${lastMsgPrefix}${lastMsgText}</div>
                         </div>
-                        <div style="font-size: 0.7rem; color: var(--royal-gold);">
-                            ${new Date(chat.updatedAt || Date.now()).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit', hour12: false })}
-                        </div>
+                        <div class="student-time">${msgTime}</div>
                     `;
-                    
+
                     div.addEventListener('click', () => {
                         openChat(chat);
-                        renderStudentsList(); // Re-render to update active class
+                        renderStudentsList();
                     });
-                    
+
                     studentsContainer.appendChild(div);
                 });
             }
+
 
             function openChat(chat) {
                 currentActivePhone = chat.phoneId;

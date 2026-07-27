@@ -30,45 +30,49 @@
             flex-direction: column;
         }
         .ticket-item {
-            padding: 15px;
+            padding: 14px 15px;
             border-bottom: 1px solid var(--border-color);
             cursor: pointer;
             transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
-        .ticket-item:hover {
-            background: rgba(212, 166, 79, 0.05);
-        }
+        .ticket-item:hover { background: rgba(212, 166, 79, 0.05); }
         .ticket-item.active {
             background: rgba(212, 166, 79, 0.15);
             border-right: 4px solid var(--royal-gold);
         }
+        .ticket-avatar {
+            width: 44px; height: 44px; border-radius: 50%;
+            background: rgba(212, 166, 79, 0.2); color: var(--royal-gold);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem; flex-shrink: 0; overflow: hidden;
+            border: 2px solid rgba(231, 76, 60, 0.4);
+        }
+        .ticket-avatar.resolved { border-color: rgba(46, 204, 113, 0.4); }
+        .ticket-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .ticket-info { flex: 1; min-width: 0; }
         .ticket-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 8px;
+            margin-bottom: 3px;
         }
-        .ticket-name {
-            font-weight: bold;
-            color: var(--text-primary);
-        }
+        .ticket-name { font-weight: bold; color: var(--text-primary); font-size: 0.95rem; }
         .ticket-status {
-            font-size: 0.8rem;
-            padding: 3px 8px;
-            border-radius: 12px;
-            background: rgba(231, 76, 60, 0.2);
-            color: #e74c3c;
+            font-size: 0.75rem; padding: 2px 8px; border-radius: 12px;
+            background: rgba(231, 76, 60, 0.2); color: #e74c3c; white-space: nowrap;
         }
-        .ticket-status.resolved {
-            background: rgba(46, 204, 113, 0.2);
-            color: #2ecc71;
+        .ticket-status.resolved { background: rgba(46, 204, 113, 0.2); color: #2ecc71; }
+        .ticket-complaint {
+            font-size: 0.82rem; color: rgba(255,100,80,0.9);
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            margin-bottom: 2px; font-weight: 500;
         }
-        .ticket-message {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+        .ticket-last-msg {
+            font-size: 0.8rem; color: var(--text-secondary);
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
         
         .chat-container {
@@ -252,6 +256,13 @@
         </main>
     </div>
 
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
+    <script src="js/firebase-config.js?v=5.0"></script>
+    <script src="js/firebase-service.js?v=5.0"></script>
     <script src="js/admin-auth.js?v=5.0"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -302,36 +313,61 @@
                 return d.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit', hour12: false }) + ' • ' + d.toLocaleDateString('ar-EG', { day: '2-digit', month: 'short' });
             }
 
+            // Load profile pictures from localStorage
+            function getStudentPic(phone) {
+                return localStorage.getItem('profilePic_' + phone) || null;
+            }
+
+            // Get last bot reply for a ticket
+            function getLastBotReply(phone) {
+                return null; // will be fetched live per ticket; shown statically from allTickets
+            }
+
             function renderTickets() {
                 ticketsContainer.innerHTML = '';
                 if (allTickets.length === 0) {
-                    ticketsContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-secondary);">لا توجد تذاكر أو شكاوى حالياً.</div>';
+                    ticketsContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-secondary);"><i class="fas fa-inbox" style="font-size:2rem;opacity:0.3;display:block;margin-bottom:10px;"></i>لا توجد شكاوى أو طلبات دعم حالياً.</div>';
                     return;
                 }
 
                 allTickets.forEach(ticket => {
                     const div = document.createElement('div');
-                    div.className = `ticket-item ${currentActiveTicket && currentActiveTicket.id === ticket.id ? 'active' : ''}`;
-                    
+                    const isActive = currentActiveTicket && currentActiveTicket.id === ticket.id;
+                    div.className = `ticket-item ${isActive ? 'active' : ''}`;
+
                     const statusClass = ticket.status === 'resolved' ? 'resolved' : '';
                     const statusText = ticket.status === 'resolved' ? 'منتهية' : 'مفتوحة';
-                    
+                    const studentName = ticket.user ? ticket.user.name : 'طالب غير معروف';
+                    const studentPhone = ticket.user ? ticket.user.phone : '';
+                    const pic = studentPhone ? getStudentPic(studentPhone) : null;
+
+                    // Avatar HTML
+                    const avatarHtml = pic
+                        ? `<div class="ticket-avatar ${statusClass}"><img src="${pic}" onerror="this.parentElement.innerHTML='<i class=\'fas fa-user\'></i>'"></div>`
+                        : `<div class="ticket-avatar ${statusClass}"><i class="fas fa-user"></i></div>`;
+
+                    // Last admin reply or complaint message
+                    const complaintText = ticket.message || 'شكوى';
+                    const lastReplyText = ticket.lastAdminReply ? `↩ ${ticket.lastAdminReply}` : 'لم يتم الرد بعد';
+
                     div.innerHTML = `
-                        <div class="ticket-header">
-                            <span class="ticket-name">${ticket.user ? ticket.user.name : 'طالب غير معروف'}</span>
-                            <span class="ticket-status ${statusClass}">${statusText}</span>
-                        </div>
-                        <div class="ticket-message">${ticket.message || 'لا توجد رسالة'}</div>
-                        <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 5px; text-align: left;">
-                            ${formatTime(ticket.ts)}
+                        ${avatarHtml}
+                        <div class="ticket-info">
+                            <div class="ticket-header">
+                                <span class="ticket-name">${studentName}</span>
+                                <span class="ticket-status ${statusClass}">${statusText}</span>
+                            </div>
+                            <div class="ticket-complaint"><i class="fas fa-exclamation-circle" style="margin-left:4px;font-size:0.75rem;"></i>${complaintText}</div>
+                            <div class="ticket-last-msg">${lastReplyText} • ${formatTime(ticket.ts)}</div>
                         </div>
                     `;
-                    
+
                     div.addEventListener('click', () => {
+                        currentActiveTicket = ticket;
                         openTicket(ticket);
-                        renderTickets(); // Re-render to update active class
+                        renderTickets();
                     });
-                    
+
                     ticketsContainer.appendChild(div);
                 });
             }
@@ -459,15 +495,13 @@
                     updatedAt: Date.now()
                 }, { merge: true });
 
-                // Mark ticket as resolved
-                if (currentActiveTicket.status !== 'resolved') {
-                    currentActiveTicket.status = 'resolved';
-                    updateTicketInFirebase(currentActiveTicket);
-                }
+                // Save last admin reply in ticket for preview in list
+                currentActiveTicket.lastAdminReply = text;
 
                 saveAdminLearning(currentActiveTicket.message, text);
 
                 adminReplyInput.value = '';
+                renderTickets(); // refresh list to show new last reply
                 if(window.showToast) window.showToast('تم إرسال الرد للطالب، وتعلّم البوت الإجابة للمرات القادمة!', 'success');
             }
 
@@ -491,7 +525,7 @@
 
             localStorage.setItem('pf_unseen_support_tickets', '0');
 
-            loadAllTickets();
+            listenToTickets();
         });
     </script>
 </body>
