@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -86,13 +86,40 @@
             border: 1px solid rgba(212, 166, 79, 0.25);
             border-radius: 12px;
             padding: 14px 18px;
-            margin-bottom: 24px;
             text-align: right;
             transition: opacity 0.3s ease, transform 0.3s ease;
+            z-index: 100;
         }
-        .dynamic-step-guide.fade-out {
-            opacity: 0;
-            transform: translateY(-5px);
+        
+        @media (min-width: 992px) {
+            .dynamic-step-guide {
+                position: fixed;
+                right: 3vw;
+                top: 50%;
+                transform: translateY(-50%);
+                width: 260px;
+                background: rgba(7, 19, 38, 0.85);
+                backdrop-filter: blur(15px);
+                border: 1px solid rgba(212, 166, 79, 0.4);
+                box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+                margin: 0;
+                padding: 20px;
+            }
+            .dynamic-step-guide.fade-out {
+                opacity: 0;
+                transform: translateY(-50%) translateX(20px);
+            }
+        }
+        
+        @media (max-width: 991px) {
+            .dynamic-step-guide {
+                position: relative;
+                margin-bottom: 24px;
+            }
+            .dynamic-step-guide.fade-out {
+                opacity: 0;
+                transform: translateY(-5px);
+            }
         }
         .guide-header {
             font-weight: 700;
