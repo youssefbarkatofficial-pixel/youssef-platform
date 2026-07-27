@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Owner Admin Authentication System
  * Mock Database and Role-based Authentication for Platform
  */

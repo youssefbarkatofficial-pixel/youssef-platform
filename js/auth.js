@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', () => {
+﻿document.addEventListener('DOMContentLoaded', () => {
   const savedAdmin = localStorage.getItem('currentAdmin');
   if (savedAdmin && !sessionStorage.getItem('currentAdmin')) {
     sessionStorage.setItem('currentAdmin', savedAdmin);
@@ -140,9 +140,9 @@ document.addEventListener('DOMContentLoaded', () => {
       ytBtn.href = 'https://www.youtube.com/@youssefstudies';
       ytBtn.target = '_blank';
       ytBtn.id = 'ytNavBtn';
-      ytBtn.className = 'btn btn-outline';
-      ytBtn.style.cssText = 'color: #ff0000; border-color: rgba(255,0,0,0.5); padding: 8px 15px; border-radius: 20px; margin-right: 5px;';
-      ytBtn.innerHTML = '<i class="fab fa-youtube" style="margin-left: 5px;"></i> قناة اليوتيوب';
+      ytBtn.className = 'btn';
+      ytBtn.style.cssText = 'background-color: #FF0000 !important; color: #ffffff !important; padding: 8px 15px; border-radius: 20px; text-decoration: none; border: none; font-weight: bold; margin-right: 5px;';
+      ytBtn.innerHTML = '<i class="fab fa-youtube" style="margin-left: 5px;"></i> <span class="desktop-text">قناة اليوتيوب</span>';
       navActions.appendChild(ytBtn);
       const bellBtn = document.createElement('a');
       bellBtn.href = '#';

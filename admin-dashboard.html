@@ -54,7 +54,7 @@
                 <div>
                     <h1 class="page-title">نظرة عامة على المنصة</h1>
                 </div>
-                <button class="btn btn-gold"><i class="fas fa-plus mr-2"></i> إضافة كورس جديد</button>
+                <button id="btnAddCourseTop" class="btn btn-gold" onclick="if(window.openEditor) window.openEditor(null);"><i class="fas fa-plus mr-2"></i> إضافة كورس جديد</button>
             </div>
 
             <div id="ownerWelcomeBanner" class="glass-panel" style="background: linear-gradient(135deg, rgba(212,166,79,0.2) 0%, rgba(7,19,38,0.95) 100%); border-right: 5px solid var(--royal-gold); border-radius: 16px; padding: 30px; margin-bottom: 30px; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1); display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; transition: all 0.3s ease;">
@@ -118,6 +118,33 @@
                     </div>
                     <div class="dash-card-icon"><i class="fas fa-wallet"></i></div>
                     <button class="btn btn-outline" style="position: absolute; bottom: 10px; left: 10px; padding: 3px 8px; font-size: 0.8rem; border-color: #e74c3c; color: #e74c3c;" onclick="openIncomeResetModal()">تصفير <i class="fas fa-undo"></i></button>
+                </div>
+            </div>
+
+            <!-- Pending Complaints Table -->
+            <div class="glass-panel dash-panel" id="complaintsRequestsPanel" style="margin-bottom: 30px;">
+                <div class="panel-header">
+                    <h2 class="panel-title" style="color: #e74c3c;"><i class="fas fa-envelope-open-text mr-2"></i> شكاوى الطلاب والدعم الفني</h2>
+                    <div style="display: flex; gap: 10px;">
+                        <a href="admin-compass.html" class="btn btn-outline" style="padding: 5px 15px; font-size: 0.9rem; border-color: #e74c3c; color: #e74c3c;"><i class="fas fa-external-link-alt"></i> فتح لوحة الشات للرد</a>
+                    </div>
+                </div>
+                
+                <div style="overflow-x: auto;">
+                    <table class="admin-table" id="complaintsTable">
+                        <thead>
+                            <tr>
+                                <th>اسم الطالب</th>
+                                <th>رقم الموبايل</th>
+                                <th>تفاصيل الشكوى</th>
+                                <th>التاريخ</th>
+                                <th>الحالة</th>
+                            </tr>
+                        </thead>
+                        <tbody id="complaintsTableBody">
+                            <tr><td colspan="5" style="text-align:center;">جاري تحميل الشكاوى...</td></tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
@@ -719,6 +746,17 @@
                     renderPayments();
                 });
 
+                // Sync support tickets
+                window.firebaseDb.collection('support_tickets')
+                .onSnapshot(snapshot => {
+                    const tickets = [];
+                    snapshot.forEach(doc => {
+                        tickets.push({ id: doc.id, ...doc.data() });
+                    });
+                    localStorage.setItem('supportTickets', JSON.stringify(tickets));
+                    renderComplaints();
+                });
+
                 // Sync students
                 window.firebaseDb.collection('students')
                 .onSnapshot(snapshot => {
@@ -751,8 +789,47 @@
                     calculateStats();
                 });
             }
-            // Render Payments Table
-            function renderPayments() {
+            
+            function renderComplaints() {
+                const tbody = document.getElementById('complaintsTableBody');
+                if (!tbody) return;
+                
+                const rawTickets = JSON.parse(localStorage.getItem('supportTickets') || '[]');
+                // Filter only open complaints or recent ones, and sort by date descending
+                const activeTickets = rawTickets.filter(t => t.status === 'open' || t.status === 'in_progress' || t.status === 'pending').sort((a,b) => b.ts - a.ts);
+                
+                if (activeTickets.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--text-secondary);">لا توجد شكاوى أو طلبات دعم معلقة حالياً</td></tr>';
+                    return;
+                }
+                
+                let html = '';
+                activeTickets.forEach(ticket => {
+                    const date = new Date(ticket.ts).toLocaleString('ar-EG');
+                    const userName = ticket.user && ticket.user.name ? ticket.user.name : 'غير معروف';
+                    const userPhone = ticket.user && ticket.user.phone ? ticket.user.phone : (ticket.userId || 'غير معروف');
+                    let badgeColor = '#e74c3c';
+                    let statusTxt = 'جديدة';
+                    if (ticket.status === 'in_progress') { badgeColor = '#f1c40f'; statusTxt = 'جاري المتابعة'; }
+                    
+                    html += `
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <td>${userName}</td>
+                            <td style="direction:ltr; text-align:right;">${userPhone}</td>
+                            <td style="max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${ticket.message.replace(/"/g, '&quot;')}">${ticket.message}</td>
+                            <td><span style="font-size:0.85rem; color:var(--text-secondary);">${date}</span></td>
+                            <td><span style="background:${badgeColor}; color:#fff; padding:3px 8px; border-radius:12px; font-size:0.8rem;">${statusTxt}</span></td>
+                        </tr>
+                    `;
+                });
+                tbody.innerHTML = html;
+            }
+
+            // Initial render
+            renderPayments();
+            renderComplaints();
+
+            function viewPaymentDetails(id) {
                 // async render to support fetching proof images from IndexedDB
                 async function fetchProofImage(req) {
                     if (req.proofImage) return req.proofImage;
@@ -1015,9 +1092,9 @@
             const courseEditorModal = document.getElementById('courseEditorModal');
             const closeCourseEditor = document.getElementById('closeCourseEditor');
             const btnCancelCourse = document.getElementById('btnCancelCourse');
-            const addCourseBtn = document.querySelector('.page-header .btn-gold');
+            const addCourseBtn = document.getElementById('btnAddCourseTop');
             
-            function openEditor(courseId = null) {
+            window.openEditor = function(courseId = null) {
                 if (courseId) {
                     const course = adminCourses.find(c => c.id === courseId);
                     if (course) {

@@ -327,6 +327,7 @@ body.light-mode .navbar.scrolled {
   font-size: 1.2rem;
   font-weight: 700;
   color: var(--soft-white);
+  white-space: nowrap;
 }
 
 .nav-links {
@@ -343,6 +344,7 @@ body.light-mode .navbar.scrolled {
   transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), color 0.3s ease;
   position: relative;
   display: inline-block;
+  white-space: nowrap;
 }
 
 .nav-links a:hover {

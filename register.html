@@ -94,7 +94,7 @@
         @media (min-width: 992px) {
             .dynamic-step-guide {
                 position: fixed;
-                right: max(15px, calc(25vw - 250px));
+                right: calc((100vw - 480px) / 2 / 2 - 130px); /* Centers it in the right gap */
                 top: 50%;
                 transform: translateY(-50%);
                 width: 260px;
@@ -105,6 +105,7 @@
                 margin: 0;
                 padding: 20px;
                 animation: popInGuide 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+                animation-delay: 0.3s;
                 opacity: 0;
             }
             .dynamic-step-guide.fade-out {
@@ -121,8 +122,12 @@
         @media (max-width: 991px) {
             .dynamic-step-guide {
                 position: relative;
-                margin-bottom: 24px;
+                width: 90%;
+                max-width: 500px;
+                margin: 0 auto 24px auto;
+                box-sizing: border-box;
                 animation: popInGuideMobile 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+                animation-delay: 0.3s;
                 opacity: 0;
             }
             .dynamic-step-guide.fade-out {
@@ -333,7 +338,8 @@
     <script src="js/storage-service.js?v=5.0"></script>
     <script src="js/main.js?v=5.0"></script>
     <script src="js/bousala-intents.js?v=1.0"></script><script src="js/support-chat.js?v=6.0"></script>
-    <script src="js/bousala-phone-fix.js?v=1.0"></script>`r`n    <script src="js/auth.js?v=5.0"></script>
+    <script src="js/bousala-phone-fix.js?v=1.0" charset="utf-8"></script>
+    <script src="js/auth.js?v=5.0" charset="utf-8"></script>
 
     <!-- Live password tips checker -->
     <script>

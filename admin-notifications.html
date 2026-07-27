@@ -49,6 +49,7 @@
 
             <div class="glass-panel dash-panel" style="max-width: 800px;">
                 <form id="notificationForm">
+                    <!-- Form content unchanged -->
                     <h3 style="color: var(--accent-cyan); margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;">أولاً: محتوى الإشعار</h3>
                     
                     <div class="form-group">
@@ -105,6 +106,27 @@
                     </div>
                 </form>
             </div>
+
+            <div class="glass-panel dash-panel" style="max-width: 1000px; margin-top: 30px;">
+                <h2 class="panel-title" style="margin-bottom: 20px;"><i class="fas fa-chart-bar mr-2 text-cyan"></i> حالة الإشعارات المرسلة</h2>
+                <div style="overflow-x: auto;">
+                    <table class="admin-table" id="notificationsLogTable">
+                        <thead>
+                            <tr>
+                                <th>الإشعار</th>
+                                <th>التاريخ</th>
+                                <th>الاستهداف</th>
+                                <th>تم الإرسال لـ</th>
+                                <th>لم يستلم / غير نشط</th>
+                                <th>فتح الإشعار (تمت القراءة)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="notificationsLogTableBody">
+                            <tr><td colspan="6" style="text-align:center;">جاري تحميل سجل الإشعارات...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </main>
     </div>
 
@@ -137,6 +159,9 @@
 
                 (async () => {
                     try {
+                        const notifId = 'notif_' + Date.now();
+                        const targetedPhones = [];
+                        
                         for (const u of users) {
                             // Grade Filter
                             if (fGrade !== 'all' && u.grade !== fGrade) continue;
@@ -152,9 +177,12 @@
                             // Activity Filter
                             if (fActivity === 'top' && !hasCourses) continue; 
                             
+                            targetedPhones.push(u.phone);
+                            
                             // إرسال الإشعار وتوثيقه في الفايربيز
                             if (window.firebaseService && window.firebaseService.addNotificationToStudent) {
                                 await window.firebaseService.addNotificationToStudent(u.phone, {
+                                    notifId: notifId,
                                     title: title,
                                     message: body
                                 });
@@ -162,6 +190,7 @@
                                 // Fallback للـ LocalStorage لو السحابة مش متاحة
                                 if (!dbUser.notifications) dbUser.notifications = [];
                                 dbUser.notifications.unshift({
+                                    notifId: notifId,
                                     title: title,
                                     message: body,
                                     date: new Date().toISOString(),
@@ -171,6 +200,26 @@
                             }
                             
                             sentCount++;
+                        }
+
+                        // Save to central log
+                        if (sentCount > 0) {
+                            const notifLog = {
+                                id: notifId,
+                                title: title,
+                                date: new Date().toISOString(),
+                                targets: { fGrade, fSub, fActivity },
+                                targetedPhones: targetedPhones
+                            };
+                            
+                            if (window.firebaseDb) {
+                                await window.firebaseDb.collection('sent_notifications').doc(notifId).set(notifLog);
+                            }
+                            
+                            let logs = JSON.parse(localStorage.getItem('sentNotifLogs') || '[]');
+                            logs.unshift(notifLog);
+                            localStorage.setItem('sentNotifLogs', JSON.stringify(logs));
+                            renderLogs();
                         }
 
                         if (window.showToast) {
@@ -188,6 +237,66 @@
                     }
                 })();
             });
+
+            // Initial load of logs
+            if (window.firebaseDb) {
+                window.firebaseDb.collection('sent_notifications').orderBy('date', 'desc').onSnapshot(snap => {
+                    let logs = [];
+                    snap.forEach(doc => logs.push(doc.data()));
+                    localStorage.setItem('sentNotifLogs', JSON.stringify(logs));
+                    renderLogs();
+                });
+            } else {
+                renderLogs();
+            }
+
+            function renderLogs() {
+                const tbody = document.getElementById('notificationsLogTableBody');
+                if (!tbody) return;
+                
+                const logs = JSON.parse(localStorage.getItem('sentNotifLogs') || '[]');
+                if (logs.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">لا توجد إشعارات مرسلة حتى الآن.</td></tr>';
+                    return;
+                }
+
+                let html = '';
+                logs.forEach(log => {
+                    let readCount = 0;
+                    let targetCount = log.targetedPhones ? log.targetedPhones.length : 0;
+                    
+                    // Tally read status from local cache of students
+                    if (log.targetedPhones && log.targetedPhones.length > 0) {
+                        log.targetedPhones.forEach(phone => {
+                            let dbUser = JSON.parse(localStorage.getItem(`db_${phone}`) || '{}');
+                            if (dbUser.notifications) {
+                                const n = dbUser.notifications.find(x => x.notifId === log.id);
+                                if (n && n.read) readCount++;
+                            }
+                        });
+                    }
+
+                    const unreadCount = targetCount - readCount;
+                    const dateStr = new Date(log.date).toLocaleString('ar-EG');
+                    
+                    // Build target string
+                    let targetStr = '';
+                    if (log.targets.fGrade === 'all' && log.targets.fSub === 'all') targetStr = 'جميع الطلاب';
+                    else targetStr = `صف: ${log.targets.fGrade}, حالة: ${log.targets.fSub}`;
+
+                    html += `
+                        <tr>
+                            <td style="font-weight:bold; color:var(--royal-gold);">${log.title}</td>
+                            <td style="font-size:0.85rem;">${dateStr}</td>
+                            <td style="font-size:0.85rem;">${targetStr}</td>
+                            <td style="font-weight:bold;">${targetCount}</td>
+                            <td style="color:#e74c3c;">${unreadCount}</td>
+                            <td style="color:#2ecc71;">${readCount}</td>
+                        </tr>
+                    `;
+                });
+                tbody.innerHTML = html;
+            }
         });
     </script>
     <script src="js/bousala-teach.js?v=1.0"></script><script src="js/bousala-intents.js?v=1.0"></script><script src="js/support-chat.js?v=6.0"></script>

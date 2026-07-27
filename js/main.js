@@ -1,4 +1,4 @@
-// ============================================================
+﻿// ============================================================
 //  دالة عرض المرحلة الدراسية — مشتركة بين كل صفحات المنصة
 //  تقبل كود المرحلة (prep1, sec2...) أو النص الكامل
 // ============================================================
@@ -762,8 +762,9 @@ document.addEventListener('DOMContentLoaded', () => {
           ytBtn.href = 'https://www.youtube.com/@youssefstudies';
           ytBtn.target = '_blank';
           ytBtn.id = 'ytNavBtn';
-          ytBtn.className = 'btn btn-youtube';
-          ytBtn.innerHTML = '<i class="fab fa-youtube mobile-icon"></i><span class="desktop-text">قناة اليوتيوب</span>';
+          ytBtn.className = 'btn';
+          ytBtn.style.cssText = 'background-color: #FF0000 !important; color: #ffffff !important; padding: 8px 15px; border-radius: 20px; text-decoration: none; border: none; font-weight: bold; margin-right: 5px;';
+          ytBtn.innerHTML = '<i class="fab fa-youtube mobile-icon" style="margin-left: 5px;"></i><span class="desktop-text">قناة اليوتيوب</span>';
           
           const mobileBtn = navActionsContainer.querySelector('.mobile-menu-btn');
           if (mobileBtn) navActionsContainer.insertBefore(ytBtn, mobileBtn);

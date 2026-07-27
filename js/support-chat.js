@@ -2604,14 +2604,14 @@
   function isComplaintTrigger(text) {
     const normalized = normalizeText(text);
     if (!normalized) return false;
-    const shortTrigger = /^(?:مشكلة|مشكله|مشكل|مشاكل|عيب|خطأ|غلط|مش راضي|مش بيفتح|فيه مشكلة|في مشكلة|الدفع متفعلش|التطبيق واقف)$/;
-    return shortTrigger.test(normalized) || (normalized.length < 45 && /(?:مشكلة|مشكله|مشكل|عيب|خطأ|غلط|مش راضي|مش بيفتح|الدفع متفعلش|التطبيق واقف)/.test(normalized));
+    const shortTrigger = /^(?:شكوى|شكوي|شكاوي|شكوئ|مشكلة|مشكله|مشكل|مشاكل|عيب|خطأ|غلط|مش راضي|مش بيفتح|فيه مشكلة|في مشكلة|الدفع متفعلش|التطبيق واقف)$/;
+    return shortTrigger.test(normalized) || (normalized.length < 60 && /(?:شكوى|شكوي|شكاوي|شكوئ|مشكلة|مشكله|مشكل|عيب|خطأ|غلط|مش راضي|مش بيفتح|الدفع متفعلش|التطبيق واقف)/.test(normalized));
   }
 
   function isEscalationSignal(text) {
     const normalized = normalizeText(text);
     if (!normalized) return false;
-    const signal = /(الكورس مش شغال|الدفع متفعلش|عندي مشكلة|فيه خطأ|مش راضي يفتح|لسه المشكلة موجودة|مش نافع|التطبيق واقف|دفع مش شغال|فيه مشكلة|مش شغال|مش نافع|مش راضي|خطأ|غلط)/;
+    const signal = /(شكوى|شكوي|شكاوي|الكورس مش شغال|الدفع متفعلش|عندي مشكلة|فيه خطأ|مش راضي يفتح|لسه المشكلة موجودة|مش نافع|التطبيق واقف|دفع مش شغال|فيه مشكلة|مش شغال|مش نافع|مش راضي|خطأ|غلط)/;
     return signal.test(normalized);
   }
 

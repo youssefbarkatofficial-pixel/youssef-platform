@@ -1,4 +1,4 @@
-// js/courses-renderer.js
+﻿// js/courses-renderer.js
 document.addEventListener('DOMContentLoaded', () => {
     // Helper: load courses and restore separated base64 images from cache
     function loadAdminCourses() {
