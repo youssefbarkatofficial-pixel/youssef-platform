@@ -964,7 +964,7 @@ window.updateItemUrl = function(sIdx, iIdx, type, val) {
                 const grade = gradeEl ? gradeEl.value : (currentEditingCourse ? (currentEditingCourse.grade || 'prep1') : 'prep1');
                 
                 let discountExpiry = null;
-                if (hasDiscount && document.getElementById('fcTimerToggle').checked) {
+                if (hasDiscount && document.getElementById('fcTimerToggle') && document.getElementById('fcTimerToggle').checked) {
                     const y = parseInt(document.getElementById('fcYears').value) || 0;
                     const m = parseInt(document.getElementById('fcMonths').value) || 0;
                     const w = parseInt(document.getElementById('fcWeeks').value) || 0;
@@ -990,90 +990,98 @@ window.updateItemUrl = function(sIdx, iIdx, type, val) {
                 submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الرفع...';
                 submitBtn.disabled = true;
 
-                let imageVal = document.getElementById('fcImage').value || 'https://via.placeholder.com/400x250/071326/D4A64F?text=Course';
-                const courseIdToSave = currentEditingCourse ? currentEditingCourse.id : ('c' + Date.now());
-
-                // Firebase Storage Upload for Image
-                const fileInput = document.getElementById('fcImageFile');
-                if (fileInput && fileInput.files && fileInput.files.length > 0) {
-                    try {
-                        const file = fileInput.files[0];
-                        if (window.firebaseStorage) {
-                            const storageRef = window.firebaseStorage.ref('courses/' + courseIdToSave + '_' + Date.now() + '_' + file.name);
-                            const snapshot = await storageRef.put(file);
-                            imageVal = await snapshot.ref.getDownloadURL();
-                            // Clear file input so it doesn't re-upload unmodified
-                            fileInput.value = '';
-                            document.getElementById('fcImage').value = imageVal;
-                        }
-                    } catch (e) {
-                        console.warn('Failed to upload image to Firebase Storage', e);
-                        // Falls back to existing base64 imageVal from canvas
-                    }
-                }
-
+                // Hide the modal immediately and defer the heavy work to allow browser repaint
                 document.getElementById('confirmSaveModal').style.display = 'none';
 
-                try {
-                    if (currentEditingCourse) {
-                        // Editing existing course
-                        const idx = adminCourses.findIndex(x => x.id === currentEditingCourse.id);
-                        if (idx === -1) {
-                            // Course not found in array — add it
-                            adminCourses.push({
-                                id: courseIdToSave,
-                                title, price, desc, grade,
-                                isFree, hasDiscount, discountPrice, discountExpiry,
-                                image: imageVal,
-                                hidden: currentEditingCourse.hidden || false,
-                                finished: currentEditingCourse.finished || false,
-                                contents: JSON.parse(JSON.stringify(tempContents))
-                            });
-                        } else {
-                            adminCourses[idx] = {
-                                id: courseIdToSave,
-                                title, price, desc, grade,
-                                isFree, hasDiscount, discountPrice, discountExpiry,
-                                image: imageVal,
-                                hidden: currentEditingCourse.hidden || false,
-                                finished: currentEditingCourse.finished || false,
-                                contents: JSON.parse(JSON.stringify(tempContents))
-                            };
-                        }
-                        // Save to Firebase if available
-                        if (window.FirebaseService && window.FirebaseService.isReady()) {
-                            await window.FirebaseService.saveCourse(adminCourses[idx !== -1 ? idx : adminCourses.length - 1]).catch(e => console.warn('Firebase save failed:', e));
-                        }
-                    } else {
-                        const newCourse = {
-                            id: courseIdToSave,
-                            title, price, desc, grade,
-                            isFree, hasDiscount, discountPrice, discountExpiry,
-                            image: imageVal,
-                            hidden: false,
-                            finished: false,
-                            contents: JSON.parse(JSON.stringify(tempContents))
-                        };
-                        adminCourses.push(newCourse);
-                        // Save to Firebase if available
-                        if (window.FirebaseService && window.FirebaseService.isReady()) {
-                            await window.FirebaseService.saveCourse(newCourse).catch(e => console.warn('Firebase save failed:', e));
-                        }
-                    }
+                setTimeout(async () => {
+                    try {
+                        let imageVal = document.getElementById('fcImage').value || 'https://via.placeholder.com/400x250/071326/D4A64F?text=Course';
+                        const courseIdToSave = currentEditingCourse ? currentEditingCourse.id : ('c' + Date.now());
 
-                    // Smart localStorage save — separate base64 images to avoid quota errors
-                    safeLocalStorageSave(adminCourses);
-                    hasUnsavedChanges = false;
-                    document.getElementById('fullCourseEditor').style.display = 'none';
-                    renderCoursesTable();
-                    window.showToast('✅ تم حفظ الكورس بنجاح!', 'success');
-                } catch(err) {
-                    console.error('Save error:', err);
-                    window.showToast('حدث خطأ أثناء الحفظ: ' + err.message, 'error');
-                } finally {
-                    submitBtn.innerHTML = originalBtnText;
-                    submitBtn.disabled = false;
-                }
+                        // Firebase Storage Upload for Image
+                        const fileInput = document.getElementById('fcImageFile');
+                        if (fileInput && fileInput.files && fileInput.files.length > 0) {
+                            try {
+                                const file = fileInput.files[0];
+                                if (window.firebaseStorage) {
+                                    const storageRef = window.firebaseStorage.ref('courses/' + courseIdToSave + '_' + Date.now() + '_' + file.name);
+                                    const snapshot = await storageRef.put(file);
+                                    imageVal = await snapshot.ref.getDownloadURL();
+                                    fileInput.value = '';
+                                    document.getElementById('fcImage').value = imageVal;
+                                }
+                            } catch (e) {
+                                console.warn('Failed to upload image to Firebase Storage', e);
+                            }
+                        }
+
+                        if (currentEditingCourse) {
+                            // Editing existing course
+                            let idx = adminCourses.findIndex(x => x.id === currentEditingCourse.id);
+                            if (idx === -1) {
+                                // Course not found in array — add it
+                                const newCourse = {
+                                    id: courseIdToSave,
+                                    title, price, desc, grade,
+                                    isFree, hasDiscount, discountPrice, discountExpiry,
+                                    image: imageVal,
+                                    hidden: currentEditingCourse.hidden || false,
+                                    finished: currentEditingCourse.finished || false,
+                                    contents: JSON.parse(JSON.stringify(tempContents || { sections: [] }))
+                                };
+                                adminCourses.push(newCourse);
+                                idx = adminCourses.length - 1;
+                            } else {
+                                adminCourses[idx] = {
+                                    id: courseIdToSave,
+                                    title, price, desc, grade,
+                                    isFree, hasDiscount, discountPrice, discountExpiry,
+                                    image: imageVal,
+                                    hidden: currentEditingCourse.hidden || false,
+                                    finished: currentEditingCourse.finished || false,
+                                    contents: JSON.parse(JSON.stringify(tempContents || { sections: [] }))
+                                };
+                            }
+                            // Save to Firebase if available
+                            if (window.FirebaseService && window.FirebaseService.isReady()) {
+                                // Using Promise.race to avoid hanging indefinitely if firebase is disconnected
+                                const savePromise = window.FirebaseService.saveCourse(adminCourses[idx]).catch(e => console.warn('Firebase save failed:', e));
+                                const timeoutPromise = new Promise(resolve => setTimeout(resolve, 8000));
+                                await Promise.race([savePromise, timeoutPromise]);
+                            }
+                        } else {
+                            const newCourse = {
+                                id: courseIdToSave,
+                                title, price, desc, grade,
+                                isFree, hasDiscount, discountPrice, discountExpiry,
+                                image: imageVal,
+                                hidden: false,
+                                finished: false,
+                                contents: JSON.parse(JSON.stringify(tempContents || { sections: [] }))
+                            };
+                            adminCourses.push(newCourse);
+                            // Save to Firebase if available
+                            if (window.FirebaseService && window.FirebaseService.isReady()) {
+                                const savePromise = window.FirebaseService.saveCourse(newCourse).catch(e => console.warn('Firebase save failed:', e));
+                                const timeoutPromise = new Promise(resolve => setTimeout(resolve, 8000));
+                                await Promise.race([savePromise, timeoutPromise]);
+                            }
+                        }
+
+                        // Smart localStorage save — separate base64 images to avoid quota errors
+                        safeLocalStorageSave(adminCourses);
+                        hasUnsavedChanges = false;
+                        document.getElementById('fullCourseEditor').style.display = 'none';
+                        renderCoursesTable();
+                        window.showToast('✅ تم حفظ الكورس بنجاح!', 'success');
+                    } catch(err) {
+                        console.error('Save error:', err);
+                        window.showToast('حدث خطأ أثناء الحفظ: ' + err.message, 'error');
+                    } finally {
+                        submitBtn.innerHTML = originalBtnText;
+                        submitBtn.disabled = false;
+                    }
+                }, 100);
             });
 
             document.getElementById('btnAddNewCourse').addEventListener('click', () => {
