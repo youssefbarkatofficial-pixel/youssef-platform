@@ -484,7 +484,9 @@ window.FirebaseService = (function () {
 
             // Cache locally
             let reqs = JSON.parse(localStorage.getItem('paymentRequests') || '[]');
-            reqs.push({ id: docRef.id, ...payload });
+            let cachedPayload = { ...payload };
+            delete cachedPayload.proofImage;
+            reqs.push({ id: docRef.id, ...cachedPayload });
             localStorage.setItem('paymentRequests', JSON.stringify(reqs));
 
             return {
@@ -498,7 +500,9 @@ window.FirebaseService = (function () {
             );
 
             let reqs = JSON.parse(localStorage.getItem('paymentRequests') || '[]');
-            reqs.push({ id: 'local_' + Date.now(), ...payload });
+            let cachedPayload = { ...payload };
+            delete cachedPayload.proofImage;
+            reqs.push({ id: 'local_' + Date.now(), ...cachedPayload });
             localStorage.setItem('paymentRequests', JSON.stringify(reqs));
 
             return {
