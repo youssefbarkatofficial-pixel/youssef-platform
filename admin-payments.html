@@ -245,9 +245,16 @@
                         } else if (req.status === 'rejected') {
                             statusBadge = '<span class="badge" style="background: rgba(231, 76, 60, 0.2); color: #e74c3c;">مرفوض</span>';
                             actionButtons = `<button class="btn btn-outline" style="padding: 5px; font-size: 0.8rem;" disabled><i class="fas fa-ban text-red"></i> مرفوض</button>`;
+                        } else if (req.status === 'cancelled') {
+                            statusBadge = '<span class="badge" style="background: rgba(255, 255, 255, 0.1); color: #888;">تم الإلغاء</span>';
+                            actionButtons = `<button class="btn btn-outline" style="padding: 5px; font-size: 0.8rem; border-color: #888; color: #888;" disabled><i class="fas fa-ban"></i> ملغي (تكرار)</button>`;
                         }
 
                         const row = document.createElement('tr');
+                        if (req.status === 'cancelled') {
+                            row.style.opacity = '0.5';
+                            row.style.filter = 'grayscale(100%)';
+                        }
                         row.innerHTML = `
                             <td><strong>${req.userName || 'طالب'}</strong></td>
                             <td dir="ltr" style="text-align: right; color: var(--accent-cyan);">${req.userId || 'غير معروف'}</td>

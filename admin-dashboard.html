@@ -926,6 +926,8 @@
                             statusBadge = '<span class="badge" style="background: rgba(46, 204, 113, 0.2); color: #2ecc71;">مقبول</span>';
                         } else if (req.status === 'rejected') {
                             statusBadge = '<span class="badge" style="background: rgba(231, 76, 60, 0.2); color: #e74c3c;">مرفوض</span>';
+                        } else if (req.status === 'cancelled') {
+                            statusBadge = '<span class="badge" style="background: rgba(255, 255, 255, 0.1); color: #888;">تم الإلغاء</span>';
                         }
 
                         const imgSrc = await fetchProofImage(req);
@@ -944,6 +946,10 @@
                         }
 
                         const row = document.createElement('tr');
+                        if (req.status === 'cancelled') {
+                            row.style.opacity = '0.5';
+                            row.style.filter = 'grayscale(100%)';
+                        }
                         row.innerHTML = `
                             <td>
                                 <div style="display: flex; align-items: center; gap: 10px;">

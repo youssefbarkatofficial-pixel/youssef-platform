@@ -425,6 +425,17 @@ document.addEventListener('DOMContentLoaded', async () => {
               
               // Save locally for UI persistence
               let localRequests = JSON.parse(localStorage.getItem('paymentRequests')) || [];
+              
+              // Cancel previous pending requests for this course by this student
+              localRequests.forEach(r => {
+                  if (r.courseId === courseId && (r.userId === user.phone || r.userPhone === user.phone) && r.status === 'pending') {
+                      r.status = 'cancelled';
+                      if (window.FirebaseService && window.FirebaseService.updatePaymentStatus && r.id) {
+                          window.FirebaseService.updatePaymentStatus(r.id, 'cancelled').catch(e => console.warn(e));
+                      }
+                  }
+              });
+
               let savedReq = { ...requestData, status: 'pending', id: result.id || Date.now() };
               delete savedReq.proofImage; // Remove huge base64 image to prevent quota error
               localRequests.push(savedReq);
