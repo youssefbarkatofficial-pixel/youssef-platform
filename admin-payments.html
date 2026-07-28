@@ -125,10 +125,10 @@
         </div>
     </div>
 
-    <script src="js/admin-auth.js?v=5.4"></script>
-    <script src="js/db-service.js?v=5.4"></script>
-    <script src="js/storage-service.js?v=5.4"></script>
-    <script src="js/main.js?v=5.4"></script>
+    <script src="js/admin-auth.js?v=5.5"></script>
+    <script src="js/db-service.js?v=5.5"></script>
+    <script src="js/storage-service.js?v=5.5"></script>
+    <script src="js/main.js?v=5.5"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const authStr = sessionStorage.getItem('currentAdmin');
@@ -147,7 +147,9 @@
                     const requests = [];
                     snapshot.forEach(doc => {
                         const data = doc.data();
-                        delete data.proofImage;
+                        if (data.status !== 'pending') {
+                            delete data.proofImage;
+                        }
                         requests.push({
                             id: doc.id,
                             ...data
@@ -216,11 +218,7 @@
                 }
 
                 // Sort by date descending
-                filteredReqs.sort((a, b) => {
-                    let tsA = a.createdAt || a.timestamp || a.date || 0;
-                    let tsB = b.createdAt || b.timestamp || b.date || 0;
-                    return new Date(tsB) - new Date(tsA);
-                });
+                filteredReqs.sort((a, b) => new Date(b.createdAt || b.timestamp) - new Date(a.createdAt || a.timestamp));
 
                 tbody.innerHTML = '';
                 (async function renderLoop() {
@@ -657,8 +655,8 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
-    <script src="js/firebase-config.js?v=5.4"></script>
-    <script src="js/firebase-service.js?v=5.4"></script>
+    <script src="js/firebase-config.js?v=5.5"></script>
+    <script src="js/firebase-service.js?v=5.5"></script>
 </body>
 </html>
 

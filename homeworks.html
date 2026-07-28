@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>�������� - ���� ���� �����</title>
+    <title>الواجبات - منصة يوسف بركات</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/dashboard.css">
@@ -22,12 +22,12 @@
     <div class="bg-effects"></div>
     <header class="navbar glass-panel">
         <a href="index.html" class="nav-brand">
-            <div class="logo-circle" style="width: 40px; height: 40px; font-size: 1.2rem;">�</div>
-            <span class="nav-brand-text">���� ���� �����</span>
+            <div class="logo-circle" style="width: 40px; height: 40px; font-size: 1.2rem;">ي</div>
+            <span class="nav-brand-text">منصة يوسف بركات</span>
         </a>
         <div class="nav-actions">
             <a href="#" class="btn btn-outline" style="padding: 8px 15px; border-radius: 20px;"><i class="fas fa-bell"></i></a>
-            <a href="#" id="logoutBtn" class="btn btn-outline" style="border-color: #e74c3c; color: #e74c3c; padding: 8px 15px; border-radius: 20px;">���� <i class="fas fa-sign-out-alt"></i></a>
+            <a href="#" id="logoutBtn" class="btn btn-outline" style="border-color: #e74c3c; color: #e74c3c; padding: 8px 15px; border-radius: 20px;">خروج <i class="fas fa-sign-out-alt"></i></a>
             
         </div>
     </header>
@@ -37,31 +37,31 @@
                 <div class="avatar" style="overflow: hidden;">
                     <img id="userAvatarImg" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Ccircle cx='40' cy='40' r='40' fill='%23071326'/%3E%3Ccircle cx='40' cy='30' r='16' fill='%23D4A64F'/%3E%3Cellipse cx='40' cy='70' rx='24' ry='18' fill='%23D4A64F'/%3E%3C/svg%3E" style="width: 100%; height: 100%; object-fit: cover;">
                 </div>
-                <h4 id="userNameDisplay">����</h4>
-                <p id="userGradeDisplay">���� �������</p>
+                <h4 id="userNameDisplay">طالب</h4>
+                <p id="userGradeDisplay">الصف الدراسي</p>
             </div>
             <ul class="sidebar-nav">
-                <li><a href="dashboard.html"><i class="fas fa-home"></i> ���� ������</a></li>
-                <li><a href="profile.html"><i class="fas fa-user"></i> �����</a></li>
-                <li><a href="courses.html"><i class="fas fa-plus-circle"></i> ������ �� ������</a></li>
-                <li><a href="my-courses.html"><i class="fas fa-video"></i> �������</a></li>
-                <li><a href="homeworks.html" class="active"><i class="fas fa-tasks"></i> ��������</a></li>
-                <li><a href="exams.html"><i class="fas fa-clipboard-list"></i> ����������</a></li>
-                <li><a href="stats.html"><i class="fas fa-chart-line"></i> ����������</a></li>
-                <li><a href="settings.html"><i class="fas fa-cog"></i> ���������</a></li>
+                <li><a href="dashboard.html"><i class="fas fa-home"></i> لوحة التحكم</a></li>
+                <li><a href="profile.html"><i class="fas fa-user"></i> حسابي</a></li>
+                <li><a href="courses.html"><i class="fas fa-plus-circle"></i> اشتراك في كورسات</a></li>
+                <li><a href="my-courses.html"><i class="fas fa-video"></i> كورساتي</a></li>
+                <li><a href="homeworks.html" class="active"><i class="fas fa-tasks"></i> الواجبات</a></li>
+                <li><a href="exams.html"><i class="fas fa-clipboard-list"></i> الامتحانات</a></li>
+                <li><a href="stats.html"><i class="fas fa-chart-line"></i> الإحصائيات</a></li>
+                <li><a href="settings.html"><i class="fas fa-cog"></i> الإعدادات</a></li>
             </ul>
         </aside>
         <main class="main-content">
             <div class="page-header">
-                <h1 class="page-title"><i class="fas fa-tasks mr-2 text-gold"></i> ��������</h1>
+                <h1 class="page-title"><i class="fas fa-tasks mr-2 text-gold"></i> الواجبات</h1>
             </div>
             <div class="glass-panel dash-panel" style="min-height: 400px;">
                 <div id="hwListContainer"></div>
                 <div id="noHwState" style="display: none; text-align: center; padding: 50px 20px;">
                     <i class="fas fa-book-reader text-gold" style="font-size: 4rem; margin-bottom: 20px; opacity: 0.5;"></i>
-                    <h2 style="color: var(--soft-white); margin-bottom: 10px;">�� ���� ������ ���</h2>
-                    <p style="color: rgba(255,255,255,0.7); margin-bottom: 20px;">����� �� �������� ����� ������ ��� �������� ������ ���</p>
-                    <a href="courses.html" class="btn btn-gold btn-large">���� ��������</a>
+                    <h2 style="color: var(--soft-white); margin-bottom: 10px;">لا توجد واجبات بعد</h2>
+                    <p style="color: rgba(255,255,255,0.7); margin-bottom: 20px;">اشترك في الكورسات أولاً للوصول إلى الواجبات الخاصة بها</p>
+                    <a href="courses.html" class="btn btn-gold btn-large">تصفح الكورسات</a>
                 </div>
             </div>
         </main>
@@ -71,11 +71,11 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
-    <script src="js/firebase-config.js?v=5.4"></script>
-    <script src="js/firebase-service.js?v=5.4"></script>
+    <script src="js/firebase-config.js?v=5.5"></script>
+    <script src="js/firebase-service.js?v=5.5"></script>
     <script src="js/profile-guard.js?v=1.0"></script>
-    <script src="js/storage-service.js?v=5.4"></script>
-    <script src="js/main.js?v=5.4"></script>
+    <script src="js/storage-service.js?v=5.5"></script>
+    <script src="js/main.js?v=5.5"></script>
     <script src="js/bousala-teach.js?v=1.0"></script><script src="js/bousala-intents.js?v=1.0"></script><script src="js/support-chat.js?v=6.0"></script>
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
@@ -88,8 +88,8 @@
             if(gradeEl) {
                 const effectiveGrade = (window.getEffectiveStudentGrade && window.getGradeLabel)
                     ? window.getGradeLabel(window.getEffectiveStudentGrade(user))
-                    : (user.grade || '����');
-                gradeEl.textContent = effectiveGrade || '����';
+                    : (user.grade || 'طالب');
+                gradeEl.textContent = effectiveGrade || 'طالب';
             }
             let dbUser = JSON.parse(localStorage.getItem(`db_${user.phone}`)) || { courses: [] };
             try {
@@ -117,19 +117,19 @@
                     const row = document.createElement('div');
                     row.className = 'course-hw-row';
                     const hwItems = homeworks.length > 0
-                        ? homeworks.map(hw => `<div class="hw-item"><span style="font-weight:bold">${hw.title || '����'}</span><a href="${hw.link || '#'}" target="_blank" class="btn btn-outline" style="padding:4px 12px;font-size:0.85rem;"><i class="fas fa-external-link-alt"></i> ���</a></div>`).join('')
-                        : `<div class="empty-message">�� ���� ������ �� ��� ������ ������</div>`;
+                        ? homeworks.map(hw => `<div class="hw-item"><span style="font-weight:bold">${hw.title || 'واجب'}</span><a href="${hw.link || '#'}" target="_blank" class="btn btn-outline" style="padding:4px 12px;font-size:0.85rem;"><i class="fas fa-external-link-alt"></i> فتح</a></div>`).join('')
+                        : `<div class="empty-message">لا توجد واجبات في هذا الكورس حالياً</div>`;
                     row.innerHTML = `
                         <div class="course-hw-header">
                             <div style="display:flex;align-items:center;gap:15px;">
                                 <i class="fas fa-book text-gold" style="font-size:1.5rem;"></i>
                                 <h3 style="margin:0;color:var(--text-primary);">${c.title}</h3>
                             </div>
-                            <button class="btn btn-outline toggle-btn">��� �������� <i class="fas fa-chevron-down" style="margin-right:8px;"></i></button>
+                            <button class="btn btn-outline toggle-btn">عرض الواجبات <i class="fas fa-chevron-down" style="margin-right:8px;"></i></button>
                         </div>
                         <div class="course-hw-body">
                             <div class="hw-category">
-                                <h4 style="color:var(--accent-cyan);"><i class="fas fa-tasks"></i> ����� ��������</h4>
+                                <h4 style="color:var(--accent-cyan);"><i class="fas fa-tasks"></i> قائمة الواجبات</h4>
                                 ${hwItems}
                             </div>
                         </div>`;
@@ -137,8 +137,8 @@
                     toggleBtn.addEventListener('click', () => {
                         row.classList.toggle('active');
                         toggleBtn.innerHTML = row.classList.contains('active')
-                            ? '����� �������� <i class="fas fa-chevron-up" style="margin-right:8px;"></i>'
-                            : '��� �������� <i class="fas fa-chevron-down" style="margin-right:8px;"></i>';
+                            ? 'إخفاء الواجبات <i class="fas fa-chevron-up" style="margin-right:8px;"></i>'
+                            : 'عرض الواجبات <i class="fas fa-chevron-down" style="margin-right:8px;"></i>';
                     });
                     container.appendChild(row);
                 });

@@ -299,12 +299,12 @@
         </div>
     </div>
 
-    <script src="js/storage-service.js?v=5.4"></script>
-    <script src="js/main.js?v=5.4"></script>
+    <script src="js/storage-service.js?v=5.5"></script>
+    <script src="js/main.js?v=5.5"></script>
     <script src="js/bousala-teach.js?v=1.0"></script><script src="js/bousala-intents.js?v=1.0"></script><script src="js/support-chat.js?v=6.0"></script>
-    <script src="js/auth.js?v=5.4"></script>
-    <script src="js/grader.js?v=5.4"></script>
-    <script src="js/dashboard.js?v=5.4"></script>
+    <script src="js/auth.js?v=5.5"></script>
+    <script src="js/grader.js?v=5.5"></script>
+    <script src="js/dashboard.js?v=5.5"></script>
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
             const urlParams = new URLSearchParams(window.location.search);
@@ -372,7 +372,7 @@
                 // Removed getPaymentRequests() call because students shouldn't fetch all requests, and it overwrites local pending state if offline sync is pending.
 
                 let paymentRequests = JSON.parse(localStorage.getItem('paymentRequests')) || [];
-                let existingReq = paymentRequests.find(req => req.courseId === courseId && req.userId === user.phone);
+                let existingReq = [...paymentRequests].reverse().find(req => req.courseId === courseId && (req.userId === user.phone || req.userPhone === user.phone));
                 if (existingReq && existingReq.status === 'pending') {
                     isPending = true;
                 }
@@ -1397,8 +1397,8 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
-    <script src="js/firebase-config.js?v=5.4"></script>
-    <script src="js/firebase-service.js?v=5.4"></script>
+    <script src="js/firebase-config.js?v=5.5"></script>
+    <script src="js/firebase-service.js?v=5.5"></script>
     <script src="js/profile-guard.js?v=1.0"></script>
 <script>
 window.injectVideoWatermark = function(container) {
