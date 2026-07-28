@@ -1,4 +1,4 @@
-﻿// js/courses-renderer.js
+// js/courses-renderer.js
 document.addEventListener('DOMContentLoaded', () => {
     // Helper: load courses and restore separated base64 images from cache
     function loadAdminCourses() {
@@ -75,7 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>`;
                         
                         if (course.discountExpiry) {
-                            countdownHTML = `<div class="discount-countdown" data-expiry="${course.discountExpiry}" style="background: rgba(231, 76, 60, 0.1); border: 1px solid rgba(231, 76, 60, 0.3); border-radius: 5px; padding: 5px; margin-top: 10px; margin-bottom: 15px; text-align: center; color: #e74c3c; font-weight: bold; font-size: 0.9rem; animation: pulse 2s infinite;"><i class="fas fa-clock"></i> ينتهي الخصم خلال: <span class="cd-timer">...</span></div>`;
+                            countdownHTML = `<div class="discount-countdown" data-expiry="${course.discountExpiry}" style="background: rgba(231, 76, 60, 0.1); border: 1px solid rgba(231, 76, 60, 0.3); border-radius: 5px; padding: 5px; margin-top: 10px; margin-bottom: 15px; text-align: center; color: #e74c3c; font-weight: bold; font-size: 0.75rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; animation: pulse 2s infinite;"><i class="fas fa-clock"></i> ينتهي الخصم خلال: <span class="cd-timer">...</span></div>`;
                         }
                     }
                 }
