@@ -10,29 +10,28 @@ const firebaseConfig = {
 // Initialize Firebase
 let app, auth, db, storage;
 
+// Unclog offline persistence queue natively before Firebase initializes
+try {
+    if (!localStorage.getItem('unclog_firestore_v2')) {
+        window.indexedDB.deleteDatabase('firestore/[DEFAULT]/youssefbarakatplatform-8abff/main');
+        localStorage.setItem('unclog_firestore_v2', 'true');
+        console.log('Cleared Firestore IndexedDB to unclog queues');
+    }
+} catch(e) {}
+
 try {
     app = firebase.initializeApp(firebaseConfig);
     auth = firebase.auth();
     db = firebase.firestore();
     storage = firebase.storage();
     
-    // Unclog offline persistence queue once to fix stuck large payments
-    let unclogged = localStorage.getItem('firestore_unclogged_v1');
-    if (!unclogged) {
-        try {
-            db.clearPersistence().then(() => {
-                db.enablePersistence({ synchronizeTabs: true }).catch(()=>{});
-                localStorage.setItem('firestore_unclogged_v1', 'true');
-            }).catch(() => {
-                db.enablePersistence({ synchronizeTabs: true }).catch(()=>{});
-                localStorage.setItem('firestore_unclogged_v1', 'true');
-            });
-        } catch(e) {}
-    } else {
-        try {
-            db.enablePersistence({ synchronizeTabs: true }).catch(()=>{});
-        } catch(e) {}
-    }
+    // Enable offline persistence natively to seamlessly cache data without overloading localStorage
+    try {
+        db.enablePersistence({ synchronizeTabs: true })
+          .catch(function(err) {
+              console.warn("Firebase persistence error:", err.code);
+          });
+    } catch(e) {}
 
     console.log("Firebase initialized successfully");
 } catch (error) {
