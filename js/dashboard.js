@@ -270,7 +270,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         return reject('يجب رفع صورة بصيغة صحيحة.');
       }
 
-      const maxBytes = 4 * 1024 * 1024;
+      const maxBytes = 500 * 1024; // 500 KB to fit within Firestore 1MB limit safely
       const reader = new FileReader();
       reader.onerror = () => reject('فشل قراءة الصورة. حاول مرة أخرى.');
       reader.onabort = () => reject('تم إيقاف قراءة الصورة.');
@@ -282,7 +282,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const img = new Image();
         img.onload = () => {
-          const maxDim = 1200;
+          const maxDim = 800; // Smaller dimension for better compression
           let width = img.width;
           let height = img.height;
           if (width > height && width > maxDim) {
@@ -312,7 +312,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             reader2.onerror = () => reject('فشل تحويل الصورة بعد الضغط.');
             reader2.onload = () => resolve(reader2.result);
             reader2.readAsDataURL(blob);
-          }, 'image/jpeg', 0.8);
+          }, 'image/jpeg', 0.6);
         };
         img.onerror = () => reject('تعذر فتح الصورة للضغط. حاول رفع صورة أخرى.');
         img.src = dataUrl;
@@ -423,8 +423,21 @@ document.addEventListener('DOMContentLoaded', async () => {
               console.log('[FIRESTORE WRITE SUCCESS]');
               if (window.showToast) window.showToast('تم إرسال طلب الاشتراك بنجاح، بانتظار موافقة الأدمن', 'success');
               
+              // Save locally for UI persistence
+              let localRequests = JSON.parse(localStorage.getItem('paymentRequests')) || [];
+              let savedReq = { ...requestData, status: 'pending', id: result.id || Date.now() };
+              delete savedReq.proofImage; // Remove huge base64 image to prevent quota error
+              localRequests.push(savedReq);
+              try { localStorage.setItem('paymentRequests', JSON.stringify(localRequests)); } catch(e) { console.error('LocalStorage quota error on paymentRequests', e); }
+
               const pModal = document.getElementById('paymentModal');
-              if (pModal) pModal.style.display = 'none';
+              if (pModal) pModal.classList.remove('active');
+
+              // Update in course-details.html
+              const actionContainer = document.getElementById('cdActionBtnContainer');
+              if (actionContainer) {
+                  actionContainer.innerHTML = `<button class="btn btn-outline" style="color:var(--accent-orange); border-color:var(--accent-orange);" onclick="showPendingMessageDetails()"><i class="fas fa-clock mr-2"></i> طلبك قيد المراجعة</button>`;
+              }
 
               const courseCardBtn = document.querySelector(`.course-card[data-course-id="${courseId}"] .btn-subscribe`) || document.querySelector(`.btn-subscribe[onclick*="${courseId}"]`);
               if (courseCardBtn) {

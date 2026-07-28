@@ -249,6 +249,17 @@ h6 {
   color: #ffffff !important;
 }
 
+.btn-green {
+  background: linear-gradient(135deg, #2ecc71, #27ae60);
+  color: #ffffff !important;
+  box-shadow: 0 4px 15px rgba(46, 204, 113, 0.4);
+  border: none;
+}
+.btn-green:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(46, 204, 113, 0.6);
+}
+
 @keyframes shine {
   0% {
     left: -100%;

@@ -472,6 +472,26 @@
             </div>
 
             <div class="form-group" style="margin-top: 15px;">
+                <label style="color: var(--text-primary); margin-bottom: 5px; display: block;">حالة الكورس (تاريخ البدء)</label>
+                <input type="text" id="editCourseStatus" class="form-control" placeholder="مثال: يبدأ فوراً أو 15 أكتوبر">
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 15px;">
+                <div class="form-group">
+                    <label style="color: var(--text-primary); margin-bottom: 5px; display: block; font-size: 0.9rem;">موعد المحاضرات</label>
+                    <input type="text" id="editLecSchedule" class="form-control" placeholder="السبت 8:00 م">
+                </div>
+                <div class="form-group">
+                    <label style="color: var(--text-primary); margin-bottom: 5px; display: block; font-size: 0.9rem;">موعد الواجبات</label>
+                    <input type="text" id="editHwSchedule" class="form-control" placeholder="الأحد 10:00 ص">
+                </div>
+                <div class="form-group">
+                    <label style="color: var(--text-primary); margin-bottom: 5px; display: block; font-size: 0.9rem;">موعد الامتحانات</label>
+                    <input type="text" id="editExamSchedule" class="form-control" placeholder="الإثنين 12:00 ظ">
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 15px;">
                 <label style="color: var(--text-primary); margin-bottom: 5px; display: block;">الصف الدراسي</label>
                 <select id="editCourseGrade" class="form-control" required>
                     <option value="prep1">أولى إعدادي</option>
@@ -875,7 +895,9 @@
                 paymentRequests.sort((a, b) => {
                     if (a.status === 'pending' && b.status !== 'pending') return -1;
                     if (a.status !== 'pending' && b.status === 'pending') return 1;
-                    return new Date(b.createdAt || b.timestamp || b.date) - new Date(a.createdAt || a.timestamp || a.date);
+                    const tsB = b.createdAt || b.timestamp || b.date || 0;
+                    const tsA = a.createdAt || a.timestamp || a.date || 0;
+                    return new Date(tsB) - new Date(tsA);
                 });
 
                 tbody.innerHTML = '';
@@ -885,8 +907,12 @@
                     for (const req of paymentRequests) {
                         const course = adminCourses.find(c => c.id === req.courseId);
                         const courseName = course ? course.title : 'كورس محذوف';
+                        const gradeMap = { 'prep1': 'أولى إعدادي', 'prep2': 'تانية إعدادي', 'prep3': 'تالتة إعدادي', 'sec1': 'أولى ثانوي', 'sec2': 'تانية ثانوي', 'sec3': 'تالتة ثانوي' };
+                        const courseGrade = course ? (gradeMap[course.grade] || course.grade || '') : '';
+                        const courseGradeHtml = courseGrade ? `<br><small style="color:var(--text-muted); font-size:0.8rem;">${courseGrade}</small>` : '';
                         const price = course ? course.price : '0';
-                        const date = new Date(req.createdAt || req.timestamp || req.date).toLocaleDateString('ar-EG', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+                        const validTs = req.createdAt || req.timestamp || req.date || Date.now();
+                        const date = new Date(validTs).toLocaleDateString('ar-EG', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 
                         let statusBadge = '';
                         let actionButtons = '';
@@ -926,7 +952,7 @@
                                 </div>
                             </td>
                             <td dir="ltr" style="text-align: right;">${req.userId || 'غير معروف'}</td>
-                            <td>${courseName}</td>
+                            <td>${courseName}${courseGradeHtml}</td>
                             <td>${price} ج.م</td>
                             <td>${date}</td>
                             <td>${imgSrc ? `<div style="display:flex;flex-direction:column;align-items:center;gap:6px;"><a href="${imgSrc}" target="_blank"><img src="${imgSrc}" style="width:50px;height:50px;object-fit:cover;border-radius:5px;cursor:pointer;"></a><button class="btn btn-outline" style="padding:4px 6px;font-size:0.75rem; margin-top:4px;" onclick='window.downloadProof(${JSON.stringify(imgSrc)}, "proof_${req.id}.png")'><i class='fas fa-download'></i> تحميل</button></div>` : 'لا يوجد'}</td>
@@ -1123,6 +1149,10 @@
                         document.getElementById('editCourseDesc').value = course.desc;
                         document.getElementById('editCoursePrice').value = course.price;
                         document.getElementById('editCourseGrade').value = course.grade;
+                        document.getElementById('editCourseStatus').value = course.courseStatus || '';
+                        document.getElementById('editLecSchedule').value = course.lecSchedule || '';
+                        document.getElementById('editHwSchedule').value = course.hwSchedule || '';
+                        document.getElementById('editExamSchedule').value = course.examSchedule || '';
                         document.getElementById('editCourseImage').value = course.image;
                         document.getElementById('editCourseImagePreview').src = course.image;
                         
@@ -1144,6 +1174,10 @@
                         document.getElementById('dtWeeks').value = '';
                         document.getElementById('dtDays').value = '';
                         document.getElementById('dtHours').value = '';
+                        document.getElementById('editCourseStatus').value = '';
+                        document.getElementById('editLecSchedule').value = '';
+                        document.getElementById('editHwSchedule').value = '';
+                        document.getElementById('editExamSchedule').value = '';
                         
                         if (course.discountExpiry) {
                             document.getElementById('editCourseTimerToggle').checked = true;
@@ -1180,6 +1214,10 @@
                     document.getElementById('dtWeeks').value = '';
                     document.getElementById('dtDays').value = '';
                     document.getElementById('dtHours').value = '';
+                    document.getElementById('editCourseStatus').value = '';
+                    document.getElementById('editLecSchedule').value = '';
+                    document.getElementById('editHwSchedule').value = '';
+                    document.getElementById('editExamSchedule').value = '';
                     
                     document.getElementById('editCourseGrade').value = 'prep1';
                     document.getElementById('editCourseImage').value = 'https://via.placeholder.com/400x250/071326/D4A64F?text=Course';
@@ -1339,6 +1377,10 @@
                     }
 
                     const grade = document.getElementById('editCourseGrade').value;
+                    const courseStatus = document.getElementById('editCourseStatus').value.trim();
+                    const lecSchedule = document.getElementById('editLecSchedule').value.trim();
+                    const hwSchedule = document.getElementById('editHwSchedule').value.trim();
+                    const examSchedule = document.getElementById('editExamSchedule').value.trim();
                     const image = document.getElementById('editCourseImage').value || 'https://via.placeholder.com/400x250/071326/D4A64F?text=Course';
                     
                     if(!title || (!price && !isFree)) {
@@ -1358,7 +1400,7 @@
                         if(id) {
                             const idx = adminCourses.findIndex(c => c.id === id);
                             if(idx !== -1) {
-                                adminCourses[idx] = { ...adminCourses[idx], title, desc, price: isFree ? '0' : price, isFree, hasDiscount, discountPrice, discountExpiry, grade, image };
+                                adminCourses[idx] = { ...adminCourses[idx], title, desc, price: isFree ? '0' : price, isFree, hasDiscount, discountPrice, discountExpiry, grade, courseStatus, lecSchedule, hwSchedule, examSchedule, image };
                                 if (window.FirebaseService && window.FirebaseService.isReady()) {
                                     await window.FirebaseService.saveCourse(adminCourses[idx]);
                                 }
@@ -1366,7 +1408,7 @@
                         } else {
                             const newCourse = {
                                 id: 'c' + Date.now(),
-                                title, desc, price: isFree ? '0' : price, isFree, hasDiscount, discountPrice, discountExpiry, grade, image,
+                                title, desc, price: isFree ? '0' : price, isFree, hasDiscount, discountPrice, discountExpiry, grade, courseStatus, lecSchedule, hwSchedule, examSchedule, image,
                                 hidden: false, finished: false,
                                 contents: { lectures: [], homeworks: [], exams: [], trainings: [], customSections: [] }
                             };

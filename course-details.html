@@ -453,6 +453,24 @@
                             <input type="text" id="adminEditCourseTitle" class="form-control" value="${course.title}">
                         </div>
                         <div class="form-group">
+                            <label>حالة الكورس (مثال: يبدأ فوراً أو 15 أكتوبر)</label>
+                            <input type="text" id="adminEditCourseStatus" class="form-control" value="${course.courseStatus || ''}">
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+                            <div class="form-group">
+                                <label style="font-size: 0.85rem;">المحاضرات</label>
+                                <input type="text" id="adminEditLecSchedule" class="form-control" value="${course.lecSchedule || ''}" placeholder="السبت 8 م">
+                            </div>
+                            <div class="form-group">
+                                <label style="font-size: 0.85rem;">الواجبات</label>
+                                <input type="text" id="adminEditHwSchedule" class="form-control" value="${course.hwSchedule || ''}" placeholder="الأحد 10 ص">
+                            </div>
+                            <div class="form-group">
+                                <label style="font-size: 0.85rem;">الامتحانات</label>
+                                <input type="text" id="adminEditExamSchedule" class="form-control" value="${course.examSchedule || ''}" placeholder="الإثنين 12 ظ">
+                            </div>
+                        </div>
+                        <div class="form-group">
                             <label>رابط الصورة</label>
                             <input type="text" id="adminEditCourseImage" class="form-control" value="${course.image}">
                         </div>
@@ -473,10 +491,18 @@
                 
                 window.saveAdminCourseEdit = function() {
                     const newTitle = document.getElementById('adminEditCourseTitle').value;
+                    const newStatus = document.getElementById('adminEditCourseStatus').value;
+                    const newLecSchedule = document.getElementById('adminEditLecSchedule').value;
+                    const newHwSchedule = document.getElementById('adminEditHwSchedule').value;
+                    const newExamSchedule = document.getElementById('adminEditExamSchedule').value;
                     const newImage = document.getElementById('adminEditCourseImage').value;
                     const newDesc = document.getElementById('adminEditCourseDesc').value;
                     
                     course.title = newTitle;
+                    course.courseStatus = newStatus;
+                    course.lecSchedule = newLecSchedule;
+                    course.hwSchedule = newHwSchedule;
+                    course.examSchedule = newExamSchedule;
                     course.image = newImage;
                     course.desc = newDesc;
                     
@@ -792,11 +818,22 @@
                     header.type = 'button';
                     header.style.cssText = 'width:100%; text-align:right; padding: 22px 24px; display:flex; align-items:center; justify-content:space-between; gap:15px; background: rgba(0,0,0,0.2); border:none; border-bottom: 1px solid rgba(255,255,255,0.05); color: var(--text-primary); cursor: pointer;';
                     
+                    let scheduleText = '';
+                    if (sec.id === 'sec_lectures' && course.lecSchedule) scheduleText = course.lecSchedule;
+                    else if (sec.id === 'sec_homeworks' && course.hwSchedule) scheduleText = course.hwSchedule;
+                    else if (sec.id === 'sec_exams' && course.examSchedule) scheduleText = course.examSchedule;
+                    
+                    let scheduleHtml = '';
+                    if (scheduleText) {
+                        scheduleHtml = `<div style="color: rgba(255,255,255,0.6); font-size: 0.85rem; margin-top: 5px; font-weight: normal;"><i class="fas fa-clock mr-1"></i> موعد النزول: ${scheduleText}</div>`;
+                    }
+
                     header.innerHTML = `
                         <div style="display:flex; align-items:center; gap:16px; flex:1;">
                             <i class="fas fa-folder-open text-gold" style="font-size:1.4rem;"></i>
                             <div style="text-align:right; min-width:0;">
                                 <div style="font-size:1.2rem; font-weight:bold; color: var(--accent-cyan); white-space:normal;">${sec.title}</div>
+                                ${scheduleHtml}
                                 <div style="color: rgba(255,255,255,0.5); font-size:0.9rem; margin-top:4px;">${(sec.items || []).filter(i => i.type !== 'header').length} محتويات</div>
                             </div>
                         </div>

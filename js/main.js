@@ -818,11 +818,20 @@ document.addEventListener('DOMContentLoaded', () => {
           
           if (themeBtn) navActions.appendChild(themeBtn);
           
+          const dashBtn = document.createElement('a');
+          dashBtn.href = 'dashboard.html';
+          dashBtn.className = 'btn btn-gold';
+          dashBtn.style.borderRadius = '20px';
+          dashBtn.style.marginRight = '5px';
+          dashBtn.innerHTML = '<i class="fas fa-chalkboard-teacher" style="margin-left: 5px;"></i> الداش بورد';
+          navActions.appendChild(dashBtn);
+
           const profileBtn = document.createElement('a');
           profileBtn.href = 'profile.html';
           profileBtn.className = 'btn btn-green';
           profileBtn.style.borderRadius = '20px';
-          profileBtn.innerHTML = '<i class="fas fa-user" style="margin-left: 8px;"></i> حسابي';
+          profileBtn.style.marginRight = '5px';
+          profileBtn.innerHTML = '<i class="fas fa-user" style="margin-left: 5px;"></i> حسابي';
           navActions.appendChild(profileBtn);
           
           const ytBtn = document.createElement('a');

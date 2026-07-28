@@ -522,9 +522,13 @@ window.FirebaseService = (function () {
                     .onSnapshot(snap => {
                         let latestReqs = [];
                         snap.forEach(doc => {
-                            latestReqs.push({ id: doc.id, ...doc.data() });
+                            let data = { id: doc.id, ...doc.data() };
+                            latestReqs.push(data);
                         });
-                        localStorage.setItem('paymentRequests', JSON.stringify(latestReqs));
+                        try {
+                            const cacheReqs = latestReqs.map(r => { const {proofImage, ...rest} = r; return rest; });
+                            localStorage.setItem('paymentRequests', JSON.stringify(cacheReqs));
+                        } catch(e) {}
                     }, err => console.warn('Payment reqs listener error', err));
             }
 
@@ -533,9 +537,13 @@ window.FirebaseService = (function () {
                 .get();
             reqs = [];
             snap.forEach(doc => {
-                reqs.push({ id: doc.id, ...doc.data() });
+                let data = { id: doc.id, ...doc.data() };
+                reqs.push(data);
             });
-            localStorage.setItem('paymentRequests', JSON.stringify(reqs));
+            try {
+                const cacheReqs = reqs.map(r => { const {proofImage, ...rest} = r; return rest; });
+                localStorage.setItem('paymentRequests', JSON.stringify(cacheReqs));
+            } catch(e) {}
             return reqs;
         } catch(e) {
             console.warn('getPaymentRequests failed', e);

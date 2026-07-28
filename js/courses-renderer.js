@@ -61,7 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         const generalSettings = JSON.parse(localStorage.getItem('generalSettings') || '{}');
-        const statusText = generalSettings.courseStatus || 'يبدأ فوراً';
+        const statusText = course.courseStatus || generalSettings.courseStatus || 'يبدأ فوراً';
 
                 let priceHTML = `<span class="course-price">${course.price} ج.م</span>`;
                 let countdownHTML = '';
