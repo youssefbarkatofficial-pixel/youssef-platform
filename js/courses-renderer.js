@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if(userStr) {
             let user = JSON.parse(userStr);
             let paymentRequests = JSON.parse(localStorage.getItem('paymentRequests')) || [];
-            let existingReq = paymentRequests.find(req => req.courseId === course.id && req.userId === user.phone);
+            let existingReq = [...paymentRequests].reverse().find(req => req.courseId === course.id && (req.userId === user.phone || req.userPhone === user.phone));
             
             let dbUser = JSON.parse(localStorage.getItem(`db_${user.phone}`)) || { courses: [] };
             

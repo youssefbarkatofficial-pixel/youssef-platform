@@ -773,7 +773,16 @@
                     snapshot.forEach(doc => {
                         requests.push({ id: doc.id, ...doc.data() });
                     });
-                    localStorage.setItem('paymentRequests', JSON.stringify(requests));
+                    
+                    try {
+                        const cacheReqs = requests.map(r => { 
+                            let copy = {...r}; 
+                            delete copy.proofImage; 
+                            return copy; 
+                        });
+                        localStorage.setItem('paymentRequests', JSON.stringify(cacheReqs));
+                    } catch(e) { console.warn('Cache error:', e); }
+                    
                     calculateStats();
                     renderPayments();
                 });
@@ -873,12 +882,20 @@
                                 const tx = db.transaction('paymentProofs', 'readonly');
                                 const store = tx.objectStore('paymentProofs');
                                 const getReq = store.get(req.proofImageKey);
-                                getReq.onsuccess = function() { resolve(getReq.result ? getReq.result.dataUrl : null); };
-                                getReq.onerror = function() { resolve(null); };
+                                getReq.onsuccess = function() { resolve(getReq.result ? getReq.result.dataUrl : `https://res.cloudinary.com/dvfe2oas8/image/upload/v1724626154/${req.proofImageKey}`); };
+                                getReq.onerror = function() { resolve(`https://res.cloudinary.com/dvfe2oas8/image/upload/v1724626154/${req.proofImageKey}`); };
                             };
-                            request.onerror = function() { resolve(null); };
+                            request.onerror = function() { resolve(`https://res.cloudinary.com/dvfe2oas8/image/upload/v1724626154/${req.proofImageKey}`); };
                         });
                     }
+                    
+                    try {
+                        const doc = await window.firebaseDb.collection('paymentRequests').doc(req.id).get();
+                        if (doc.exists && doc.data().proofImage) {
+                            return doc.data().proofImage;
+                        }
+                    } catch(e) {}
+                    
                     return null;
                 }
 
@@ -1056,30 +1073,32 @@
             };
 
             window.rejectPayment = async function(id) {
-                if(confirm('هل أنت متأكد من رفض هذا الطلب؟')) {
-                    let paymentRequests = JSON.parse(localStorage.getItem('paymentRequests') || '[]');
-                    const reqIndex = paymentRequests.findIndex(r => r.id === id);
-                    if(reqIndex > -1) {
-                        const userId = paymentRequests[reqIndex].userId;
-                        
-                        // ALWAYS update local cache
-                        paymentRequests[reqIndex].status = 'rejected';
-                        let dbUser = JSON.parse(localStorage.getItem(`db_${userId}`)) || { notifications: [] };
-                        if(!dbUser.notifications) dbUser.notifications = [];
-                        dbUser.notifications.push({
-                            title: 'مراجعة الدفع',
-                            message: 'حدثت مشكلة في تأكيد دفعك، يرجى التواصل مع الدعم أو إعادة رفع صورة التحويل صحيحة.',
-                            timestamp: new Date().toISOString(),
-                            read: false,
-                            courseId: paymentRequests[reqIndex].courseId
-                        });
-                        localStorage.setItem(`db_${userId}`, JSON.stringify(dbUser));
-                        localStorage.setItem('paymentRequests', JSON.stringify(paymentRequests));
-                        
-                        renderPayments();
-                        calculateStats();
-                        if(window.showToast) window.showToast('تم رفض الطلب', 'error');
-                    }
+                if(!confirm('هل أنت متأكد من رفض هذا الطلب؟')) return;
+                
+                if (window.FirebaseService && typeof window.FirebaseService.isReady === 'function' && window.FirebaseService.isReady()) {
+                    try {
+                        let paymentRequests = JSON.parse(localStorage.getItem('paymentRequests') || '[]');
+                        const reqIndex = paymentRequests.findIndex(r => r.id === id);
+                        if(reqIndex > -1) {
+                            const userId = paymentRequests[reqIndex].userId;
+                            const courseId = paymentRequests[reqIndex].courseId;
+                            
+                            await window.FirebaseService.updatePaymentStatus(id, 'rejected');
+                            
+                            await window.FirebaseService.addNotificationToStudent(userId, {
+                                title: 'مشكلة في تأكيد الدفع ⚠️',
+                                message: 'حدثت مشكلة في تأكيد الدفع أو صورة التحويل غير واضحة. يرجى إعادة رفع صورة التحويل.',
+                                type: 'error',
+                                link: '/course-details.html?id=' + courseId,
+                                courseId: courseId,
+                                read: false
+                            });
+                            
+                            if(window.showToast) window.showToast('تم رفض الطلب بنجاح', 'error');
+                        }
+                    } catch(e) { console.warn('Firebase sync failed for payment rejection', e); }
+                } else {
+                    if(window.showToast) window.showToast('يرجى انتظار تحميل السحابة', 'error');
                 }
             };
 

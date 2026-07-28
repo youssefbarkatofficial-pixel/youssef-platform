@@ -147,9 +147,7 @@
                     const requests = [];
                     snapshot.forEach(doc => {
                         const data = doc.data();
-                        if (data.status !== 'pending') {
-                            delete data.proofImage;
-                        }
+                        delete data.proofImage;
                         requests.push({
                             id: doc.id,
                             ...data

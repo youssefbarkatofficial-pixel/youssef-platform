@@ -1061,14 +1061,14 @@ document.addEventListener('DOMContentLoaded', () => {
       // If redirected here from an approval notification, show fireworks on course page
       try {
           const curPath = window.location.pathname || '';
-          if (curPath.includes('course-details')) {
+          if (curPath.includes('course-details') || curPath.includes('courses.html')) {
               const u = new URL(window.location.href);
-              const courseId = u.searchParams.get('id');
+              const courseId = u.searchParams.get('id') || u.searchParams.get('highlight');
               if (courseId && sessionStorage.getItem('celebrate_course_' + courseId)) {
                   try { sessionStorage.removeItem('celebrate_course_' + courseId); } catch(e){}
                   setTimeout(() => {
                       try { if (window.triggerFireworks) window.triggerFireworks(4500); } catch(e){}
-                      try { if (window.showToast) window.showToast('تهانينا! كورسك متاح الآن 🎉', 'majestic', { duration: 5000, isMajestic: true, playSound: 'celebration' }); } catch(e){}
+                      try { if (window.showToast) window.showToast('تهانينا! الكورس الخاص بك متاح الآن 🎉', 'majestic', { duration: 5000, isMajestic: true, playSound: 'celebration' }); } catch(e){}
                   }, 600);
               }
           }
@@ -1366,6 +1366,27 @@ document.addEventListener('DOMContentLoaded', () => {
                                       localStorage.setItem('currentStudent', JSON.stringify(remoteUser));
                                   }
                                   
+                                  // Auto-clear rejected pending requests
+                                  try {
+                                      if (localNotifs.length < remoteNotifs.length) {
+                                          let hasRejection = false;
+                                          const newNotifs = remoteNotifs.slice(0, remoteNotifs.length - localNotifs.length); // assuming appended, or just check all
+                                          let pReqs = JSON.parse(localStorage.getItem('paymentRequests') || '[]');
+                                          remoteNotifs.forEach(n => {
+                                              if (n.title && n.title.includes('مشكلة في تأكيد الدفع')) {
+                                                  const idx = pReqs.findIndex(r => r.courseId === n.courseId && r.status === 'pending');
+                                                  if (idx > -1) {
+                                                      pReqs[idx].status = 'rejected';
+                                                      hasRejection = true;
+                                                  }
+                                              }
+                                          });
+                                          if (hasRejection) {
+                                              localStorage.setItem('paymentRequests', JSON.stringify(pReqs));
+                                          }
+                                      }
+                                  } catch(e) {}
+                                  
                                   // If new course was added, reload to reflect unlocked state
                                   if (localCourses.length < remoteCourses.length) {
                                       if (window.location.pathname.includes('courses.html') || window.location.pathname.includes('course-details.html')) {
@@ -1377,6 +1398,13 @@ document.addEventListener('DOMContentLoaded', () => {
                                       const unreadCount = remoteNotifs.filter(n => !n.read).length;
                                       if (unreadCount > 0 && typeof window.audioManager !== 'undefined') {
                                           try { window.audioManager.play('whatsapp'); } catch(e){}
+                                      }
+                                      // If rejection was processed, we might want to reload to show the subscribe button again
+                                      let pReqs = JSON.parse(localStorage.getItem('paymentRequests') || '[]');
+                                      if (remoteNotifs.some(n => n.title && n.title.includes('مشكلة في تأكيد الدفع') && !n.read)) {
+                                          if (window.location.pathname.includes('courses.html') || window.location.pathname.includes('course-details.html')) {
+                                              setTimeout(() => window.location.reload(), 1500);
+                                          }
                                       }
                                   }
                               }
