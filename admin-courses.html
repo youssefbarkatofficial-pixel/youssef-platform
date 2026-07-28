@@ -1005,13 +1005,19 @@ window.updateItemUrl = function(sIdx, iIdx, type, val) {
                                 const file = fileInput.files[0];
                                 if (window.firebaseStorage) {
                                     const storageRef = window.firebaseStorage.ref('courses/' + courseIdToSave + '_' + Date.now() + '_' + file.name);
-                                    const snapshot = await storageRef.put(file);
+                                    
+                                    // Protect against hanging uploads
+                                    const uploadPromise = storageRef.put(file);
+                                    const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Upload timeout')), 15000));
+                                    
+                                    const snapshot = await Promise.race([uploadPromise, timeoutPromise]);
                                     imageVal = await snapshot.ref.getDownloadURL();
                                     fileInput.value = '';
                                     document.getElementById('fcImage').value = imageVal;
                                 }
                             } catch (e) {
-                                console.warn('Failed to upload image to Firebase Storage', e);
+                                console.warn('Failed to upload image to Firebase Storage, continuing without image update.', e);
+                                // Falls back to whatever imageVal currently is
                             }
                         }
 
