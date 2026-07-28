@@ -116,7 +116,6 @@
           '<i class="fas fa-upload" style="margin-left:6px;"></i> اختار صورة',
         '</label>',
         '<input type="file" id="pgFileInput" accept="image/*" style="display:none">',
-        '<p id="pgNote">📦 الصورة بتتضغط تلقائياً — أعلى جودة بأصغر حجم</p>',
         '<div id="pgStatus" style="color:#f39c12;font-size:0.85rem;min-height:20px;margin-top:6px;"></div>',
         '<button id="pgBtn" disabled>✅ حفظ الصورة وأكمل</button>',
       '</div>'
@@ -146,7 +145,7 @@
         preview.src = b64;
         var kbBefore = Math.round(file.size / 1024);
         var kbAfter  = Math.round(b64.length * 0.75 / 1024);
-        statusEl.textContent = '✅ تم! الحجم: ' + kbBefore + 'KB → ' + kbAfter + 'KB';
+        statusEl.textContent = '✅ تم اختيار الصورة بنجاح';
         saveBtn.disabled = false;
       });
     });
