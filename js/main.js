@@ -1,4 +1,4 @@
-﻿// ============================================================
+// ============================================================
 //  دالة عرض المرحلة الدراسية — مشتركة بين كل صفحات المنصة
 //  تقبل كود المرحلة (prep1, sec2...) أو النص الكامل
 // ============================================================
@@ -1306,14 +1306,19 @@ document.addEventListener('DOMContentLoaded', () => {
                   }
 
                   if (localUser && localUser.email) {
-                      window.firebaseDb.collection('students').doc(localUser.email).get().then(doc => {
+                      window.firebaseDb.collection('students').doc(localUser.email).onSnapshot(doc => {
                           if (doc.exists) {
                               const remoteUser = doc.data();
-                              // Check if local courses array is manipulated
-                              const localCourses = Array.isArray(localUser.courses) ? localUser.courses : [];
+                              const localStr = sessionStorage.getItem('currentStudent') || localStorage.getItem('currentStudent') || '{}';
+                              const currentLocalUser = JSON.parse(localStr);
+                              
+                              const localCourses = Array.isArray(currentLocalUser.courses) ? currentLocalUser.courses : [];
                               const remoteCourses = Array.isArray(remoteUser.courses) ? remoteUser.courses : [];
                               
-                              // If local has more courses than remote, or remote has been disabled
+                              const localNotifs = Array.isArray(currentLocalUser.notifications) ? currentLocalUser.notifications : [];
+                              const remoteNotifs = Array.isArray(remoteUser.notifications) ? remoteUser.notifications : [];
+                              
+                              // If local has more courses than remote, or remote has been disabled (Anti-Cheat)
                               if (localCourses.length > remoteCourses.length || remoteUser.status === 'blocked') {
                                   console.warn("Security Alert: Course manipulation detected or account blocked. Syncing with server...");
                                   sessionStorage.setItem('currentStudent', JSON.stringify(remoteUser));
@@ -1322,9 +1327,30 @@ document.addEventListener('DOMContentLoaded', () => {
                                   }
                                   if(window.showToast) window.showToast('تم تحديث بيانات حسابك من الخادم الأساسي.', 'warning');
                                   setTimeout(() => window.location.reload(), 2000);
+                              } 
+                              // Silent Sync (e.g. Admin approved a payment or sent a notification)
+                              else if (localCourses.length < remoteCourses.length || localNotifs.length !== remoteNotifs.length) {
+                                  sessionStorage.setItem('currentStudent', JSON.stringify(remoteUser));
+                                  if (localStorage.getItem('currentStudent')) {
+                                      localStorage.setItem('currentStudent', JSON.stringify(remoteUser));
+                                  }
+                                  
+                                  // If new course was added, reload to reflect unlocked state
+                                  if (localCourses.length < remoteCourses.length) {
+                                      if (window.location.pathname.includes('courses.html') || window.location.pathname.includes('course-details.html')) {
+                                          if(window.showToast) window.showToast('تم تحديث اشتراكاتك! جاري تحديث الصفحة...', 'success');
+                                          setTimeout(() => window.location.reload(), 1500);
+                                      }
+                                  } else {
+                                      // Just update notifications badge in background if possible
+                                      const unreadCount = remoteNotifs.filter(n => !n.read).length;
+                                      if (unreadCount > 0 && typeof window.audioManager !== 'undefined') {
+                                          try { window.audioManager.play('whatsapp'); } catch(e){}
+                                      }
+                                  }
                               }
                           }
-                      }).catch(e => console.warn('Anti-cheat verify failed', e));
+                      }, e => console.warn('Anti-cheat / Real-time sync failed', e));
                   }
               } catch(e) {}
           }
