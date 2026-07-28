@@ -812,29 +812,51 @@ document.addEventListener('DOMContentLoaded', () => {
   if (currentStudentStr && !sessionStorage.getItem('currentAdmin') && !window.location.pathname.includes('admin-')) {
       const navActions = document.querySelector('.nav-actions');
       if (navActions) {
-          if (!navActions.querySelector('.fa-bell')) {
-              const bellBtn = document.createElement('a');
-              bellBtn.href = '#';
-              bellBtn.className = 'btn btn-outline';
-              bellBtn.style.cssText = 'padding: 8px 15px; border-radius: 20px;';
-              bellBtn.innerHTML = '<i class="fas fa-bell"></i>';
-              
-              const mobileBtn = navActions.querySelector('.mobile-menu-btn');
-              if (mobileBtn) navActions.insertBefore(bellBtn, mobileBtn);
-              else navActions.appendChild(bellBtn);
-          }
-          if (!navActions.querySelector('#logoutBtn')) {
-              const logoutBtn = document.createElement('a');
-              logoutBtn.href = '#';
-              logoutBtn.id = 'logoutBtn';
-              logoutBtn.className = 'btn btn-outline';
-              logoutBtn.style.cssText = 'border-color: #e74c3c; color: #e74c3c; padding: 8px 15px; border-radius: 20px; margin-right: 5px;';
-              logoutBtn.innerHTML = '<span class="desktop-text" style="margin-left: 5px;">خروج</span><i class="fas fa-sign-out-alt mobile-icon"></i>';
-              
-              const mobileBtn = navActions.querySelector('.mobile-menu-btn');
-              if (mobileBtn) navActions.insertBefore(logoutBtn, mobileBtn);
-              else navActions.appendChild(logoutBtn);
-          }
+          const themeBtn = document.getElementById('themeToggle');
+          const mobileBtn = document.querySelector('.mobile-menu-btn');
+          navActions.innerHTML = ''; // Clear Login/Register buttons
+          
+          if (themeBtn) navActions.appendChild(themeBtn);
+          
+          const profileBtn = document.createElement('a');
+          profileBtn.href = 'profile.html';
+          profileBtn.className = 'btn btn-green';
+          profileBtn.style.borderRadius = '20px';
+          profileBtn.innerHTML = '<i class="fas fa-user" style="margin-left: 8px;"></i> حسابي';
+          navActions.appendChild(profileBtn);
+          
+          const ytBtn = document.createElement('a');
+          ytBtn.href = 'https://www.youtube.com/@youssefstudies';
+          ytBtn.target = '_blank';
+          ytBtn.id = 'ytNavBtn';
+          ytBtn.className = 'btn';
+          ytBtn.style.cssText = 'background-color: #FF0000 !important; color: #ffffff !important; padding: 8px 15px; border-radius: 20px; text-decoration: none; border: none; font-weight: bold; margin-right: 5px;';
+          ytBtn.innerHTML = '<i class="fab fa-youtube" style="margin-left: 5px;"></i> <span class="desktop-text">قناة اليوتيوب</span>';
+          navActions.appendChild(ytBtn);
+          
+          const bellBtn = document.createElement('a');
+          bellBtn.href = '#';
+          bellBtn.className = 'btn btn-outline';
+          bellBtn.style.cssText = 'padding: 8px 15px; border-radius: 20px;';
+          bellBtn.innerHTML = '<i class="fas fa-bell"></i>';
+          navActions.appendChild(bellBtn);
+          
+          const logoutBtn = document.createElement('a');
+          logoutBtn.href = '#';
+          logoutBtn.id = 'logoutBtn';
+          logoutBtn.className = 'btn btn-outline';
+          logoutBtn.style.cssText = 'border-color: #e74c3c; color: #e74c3c; padding: 8px 15px; border-radius: 20px; margin-right: 5px;';
+          logoutBtn.innerHTML = '<span class="desktop-text" style="margin-left: 5px;">خروج</span><i class="fas fa-sign-out-alt mobile-icon"></i>';
+          navActions.appendChild(logoutBtn);
+          
+          if (mobileBtn) navActions.appendChild(mobileBtn);
+      }
+      
+      // Update Hero button on index page if exists
+      const heroSubscribeBtn = document.getElementById('heroSubscribeBtn');
+      if (heroSubscribeBtn) {
+          heroSubscribeBtn.href = 'courses.html';
+          heroSubscribeBtn.innerHTML = 'تصفح كورساتك <i class="fas fa-arrow-left mr-2" style="margin-right: 10px;"></i>';
       }
   }
 
