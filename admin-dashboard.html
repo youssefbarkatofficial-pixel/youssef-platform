@@ -841,7 +841,7 @@
             renderPayments();
             renderComplaints();
 
-            function viewPaymentDetails(id) {
+            function renderPayments() {
                 // async render to support fetching proof images from IndexedDB
                 async function fetchProofImage(req) {
                     if (req.proofImage) return req.proofImage;
