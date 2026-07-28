@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (dbUser.courses && dbUser.courses.includes(course.id)) {
                 actionBtnHTML = `<a href="#" class="btn btn-green" onclick="openCourseDetails(event, '${course.id}')">دخول الكورس</a>`;
             } else if (existingReq && existingReq.status === 'pending') {
-                actionBtnHTML = `<a href="#" class="btn btn-outline" style="color:var(--accent-orange); border-color:var(--accent-orange);" onclick="showPendingMessage(event)">طلبك قيد المراجعة</a>`;
+                actionBtnHTML = `<a href="#" class="btn btn-outline" style="color:var(--accent-orange); border-color:var(--accent-orange);" onclick="showPendingMessage(event, '${course.id}')">طلبك قيد المراجعة</a>`;
             }
         }
         
@@ -243,9 +243,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    window.showPendingMessage = function(e) {
+    window.showPendingMessage = function(e, courseId) {
         if(e) e.preventDefault();
         
+        let retryBtnHTML = courseId ? `<button class="btn btn-gold" onclick="document.getElementById('pendingMsgModal').classList.remove('active'); window.openPaymentModal(event, '${courseId}')" style="flex: 1 1 100%;"><i class="fas fa-redo"></i> إعادة محاولة الدفع</button>` : '';
+
         // Show pending message with WhatsApp/Call
         let msgHTML = `
             <div style="text-align: center;">
@@ -255,9 +257,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; margin-bottom: 20px;">
                     <p style="font-size: 0.9rem; margin-bottom: 10px;">إذا قمت بالتحويل بالفعل ولم يتم التفعيل بعد، تواصل عبر الرقم:<br><strong style="font-size: 1.2rem; color: var(--accent-cyan);">01023675235</strong></p>
                 </div>
-                <div style="display: flex; gap: 10px; justify-content: center;">
-                    <a href="https://wa.me/201023675235" target="_blank" class="btn btn-green" style="background-color: #25D366; border-color: #25D366;"><i class="fab fa-whatsapp"></i> واتساب</a>
-                    <a href="tel:01023675235" class="btn btn-outline"><i class="fas fa-phone"></i> اتصال</a>
+                <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                    <a href="https://wa.me/201023675235" target="_blank" class="btn btn-green" style="background-color: #25D366; border-color: #25D366; flex: 1;"><i class="fab fa-whatsapp"></i> واتساب</a>
+                    <a href="tel:01023675235" class="btn btn-outline" style="flex: 1;"><i class="fas fa-phone"></i> اتصال</a>
+                    ${retryBtnHTML}
                 </div>
             </div>
         `;
