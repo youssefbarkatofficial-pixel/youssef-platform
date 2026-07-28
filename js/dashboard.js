@@ -428,7 +428,7 @@ document.addEventListener('DOMContentLoaded', async () => {
               
               // Cancel previous pending requests for this course by this student
               localRequests.forEach(r => {
-                  if (r.courseId === courseId && (r.userId === user.phone || r.userPhone === user.phone) && r.status === 'pending') {
+                  if (r.id !== result.id && r.courseId === courseId && (r.userId === user.phone || r.userPhone === user.phone) && r.status === 'pending') {
                       r.status = 'cancelled';
                       if (window.FirebaseService && window.FirebaseService.updatePaymentStatus && r.id) {
                           window.FirebaseService.updatePaymentStatus(r.id, 'cancelled').catch(e => console.warn(e));
