@@ -369,11 +369,7 @@
                     isOwned = dbUser.courses && dbUser.courses.includes(courseId);
                 }
 
-                if (window.FirebaseService && typeof window.FirebaseService.getPaymentRequests === 'function') {
-                    try {
-                        await window.FirebaseService.getPaymentRequests();
-                    } catch(e) {}
-                }
+                // Removed getPaymentRequests() call because students shouldn't fetch all requests, and it overwrites local pending state if offline sync is pending.
 
                 let paymentRequests = JSON.parse(localStorage.getItem('paymentRequests')) || [];
                 let existingReq = paymentRequests.find(req => req.courseId === courseId && req.userId === user.phone);

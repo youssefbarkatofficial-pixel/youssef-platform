@@ -16,13 +16,23 @@ try {
     db = firebase.firestore();
     storage = firebase.storage();
     
-    // Enable offline persistence natively to seamlessly cache data without overloading localStorage
-    try {
-        db.enablePersistence({ synchronizeTabs: true })
-          .catch(function(err) {
-              console.warn("Firebase persistence error:", err.code);
-          });
-    } catch(e) {}
+    // Unclog offline persistence queue once to fix stuck large payments
+    let unclogged = localStorage.getItem('firestore_unclogged_v1');
+    if (!unclogged) {
+        try {
+            db.clearPersistence().then(() => {
+                db.enablePersistence({ synchronizeTabs: true }).catch(()=>{});
+                localStorage.setItem('firestore_unclogged_v1', 'true');
+            }).catch(() => {
+                db.enablePersistence({ synchronizeTabs: true }).catch(()=>{});
+                localStorage.setItem('firestore_unclogged_v1', 'true');
+            });
+        } catch(e) {}
+    } else {
+        try {
+            db.enablePersistence({ synchronizeTabs: true }).catch(()=>{});
+        } catch(e) {}
+    }
 
     console.log("Firebase initialized successfully");
 } catch (error) {

@@ -146,16 +146,24 @@
                 .onSnapshot(snapshot => {
                     const requests = [];
                     snapshot.forEach(doc => {
+                        const data = doc.data();
+                        if (data.status !== 'pending') {
+                            delete data.proofImage;
+                        }
                         requests.push({
                             id: doc.id,
-                            ...doc.data()
+                            ...data
                         });
                     });
                     
                     console.log('[ADMIN PAYMENT REQUESTS]', requests.length);
                     paymentRequests = requests;
                     
-                    localStorage.setItem('cached_payment_requests', JSON.stringify(requests));
+                    try {
+                        localStorage.setItem('cached_payment_requests', JSON.stringify(requests));
+                    } catch (e) {
+                        console.error('LocalStorage quota error on admin-payments', e);
+                    }
                     
                     calculatePaymentStats();
                     renderPayments();
@@ -181,22 +189,17 @@
 
             async function renderPayments() {
                 async function fetchProofImage(req) {
-                    if (req.proofImage) return req.proofImage;
-                    if (req.proofImageKey) {
-                        return new Promise((resolve) => {
-                            const request = indexedDB.open('platformPaymentDB', 1);
-                            request.onsuccess = function() {
-                                const db = request.result;
-                                const tx = db.transaction('paymentProofs', 'readonly');
-                                const store = tx.objectStore('paymentProofs');
-                                const getReq = store.get(req.proofImageKey);
-                                getReq.onsuccess = function() {
-                                    resolve(getReq.result ? getReq.result.dataUrl : null);
-                                };
-                                getReq.onerror = function() { resolve(null); };
-                            };
-                            request.onerror = function() { resolve(null); };
-                        });
+                    if (req.proofImage) {
+                        return req.proofImage;
+                    } else if (req.proofImageKey) {
+                        return `https://res.cloudinary.com/dvfe2oas8/image/upload/v1724626154/${req.proofImageKey}`;
+                    } else {
+                        try {
+                            const doc = await window.firebaseDb.collection('paymentRequests').doc(req.id).get();
+                            if (doc.exists && doc.data().proofImage) {
+                                return doc.data().proofImage;
+                            }
+                        } catch(e) {}
                     }
                     return null;
                 }
