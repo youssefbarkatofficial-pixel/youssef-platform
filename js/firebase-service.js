@@ -11,6 +11,27 @@ window.FirebaseService = (function () {
     // --- Realtime Listeners ---
     let coursesListenerUnsubscribe = null;
     let paymentRequestsListenerUnsubscribe = null;
+
+    // Sanitize localStorage immediately to prevent QuotaExceededError from old stuck requests
+    try {
+        let storedReqs = localStorage.getItem('paymentRequests');
+        if (storedReqs) {
+            let parsedReqs = JSON.parse(storedReqs);
+            let needsSave = false;
+            parsedReqs.forEach(r => {
+                if (r.proofImage) {
+                    delete r.proofImage;
+                    needsSave = true;
+                }
+            });
+            if (needsSave) {
+                localStorage.setItem('paymentRequests', JSON.stringify(parsedReqs));
+                console.log('Sanitized paymentRequests in localStorage');
+            }
+        }
+    } catch(e) {
+        console.warn('Failed to sanitize localStorage:', e);
+    }
     let studentListeners = {};
 
     // --- Helpers ---
