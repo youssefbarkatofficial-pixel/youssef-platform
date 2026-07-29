@@ -668,13 +668,13 @@ img, video {
   }
 
   .navbar .nav-brand-text {
-    font-size: 1.1rem !important;
+    font-size: 1.4rem !important;
   }
   
   .navbar .logo-circle {
-    width: 35px !important;
-    height: 35px !important;
-    font-size: 1.2rem !important;
+    width: 45px !important;
+    height: 45px !important;
+    font-size: 1.5rem !important;
   }
 
   .navbar .nav-actions {
