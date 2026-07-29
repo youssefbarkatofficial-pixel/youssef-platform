@@ -831,7 +831,7 @@ document.addEventListener('DOMContentLoaded', () => {
           dashBtn.className = 'btn btn-gold';
           dashBtn.style.borderRadius = '20px';
           dashBtn.style.marginRight = '5px';
-          dashBtn.innerHTML = '<i class="fas fa-chalkboard-teacher" style="margin-left: 5px;"></i> الداش بورد';
+          dashBtn.innerHTML = '<i class="fas fa-chalkboard-teacher" style="margin-left: 5px;"></i><span class="desktop-text"> الداش بورد</span>';
           navActions.appendChild(dashBtn);
 
           const profileBtn = document.createElement('a');
@@ -840,7 +840,7 @@ document.addEventListener('DOMContentLoaded', () => {
           profileBtn.className = 'btn btn-green';
           profileBtn.style.borderRadius = '20px';
           profileBtn.style.marginRight = '5px';
-          profileBtn.innerHTML = '<i class="fas fa-user" style="margin-left: 5px;"></i> حسابي';
+          profileBtn.innerHTML = '<i class="fas fa-user" style="margin-left: 5px;"></i><span class="desktop-text"> حسابي</span>';
           navActions.appendChild(profileBtn);
           
           const ytBtn = document.createElement('a');
@@ -1035,13 +1035,13 @@ document.addEventListener('DOMContentLoaded', () => {
               if (btn && btn.tagName === 'A' && !btn.href.includes('admin-')) {
                   btn.style.position = 'relative';
                   btn.style.overflow = 'visible'; // Ensure badge is not cut off
-                  bell.style.fontSize = '1.4rem'; // Enlarge the bell icon as requested
+                  bell.style.fontSize = '1.2rem'; // Unified icon size
                   
                   if (unreadCount > 0) {
                       // Add red badge
                       let badge = document.createElement('span');
                       badge.id = 'notifBadge';
-                      badge.style.cssText = 'position:absolute; top:0; right:0; background:#e74c3c; color:white; border-radius:50%; width:18px; height:18px; font-size:11px; display:flex; justify-content:center; align-items:center; font-weight:bold; box-shadow: 0 0 5px rgba(231,76,60,0.5); z-index: 100; pointer-events:none;';
+                      badge.style.cssText = 'position:absolute; top:-4px; right:-4px; background:#e74c3c; color:white; border-radius:50%; width:16px; height:16px; font-size:10px; display:flex; justify-content:center; align-items:center; font-weight:bold; box-shadow: 0 0 5px rgba(231,76,60,0.5); z-index: 100; pointer-events:none;';
                       badge.textContent = unreadCount;
                       btn.appendChild(badge);
                       

@@ -740,9 +740,8 @@ img, video {
   }
   
   .nav-actions .btn .desktop-text,
-  .nav-actions .btn span {
-    display: inline-block !important;
-    font-size: clamp(9px, 2.5vw, 0.9rem) !important;
+  .nav-actions .btn span:not(#notifBadge) {
+    display: none !important;
   }
 
   /* Don't hide ANY buttons on mobile! Wait, user requested to hide them again to save space */

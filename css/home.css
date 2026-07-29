@@ -24,14 +24,15 @@
 }
 
 .hero-content .heading-luxury {
-  white-space: normal;
+  white-space: normal !important;
   overflow-wrap: break-word;
+  overflow: visible !important;
   text-align: center !important;
   width: 100% !important;
   display: flex;
   justify-content: center;
   align-items: center;
-  margin: 0 auto;
+  margin: 0 auto 20px auto !important;
 }
 
 .hero-subtitle {
