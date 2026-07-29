@@ -158,10 +158,13 @@ h6 {
 }
 
 .heading-luxury {
-  font-size: clamp(2.5rem, 5vw, 4.5rem);
+  font-size: clamp(1.2rem, 3vw, 2.5rem) !important;
   color: var(--royal-gold);
   text-shadow: 0 4px 15px rgba(212, 166, 79, 0.5);
   font-weight: bold;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
 }
 
 /* Buttons */
@@ -771,13 +774,13 @@ img, video {
     font-size: clamp(9px, 2.5vw, 0.9rem) !important;
   }
 
-  /* Don't hide ANY buttons on mobile! Show them all but scaled down */
+  /* Don't hide ANY buttons on mobile! Wait, user requested to hide them again to save space */
   #ytNavBtn .mobile-icon {
     display: none !important;
   }
   #profileNavBtn,
   #bellNavBtn {
-    display: flex !important;
+    display: none !important;
   }
 
   #themeToggle {

@@ -853,6 +853,11 @@ document.addEventListener('DOMContentLoaded', () => {
           try {
               const user = await window.FirebaseService.loginStudent(phone, pwd);
               if (user && user.role === 'student') {
+                localStorage.setItem(`db_${user.phone}`, JSON.stringify(user));
+                if (window.PlatformStorage && user.lastUpdatedAcademicYear) {
+                  const state = window.PlatformStorage.getStoredState(user.phone);
+                  window.PlatformStorage.saveState(user.phone, { ...state, lastUpdatedYear: user.lastUpdatedAcademicYear, promotionCompleted: true, grade: user.grade || state.grade });
+                }
                 sessionStorage.setItem('currentStudent', JSON.stringify(user));
                 sessionStorage.setItem('pfJustLoggedIn', 'true');
                 if (rememberMe) localStorage.setItem('currentStudent', JSON.stringify(user));
@@ -874,6 +879,11 @@ document.addEventListener('DOMContentLoaded', () => {
                   if (rescue.ok) {
                       const rescuedUser = await window.FirebaseService.getStudentByPhone(rescue.normPhone);
                       if (rescuedUser && rescuedUser.role === 'student') {
+                          localStorage.setItem(`db_${rescuedUser.phone}`, JSON.stringify(rescuedUser));
+                          if (window.PlatformStorage && rescuedUser.lastUpdatedAcademicYear) {
+                            const state = window.PlatformStorage.getStoredState(rescuedUser.phone);
+                            window.PlatformStorage.saveState(rescuedUser.phone, { ...state, lastUpdatedYear: rescuedUser.lastUpdatedAcademicYear, promotionCompleted: true, grade: rescuedUser.grade || state.grade });
+                          }
                           sessionStorage.setItem('currentStudent', JSON.stringify(rescuedUser));
                           sessionStorage.setItem('pfJustLoggedIn', 'true');
                           if (rememberMe) localStorage.setItem('currentStudent', JSON.stringify(rescuedUser));
