@@ -611,6 +611,7 @@ img, video {
     margin-top: 5px;
     border-top: 1px solid rgba(255,255,255,0.05);
     scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
   }
   
   .nav-links::-webkit-scrollbar {
@@ -716,22 +717,20 @@ img, video {
     flex-shrink: 0;
   }
 
-  /* Hide text of non-essential buttons to save space for Login/Register */
+  /* Keep all buttons visible with text and enable horizontal scroll */
   #ytNavBtn .desktop-text, 
   #logoutBtn .desktop-text {
-    display: none !important;
+    display: inline-block !important; /* Force text to show */
   }
   #ytNavBtn .mobile-icon,
   #logoutBtn .mobile-icon {
-    display: inline-block !important;
-    margin: 0 !important;
-    font-size: 1.1rem !important;
+    display: none !important; /* Hide the mobile-only icon if we show text */
   }
 
-  .nav-links {
-    gap: 15px;
-    padding: 8px 5px 5px;
-    justify-content: center; /* Center the links */
+  .nav-actions .btn {
+    padding: 8px 15px !important;
+    font-size: 0.95rem !important;
+    flex-shrink: 0;
   }
   .nav-links a {
     font-size: 0.95rem;
@@ -745,8 +744,9 @@ img, video {
   
   /* Typography tweaks */
   .heading-luxury {
-    font-size: clamp(1.65rem, 7.5vw, 2.5rem);
-    white-space: nowrap;
+    font-size: clamp(1.5rem, 6vw, 2.2rem);
+    white-space: normal; /* Fix overflow by allowing wrap */
+    word-break: break-word;
   }
   h2 {
     font-size: clamp(1.4rem, 6vw, 2rem);

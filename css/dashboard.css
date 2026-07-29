@@ -225,16 +225,44 @@
 .badge-active { background: rgba(46, 204, 113, 0.2); color: #2ecc71; }
 .badge-pending { background: rgba(241, 196, 15, 0.2); color: #f1c40f; }
 
+#mobileSidebarToggle {
+  display: none;
+}
+
 /* Responsive */
 @media (max-width: 992px) {
   .sidebar {
     transform: translateX(100%);
     width: clamp(250px, 75vw, 320px);
     box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
+    z-index: 1000; /* Ensure it is above the overlay */
   }
   
   .sidebar.active {
     transform: translateX(0);
+  }
+  
+  .sidebar-overlay {
+    position: fixed;
+    top: 80px;
+    left: 0;
+    width: 100%;
+    height: calc(100vh - 80px);
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 999;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+  
+  .sidebar-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  #mobileSidebarToggle {
+    display: inline-flex !important;
   }
   
   .main-content {
