@@ -717,19 +717,32 @@ img, video {
     flex-shrink: 0;
   }
 
-  /* Keep all buttons visible with text and enable horizontal scroll */
-  #ytNavBtn .desktop-text, 
-  #logoutBtn .desktop-text {
-    display: inline-block !important; /* Force text to show */
+  /* Optimize buttons for mobile to match pre-login layout (2 text buttons max) */
+  #ytNavBtn .desktop-text {
+    display: none !important;
   }
-  #ytNavBtn .mobile-icon,
+  #ytNavBtn .mobile-icon {
+    display: inline-block !important;
+    margin: 0 !important;
+    font-size: 1.1rem !important;
+  }
+  
+  #logoutBtn .desktop-text {
+    display: inline-block !important; /* Keep Logout as text */
+  }
   #logoutBtn .mobile-icon {
-    display: none !important; /* Hide the mobile-only icon if we show text */
+    display: none !important;
   }
 
-  .nav-actions .btn {
-    padding: 8px 15px !important;
-    font-size: 0.95rem !important;
+  /* Hide Bell and Profile on mobile to save space so Dashboard and Logout fit perfectly */
+  #profileNavBtn,
+  #bellNavBtn {
+    display: none !important;
+  }
+
+  .nav-actions .btn:not(#themeToggle) {
+    padding: 6px 12px !important;
+    font-size: 0.85rem !important;
     flex-shrink: 0;
   }
   .nav-links a {

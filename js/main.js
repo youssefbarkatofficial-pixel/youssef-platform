@@ -828,6 +828,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
           const profileBtn = document.createElement('a');
           profileBtn.href = 'profile.html';
+          profileBtn.id = 'profileNavBtn';
           profileBtn.className = 'btn btn-green';
           profileBtn.style.borderRadius = '20px';
           profileBtn.style.marginRight = '5px';
@@ -845,6 +846,7 @@ document.addEventListener('DOMContentLoaded', () => {
           
           const bellBtn = document.createElement('a');
           bellBtn.href = '#';
+          bellBtn.id = 'bellNavBtn';
           bellBtn.className = 'btn btn-outline';
           bellBtn.style.cssText = 'padding: 8px 15px; border-radius: 20px;';
           bellBtn.innerHTML = '<i class="fas fa-bell"></i>';
