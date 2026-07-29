@@ -232,16 +232,19 @@
 /* Responsive */
 @media (max-width: 992px) {
   .sidebar {
-    right: -110%;
-    transform: none !important;
+    transform: translateX(120%);
     width: clamp(250px, 75vw, 320px);
     box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
-    z-index: 99999 !important; /* Ensure it is above the overlay */
-    transition: right 0.3s ease-in-out;
+    z-index: 999999 !important; /* Extremely high z-index */
+    transition: transform 0.3s ease-in-out;
+    visibility: hidden;
   }
   
   .sidebar.active {
-    right: 0 !important;
+    transform: translateX(0) !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    display: block !important;
   }
   
   .sidebar-overlay {
