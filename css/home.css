@@ -271,6 +271,7 @@ img.teacher-fg-img.pop-out {
   transform: translate(var(--tx, 0), var(--ty, 0)) scale(1);
   z-index: 2;
   word-break: break-word;
+  overflow: hidden;
 }
 
 .feature-node:hover {
@@ -281,8 +282,14 @@ img.teacher-fg-img.pop-out {
 
 .feature-node h4 {
   color: var(--soft-gold);
-  font-size: 1rem;
+  font-size: 0.85rem;
   margin: 0;
+  width: 100%;
+  white-space: pre-wrap !important;
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+  word-break: break-word !important;
+  line-height: 1.4;
 }
 
 /* About Teacher */
@@ -393,7 +400,7 @@ img.teacher-fg-img.pop-out {
   }
   
   .feature-node h4 {
-    font-size: 0.85rem;
+    font-size: 0.75rem;
   }
   
   .feature-node:hover {
