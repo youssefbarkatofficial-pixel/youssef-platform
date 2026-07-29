@@ -717,55 +717,95 @@ img, video {
     flex-shrink: 0;
   }
 
-  /* Optimize buttons for mobile to match pre-login layout (2 text buttons max) */
-  #ytNavBtn .desktop-text {
-    display: none !important;
-  }
-  #ytNavBtn .mobile-icon {
-    display: inline-block !important;
-    margin: 0 !important;
-    font-size: 1.1rem !important;
+  /* Universal Scaling for Mobile - Everything fits on one line */
+  .navbar {
+    padding: 0.5rem 2% !important;
+    gap: 2px !important;
+    flex-wrap: nowrap !important;
   }
   
-  #logoutBtn .desktop-text {
-    display: inline-block !important; /* Keep Logout as text */
-  }
-  #logoutBtn .mobile-icon {
-    display: none !important;
-  }
-
-  /* Hide Bell and Profile on mobile to save space so Dashboard and Logout fit perfectly */
-  #profileNavBtn,
-  #bellNavBtn {
-    display: none !important;
-  }
-
-  .nav-actions .btn:not(#themeToggle) {
-    padding: 6px 12px !important;
-    font-size: 0.85rem !important;
-    flex-shrink: 0;
-  }
-  .nav-links a {
-    font-size: 0.95rem;
-  }
-
-  .btn:not(.nav-actions .btn):not(.close-modal):not(.notif-filter-btn) {
-    width: 100%;
-    text-align: center;
-    margin-bottom: 10px;
+  .nav-brand {
+    gap: 5px !important;
   }
   
-  /* Typography tweaks */
-  .heading-luxury {
-    font-size: clamp(10px, 3.8vw, 1.8rem) !important;
+  .nav-brand-text {
+    font-size: clamp(10px, 3.5vw, 1.2rem) !important;
     white-space: nowrap !important;
   }
-  h2 {
-    font-size: clamp(1.4rem, 6vw, 2rem);
+  
+  .logo-circle {
+    width: clamp(25px, 8vw, 40px) !important;
+    height: clamp(25px, 8vw, 40px) !important;
   }
-  h3 {
-    font-size: clamp(1.15rem, 5vw, 1.5rem);
+  
+  .logo-circle span {
+    font-size: clamp(1rem, 4vw, 1.5rem) !important;
   }
+
+  .nav-actions {
+    gap: 3px !important;
+    flex-wrap: nowrap !important;
+    overflow: visible !important;
+  }
+
+  /* Make buttons fully responsive, shrink padding and font instead of hiding */
+  .nav-actions .btn {
+    padding: clamp(3px, 1vw, 8px) clamp(5px, 1.5vw, 12px) !important;
+    font-size: clamp(9px, 2.5vw, 0.9rem) !important;
+    white-space: nowrap !important;
+    border-radius: 15px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 3px !important;
+  }
+  
+  .nav-actions .btn i {
+    font-size: clamp(10px, 3vw, 1.1rem) !important;
+    margin: 0 !important;
+  }
+  
+  .nav-actions .btn .desktop-text,
+  .nav-actions .btn span {
+    display: inline-block !important;
+    font-size: clamp(9px, 2.5vw, 0.9rem) !important;
+  }
+
+  /* Don't hide ANY buttons on mobile! Show them all but scaled down */
+  #ytNavBtn .mobile-icon {
+    display: none !important;
+  }
+  #profileNavBtn,
+  #bellNavBtn {
+    display: flex !important;
+  }
+
+  #themeToggle {
+    width: clamp(25px, 7vw, 40px) !important;
+    height: clamp(25px, 7vw, 40px) !important;
+    padding: 0 !important;
+  }
+
+  /* Typography tweaks - fully fluid and one line */
+  .heading-luxury,
+  h1, h2, h3, h4, 
+  .course-card h3,
+  .course-title,
+  .dashboard-card h3 {
+    white-space: nowrap !important;
+    font-size: clamp(10px, 3.5vw, 1.5rem) !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+  
+  /* specifically for course details page title to make sure it is legible */
+  #cdTitle {
+     font-size: clamp(12px, 4vw, 2rem) !important;
+     white-space: nowrap !important;
+     text-overflow: ellipsis !important;
+     overflow: hidden !important;
+  }
+
   /* Modals */
   .modal-content {
     padding: 20px 15px;
