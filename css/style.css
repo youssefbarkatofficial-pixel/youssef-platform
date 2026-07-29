@@ -716,35 +716,27 @@ img, video {
   /* Removed universal scaling blocks that break preloader */
   
   .navbar .nav-actions .btn:not(#themeToggle) {
-    padding: 6px 12px !important;
-    font-size: 0.8rem !important;
-  }
-    overflow: visible !important;
-  }
-
-  /* Make buttons fully responsive, shrink padding and font instead of hiding */
-  .nav-actions .btn {
-    padding: clamp(3px, 1vw, 8px) clamp(5px, 1.5vw, 12px) !important;
-    font-size: clamp(9px, 2.5vw, 0.9rem) !important;
-    white-space: nowrap !important;
-    border-radius: 15px !important;
+    padding: 4px 6px !important;
+    font-size: 0.7rem !important;
+    border-radius: 12px !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    gap: 3px !important;
+    gap: 4px !important;
+    white-space: nowrap !important;
   }
   
   .nav-actions .btn i {
-    font-size: clamp(10px, 3vw, 1.1rem) !important;
+    font-size: 0.9rem !important;
     margin: 0 !important;
   }
   
   .nav-actions .btn .desktop-text,
   .nav-actions .btn span:not(#notifBadge) {
-    display: none !important;
+    display: inline-block !important;
+    font-size: 0.7rem !important;
   }
 
-  /* Don't hide ANY buttons on mobile! Wait, user requested to hide them again to save space */
   #ytNavBtn .mobile-icon {
     display: none !important;
   }
