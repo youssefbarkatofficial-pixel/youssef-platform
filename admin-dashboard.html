@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <script>
         if (!sessionStorage.getItem('currentAdmin')) { window.location.replace('admin-login.html'); }
-        else { document.documentElement.style.display = 'none'; }
     </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>لوحة الإدارة | يوسف بركات</title>
@@ -698,43 +697,15 @@
             }
 
             // Real Stats Calculation
-            async function calculateStats() {
+            function calculateStats() {
                 let users = JSON.parse(localStorage.getItem('strictUsers') || '[]');
                 
-                // Try fetch from Firebase for real sync
-                if (window.FirebaseService && typeof window.FirebaseService.isReady === 'function' && window.FirebaseService.isReady()) {
-                    try {
-                        const snap = await window.firebaseDb.collection('students').get();
-                        let remoteUsers = [];
-                        snap.forEach(doc => {
-                            const data = doc.data();
-                            if (!data.phone || data.phone === 'undefined' || !data.name || data.name === 'undefined' || data.role === 'admin') return;
-                            remoteUsers.push(data);
-                        });
-                        if (remoteUsers.length > 0) {
-                            users = remoteUsers;
-                            localStorage.setItem('strictUsers', JSON.stringify(users));
-                            localStorage.setItem('cached_students', JSON.stringify(users));
-                        }
-                    } catch(e) { console.error('Error fetching students for stats', e); }
-                }
-
                 let totalSubs = 0;
                 let totalRev = 0;
                 
                 for (let u of users) {
-                    let db = JSON.parse(localStorage.getItem('db_' + u.phone) || '{}');
-                    if (window.FirebaseService && window.FirebaseService.getUser) {
-                        try {
-                            const remoteDb = await window.FirebaseService.getUser(u.phone);
-                            if (remoteDb) {
-                                db = remoteDb;
-                                localStorage.setItem('db_' + u.phone, JSON.stringify(db));
-                            }
-                        } catch(e) {}
-                    }
-                    if (db && db.courses) {
-                        totalSubs += db.courses.length;
+                    if (u && u.courses && Array.isArray(u.courses)) {
+                        totalSubs += u.courses.length;
                     }
                 }
                 
@@ -873,6 +844,7 @@
             function renderPayments() {
                 // async render to support fetching proof images from IndexedDB
                 async function fetchProofImage(req) {
+                    if (req.proofImageUrl) return req.proofImageUrl;
                     if (req.proofImage) return req.proofImage;
                     if (req.proofImageKey) {
                         return new Promise((resolve) => {
@@ -893,6 +865,8 @@
                         const doc = await window.firebaseDb.collection('paymentRequests').doc(req.id).get();
                         if (doc.exists && doc.data().proofImage) {
                             return doc.data().proofImage;
+                        } else if (doc.exists && doc.data().proofImageUrl) {
+                            return doc.data().proofImageUrl;
                         }
                     } catch(e) {}
                     
@@ -989,22 +963,11 @@
 
             renderPayments();
 
-            // Helper to download proof images (supports dataURLs and remote URLs)
-            window.downloadProof = function(src, filename) {
+            window.downloadProof = async function(src, filename) {
                 if (!src) return alert('لا توجد صورة للتحميل');
                 try {
-                    const a = document.createElement('a');
-                    a.href = src;
-                    a.download = filename || 'proof.png';
-                    document.body.appendChild(a);
-                    a.click();
-                    a.remove();
-                    return;
-                } catch (e) {
-                    // fallback to fetch blob then download
-                }
-
-                fetch(src).then(r => r.blob()).then(blob => {
+                    const r = await fetch(src, { mode: 'cors' });
+                    const blob = await r.blob();
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.href = url;
@@ -1013,10 +976,10 @@
                     a.click();
                     a.remove();
                     setTimeout(() => URL.revokeObjectURL(url), 5000);
-                }).catch(err => {
-                    console.warn('downloadProof failed', err);
-                    alert('تعذر تنزيل الصورة');
-                });
+                } catch(e) {
+                    console.warn('Download fetch failed, opening in new tab', e);
+                    window.open(src, '_blank');
+                }
             };
 
             const btnRefreshPayments = document.getElementById('btnRefreshPayments');
@@ -1052,22 +1015,23 @@
                         localStorage.setItem(`db_${userId}`, JSON.stringify(dbUser));
                         localStorage.setItem('paymentRequests', JSON.stringify(paymentRequests));
 
-                        // Sync to Firestore
+                        // Sync to Firestore in the background (Optimistic UI)
                         if (window.FirebaseService && typeof window.FirebaseService.isReady === 'function' && window.FirebaseService.isReady()) {
-                            try {
-                                await window.FirebaseService.updatePaymentStatus(id, 'approved');
-                                await window.FirebaseService.addCourseToStudent(userId, courseId);
-                                await window.FirebaseService.addNotificationToStudent(userId, {
+                            Promise.all([
+                                window.FirebaseService.updatePaymentStatus(id, 'approved'),
+                                window.FirebaseService.addCourseToStudent(userId, courseId),
+                                window.FirebaseService.addNotificationToStudent(userId, {
                                     title: 'تم قبول اشتراكك بنجاح 🎉',
                                     message: `تهانينا! تم تفعيل كورس "${courseName}" بنجاح. يمكنك الآن بدء المذاكرة.`,
                                     courseId: courseId
-                                });
-                            } catch(e) { console.warn('Firebase sync failed for payment approval', e); }
+                                })
+                            ]).catch(e => console.warn('Background sync warning (approve):', e));
                         }
+
+                        if(window.showToast) window.showToast('تم قبول الطلب وتفعيل الكورس للطالب ✅', 'success');
 
                         renderPayments();
                         calculateStats();
-                        if(window.showToast) window.showToast('تم قبول الطلب وتفعيل الكورس للطالب ✅', 'success');
                     }
                 }
             };
@@ -1075,30 +1039,43 @@
             window.rejectPayment = async function(id) {
                 if(!confirm('هل أنت متأكد من رفض هذا الطلب؟')) return;
                 
-                if (window.FirebaseService && typeof window.FirebaseService.isReady === 'function' && window.FirebaseService.isReady()) {
-                    try {
-                        let paymentRequests = JSON.parse(localStorage.getItem('paymentRequests') || '[]');
-                        const reqIndex = paymentRequests.findIndex(r => r.id === id);
-                        if(reqIndex > -1) {
-                            const userId = paymentRequests[reqIndex].userId;
-                            const courseId = paymentRequests[reqIndex].courseId;
-                            
-                            await window.FirebaseService.updatePaymentStatus(id, 'rejected');
-                            
-                            await window.FirebaseService.addNotificationToStudent(userId, {
-                                title: 'مشكلة في تأكيد الدفع ⚠️',
-                                message: 'حدثت مشكلة في تأكيد الدفع أو صورة التحويل غير واضحة. يرجى إعادة رفع صورة التحويل.',
-                                type: 'error',
-                                link: '/course-details.html?id=' + courseId,
-                                courseId: courseId,
-                                read: false
-                            });
-                            
-                            if(window.showToast) window.showToast('تم رفض الطلب بنجاح', 'error');
-                        }
-                    } catch(e) { console.warn('Firebase sync failed for payment rejection', e); }
-                } else {
-                    if(window.showToast) window.showToast('يرجى انتظار تحميل السحابة', 'error');
+                let paymentRequests = JSON.parse(localStorage.getItem('paymentRequests') || '[]');
+                const reqIndex = paymentRequests.findIndex(r => r.id === id);
+                if(reqIndex > -1) {
+                    const userId = paymentRequests[reqIndex].userId;
+                    const courseId = paymentRequests[reqIndex].courseId;
+                    const courseName = (adminCourses.find(c => c.id === courseId) || {}).title || courseId;
+
+                    // Update local cache
+                    paymentRequests[reqIndex].status = 'rejected';
+                    localStorage.setItem('paymentRequests', JSON.stringify(paymentRequests));
+                    
+                    let dbUser = JSON.parse(localStorage.getItem(`db_${userId}`)) || { courses: [], notifications: [] };
+                    if(!dbUser.notifications) dbUser.notifications = [];
+                    dbUser.notifications.push({
+                        title: 'تم رفض اشتراكك ❌',
+                        message: `عذراً، تم رفض اشتراكك في كورس "${courseName}". يرجى مراجعة الدعم الفني.`,
+                        timestamp: new Date().toISOString(),
+                        read: false
+                    });
+                    localStorage.setItem(`db_${userId}`, JSON.stringify(dbUser));
+
+                    // Sync to Firestore in the background
+                    if (window.FirebaseService && typeof window.FirebaseService.isReady === 'function' && window.FirebaseService.isReady()) {
+                        Promise.all([
+                            window.FirebaseService.updatePaymentStatus(id, 'rejected'),
+                            window.FirebaseService.addNotificationToStudent(userId, {
+                                title: 'تم رفض اشتراكك ❌',
+                                message: `عذراً، تم رفض اشتراكك في كورس "${courseName}". يرجى مراجعة بيانات الدفع والتواصل مع الدعم الفني.`,
+                                courseId: courseId
+                            })
+                        ]).catch(e => console.warn('Background sync warning (reject):', e));
+                    }
+
+                    if(window.showToast) window.showToast('تم رفض الطلب ❌', 'success');
+
+                    renderPayments();
+                    calculateStats();
                 }
             };
 

@@ -24,13 +24,14 @@
 }
 
 .hero-content .heading-luxury {
-  white-space: nowrap;
-  overflow-wrap: normal;
+  white-space: normal;
+  overflow-wrap: break-word;
   text-align: center !important;
   width: 100% !important;
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto;
 }
 
 .hero-subtitle {
@@ -256,9 +257,9 @@ img.teacher-fg-img.pop-out {
 
 .feature-node {
   position: absolute;
-  width: 150px;
-  height: 150px;
-  padding: 10px;
+  width: 170px;
+  height: 170px;
+  padding: 12px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -272,8 +273,8 @@ img.teacher-fg-img.pop-out {
   transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.4s ease;
   top: 50%;
   left: 50%;
-  margin-top: -75px; /* half height */
-  margin-left: -75px; /* half width */
+  margin-top: -85px; /* half height */
+  margin-left: -85px; /* half width */
   transform: translate(var(--tx, 0), var(--ty, 0)) scale(1);
   z-index: 2;
   word-break: break-word;
@@ -446,11 +447,11 @@ img.teacher-fg-img.pop-out {
   }
   
   .feature-node {
-    width: 95px;
-    height: 95px;
-    margin-top: -47.5px;
-    margin-left: -47.5px;
-    padding: 6px;
+    width: 110px;
+    height: 110px;
+    margin-top: -55px;
+    margin-left: -55px;
+    padding: 8px;
   }
   
   .feature-node i {
@@ -459,7 +460,7 @@ img.teacher-fg-img.pop-out {
   }
   
   .feature-node h4 {
-    font-size: 0.65rem !important;
+    font-size: 0.75rem !important;
     line-height: 1.2;
     padding: 0 2px;
   }

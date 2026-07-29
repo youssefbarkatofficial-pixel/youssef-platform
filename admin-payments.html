@@ -3,7 +3,6 @@
 <head>
     <script>
         if (!sessionStorage.getItem('currentAdmin')) { window.location.replace('admin-login.html'); }
-        else { document.documentElement.style.display = 'none'; }
     </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -189,14 +188,34 @@
 
             async function renderPayments() {
                 async function fetchProofImage(req) {
-                    if (req.proofImage) {
-                        return req.proofImage;
-                    } else if (req.proofImageKey) {
-                        return `https://res.cloudinary.com/dvfe2oas8/image/upload/v1724626154/${req.proofImageKey}`;
-                    } else {
+                    if (req.proofImageUrl) return req.proofImageUrl;
+                    if (req.proofImage) return req.proofImage;
+                    
+                    if (req.proofImageKey) {
+                        return new Promise((resolve) => {
+                            const request = indexedDB.open('platformPaymentDB', 1);
+                            request.onsuccess = function() {
+                                const db = request.result;
+                                if (!db.objectStoreNames.contains('paymentProofs')) {
+                                    resolve(`https://res.cloudinary.com/dvfe2oas8/image/upload/v1724626154/${req.proofImageKey}`);
+                                    return;
+                                }
+                                const tx = db.transaction('paymentProofs', 'readonly');
+                                const store = tx.objectStore('paymentProofs');
+                                const getReq = store.get(req.proofImageKey);
+                                getReq.onsuccess = function() { resolve(getReq.result ? getReq.result.dataUrl : `https://res.cloudinary.com/dvfe2oas8/image/upload/v1724626154/${req.proofImageKey}`); };
+                                getReq.onerror = function() { resolve(`https://res.cloudinary.com/dvfe2oas8/image/upload/v1724626154/${req.proofImageKey}`); };
+                            };
+                            request.onerror = function() { resolve(`https://res.cloudinary.com/dvfe2oas8/image/upload/v1724626154/${req.proofImageKey}`); };
+                        });
+                    }
+
+                    if (window.firebaseDb && req.id) {
                         try {
                             const doc = await window.firebaseDb.collection('paymentRequests').doc(req.id).get();
-                            if (doc.exists && doc.data().proofImage) {
+                            if (doc.exists && doc.data().proofImageUrl) {
+                                return doc.data().proofImageUrl;
+                            } else if (doc.exists && doc.data().proofImage) {
                                 return doc.data().proofImage;
                             }
                         } catch(e) {}

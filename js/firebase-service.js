@@ -446,7 +446,10 @@ window.FirebaseService = (function () {
             if (!snap.empty) {
                 await snap.docs[0].ref.update(updates);
             }
-        } catch (e) { console.warn('updateStudentData failed', e); }
+        } catch (e) { 
+            console.warn('updateStudentData failed', e); 
+            throw e;
+        }
         return cached;
     }
 
@@ -589,7 +592,10 @@ window.FirebaseService = (function () {
         if (!isFirebaseReady()) return;
         try {
             await getDb().collection('paymentRequests').doc(id).update({ status });
-        } catch (e) { console.warn('updatePaymentStatus failed', e); }
+        } catch (e) { 
+            console.warn('updatePaymentStatus failed', e); 
+            throw e;
+        }
     }
 
     // ============================================================

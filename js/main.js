@@ -158,15 +158,23 @@ document.addEventListener('DOMContentLoaded', () => {
     
     if (mobileBtn) {
         if (window.audioManager) window.audioManager.play('menuOpen');
-        if (navLinks) navLinks.classList.toggle('active');
-        if (sidebar) sidebar.classList.toggle('active');
+        if (navLinks) {
+            navLinks.classList.toggle('active');
+            document.body.style.overflow = navLinks.classList.contains('active') ? 'hidden' : '';
+        }
+        if (sidebar) {
+            sidebar.classList.toggle('active');
+            if(!navLinks) document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';
+        }
     } else {
         // Close if clicked outside
         if (navLinks && navLinks.classList.contains('active') && !e.target.closest('.nav-links')) {
             navLinks.classList.remove('active');
+            document.body.style.overflow = '';
         }
         if (sidebar && sidebar.classList.contains('active') && !e.target.closest('.sidebar') && !e.target.closest('.mobile-menu-btn')) {
             sidebar.classList.remove('active');
+            document.body.style.overflow = '';
         }
     }
   });
@@ -1059,6 +1067,9 @@ document.addEventListener('DOMContentLoaded', () => {
                   }
               }
           });
+          
+          // Floating notification bell removed per user request (prefers top navbar)
+
       }, 150);
       // If redirected here from an approval notification, show fireworks on course page
       try {
@@ -1123,11 +1134,17 @@ document.addEventListener('DOMContentLoaded', () => {
       
       // Calculate position
       const rect = bellBtn.getBoundingClientRect();
-      const leftPos = Math.max(10, rect.left - 150); // prevent going off left edge
+      const leftPos = Math.max(10, Math.min(rect.left - 150, window.innerWidth - 330)); 
+      
+      let topPos = rect.bottom + 15;
+      if (topPos + 400 > window.innerHeight) {
+          topPos = rect.top - 415; // show above if not enough space below
+      }
+      if (topPos < 10) topPos = 10;
       
       dropdown.style.cssText = `
           position: fixed;
-          top: ${rect.bottom + 15}px;
+          top: ${topPos}px;
           left: ${leftPos}px;
           width: 320px;
           max-height: 400px;
@@ -1195,7 +1212,7 @@ document.addEventListener('DOMContentLoaded', () => {
           } else {
                   filtered.forEach(n => {
                   const targetId = n.courseId || n.targetCourseId || null;
-                  const targetAttr = targetId ? `data-course-id="${targetId}"` : '';
+                  const targetAttr = targetId ? `data-course-id="${targetId}" data-notif-title="${n.title.replace(/"/g, '&quot;')}"` : '';
                   const clickableStyle = targetId ? 'cursor:pointer;' : '';
                   const d = new Date(n.timestamp || n.date || Date.now());
                   container.innerHTML += `
@@ -1213,7 +1230,14 @@ document.addEventListener('DOMContentLoaded', () => {
               clickableItems.forEach(item => {
                   item.addEventListener('click', () => {
                       const courseId = item.getAttribute('data-course-id');
-                      if (courseId) window.openApprovedCourseNotification(courseId);
+                      const title = item.getAttribute('data-notif-title') || '';
+                      if (courseId) {
+                          if (title.includes('قبول') || title.includes('تفعيل') || title.includes('مبروك') || title.includes('نجاح')) {
+                              window.openApprovedCourseNotification(courseId);
+                          } else {
+                              window.location.href = `courses.html?highlight=${encodeURIComponent(courseId)}`;
+                          }
+                      }
                   });
               });
           }
@@ -1368,24 +1392,21 @@ document.addEventListener('DOMContentLoaded', () => {
                                       localStorage.setItem('currentStudent', JSON.stringify(remoteUser));
                                   }
                                   
-                                  // Auto-clear rejected pending requests
+                                  // Auto-clear rejected pending requests reliably
                                   try {
-                                      if (localNotifs.length < remoteNotifs.length) {
-                                          let hasRejection = false;
-                                          const newNotifs = remoteNotifs.slice(0, remoteNotifs.length - localNotifs.length); // assuming appended, or just check all
-                                          let pReqs = JSON.parse(localStorage.getItem('paymentRequests') || '[]');
-                                          remoteNotifs.forEach(n => {
-                                              if (n.title && n.title.includes('مشكلة في تأكيد الدفع')) {
-                                                  const idx = pReqs.findIndex(r => r.courseId === n.courseId && r.status === 'pending');
-                                                  if (idx > -1) {
-                                                      pReqs[idx].status = 'rejected';
-                                                      hasRejection = true;
-                                                  }
+                                      let hasRejection = false;
+                                      let pReqs = JSON.parse(localStorage.getItem('paymentRequests') || '[]');
+                                      remoteNotifs.forEach(n => {
+                                          if (n.title && n.title.includes('مشكلة في تأكيد الدفع')) {
+                                              const idx = pReqs.findIndex(r => r.courseId === n.courseId && r.status === 'pending');
+                                              if (idx > -1) {
+                                                  pReqs[idx].status = 'rejected';
+                                                  hasRejection = true;
                                               }
-                                          });
-                                          if (hasRejection) {
-                                              localStorage.setItem('paymentRequests', JSON.stringify(pReqs));
                                           }
+                                      });
+                                      if (hasRejection) {
+                                          localStorage.setItem('paymentRequests', JSON.stringify(pReqs));
                                       }
                                   } catch(e) {}
                                   
@@ -1402,7 +1423,6 @@ document.addEventListener('DOMContentLoaded', () => {
                                           try { window.audioManager.play('whatsapp'); } catch(e){}
                                       }
                                       // If rejection was processed, we might want to reload to show the subscribe button again
-                                      let pReqs = JSON.parse(localStorage.getItem('paymentRequests') || '[]');
                                       if (remoteNotifs.some(n => n.title && n.title.includes('مشكلة في تأكيد الدفع') && !n.read)) {
                                           if (window.location.pathname.includes('courses.html') || window.location.pathname.includes('course-details.html')) {
                                               setTimeout(() => window.location.reload(), 1500);

@@ -213,15 +213,25 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
 
                 if (n.courseId) {
-                  try { if (window.triggerConfetti) window.triggerConfetti(); } catch(e){}
-                  try { if (window.showToast) window.showToast('تهانينا! تم تفعيل كورسك. توجه الآن لمحتوى الكورس.', 'majestic', { title: '🎉 مبروك!', duration: 4500, isMajestic: true, playSound: 'celebration' }); } catch(e){}
-                  try { 
-                      if (!localStorage.getItem('has_celebrated_' + n.courseId)) {
-                          sessionStorage.setItem('celebrate_course_' + n.courseId, '1'); 
-                          localStorage.setItem('has_celebrated_' + n.courseId, '1');
-                      }
-                  } catch(e){}
-                  window.location.href = `courses.html?highlight=${encodeURIComponent(n.courseId)}`;
+                  const isPositive = n.title && (n.title.includes('قبول') || n.title.includes('تفعيل') || n.title.includes('مبروك') || n.title.includes('نجاح'));
+                  
+                  if (isPositive) {
+                      try { if (window.triggerConfetti) window.triggerConfetti(); } catch(e){}
+                      try { if (window.showToast) window.showToast('تهانينا! تم تفعيل كورسك. توجه الآن لمحتوى الكورس.', 'majestic', { title: '🎉 مبروك!', duration: 4500, isMajestic: true, playSound: 'celebration' }); } catch(e){}
+                      try { 
+                          if (!localStorage.getItem('has_celebrated_' + n.courseId)) {
+                              sessionStorage.setItem('celebrate_course_' + n.courseId, '1'); 
+                              localStorage.setItem('has_celebrated_' + n.courseId, '1');
+                          }
+                      } catch(e){}
+                  } else {
+                      // Negative or generic notification
+                      try { if (window.showToast) window.showToast(n.message || 'يرجى مراجعة حالة الكورس', n.title && n.title.includes('مشكلة') ? 'error' : 'info'); } catch(e){}
+                  }
+                  
+                  setTimeout(() => {
+                      window.location.href = `courses.html?highlight=${encodeURIComponent(n.courseId)}`;
+                  }, isPositive ? 1500 : 500);
                 } else {
                   try { if (window.showToast) window.showToast(n.message || 'تم استلام الإشعار', 'success', { playSound: 'notifArrive' }); } catch(e){}
                 }
@@ -454,6 +464,20 @@ document.addEventListener('DOMContentLoaded', async () => {
       const proofImageKey = 'proof_' + Date.now() + '_' + encodeURIComponent(user.phone);
       await savePaymentProofImage(proofImageKey, proofImageBase64);
 
+      let proofImageUrl = null;
+      if (window.firebase && window.firebase.storage) {
+          try {
+              const response = await fetch(proofImageBase64);
+              const blob = await response.blob();
+              const storageRef = window.firebase.storage().ref().child(`payment_proofs/${proofImageKey}.jpg`);
+              const snapshot = await storageRef.put(blob);
+              proofImageUrl = await snapshot.ref.getDownloadURL();
+              console.log('[UPLOAD] Image uploaded to Storage:', proofImageUrl);
+          } catch(e) {
+              console.error('Failed to upload to Firebase Storage', e);
+          }
+      }
+
       let courseName = 'غير معروف';
       const cTitleEl = document.querySelector(`.course-card[data-course-id="${courseId}"] .course-title`);
       if (cTitleEl) courseName = cTitleEl.innerText;
@@ -466,6 +490,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         userPhone: user.phone,
         userEmail: user.email || `${user.phone}@student.youssefbarakat.com`,
         proofImageKey: proofImageKey,
+        proofImageUrl: proofImageUrl,
         proofImage: proofImageBase64
       };
 

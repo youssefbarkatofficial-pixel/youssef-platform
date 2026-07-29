@@ -1,9 +1,8 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <script>
         if (!sessionStorage.getItem('currentAdmin')) { window.location.replace('admin-login.html'); }
-        else { document.documentElement.style.display = 'none'; }
     </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -271,6 +270,7 @@
                 hasUnsavedChanges = false;
                 
                 let dbUser = JSON.parse(localStorage.getItem(`db_${phone}`)) || { courses: [] };
+                window.originalStudentCourses = [...(dbUser.courses || [])];
                 tempStudentCourses = [...(dbUser.courses || [])];
 
                 document.getElementById('studentNameTitle').textContent = `إدارة الطالب: ${student.name}`;
@@ -389,31 +389,78 @@
                 document.getElementById('confirmSaveModal').style.display = 'none';
             });
 
-            document.getElementById('btnConfirmSaveYes').addEventListener('click', () => {
+            document.getElementById('btnConfirmSaveYes').addEventListener('click', async () => {
                 if(currentStudentPhone) {
+                    const student = users.find(u => u.phone === currentStudentPhone);
                     let dbUser = JSON.parse(localStorage.getItem(`db_${currentStudentPhone}`)) || { courses: [] };
+                    const oldCourses = window.originalStudentCourses || [];
                     dbUser.courses = [...tempStudentCourses];
                     localStorage.setItem(`db_${currentStudentPhone}`, JSON.stringify(dbUser));
+                    
+                    const newlyAdded = tempStudentCourses.filter(c => !oldCourses.includes(c));
+                    
+                    if (window.FirebaseService && typeof window.FirebaseService.updateStudentData === 'function') {
+                        try {
+                            await window.FirebaseService.updateStudentData(currentStudentPhone, { courses: dbUser.courses });
+                        } catch(e) { console.error('Failed to sync student courses', e); }
+                    }
+                    
+                    // Create auto-approved payment requests for newly added courses
+                    if (newlyAdded.length > 0) {
+                        let paymentRequests = JSON.parse(localStorage.getItem('paymentRequests') || '[]');
+                        let notifications = dbUser.notifications || [];
+                        
+                        for (const cId of newlyAdded) {
+                            const courseInfo = adminCourses.find(c => c.id === cId);
+                            const reqId = 'auto_admin_' + Date.now() + '_' + Math.floor(Math.random()*1000);
+                            const req = {
+                                id: reqId,
+                                userId: currentStudentPhone,
+                                userPhone: currentStudentPhone,
+                                userName: student ? student.name : 'طالب',
+                                courseId: cId,
+                                status: 'approved',
+                                price: 0,
+                                isFree: true,
+                                approvedByAdmin: true,
+                                archived_revenue: true,
+                                createdAt: new Date().toISOString(),
+                                timestamp: Date.now()
+                            };
+                            paymentRequests.push(req);
+                            
+                            // Send notification
+                            notifications.push({
+                                id: 'notif_' + Date.now() + Math.random(),
+                                title: 'تم تفعيل كورس جديد',
+                                message: `تم تفعيل كورس ${courseInfo ? courseInfo.title : ''} لك مجاناً من قبل الإدارة. نتمنى لك التوفيق!`,
+                                date: new Date().toISOString(),
+                                read: false
+                            });
+                            
+                            // Upload to Firebase if possible
+                            if (window.firebaseDb) {
+                                try {
+                                    await window.firebaseDb.collection('paymentRequests').doc(reqId).set(req);
+                                } catch(e) {}
+                            }
+                        }
+                        
+                        localStorage.setItem('paymentRequests', JSON.stringify(paymentRequests));
+                        dbUser.notifications = notifications;
+                        localStorage.setItem(`db_${currentStudentPhone}`, JSON.stringify(dbUser));
+                        
+                        if (window.FirebaseService && typeof window.FirebaseService.updateStudentData === 'function') {
+                             try { await window.FirebaseService.updateStudentData(currentStudentPhone, { notifications: dbUser.notifications }); } catch(e){}
+                        }
+                    }
                     
                     hasUnsavedChanges = false;
                     document.getElementById('confirmSaveModal').style.display = 'none';
                     document.getElementById('studentEditorModal').style.display = 'none';
                     renderStudentsTable();
-                    if(window.showToast) window.showToast('تم حفظ التعديلات للطالب بنجاح', 'success');
-                }
-            });
-
-            document.getElementById('btnConfirmSaveYes').addEventListener('click', () => {
-                if(currentStudentPhone) {
-                    let dbUser = JSON.parse(localStorage.getItem(`db_${currentStudentPhone}`)) || { courses: [] };
-                    dbUser.courses = [...tempStudentCourses];
-                    localStorage.setItem(`db_${currentStudentPhone}`, JSON.stringify(dbUser));
-                    
-                    hasUnsavedChanges = false;
-                    document.getElementById('confirmSaveModal').style.display = 'none';
-                    document.getElementById('studentEditorModal').style.display = 'none';
-                    renderStudentsTable();
-                    if(window.showToast) window.showToast('تم حفظ التعديلات للطالب بنجاح', 'success');
+                    if(window.showToast) window.showToast('تم تفعيل الكورسات للطالب بنجاح', 'success');
+                    else alert('تم تفعيل الكورسات للطالب بنجاح');
                 }
             });
 

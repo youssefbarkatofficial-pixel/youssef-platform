@@ -749,10 +749,7 @@ img, video {
   #ytNavBtn .mobile-icon {
     display: none !important;
   }
-  #profileNavBtn,
-  #bellNavBtn {
-    display: none !important;
-  }
+  /* Profile and Bell must be visible for students */
 
   #themeToggle {
     width: clamp(25px, 7vw, 40px) !important;
