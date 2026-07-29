@@ -25,6 +25,11 @@
 .hero-content .heading-luxury {
   white-space: nowrap;
   overflow-wrap: normal;
+  text-align: center !important;
+  width: 100% !important;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .hero-subtitle {
@@ -250,9 +255,9 @@ img.teacher-fg-img.pop-out {
 
 .feature-node {
   position: absolute;
-  width: 190px;
-  height: 190px;
-  padding: 15px;
+  width: 170px;
+  height: 170px;
+  padding: 10px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -266,8 +271,8 @@ img.teacher-fg-img.pop-out {
   transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.4s ease;
   top: 50%;
   left: 50%;
-  margin-top: -95px; /* half height */
-  margin-left: -95px; /* half width */
+  margin-top: -85px; /* half height */
+  margin-left: -85px; /* half width */
   transform: translate(var(--tx, 0), var(--ty, 0)) scale(1);
   z-index: 2;
   word-break: break-word;
@@ -358,6 +363,7 @@ img.teacher-fg-img.pop-out {
   .hero-container {
     grid-template-columns: 1fr;
     text-align: center;
+    justify-items: center;
   }
   
   .hero-btns {
@@ -443,11 +449,11 @@ img.teacher-fg-img.pop-out {
     height: 110px;
     margin-top: -55px;
     margin-left: -55px;
-    padding: 5px;
+    padding: 8px;
   }
   
   .feature-node i {
-    font-size: 1.2rem !important;
+    font-size: 1.1rem !important;
     margin-bottom: 2px !important;
   }
   
