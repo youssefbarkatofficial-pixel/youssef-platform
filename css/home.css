@@ -437,31 +437,31 @@ img.teacher-fg-img.pop-out {
     padding-top: 220px;
   }
   .features-circle-container {
-    width: 280px;
-    height: 280px;
+    width: 260px;
+    height: 260px;
   }
   
   .center-logo {
-    width: 80px;
-    height: 80px;
-    font-size: 1.2rem;
+    width: 70px;
+    height: 70px;
+    font-size: 1rem;
   }
   
   .feature-node {
-    width: 110px;
-    height: 110px;
-    margin-top: -55px;
-    margin-left: -55px;
-    padding: 8px;
+    width: 95px;
+    height: 95px;
+    margin-top: -47.5px;
+    margin-left: -47.5px;
+    padding: 6px;
   }
   
   .feature-node i {
-    font-size: 1rem !important;
+    font-size: 0.9rem !important;
     margin-bottom: 2px !important;
   }
   
   .feature-node h4 {
-    font-size: 0.75rem !important;
+    font-size: 0.65rem !important;
     line-height: 1.2;
     padding: 0 2px;
   }
