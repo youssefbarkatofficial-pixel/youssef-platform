@@ -540,7 +540,11 @@ function migrateCourseToSections(contents) {
     }
 
     if (sections.length === 0) {
-        sections.push({ id: 'sec_default', title: 'القسم الأول', items: [] });
+        sections = [
+            { id: 'sec_lectures', title: 'المحاضرات', items: [] },
+            { id: 'sec_homeworks', title: 'الواجبات', items: [] },
+            { id: 'sec_exams', title: 'الامتحانات', items: [] }
+        ];
     }
 
     return { sections: sections };
@@ -560,10 +564,13 @@ function renderContentLists() {
         secDiv.style.cssText = 'background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 20px; margin-bottom: 20px;';
         
         secDiv.innerHTML = `
-            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; margin-bottom: 15px;">
-                <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+                <div style="display: flex; align-items: center; gap: 10px; flex: 1; min-width: 250px;">
                     <i class="fas fa-folder-open text-gold" style="font-size: 1.5rem;"></i>
-                    <input type="text" value="${sec.title}" class="form-control" style="font-size: 1.2rem; font-weight: bold; background: transparent; border: none; color: var(--accent-cyan); width: 100%; max-width: 300px;" onchange="updateSectionTitle(${sIdx}, this.value)" placeholder="اسم القسم">
+                    <div style="position: relative; display: flex; align-items: center; width: 100%; max-width: 300px;">
+                        <input type="text" value="${sec.title}" class="form-control" style="font-size: 1.2rem; font-weight: bold; background: rgba(0,0,0,0.2); border: 1px dashed rgba(255,255,255,0.2); color: var(--accent-cyan); width: 100%; padding: 5px 35px 5px 10px; border-radius: 8px; transition: border 0.3s;" onfocus="this.style.border='1px solid var(--accent-cyan)'" onblur="this.style.border='1px dashed rgba(255,255,255,0.2)'" onchange="updateSectionTitle(${sIdx}, this.value)" placeholder="اسم القسم" title="اضغط لتعديل اسم القسم">
+                        <i class="fas fa-pen" style="position: absolute; right: 10px; color: rgba(255,255,255,0.4); font-size: 0.9rem; pointer-events: none;"></i>
+                    </div>
                 </div>
                 <div style="display: flex; gap: 10px;">
                     <button class="btn btn-outline" style="padding: 5px 12px; font-size: 0.85rem;" onclick="addSectionItem(${sIdx})"><i class="fas fa-plus"></i> إضافة محتوى</button>
@@ -687,8 +694,11 @@ function generateDependsOnOptions(currentSIdx, currentIIdx, selectedVal) {
 }
 
 window.addNewSection = function() {
+    const name = prompt('أدخل اسم القسم الجديد (مثال: محاضرة تعريفية، واجب متفوقين):', 'قسم جديد');
+    if (!name) return; // Cancelled
+    
     if(!tempContents.sections) tempContents.sections = [];
-    tempContents.sections.push({ id: 'sec_' + Date.now(), title: 'قسم جديد', items: [] });
+    tempContents.sections.push({ id: 'sec_' + Date.now(), title: name, items: [] });
     markUnsaved();
     renderContentLists();
 };
@@ -807,7 +817,11 @@ window.openCourseEditor = function(id = null) {
         document.getElementById('fcDesc').value = '';
         document.getElementById('fcImage').value = 'https://via.placeholder.com/400x250/071326/D4A64F?text=Course';
         document.getElementById('fcImagePreview').src = 'https://via.placeholder.com/400x250/071326/D4A64F?text=Course';
-        tempContents = { sections: [] };
+        tempContents = { sections: [
+            { id: 'sec_lectures', title: 'المحاضرات', items: [] },
+            { id: 'sec_homeworks', title: 'الواجبات', items: [] },
+            { id: 'sec_exams', title: 'الامتحانات', items: [] }
+        ] };
     }
     
     renderContentLists();
