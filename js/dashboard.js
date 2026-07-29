@@ -20,11 +20,16 @@ document.addEventListener('DOMContentLoaded', () => {
             toggleBtn.className = 'btn btn-outline mobile-only-btn';
             toggleBtn.style.cssText = 'border: none; font-size: 1.5rem; padding: 5px 10px; margin-right: auto; order: -1;';
             toggleBtn.innerHTML = '<i class="fas fa-bars"></i>';
-            toggleBtn.onclick = (e) => {
+            toggleBtn.addEventListener('click', (e) => {
                 e.preventDefault();
                 sidebar.classList.toggle('active');
+                if (sidebar.classList.contains('active')) {
+                    sidebar.style.cssText = 'right: 0 !important; visibility: visible !important; transform: none !important; opacity: 1 !important; display: block !important;';
+                } else {
+                    sidebar.style.cssText = '';
+                }
                 document.getElementById('sidebarOverlay').classList.toggle('active');
-            };
+            });
             navActions.appendChild(toggleBtn);
         }
     }
