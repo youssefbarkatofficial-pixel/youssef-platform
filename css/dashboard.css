@@ -232,14 +232,16 @@
 /* Responsive */
 @media (max-width: 992px) {
   .sidebar {
-    transform: translateX(100%);
+    right: -110%;
+    transform: none !important;
     width: clamp(250px, 75vw, 320px);
     box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
     z-index: 99999 !important; /* Ensure it is above the overlay */
+    transition: right 0.3s ease-in-out;
   }
   
   .sidebar.active {
-    transform: translateX(0);
+    right: 0 !important;
   }
   
   .sidebar-overlay {
