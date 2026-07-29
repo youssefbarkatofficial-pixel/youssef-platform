@@ -435,7 +435,8 @@
                                 title: 'تم تفعيل كورس جديد',
                                 message: `تم تفعيل كورس ${courseInfo ? courseInfo.title : ''} لك مجاناً من قبل الإدارة. نتمنى لك التوفيق!`,
                                 date: new Date().toISOString(),
-                                read: false
+                                read: false,
+                                courseId: cId
                             });
                             
                             // Upload to Firebase if possible
