@@ -234,7 +234,9 @@
   .sidebar {
     transform: translateX(120%);
     width: clamp(250px, 75vw, 320px);
-    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
+    top: 130px !important;
+    height: calc(100vh - 130px) !important;
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.1); /* Lighter shadow */
     z-index: 999999 !important; /* Extremely high z-index */
     transition: transform 0.3s ease-in-out;
     visibility: hidden;
@@ -249,12 +251,11 @@
   
   .sidebar-overlay {
     position: fixed;
-    top: 80px;
+    top: 130px;
     left: 0;
     width: 100%;
-    height: calc(100vh - 80px);
-    background: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(4px);
+    height: calc(100vh - 130px);
+    background: transparent; /* Removed the black shadow */
     z-index: 99998 !important;
     opacity: 0;
     pointer-events: none;
@@ -307,8 +308,8 @@
   }
   
   .sidebar {
-    top: 60px;
-    height: calc(100vh - 60px);
+    top: 110px !important;
+    height: calc(100vh - 110px) !important;
   }
 
   .dash-card {

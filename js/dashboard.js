@@ -7,10 +7,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const overlay = document.createElement('div');
             overlay.className = 'sidebar-overlay';
             overlay.id = 'sidebarOverlay';
-            overlay.onclick = () => {
-                sidebar.classList.remove('active');
-                overlay.classList.remove('active');
-            };
+                overlay.addEventListener('click', () => {
+                    sidebar.classList.remove('active');
+                    sidebar.style.cssText = '';
+                    overlay.classList.remove('active');
+                    document.body.style.overflow = '';
+                });
             sidebar.parentNode.insertBefore(overlay, sidebar);
         }
         
@@ -25,10 +27,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 sidebar.classList.toggle('active');
                 if (sidebar.classList.contains('active')) {
                     sidebar.style.cssText = 'right: 0 !important; visibility: visible !important; transform: none !important; opacity: 1 !important; display: block !important;';
+                    document.body.style.overflow = 'hidden';
                 } else {
                     sidebar.style.cssText = '';
+                    document.body.style.overflow = '';
                 }
                 document.getElementById('sidebarOverlay').classList.toggle('active');
+            });
+
+            // Close sidebar when clicking a link inside it
+            const sidebarLinks = sidebar.querySelectorAll('.sidebar-nav a');
+            sidebarLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                    if (window.innerWidth <= 992 && sidebar.classList.contains('active')) {
+                        sidebar.classList.remove('active');
+                        sidebar.style.cssText = '';
+                        document.getElementById('sidebarOverlay').classList.remove('active');
+                        document.body.style.overflow = '';
+                    }
+                });
             });
             navActions.appendChild(toggleBtn);
         }
