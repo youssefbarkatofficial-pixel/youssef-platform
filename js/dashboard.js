@@ -470,7 +470,11 @@ document.addEventListener('DOMContentLoaded', async () => {
               const response = await fetch(proofImageBase64);
               const blob = await response.blob();
               const storageRef = window.firebase.storage().ref().child(`payment_proofs/${proofImageKey}.jpg`);
-              const snapshot = await storageRef.put(blob);
+              
+              const uploadPromise = storageRef.put(blob);
+              const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Storage upload timeout')), 15000));
+              
+              const snapshot = await Promise.race([uploadPromise, timeoutPromise]);
               proofImageUrl = await snapshot.ref.getDownloadURL();
               console.log('[UPLOAD] Image uploaded to Storage:', proofImageUrl);
           } catch(e) {

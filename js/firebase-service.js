@@ -500,9 +500,9 @@ window.FirebaseService = (function () {
         }
 
         try {
-            const docRef = await getDb()
-                .collection('paymentRequests')
-                .add(payload);
+            const addPromise = getDb().collection('paymentRequests').add(payload);
+            const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Firestore timeout')), 10000));
+            const docRef = await Promise.race([addPromise, timeoutPromise]);
 
             console.log('[PAYMENT REQUEST SAVED]', docRef.id);
 
