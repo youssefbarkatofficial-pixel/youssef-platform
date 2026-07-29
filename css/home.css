@@ -411,13 +411,13 @@ img.teacher-fg-img.pop-out {
 
 @media (max-width: 768px) {
   .hero {
-    padding-top: 150px;
+    padding-top: 180px;
   }
 }
 
 @media (max-width: 480px) {
   .hero {
-    padding-top: 160px;
+    padding-top: 220px;
   }
   .features-circle-container {
     width: 280px;
