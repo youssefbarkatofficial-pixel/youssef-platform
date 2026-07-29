@@ -24,7 +24,7 @@
 }
 
 .hero-content .heading-luxury {
-  white-space: normal !important;
+  white-space: nowrap !important;
   overflow-wrap: break-word;
   overflow: visible !important;
   text-align: center !important;
@@ -374,7 +374,7 @@ img.teacher-fg-img.pop-out {
   }
 
   .hero-content .heading-luxury {
-    white-space: normal;
+    white-space: normal !important;
   }
   
   .hero-image-wrapper {
