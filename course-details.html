@@ -1,19 +1,19 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تفاصيل الكورس | منصة يوسف بركات للدراسات الاجتماعية</title>
+    <title>طھظپط§طµظٹظ„ ط§ظ„ظƒظˆط±ط³ | ظ…ظ†طµط© ظٹظˆط³ظپ ط¨ط±ظƒط§طھ ظ„ظ„ط¯ط±ط§ط³ط§طھ ط§ظ„ط§ط¬طھظ…ط§ط¹ظٹط©</title>
     
     <!-- Professional SEO Metadata -->
-    <meta name="description" content="تعرف على تفاصيل كورس الدراسات الاجتماعية مع مستر يوسف بركات. شاهد المحاضرات والملازم الخاصة بالكورس وابدأ رحلة التفوق.">
-    <meta name="keywords" content="تفاصيل كورس دراسات, يوسف بركات, منصة يوسف بركات, شرح تاريخ, شرح جغرافيا, مراجعة دراسات اجتماعية, منصة تعليمية">
+    <meta name="description" content="طھط¹ط±ظپ ط¹ظ„ظ‰ طھظپط§طµظٹظ„ ظƒظˆط±ط³ ط§ظ„ط¯ط±ط§ط³ط§طھ ط§ظ„ط§ط¬طھظ…ط§ط¹ظٹط© ظ…ط¹ ظ…ط³طھط± ظٹظˆط³ظپ ط¨ط±ظƒط§طھ. ط´ط§ظ‡ط¯ ط§ظ„ظ…ط­ط§ط¶ط±ط§طھ ظˆط§ظ„ظ…ظ„ط§ط²ظ… ط§ظ„ط®ط§طµط© ط¨ط§ظ„ظƒظˆط±ط³ ظˆط§ط¨ط¯ط£ ط±ط­ظ„ط© ط§ظ„طھظپظˆظ‚.">
+    <meta name="keywords" content="طھظپط§طµظٹظ„ ظƒظˆط±ط³ ط¯ط±ط§ط³ط§طھ, ظٹظˆط³ظپ ط¨ط±ظƒط§طھ, ظ…ظ†طµط© ظٹظˆط³ظپ ط¨ط±ظƒط§طھ, ط´ط±ط­ طھط§ط±ظٹط®, ط´ط±ط­ ط¬ط؛ط±ط§ظپظٹط§, ظ…ط±ط§ط¬ط¹ط© ط¯ط±ط§ط³ط§طھ ط§ط¬طھظ…ط§ط¹ظٹط©, ظ…ظ†طµط© طھط¹ظ„ظٹظ…ظٹط©">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://youssefbarakat.pages.dev/course-details.html" />
     
     <!-- Open Graph (Social Media) -->
-    <meta property="og:title" content="تفاصيل الكورس | منصة يوسف بركات للدراسات الاجتماعية">
-    <meta property="og:description" content="تعرف على تفاصيل كورس الدراسات الاجتماعية مع مستر يوسف بركات.">
+    <meta property="og:title" content="طھظپط§طµظٹظ„ ط§ظ„ظƒظˆط±ط³ | ظ…ظ†طµط© ظٹظˆط³ظپ ط¨ط±ظƒط§طھ ظ„ظ„ط¯ط±ط§ط³ط§طھ ط§ظ„ط§ط¬طھظ…ط§ط¹ظٹط©">
+    <meta property="og:description" content="طھط¹ط±ظپ ط¹ظ„ظ‰ طھظپط§طµظٹظ„ ظƒظˆط±ط³ ط§ظ„ط¯ط±ط§ط³ط§طھ ط§ظ„ط§ط¬طھظ…ط§ط¹ظٹط© ظ…ط¹ ظ…ط³طھط± ظٹظˆط³ظپ ط¨ط±ظƒط§طھ.">
     <meta property="og:type" content="article">
     <meta property="og:locale" content="ar_EG">
     <meta property="og:url" content="https://youssefbarakat.pages.dev/course-details.html">
@@ -23,7 +23,7 @@
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
     <link rel="preconnect" href="https://www.gstatic.com">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.css?v=2.2">
     <link rel="stylesheet" href="css/courses.css">
     <link rel="stylesheet" href="css/auth.css">
     <!-- Dynamic SEO title/OG per course -->
@@ -36,9 +36,9 @@
                 const courses = JSON.parse(localStorage.getItem('adminCourses') || '[]');
                 const c = courses.find(x => x.id === cid);
                 if (c && c.title) {
-                    document.title = c.title + ' | منصة يوسف بركات للدراسات الاجتماعية';
+                    document.title = c.title + ' | ظ…ظ†طµط© ظٹظˆط³ظپ ط¨ط±ظƒط§طھ ظ„ظ„ط¯ط±ط§ط³ط§طھ ط§ظ„ط§ط¬طھظ…ط§ط¹ظٹط©';
                     var ogTitle = document.querySelector('meta[property="og:title"]');
-                    if (ogTitle) ogTitle.setAttribute('content', c.title + ' | منصة يوسف بركات');
+                    if (ogTitle) ogTitle.setAttribute('content', c.title + ' | ظ…ظ†طµط© ظٹظˆط³ظپ ط¨ط±ظƒط§طھ');
                     var ogDesc = document.querySelector('meta[property="og:description"]');
                     if (ogDesc && c.desc) ogDesc.setAttribute('content', c.desc);
                     var metaDesc = document.querySelector('meta[name="description"]');
@@ -55,13 +55,13 @@
     <!-- Header -->
     <header class="navbar glass-panel">
         <a href="index.html" class="nav-brand">
-            <div class="logo-circle">ي</div>
-            <span class="nav-brand-text">منصة يوسف بركات</span>
+            <div class="logo-circle">ظٹ</div>
+            <span class="nav-brand-text">ظ…ظ†طµط© ظٹظˆط³ظپ ط¨ط±ظƒط§طھ</span>
         </a>
         <ul class="nav-links">
-            <li><a href="index.html">الرئيسية</a></li>
-            <li><a href="courses.html">الكورسات</a></li>
-            <li><a href="dashboard.html">لوحة التحكم</a></li>
+            <li><a href="index.html">ط§ظ„ط±ط¦ظٹط³ظٹط©</a></li>
+            <li><a href="courses.html">ط§ظ„ظƒظˆط±ط³ط§طھ</a></li>
+            <li><a href="dashboard.html">ظ„ظˆط­ط© ط§ظ„طھط­ظƒظ…</a></li>
         </ul>
         <div class="nav-actions">
             
@@ -72,7 +72,7 @@
         <div class="glass-panel" style="padding: 40px; border-radius: 20px; max-width: 800px; margin: 0 auto;">
             
             <a href="courses.html" style="color: var(--accent-cyan); text-decoration: none; font-size: 0.9rem; margin-bottom: 20px; display: inline-block;">
-                <i class="fas fa-arrow-right mr-2"></i> العودة للكورسات
+                <i class="fas fa-arrow-right mr-2"></i> ط§ظ„ط¹ظˆط¯ط© ظ„ظ„ظƒظˆط±ط³ط§طھ
             </a>
 
             <div style="display: flex; flex-wrap: wrap; gap: 30px; margin-bottom: 40px; align-items: flex-start;">
@@ -81,7 +81,7 @@
                 </div>
                 <div style="flex: 1; min-width: 250px;">
                     <span id="cdGrade" class="badge" style="background: rgba(212, 166, 79, 0.2); color: var(--royal-gold); padding: 5px 15px; border-radius: 20px; font-size: 0.9rem; margin-bottom: 15px; display: inline-block;"></span>
-                    <h1 id="cdTitle" class="heading-luxury mb-1" style="font-size: 2rem;"></h1>
+                    <h1 id="cdTitle" class="heading-luxury mb-1"></h1>
                     <p id="cdDesc" style="color: rgba(255,255,255,0.8); line-height: 1.6; margin-bottom: 20px;"></p>
                     <div style="display: flex; align-items: flex-end; flex-wrap: wrap; gap: 20px; margin-bottom: 20px;">
                         <div style="font-weight: bold; color: var(--royal-gold);" id="cdPrice"></div>
@@ -99,48 +99,48 @@
     <div class="modal-overlay" id="paymentModal">
         <div class="glass-panel modal-content" style="padding: 30px; max-width: 500px;">
             <button class="close-modal" onclick="document.getElementById('paymentModal').classList.remove('active')"><i class="fas fa-times"></i></button>
-            <h2 class="text-gold mb-2 text-center">تأكيد الاشتراك والدفع</h2>
+            <h2 class="text-gold mb-2 text-center">طھط£ظƒظٹط¯ ط§ظ„ط§ط´طھط±ط§ظƒ ظˆط§ظ„ط¯ظپط¹</h2>
             
-            <p style="margin-bottom: 20px; text-align: center;">اختر طريقة الدفع المناسبة لك:</p>
+            <p style="margin-bottom: 20px; text-align: center;">ط§ط®طھط± ط·ط±ظٹظ‚ط© ط§ظ„ط¯ظپط¹ ط§ظ„ظ…ظ†ط§ط³ط¨ط© ظ„ظƒ:</p>
             
             <div class="payment-methods">
                 <div class="pay-method active" data-type="vodafone">
                     <i class="fas fa-mobile-alt" style="font-size: 2rem; color: #e60000; margin-bottom: 10px;"></i>
-                    <h4>فودافون كاش</h4>
+                    <h4>ظپظˆط¯ط§ظپظˆظ† ظƒط§ط´</h4>
                 </div>
                 <div class="pay-method" data-type="fawry" style="opacity: 0.5; pointer-events: none; filter: grayscale(100%); position: relative;">
-                    <span style="position: absolute; top: 5px; left: 5px; background: rgba(0,0,0,0.5); font-size: 0.7rem; padding: 2px 5px; border-radius: 3px;">قريباً</span>
+                    <span style="position: absolute; top: 5px; left: 5px; background: rgba(0,0,0,0.5); font-size: 0.7rem; padding: 2px 5px; border-radius: 3px;">ظ‚ط±ظٹط¨ط§ظ‹</span>
                     <i class="fas fa-store" style="font-size: 2rem; color: #f1c40f; margin-bottom: 10px;"></i>
-                    <h4>فوري</h4>
+                    <h4>ظپظˆط±ظٹ</h4>
                 </div>
             </div>
 
             <div class="payment-details" id="vodafoneDetails">
-                <p>قم بتحويل المبلغ على الرقم التالي عبر فودافون كاش:</p>
+                <p>ظ‚ظ… ط¨طھط­ظˆظٹظ„ ط§ظ„ظ…ط¨ظ„ط؛ ط¹ظ„ظ‰ ط§ظ„ط±ظ‚ظ… ط§ظ„طھط§ظ„ظٹ ط¹ط¨ط± ظپظˆط¯ط§ظپظˆظ† ظƒط§ط´:</p>
                 <div class="copy-box">
                     <span id="vCashNum" style="font-size: 1.2rem; font-weight: bold; letter-spacing: 2px;">01023675235</span>
                     <button class="copy-btn" data-target="vCashNum"><i class="fas fa-copy"></i></button>
                 </div>
-                <p style="font-size: 0.85rem; margin-top: 10px; color: var(--accent-cyan);">* برجاء الاحتفاظ بصورة التحويل (الاسكرين شوت) لرفعها بعد الدفع.</p>
+                <p style="font-size: 0.85rem; margin-top: 10px; color: var(--accent-cyan);">* ط¨ط±ط¬ط§ط، ط§ظ„ط§ط­طھظپط§ط¸ ط¨طµظˆط±ط© ط§ظ„طھط­ظˆظٹظ„ (ط§ظ„ط§ط³ظƒط±ظٹظ† ط´ظˆطھ) ظ„ط±ظپط¹ظ‡ط§ ط¨ط¹ط¯ ط§ظ„ط¯ظپط¹.</p>
             </div>
 
             <div class="payment-details" id="fawryDetails" style="display: none;">
-                <p>توجه لأقرب ماكينة فوري واستخدم كود الدفع التالي:</p>
+                <p>طھظˆط¬ظ‡ ظ„ط£ظ‚ط±ط¨ ظ…ط§ظƒظٹظ†ط© ظپظˆط±ظٹ ظˆط§ط³طھط®ط¯ظ… ظƒظˆط¯ ط§ظ„ط¯ظپط¹ ط§ظ„طھط§ظ„ظٹ:</p>
                 <div class="copy-box">
                     <span id="fawryCode" style="font-size: 1.2rem; font-weight: bold; letter-spacing: 2px;">784512</span>
                     <button class="copy-btn" data-target="fawryCode"><i class="fas fa-copy"></i></button>
                 </div>
-                <p style="font-size: 0.85rem; margin-top: 10px; color: var(--accent-cyan);">* الكود صالح لمدة 24 ساعة فقط.</p>
+                <p style="font-size: 0.85rem; margin-top: 10px; color: var(--accent-cyan);">* ط§ظ„ظƒظˆط¯ طµط§ظ„ط­ ظ„ظ…ط¯ط© 24 ط³ط§ط¹ط© ظپظ‚ط·.</p>
             </div>
 
             <div class="form-group" style="margin-top: 20px;">
-                <label>ارفع صورة التحويل</label>
+                <label>ط§ط±ظپط¹ طµظˆط±ط© ط§ظ„طھط­ظˆظٹظ„</label>
                 <input type="file" id="paymentProofImage" class="form-control" style="padding: 10px;" accept="image/*">
             </div>
 
             <div style="display: flex; gap: 10px; margin-top: 20px;">
-                <button class="btn btn-outline" style="flex: 1;" onclick="document.getElementById('paymentModal').classList.remove('active')">تراجع</button>
-                <button type="button" class="btn btn-green" style="flex: 1;" id="confirmPayment" onclick="submitPaymentRequest()">استمرار</button>
+                <button class="btn btn-outline" style="flex: 1;" onclick="document.getElementById('paymentModal').classList.remove('active')">طھط±ط§ط¬ط¹</button>
+                <button type="button" class="btn btn-green" style="flex: 1;" id="confirmPayment" onclick="submitPaymentRequest()">ط§ط³طھظ…ط±ط§ط±</button>
             </div>
         </div>
     </div>
@@ -161,69 +161,69 @@
             <button class="close-modal" onclick="document.getElementById('loginModal').classList.remove('active')"><i class="fas fa-times"></i></button>
             <div class="auth-header">
                 <div class="auth-logo"><i class="fas fa-user-graduate"></i></div>
-                <h2>تسجيل الدخول</h2>
-                <p>مرحباً بك مجدداً في منصتك</p>
+                <h2>طھط³ط¬ظٹظ„ ط§ظ„ط¯ط®ظˆظ„</h2>
+                <p>ظ…ط±ط­ط¨ط§ظ‹ ط¨ظƒ ظ…ط¬ط¯ط¯ط§ظ‹ ظپظٹ ظ…ظ†طµطھظƒ</p>
             </div>
             <form id="loginForm">
                 <div class="form-group">
-                    <label>رقم الموبايل</label>
-                    <input type="text" id="loginPhone" class="form-control" placeholder="أدخل رقم الموبايل" required>
+                    <label>ط±ظ‚ظ… ط§ظ„ظ…ظˆط¨ط§ظٹظ„</label>
+                    <input type="text" id="loginPhone" class="form-control" placeholder="ط£ط¯ط®ظ„ ط±ظ‚ظ… ط§ظ„ظ…ظˆط¨ط§ظٹظ„" required>
                 </div>
                 <div class="form-group">
-                    <label>كلمة المرور</label>
-                    <input type="password" id="loginPassword" class="form-control" placeholder="أدخل كلمة المرور" required>
+                    <label>ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط±</label>
+                    <input type="password" id="loginPassword" class="form-control" placeholder="ط£ط¯ط®ظ„ ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط±" required>
                   <div id="loginError" class="error-message" style="display:none; color: #e74c3c; background: rgba(231,76,60,0.1); padding: 10px; border-radius: 8px; margin-top: 15px; font-size: 0.9rem; text-align: center; border: 1px solid rgba(231,76,60,0.3);"></div>
                 </div>
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <a href="#" id="forgotPasswordLink" style="color: var(--accent-cyan); font-weight: 700;">نسيت كلمة المرور؟</a>
-                    <span style="color: rgba(0,0,0,0.6); font-size: 0.92rem;">تسجيل الدخول الآمن</span>
+                    <a href="#" id="forgotPasswordLink" style="color: var(--accent-cyan); font-weight: 700;">ظ†ط³ظٹطھ ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط±طں</a>
+                    <span style="color: rgba(0,0,0,0.6); font-size: 0.92rem;">طھط³ط¬ظٹظ„ ط§ظ„ط¯ط®ظˆظ„ ط§ظ„ط¢ظ…ظ†</span>
                 </div>
-                <button type="submit" class="btn btn-green btn-block">تسجيل الدخول</button>
+                <button type="submit" class="btn btn-green btn-block">طھط³ط¬ظٹظ„ ط§ظ„ط¯ط®ظˆظ„</button>
             </form>
             <div id="forgotPasswordModal" class="modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 10000; justify-content: center; align-items: center; padding: 20px;">
                 <div class="glass-panel" style="max-width: 520px; width: 100%; padding: 30px; position: relative; border-radius: 20px;">
                     <button onclick="document.getElementById('forgotPasswordModal').style.display='none'" style="position: absolute; top: 18px; right: 18px; background: transparent; border: none; color: var(--text-primary); font-size: 1.4rem; cursor: pointer;"><i class="fas fa-times"></i></button>
-                    <h2 style="margin-bottom: 20px; color: var(--royal-gold);">استعادة كلمة المرور</h2>
-                    <p style="margin-bottom: 20px; color: var(--text-secondary);">اكتب رقم ولي الأمر المرتبط بحسابك وهيتم إرسال كود تأكيد لتغيير كلمة السر.</p>
+                    <h2 style="margin-bottom: 20px; color: var(--royal-gold);">ط§ط³طھط¹ط§ط¯ط© ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط±</h2>
+                    <p style="margin-bottom: 20px; color: var(--text-secondary);">ط§ظƒطھط¨ ط±ظ‚ظ… ظˆظ„ظٹ ط§ظ„ط£ظ…ط± ط§ظ„ظ…ط±طھط¨ط· ط¨ط­ط³ط§ط¨ظƒ ظˆظ‡ظٹطھظ… ط¥ط±ط³ط§ظ„ ظƒظˆط¯ طھط£ظƒظٹط¯ ظ„طھط؛ظٹظٹط± ظƒظ„ظ…ط© ط§ظ„ط³ط±.</p>
                     <div id="fpStatusText" style="display:none; margin-bottom: 20px; padding: 12px 14px; border-radius: 16px; font-size: 0.95rem; line-height:1.5;"></div>
                     <form id="forgotPasswordForm">
                         <div class="form-group">
-                            <label>رقم الطالب</label>
-                            <input type="tel" id="fpStudentPhone" class="form-control" placeholder="رقم الطالب" required>
+                            <label>ط±ظ‚ظ… ط§ظ„ط·ط§ظ„ط¨</label>
+                            <input type="tel" id="fpStudentPhone" class="form-control" placeholder="ط±ظ‚ظ… ط§ظ„ط·ط§ظ„ط¨" required>
                         </div>
                         <div class="form-group">
-                            <label>رقم ولي الأمر</label>
-                            <input type="tel" id="fpParentPhone" class="form-control" placeholder="رقم ولي الأمر" required>
-                            <span id="fpParentError" class="error-message" style="display:none;">الرقم غير مطابق لولي الأمر المسجل.</span>
+                            <label>ط±ظ‚ظ… ظˆظ„ظٹ ط§ظ„ط£ظ…ط±</label>
+                            <input type="tel" id="fpParentPhone" class="form-control" placeholder="ط±ظ‚ظ… ظˆظ„ظٹ ط§ظ„ط£ظ…ط±" required>
+                            <span id="fpParentError" class="error-message" style="display:none;">ط§ظ„ط±ظ‚ظ… ط؛ظٹط± ظ…ط·ط§ط¨ظ‚ ظ„ظˆظ„ظٹ ط§ظ„ط£ظ…ط± ط§ظ„ظ…ط³ط¬ظ„.</span>
                         <div id="fpStep2" style="display:none;">
                             <div class="form-group">
-                                <label>أدخل كود التحقق</label>
+                                <label>ط£ط¯ط®ظ„ ظƒظˆط¯ ط§ظ„طھط­ظ‚ظ‚</label>
                                 <input type="text" id="fpOtpCode" class="form-control" placeholder="xxxxx" maxlength="5">
                             </div>
                             <div class="form-group" style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
-                                <button type="button" id="fpResendBtn" class="btn btn-outline" style="display:none; padding: 10px 14px; min-width:150px;">إعادة إرسال الكود</button>
-                                <span id="fpOtpHelp" style="flex:1 1 100%; color: rgba(0,0,0,0.72); font-size: 0.92rem;">الكود صالح لمدة 10 دقائق ولا يتم مشاركته مع أي شخص.</span>
+                                <button type="button" id="fpResendBtn" class="btn btn-outline" style="display:none; padding: 10px 14px; min-width:150px;">ط¥ط¹ط§ط¯ط© ط¥ط±ط³ط§ظ„ ط§ظ„ظƒظˆط¯</button>
+                                <span id="fpOtpHelp" style="flex:1 1 100%; color: rgba(0,0,0,0.72); font-size: 0.92rem;">ط§ظ„ظƒظˆط¯ طµط§ظ„ط­ ظ„ظ…ط¯ط© 10 ط¯ظ‚ط§ط¦ظ‚ ظˆظ„ط§ ظٹطھظ… ظ…ط´ط§ط±ظƒطھظ‡ ظ…ط¹ ط£ظٹ ط´ط®طµ.</span>
                             </div>
                             <div class="form-group">
-                                <label>كلمة المرور الجديدة</label>
-                                <input type="password" id="fpNewPassword" class="form-control" placeholder="كلمة المرور الجديدة">
+                                <label>ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط± ط§ظ„ط¬ط¯ظٹط¯ط©</label>
+                                <input type="password" id="fpNewPassword" class="form-control" placeholder="ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط± ط§ظ„ط¬ط¯ظٹط¯ط©">
                             </div>
                             <div class="form-group">
-                                <label>تأكيد كلمة المرور الجديدة</label>
-                                <input type="password" id="fpConfirmPassword" class="form-control" placeholder="تأكيد كلمة المرور الجديدة">
-                                <span id="fpPasswordError" class="error-message" style="display:none;">يجب أن تتطابق كلمات المرور وأن تكون قوية.</span>
+                                <label>طھط£ظƒظٹط¯ ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط± ط§ظ„ط¬ط¯ظٹط¯ط©</label>
+                                <input type="password" id="fpConfirmPassword" class="form-control" placeholder="طھط£ظƒظٹط¯ ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط± ط§ظ„ط¬ط¯ظٹط¯ط©">
+                                <span id="fpPasswordError" class="error-message" style="display:none;">ظٹط¬ط¨ ط£ظ† طھطھط·ط§ط¨ظ‚ ظƒظ„ظ…ط§طھ ط§ظ„ظ…ط±ظˆط± ظˆط£ظ† طھظƒظˆظ† ظ‚ظˆظٹط©.</span>
                             </div>
                         </div>
                         </div>
                         <div style="display:flex; justify-content: space-between; gap: 10px; margin-top: 20px;">
-                            <button type="button" class="btn btn-outline" onclick="document.getElementById('forgotPasswordModal').style.display='none'">إلغاء</button>
-                            <button type="submit" id="fpSubmitBtn" class="btn btn-green">إرسال الكود عبر واتساب</button>
+                            <button type="button" class="btn btn-outline" onclick="document.getElementById('forgotPasswordModal').style.display='none'">ط¥ظ„ط؛ط§ط،</button>
+                            <button type="submit" id="fpSubmitBtn" class="btn btn-green">ط¥ط±ط³ط§ظ„ ط§ظ„ظƒظˆط¯ ط¹ط¨ط± ظˆط§طھط³ط§ط¨</button>
                         </div>
                     </form>
                 </div>
             </div>
             <div class="auth-footer">
-                <p>ليس لديك حساب؟ <a href="register.html">إنشاء حساب جديد</a></p>
+                <p>ظ„ظٹط³ ظ„ط¯ظٹظƒ ط­ط³ط§ط¨طں <a href="register.html">ط¥ظ†ط´ط§ط، ط­ط³ط§ط¨ ط¬ط¯ظٹط¯</a></p>
             </div>
         </div>
     <!-- Login Modal -->
@@ -232,69 +232,69 @@
             <button class="close-modal" onclick="document.getElementById('loginModal').classList.remove('active')"><i class="fas fa-times"></i></button>
             <div class="auth-header">
                 <div class="auth-logo"><i class="fas fa-user-graduate"></i></div>
-                <h2>تسجيل الدخول</h2>
-                <p>مرحباً بك مجدداً في منصتك</p>
+                <h2>طھط³ط¬ظٹظ„ ط§ظ„ط¯ط®ظˆظ„</h2>
+                <p>ظ…ط±ط­ط¨ط§ظ‹ ط¨ظƒ ظ…ط¬ط¯ط¯ط§ظ‹ ظپظٹ ظ…ظ†طµطھظƒ</p>
             </div>
             <form id="loginForm">
                 <div class="form-group">
-                    <label>رقم الموبايل</label>
-                    <input type="text" id="loginPhone" class="form-control" placeholder="أدخل رقم الموبايل" required>
+                    <label>ط±ظ‚ظ… ط§ظ„ظ…ظˆط¨ط§ظٹظ„</label>
+                    <input type="text" id="loginPhone" class="form-control" placeholder="ط£ط¯ط®ظ„ ط±ظ‚ظ… ط§ظ„ظ…ظˆط¨ط§ظٹظ„" required>
                 </div>
                 <div class="form-group">
-                    <label>كلمة المرور</label>
-                    <input type="password" id="loginPassword" class="form-control" placeholder="أدخل كلمة المرور" required>
+                    <label>ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط±</label>
+                    <input type="password" id="loginPassword" class="form-control" placeholder="ط£ط¯ط®ظ„ ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط±" required>
                   <div id="loginError" class="error-message" style="display:none; color: #e74c3c; background: rgba(231,76,60,0.1); padding: 10px; border-radius: 8px; margin-top: 15px; font-size: 0.9rem; text-align: center; border: 1px solid rgba(231,76,60,0.3);"></div>
                 </div>
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <a href="#" id="forgotPasswordLink" style="color: var(--accent-cyan); font-weight: 700;">نسيت كلمة المرور؟</a>
-                    <span style="color: rgba(0,0,0,0.6); font-size: 0.92rem;">تسجيل الدخول الآمن</span>
+                    <a href="#" id="forgotPasswordLink" style="color: var(--accent-cyan); font-weight: 700;">ظ†ط³ظٹطھ ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط±طں</a>
+                    <span style="color: rgba(0,0,0,0.6); font-size: 0.92rem;">طھط³ط¬ظٹظ„ ط§ظ„ط¯ط®ظˆظ„ ط§ظ„ط¢ظ…ظ†</span>
                 </div>
-                <button type="submit" class="btn btn-green btn-block">تسجيل الدخول</button>
+                <button type="submit" class="btn btn-green btn-block">طھط³ط¬ظٹظ„ ط§ظ„ط¯ط®ظˆظ„</button>
             </form>
             <div id="forgotPasswordModal" class="modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 10000; justify-content: center; align-items: center; padding: 20px;">
                 <div class="glass-panel" style="max-width: 520px; width: 100%; padding: 30px; position: relative; border-radius: 20px;">
                     <button onclick="document.getElementById('forgotPasswordModal').style.display='none'" style="position: absolute; top: 18px; right: 18px; background: transparent; border: none; color: var(--text-primary); font-size: 1.4rem; cursor: pointer;"><i class="fas fa-times"></i></button>
-                    <h2 style="margin-bottom: 20px; color: var(--royal-gold);">استعادة كلمة المرور</h2>
-                    <p style="margin-bottom: 20px; color: var(--text-secondary);">اكتب رقم ولي الأمر المرتبط بحسابك وهيتم إرسال كود تأكيد لتغيير كلمة السر.</p>
+                    <h2 style="margin-bottom: 20px; color: var(--royal-gold);">ط§ط³طھط¹ط§ط¯ط© ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط±</h2>
+                    <p style="margin-bottom: 20px; color: var(--text-secondary);">ط§ظƒطھط¨ ط±ظ‚ظ… ظˆظ„ظٹ ط§ظ„ط£ظ…ط± ط§ظ„ظ…ط±طھط¨ط· ط¨ط­ط³ط§ط¨ظƒ ظˆظ‡ظٹطھظ… ط¥ط±ط³ط§ظ„ ظƒظˆط¯ طھط£ظƒظٹط¯ ظ„طھط؛ظٹظٹط± ظƒظ„ظ…ط© ط§ظ„ط³ط±.</p>
                     <div id="fpStatusText" style="display:none; margin-bottom: 20px; padding: 12px 14px; border-radius: 16px; font-size: 0.95rem; line-height:1.5;"></div>
                     <form id="forgotPasswordForm">
                         <div class="form-group">
-                            <label>رقم الطالب</label>
-                            <input type="tel" id="fpStudentPhone" class="form-control" placeholder="رقم الطالب" required>
+                            <label>ط±ظ‚ظ… ط§ظ„ط·ط§ظ„ط¨</label>
+                            <input type="tel" id="fpStudentPhone" class="form-control" placeholder="ط±ظ‚ظ… ط§ظ„ط·ط§ظ„ط¨" required>
                         </div>
                         <div class="form-group">
-                            <label>رقم ولي الأمر</label>
-                            <input type="tel" id="fpParentPhone" class="form-control" placeholder="رقم ولي الأمر" required>
-                            <span id="fpParentError" class="error-message" style="display:none;">الرقم غير مطابق لولي الأمر المسجل.</span>
+                            <label>ط±ظ‚ظ… ظˆظ„ظٹ ط§ظ„ط£ظ…ط±</label>
+                            <input type="tel" id="fpParentPhone" class="form-control" placeholder="ط±ظ‚ظ… ظˆظ„ظٹ ط§ظ„ط£ظ…ط±" required>
+                            <span id="fpParentError" class="error-message" style="display:none;">ط§ظ„ط±ظ‚ظ… ط؛ظٹط± ظ…ط·ط§ط¨ظ‚ ظ„ظˆظ„ظٹ ط§ظ„ط£ظ…ط± ط§ظ„ظ…ط³ط¬ظ„.</span>
                         <div id="fpStep2" style="display:none;">
                             <div class="form-group">
-                                <label>أدخل كود التحقق</label>
+                                <label>ط£ط¯ط®ظ„ ظƒظˆط¯ ط§ظ„طھط­ظ‚ظ‚</label>
                                 <input type="text" id="fpOtpCode" class="form-control" placeholder="xxxxx" maxlength="5">
                             </div>
                             <div class="form-group" style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
-                                <button type="button" id="fpResendBtn" class="btn btn-outline" style="display:none; padding: 10px 14px; min-width:150px;">إعادة إرسال الكود</button>
-                                <span id="fpOtpHelp" style="flex:1 1 100%; color: rgba(0,0,0,0.72); font-size: 0.92rem;">الكود صالح لمدة 10 دقائق ولا يتم مشاركته مع أي شخص.</span>
+                                <button type="button" id="fpResendBtn" class="btn btn-outline" style="display:none; padding: 10px 14px; min-width:150px;">ط¥ط¹ط§ط¯ط© ط¥ط±ط³ط§ظ„ ط§ظ„ظƒظˆط¯</button>
+                                <span id="fpOtpHelp" style="flex:1 1 100%; color: rgba(0,0,0,0.72); font-size: 0.92rem;">ط§ظ„ظƒظˆط¯ طµط§ظ„ط­ ظ„ظ…ط¯ط© 10 ط¯ظ‚ط§ط¦ظ‚ ظˆظ„ط§ ظٹطھظ… ظ…ط´ط§ط±ظƒطھظ‡ ظ…ط¹ ط£ظٹ ط´ط®طµ.</span>
                             </div>
                             <div class="form-group">
-                                <label>كلمة المرور الجديدة</label>
-                                <input type="password" id="fpNewPassword" class="form-control" placeholder="كلمة المرور الجديدة">
+                                <label>ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط± ط§ظ„ط¬ط¯ظٹط¯ط©</label>
+                                <input type="password" id="fpNewPassword" class="form-control" placeholder="ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط± ط§ظ„ط¬ط¯ظٹط¯ط©">
                             </div>
                             <div class="form-group">
-                                <label>تأكيد كلمة المرور الجديدة</label>
-                                <input type="password" id="fpConfirmPassword" class="form-control" placeholder="تأكيد كلمة المرور الجديدة">
-                                <span id="fpPasswordError" class="error-message" style="display:none;">يجب أن تتطابق كلمات المرور وأن تكون قوية.</span>
+                                <label>طھط£ظƒظٹط¯ ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط± ط§ظ„ط¬ط¯ظٹط¯ط©</label>
+                                <input type="password" id="fpConfirmPassword" class="form-control" placeholder="طھط£ظƒظٹط¯ ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط± ط§ظ„ط¬ط¯ظٹط¯ط©">
+                                <span id="fpPasswordError" class="error-message" style="display:none;">ظٹط¬ط¨ ط£ظ† طھطھط·ط§ط¨ظ‚ ظƒظ„ظ…ط§طھ ط§ظ„ظ…ط±ظˆط± ظˆط£ظ† طھظƒظˆظ† ظ‚ظˆظٹط©.</span>
                             </div>
                         </div>
                         </div>
                         <div style="display:flex; justify-content: space-between; gap: 10px; margin-top: 20px;">
-                            <button type="button" class="btn btn-outline" onclick="document.getElementById('forgotPasswordModal').style.display='none'">إلغاء</button>
-                            <button type="submit" id="fpSubmitBtn" class="btn btn-green">إرسال الكود عبر واتساب</button>
+                            <button type="button" class="btn btn-outline" onclick="document.getElementById('forgotPasswordModal').style.display='none'">ط¥ظ„ط؛ط§ط،</button>
+                            <button type="submit" id="fpSubmitBtn" class="btn btn-green">ط¥ط±ط³ط§ظ„ ط§ظ„ظƒظˆط¯ ط¹ط¨ط± ظˆط§طھط³ط§ط¨</button>
                         </div>
                     </form>
                 </div>
             </div>
             <div class="auth-footer">
-                <p>ليس لديك حساب؟ <a href="register.html">إنشاء حساب جديد</a></p>
+                <p>ظ„ظٹط³ ظ„ط¯ظٹظƒ ط­ط³ط§ط¨طں <a href="register.html">ط¥ظ†ط´ط§ط، ط­ط³ط§ط¨ ط¬ط¯ظٹط¯</a></p>
             </div>
         </div>
     </div>
@@ -329,7 +329,7 @@
             }
             
             if(!course) {
-                alert('هذا الكورس غير موجود');
+                alert('ظ‡ط°ط§ ط§ظ„ظƒظˆط±ط³ ط؛ظٹط± ظ…ظˆط¬ظˆط¯');
                 window.location.href = 'courses.html';
                 return;
             }
@@ -358,7 +358,7 @@
                     } catch(e) {
                         console.error('Server verification failed', e);
                         isOwned = false;
-                        alert('تعذر التحقق من ملكيتك للكورس بسبب مشكلة في الاتصال بالإنترنت. يرجى المحاولة لاحقاً.');
+                        alert('طھط¹ط°ط± ط§ظ„طھط­ظ‚ظ‚ ظ…ظ† ظ…ظ„ظƒظٹطھظƒ ظ„ظ„ظƒظˆط±ط³ ط¨ط³ط¨ط¨ ظ…ط´ظƒظ„ط© ظپظٹ ط§ظ„ط§طھطµط§ظ„ ط¨ط§ظ„ط¥ظ†طھط±ظ†طھ. ظٹط±ط¬ظ‰ ط§ظ„ظ…ط­ط§ظˆظ„ط© ظ„ط§ط­ظ‚ط§ظ‹.');
                         window.location.href = 'courses.html';
                         return;
                     }
@@ -379,10 +379,10 @@
             }
 
             const grades = {
-                'prep1': 'أولى إعدادي',
-                'prep2': 'تانية إعدادي',
-                'prep3': 'تالتة إعدادي',
-                'sec1': 'أولى ثانوي'
+                'prep1': 'ط£ظˆظ„ظ‰ ط¥ط¹ط¯ط§ط¯ظٹ',
+                'prep2': 'طھط§ظ†ظٹط© ط¥ط¹ط¯ط§ط¯ظٹ',
+                'prep3': 'طھط§ظ„طھط© ط¥ط¹ط¯ط§ط¯ظٹ',
+                'sec1': 'ط£ظˆظ„ظ‰ ط«ط§ظ†ظˆظٹ'
             };
 
             document.getElementById('cdImage').src = course.image;
@@ -393,8 +393,8 @@
             if (course.hasDiscount && course.discountPrice && (!course.discountExpiry || course.discountExpiry > Date.now())) {
                 priceContainer.innerHTML = `
                     <div style="display:flex; flex-direction:column; align-items:flex-start; line-height: 1;">
-                        <span style="text-decoration: line-through; font-size: 1.1rem; color: var(--text-muted); opacity: 0.8; margin-bottom: 5px;">${course.price} ج.م</span>
-                        <span style="color: #2ecc71; font-size: 2.2rem;">${course.discountPrice} ج.م</span>
+                        <span style="text-decoration: line-through; font-size: 1.1rem; color: var(--text-muted); opacity: 0.8; margin-bottom: 5px;">${course.price} ط¬.ظ…</span>
+                        <span style="color: #2ecc71; font-size: 2.2rem;">${course.discountPrice} ط¬.ظ…</span>
                     </div>
                 `;
                 if (course.discountExpiry) {
@@ -402,7 +402,7 @@
                     timerDiv.className = 'discount-countdown';
                     timerDiv.setAttribute('data-expiry', course.discountExpiry);
                     timerDiv.style.cssText = 'background: rgba(231, 76, 60, 0.1); border: 1px solid rgba(231, 76, 60, 0.3); border-radius: 5px; padding: 10px; margin-top: 15px; text-align: center; color: #e74c3c; font-weight: bold; font-size: 1rem; animation: pulse 2s infinite; width: 100%;';
-                    timerDiv.innerHTML = '<i class="fas fa-clock"></i> ينتهي الخصم خلال: <span class="cd-timer">...</span>';
+                    timerDiv.innerHTML = '<i class="fas fa-clock"></i> ظٹظ†طھظ‡ظٹ ط§ظ„ط®طµظ… ط®ظ„ط§ظ„: <span class="cd-timer">...</span>';
                     // We'll append this after setting the grade, just below the title area.
                     setTimeout(() => {
                         const actContainer = document.getElementById('cdActionBtnContainer');
@@ -412,7 +412,7 @@
                     }, 0);
                 }
             } else {
-                priceContainer.innerHTML = `<span style="font-size: 2.2rem; color: var(--royal-gold); line-height: 1;">${course.price} ج.م</span>`;
+                priceContainer.innerHTML = `<span style="font-size: 2.2rem; color: var(--royal-gold); line-height: 1;">${course.price} ط¬.ظ…</span>`;
             }
             
             document.getElementById('cdGrade').textContent = grades[course.grade] || course.grade;
@@ -431,10 +431,10 @@
             if (isAdmin) {
                 actionContainer.innerHTML = `
                     <button class="btn btn-outline" style="border-color: var(--accent-cyan); color: var(--accent-cyan); margin-left: 10px;" onclick="openAdminCourseEdit()">
-                        <i class="fas fa-edit mr-2"></i> تعديل بيانات الكورس
+                        <i class="fas fa-edit mr-2"></i> طھط¹ط¯ظٹظ„ ط¨ظٹط§ظ†ط§طھ ط§ظ„ظƒظˆط±ط³
                     </button>
                     <button class="btn btn-outline" style="border-color: var(--royal-gold); color: var(--royal-gold);" onclick="window.location.href='admin-courses.html?id=${course.id}'">
-                        <i class="fas fa-layer-group mr-2"></i> تعديل المحتوى
+                        <i class="fas fa-layer-group mr-2"></i> طھط¹ط¯ظٹظ„ ط§ظ„ظ…ط­طھظˆظ‰
                     </button>
                 `;
                 
@@ -443,38 +443,38 @@
                 <div class="modal-overlay" id="adminEditCourseModal">
                     <div class="glass-panel modal-content" style="padding: 30px; max-width: 500px;">
                         <button class="close-modal" onclick="document.getElementById('adminEditCourseModal').classList.remove('active')"><i class="fas fa-times"></i></button>
-                        <h2 class="text-gold mb-2 text-center">تعديل بيانات الكورس</h2>
+                        <h2 class="text-gold mb-2 text-center">طھط¹ط¯ظٹظ„ ط¨ظٹط§ظ†ط§طھ ط§ظ„ظƒظˆط±ط³</h2>
                         <div class="form-group mt-2">
-                            <label>اسم الكورس</label>
+                            <label>ط§ط³ظ… ط§ظ„ظƒظˆط±ط³</label>
                             <input type="text" id="adminEditCourseTitle" class="form-control" value="${course.title}">
                         </div>
                         <div class="form-group">
-                            <label>حالة الكورس (مثال: يبدأ فوراً أو 15 أكتوبر)</label>
+                            <label>ط­ط§ظ„ط© ط§ظ„ظƒظˆط±ط³ (ظ…ط«ط§ظ„: ظٹط¨ط¯ط£ ظپظˆط±ط§ظ‹ ط£ظˆ 15 ط£ظƒطھظˆط¨ط±)</label>
                             <input type="text" id="adminEditCourseStatus" class="form-control" value="${course.courseStatus || ''}">
                         </div>
                         <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 15px;">
                             <div class="form-group">
-                                <label style="font-size: 0.85rem;">المحاضرات</label>
-                                <input type="text" id="adminEditLecSchedule" class="form-control" value="${course.lecSchedule || ''}" placeholder="السبت 8 م">
+                                <label style="font-size: 0.85rem;">ط§ظ„ظ…ط­ط§ط¶ط±ط§طھ</label>
+                                <input type="text" id="adminEditLecSchedule" class="form-control" value="${course.lecSchedule || ''}" placeholder="ط§ظ„ط³ط¨طھ 8 ظ…">
                             </div>
                             <div class="form-group">
-                                <label style="font-size: 0.85rem;">الواجبات</label>
-                                <input type="text" id="adminEditHwSchedule" class="form-control" value="${course.hwSchedule || ''}" placeholder="الأحد 10 ص">
+                                <label style="font-size: 0.85rem;">ط§ظ„ظˆط§ط¬ط¨ط§طھ</label>
+                                <input type="text" id="adminEditHwSchedule" class="form-control" value="${course.hwSchedule || ''}" placeholder="ط§ظ„ط£ط­ط¯ 10 طµ">
                             </div>
                             <div class="form-group">
-                                <label style="font-size: 0.85rem;">الامتحانات</label>
-                                <input type="text" id="adminEditExamSchedule" class="form-control" value="${course.examSchedule || ''}" placeholder="الإثنين 12 ظ">
+                                <label style="font-size: 0.85rem;">ط§ظ„ط§ظ…طھط­ط§ظ†ط§طھ</label>
+                                <input type="text" id="adminEditExamSchedule" class="form-control" value="${course.examSchedule || ''}" placeholder="ط§ظ„ط¥ط«ظ†ظٹظ† 12 ط¸">
                             </div>
                         </div>
                         <div class="form-group">
-                            <label>رابط الصورة</label>
+                            <label>ط±ط§ط¨ط· ط§ظ„طµظˆط±ط©</label>
                             <input type="text" id="adminEditCourseImage" class="form-control" value="${course.image}">
                         </div>
                         <div class="form-group">
-                            <label>الوصف</label>
+                            <label>ط§ظ„ظˆطµظپ</label>
                             <textarea id="adminEditCourseDesc" class="form-control" rows="3">${course.desc}</textarea>
                         </div>
-                        <button class="btn btn-green btn-block mt-2" onclick="saveAdminCourseEdit()">حفظ التعديلات</button>
+                        <button class="btn btn-green btn-block mt-2" onclick="saveAdminCourseEdit()">ط­ظپط¸ ط§ظ„طھط¹ط¯ظٹظ„ط§طھ</button>
                     </div>
                 </div>`;
                 const div = document.createElement('div');
@@ -518,17 +518,17 @@
                 };
             }
             else if (isOwned) {
-                actionContainer.innerHTML = `<button class="btn btn-green"><i class="fas fa-check-circle mr-2"></i> المحتوى مفتوح لك</button>`;
+                actionContainer.innerHTML = `<button class="btn btn-green"><i class="fas fa-check-circle mr-2"></i> ط§ظ„ظ…ط­طھظˆظ‰ ظ…ظپطھظˆط­ ظ„ظƒ</button>`;
             } else if (isPending) {
-                actionContainer.innerHTML = `<button class="btn btn-outline" style="color:var(--accent-orange); border-color:var(--accent-orange);" onclick="showPendingMessageDetails()"><i class="fas fa-clock mr-2"></i> طلبك قيد المراجعة</button>`;
+                actionContainer.innerHTML = `<button class="btn btn-outline" style="color:var(--accent-orange); border-color:var(--accent-orange);" onclick="showPendingMessageDetails()"><i class="fas fa-clock mr-2"></i> ط·ظ„ط¨ظƒ ظ‚ظٹط¯ ط§ظ„ظ…ط±ط§ط¬ط¹ط©</button>`;
             } else if (course.isFree || course.price == '0' || course.price === 0) {
                 if (userStr) {
-                    actionContainer.innerHTML = `<button class="btn btn-green" onclick="enrollFreeCourse('${course.id}')"><i class="fas fa-door-open mr-2"></i> دخول الكورس مجاناً</button>`;
+                    actionContainer.innerHTML = `<button class="btn btn-green" onclick="enrollFreeCourse('${course.id}')"><i class="fas fa-door-open mr-2"></i> ط¯ط®ظˆظ„ ط§ظ„ظƒظˆط±ط³ ظ…ط¬ط§ظ†ط§ظ‹</button>`;
                 } else {
-                    actionContainer.innerHTML = `<button class="btn btn-outline" style="color:#f1c40f; border-color:#f1c40f;" onclick="window.location.href='index.html#login'"><i class="fas fa-user-lock mr-2"></i> يجب تسجيل الدخول للاستمتاع بالكورس المجاني</button>`;
+                    actionContainer.innerHTML = `<button class="btn btn-outline" style="color:#f1c40f; border-color:#f1c40f;" onclick="window.location.href='index.html#login'"><i class="fas fa-user-lock mr-2"></i> ظٹط¬ط¨ طھط³ط¬ظٹظ„ ط§ظ„ط¯ط®ظˆظ„ ظ„ظ„ط§ط³طھظ…طھط§ط¹ ط¨ط§ظ„ظƒظˆط±ط³ ط§ظ„ظ…ط¬ط§ظ†ظٹ</button>`;
                 }
             } else {
-                actionContainer.innerHTML = `<button class="btn btn-gold" onclick="openPaymentModalDetails('${course.id}')"><i class="fas fa-lock-open mr-2"></i> الاشتراك لفتح المحتوى</button>`;
+                actionContainer.innerHTML = `<button class="btn btn-gold" onclick="openPaymentModalDetails('${course.id}')"><i class="fas fa-lock-open mr-2"></i> ط§ظ„ط§ط´طھط±ط§ظƒ ظ„ظپطھط­ ط§ظ„ظ…ط­طھظˆظ‰</button>`;
             }
 
             const rawContents = course.contents || {};
@@ -542,9 +542,9 @@
                 }
 
                 let defaultSections = [
-                    { id: 'sec_lectures', title: 'المحاضرات', items: [] },
-                    { id: 'sec_homeworks', title: 'الواجبات', items: [] },
-                    { id: 'sec_exams', title: 'الامتحانات', items: [] }
+                    { id: 'sec_lectures', title: 'ط§ظ„ظ…ط­ط§ط¶ط±ط§طھ', items: [] },
+                    { id: 'sec_homeworks', title: 'ط§ظ„ظˆط§ط¬ط¨ط§طھ', items: [] },
+                    { id: 'sec_exams', title: 'ط§ظ„ط§ظ…طھط­ط§ظ†ط§طھ', items: [] }
                 ];
                 
                 // Helper to find items attached to a specific lecture
@@ -599,13 +599,13 @@
                 if (c.trainings && c.trainings.length) {
                     let unattached = c.trainings.filter(t => !t.attachedToLectureId);
                     if (unattached.length) {
-                        sections.push({ id: 'sec_trainings', title: 'التدريبات', items: unattached });
+                        sections.push({ id: 'sec_trainings', title: 'ط§ظ„طھط¯ط±ظٹط¨ط§طھ', items: unattached });
                     }
                 }
 
                 if (c.customSections && c.customSections.length) {
                     c.customSections.forEach((sec, idx) => {
-                        sections.push({ id: 'sec_custom_'+idx, title: sec.name || 'قسم مخصص', items: sec.items || [] });
+                        sections.push({ id: 'sec_custom_'+idx, title: sec.name || 'ظ‚ط³ظ… ظ…ط®طµطµ', items: sec.items || [] });
                     });
                 }
                 
@@ -645,20 +645,20 @@
                             window.location.href = 'index.html?login=true';
                             return;
                         } else {
-                            if(window.showToast) window.showToast('يرجى الضغط على زر "دخول الكورس مجاناً" باللون الأخضر بالأعلى أولاً', 'info');
-                            else alert('يرجى الضغط على زر "دخول الكورس مجاناً" باللون الأخضر بالأعلى أولاً');
+                            if(window.showToast) window.showToast('ظٹط±ط¬ظ‰ ط§ظ„ط¶ط؛ط· ط¹ظ„ظ‰ ط²ط± "ط¯ط®ظˆظ„ ط§ظ„ظƒظˆط±ط³ ظ…ط¬ط§ظ†ط§ظ‹" ط¨ط§ظ„ظ„ظˆظ† ط§ظ„ط£ط®ط¶ط± ط¨ط§ظ„ط£ط¹ظ„ظ‰ ط£ظˆظ„ط§ظ‹', 'info');
+                            else alert('ظٹط±ط¬ظ‰ ط§ظ„ط¶ط؛ط· ط¹ظ„ظ‰ ط²ط± "ط¯ط®ظˆظ„ ط§ظ„ظƒظˆط±ط³ ظ…ط¬ط§ظ†ط§ظ‹" ط¨ط§ظ„ظ„ظˆظ† ط§ظ„ط£ط®ط¶ط± ط¨ط§ظ„ط£ط¹ظ„ظ‰ ط£ظˆظ„ط§ظ‹');
                             return;
                         }
                     } else {
-                        if(window.showToast) window.showToast('هذا المحتوى غير متاح، يجب عليك الاشتراك في الكورس أولاً', 'error');
-                        else alert('هذا المحتوى غير متاح، يجب عليك الاشتراك في الكورس أولاً');
+                        if(window.showToast) window.showToast('ظ‡ط°ط§ ط§ظ„ظ…ط­طھظˆظ‰ ط؛ظٹط± ظ…طھط§ط­طŒ ظٹط¬ط¨ ط¹ظ„ظٹظƒ ط§ظ„ط§ط´طھط±ط§ظƒ ظپظٹ ط§ظ„ظƒظˆط±ط³ ط£ظˆظ„ط§ظ‹', 'error');
+                        else alert('ظ‡ط°ط§ ط§ظ„ظ…ط­طھظˆظ‰ ط؛ظٹط± ظ…طھط§ط­طŒ ظٹط¬ط¨ ط¹ظ„ظٹظƒ ط§ظ„ط§ط´طھط±ط§ظƒ ظپظٹ ط§ظ„ظƒظˆط±ط³ ط£ظˆظ„ط§ظ‹');
                         return;
                     }
                 }
                 
                 if(isLocked && !isAdmin) {
-                    if(window.showToast) window.showToast(lockReason || 'هذا المحتوى مقفول حالياً', 'error');
-                    else alert(lockReason || 'هذا المحتوى مقفول حالياً');
+                    if(window.showToast) window.showToast(lockReason || 'ظ‡ط°ط§ ط§ظ„ظ…ط­طھظˆظ‰ ظ…ظ‚ظپظˆظ„ ط­ط§ظ„ظٹط§ظ‹', 'error');
+                    else alert(lockReason || 'ظ‡ط°ط§ ط§ظ„ظ…ط­طھظˆظ‰ ظ…ظ‚ظپظˆظ„ ط­ط§ظ„ظٹط§ظ‹');
                     return;
                 }
                 
@@ -681,7 +681,7 @@
                                 
                                 const handleVideoEnded = () => {
                                     markItemCompleted(item.id);
-                                    if(window.showToast) window.showToast('تم اكتمال مشاهدة الدرس بنجاح!', 'success');
+                                    if(window.showToast) window.showToast('طھظ… ط§ظƒطھظ…ط§ظ„ ظ…ط´ط§ظ‡ط¯ط© ط§ظ„ط¯ط±ط³ ط¨ظ†ط¬ط§ط­!', 'success');
                                     
                                     // Find next attached training
                                     let parentId = item._parentLecId || item.id;
@@ -741,13 +741,13 @@
                             }
                         } else if (item.videoUrl) {
                             const posterAttr = item.thumbnail ? `poster="${item.thumbnail}"` : '';
-                            container.innerHTML = `<video width="100%" height="100%" controls controlsList="nodownload" autoplay ${posterAttr}><source src="${item.videoUrl}" type="video/mp4">متصفحك لا يدعم تشغيل الفيديو.</video>`;
+                            container.innerHTML = `<video width="100%" height="100%" controls controlsList="nodownload" autoplay ${posterAttr}><source src="${item.videoUrl}" type="video/mp4">ظ…طھطµظپط­ظƒ ظ„ط§ ظٹط¯ط¹ظ… طھط´ط؛ظٹظ„ ط§ظ„ظپظٹط¯ظٹظˆ.</video>`;
                             if (window.injectVideoWatermark) window.injectVideoWatermark(container);
                             const vidEl = container.querySelector('video');
                             if(vidEl) {
                                 vidEl.onended = () => {
                                     markItemCompleted(item.id);
-                                    if(window.showToast) window.showToast('تم اكتمال مشاهدة الدرس بنجاح!', 'success');
+                                    if(window.showToast) window.showToast('طھظ… ط§ظƒطھظ…ط§ظ„ ظ…ط´ط§ظ‡ط¯ط© ط§ظ„ط¯ط±ط³ ط¨ظ†ط¬ط§ط­!', 'success');
                                     
                                     // Find next attached training
                                     let parentId = item._parentLecId || item.id;
@@ -789,8 +789,8 @@
                     return;
                 }
                 
-                if(window.showToast) window.showToast('افتح المحتوى: ' + item.title, 'success');
-                else alert('افتح المحتوى: ' + item.title);
+                if(window.showToast) window.showToast('ط§ظپطھط­ ط§ظ„ظ…ط­طھظˆظ‰: ' + item.title, 'success');
+                else alert('ط§ظپطھط­ ط§ظ„ظ…ط­طھظˆظ‰: ' + item.title);
             }
 
             function toItemIcon(type) {
@@ -821,7 +821,7 @@
                     
                     let scheduleHtml = '';
                     if (scheduleText) {
-                        scheduleHtml = `<div style="color: rgba(255,255,255,0.6); font-size: 0.85rem; margin-top: 5px; font-weight: normal;"><i class="fas fa-clock mr-1"></i> موعد النزول: ${scheduleText}</div>`;
+                        scheduleHtml = `<div style="color: rgba(255,255,255,0.6); font-size: 0.85rem; margin-top: 5px; font-weight: normal;"><i class="fas fa-clock mr-1"></i> ظ…ظˆط¹ط¯ ط§ظ„ظ†ط²ظˆظ„: ${scheduleText}</div>`;
                     }
 
                     header.innerHTML = `
@@ -830,7 +830,7 @@
                             <div style="text-align:right; min-width:0;">
                                 <div style="font-size:1.2rem; font-weight:bold; color: var(--accent-cyan); white-space:normal;">${sec.title}</div>
                                 ${scheduleHtml}
-                                <div style="color: rgba(255,255,255,0.5); font-size:0.9rem; margin-top:4px;">${(sec.items || []).filter(i => i.type !== 'header').length} محتويات</div>
+                                <div style="color: rgba(255,255,255,0.5); font-size:0.9rem; margin-top:4px;">${(sec.items || []).filter(i => i.type !== 'header').length} ظ…ط­طھظˆظٹط§طھ</div>
                             </div>
                         </div>
                         <i class="fas fa-chevron-down" style="color: rgba(255,255,255,0.5); transition: transform 0.3s;" id="chevron_${sIdx}"></i>
@@ -848,7 +848,7 @@
                     detailsInner.style.cssText = 'display:flex; flex-direction:column; gap:12px; padding: 20px;';
 
                     if(!sec.items || sec.items.length === 0) {
-                        detailsInner.innerHTML = '<div style="text-align:center; padding: 30px; background: rgba(0,0,0,0.2); border-radius: 12px; margin-top: 10px;"><i class="fas fa-laptop-code mb-3" style="font-size: 2.5rem; color: var(--accent-cyan); opacity: 0.8;"></i><h3 style="color: var(--royal-gold); margin-bottom: 10px;">المحتوى قيد التجهيز 🚀</h3><p style="color: rgba(255,255,255,0.7); line-height: 1.6; font-size: 0.95rem;">يتم الآن إعداد وتجهيز محتوى هذا القسم بأفضل جودة ليكون متاحاً قريباً، ابقوا متابعين ولا تفوتوا الجديد!</p></div>';
+                        detailsInner.innerHTML = '<div style="text-align:center; padding: 30px; background: rgba(0,0,0,0.2); border-radius: 12px; margin-top: 10px;"><i class="fas fa-laptop-code mb-3" style="font-size: 2.5rem; color: var(--accent-cyan); opacity: 0.8;"></i><h3 style="color: var(--royal-gold); margin-bottom: 10px;">ط§ظ„ظ…ط­طھظˆظ‰ ظ‚ظٹط¯ ط§ظ„طھط¬ظ‡ظٹط² ًںڑ€</h3><p style="color: rgba(255,255,255,0.7); line-height: 1.6; font-size: 0.95rem;">ظٹطھظ… ط§ظ„ط¢ظ† ط¥ط¹ط¯ط§ط¯ ظˆطھط¬ظ‡ظٹط² ظ…ط­طھظˆظ‰ ظ‡ط°ط§ ط§ظ„ظ‚ط³ظ… ط¨ط£ظپط¶ظ„ ط¬ظˆط¯ط© ظ„ظٹظƒظˆظ† ظ…طھط§ط­ط§ظ‹ ظ‚ط±ظٹط¨ط§ظ‹طŒ ط§ط¨ظ‚ظˆط§ ظ…طھط§ط¨ط¹ظٹظ† ظˆظ„ط§ طھظپظˆطھظˆط§ ط§ظ„ط¬ط¯ظٹط¯!</p></div>';
                     } else {
                         let currentHeaderGroup = null;
 
@@ -874,7 +874,7 @@
                             if (item.dependsOn) {
                                 if (!isItemCompleted(item.dependsOn)) {
                                     isLocked = true;
-                                    lockReason = 'يجب إكمال المحتوى السابق أولاً';
+                                    lockReason = 'ظٹط¬ط¨ ط¥ظƒظ…ط§ظ„ ط§ظ„ظ…ط­طھظˆظ‰ ط§ظ„ط³ط§ط¨ظ‚ ط£ظˆظ„ط§ظ‹';
                                 }
                             }
                             
@@ -886,7 +886,7 @@
                                 if (Date.now() < availTime) {
                                     isLocked = true;
                                     const dateStr = new Date(availStr).toLocaleDateString('ar-EG');
-                                    lockReason = `سيكون متاحاً يوم ${dateStr}`;
+                                    lockReason = `ط³ظٹظƒظˆظ† ظ…طھط§ط­ط§ظ‹ ظٹظˆظ… ${dateStr}`;
                                     if(!isAdmin && !isOwned) return; 
                                 }
                             }
@@ -895,7 +895,7 @@
                                 const untilTime = new Date(untilStr).getTime();
                                 if (Date.now() > untilTime) {
                                     isLocked = true;
-                                    lockReason = `انتهى وقت إتاحة المحتوى`;
+                                    lockReason = `ط§ظ†طھظ‡ظ‰ ظˆظ‚طھ ط¥طھط§ط­ط© ط§ظ„ظ…ط­طھظˆظ‰`;
                                     if(!isAdmin && !isOwned) return; 
                                 }
                             }
@@ -905,7 +905,7 @@
 
                             const isCompleted = isItemCompleted(item.id);
                             const iconColor = isLocked ? 'rgba(255,255,255,0.4)' : (isCompleted ? '#2ecc71' : 'var(--accent-cyan)');
-                            const statusBadge = isCompleted ? `<span style="background:#2ecc71; color:#000; font-size:0.7rem; padding:2px 6px; border-radius:4px; margin-right:8px;">مكتمل</span>` : '';
+                            const statusBadge = isCompleted ? `<span style="background:#2ecc71; color:#000; font-size:0.7rem; padding:2px 6px; border-radius:4px; margin-right:8px;">ظ…ظƒطھظ…ظ„</span>` : '';
 
                             row.innerHTML = `
                                 <div style="display:flex; align-items:center; gap:15px; flex:1;">
@@ -915,8 +915,8 @@
                                     <div style="min-width:0;">
                                         <div style="color: var(--text-primary); font-weight: 700; font-size: 1.05rem;">${item.title} ${statusBadge}</div>
                                         <div style="font-size:0.8rem; color: rgba(255,255,255,0.5); margin-top: 4px;">
-                                            ${item.type === 'video' ? 'فيديو مسجل' : item.type === 'pdf' ? 'مذكرة' : item.type === 'task' ? 'واجب وتدريب' : 'امتحان'}
-                                            ${item.deadlineDate ? ` <span style="color: #e74c3c; margin-right: 10px;"><i class="fas fa-clock"></i> الديدلاين: ${new Date(item.deadlineDate).toLocaleDateString('ar-EG')}</span>` : ''}
+                                            ${item.type === 'video' ? 'ظپظٹط¯ظٹظˆ ظ…ط³ط¬ظ„' : item.type === 'pdf' ? 'ظ…ط°ظƒط±ط©' : item.type === 'task' ? 'ظˆط§ط¬ط¨ ظˆطھط¯ط±ظٹط¨' : 'ط§ظ…طھط­ط§ظ†'}
+                                            ${item.deadlineDate ? ` <span style="color: #e74c3c; margin-right: 10px;"><i class="fas fa-clock"></i> ط§ظ„ط¯ظٹط¯ظ„ط§ظٹظ†: ${new Date(item.deadlineDate).toLocaleDateString('ar-EG')}</span>` : ''}
                                         </div>
                                     </div>
                                 </div>
@@ -927,13 +927,13 @@
                             actionBtn.style.cssText = 'padding: 8px 16px; border-radius: 8px; font-size: 0.9rem; white-space: nowrap;';
                             
                             if (isLocked) {
-                                actionBtn.innerHTML = '<i class="fas fa-lock"></i> مقفول';
+                                actionBtn.innerHTML = '<i class="fas fa-lock"></i> ظ…ظ‚ظپظˆظ„';
                                 actionBtn.style.borderColor = 'rgba(255,255,255,0.2)';
                                 actionBtn.style.color = 'rgba(255,255,255,0.5)';
                             } else {
                                 let isFreeCourse = (course.isFree || course.price == '0' || course.price === 0);
                                 if (isOwned || isAdmin) {
-                                    actionBtn.textContent = isCompleted ? 'مراجعة' : 'بدء';
+                                    actionBtn.textContent = isCompleted ? 'ظ…ط±ط§ط¬ط¹ط©' : 'ط¨ط¯ط،';
                                     if (isCompleted) {
                                         actionBtn.style.borderColor = '#2ecc71';
                                         actionBtn.style.color = '#2ecc71';
@@ -943,9 +943,9 @@
                                     }
                                 } else {
                                     if (isFreeCourse) {
-                                        actionBtn.textContent = userStr ? 'انضمام مجاني' : 'سجل الدخول';
+                                        actionBtn.textContent = userStr ? 'ط§ظ†ط¶ظ…ط§ظ… ظ…ط¬ط§ظ†ظٹ' : 'ط³ط¬ظ„ ط§ظ„ط¯ط®ظˆظ„';
                                     } else {
-                                        actionBtn.textContent = 'اشترك لفتح';
+                                        actionBtn.textContent = 'ط§ط´طھط±ظƒ ظ„ظپطھط­';
                                     }
                                     actionBtn.style.borderColor = 'var(--accent-orange)';
                                     actionBtn.style.color = 'var(--accent-orange)';
@@ -1018,17 +1018,17 @@
                 } catch(e) { console.error('Failed to mount Bousala Course Viewer', e); }
             })();
 
-            // Add exam modal UI — Full Featured (Timer, Auto-Submit, Strict Mode, Encouragement, Attempts)
+            // Add exam modal UI â€” Full Featured (Timer, Auto-Submit, Strict Mode, Encouragement, Attempts)
             (function(){
                 const examModalHtml = `
                 <div class="modal-overlay" id="examModal">
                   <div class="glass-panel modal-content" style="padding: 20px; max-width: 800px; position:relative;">
                     <button class="close-modal" id="examModalCloseBtn"><i class="fas fa-times"></i></button>
-                    <h2 id="examModalTitle" style="margin-bottom:10px;">امتحان</h2>
+                    <h2 id="examModalTitle" style="margin-bottom:10px;">ط§ظ…طھط­ط§ظ†</h2>
                     <div id="examQuestionsContainer" style="display:block; max-height:50vh; overflow:auto; gap:10px; margin-bottom:12px;"></div>
                     <div style="display:flex; gap:10px; justify-content:flex-end;">
-                      <button class="btn btn-outline" id="examCancelBtn">إلغاء</button>
-                      <button class="btn btn-green" id="submitExamBtn">تسليم الإجابات</button>
+                      <button class="btn btn-outline" id="examCancelBtn">ط¥ظ„ط؛ط§ط،</button>
+                      <button class="btn btn-green" id="submitExamBtn">طھط³ظ„ظٹظ… ط§ظ„ط¥ط¬ط§ط¨ط§طھ</button>
                     </div>
                     <div id="examResultContainer" style="margin-top:12px; display:none;"></div>
                   </div>
@@ -1056,24 +1056,24 @@
                     } else if(course && course.contents) {
                         if(typeof examObjOrIndex === 'number' && Array.isArray(course.contents.exams)) exam = course.contents.exams[examObjOrIndex];
                     }
-                    if(!exam) { if(window.showToast) window.showToast('لا يوجد امتحان قابل للتشغيل','error'); else alert('لا يوجد امتحان.'); return; }
+                    if(!exam) { if(window.showToast) window.showToast('ظ„ط§ ظٹظˆط¬ط¯ ط§ظ…طھط­ط§ظ† ظ‚ط§ط¨ظ„ ظ„ظ„طھط´ط؛ظٹظ„','error'); else alert('ظ„ط§ ظٹظˆط¬ط¯ ط§ظ…طھط­ط§ظ†.'); return; }
 
                     // Check availability window
                     const nowMs = Date.now();
                     if(exam.availableFrom && new Date(exam.availableFrom).getTime() > nowMs) {
                         const fromStr = new Date(exam.availableFrom).toLocaleString('ar-EG');
-                        if(window.showToast) window.showToast('الامتحان لم يفتح بعد. يفتح في: ' + fromStr, 'error');
-                        else alert('الامتحان لم يفتح بعد. يفتح في: ' + fromStr);
+                        if(window.showToast) window.showToast('ط§ظ„ط§ظ…طھط­ط§ظ† ظ„ظ… ظٹظپطھط­ ط¨ط¹ط¯. ظٹظپطھط­ ظپظٹ: ' + fromStr, 'error');
+                        else alert('ط§ظ„ط§ظ…طھط­ط§ظ† ظ„ظ… ظٹظپطھط­ ط¨ط¹ط¯. ظٹظپطھط­ ظپظٹ: ' + fromStr);
                         return;
                     }
                     if(exam.availableUntil && new Date(exam.availableUntil).getTime() < nowMs) {
-                        if(window.showToast) window.showToast('انتهى وقت هذا الامتحان ولا يمكن الدخول إليه.', 'error');
-                        else alert('انتهى وقت هذا الامتحان ولا يمكن الدخول إليه.');
+                        if(window.showToast) window.showToast('ط§ظ†طھظ‡ظ‰ ظˆظ‚طھ ظ‡ط°ط§ ط§ظ„ط§ظ…طھط­ط§ظ† ظˆظ„ط§ ظٹظ…ظƒظ† ط§ظ„ط¯ط®ظˆظ„ ط¥ظ„ظٹظ‡.', 'error');
+                        else alert('ط§ظ†طھظ‡ظ‰ ظˆظ‚طھ ظ‡ط°ط§ ط§ظ„ط§ظ…طھط­ط§ظ† ظˆظ„ط§ ظٹظ…ظƒظ† ط§ظ„ط¯ط®ظˆظ„ ط¥ظ„ظٹظ‡.');
                         return;
                     }
 
                     const modal = document.getElementById('examModal');
-                    document.getElementById('examModalTitle').textContent = exam.title || 'امتحان';
+                    document.getElementById('examModalTitle').textContent = exam.title || 'ط§ظ…طھط­ط§ظ†';
 
                     const container = document.getElementById('examQuestionsContainer');
                     container.innerHTML = '';
@@ -1087,11 +1087,11 @@
                         if(q.type === 'choose'){
                             inputHtml = '<div>' + ['a','b','c','d'].map(k => '<label style="display:block;margin-bottom:8px;cursor:pointer;"><input type=radio name=qa_' + idx + ' value="' + k + '"/> ' + (q.options && q.options[k] ? q.options[k] : k) + '</label>').join('') + '</div>';
                         } else if(q.type === 'tf'){
-                            inputHtml = '<label style="cursor:pointer;"><input type=radio name=qa_' + idx + ' value="صح"/> صح</label><label style="margin-right:15px;cursor:pointer;"><input type=radio name=qa_' + idx + ' value="خطأ"/> خطأ</label>';
+                            inputHtml = '<label style="cursor:pointer;"><input type=radio name=qa_' + idx + ' value="طµط­"/> طµط­</label><label style="margin-right:15px;cursor:pointer;"><input type=radio name=qa_' + idx + ' value="ط®ط·ط£"/> ط®ط·ط£</label>';
                         } else {
-                            inputHtml = '<textarea name=qa_' + idx + ' rows=3 style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);color:#fff;border-radius:6px;padding:8px;" placeholder="اكتب إجابتك هنا"></textarea>';
+                            inputHtml = '<textarea name=qa_' + idx + ' rows=3 style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);color:#fff;border-radius:6px;padding:8px;" placeholder="ط§ظƒطھط¨ ط¥ط¬ط§ط¨طھظƒ ظ‡ظ†ط§"></textarea>';
                         }
-                        qDiv.innerHTML = '<p style="margin:0 0 10px 0;font-weight:600;"><span style="color:var(--royal-gold);">س' + (idx+1) + ':</span> ' + q.text + '</p>' + inputHtml;
+                        qDiv.innerHTML = '<p style="margin:0 0 10px 0;font-weight:600;"><span style="color:var(--royal-gold);">ط³' + (idx+1) + ':</span> ' + q.text + '</p>' + inputHtml;
                         container.appendChild(qDiv);
                     });
 
@@ -1099,12 +1099,12 @@
                     const cancelBtn = document.getElementById('examCancelBtn');
                     const resultBox = document.getElementById('examResultContainer');
                     resultBox.style.display = 'none'; resultBox.innerHTML = '';
-                    submitBtn.disabled = false; submitBtn.innerHTML = 'تسليم الإجابات';
+                    submitBtn.disabled = false; submitBtn.innerHTML = 'طھط³ظ„ظٹظ… ط§ظ„ط¥ط¬ط§ط¨ط§طھ';
 
                     async function doSubmit(autoSubmit) {
                         _stopTimer();
                         const studentStr = sessionStorage.getItem('currentStudent');
-                        if(!studentStr){ alert('يجب تسجيل الدخول لتسليم الإجابة'); return; }
+                        if(!studentStr){ alert('ظٹط¬ط¨ طھط³ط¬ظٹظ„ ط§ظ„ط¯ط®ظˆظ„ ظ„طھط³ظ„ظٹظ… ط§ظ„ط¥ط¬ط§ط¨ط©'); return; }
                         const student = JSON.parse(studentStr);
                         const answers = [];
                         questions.forEach((q, idx) => {
@@ -1119,7 +1119,7 @@
                         });
 
                         submitBtn.disabled = true;
-                        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري التصحيح...';
+                        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ط¬ط§ط±ظٹ ط§ظ„طھطµط­ظٹط­...';
 
                         // Import Bousala Grader
                         let BousalaGrader = null;
@@ -1153,7 +1153,7 @@
                                     } else {
                                         const opts = { choices: item.q.options ? Object.values(item.q.options) : null, altAnswers: item.q.altAnswers };
                                         const res = BousalaGrader.gradeObjective(item.answer, item.q.answer, opts);
-                                        r = { score: res.score, feedback: res.why, needsReview: false, method: "آلي" };
+                                        r = { score: res.score, feedback: res.why, needsReview: false, method: "ط¢ظ„ظٹ" };
                                     }
                                 }
                             } catch(e) { console.error('Bousala grading failed for item, using fallback', e); }
@@ -1163,7 +1163,7 @@
                                 try {
                                     if(window.PF_Grader && typeof window.PF_Grader.scoreAnswer === 'function') {
                                         const res = window.PF_Grader.scoreAnswer(item.answer, item.q.answer, item.q.type || 'explain');
-                                        r = { score: res.score || 0, feedback: res.feedback || (res.score === 1 ? 'إجابة صحيحة تمامًا ✅' : 'راجع الإجابة'), needsReview: false };
+                                        r = { score: res.score || 0, feedback: res.feedback || (res.score === 1 ? 'ط¥ط¬ط§ط¨ط© طµط­ظٹط­ط© طھظ…ط§ظ…ظ‹ط§ âœ…' : 'ط±ط§ط¬ط¹ ط§ظ„ط¥ط¬ط§ط¨ط©'), needsReview: false };
                                     }
                                 } catch(e) {}
                             }
@@ -1172,10 +1172,10 @@
                                 const correct = (item.q.answer || '').toString().trim().toLowerCase();
                                 const given = String(item.answer || '').trim().toLowerCase();
                                 const ok = given !== '' && given === correct;
-                                r = { score: ok ? 1 : 0, feedback: ok ? 'إجابة صحيحة ✅' : ('إجابة غير صحيحة ❌ — الإجابة الصحيحة: ' + item.q.answer), needsReview: false };
+                                r = { score: ok ? 1 : 0, feedback: ok ? 'ط¥ط¬ط§ط¨ط© طµط­ظٹط­ط© âœ…' : ('ط¥ط¬ط§ط¨ط© ط؛ظٹط± طµط­ظٹط­ط© â‌Œ â€” ط§ظ„ط¥ط¬ط§ط¨ط© ط§ظ„طµط­ظٹط­ط©: ' + item.q.answer), needsReview: false };
                             }
 
-                            results.push({ question: item.q.text, rawAnswer: item.answer, score: r.score, feedback: r.feedback, needsReview: !!r.needsReview, method: r.method || "قديم" });
+                            results.push({ question: item.q.text, rawAnswer: item.answer, score: r.score, feedback: r.feedback, needsReview: !!r.needsReview, method: r.method || "ظ‚ط¯ظٹظ…" });
                         }
 
                         const total = results.reduce((s, r) => s + (r.score || 0), 0);
@@ -1187,17 +1187,17 @@
                         const dispPct = penaltyApplied ? effectivePercent : percent;
 
                         let encouragement = '', encColor = '', encIcon = '';
-                        if(dispPct >= 85) { encouragement = 'برافو! أداء ممتاز، استمر! 🎉'; encColor = '#2ecc71'; encIcon = '🏆'; }
-                        else if(dispPct >= 60) { encouragement = 'عاش! أداء كويس، راجع الأخطاء وهتوصل! 👏'; encColor = '#f39c12'; encIcon = '👍'; }
-                        else { encouragement = 'كمل! مش ناقصك غير مذاكرة أكتر، هتقدر إن شاء الله! 💪'; encColor = '#e74c3c'; encIcon = '📚'; }
+                        if(dispPct >= 85) { encouragement = 'ط¨ط±ط§ظپظˆ! ط£ط¯ط§ط، ظ…ظ…طھط§ط²طŒ ط§ط³طھظ…ط±! ًںژ‰'; encColor = '#2ecc71'; encIcon = 'ًںڈ†'; }
+                        else if(dispPct >= 60) { encouragement = 'ط¹ط§ط´! ط£ط¯ط§ط، ظƒظˆظٹط³طŒ ط±ط§ط¬ط¹ ط§ظ„ط£ط®ط·ط§ط، ظˆظ‡طھظˆطµظ„! ًں‘ڈ'; encColor = '#f39c12'; encIcon = 'ًں‘چ'; }
+                        else { encouragement = 'ظƒظ…ظ„! ظ…ط´ ظ†ط§ظ‚طµظƒ ط؛ظٹط± ظ…ط°ط§ظƒط±ط© ط£ظƒطھط±طŒ ظ‡طھظ‚ط¯ط± ط¥ظ† ط´ط§ط، ط§ظ„ظ„ظ‡! ًں’ھ'; encColor = '#e74c3c'; encIcon = 'ًں“ڑ'; }
 
                         resultBox.style.display = 'block';
                         let rHtml = '<div style="background:rgba(255,255,255,0.04);padding:20px;border-radius:14px;border:1px solid rgba(255,255,255,0.1);">';
                         rHtml += '<div style="font-size:2.5rem;margin-bottom:6px;">' + encIcon + '</div>';
                         rHtml += '<div style="font-size:1.3rem;font-weight:bold;color:' + encColor + ';margin-bottom:10px;">' + encouragement + '</div>';
-                        rHtml += '<div style="font-size:1.1rem;"><strong>درجتك: ' + percent + '%</strong>' + (penaltyApplied ? ' <span style="color:#e74c3c;">(بعد خصم التأخير: ' + effectivePercent + '%)</span>' : '') + '</div>';
-                        if(autoSubmit) rHtml += '<div style="margin-top:8px;color:#e74c3c;font-size:0.9rem;">⏰ تم التسليم التلقائي بعد انتهاء الوقت.</div>';
-                        if(penaltyApplied) rHtml += '<div style="margin-top:10px;padding:10px;background:rgba(231,76,60,0.15);border-radius:8px;color:#e74c3c;font-size:0.9rem;">⚠️ <strong>تم خصم ' + penaltyAmount + '% من درجتك بسبب التأخر في التسليم بعد الموعد النهائي.</strong></div>';
+                        rHtml += '<div style="font-size:1.1rem;"><strong>ط¯ط±ط¬طھظƒ: ' + percent + '%</strong>' + (penaltyApplied ? ' <span style="color:#e74c3c;">(ط¨ط¹ط¯ ط®طµظ… ط§ظ„طھط£ط®ظٹط±: ' + effectivePercent + '%)</span>' : '') + '</div>';
+                        if(autoSubmit) rHtml += '<div style="margin-top:8px;color:#e74c3c;font-size:0.9rem;">âڈ° طھظ… ط§ظ„طھط³ظ„ظٹظ… ط§ظ„طھظ„ظ‚ط§ط¦ظٹ ط¨ط¹ط¯ ط§ظ†طھظ‡ط§ط، ط§ظ„ظˆظ‚طھ.</div>';
+                        if(penaltyApplied) rHtml += '<div style="margin-top:10px;padding:10px;background:rgba(231,76,60,0.15);border-radius:8px;color:#e74c3c;font-size:0.9rem;">âڑ ï¸ڈ <strong>طھظ… ط®طµظ… ' + penaltyAmount + '% ظ…ظ† ط¯ط±ط¬طھظƒ ط¨ط³ط¨ط¨ ط§ظ„طھط£ط®ط± ظپظٹ ط§ظ„طھط³ظ„ظٹظ… ط¨ط¹ط¯ ط§ظ„ظ…ظˆط¹ط¯ ط§ظ„ظ†ظ‡ط§ط¦ظٹ.</strong></div>';
                         rHtml += '<hr style="border-color:rgba(255,255,255,0.08);margin:14px 0;"><div id="_examResDetails"></div></div>';
                         resultBox.innerHTML = rHtml;
 
@@ -1205,12 +1205,12 @@
                         results.forEach((r, i) => {
                             const p = document.createElement('div');
                             p.style.cssText = 'padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.06);font-size:0.9rem;line-height:1.6;';
-                            p.innerHTML = '<strong>س' + (i+1) + ':</strong> ' + r.question + '<br/><em style="color:rgba(255,255,255,0.6);">إجابتك:</em> <span style="color:' + (r.score >= 0.5 ? '#2ecc71' : '#e74c3c') + ';">' + (r.rawAnswer || '(بدون إجابة)') + '</span><br/><em style="color:rgba(255,255,255,0.6);">التعليق:</em> ' + r.feedback;
+                            p.innerHTML = '<strong>ط³' + (i+1) + ':</strong> ' + r.question + '<br/><em style="color:rgba(255,255,255,0.6);">ط¥ط¬ط§ط¨طھظƒ:</em> <span style="color:' + (r.score >= 0.5 ? '#2ecc71' : '#e74c3c') + ';">' + (r.rawAnswer || '(ط¨ط¯ظˆظ† ط¥ط¬ط§ط¨ط©)') + '</span><br/><em style="color:rgba(255,255,255,0.6);">ط§ظ„طھط¹ظ„ظٹظ‚:</em> ' + r.feedback;
                             detEl.appendChild(p);
                         });
 
                         container.querySelectorAll('input, textarea').forEach(el => el.disabled = true);
-                        submitBtn.disabled = true; submitBtn.innerHTML = '<i class="fas fa-check-circle"></i> تم التسليم';
+                        submitBtn.disabled = true; submitBtn.innerHTML = '<i class="fas fa-check-circle"></i> طھظ… ط§ظ„طھط³ظ„ظٹظ…';
                         _deactivateStrict();
                         markItemCompleted(exam.id || ('exam_' + (typeof examObjOrIndex === 'number' ? examObjOrIndex : Date.now())));
 
@@ -1232,7 +1232,7 @@
                             if(aNum > 1) {
                                 const ntc = document.createElement('div');
                                 ntc.style.cssText = 'margin-top:12px;padding:12px;background:rgba(212,166,79,0.12);border-radius:8px;color:var(--royal-gold);font-size:0.9rem;';
-                                ntc.innerHTML = '<i class="fas fa-info-circle"></i> <strong>تنبيه:</strong> هذه المحاولة رقم ' + aNum + '. <strong>المحاولة الأولى هي الدرجة المعتمدة رسمياً.</strong> المحاولات اللاحقة محفوظة للمراجعة.';
+                                ntc.innerHTML = '<i class="fas fa-info-circle"></i> <strong>طھظ†ط¨ظٹظ‡:</strong> ظ‡ط°ظ‡ ط§ظ„ظ…ط­ط§ظˆظ„ط© ط±ظ‚ظ… ' + aNum + '. <strong>ط§ظ„ظ…ط­ط§ظˆظ„ط© ط§ظ„ط£ظˆظ„ظ‰ ظ‡ظٹ ط§ظ„ط¯ط±ط¬ط© ط§ظ„ظ…ط¹طھظ…ط¯ط© ط±ط³ظ…ظٹط§ظ‹.</strong> ط§ظ„ظ…ط­ط§ظˆظ„ط§طھ ط§ظ„ظ„ط§ط­ظ‚ط© ظ…ط­ظپظˆط¸ط© ظ„ظ„ظ…ط±ط§ط¬ط¹ط©.';
                                 resultBox.appendChild(ntc);
                             }
                         } catch(e) { console.error('save exam result failed', e); }
@@ -1241,7 +1241,7 @@
                     submitBtn.onclick = function() { doSubmit(false); };
                     cancelBtn.onclick = function() {
                         if(exam.strictMode && !submitBtn.disabled) {
-                            if(confirm('⚠️ الامتحان في الوضع الصارم. هل تريد الخروج وتسليم إجاباتك الحالية؟')) { doSubmit(true); setTimeout(() => modal.classList.remove('active'), 700); }
+                            if(confirm('âڑ ï¸ڈ ط§ظ„ط§ظ…طھط­ط§ظ† ظپظٹ ط§ظ„ظˆط¶ط¹ ط§ظ„طµط§ط±ظ…. ظ‡ظ„ طھط±ظٹط¯ ط§ظ„ط®ط±ظˆط¬ ظˆطھط³ظ„ظٹظ… ط¥ط¬ط§ط¨ط§طھظƒ ط§ظ„ط­ط§ظ„ظٹط©طں')) { doSubmit(true); setTimeout(() => modal.classList.remove('active'), 700); }
                         } else { _stopTimer(); _deactivateStrict(); modal.classList.remove('active'); }
                     };
                     document.getElementById('examModalCloseBtn').onclick = cancelBtn.onclick;
@@ -1259,8 +1259,8 @@
                             const urg = secsLeft <= 60;
                             timerEl.style.color = urg ? '#e74c3c' : 'var(--royal-gold)';
                             timerEl.style.borderColor = urg ? 'rgba(231,76,60,0.4)' : 'rgba(212,166,79,0.2)';
-                            timerEl.innerHTML = '⏱️ الوقت المتبقي: <span>' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0') + '</span>';
-                            if(secsLeft <= 0) { _stopTimer(); timerEl.innerHTML = '⏰ <span style="color:#e74c3c;">انتهى الوقت! جاري التسليم التلقائي...</span>'; setTimeout(() => doSubmit(true), 500); }
+                            timerEl.innerHTML = 'âڈ±ï¸ڈ ط§ظ„ظˆظ‚طھ ط§ظ„ظ…طھط¨ظ‚ظٹ: <span>' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0') + '</span>';
+                            if(secsLeft <= 0) { _stopTimer(); timerEl.innerHTML = 'âڈ° <span style="color:#e74c3c;">ط§ظ†طھظ‡ظ‰ ط§ظ„ظˆظ‚طھ! ط¬ط§ط±ظٹ ط§ظ„طھط³ظ„ظٹظ… ط§ظ„طھظ„ظ‚ط§ط¦ظٹ...</span>'; setTimeout(() => doSubmit(true), 500); }
                             secsLeft--;
                         }
                         updTm(); _examTimerInterval = setInterval(updTm, 1000);
@@ -1268,14 +1268,14 @@
 
                     // ===== STRICT MODE =====
                     if(exam.strictMode) {
-                        _examStrictBeforeUnload = function(e) { e.preventDefault(); e.returnValue = '⚠️ لو غلقت الصفحة هيتم تسليم الامتحان تلقائياً!'; return e.returnValue; };
-                        _examStrictVisibility = function() { if(document.hidden && !submitBtn.disabled) { if(window.showToast) window.showToast('⚠️ تحذير: تغيير التبويب محظور أثناء الامتحان الصارم!', 'error'); } };
+                        _examStrictBeforeUnload = function(e) { e.preventDefault(); e.returnValue = 'âڑ ï¸ڈ ظ„ظˆ ط؛ظ„ظ‚طھ ط§ظ„طµظپط­ط© ظ‡ظٹطھظ… طھط³ظ„ظٹظ… ط§ظ„ط§ظ…طھط­ط§ظ† طھظ„ظ‚ط§ط¦ظٹط§ظ‹!'; return e.returnValue; };
+                        _examStrictVisibility = function() { if(document.hidden && !submitBtn.disabled) { if(window.showToast) window.showToast('âڑ ï¸ڈ طھط­ط°ظٹط±: طھط؛ظٹظٹط± ط§ظ„طھط¨ظˆظٹط¨ ظ…ط­ط¸ظˆط± ط£ط«ظ†ط§ط، ط§ظ„ط§ظ…طھط­ط§ظ† ط§ظ„طµط§ط±ظ…!', 'error'); } };
                         window.addEventListener('beforeunload', _examStrictBeforeUnload);
                         document.addEventListener('visibilitychange', _examStrictVisibility);
                         const sb = document.createElement('div');
                         sb.id = 'examStrictBadge';
                         sb.style.cssText = 'background:rgba(231,76,60,0.15);border:1px solid rgba(231,76,60,0.3);color:#e74c3c;padding:10px 14px;border-radius:8px;font-size:0.9rem;margin-bottom:12px;';
-                        sb.innerHTML = '🔒 <strong>وضع الامتحان الصارم مفعّل</strong> — الخروج أو تغيير التبويب محظور أثناء الامتحان.';
+                        sb.innerHTML = 'ًں”’ <strong>ظˆط¶ط¹ ط§ظ„ط§ظ…طھط­ط§ظ† ط§ظ„طµط§ط±ظ… ظ…ظپط¹ظ‘ظ„</strong> â€” ط§ظ„ط®ط±ظˆط¬ ط£ظˆ طھط؛ظٹظٹط± ط§ظ„طھط¨ظˆظٹط¨ ظ…ط­ط¸ظˆط± ط£ط«ظ†ط§ط، ط§ظ„ط§ظ…طھط­ط§ظ†.';
                         container.parentElement.insertBefore(sb, container);
                     }
 
@@ -1300,7 +1300,7 @@
                         const vodafoneDetails = document.getElementById('vodafoneDetails');
                         if(vodafoneDetails) {
                             const p = vodafoneDetails.querySelector('p');
-                            if(p) p.textContent = paymentSettings.paymentInstructions || 'قم بتحويل المبلغ على الرقم التالي عبر فودافون كاش:';
+                            if(p) p.textContent = paymentSettings.paymentInstructions || 'ظ‚ظ… ط¨طھط­ظˆظٹظ„ ط§ظ„ظ…ط¨ظ„ط؛ ط¹ظ„ظ‰ ط§ظ„ط±ظ‚ظ… ط§ظ„طھط§ظ„ظٹ ط¹ط¨ط± ظپظˆط¯ط§ظپظˆظ† ظƒط§ط´:';
                         }
                         const fawryMethodBtn = document.querySelector('.pay-method[data-type="fawry"]');
                         if(fawryMethodBtn) {
@@ -1334,15 +1334,15 @@
                 let msgHTML = `
                     <div style="text-align: center;">
                         <i class="fas fa-clock" style="font-size: 3rem; color: var(--accent-orange); margin-bottom: 15px;"></i>
-                        <h3 style="color: var(--text-primary); margin-bottom: 10px;">طلب الدفع تحت المراجعة</h3>
-                        <p style="color: rgba(255,255,255,0.8); margin-bottom: 20px;">سيتم تفعيل الكورس فور التأكد من التحويل</p>
+                        <h3 style="color: var(--text-primary); margin-bottom: 10px;">ط·ظ„ط¨ ط§ظ„ط¯ظپط¹ طھط­طھ ط§ظ„ظ…ط±ط§ط¬ط¹ط©</h3>
+                        <p style="color: rgba(255,255,255,0.8); margin-bottom: 20px;">ط³ظٹطھظ… طھظپط¹ظٹظ„ ط§ظ„ظƒظˆط±ط³ ظپظˆط± ط§ظ„طھط£ظƒط¯ ظ…ظ† ط§ظ„طھط­ظˆظٹظ„</p>
                         <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; margin-bottom: 20px;">
-                            <p style="font-size: 0.9rem; margin-bottom: 10px;">إذا قمت بالتحويل بالفعل ولم يتم التفعيل بعد، تواصل عبر الرقم:<br><strong style="font-size: 1.2rem; color: var(--accent-cyan);">01023675235</strong></p>
+                            <p style="font-size: 0.9rem; margin-bottom: 10px;">ط¥ط°ط§ ظ‚ظ…طھ ط¨ط§ظ„طھط­ظˆظٹظ„ ط¨ط§ظ„ظپط¹ظ„ ظˆظ„ظ… ظٹطھظ… ط§ظ„طھظپط¹ظٹظ„ ط¨ط¹ط¯طŒ طھظˆط§طµظ„ ط¹ط¨ط± ط§ظ„ط±ظ‚ظ…:<br><strong style="font-size: 1.2rem; color: var(--accent-cyan);">01023675235</strong></p>
                         </div>
                         <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
-                            <a href="https://wa.me/201023675235" target="_blank" class="btn btn-green" style="background-color: #25D366; border-color: #25D366; flex: 1;"><i class="fab fa-whatsapp"></i> واتساب</a>
-                            <a href="tel:01023675235" class="btn btn-outline" style="flex: 1;"><i class="fas fa-phone"></i> اتصال</a>
-                            <button class="btn btn-gold" onclick="document.getElementById('pendingMsgModal').classList.remove('active'); window.openPaymentModalDetails(courseId)" style="flex: 1 1 100%;"><i class="fas fa-redo"></i> إعادة المحاولة الدفع</button>
+                            <a href="https://wa.me/201023675235" target="_blank" class="btn btn-green" style="background-color: #25D366; border-color: #25D366; flex: 1;"><i class="fab fa-whatsapp"></i> ظˆط§طھط³ط§ط¨</a>
+                            <a href="tel:01023675235" class="btn btn-outline" style="flex: 1;"><i class="fas fa-phone"></i> ط§طھطµط§ظ„</a>
+                            <button class="btn btn-gold" onclick="document.getElementById('pendingMsgModal').classList.remove('active'); window.openPaymentModalDetails(courseId)" style="flex: 1 1 100%;"><i class="fas fa-redo"></i> ط¥ط¹ط§ط¯ط© ط§ظ„ظ…ط­ط§ظˆظ„ط© ط§ظ„ط¯ظپط¹</button>
                         </div>
                     </div>
                 `;
@@ -1383,7 +1383,7 @@
                     const status = document.getElementById('fpStatusText');
                     if (status) {
                         status.style.display = 'block';
-                        status.textContent = `سيتم إرسال كود مكون من ${OTP_LEN} أرقام لرقم ولي الأمر عبر واتساب. لا تشاركه مع أي شخص.`;
+                        status.textContent = `ط³ظٹطھظ… ط¥ط±ط³ط§ظ„ ظƒظˆط¯ ظ…ظƒظˆظ† ظ…ظ† ${OTP_LEN} ط£ط±ظ‚ط§ظ… ظ„ط±ظ‚ظ… ظˆظ„ظٹ ط§ظ„ط£ظ…ط± ط¹ط¨ط± ظˆط§طھط³ط§ط¨. ظ„ط§ طھط´ط§ط±ظƒظ‡ ظ…ط¹ ط£ظٹ ط´ط®طµ.`;
                         status.style.color = '#f8f1d4';
                         status.style.background = 'rgba(212, 166, 79, 0.12)';
                         status.style.border = '1px solid rgba(212, 166, 79, 0.24)';
@@ -1460,7 +1460,7 @@ window.enrollFreeCourse = async function(courseId) {
         }
     }
     
-    if(window.showToast) window.showToast('مرحباً بك في الكورس المجاني!', 'success');
+    if(window.showToast) window.showToast('ظ…ط±ط­ط¨ط§ظ‹ ط¨ظƒ ظپظٹ ط§ظ„ظƒظˆط±ط³ ط§ظ„ظ…ط¬ط§ظ†ظٹ!', 'success');
     setTimeout(() => {
     setTimeout(() => {
         window.location.reload();
@@ -1477,7 +1477,7 @@ setInterval(() => {
         const remaining = expiry - Date.now();
         
         if (remaining <= 0) {
-            el.innerHTML = 'انتهى الخصم';
+            el.innerHTML = 'ط§ظ†طھظ‡ظ‰ ط§ظ„ط®طµظ…';
             el.style.animation = 'none';
             el.style.opacity = '0.5';
             setTimeout(() => {
@@ -1491,14 +1491,14 @@ setInterval(() => {
             let s = Math.floor(seconds % 60);
             
             let parts = [];
-            if (d > 0) parts.push(`${d} يوم`);
-            if (h > 0) parts.push(`${h} ساعة`);
-            if (m > 0) parts.push(`${m} دقيقة`);
-            parts.push(`${s} ثانية`);
+            if (d > 0) parts.push(`${d} ظٹظˆظ…`);
+            if (h > 0) parts.push(`${h} ط³ط§ط¹ط©`);
+            if (m > 0) parts.push(`${m} ط¯ظ‚ظٹظ‚ط©`);
+            parts.push(`${s} ط«ط§ظ†ظٹط©`);
             
             const timerSpan = el.querySelector('.cd-timer');
             if (timerSpan) {
-                timerSpan.textContent = parts.join(' و ');
+                timerSpan.textContent = parts.join(' ظˆ ');
             }
         }
     });
@@ -1507,6 +1507,7 @@ setInterval(() => {
 </script>
 </body>
 </html>
+
 
 
 

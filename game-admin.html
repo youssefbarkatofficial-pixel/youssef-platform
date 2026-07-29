@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>���� ���� ���� ������� ??</title>
+  <title>ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ??</title>
   
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -151,13 +151,13 @@
   <!-- Sidebar -->
   <div class="sidebar">
     <div class="sidebar-header">
-      <h2>?? ���� �������</h2>
-      <p>����� �������</p>
+      <h2>?? ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½</h2>
+      <p>ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½</p>
     </div>
-    <button class="nav-btn active" onclick="switchTab('dashboard')"><i class="fas fa-chart-pie"></i> �������� ����</button>
-    <button class="nav-btn" onclick="switchTab('players')"><i class="fas fa-users"></i> ��������</button>
-    <button class="nav-btn" onclick="switchTab('questions')"><i class="fas fa-database"></i> ����� �������</button>
-    <button class="nav-btn" onclick="switchTab('settings')"><i class="fas fa-cog"></i> ������� ������</button>
+    <button class="nav-btn active" onclick="switchTab('dashboard')"><i class="fas fa-chart-pie"></i> ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½</button>
+    <button class="nav-btn" onclick="switchTab('players')"><i class="fas fa-users"></i> ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½</button>
+    <button class="nav-btn" onclick="switchTab('questions')"><i class="fas fa-database"></i> ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½</button>
+    <button class="nav-btn" onclick="switchTab('settings')"><i class="fas fa-cog"></i> ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½</button>
   </div>
 
   <!-- Main Content -->
@@ -165,86 +165,86 @@
     
     <!-- Dashboard -->
     <div id="sec-dashboard" class="section active">
-      <h1 class="page-title">���� ����</h1>
+      <h1 class="page-title">ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½</h1>
       
       <div class="stats-grid">
         <div class="stat-card">
           <div class="icon"><i class="fas fa-users"></i></div>
           <div class="val" id="stat-total-players">0</div>
-          <div class="lbl">������ ��������</div>
+          <div class="lbl">ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½</div>
         </div>
         <div class="stat-card">
           <div class="icon"><i class="fas fa-gamepad"></i></div>
           <div class="val" id="stat-total-matches">0</div>
-          <div class="lbl">��������� ��������</div>
+          <div class="lbl">ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½</div>
         </div>
         <div class="stat-card">
           <div class="icon"><i class="fas fa-star"></i></div>
           <div class="val" id="stat-total-xp">0</div>
-          <div class="lbl">������ XP ������</div>
+          <div class="lbl">ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ XP ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½</div>
         </div>
       </div>
     </div>
 
     <!-- Players -->
     <div id="sec-players" class="section">
-      <h1 class="page-title">����� ��������</h1>
+      <h1 class="page-title">ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½</h1>
       <div style="display:flex;gap:10px;margin-bottom:20px;">
-        <input type="text" id="search-player" placeholder="���� ���� ������ �� ������..." style="padding:10px;border-radius:8px;border:1px solid var(--dark-border);background:var(--dark-bg);color:white;flex:1;">
+        <input type="text" id="search-player" placeholder="ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½..." style="padding:10px;border-radius:8px;border:1px solid var(--dark-border);background:var(--dark-bg);color:white;flex:1;">
         <select id="filter-grade" style="padding:10px;border-radius:8px;border:1px solid var(--dark-border);background:var(--dark-bg);color:white;">
-          <option value="all">�� ������</option>
-          <option value="7">��� ������</option>
-          <option value="8">���� ������</option>
-          <option value="9">���� ������</option>
-          <option value="10">��� �����</option>
+          <option value="all">ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½</option>
+          <option value="7">ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½</option>
+          <option value="8">ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½</option>
+          <option value="9">ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½</option>
+          <option value="10">ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½</option>
         </select>
-        <button class="btn-primary" onclick="loadPlayers()"><i class="fas fa-search"></i> ���</button>
+        <button class="btn-primary" onclick="loadPlayers()"><i class="fas fa-search"></i> ï؟½ï؟½ï؟½</button>
       </div>
 
       <table>
         <thead>
           <tr>
-            <th>�����</th>
-            <th>����</th>
-            <th>������</th>
+            <th>ï؟½ï؟½ï؟½ï؟½ï؟½</th>
+            <th>ï؟½ï؟½ï؟½ï؟½</th>
+            <th>ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½</th>
             <th>XP</th>
-            <th>���������</th>
-            <th>�������</th>
+            <th>ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½</th>
+            <th>ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½</th>
           </tr>
         </thead>
         <tbody id="players-table-body">
-          <tr><td colspan="6" style="text-align:center;">���� �������...</td></tr>
+          <tr><td colspan="6" style="text-align:center;">ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½...</td></tr>
         </tbody>
       </table>
     </div>
 
     <!-- Questions -->
     <div id="sec-questions" class="section">
-      <h1 class="page-title">��� �������</h1>
+      <h1 class="page-title">ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½</h1>
       <p style="color:var(--text-muted);margin-bottom:20px;">
-        ������� ������ ���� �� ��� `js/game-questions.js`. ���� ������� ������ ����� �� Firebase.
+        ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ ï؟½ï؟½ï؟½ `js/game-questions.js`. ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ Firebase.
       </p>
-      <button class="btn-primary" onclick="alert('�� ������� ������ ���� ��� ����� ������� ������ ������ Firebase ������ ������� �� ���� ������ ���� ����� �����.')">
-        <i class="fas fa-plus"></i> ����� ���� ���� (������)
+      <button class="btn-primary" onclick="alert('ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ Firebase ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½.')">
+        <i class="fas fa-plus"></i> ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ (ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½)
       </button>
     </div>
 
     <!-- Settings -->
     <div id="sec-settings" class="section">
-      <h1 class="page-title">���� ���� ������� (������)</h1>
+      <h1 class="page-title">ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ (ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½)</h1>
       <div class="stat-card" style="text-align:right; max-width:500px;">
-        <h3>����� ���� ���� �����</h3>
-        <p style="color:var(--text-muted);margin-bottom:16px;">������ ����� ������ �� ������� �� "���� ������� ������"</p>
+        <h3>ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½</h3>
+        <p style="color:var(--text-muted);margin-bottom:16px;">ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ "ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½"</p>
         
         <div class="form-group">
-          <label>��� UID ������</label>
-          <input type="text" id="owner-uid" placeholder="���� ��� UID ����� �� ���">
+          <label>ï؟½ï؟½ï؟½ UID ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½</label>
+          <input type="text" id="owner-uid" placeholder="ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ UID ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ ï؟½ï؟½ï؟½">
         </div>
         <div class="form-group">
-          <label>����� ���� XP</label>
+          <label>ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ XP</label>
           <input type="number" id="owner-xp" value="999999">
         </div>
-        <button class="btn-primary" onclick="setOwnerXP()">��� ������</button>
+        <button class="btn-primary" onclick="setOwnerXP()">ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½</button>
       </div>
     </div>
 
@@ -253,23 +253,23 @@
   <!-- Edit Player Modal -->
   <div class="modal" id="edit-modal">
     <div class="modal-content">
-      <h3>����� ������</h3>
+      <h3>ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½</h3>
       <input type="hidden" id="edit-uid">
       <div class="form-group">
-        <label>�����</label>
+        <label>ï؟½ï؟½ï؟½ï؟½ï؟½</label>
         <input type="text" id="edit-name" readonly style="opacity:0.7">
       </div>
       <div class="form-group">
-        <label>���� XP</label>
+        <label>ï؟½ï؟½ï؟½ï؟½ XP</label>
         <input type="number" id="edit-xp">
       </div>
       <div class="form-group">
-        <label>����������</label>
+        <label>ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½</label>
         <input type="number" id="edit-wins">
       </div>
       <div style="display:flex;gap:10px;margin-top:20px;">
-        <button class="btn-primary" style="flex:1" onclick="savePlayerEdit()">���</button>
-        <button class="action-btn" style="flex:1" onclick="document.getElementById('edit-modal').classList.remove('active')">�����</button>
+        <button class="btn-primary" style="flex:1" onclick="savePlayerEdit()">ï؟½ï؟½ï؟½</button>
+        <button class="action-btn" style="flex:1" onclick="document.getElementById('edit-modal').classList.remove('active')">ï؟½ï؟½ï؟½ï؟½ï؟½</button>
       </div>
     </div>
   </div>
@@ -322,7 +322,7 @@
     async function loadPlayers() {
       if(!window.firebaseDb) return;
       const tbody = document.getElementById('players-table-body');
-      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">���� �������...</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½...</td></tr>';
       
       const gradeFilter = document.getElementById('filter-grade').value;
       const search = document.getElementById('search-player').value.trim().toLowerCase();
@@ -338,7 +338,7 @@
         
         snap.forEach(doc => {
           const d = doc.data();
-          const name = (d.name || '�����').toLowerCase();
+          const name = (d.name || 'ï؟½ï؟½ï؟½ï؟½ï؟½').toLowerCase();
           
           if (search && !name.includes(search)) return; // Simple client-side search filter
 
@@ -346,24 +346,24 @@
           
           html += `
             <tr>
-              <td>${d.name || '�����'}</td>
+              <td>${d.name || 'ï؟½ï؟½ï؟½ï؟½ï؟½'}</td>
               <td>${d.grade || '---'}</td>
               <td><span style="color:var(--gold)">${rank}</span></td>
               <td>${d.gameXp || 0}</td>
               <td>${d.gamesPlayed || 0}</td>
               <td>
-                <button class="action-btn" onclick="openEditModal('${doc.id}', '${d.name}', ${d.gameXp||0}, ${d.gameWins||0})">�����</button>
+                <button class="action-btn" onclick="openEditModal('${doc.id}', '${d.name}', ${d.gameXp||0}, ${d.gameWins||0})">ï؟½ï؟½ï؟½ï؟½ï؟½</button>
               </td>
             </tr>
           `;
         });
 
-        if(html === '') html = '<tr><td colspan="6" style="text-align:center;">�� ���� ������</td></tr>';
+        if(html === '') html = '<tr><td colspan="6" style="text-align:center;">ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½</td></tr>';
         tbody.innerHTML = html;
 
       } catch(e) {
         console.error(e);
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:red;">��� ��� �� �������</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:red;">ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½</td></tr>';
       }
     }
 
@@ -387,28 +387,29 @@
         });
         document.getElementById('edit-modal').classList.remove('active');
         loadPlayers();
-        alert('�� ����� �����');
+        alert('ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½');
       } catch(e) {
-        alert('��� ���: ' + e.message);
+        alert('ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½: ' + e.message);
       }
     }
 
     async function setOwnerXP() {
       const uid = document.getElementById('owner-uid').value.trim();
       const xp = parseInt(document.getElementById('owner-xp').value) || 999999;
-      if (!uid) return alert('���� ��� UID ����� ��');
+      if (!uid) return alert('ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ UID ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½');
 
       try {
         await window.firebaseDb.collection('users').doc(uid).set({
           gameXp: xp,
-          name: "���� �����",
+          name: "ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½",
           grade: "owner"
         }, { merge: true });
-        alert('�� ����� ���� ������ �����!');
+        alert('ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½!');
       } catch(e) {
-        alert('��� ���: ' + e.message);
+        alert('ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½: ' + e.message);
       }
     }
   </script>
 </body>
 </html>
+

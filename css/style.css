@@ -757,9 +757,8 @@ img, video {
   
   /* Typography tweaks */
   .heading-luxury {
-    font-size: clamp(1.5rem, 6vw, 2.2rem);
-    white-space: normal; /* Fix overflow by allowing wrap */
-    word-break: break-word;
+    font-size: clamp(10px, 3.8vw, 1.8rem) !important;
+    white-space: nowrap !important;
   }
   h2 {
     font-size: clamp(1.4rem, 6vw, 2rem);

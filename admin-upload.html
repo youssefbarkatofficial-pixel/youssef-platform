@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <script>
@@ -7,9 +7,9 @@
     </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>الرفع السريع - لوحة الإدارة</title>
+    <title>ط§ظ„ط±ظپط¹ ط§ظ„ط³ط±ظٹط¹ - ظ„ظˆط­ط© ط§ظ„ط¥ط¯ط§ط±ط©</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.css?v=2.2">
     <link rel="stylesheet" href="css/dashboard.css">
 </head>
 <body>
@@ -17,144 +17,144 @@
 
     <header class="navbar glass-panel" style="border-bottom-color: var(--royal-gold);">
         <a href="index.html" class="nav-brand">
-            <div class="logo-circle" style="color: #fff; background: var(--royal-gold);">ي</div>
-            <span class="nav-brand-text text-gold">لوحة الإدارة - يوسف بركات</span>
+            <div class="logo-circle" style="color: #fff; background: var(--royal-gold);">ظٹ</div>
+            <span class="nav-brand-text text-gold">ظ„ظˆط­ط© ط§ظ„ط¥ط¯ط§ط±ط© - ظٹظˆط³ظپ ط¨ط±ظƒط§طھ</span>
         </a>
         <div class="nav-actions">
-            <a href="#" id="logoutBtn" class="btn btn-outline" style="border-color: #e74c3c; color: #e74c3c; padding: 8px 15px; border-radius: 20px;">خروج <i class="fas fa-sign-out-alt"></i></a>
+            <a href="#" id="logoutBtn" class="btn btn-outline" style="border-color: #e74c3c; color: #e74c3c; padding: 8px 15px; border-radius: 20px;">ط®ط±ظˆط¬ <i class="fas fa-sign-out-alt"></i></a>
         </div>
     </header>
 
     <div class="dashboard-layout">
         <aside class="sidebar" id="sidebar" style="border-left-color: var(--royal-gold);">
             <ul class="sidebar-nav" style="margin-top: 20px;">
-                <li><a href="admin-dashboard.html"><i class="fas fa-chart-line"></i> الإحصائيات العامة</a></li>
-                <li><a href="admin-students.html"><i class="fas fa-users"></i> إدارة الطلاب</a></li>
-                <li><a href="admin-students-details.html"><i class="fas fa-user-graduate"></i> إحصائيات الطلاب (تفصيلي)</a></li>
-                <li><a href="admin-courses.html"><i class="fas fa-book-open"></i> إدارة الكورسات</a></li>
-                <li><a href="admin-upload.html" class="active"><i class="fas fa-bolt"></i> الرفع السريع</a></li>
-                <li><a href="admin-payments.html"><i class="fas fa-money-check-alt"></i> مراجعة المدفوعات</a></li>
-                <li><a href="admin-compass.html"><i class="fas fa-compass"></i> بوت البوصلة</a></li>
-                <li><a href="admin-bot-monitor.html"><i class="fas fa-eye"></i> مراقبة شات البوصلة</a></li>
-                <li><a href="admin-notifications.html"><i class="fas fa-bell"></i> إرسال الإشعارات</a></li>
-                <li><a href="admin-settings.html"><i class="fas fa-cog"></i> إعدادات المنصة</a></li>
+                <li><a href="admin-dashboard.html"><i class="fas fa-chart-line"></i> ط§ظ„ط¥ط­طµط§ط¦ظٹط§طھ ط§ظ„ط¹ط§ظ…ط©</a></li>
+                <li><a href="admin-students.html"><i class="fas fa-users"></i> ط¥ط¯ط§ط±ط© ط§ظ„ط·ظ„ط§ط¨</a></li>
+                <li><a href="admin-students-details.html"><i class="fas fa-user-graduate"></i> ط¥ط­طµط§ط¦ظٹط§طھ ط§ظ„ط·ظ„ط§ط¨ (طھظپطµظٹظ„ظٹ)</a></li>
+                <li><a href="admin-courses.html"><i class="fas fa-book-open"></i> ط¥ط¯ط§ط±ط© ط§ظ„ظƒظˆط±ط³ط§طھ</a></li>
+                <li><a href="admin-upload.html" class="active"><i class="fas fa-bolt"></i> ط§ظ„ط±ظپط¹ ط§ظ„ط³ط±ظٹط¹</a></li>
+                <li><a href="admin-payments.html"><i class="fas fa-money-check-alt"></i> ظ…ط±ط§ط¬ط¹ط© ط§ظ„ظ…ط¯ظپظˆط¹ط§طھ</a></li>
+                <li><a href="admin-compass.html"><i class="fas fa-compass"></i> ط¨ظˆطھ ط§ظ„ط¨ظˆطµظ„ط©</a></li>
+                <li><a href="admin-bot-monitor.html"><i class="fas fa-eye"></i> ظ…ط±ط§ظ‚ط¨ط© ط´ط§طھ ط§ظ„ط¨ظˆطµظ„ط©</a></li>
+                <li><a href="admin-notifications.html"><i class="fas fa-bell"></i> ط¥ط±ط³ط§ظ„ ط§ظ„ط¥ط´ط¹ط§ط±ط§طھ</a></li>
+                <li><a href="admin-settings.html"><i class="fas fa-cog"></i> ط¥ط¹ط¯ط§ط¯ط§طھ ط§ظ„ظ…ظ†طµط©</a></li>
             </ul>
         </aside>
 
         <main class="main-content">
             <div class="page-header">
-                <h1 class="page-title"><i class="fas fa-bolt text-gold mr-2"></i> الرفع السريع</h1>
-                <p style="color: rgba(255,255,255,0.7); margin-top: 10px;">أضف محتوى للكورسات مباشرة دون الحاجة للدخول لصفحة تعديل الكورس بالكامل.</p>
+                <h1 class="page-title"><i class="fas fa-bolt text-gold mr-2"></i> ط§ظ„ط±ظپط¹ ط§ظ„ط³ط±ظٹط¹</h1>
+                <p style="color: rgba(255,255,255,0.7); margin-top: 10px;">ط£ط¶ظپ ظ…ط­طھظˆظ‰ ظ„ظ„ظƒظˆط±ط³ط§طھ ظ…ط¨ط§ط´ط±ط© ط¯ظˆظ† ط§ظ„ط­ط§ط¬ط© ظ„ظ„ط¯ط®ظˆظ„ ظ„طµظپط­ط© طھط¹ط¯ظٹظ„ ط§ظ„ظƒظˆط±ط³ ط¨ط§ظ„ظƒط§ظ…ظ„.</p>
             </div>
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
                 <!-- Video Upload Panel -->
                 <div class="glass-panel dash-panel">
-                    <h2 style="color: var(--accent-cyan); margin-bottom: 20px;"><i class="fas fa-video mr-2"></i> إضافة محاضرة فيديو</h2>
+                    <h2 style="color: var(--accent-cyan); margin-bottom: 20px;"><i class="fas fa-video mr-2"></i> ط¥ط¶ط§ظپط© ظ…ط­ط§ط¶ط±ط© ظپظٹط¯ظٹظˆ</h2>
                     <form id="fastUploadVideoForm">
                         <div class="form-group">
-                            <label>عنوان المحاضرة / الفيديو</label>
-                            <input type="text" id="vTitle" class="form-control" placeholder="مثال: الدرس الأول" required>
+                            <label>ط¹ظ†ظˆط§ظ† ط§ظ„ظ…ط­ط§ط¶ط±ط© / ط§ظ„ظپظٹط¯ظٹظˆ</label>
+                            <input type="text" id="vTitle" class="form-control" placeholder="ظ…ط«ط§ظ„: ط§ظ„ط¯ط±ط³ ط§ظ„ط£ظˆظ„" required>
                         </div>
                         <div class="form-group">
-                            <label>اختر الكورس</label>
+                            <label>ط§ط®طھط± ط§ظ„ظƒظˆط±ط³</label>
                             <select id="vCourseSelect" class="form-control" required></select>
                         </div>
                         <div class="form-group">
-                            <label>القسم</label>
+                            <label>ط§ظ„ظ‚ط³ظ…</label>
                             <select id="vSectionSelect" class="form-control">
-                                <option value="lectures">المحاضرات</option>
-                                <option value="homeworks">الواجبات (كفيديو حل)</option>
-                                <option value="exams">الامتحانات (كفيديو مراجعة)</option>
+                                <option value="lectures">ط§ظ„ظ…ط­ط§ط¶ط±ط§طھ</option>
+                                <option value="homeworks">ط§ظ„ظˆط§ط¬ط¨ط§طھ (ظƒظپظٹط¯ظٹظˆ ط­ظ„)</option>
+                                <option value="exams">ط§ظ„ط§ظ…طھط­ط§ظ†ط§طھ (ظƒظپظٹط¯ظٹظˆ ظ…ط±ط§ط¬ط¹ط©)</option>
                             </select>
                         </div>
                         <div class="form-group" id="vLectureAttachGroup" style="display:none;">
-                            <label>اربط الفيديو بمحاضرة موجودة</label>
+                            <label>ط§ط±ط¨ط· ط§ظ„ظپظٹط¯ظٹظˆ ط¨ظ…ط­ط§ط¶ط±ط© ظ…ظˆط¬ظˆط¯ط©</label>
                             <select id="vAttachLectureSelect" class="form-control">
-                                <option value="">-- اختر محاضرة --</option>
+                                <option value="">-- ط§ط®طھط± ظ…ط­ط§ط¶ط±ط© --</option>
                             </select>
                         </div>
                         <div class="form-group">
-                            <label>طريقة إضافة الفيديو</label>
+                            <label>ط·ط±ظٹظ‚ط© ط¥ط¶ط§ظپط© ط§ظ„ظپظٹط¯ظٹظˆ</label>
                             <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                                <label style="display:flex; align-items:center; gap: 6px;"><input type="radio" name="videoSource" value="upload" checked> رفع ملف</label>
-                                <label style="display:flex; align-items:center; gap: 6px;"><input type="radio" name="videoSource" value="youtube"> رابط فيديو</label>
+                                <label style="display:flex; align-items:center; gap: 6px;"><input type="radio" name="videoSource" value="upload" checked> ط±ظپط¹ ظ…ظ„ظپ</label>
+                                <label style="display:flex; align-items:center; gap: 6px;"><input type="radio" name="videoSource" value="youtube"> ط±ط§ط¨ط· ظپظٹط¯ظٹظˆ</label>
                             </div>
                         </div>
                         <div class="form-group" id="videoFileGroup">
-                            <label>ملف الفيديو</label>
+                            <label>ظ…ظ„ظپ ط§ظ„ظپظٹط¯ظٹظˆ</label>
                             <input type="file" id="vFileInput" accept="video/*" class="form-control" style="padding: 10px;">
                         </div>
                         <div class="form-group" id="videoUrlGroup" style="display:none;">
-                            <label>رابط الفيديو (يوتيوب أو رابط مباشر من السحابة)</label>
-                            <input type="url" id="vYoutubeUrl" class="form-control" placeholder="مثال: https://.../video.mp4">
+                            <label>ط±ط§ط¨ط· ط§ظ„ظپظٹط¯ظٹظˆ (ظٹظˆطھظٹظˆط¨ ط£ظˆ ط±ط§ط¨ط· ظ…ط¨ط§ط´ط± ظ…ظ† ط§ظ„ط³ط­ط§ط¨ط©)</label>
+                            <input type="url" id="vYoutubeUrl" class="form-control" placeholder="ظ…ط«ط§ظ„: https://.../video.mp4">
                         </div>
                         <div class="form-group" style="display:flex; gap:10px;">
                             <div style="flex:1;">
-                                <label>📅 متاح من (اختياري)</label>
+                                <label>ًں“… ظ…طھط§ط­ ظ…ظ† (ط§ط®طھظٹط§ط±ظٹ)</label>
                                 <input type="datetime-local" id="vAvailableFrom" class="form-control">
                             </div>
                             <div style="flex:1;">
-                                <label>📅 ينتهي في (اختياري)</label>
+                                <label>ًں“… ظٹظ†طھظ‡ظٹ ظپظٹ (ط§ط®طھظٹط§ط±ظٹ)</label>
                                 <input type="datetime-local" id="vAvailableUntil" class="form-control">
                             </div>
                         </div>
-                        <button type="submit" class="btn btn-gold btn-block"><i class="fas fa-upload mr-2"></i> حفظ الفيديو بالكورس</button>
+                        <button type="submit" class="btn btn-gold btn-block"><i class="fas fa-upload mr-2"></i> ط­ظپط¸ ط§ظ„ظپظٹط¯ظٹظˆ ط¨ط§ظ„ظƒظˆط±ط³</button>
                     </form>
                 </div>
 
                 <!-- PDF Upload Panel -->
                 <div class="glass-panel dash-panel">
-                    <h2 style="color: #2ecc71; margin-bottom: 20px;"><i class="fas fa-file-pdf mr-2"></i> إضافة مذكرة (PDF)</h2>
+                    <h2 style="color: #2ecc71; margin-bottom: 20px;"><i class="fas fa-file-pdf mr-2"></i> ط¥ط¶ط§ظپط© ظ…ط°ظƒط±ط© (PDF)</h2>
                     <form id="fastUploadPdfForm">
                         <div class="form-group">
-                            <label>عنوان المذكرة</label>
-                            <input type="text" id="pTitle" class="form-control" placeholder="مثال: مذكرة الوحدة الأولى" required>
+                            <label>ط¹ظ†ظˆط§ظ† ط§ظ„ظ…ط°ظƒط±ط©</label>
+                            <input type="text" id="pTitle" class="form-control" placeholder="ظ…ط«ط§ظ„: ظ…ط°ظƒط±ط© ط§ظ„ظˆط­ط¯ط© ط§ظ„ط£ظˆظ„ظ‰" required>
                         </div>
                         <div class="form-group">
-                            <label>اختر الكورس</label>
+                            <label>ط§ط®طھط± ط§ظ„ظƒظˆط±ط³</label>
                             <select id="pCourseSelect" class="form-control" required></select>
                         </div>
                         <div class="form-group">
-                            <label>القسم</label>
+                            <label>ط§ظ„ظ‚ط³ظ…</label>
                             <select id="pSectionSelect" class="form-control">
-                                <option value="lectures">المحاضرات (كمذكرة شرح)</option>
-                                <option value="homeworks">الواجبات (كملف واجب)</option>
-                                <option value="exams">الامتحانات</option>
+                                <option value="lectures">ط§ظ„ظ…ط­ط§ط¶ط±ط§طھ (ظƒظ…ط°ظƒط±ط© ط´ط±ط­)</option>
+                                <option value="homeworks">ط§ظ„ظˆط§ط¬ط¨ط§طھ (ظƒظ…ظ„ظپ ظˆط§ط¬ط¨)</option>
+                                <option value="exams">ط§ظ„ط§ظ…طھط­ط§ظ†ط§طھ</option>
                             </select>
                         </div>
                         <div class="form-group" id="pLectureAttachGroup" style="display:none;">
-                            <label>اربط المذكرة بمحاضرة موجودة</label>
+                            <label>ط§ط±ط¨ط· ط§ظ„ظ…ط°ظƒط±ط© ط¨ظ…ط­ط§ط¶ط±ط© ظ…ظˆط¬ظˆط¯ط©</label>
                             <select id="pAttachLectureSelect" class="form-control">
-                                <option value="">-- اختر محاضرة --</option>
+                                <option value="">-- ط§ط®طھط± ظ…ط­ط§ط¶ط±ط© --</option>
                             </select>
                         </div>
                         <div class="form-group">
-                            <label>طريقة إضافة المذكرة</label>
+                            <label>ط·ط±ظٹظ‚ط© ط¥ط¶ط§ظپط© ط§ظ„ظ…ط°ظƒط±ط©</label>
                             <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                                <label style="display:flex; align-items:center; gap: 6px;"><input type="radio" name="pdfSource" value="upload" checked> رفع ملف</label>
-                                <label style="display:flex; align-items:center; gap: 6px;"><input type="radio" name="pdfSource" value="link"> رابط مذكرة</label>
+                                <label style="display:flex; align-items:center; gap: 6px;"><input type="radio" name="pdfSource" value="upload" checked> ط±ظپط¹ ظ…ظ„ظپ</label>
+                                <label style="display:flex; align-items:center; gap: 6px;"><input type="radio" name="pdfSource" value="link"> ط±ط§ط¨ط· ظ…ط°ظƒط±ط©</label>
                             </div>
                         </div>
                         <div class="form-group" id="pdfFileGroup">
-                            <label>ملف الـ PDF</label>
+                            <label>ظ…ظ„ظپ ط§ظ„ظ€ PDF</label>
                             <input type="file" id="pFileInput" accept=".pdf" class="form-control" style="padding: 10px;">
                         </div>
                         <div class="form-group" id="pdfUrlGroup" style="display:none;">
-                            <label>رابط المذكرة</label>
+                            <label>ط±ط§ط¨ط· ط§ظ„ظ…ط°ظƒط±ط©</label>
                             <input type="url" id="pLinkUrl" class="form-control" placeholder="https://drive.google.com/...">
                         </div>
                         <div class="form-group" style="display:flex; gap:10px;">
                             <div style="flex:1;">
-                                <label>📅 متاح من (اختياري)</label>
+                                <label>ًں“… ظ…طھط§ط­ ظ…ظ† (ط§ط®طھظٹط§ط±ظٹ)</label>
                                 <input type="datetime-local" id="pAvailableFrom" class="form-control">
                             </div>
                             <div style="flex:1;">
-                                <label>📅 ينتهي في (اختياري)</label>
+                                <label>ًں“… ظٹظ†طھظ‡ظٹ ظپظٹ (ط§ط®طھظٹط§ط±ظٹ)</label>
                                 <input type="datetime-local" id="pAvailableUntil" class="form-control">
                             </div>
                         </div>
-                        <button type="submit" class="btn btn-green btn-block" style="background-color: #2ecc71; border-color: #2ecc71; color: #fff;"><i class="fas fa-upload mr-2"></i> حفظ المذكرة بالكورس</button>
+                        <button type="submit" class="btn btn-green btn-block" style="background-color: #2ecc71; border-color: #2ecc71; color: #fff;"><i class="fas fa-upload mr-2"></i> ط­ظپط¸ ط§ظ„ظ…ط°ظƒط±ط© ط¨ط§ظ„ظƒظˆط±ط³</button>
                     </form>
                 </div>
             </div>
@@ -162,94 +162,94 @@
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 30px;">
                 <!-- Exam Builder Panel -->
                 <div class="glass-panel dash-panel" style="grid-column: 1 / -1;">
-                    <h2 style="color: #f39c12; margin-bottom: 20px;"><i class="fas fa-clipboard-list mr-2"></i> إضافة امتحان بصري</h2>
+                    <h2 style="color: #f39c12; margin-bottom: 20px;"><i class="fas fa-clipboard-list mr-2"></i> ط¥ط¶ط§ظپط© ط§ظ…طھط­ط§ظ† ط¨طµط±ظٹ</h2>
                     <form id="fastUploadExamForm">
                         <div class="form-group">
-                            <label>عنوان الامتحان</label>
-                            <input type="text" id="eTitle" class="form-control" placeholder="مثال: امتحان الوحدة الأولى" required>
+                            <label>ط¹ظ†ظˆط§ظ† ط§ظ„ط§ظ…طھط­ط§ظ†</label>
+                            <input type="text" id="eTitle" class="form-control" placeholder="ظ…ط«ط§ظ„: ط§ظ…طھط­ط§ظ† ط§ظ„ظˆط­ط¯ط© ط§ظ„ط£ظˆظ„ظ‰" required>
                         </div>
                         <div class="form-group">
-                            <label>اختر الكورس</label>
+                            <label>ط§ط®طھط± ط§ظ„ظƒظˆط±ط³</label>
                             <select id="eCourseSelect" class="form-control" required></select>
                         </div>
                         <div class="form-group">
-                            <label>عرض الامتحان باسم</label>
+                            <label>ط¹ط±ط¶ ط§ظ„ط§ظ…طھط­ط§ظ† ط¨ط§ط³ظ…</label>
                             <select id="eDisplayName" class="form-control">
-                                <option value="exam">امتحان</option>
-                                <option value="training">تدريب</option>
-                                <option value="homework">واجب</option>
+                                <option value="exam">ط§ظ…طھط­ط§ظ†</option>
+                                <option value="training">طھط¯ط±ظٹط¨</option>
+                                <option value="homework">ظˆط§ط¬ط¨</option>
                             </select>
                         </div>
                         <div class="form-group" id="trainingAttachGroup" style="display:none;">
-                            <label>اربط التدريب بمحضرة (اختياري)</label>
+                            <label>ط§ط±ط¨ط· ط§ظ„طھط¯ط±ظٹط¨ ط¨ظ…ط­ط¶ط±ط© (ط§ط®طھظٹط§ط±ظٹ)</label>
                             <select id="attachLectureSelect" class="form-control">
-                                <option value="">-- اختر محاضرة --</option>
+                                <option value="">-- ط§ط®طھط± ظ…ط­ط§ط¶ط±ط© --</option>
                             </select>
                         </div>
                         <div class="form-group" id="homeworkLinkGroup" style="display:none;">
-                            <label>اربط الواجب بتدريب (اختياري)</label>
+                            <label>ط§ط±ط¨ط· ط§ظ„ظˆط§ط¬ط¨ ط¨طھط¯ط±ظٹط¨ (ط§ط®طھظٹط§ط±ظٹ)</label>
                             <select id="linkTrainingSelect" class="form-control">
-                                <option value="">-- بدون ربط --</option>
+                                <option value="">-- ط¨ط¯ظˆظ† ط±ط¨ط· --</option>
                             </select>
                         </div>
                         <div class="form-group">
-                            <label>نوع السؤال</label>
+                            <label>ظ†ظˆط¹ ط§ظ„ط³ط¤ط§ظ„</label>
                             <select id="questionType" class="form-control">
-                                <option value="choose">اختر</option>
-                                <option value="fill">أكمل</option>
-                                <option value="tf">صح وغلط</option>
-                                <option value="explain">بم تفسر</option>
-                                <option value="result">ما النتائج</option>
-                                <option value="prove">دلل</option>
-                                <option value="relation">ما العلاقة</option>
-                                <option value="whatif">ماذا يحدث إذا</option>
-                                <option value="meaning">ما المقصود</option>
+                                <option value="choose">ط§ط®طھط±</option>
+                                <option value="fill">ط£ظƒظ…ظ„</option>
+                                <option value="tf">طµط­ ظˆط؛ظ„ط·</option>
+                                <option value="explain">ط¨ظ… طھظپط³ط±</option>
+                                <option value="result">ظ…ط§ ط§ظ„ظ†طھط§ط¦ط¬</option>
+                                <option value="prove">ط¯ظ„ظ„</option>
+                                <option value="relation">ظ…ط§ ط§ظ„ط¹ظ„ط§ظ‚ط©</option>
+                                <option value="whatif">ظ…ط§ط°ط§ ظٹط­ط¯ط« ط¥ط°ط§</option>
+                                <option value="meaning">ظ…ط§ ط§ظ„ظ…ظ‚طµظˆط¯</option>
                             </select>
                         </div>
                         <div class="form-group">
-                            <label>السؤال</label>
-                            <textarea id="questionText" class="form-control" rows="3" placeholder="اكتب نص السؤال هنا" required></textarea>
+                            <label>ط§ظ„ط³ط¤ط§ظ„</label>
+                            <textarea id="questionText" class="form-control" rows="3" placeholder="ط§ظƒطھط¨ ظ†طµ ط§ظ„ط³ط¤ط§ظ„ ظ‡ظ†ط§" required></textarea>
                         </div>
                         <div class="form-group" id="chooseOptionsGroup" style="display: none;">
-                            <label>الخيارات الأربعة</label>
-                            <input type="text" id="optA" class="form-control" placeholder="أ" style="margin-bottom: 10px;">
-                            <input type="text" id="optB" class="form-control" placeholder="ب" style="margin-bottom: 10px;">
-                            <input type="text" id="optC" class="form-control" placeholder="ج" style="margin-bottom: 10px;">
-                            <input type="text" id="optD" class="form-control" placeholder="د">
+                            <label>ط§ظ„ط®ظٹط§ط±ط§طھ ط§ظ„ط£ط±ط¨ط¹ط©</label>
+                            <input type="text" id="optA" class="form-control" placeholder="ط£" style="margin-bottom: 10px;">
+                            <input type="text" id="optB" class="form-control" placeholder="ط¨" style="margin-bottom: 10px;">
+                            <input type="text" id="optC" class="form-control" placeholder="ط¬" style="margin-bottom: 10px;">
+                            <input type="text" id="optD" class="form-control" placeholder="ط¯">
                         </div>
                         <div class="form-group">
-                            <label>الإجابة الصحيحة أو التوضيح</label>
-                            <input type="text" id="correctAnswer" class="form-control" placeholder="مثال: أ" required>
+                            <label>ط§ظ„ط¥ط¬ط§ط¨ط© ط§ظ„طµط­ظٹط­ط© ط£ظˆ ط§ظ„طھظˆط¶ظٹط­</label>
+                            <input type="text" id="correctAnswer" class="form-control" placeholder="ظ…ط«ط§ظ„: ط£" required>
                         </div>
-                        <button type="button" id="btnGenerateRubric" class="btn btn-outline" style="margin-bottom: 15px; border-color: #9b59b6; color: #9b59b6; display: none;"><i class="fas fa-magic mr-2"></i> توليد تقييم ذكي بالذكاء الاصطناعي</button>
+                        <button type="button" id="btnGenerateRubric" class="btn btn-outline" style="margin-bottom: 15px; border-color: #9b59b6; color: #9b59b6; display: none;"><i class="fas fa-magic mr-2"></i> طھظˆظ„ظٹط¯ طھظ‚ظٹظٹظ… ط°ظƒظٹ ط¨ط§ظ„ط°ظƒط§ط، ط§ظ„ط§طµط·ظ†ط§ط¹ظٹ</button>
                         <div id="rubricPreviewContainer" style="display: none; margin-bottom: 15px; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px; font-size: 0.9rem; color: #d4af37; white-space: pre-wrap;"></div>
-                        <button type="button" id="btnAddExamQuestion" class="btn btn-outline" style="margin-bottom: 15px;"><i class="fas fa-plus mr-2"></i> إضافة سؤال للامتحان</button>
+                        <button type="button" id="btnAddExamQuestion" class="btn btn-outline" style="margin-bottom: 15px;"><i class="fas fa-plus mr-2"></i> ط¥ط¶ط§ظپط© ط³ط¤ط§ظ„ ظ„ظ„ط§ظ…طھط­ط§ظ†</button>
                         <div id="examQuestionsList" style="display: grid; gap: 10px; margin-bottom: 20px;"></div>
                         <hr style="border-color:rgba(255,255,255,0.1); margin: 20px 0;">
-                        <h3 style="color: #f39c12; margin-bottom: 15px;"><i class="fas fa-clock mr-2"></i> إعدادات الوقت والنشر</h3>
+                        <h3 style="color: #f39c12; margin-bottom: 15px;"><i class="fas fa-clock mr-2"></i> ط¥ط¹ط¯ط§ط¯ط§طھ ط§ظ„ظˆظ‚طھ ظˆط§ظ„ظ†ط´ط±</h3>
                         <div class="form-group" style="display:flex; gap:10px;">
                             <div style="flex:1;">
-                                <label>📅 تاريخ بدء الامتحان (اختياري)</label>
+                                <label>ًں“… طھط§ط±ظٹط® ط¨ط¯ط، ط§ظ„ط§ظ…طھط­ط§ظ† (ط§ط®طھظٹط§ط±ظٹ)</label>
                                 <input type="datetime-local" id="eAvailableFrom" class="form-control">
                             </div>
                             <div style="flex:1;">
-                                <label>📅 تاريخ انتهاء الامتحان (اختياري)</label>
+                                <label>ًں“… طھط§ط±ظٹط® ط§ظ†طھظ‡ط§ط، ط§ظ„ط§ظ…طھط­ط§ظ† (ط§ط®طھظٹط§ط±ظٹ)</label>
                                 <input type="datetime-local" id="eAvailableUntil" class="form-control">
                             </div>
                         </div>
                         <div class="form-group" style="display:flex; gap:10px; align-items:flex-end;">
                             <div style="flex:1;">
-                                <label>⏱️ مدة الامتحان (بالدقائق، 0 = بدون حد)</label>
-                                <input type="number" id="eDuration" class="form-control" placeholder="مثال: 30" min="0" value="0">
+                                <label>âڈ±ï¸ڈ ظ…ط¯ط© ط§ظ„ط§ظ…طھط­ط§ظ† (ط¨ط§ظ„ط¯ظ‚ط§ط¦ظ‚طŒ 0 = ط¨ط¯ظˆظ† ط­ط¯)</label>
+                                <input type="number" id="eDuration" class="form-control" placeholder="ظ…ط«ط§ظ„: 30" min="0" value="0">
                             </div>
                             <div style="flex:1; padding-bottom: 3px;">
                                 <label style="display:flex; align-items:center; gap:10px; cursor:pointer;">
                                     <input type="checkbox" id="eStrictMode" style="width:18px; height:18px;">
-                                    <span>🔒 وضع الامتحان الصارم (منع الخروج)</span>
+                                    <span>ًں”’ ظˆط¶ط¹ ط§ظ„ط§ظ…طھط­ط§ظ† ط§ظ„طµط§ط±ظ… (ظ…ظ†ط¹ ط§ظ„ط®ط±ظˆط¬)</span>
                                 </label>
                             </div>
                         </div>
-                        <button type="submit" class="btn btn-gold btn-block"><i class="fas fa-upload mr-2"></i> حفظ الامتحان بالكورس</button>
+                        <button type="submit" class="btn btn-gold btn-block"><i class="fas fa-upload mr-2"></i> ط­ظپط¸ ط§ظ„ط§ظ…طھط­ط§ظ† ط¨ط§ظ„ظƒظˆط±ط³</button>
                     </form>
                 </div>
             </div>
@@ -275,7 +275,7 @@
             const eSelect = document.getElementById('eCourseSelect');
 
             function populateCourseSelects(coursesList) {
-                let optionsHtml = '<option value="">-- اختر كورس --</option>';
+                let optionsHtml = '<option value="">-- ط§ط®طھط± ظƒظˆط±ط³ --</option>';
                 coursesList.forEach(c => {
                     optionsHtml += `<option value="${c.id}">${c.title}</option>`;
                 });
@@ -385,30 +385,30 @@
                     const qText = document.getElementById('questionText').value;
                     const qAnswer = document.getElementById('correctAnswer').value;
                     if(!qText || !qAnswer) {
-                        alert('يجب كتابة السؤال والإجابة النموذجية أولاً قبل توليد التقييم.');
+                        alert('ظٹط¬ط¨ ظƒطھط§ط¨ط© ط§ظ„ط³ط¤ط§ظ„ ظˆط§ظ„ط¥ط¬ط§ط¨ط© ط§ظ„ظ†ظ…ظˆط°ط¬ظٹط© ط£ظˆظ„ط§ظ‹ ظ‚ط¨ظ„ طھظˆظ„ظٹط¯ ط§ظ„طھظ‚ظٹظٹظ….');
                         return;
                     }
 
                     if(!window.BousalaRubricGenerator) {
-                        alert('وحدة الذكاء الاصطناعي لتوليد التقييم غير متوفرة.');
+                        alert('ظˆط­ط¯ط© ط§ظ„ط°ظƒط§ط، ط§ظ„ط§طµط·ظ†ط§ط¹ظٹ ظ„طھظˆظ„ظٹط¯ ط§ظ„طھظ‚ظٹظٹظ… ط؛ظٹط± ظ…طھظˆظپط±ط©.');
                         return;
                     }
 
-                    btnGenerateRubric.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> جاري التوليد...';
+                    btnGenerateRubric.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> ط¬ط§ط±ظٹ ط§ظ„طھظˆظ„ظٹط¯...';
                     btnGenerateRubric.disabled = true;
 
                     try {
                         const rubric = await window.BousalaRubricGenerator.generateRubricFromModelAnswer(qText, qAnswer);
                         currentGeneratedRubric = rubric;
                         
-                        rubricPreviewContainer.innerHTML = '<strong>معايير التقييم المولدة:</strong><br>' + 
+                        rubricPreviewContainer.innerHTML = '<strong>ظ…ط¹ط§ظٹظٹط± ط§ظ„طھظ‚ظٹظٹظ… ط§ظ„ظ…ظˆظ„ط¯ط©:</strong><br>' + 
                             rubric.criteria.map(c => `- ${c.concept} (${c.weight * 100}%)`).join('<br>');
                         rubricPreviewContainer.style.display = 'block';
                     } catch(err) {
                         console.error('Rubric Generation Error:', err);
-                        alert('حدث خطأ أثناء توليد التقييم: ' + err.message);
+                        alert('ط­ط¯ط« ط®ط·ط£ ط£ط«ظ†ط§ط، طھظˆظ„ظٹط¯ ط§ظ„طھظ‚ظٹظٹظ…: ' + err.message);
                     } finally {
-                        btnGenerateRubric.innerHTML = '<i class="fas fa-magic mr-2"></i> توليد تقييم ذكي بالذكاء الاصطناعي';
+                        btnGenerateRubric.innerHTML = '<i class="fas fa-magic mr-2"></i> طھظˆظ„ظٹط¯ طھظ‚ظٹظٹظ… ط°ظƒظٹ ط¨ط§ظ„ط°ظƒط§ط، ط§ظ„ط§طµط·ظ†ط§ط¹ظٹ';
                         btnGenerateRubric.disabled = false;
                     }
                 });
@@ -423,10 +423,10 @@
 
             function populateLectureAndTrainingSelectors(courseId){
                 // clear
-                attachLectureSelect.innerHTML = '<option value="">-- اختر محاضرة --</option>';
-                linkTrainingSelect.innerHTML = '<option value="">-- بدون ربط --</option>';
-                document.getElementById('vAttachLectureSelect').innerHTML = '<option value="">-- اختر محاضرة --</option>';
-                document.getElementById('pAttachLectureSelect').innerHTML = '<option value="">-- اختر محاضرة --</option>';
+                attachLectureSelect.innerHTML = '<option value="">-- ط§ط®طھط± ظ…ط­ط§ط¶ط±ط© --</option>';
+                linkTrainingSelect.innerHTML = '<option value="">-- ط¨ط¯ظˆظ† ط±ط¨ط· --</option>';
+                document.getElementById('vAttachLectureSelect').innerHTML = '<option value="">-- ط§ط®طھط± ظ…ط­ط§ط¶ط±ط© --</option>';
+                document.getElementById('pAttachLectureSelect').innerHTML = '<option value="">-- ط§ط®طھط± ظ…ط­ط§ط¶ط±ط© --</option>';
                 if(!courseId) return;
                 const course = adminCourses.find(c=>c.id === courseId);
                 if(!course) return;
@@ -434,7 +434,7 @@
                 const lectures = contents.lectures || [];
                 lectures.forEach((lec, idx)=>{
                     const val = lec.id || lec.title || ('lec_'+idx);
-                    const opt = document.createElement('option'); opt.value = val; opt.textContent = lec.title || ('محاضرة ' + (idx+1));
+                    const opt = document.createElement('option'); opt.value = val; opt.textContent = lec.title || ('ظ…ط­ط§ط¶ط±ط© ' + (idx+1));
                     attachLectureSelect.appendChild(opt);
                     document.getElementById('vAttachLectureSelect').appendChild(opt.cloneNode(true));
                     document.getElementById('pAttachLectureSelect').appendChild(opt.cloneNode(true));
@@ -443,7 +443,7 @@
                 const trainings = contents.trainings || [];
                 trainings.forEach((t, idx)=>{
                     const val = t.createdAt || ('t_'+idx);
-                    const opt = document.createElement('option'); opt.value = val; opt.textContent = t.title || ('تدريب ' + (idx+1));
+                    const opt = document.createElement('option'); opt.value = val; opt.textContent = t.title || ('طھط¯ط±ظٹط¨ ' + (idx+1));
                     linkTrainingSelect.appendChild(opt);
                 });
             }
@@ -493,7 +493,7 @@
                     const qAnswer = document.getElementById('correctAnswer').value;
 
                     if(!qText || !qAnswer) {
-                        alert('يرجى إدخال السؤال والإجابة');
+                        alert('ظٹط±ط¬ظ‰ ط¥ط¯ط®ط§ظ„ ط§ظ„ط³ط¤ط§ظ„ ظˆط§ظ„ط¥ط¬ط§ط¨ط©');
                         return;
                     }
 
@@ -501,10 +501,10 @@
 
                     if(qType === 'choose') {
                         qObj.options = {
-                            a: document.getElementById('optA').value || 'أ',
-                            b: document.getElementById('optB').value || 'ب',
-                            c: document.getElementById('optC').value || 'ج',
-                            d: document.getElementById('optD').value || 'د'
+                            a: document.getElementById('optA').value || 'ط£',
+                            b: document.getElementById('optB').value || 'ط¨',
+                            c: document.getElementById('optC').value || 'ط¬',
+                            d: document.getElementById('optD').value || 'ط¯'
                         };
                     }
 
@@ -547,9 +547,9 @@
                     qDiv.innerHTML = `
                         <div style="display:flex; justify-content:space-between; align-items:start;">
                             <div style="flex:1;">
-                                <p style="margin:0 0 5px 0; color:var(--text-primary);"><strong>السؤال ${idx+1}</strong></p>
+                                <p style="margin:0 0 5px 0; color:var(--text-primary);"><strong>ط§ظ„ط³ط¤ط§ظ„ ${idx+1}</strong></p>
                                 <p style="margin:0 0 5px 0; color:rgba(255,255,255,0.8);">${q.text.substring(0, 50)}...</p>
-                                <p style="margin:0; color:var(--accent-cyan); font-size:0.9rem;">الإجابة: ${q.answer}</p>
+                                <p style="margin:0; color:var(--accent-cyan); font-size:0.9rem;">ط§ظ„ط¥ط¬ط§ط¨ط©: ${q.answer}</p>
                             </div>
                             <button type="button" onclick="examQuestions.splice(${idx}, 1); renderQuestionsList();" class="btn btn-outline" style="padding:5px 10px; border-color:#e74c3c; color:#e74c3c;"><i class="fas fa-trash"></i></button>
                         </div>
@@ -618,11 +618,11 @@
                         } else {
                             localStorage.setItem('adminCourses', JSON.stringify(courses));
                         }
-                        if(window.showToast) window.showToast('✅ تم الحفظ بنجاح!', 'success');
-                        else alert('تم الحفظ بنجاح!');
+                        if(window.showToast) window.showToast('âœ… طھظ… ط§ظ„ط­ظپط¸ ط¨ظ†ط¬ط§ط­!', 'success');
+                        else alert('طھظ… ط§ظ„ط­ظپط¸ ط¨ظ†ط¬ط§ط­!');
                     } catch(err) {
-                        if(window.showToast) window.showToast('❌ خطأ في الحفظ: ' + err.message, 'error');
-                        else alert('خطأ في الحفظ: ' + err.message);
+                        if(window.showToast) window.showToast('â‌Œ ط®ط·ط£ ظپظٹ ط§ظ„ط­ظپط¸: ' + err.message, 'error');
+                        else alert('ط®ط·ط£ ظپظٹ ط§ظ„ط­ظپط¸: ' + err.message);
                     }
                 }
             }
@@ -634,12 +634,12 @@
                 const section = document.getElementById('vSectionSelect').value;
                 const source = document.querySelector('input[name="videoSource"]:checked').value;
                 
-                if(!cId) { alert('يجب اختيار كورس'); return; }
+                if(!cId) { alert('ظٹط¬ط¨ ط§ط®طھظٹط§ط± ظƒظˆط±ط³'); return; }
 
                 let itemObj = { title: title, type: 'video', source: source, attachLectureId: document.getElementById('vAttachLectureSelect').value };
                 if(source === 'youtube') {
                     let urlVal = document.getElementById('vYoutubeUrl').value;
-                    if(!urlVal) { alert('يرجى وضع رابط الفيديو'); return; }
+                    if(!urlVal) { alert('ظٹط±ط¬ظ‰ ظˆط¶ط¹ ط±ط§ط¨ط· ط§ظ„ظپظٹط¯ظٹظˆ'); return; }
                     if(urlVal.includes('youtube') || urlVal.includes('youtu.be')) {
                         itemObj.youtubeUrl = urlVal;
                     } else {
@@ -649,12 +649,12 @@
                     itemObj.availableUntil = document.getElementById('vAvailableUntil').value;
                 } else if(source === 'upload') {
                     const fileInput = document.getElementById('vFileInput');
-                    if (!fileInput.files.length) { alert('يرجى اختيار ملف فيديو'); return; }
+                    if (!fileInput.files.length) { alert('ظٹط±ط¬ظ‰ ط§ط®طھظٹط§ط± ظ…ظ„ظپ ظپظٹط¯ظٹظˆ'); return; }
                     const file = fileInput.files[0];
                     const storageRef = window.firebaseStorage.ref('videos/' + Date.now() + '_' + file.name);
                     const submitBtn = e.target.querySelector('button[type="submit"]');
                     const originalBtnText = submitBtn.innerHTML;
-                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الرفع...';
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ط¬ط§ط±ظٹ ط§ظ„ط±ظپط¹...';
                     submitBtn.disabled = true;
                     try {
                         const snapshot = await storageRef.put(file);
@@ -663,7 +663,7 @@
                         itemObj.fileName = file.name; itemObj.availableFrom = document.getElementById('vAvailableFrom').value; itemObj.availableUntil = document.getElementById('vAvailableUntil').value;
                     } catch(err) {
                         console.error('Upload failed', err);
-                        alert('حدث خطأ أثناء رفع الفيديو: ' + err.message);
+                        alert('ط­ط¯ط« ط®ط·ط£ ط£ط«ظ†ط§ط، ط±ظپط¹ ط§ظ„ظپظٹط¯ظٹظˆ: ' + err.message);
                         submitBtn.innerHTML = originalBtnText;
                         submitBtn.disabled = false;
                         return;
@@ -683,20 +683,20 @@
                 const section = document.getElementById('pSectionSelect').value;
                 const source = document.querySelector('input[name="pdfSource"]:checked').value;
                 
-                if(!cId) { alert('يجب اختيار كورس'); return; }
+                if(!cId) { alert('ظٹط¬ط¨ ط§ط®طھظٹط§ط± ظƒظˆط±ط³'); return; }
 
                 let itemObj = { title: title, type: 'pdf', source: source, attachLectureId: document.getElementById('pAttachLectureSelect').value };
                 if(source === 'link') {
                     itemObj.pdfUrl = document.getElementById('pLinkUrl').value;
-                    if(!itemObj.pdfUrl) { alert('يرجى وضع رابط خارجي للملف'); return; } itemObj.availableFrom = document.getElementById('pAvailableFrom').value; itemObj.availableUntil = document.getElementById('pAvailableUntil').value;
+                    if(!itemObj.pdfUrl) { alert('ظٹط±ط¬ظ‰ ظˆط¶ط¹ ط±ط§ط¨ط· ط®ط§ط±ط¬ظٹ ظ„ظ„ظ…ظ„ظپ'); return; } itemObj.availableFrom = document.getElementById('pAvailableFrom').value; itemObj.availableUntil = document.getElementById('pAvailableUntil').value;
                 } else if(source === 'upload') {
                     const fileInput = document.getElementById('pFileInput');
-                    if (!fileInput.files.length) { alert('يرجى اختيار ملف PDF'); return; }
+                    if (!fileInput.files.length) { alert('ظٹط±ط¬ظ‰ ط§ط®طھظٹط§ط± ظ…ظ„ظپ PDF'); return; }
                     const file = fileInput.files[0];
                     const storageRef = window.firebaseStorage.ref('pdfs/' + Date.now() + '_' + file.name);
                     const submitBtn = e.target.querySelector('button[type="submit"]');
                     const originalBtnText = submitBtn.innerHTML;
-                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الرفع...';
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ط¬ط§ط±ظٹ ط§ظ„ط±ظپط¹...';
                     submitBtn.disabled = true;
                     try {
                         const snapshot = await storageRef.put(file);
@@ -705,7 +705,7 @@
                         itemObj.fileName = file.name; itemObj.availableFrom = document.getElementById('pAvailableFrom').value; itemObj.availableUntil = document.getElementById('pAvailableUntil').value;
                     } catch(err) {
                         console.error('Upload failed', err);
-                        alert('حدث خطأ أثناء رفع الملف: ' + err.message);
+                        alert('ط­ط¯ط« ط®ط·ط£ ط£ط«ظ†ط§ط، ط±ظپط¹ ط§ظ„ظ…ظ„ظپ: ' + err.message);
                         submitBtn.innerHTML = originalBtnText;
                         submitBtn.disabled = false;
                         return;
@@ -726,8 +726,8 @@
                     const eTitle = document.getElementById('eTitle').value;
                     const displayName = document.getElementById('eDisplayName').value;
                     
-                    if(!cId) { alert('يجب اختيار كورس'); return; }
-                    if(examQuestions.length === 0) { alert('يرجى إضافة أسئلة للامتحان'); return; }
+                    if(!cId) { alert('ظٹط¬ط¨ ط§ط®طھظٹط§ط± ظƒظˆط±ط³'); return; }
+                    if(examQuestions.length === 0) { alert('ظٹط±ط¬ظ‰ ط¥ط¶ط§ظپط© ط£ط³ط¦ظ„ط© ظ„ظ„ط§ظ…طھط­ط§ظ†'); return; }
 
                     const examObj = {
                         availableFrom: document.getElementById('eAvailableFrom').value,
@@ -774,6 +774,7 @@
     <script src="js/firebase-service.js?v=5.5"></script>
 </body>
 </html>
+
 
 
 
