@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <script>
@@ -7,9 +7,9 @@
     </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ط¥ط¯ط§ط±ط© ط§ظ„ظƒظˆط±ط³ط§طھ - ظ„ظˆط­ط© ط§ظ„ط¥ط¯ط§ط±ط©</title>
+    <title>إدارة الكورسات - لوحة الإدارة</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="css/style.css?v=2.2">
+    <link rel="stylesheet" href="css/style.css?v=1785339977349">
     <link rel="stylesheet" href="css/dashboard.css">
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     <style>
@@ -68,38 +68,38 @@
 <body>
     <div class="bg-effects"></div>
     <!-- Toast Notification Element -->
-    <div id="adminToast"><i class="fas fa-check-circle"></i> <span id="adminToastMsg">طھظ… ط§ظ„ط­ظپط¸ ط¨ظ†ط¬ط§ط­!</span></div>
+    <div id="adminToast"><i class="fas fa-check-circle"></i> <span id="adminToastMsg">تم الحفظ بنجاح!</span></div>
 
     <header class="navbar glass-panel" style="border-bottom-color: var(--royal-gold);">
         <a href="index.html" class="nav-brand">
-            <div class="logo-circle" style="color: #fff; background: var(--royal-gold);">ظٹ</div>
-            <span class="nav-brand-text text-gold">ظ„ظˆط­ط© ط§ظ„ط¥ط¯ط§ط±ط© - ظٹظˆط³ظپ ط¨ط±ظƒط§طھ</span>
+            <div class="logo-circle" style="color: #fff; background: var(--royal-gold);">ي</div>
+            <span class="nav-brand-text text-gold">لوحة الإدارة - يوسف بركات</span>
         </a>
         <div class="nav-actions">
-            <a href="#" id="logoutBtn" class="btn btn-outline" style="border-color: #e74c3c; color: #e74c3c; padding: 8px 15px; border-radius: 20px;">ط®ط±ظˆط¬ <i class="fas fa-sign-out-alt"></i></a>
+            <a href="#" id="logoutBtn" class="btn btn-outline" style="border-color: #e74c3c; color: #e74c3c; padding: 8px 15px; border-radius: 20px;">خروج <i class="fas fa-sign-out-alt"></i></a>
         </div>
     </header>
 
     <div class="dashboard-layout">
         <aside class="sidebar" id="sidebar" style="border-left-color: var(--royal-gold);">
             <ul class="sidebar-nav" style="margin-top: 20px;">
-                <li><a href="admin-dashboard.html"><i class="fas fa-chart-line"></i> ط§ظ„ط¥ط­طµط§ط¦ظٹط§طھ ط§ظ„ط¹ط§ظ…ط©</a></li>
-                <li><a href="admin-students.html"><i class="fas fa-users"></i> ط¥ط¯ط§ط±ط© ط§ظ„ط·ظ„ط§ط¨</a></li>
-                <li><a href="admin-students-details.html"><i class="fas fa-user-graduate"></i> ط¥ط­طµط§ط¦ظٹط§طھ ط§ظ„ط·ظ„ط§ط¨ (طھظپطµظٹظ„ظٹ)</a></li>
-                <li><a href="admin-courses.html" class="active"><i class="fas fa-book-open"></i> ط¥ط¯ط§ط±ط© ط§ظ„ظƒظˆط±ط³ط§طھ</a></li>
-                <li><a href="admin-upload.html"><i class="fas fa-bolt"></i> ط§ظ„ط±ظپط¹ ط§ظ„ط³ط±ظٹط¹</a></li>
-                <li><a href="admin-payments.html"><i class="fas fa-money-check-alt"></i> ظ…ط±ط§ط¬ط¹ط© ط§ظ„ظ…ط¯ظپظˆط¹ط§طھ</a></li>
-                <li><a href="admin-compass.html"><i class="fas fa-compass"></i> ط¨ظˆطھ ط§ظ„ط¨ظˆطµظ„ط©</a></li>
-                <li><a href="admin-bot-monitor.html"><i class="fas fa-eye"></i> ظ…ط±ط§ظ‚ط¨ط© ط´ط§طھ ط§ظ„ط¨ظˆطµظ„ط©</a></li>
-                <li><a href="admin-notifications.html"><i class="fas fa-bell"></i> ط¥ط±ط³ط§ظ„ ط§ظ„ط¥ط´ط¹ط§ط±ط§طھ</a></li>
-                <li><a href="admin-settings.html"><i class="fas fa-cog"></i> ط¥ط¹ط¯ط§ط¯ط§طھ ط§ظ„ظ…ظ†طµط©</a></li>
+                <li><a href="admin-dashboard.html"><i class="fas fa-chart-line"></i> الإحصائيات العامة</a></li>
+                <li><a href="admin-students.html"><i class="fas fa-users"></i> إدارة الطلاب</a></li>
+                <li><a href="admin-students-details.html"><i class="fas fa-user-graduate"></i> إحصائيات الطلاب (تفصيلي)</a></li>
+                <li><a href="admin-courses.html" class="active"><i class="fas fa-book-open"></i> إدارة الكورسات</a></li>
+                <li><a href="admin-upload.html"><i class="fas fa-bolt"></i> الرفع السريع</a></li>
+                <li><a href="admin-payments.html"><i class="fas fa-money-check-alt"></i> مراجعة المدفوعات</a></li>
+                <li><a href="admin-compass.html"><i class="fas fa-compass"></i> بوت البوصلة</a></li>
+                <li><a href="admin-bot-monitor.html"><i class="fas fa-eye"></i> مراقبة شات البوصلة</a></li>
+                <li><a href="admin-notifications.html"><i class="fas fa-bell"></i> إرسال الإشعارات</a></li>
+                <li><a href="admin-settings.html"><i class="fas fa-cog"></i> إعدادات المنصة</a></li>
             </ul>
         </aside>
 
         <main class="main-content">
             <div class="page-header">
-                <h1 class="page-title">ط¥ط¯ط§ط±ط© ط§ظ„ظƒظˆط±ط³ط§طھ</h1>
-                <button class="btn btn-gold" id="btnAddNewCourse"><i class="fas fa-plus mr-2"></i> ط¥ط¶ط§ظپط© ظƒظˆط±ط³ ط¬ط¯ظٹط¯</button>
+                <h1 class="page-title">إدارة الكورسات</h1>
+                <button class="btn btn-gold" id="btnAddNewCourse"><i class="fas fa-plus mr-2"></i> إضافة كورس جديد</button>
             </div>
 
             <div class="glass-panel dash-panel">
@@ -107,12 +107,12 @@
                     <table class="admin-table" id="coursesTable">
                         <thead>
                             <tr>
-                                <th>طµظˆط±ط©</th>
-                                <th>ط§ط³ظ… ط§ظ„ظƒظˆط±ط³</th>
-                                <th>ط§ظ„طµظپ</th>
-                                <th>ط§ظ„ط³ط¹ط±</th>
-                                <th>ط§ظ„ط­ط§ظ„ط©</th>
-                                <th>ط¥ط¬ط±ط§ط،ط§طھ</th>
+                                <th>صورة</th>
+                                <th>اسم الكورس</th>
+                                <th>الصف</th>
+                                <th>السعر</th>
+                                <th>الحالة</th>
+                                <th>إجراءات</th>
                             </tr>
                         </thead>
                         <tbody id="coursesTableBody"></tbody>
@@ -126,65 +126,65 @@
     <div id="fullCourseEditor" class="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000; overflow-y: auto; padding: 40px 0;">
         <div class="glass-panel" style="width: 95%; max-width: 900px; margin: 0 auto; padding: 30px; position: relative;">
             <button id="closeFullEditor" style="position: absolute; top: 20px; right: 20px; background: transparent; border: none; color: #fff; font-size: 1.8rem; cursor: pointer;"><i class="fas fa-times"></i></button>
-            <h2 class="text-gold mb-2" id="editorTitle">طھط¹ط¯ظٹظ„ ط§ظ„ظƒظˆط±ط³</h2>
+            <h2 class="text-gold mb-2" id="editorTitle">تعديل الكورس</h2>
             
             <input type="hidden" id="fcId">
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
                 <div class="form-group">
-                    <label>ط¹ظ†ظˆط§ظ† ط§ظ„ظƒظˆط±ط³</label>
+                    <label>عنوان الكورس</label>
                     <input type="text" id="fcTitle" class="form-control" oninput="markUnsaved()">
                 </div>
                 <div class="form-group">
-                    <label>ط§ظ„ط³ط¹ط± (ط¬.ظ…)</label>
+                    <label>السعر (ج.م)</label>
                     <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
                         <input type="number" id="fcPrice" class="form-control" oninput="markUnsaved()" style="flex: 1; min-width: 100px;">
                         <div style="display: flex; gap: 10px; align-items: center;">
                             <label style="color:var(--text-secondary); display:flex; align-items:center; gap:6px; cursor:pointer;">
                                 <input type="checkbox" id="fcFree" onchange="markUnsaved(); document.getElementById('fcPrice').disabled = this.checked; if(this.checked) { document.getElementById('fcPrice').value='0'; document.getElementById('fcHasDiscount').checked=false; document.getElementById('fcHasDiscount').dispatchEvent(new Event('change')); }"> 
-                                <span>ظ…ط¬ط§ظ†ظٹ</span>
+                                <span>مجاني</span>
                             </label>
                             
                             <label style="color:var(--text-secondary); display:flex; align-items:center; gap:6px; cursor:pointer;">
                                 <input type="checkbox" id="fcHasDiscount" onchange="markUnsaved(); document.getElementById('fcDiscountOptions').style.display = this.checked ? 'block' : 'none'; if(this.checked) { document.getElementById('fcFree').checked=false; document.getElementById('fcPrice').disabled=false; }"> 
-                                <span>طھظپط¹ظٹظ„ ط®طµظ…</span>
+                                <span>تفعيل خصم</span>
                             </label>
                         </div>
                     </div>
                     
                     <div id="fcDiscountOptions" style="display: none; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; margin-top: 15px; border: 1px solid rgba(255,255,255,0.05);">
                         <div class="form-group">
-                            <label style="color: var(--text-primary); margin-bottom: 8px; display: block;">ط§ظ„ط³ط¹ط± ط¨ط¹ط¯ ط§ظ„ط®طµظ… (ط¬.ظ…)</label>
+                            <label style="color: var(--text-primary); margin-bottom: 8px; display: block;">السعر بعد الخصم (ج.م)</label>
                             <input type="number" id="fcDiscountPrice" class="form-control" oninput="markUnsaved()">
                         </div>
                         
                         <div class="form-group" style="margin-bottom: 15px; margin-top: 15px;">
                             <label style="color:var(--text-primary); display:flex; align-items:center; gap:8px; cursor:pointer;">
                                 <input type="checkbox" id="fcTimerToggle" onchange="markUnsaved(); document.getElementById('fcDiscountTimerOptions').style.display = this.checked ? 'block' : 'none';"> 
-                                <span style="font-weight: bold; color: var(--royal-gold);">طھظپط¹ظٹظ„ ط¹ط¯ط§ط¯ ظ…ط¤ظ‚طھ ظ„ظ„ط®طµظ…</span>
+                                <span style="font-weight: bold; color: var(--royal-gold);">تفعيل عداد مؤقت للخصم</span>
                             </label>
                         </div>
                         
                         <div id="fcDiscountTimerOptions" style="display: none;">
-                            <label style="color: var(--text-secondary); margin-bottom: 12px; display: block; font-size: 0.95rem;">ط­ط¯ط¯ ط§ظ„ظ…ط¯ط© ط§ظ„ظ…طھط¨ظ‚ظٹط© ظ„ط§ظ†طھظ‡ط§ط، ط§ظ„ط®طµظ…:</label>
+                            <label style="color: var(--text-secondary); margin-bottom: 12px; display: block; font-size: 0.95rem;">حدد المدة المتبقية لانتهاء الخصم:</label>
                             <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px;">
                                 <div class="form-group" style="margin-bottom: 0;">
-                                    <label style="color:var(--text-secondary);font-size:0.75rem; text-align: center; display: block; margin-bottom: 5px;">ط³ظ†ط©</label>
+                                    <label style="color:var(--text-secondary);font-size:0.75rem; text-align: center; display: block; margin-bottom: 5px;">سنة</label>
                                     <input type="number" id="fcYears" class="form-control" min="0" placeholder="0" style="text-align:center; padding: 8px 4px;" oninput="markUnsaved()">
                                 </div>
                                 <div class="form-group" style="margin-bottom: 0;">
-                                    <label style="color:var(--text-secondary);font-size:0.75rem; text-align: center; display: block; margin-bottom: 5px;">ط´ظ‡ط±</label>
+                                    <label style="color:var(--text-secondary);font-size:0.75rem; text-align: center; display: block; margin-bottom: 5px;">شهر</label>
                                     <input type="number" id="fcMonths" class="form-control" min="0" placeholder="0" style="text-align:center; padding: 8px 4px;" oninput="markUnsaved()">
                                 </div>
                                 <div class="form-group" style="margin-bottom: 0;">
-                                    <label style="color:var(--text-secondary);font-size:0.75rem; text-align: center; display: block; margin-bottom: 5px;">ط£ط³ط¨ظˆط¹</label>
+                                    <label style="color:var(--text-secondary);font-size:0.75rem; text-align: center; display: block; margin-bottom: 5px;">أسبوع</label>
                                     <input type="number" id="fcWeeks" class="form-control" min="0" placeholder="0" style="text-align:center; padding: 8px 4px;" oninput="markUnsaved()">
                                 </div>
                                 <div class="form-group" style="margin-bottom: 0;">
-                                    <label style="color:var(--text-secondary);font-size:0.75rem; text-align: center; display: block; margin-bottom: 5px;">ظٹظˆظ…</label>
+                                    <label style="color:var(--text-secondary);font-size:0.75rem; text-align: center; display: block; margin-bottom: 5px;">يوم</label>
                                     <input type="number" id="fcDays" class="form-control" min="0" placeholder="0" style="text-align:center; padding: 8px 4px;" oninput="markUnsaved()">
                                 </div>
                                 <div class="form-group" style="margin-bottom: 0;">
-                                    <label style="color:var(--text-secondary);font-size:0.75rem; text-align: center; display: block; margin-bottom: 5px;">ط³ط§ط¹ط©</label>
+                                    <label style="color:var(--text-secondary);font-size:0.75rem; text-align: center; display: block; margin-bottom: 5px;">ساعة</label>
                                     <input type="number" id="fcHours" class="form-control" min="0" placeholder="0" style="text-align:center; padding: 8px 4px;" oninput="markUnsaved()">
                                 </div>
                             </div>
@@ -192,18 +192,18 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label>ط§ظ„طµظپ ط§ظ„ط¯ط±ط§ط³ظٹ</label>
+                    <label>الصف الدراسي</label>
                     <select id="fcGrade" class="form-control" onchange="markUnsaved()">
-                        <option value="prep1">ط£ظˆظ„ظ‰ ط¥ط¹ط¯ط§ط¯ظٹ</option>
-                        <option value="prep2">طھط§ظ†ظٹط© ط¥ط¹ط¯ط§ط¯ظٹ</option>
-                        <option value="prep3">طھط§ظ„طھط© ط¥ط¹ط¯ط§ط¯ظٹ</option>
-                        <option value="sec1">ط£ظˆظ„ظ‰ ط«ط§ظ†ظˆظٹ</option>
-                        <option value="sec2">طھط§ظ†ظٹط© ط«ط§ظ†ظˆظٹ</option>
-                        <option value="sec3">طھط§ظ„طھط© ط«ط§ظ†ظˆظٹ</option>
+                        <option value="prep1">أولى إعدادي</option>
+                        <option value="prep2">تانية إعدادي</option>
+                        <option value="prep3">تالتة إعدادي</option>
+                        <option value="sec1">أولى ثانوي</option>
+                        <option value="sec2">تانية ثانوي</option>
+                        <option value="sec3">تالتة ثانوي</option>
                     </select>
                 </div>
                 <div class="form-group" style="grid-column: 1/-1;">
-                    <label>طµظˆط±ط© ط§ظ„ط؛ظ„ط§ظپ (ط§ظ„ظƒظˆط±ط³)</label>
+                    <label>صورة الغلاف (الكورس)</label>
                     <input type="file" id="fcImageFile" accept="image/*" class="form-control" style="background: rgba(255,255,255,0.05); cursor: pointer;">
                     <input type="hidden" id="fcImage">
                     <div style="width: 100%; aspect-ratio: 16/9; overflow: hidden; border-radius: 10px; margin-top: 10px; border: 1px solid var(--border-color); background: var(--secondary-navy, #0a1e3a);">
@@ -211,21 +211,21 @@
                     </div>
                 </div>
                 <div class="form-group" style="grid-column: 1/-1;">
-                    <label>ظˆطµظپ ط§ظ„ظƒظˆط±ط³</label>
+                    <label>وصف الكورس</label>
                     <textarea id="fcDesc" class="form-control" rows="3" oninput="markUnsaved()"></textarea>
                 </div>
             </div>
 
-            <h2 style="color: var(--accent-cyan); margin-top: 40px; border-bottom: 2px solid rgba(255,255,255,0.1); padding-bottom: 10px;">ط¥ط¯ط§ط±ط© ط§ظ„ظ…ط­طھظˆظٹط§طھ</h2>
+            <h2 style="color: var(--accent-cyan); margin-top: 40px; border-bottom: 2px solid rgba(255,255,255,0.1); padding-bottom: 10px;">إدارة المحتويات</h2>
             
             <!-- Dynamic Sections Container -->
             <div id="fcSectionsContainer"></div>
             <div style="margin-top: 30px; text-align: center;">
-                <button class="btn btn-outline" style="border-color: var(--accent-cyan); color: var(--accent-cyan); padding: 10px 20px;" onclick="addNewSection()"><i class="fas fa-folder-plus mr-2"></i> ط¥ط¶ط§ظپط© ظ‚ط³ظ… ط¬ط¯ظٹط¯</button>
+                <button class="btn btn-outline" style="border-color: var(--accent-cyan); color: var(--accent-cyan); padding: 10px 20px;" onclick="addNewSection()"><i class="fas fa-folder-plus mr-2"></i> إضافة قسم جديد</button>
             </div>
 
             <div style="margin-top: 40px; text-align: left;">
-                <button class="btn btn-gold btn-large" id="btnSaveFullCourse"><i class="fas fa-save mr-2"></i> ط­ظپط¸ ط§ظ„طھط¹ط¯ظٹظ„ط§طھ</button>
+                <button class="btn btn-gold btn-large" id="btnSaveFullCourse"><i class="fas fa-save mr-2"></i> حفظ التعديلات</button>
             </div>
         </div>
     </div>
@@ -234,10 +234,10 @@
     <div id="confirmSaveModal" class="confirm-modal">
         <div class="confirm-modal-content">
             <i class="fas fa-question-circle text-gold" style="font-size: 4rem; margin-bottom: 20px;"></i>
-            <h3>ظ‡ظ„ ط£ظ†طھ ظ…طھط£ظƒط¯ ظ…ظ† ط­ظپط¸ ظ‡ط°ظ‡ ط§ظ„طھط¹ط¯ظٹظ„ط§طھطں</h3>
+            <h3>هل أنت متأكد من حفظ هذه التعديلات؟</h3>
             <div class="confirm-modal-actions">
-                <button class="btn btn-green" id="btnConfirmSaveYes" style="flex: 1;">ظ†ط¹ظ…طŒ ط§ط­ظپط¸</button>
-                <button class="btn btn-outline" id="btnConfirmSaveNo" style="flex: 1;">ظ„ط§طŒ طھط±ط§ط¬ط¹</button>
+                <button class="btn btn-green" id="btnConfirmSaveYes" style="flex: 1;">نعم، احفظ</button>
+                <button class="btn btn-outline" id="btnConfirmSaveNo" style="flex: 1;">لا، تراجع</button>
             </div>
         </div>
     </div>
@@ -246,11 +246,11 @@
     <div id="confirmExitModal" class="confirm-modal">
         <div class="confirm-modal-content">
             <i class="fas fa-exclamation-triangle text-orange" style="font-size: 4rem; margin-bottom: 20px; color: #e67e22;"></i>
-            <h3 style="margin-bottom: 10px;">ظ„ط¯ظٹظƒ طھط¹ط¯ظٹظ„ط§طھ ظ„ظ… ظٹطھظ… ط­ظپط¸ظ‡ط§!</h3>
-            <p style="color: rgba(255,255,255,0.7); margin-bottom: 20px;">ظ‡ظ„ طھط±ظٹط¯ ط§ط³طھظƒظ…ط§ظ„ ط§ظ„طھط¹ط¯ظٹظ„ ط£ظ… ط¥ظ„ط؛ط§ط، ط§ظ„طھط¹ط¯ظٹظ„ط§طھ ظˆط§ظ„ط®ط±ظˆط¬طں</p>
+            <h3 style="margin-bottom: 10px;">لديك تعديلات لم يتم حفظها!</h3>
+            <p style="color: rgba(255,255,255,0.7); margin-bottom: 20px;">هل تريد استكمال التعديل أم إلغاء التعديلات والخروج؟</p>
             <div class="confirm-modal-actions">
-                <button class="btn btn-outline" id="btnExitDiscard" style="flex: 1; border-color: #e74c3c; color: #e74c3c;">ط±ظپط¶ ط§ظ„طھط¹ط¯ظٹظ„ ظˆط§ظ„ط®ط±ظˆط¬</button>
-                <button class="btn btn-green" id="btnExitResume" style="flex: 1;">ط§ط³طھظƒظ…ط§ظ„ ط§ظ„طھط¹ط¯ظٹظ„</button>
+                <button class="btn btn-outline" id="btnExitDiscard" style="flex: 1; border-color: #e74c3c; color: #e74c3c;">رفض التعديل والخروج</button>
+                <button class="btn btn-green" id="btnExitResume" style="flex: 1;">استكمال التعديل</button>
             </div>
         </div>
     </div>
@@ -348,7 +348,7 @@
         let hasUnsavedChanges = false;
 
         window.addCustomSection = function() {
-            const name = prompt('ط£ط¯ط®ظ„ ط§ط³ظ… ط§ظ„ظ‚ط³ظ… ط§ظ„ط¬ط¯ظٹط¯:');
+            const name = prompt('أدخل اسم القسم الجديد:');
             if(name) {
                 if(!tempContents.customSections) tempContents.customSections = [];
                 tempContents.customSections.push({ id: 'sec_' + Date.now(), name: name, items: [] });
@@ -358,7 +358,7 @@
         };
 
         window.removeCustomSection = function(index) {
-            if(confirm('ظ‡ظ„ ط£ظ†طھ ظ…طھط£ظƒط¯ ظ…ظ† ط­ط°ظپ ظ‡ط°ط§ ط§ظ„ظ‚ط³ظ… ظˆظƒظ„ ظ…ط­طھظˆظٹط§طھظ‡طں')) {
+            if(confirm('هل أنت متأكد من حذف هذا القسم وكل محتوياته؟')) {
                 tempContents.customSections.splice(index, 1);
                 markUnsaved();
                 renderContentLists();
@@ -366,13 +366,13 @@
         };
 
         window.addCustomItem = function(sectionIndex) {
-            tempContents.customSections[sectionIndex].items.push({ title: 'ط¹ظ†طµط± ط¬ط¯ظٹط¯', type: 'file' });
+            tempContents.customSections[sectionIndex].items.push({ title: 'عنصر جديد', type: 'file' });
             markUnsaved();
             renderContentLists();
         };
 
         window.removeCustomItem = function(sectionIndex, itemIndex) {
-            if(confirm('ط­ط°ظپ ظ‡ط°ط§ ط§ظ„ط¹ظ†طµط±طں')) {
+            if(confirm('حذف هذا العنصر؟')) {
                 tempContents.customSections[sectionIndex].items.splice(itemIndex, 1);
                 markUnsaved();
                 renderContentLists();
@@ -397,7 +397,7 @@
                     <div class="section-header">
                         <h3 style="color: var(--accent-cyan);"><i class="fas fa-folder-open mr-2"></i> ${sec.name}</h3>
                         <div>
-                            <button class="btn btn-outline" style="padding: 5px 10px; font-size: 0.8rem;" onclick="addCustomItem(${sIdx})"><i class="fas fa-plus"></i> ط¥ط¶ط§ظپط© ط¹ظ†طµط±</button>
+                            <button class="btn btn-outline" style="padding: 5px 10px; font-size: 0.8rem;" onclick="addCustomItem(${sIdx})"><i class="fas fa-plus"></i> إضافة عنصر</button>
                             <button class="btn btn-outline" style="padding: 5px 10px; font-size: 0.8rem; color: #e74c3c; border-color: #e74c3c;" onclick="removeCustomSection(${sIdx})"><i class="fas fa-trash"></i></button>
                         </div>
                     </div>
@@ -407,7 +407,7 @@
                 
                 const listDiv = document.getElementById('customSectionList_' + sIdx);
                 if(sec.items.length === 0) {
-                    listDiv.innerHTML = '<p style="color: rgba(255,255,255,0.4); text-align: center; padding: 10px;">ظ„ط§ ظٹظˆط¬ط¯ ظ…ط­طھظˆظ‰ ظپظٹ ظ‡ط°ط§ ط§ظ„ظ‚ط³ظ….</p>';
+                    listDiv.innerHTML = '<p style="color: rgba(255,255,255,0.4); text-align: center; padding: 10px;">لا يوجد محتوى في هذا القسم.</p>';
                 } else {
                     sec.items.forEach((item, iIdx) => {
                         const itemDiv = document.createElement('div');
@@ -435,25 +435,25 @@
                 const tr = document.createElement('tr');
                 
                 let visibilityBtn = c.hidden ? 
-                    `<button class="btn btn-outline" style="padding: 5px; font-size: 0.8rem;" onclick="toggleCourseVisibility('${c.id}')" title="ط¥ط¸ظ‡ط§ط±"><i class="fas fa-eye-slash text-orange"></i></button>` :
-                    `<button class="btn btn-outline" style="padding: 5px; font-size: 0.8rem;" onclick="toggleCourseVisibility('${c.id}')" title="ط¥ط®ظپط§ط،"><i class="fas fa-eye text-cyan"></i></button>`;
+                    `<button class="btn btn-outline" style="padding: 5px; font-size: 0.8rem;" onclick="toggleCourseVisibility('${c.id}')" title="إظهار"><i class="fas fa-eye-slash text-orange"></i></button>` :
+                    `<button class="btn btn-outline" style="padding: 5px; font-size: 0.8rem;" onclick="toggleCourseVisibility('${c.id}')" title="إخفاء"><i class="fas fa-eye text-cyan"></i></button>`;
                 
                 let finishBtn = c.finished ?
-                    `<button class="btn btn-outline" style="padding: 5px; font-size: 0.8rem; border-color: #e74c3c; color: #e74c3c;" onclick="toggleCourseFinish('${c.id}')" title="ط¥ظ„ط؛ط§ط، ط§ظ„ط§ظ†طھظ‡ط§ط،"><i class="fas fa-calendar-times"></i></button>` :
-                    `<button class="btn btn-outline" style="padding: 5px; font-size: 0.8rem;" onclick="toggleCourseFinish('${c.id}')" title="طھط­ط¯ظٹط¯ ظƒظ…ظ†طھظ‡ظٹ"><i class="fas fa-calendar-check text-green"></i></button>`;
+                    `<button class="btn btn-outline" style="padding: 5px; font-size: 0.8rem; border-color: #e74c3c; color: #e74c3c;" onclick="toggleCourseFinish('${c.id}')" title="إلغاء الانتهاء"><i class="fas fa-calendar-times"></i></button>` :
+                    `<button class="btn btn-outline" style="padding: 5px; font-size: 0.8rem;" onclick="toggleCourseFinish('${c.id}')" title="تحديد كمنتهي"><i class="fas fa-calendar-check text-green"></i></button>`;
 
                 tr.innerHTML = `
                     <td><div style="width: 50px; height: 50px; overflow: hidden; border-radius: 5px; ${c.finished ? 'filter: grayscale(1); opacity: 0.5;' : ''}"><img src="${c.image}" style="width: 100%; height: 100%; object-fit: cover; object-position: center; display: block;"></div></td>
                     <td style="${c.finished ? 'text-decoration: line-through; opacity: 0.5;' : ''}">${c.title}</td>
                     <td><span class="badge" style="background: rgba(255,255,255,0.1);">${c.grade}</span></td>
-                    <td>${c.price} ط¬.ظ…</td>
-                    <td>${c.hidden ? '<span class="badge" style="background: rgba(231, 76, 60, 0.2); color: #e74c3c;">ظ…ط®ظپظٹ</span>' : (c.finished ? '<span class="badge" style="background: rgba(149, 165, 166, 0.2); color: #95a5a6;">ظ…ظ†طھظ‡ظٹ</span>' : '<span class="badge" style="background: rgba(46, 204, 113, 0.2); color: #2ecc71;">ظ…ط¹ظ„ظ†</span>')}</td>
+                    <td>${c.price} ج.م</td>
+                    <td>${c.hidden ? '<span class="badge" style="background: rgba(231, 76, 60, 0.2); color: #e74c3c;">مخفي</span>' : (c.finished ? '<span class="badge" style="background: rgba(149, 165, 166, 0.2); color: #95a5a6;">منتهي</span>' : '<span class="badge" style="background: rgba(46, 204, 113, 0.2); color: #2ecc71;">معلن</span>')}</td>
                     <td style="display: flex; gap: 5px;">
-                        <button class="btn btn-green" style="padding: 5px 10px; font-size: 0.8rem;" onclick="openCourseEditor('${c.id}')"><i class="fas fa-edit"></i> طھط¹ط¯ظٹظ„</button>
-                        <button class="btn btn-outline" style="padding: 5px 10px; font-size: 0.8rem; border-color: var(--royal-gold); color: var(--royal-gold);" onclick="openCourseSubscribers('${c.id}')"><i class="fas fa-users"></i> ط§ظ„ظ…ط´طھط±ظƒظٹظ†</button>
+                        <button class="btn btn-green" style="padding: 5px 10px; font-size: 0.8rem;" onclick="openCourseEditor('${c.id}')"><i class="fas fa-edit"></i> تعديل</button>
+                        <button class="btn btn-outline" style="padding: 5px 10px; font-size: 0.8rem; border-color: var(--royal-gold); color: var(--royal-gold);" onclick="openCourseSubscribers('${c.id}')"><i class="fas fa-users"></i> المشتركين</button>
                         ${visibilityBtn}
                         ${finishBtn}
-                        <button class="btn btn-outline" style="padding: 5px 10px; font-size: 0.8rem; border-color: #e74c3c; color: #e74c3c;" onclick="deleteCourseSecure('${c.id}')" title="ط­ط°ظپ ط§ظ„ظƒظˆط±ط³ ظ†ظ‡ط§ط¦ظٹط§ظ‹"><i class="fas fa-trash"></i></button>
+                        <button class="btn btn-outline" style="padding: 5px 10px; font-size: 0.8rem; border-color: #e74c3c; color: #e74c3c;" onclick="deleteCourseSecure('${c.id}')" title="حذف الكورس نهائياً"><i class="fas fa-trash"></i></button>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -464,11 +464,11 @@
             const pwd = await window.requireAdminPassword();
             if (pwd === null) return;
             if (pwd !== "My@36_172001") {
-                alert("ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط± ط؛ظٹط± طµط­ظٹط­ط©!");
+                alert("كلمة المرور غير صحيحة!");
                 return;
             }
-            if(confirm('طھط­ط°ظٹط± ظ†ظ‡ط§ط¦ظٹ: ظ‡ظ„ ط£ظ†طھ ظ…طھط£ظƒط¯ ظ…ظ† ط­ط°ظپ ظ‡ط°ط§ ط§ظ„ظƒظˆط±ط³ ط¨ط§ظ„ظƒط§ظ…ظ„ ظ…ظ† ظ‚ط§ط¹ط¯ط© ط§ظ„ط¨ظٹط§ظ†ط§طھطں ظ„ط§ ظٹظ…ظƒظ† ط§ظ„طھط±ط§ط¬ط¹ ط¹ظ† ظ‡ط°ط§ ط§ظ„ط¥ط¬ط±ط§ط،.')) {
-                window.showToast('ط¬ط§ط±ظٹ ط­ط°ظپ ط§ظ„ظƒظˆط±ط³...', 'warning');
+            if(confirm('تحذير نهائي: هل أنت متأكد من حذف هذا الكورس بالكامل من قاعدة البيانات؟ لا يمكن التراجع عن هذا الإجراء.')) {
+                window.showToast('جاري حذف الكورس...', 'warning');
                 if(window.FirebaseService) {
                     await window.FirebaseService.deleteCourse(id);
                 } else {
@@ -478,7 +478,7 @@
                 }
                 adminCourses = adminCourses.filter(c => c.id !== id);
                 renderCoursesTable();
-                window.showToast('طھظ… ط­ط°ظپ ط§ظ„ظƒظˆط±ط³ ظ†ظ‡ط§ط¦ظٹط§ظ‹', 'success');
+                window.showToast('تم حذف الكورس نهائياً', 'success');
             }
         };
 
@@ -523,25 +523,25 @@ function migrateCourseToSections(contents) {
                 items.push(lec);
             }
         });
-        sections.push({ id: 'sec_lectures', title: 'ط§ظ„ظ…ط­ط§ط¶ط±ط§طھ', items: items });
+        sections.push({ id: 'sec_lectures', title: 'المحاضرات', items: items });
     }
     
     if (c.homeworks && c.homeworks.length) {
-        sections.push({ id: 'sec_homeworks', title: 'ط§ظ„ظˆط§ط¬ط¨ط§طھ', items: c.homeworks });
+        sections.push({ id: 'sec_homeworks', title: 'الواجبات', items: c.homeworks });
     }
     
     if (c.exams && c.exams.length) {
-        sections.push({ id: 'sec_exams', title: 'ط§ظ„ط§ظ…طھط­ط§ظ†ط§طھ', items: c.exams });
+        sections.push({ id: 'sec_exams', title: 'الامتحانات', items: c.exams });
     }
     
     if (c.customSections && c.customSections.length) {
         c.customSections.forEach((sec, idx) => {
-            sections.push({ id: 'sec_custom_'+idx, title: sec.name || 'ظ‚ط³ظ… ظ…ط®طµطµ', items: sec.items || [] });
+            sections.push({ id: 'sec_custom_'+idx, title: sec.name || 'قسم مخصص', items: sec.items || [] });
         });
     }
 
     if (sections.length === 0) {
-        sections.push({ id: 'sec_default', title: 'ط§ظ„ظ‚ط³ظ… ط§ظ„ط£ظˆظ„', items: [] });
+        sections.push({ id: 'sec_default', title: 'القسم الأول', items: [] });
     }
 
     return { sections: sections };
@@ -564,11 +564,11 @@ function renderContentLists() {
             <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; margin-bottom: 15px;">
                 <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
                     <i class="fas fa-folder-open text-gold" style="font-size: 1.5rem;"></i>
-                    <input type="text" value="${sec.title}" class="form-control" style="font-size: 1.2rem; font-weight: bold; background: transparent; border: none; color: var(--accent-cyan); width: 100%; max-width: 300px;" onchange="updateSectionTitle(${sIdx}, this.value)" placeholder="ط§ط³ظ… ط§ظ„ظ‚ط³ظ…">
+                    <input type="text" value="${sec.title}" class="form-control" style="font-size: 1.2rem; font-weight: bold; background: transparent; border: none; color: var(--accent-cyan); width: 100%; max-width: 300px;" onchange="updateSectionTitle(${sIdx}, this.value)" placeholder="اسم القسم">
                 </div>
                 <div style="display: flex; gap: 10px;">
-                    <button class="btn btn-outline" style="padding: 5px 12px; font-size: 0.85rem;" onclick="addSectionItem(${sIdx})"><i class="fas fa-plus"></i> ط¥ط¶ط§ظپط© ظ…ط­طھظˆظ‰</button>
-                    <button class="btn btn-outline" style="padding: 5px 12px; font-size: 0.85rem; border-color: #e74c3c; color: #e74c3c;" onclick="removeSection(${sIdx})"><i class="fas fa-trash"></i> ط­ط°ظپ ط§ظ„ظ‚ط³ظ…</button>
+                    <button class="btn btn-outline" style="padding: 5px 12px; font-size: 0.85rem;" onclick="addSectionItem(${sIdx})"><i class="fas fa-plus"></i> إضافة محتوى</button>
+                    <button class="btn btn-outline" style="padding: 5px 12px; font-size: 0.85rem; border-color: #e74c3c; color: #e74c3c;" onclick="removeSection(${sIdx})"><i class="fas fa-trash"></i> حذف القسم</button>
                 </div>
             </div>
             <div id="sectionItems_${sIdx}" style="display: flex; flex-direction: column; gap: 10px;"></div>
@@ -578,7 +578,7 @@ function renderContentLists() {
         
         const itemsContainer = document.getElementById('sectionItems_' + sIdx);
         if(!sec.items || sec.items.length === 0) {
-            itemsContainer.innerHTML = '<div style="text-align: center; color: rgba(255,255,255,0.4); padding: 15px; background: rgba(0,0,0,0.2); border-radius: 8px;">ظ„ط§ ظٹظˆط¬ط¯ ظ…ط­طھظˆظ‰ ظپظٹ ظ‡ط°ط§ ط§ظ„ظ‚ط³ظ…. ط§ط¶ط؛ط· ط¹ظ„ظ‰ ط¥ط¶ط§ظپط© ظ…ط­طھظˆظ‰.</div>';
+            itemsContainer.innerHTML = '<div style="text-align: center; color: rgba(255,255,255,0.4); padding: 15px; background: rgba(0,0,0,0.2); border-radius: 8px;">لا يوجد محتوى في هذا القسم. اضغط على إضافة محتوى.</div>';
         } else {
             sec.items.forEach((item, iIdx) => {
                 const itemDiv = document.createElement('div');
@@ -595,23 +595,23 @@ function renderContentLists() {
                 let html = `
                     <div style="display: flex; align-items: flex-start; gap: 15px;">
                         <select onchange="updateItemType(${sIdx}, ${iIdx}, this.value)" style="background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 5px; padding: 5px; width: 120px;">
-                            <option value="video" ${item.type==='video'?'selected':''}>ظپظٹط¯ظٹظˆ (ط¯ط±ط³)</option>
-                            <option value="pdf" ${item.type==='pdf'?'selected':''}>ظ…ط°ظƒط±ط© (PDF)</option>
-                            <option value="task" ${item.type==='task'?'selected':''}>طھط¯ط±ظٹط¨ / ظˆط§ط¬ط¨</option>
-                            <option value="quiz" ${item.type==='quiz'?'selected':''}>ط§ظ…طھط­ط§ظ† ط´ط§ظ…ظ„</option>
-                            <option value="header" ${item.type==='header'?'selected':''}>ط¹ظ†ظˆط§ظ† ظپط±ط¹ظٹ</option>
+                            <option value="video" ${item.type==='video'?'selected':''}>فيديو (درس)</option>
+                            <option value="pdf" ${item.type==='pdf'?'selected':''}>مذكرة (PDF)</option>
+                            <option value="task" ${item.type==='task'?'selected':''}>تدريب / واجب</option>
+                            <option value="quiz" ${item.type==='quiz'?'selected':''}>امتحان شامل</option>
+                            <option value="header" ${item.type==='header'?'selected':''}>عنوان فرعي</option>
                         </select>
                         
                         <div style="flex: 1; display: flex; flex-direction: column; gap: 10px;">
-                            <input type="text" class="form-control" value="${item.title || ''}" onchange="updateItemField(${sIdx}, ${iIdx}, 'title', this.value)" placeholder="ط¹ظ†ظˆط§ظ† ط§ظ„ظ…ط­طھظˆظ‰ (ظ…ط«ط§ظ„: ط§ظ„ط­طµط© ط§ظ„ط£ظˆظ„ظ‰)" style="padding: 8px; border: 1px solid rgba(255,255,255,0.2);">
+                            <input type="text" class="form-control" value="${item.title || ''}" onchange="updateItemField(${sIdx}, ${iIdx}, 'title', this.value)" placeholder="عنوان المحتوى (مثال: الحصة الأولى)" style="padding: 8px; border: 1px solid rgba(255,255,255,0.2);">
                 `;
 
                 // URL fields based on type
                 if (item.type === 'video') {
-                    html += `<input type="text" class="form-control" value="${item.videoUrl || item.youtubeUrl || ''}" onchange="updateItemUrl(${sIdx}, ${iIdx}, 'video', this.value)" placeholder="ط±ط§ط¨ط· ط§ظ„ظپظٹط¯ظٹظˆ (ط³ظٹط±ظپط± ط£ظˆ ظٹظˆطھظٹظˆط¨)" style="padding: 6px; font-size: 0.9rem;">`;
-                    html += `<input type="text" class="form-control" value="${item.thumbnail || ''}" onchange="updateItemField(${sIdx}, ${iIdx}, 'thumbnail', this.value)" placeholder="ط±ط§ط¨ط· ط§ظ„طµظˆط±ط© ط§ظ„ظ…طµط؛ط±ط© (ط§ط®طھظٹط§ط±ظٹ)" style="padding: 6px; font-size: 0.9rem;">`;
+                    html += `<input type="text" class="form-control" value="${item.videoUrl || item.youtubeUrl || ''}" onchange="updateItemUrl(${sIdx}, ${iIdx}, 'video', this.value)" placeholder="رابط الفيديو (سيرفر أو يوتيوب)" style="padding: 6px; font-size: 0.9rem;">`;
+                    html += `<input type="text" class="form-control" value="${item.thumbnail || ''}" onchange="updateItemField(${sIdx}, ${iIdx}, 'thumbnail', this.value)" placeholder="رابط الصورة المصغرة (اختياري)" style="padding: 6px; font-size: 0.9rem;">`;
                 } else if (item.type === 'pdf') {
-                    html += `<input type="text" class="form-control" value="${item.pdfUrl || ''}" onchange="updateItemUrl(${sIdx}, ${iIdx}, 'pdf', this.value)" placeholder="ط±ط§ط¨ط· ط§ظ„ظ…ط°ظƒط±ط© (PDF)" style="padding: 6px; font-size: 0.9rem;">`;
+                    html += `<input type="text" class="form-control" value="${item.pdfUrl || ''}" onchange="updateItemUrl(${sIdx}, ${iIdx}, 'pdf', this.value)" placeholder="رابط المذكرة (PDF)" style="padding: 6px; font-size: 0.9rem;">`;
                 }
 
                 // Advanced LMS fields (Availability, Deadline, Depends On)
@@ -619,21 +619,21 @@ function renderContentLists() {
                     html += `
                         <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 5px; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 5px;">
                             <div style="flex: 1; min-width: 150px;">
-                                <label style="font-size: 0.8rem; color: #aaa; margin-bottom: 2px; display: block;">طھط§ط±ظٹط® ط§ظ„ط¥طھط§ط­ط© (ظ„ظپطھط­ ط§ظ„ط¯ط±ط³)</label>
+                                <label style="font-size: 0.8rem; color: #aaa; margin-bottom: 2px; display: block;">تاريخ الإتاحة (لفتح الدرس)</label>
                                 <input type="datetime-local" class="form-control" value="${item.availabilityDate || ''}" onchange="updateItemField(${sIdx}, ${iIdx}, 'availabilityDate', this.value)" style="padding: 4px; font-size: 0.8rem;">
                             </div>
                             <div style="flex: 1; min-width: 150px;">
-                                <label style="font-size: 0.8rem; color: #e74c3c; margin-bottom: 2px; display: block;">ط§ظ„ظ…ظˆط¹ط¯ ط§ظ„ظ†ظ‡ط§ط¦ظٹ (ط§ظ„ط¯ظٹط¯ظ„ط§ظٹظ†)</label>
+                                <label style="font-size: 0.8rem; color: #e74c3c; margin-bottom: 2px; display: block;">الموعد النهائي (الديدلاين)</label>
                                 <input type="datetime-local" class="form-control" value="${item.deadlineDate || ''}" onchange="updateItemField(${sIdx}, ${iIdx}, 'deadlineDate', this.value)" style="padding: 4px; font-size: 0.8rem;">
                             </div>
                             <div style="flex: 1; min-width: 100px;">
-                                <label style="font-size: 0.8rem; color: #f39c12; margin-bottom: 2px; display: block;">ط§ظ„ط®طµظ… ط¹ظ†ط¯ ط§ظ„طھط£ط®ظٹط± (%)</label>
-                                <input type="number" min="0" max="100" class="form-control" value="${item.penalty || 0}" onchange="updateItemField(${sIdx}, ${iIdx}, 'penalty', this.value)" style="padding: 4px; font-size: 0.8rem;" placeholder="ظ…ط«ط§ظ„: 10">
+                                <label style="font-size: 0.8rem; color: #f39c12; margin-bottom: 2px; display: block;">الخصم عند التأخير (%)</label>
+                                <input type="number" min="0" max="100" class="form-control" value="${item.penalty || 0}" onchange="updateItemField(${sIdx}, ${iIdx}, 'penalty', this.value)" style="padding: 4px; font-size: 0.8rem;" placeholder="مثال: 10">
                             </div>
                             <div style="flex: 1; min-width: 150px;">
-                                <label style="font-size: 0.8rem; color: #3498db; margin-bottom: 2px; display: block;">ظٹط¹طھظ…ط¯ ط¹ظ„ظ‰ (ظ…ظ‚ظپظ„ ط­طھظ‰ ظٹظڈظ†ط¬ط²)</label>
+                                <label style="font-size: 0.8rem; color: #3498db; margin-bottom: 2px; display: block;">يعتمد على (مقفل حتى يُنجز)</label>
                                 <select class="form-control" onchange="updateItemField(${sIdx}, ${iIdx}, 'dependsOn', this.value)" style="padding: 4px; font-size: 0.8rem;">
-                                    <option value="">-- ظ„ط§ ظٹظˆط¬ط¯ (ظ…طھط§ط­ ظپظˆط±ط§ظ‹) --</option>
+                                    <option value="">-- لا يوجد (متاح فوراً) --</option>
                                     ${generateDependsOnOptions(sIdx, iIdx, item.dependsOn)}
                                 </select>
                             </div>
@@ -647,11 +647,11 @@ function renderContentLists() {
                         <div style="display: flex; gap: 15px; margin-top: 5px; background: rgba(46, 204, 113, 0.1); padding: 10px; border-radius: 5px; border: 1px solid rgba(46, 204, 113, 0.3);">
                             <div style="flex: 1; display: flex; align-items: center; gap: 8px;">
                                 <input type="checkbox" id="strictMode_${sIdx}_${iIdx}" onchange="updateItemField(${sIdx}, ${iIdx}, 'strictMode', this.checked)" ${item.strictMode ? 'checked' : ''}>
-                                <label for="strictMode_${sIdx}_${iIdx}" style="margin:0; font-size: 0.9rem; color: #2ecc71; cursor: pointer;">طھظپط¹ظٹظ„ ط§ظ„ظˆط¶ط¹ ط§ظ„طµط§ط±ظ… (ظ…ظ†ط¹ ط§ظ„ط®ط±ظˆط¬ ظ…ظ† ظ†ط§ظپط°ط© ط§ظ„ط§ظ…طھط­ط§ظ†)</label>
+                                <label for="strictMode_${sIdx}_${iIdx}" style="margin:0; font-size: 0.9rem; color: #2ecc71; cursor: pointer;">تفعيل الوضع الصارم (منع الخروج من نافذة الامتحان)</label>
                             </div>
                             <div style="flex: 1; display: flex; align-items: center; gap: 8px;">
-                                <label style="font-size: 0.9rem; color: #fff;">ظ…ط¯ط© ط§ظ„ط§ظ…طھط­ط§ظ† (ط¨ط§ظ„ط¯ظ‚ط§ط¦ظ‚):</label>
-                                <input type="number" min="0" class="form-control" value="${item.duration || 0}" onchange="updateItemField(${sIdx}, ${iIdx}, 'duration', this.value)" style="padding: 4px; font-size: 0.9rem; width: 80px;" placeholder="0 = ط؛ظٹط± ظ…ط­ط¯ط¯">
+                                <label style="font-size: 0.9rem; color: #fff;">مدة الامتحان (بالدقائق):</label>
+                                <input type="number" min="0" class="form-control" value="${item.duration || 0}" onchange="updateItemField(${sIdx}, ${iIdx}, 'duration', this.value)" style="padding: 4px; font-size: 0.9rem; width: 80px;" placeholder="0 = غير محدد">
                             </div>
                         </div>
                     `;
@@ -659,7 +659,7 @@ function renderContentLists() {
 
                 html += `
                         </div>
-                        <button class="btn btn-outline" style="padding: 6px 10px; border-color: #e74c3c; color: #e74c3c;" onclick="removeItem(${sIdx}, ${iIdx})" title="ط­ط°ظپ ط§ظ„ظ…ط­طھظˆظ‰"><i class="fas fa-trash"></i></button>
+                        <button class="btn btn-outline" style="padding: 6px 10px; border-color: #e74c3c; color: #e74c3c;" onclick="removeItem(${sIdx}, ${iIdx})" title="حذف المحتوى"><i class="fas fa-trash"></i></button>
                     </div>
                 `;
                 
@@ -680,7 +680,7 @@ function generateDependsOnOptions(currentSIdx, currentIIdx, selectedVal) {
                 if(item.type === 'header') return;
                 
                 const isSelected = (item.id === selectedVal) ? 'selected' : '';
-                optionsHtml += `<option value="${item.id}" ${isSelected}>${item.title || 'ط¨ط¯ظˆظ† ط§ط³ظ…'}</option>`;
+                optionsHtml += `<option value="${item.id}" ${isSelected}>${item.title || 'بدون اسم'}</option>`;
             });
         }
     });
@@ -689,14 +689,14 @@ function generateDependsOnOptions(currentSIdx, currentIIdx, selectedVal) {
 
 window.addNewSection = function() {
     if(!tempContents.sections) tempContents.sections = [];
-    tempContents.sections.push({ id: 'sec_' + Date.now(), title: 'ظ‚ط³ظ… ط¬ط¯ظٹط¯', items: [] });
+    tempContents.sections.push({ id: 'sec_' + Date.now(), title: 'قسم جديد', items: [] });
     markUnsaved();
     renderContentLists();
 };
 
 window.removeSection = async function(sIdx) {
     if(!tempContents.sections[sIdx].items || tempContents.sections[sIdx].items.length === 0) {
-        if(confirm('ظ‡ظ„ ط£ظ†طھ ظ…طھط£ظƒط¯ ظ…ظ† ط­ط°ظپ ظ‡ط°ط§ ط§ظ„ظ‚ط³ظ… ط§ظ„ظپط§ط±ط؛طں')) {
+        if(confirm('هل أنت متأكد من حذف هذا القسم الفارغ؟')) {
             tempContents.sections.splice(sIdx, 1);
             markUnsaved();
             renderContentLists();
@@ -707,11 +707,11 @@ window.removeSection = async function(sIdx) {
     const pwd = await window.requireAdminPassword();
     if (pwd === null) return;
     if (pwd !== "My@36_172001") {
-        alert("ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط± ط؛ظٹط± طµط­ظٹط­ط©!");
+        alert("كلمة المرور غير صحيحة!");
         return;
     }
 
-    if(confirm('ظ‡ظ„ ط£ظ†طھ ظ…طھط£ظƒط¯ ظ…ظ† ط­ط°ظپ ظ‡ط°ط§ ط§ظ„ظ‚ط³ظ… ط¨ط§ظ„ظƒط§ظ…ظ„ ط¨ظ…ط§ ظٹط­طھظˆظٹظ‡ ظ…ظ† ط¯ط±ظˆط³طں')) {
+    if(confirm('هل أنت متأكد من حذف هذا القسم بالكامل بما يحتويه من دروس؟')) {
         tempContents.sections.splice(sIdx, 1);
         markUnsaved();
         renderContentLists();
@@ -727,7 +727,7 @@ window.addSectionItem = function(sIdx) {
     if(!tempContents.sections[sIdx].items) tempContents.sections[sIdx].items = [];
     tempContents.sections[sIdx].items.push({
         id: 'item_' + Date.now(),
-        title: 'ظ…ط­طھظˆظ‰ ط¬ط¯ظٹط¯',
+        title: 'محتوى جديد',
         type: 'video'
     });
     markUnsaved();
@@ -739,7 +739,7 @@ window.openCourseEditor = function(id = null) {
     if (id) {
         const c = adminCourses.find(x => x.id === id);
         currentEditingCourse = c;
-        document.getElementById('editorTitle').textContent = 'طھط¹ط¯ظٹظ„ ط§ظ„ظƒظˆط±ط³: ' + c.title;
+        document.getElementById('editorTitle').textContent = 'تعديل الكورس: ' + c.title;
         document.getElementById('fcId').value = c.id;
         document.getElementById('fcTitle').value = c.title;
         document.getElementById('fcPrice').value = c.price;
@@ -787,7 +787,7 @@ window.openCourseEditor = function(id = null) {
         tempContents = migrateCourseToSections(c.contents);
     } else {
         currentEditingCourse = null;
-        document.getElementById('editorTitle').textContent = 'ط¥ط¶ط§ظپط© ظƒظˆط±ط³ ط¬ط¯ظٹط¯';
+        document.getElementById('editorTitle').textContent = 'إضافة كورس جديد';
         document.getElementById('fcId').value = '';
         document.getElementById('fcTitle').value = '';
         document.getElementById('fcPrice').value = '';
@@ -819,11 +819,11 @@ window.removeItem = async function(sIdx, iIdx) {
     const pwd = await window.requireAdminPassword();
     if (pwd === null) return;
     if (pwd !== "My@36_172001") {
-        alert("ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط± ط؛ظٹط± طµط­ظٹط­ط©!");
+        alert("كلمة المرور غير صحيحة!");
         return;
     }
 
-    if(confirm('ظ‡ظ„ ط£ظ†طھ ظ…طھط£ظƒط¯ ظ…ظ† ط­ط°ظپ ظ‡ط°ط§ ط§ظ„ط¹ظ†طµط±طں')) {
+    if(confirm('هل أنت متأكد من حذف هذا العنصر؟')) {
         tempContents.sections[sIdx].items.splice(iIdx, 1);
         markUnsaved();
         renderContentLists();
@@ -867,7 +867,7 @@ window.updateItemUrl = function(sIdx, iIdx, type, val) {
             
             // Sync courses from Firebase on load to prevent overwriting with old local cache
             try {
-                window.showToast('âڈ³ ط¬ط§ط±ظٹ طھط­ط¯ظٹط« ط¨ظٹط§ظ†ط§طھ ط§ظ„ظƒظˆط±ط³ط§طھ...', 'warning');
+                window.showToast('⏳ جاري تحديث بيانات الكورسات...', 'warning');
                 
                 // Wait for firebase SDK to load if it hasn't
                 let retries = 0;
@@ -901,7 +901,7 @@ window.updateItemUrl = function(sIdx, iIdx, type, val) {
             }
 
             renderCoursesTable();
-            window.showToast('âœ… ط§ظ„ظƒظˆط±ط³ط§طھ ط¬ط§ظ‡ط²ط©', 'success');
+            window.showToast('✅ الكورسات جاهزة', 'success');
 
             // Allow URL param to open editor immediately from dashboard
             const urlParams = new URLSearchParams(window.location.search);
@@ -983,11 +983,11 @@ window.updateItemUrl = function(sIdx, iIdx, type, val) {
                 
                 if (!title || (!isFree && !price)) {
                     document.getElementById('confirmSaveModal').style.display = 'none';
-                    window.showToast('ط§ظ„ط±ط¬ط§ط، ط¥ط¯ط®ط§ظ„ ط§ظ„ط¹ظ†ظˆط§ظ† ظˆط§ظ„ط³ط¹ط±', 'error');
+                    window.showToast('الرجاء إدخال العنوان والسعر', 'error');
                     return;
                 }
 
-                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ط¬ط§ط±ظٹ ط§ظ„ط±ظپط¹...';
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الرفع...';
                 submitBtn.disabled = true;
 
                 // Hide the modal immediately and defer the heavy work to allow browser repaint
@@ -1025,7 +1025,7 @@ window.updateItemUrl = function(sIdx, iIdx, type, val) {
                             // Editing existing course
                             let idx = adminCourses.findIndex(x => x.id === currentEditingCourse.id);
                             if (idx === -1) {
-                                // Course not found in array â€” add it
+                                // Course not found in array — add it
                                 const newCourse = {
                                     id: courseIdToSave,
                                     title, price, desc, grade,
@@ -1074,15 +1074,15 @@ window.updateItemUrl = function(sIdx, iIdx, type, val) {
                             }
                         }
 
-                        // Smart localStorage save â€” separate base64 images to avoid quota errors
+                        // Smart localStorage save — separate base64 images to avoid quota errors
                         safeLocalStorageSave(adminCourses);
                         hasUnsavedChanges = false;
                         document.getElementById('fullCourseEditor').style.display = 'none';
                         renderCoursesTable();
-                        window.showToast('âœ… طھظ… ط­ظپط¸ ط§ظ„ظƒظˆط±ط³ ط¨ظ†ط¬ط§ط­!', 'success');
+                        window.showToast('✅ تم حفظ الكورس بنجاح!', 'success');
                     } catch(err) {
                         console.error('Save error:', err);
-                        window.showToast('ط­ط¯ط« ط®ط·ط£ ط£ط«ظ†ط§ط، ط§ظ„ط­ظپط¸: ' + err.message, 'error');
+                        window.showToast('حدث خطأ أثناء الحفظ: ' + err.message, 'error');
                     } finally {
                         submitBtn.innerHTML = originalBtnText;
                         submitBtn.disabled = false;
@@ -1149,16 +1149,16 @@ window.updateItemUrl = function(sIdx, iIdx, type, val) {
     <div id="courseSubscribersModal" class="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; justify-content: center; align-items: center;">
         <div class="glass-panel" style="width: 95%; max-width: 800px; padding: 30px; position: relative; max-height: 90vh; overflow-y: auto;">
             <button onclick="document.getElementById('courseSubscribersModal').style.display='none'" style="position: absolute; top: 15px; right: 15px; background: transparent; border: none; color: var(--text-secondary); font-size: 1.5rem; cursor: pointer;"><i class="fas fa-times"></i></button>
-            <h2 class="text-gold mb-2" id="courseSubscribersTitle"><i class="fas fa-users mr-2"></i> ظ…ط´طھط±ظƒظٹ ط§ظ„ظƒظˆط±ط³</h2>
+            <h2 class="text-gold mb-2" id="courseSubscribersTitle"><i class="fas fa-users mr-2"></i> مشتركي الكورس</h2>
             
             <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px; margin-bottom:15px; background:rgba(255,255,255,0.05); padding:10px; border-radius:8px;">
                 <label style="display:flex; align-items:center; gap:10px; cursor:pointer;">
                     <input type="checkbox" id="selectAllSubscribers" style="width:18px; height:18px;">
-                    <span>طھط­ط¯ظٹط¯ ط§ظ„ظƒظ„</span>
+                    <span>تحديد الكل</span>
                 </label>
                 <div>
-                    <button class="btn btn-outline" style="border-color:#e74c3c; color:#e74c3c; padding:6px 12px; font-size:0.9rem;" onclick="bulkRemoveSubscribers()"><i class="fas fa-trash-alt mr-1"></i> ط¥ط²ط§ظ„ط© ط§ظ„ظ…ط­ط¯ط¯ظٹظ† طµظ…طھط§ظ‹</button>
-                    <button class="btn btn-gold" style="padding:6px 12px; font-size:0.9rem;" onclick="exportSubscribersCSV()"><i class="fas fa-download mr-1"></i> ظ…ط³ظˆط¯ط© ط§ظ„ظ…ط´طھط±ظƒظٹظ† (CSV)</button>
+                    <button class="btn btn-outline" style="border-color:#e74c3c; color:#e74c3c; padding:6px 12px; font-size:0.9rem;" onclick="bulkRemoveSubscribers()"><i class="fas fa-trash-alt mr-1"></i> إزالة المحددين صمتاً</button>
+                    <button class="btn btn-gold" style="padding:6px 12px; font-size:0.9rem;" onclick="exportSubscribersCSV()"><i class="fas fa-download mr-1"></i> مسودة المشتركين (CSV)</button>
                 </div>
             </div>
 
@@ -1167,10 +1167,10 @@ window.updateItemUrl = function(sIdx, iIdx, type, val) {
                     <thead>
                         <tr>
                             <th style="width:40px;"></th>
-                            <th>ط§ط³ظ… ط§ظ„ط·ط§ظ„ط¨</th>
-                            <th>ط§ظ„ظ‡ط§طھظپ</th>
-                            <th>ط§ظ„طµظپ</th>
-                            <th>ط¥ط¬ط±ط§ط،ط§طھ</th>
+                            <th>اسم الطالب</th>
+                            <th>الهاتف</th>
+                            <th>الصف</th>
+                            <th>إجراءات</th>
                         </tr>
                     </thead>
                     <tbody id="courseSubscribersTbody">
@@ -1192,14 +1192,14 @@ window.openCourseSubscribers = async function(courseId) {
     const title = document.getElementById('courseSubscribersTitle');
     document.getElementById('selectAllSubscribers').checked = false;
     
-    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;"><i class="fas fa-spinner fa-spin"></i> ط¬ط§ط±ظٹ ط¬ظ„ط¨ ط§ظ„ظ…ط´طھط±ظƒظٹظ†...</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;"><i class="fas fa-spinner fa-spin"></i> جاري جلب المشتركين...</td></tr>';
     modal.style.display = 'flex';
     
-    let courseName = "ط§ظ„ظƒظˆط±ط³";
+    let courseName = "الكورس";
     const adminCourses = JSON.parse(localStorage.getItem('adminCourses') || '[]');
     const c = adminCourses.find(x => x.id === courseId);
     if(c) courseName = c.title;
-    title.innerHTML = '<i class="fas fa-users mr-2"></i> ظ…ط´طھط±ظƒظٹ: ' + courseName;
+    title.innerHTML = '<i class="fas fa-users mr-2"></i> مشتركي: ' + courseName;
 
     try {
         let allUsers = [];
@@ -1225,7 +1225,7 @@ window.openCourseSubscribers = async function(courseId) {
         renderSubscribersTable();
     } catch(e) {
         console.error(e);
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#e74c3c;">ط®ط·ط£ ظپظٹ ط¬ظ„ط¨ ط§ظ„ط¨ظٹط§ظ†ط§طھ</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#e74c3c;">خطأ في جلب البيانات</td></tr>';
     }
 };
 
@@ -1234,7 +1234,7 @@ function renderSubscribersTable() {
     tbody.innerHTML = '';
     
     if(currentCourseSubscribersData.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--text-secondary);">ظ„ط§ ظٹظˆط¬ط¯ ظ…ط´طھط±ظƒظٹظ† ظپظٹ ظ‡ط°ط§ ط§ظ„ظƒظˆط±ط³</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--text-secondary);">لا يوجد مشتركين في هذا الكورس</td></tr>';
         return;
     }
     
@@ -1246,8 +1246,8 @@ function renderSubscribersTable() {
             <td style="direction:ltr; text-align:right;">${s.phone}</td>
             <td><span class="badge" style="background:rgba(255,255,255,0.1);">${s.grade}</span></td>
             <td>
-                <button class="btn btn-outline" style="padding:4px 8px; font-size:0.8rem; border-color:#e74c3c; color:#e74c3c;" onclick="removeSingleSubscriber('${s.phone}')" title="ط¥ط²ط§ظ„ط© طµط§ظ…طھط©">
-                    <i class="fas fa-times"></i> ط¥ط²ط§ظ„ط©
+                <button class="btn btn-outline" style="padding:4px 8px; font-size:0.8rem; border-color:#e74c3c; color:#e74c3c;" onclick="removeSingleSubscriber('${s.phone}')" title="إزالة صامتة">
+                    <i class="fas fa-times"></i> إزالة
                 </button>
             </td>
         `;
@@ -1261,24 +1261,24 @@ document.getElementById('selectAllSubscribers').addEventListener('change', funct
 });
 
 window.removeSingleSubscriber = async function(phone) {
-    if(!confirm('ظ‡ظ„ ط£ظ†طھ ظ…طھط£ظƒط¯ ظ…ظ† ط¥ط²ط§ظ„ط© ظ‡ط°ط§ ط§ظ„ط·ط§ظ„ط¨ ظ…ظ† ط§ظ„ظƒظˆط±ط³طں (ظ„ظ† ظٹطµظ„ظ‡ ط¥ط´ط¹ط§ط± ط¨ط°ظ„ظƒ)')) return;
+    if(!confirm('هل أنت متأكد من إزالة هذا الطالب من الكورس؟ (لن يصله إشعار بذلك)')) return;
     await processUnsubscribe([phone]);
 };
 
 window.bulkRemoveSubscribers = async function() {
     const checkboxes = document.querySelectorAll('.subscriber-checkbox:checked');
     if(checkboxes.length === 0) {
-        alert('ط§ظ„ط±ط¬ط§ط، طھط­ط¯ظٹط¯ ط·ط§ظ„ط¨ ظˆط§ط­ط¯ ط¹ظ„ظ‰ ط§ظ„ط£ظ‚ظ„');
+        alert('الرجاء تحديد طالب واحد على الأقل');
         return;
     }
-    if(!confirm('ظ‡ظ„ ط£ظ†طھ ظ…طھط£ظƒط¯ ظ…ظ† ط¥ط²ط§ظ„ط© ط¬ظ…ظٹط¹ ط§ظ„ط·ظ„ط§ط¨ ط§ظ„ظ…ط­ط¯ط¯ظٹظ† ظ…ظ† ظ‡ط°ط§ ط§ظ„ظƒظˆط±ط³طں (' + checkboxes.length + ' ط·ظ„ط§ط¨)')) return;
+    if(!confirm('هل أنت متأكد من إزالة جميع الطلاب المحددين من هذا الكورس؟ (' + checkboxes.length + ' طلاب)')) return;
     
     const phones = Array.from(checkboxes).map(cb => cb.value);
     await processUnsubscribe(phones);
 };
 
 async function processUnsubscribe(phones) {
-    const btnText = '<i class="fas fa-spinner fa-spin"></i> ط¬ط§ط±ظٹ ط§ظ„ط¥ط²ط§ظ„ط©...';
+    const btnText = '<i class="fas fa-spinner fa-spin"></i> جاري الإزالة...';
     let processed = 0;
     for(let phone of phones) {
         try {
@@ -1299,8 +1299,8 @@ async function processUnsubscribe(phones) {
         } catch(e) { console.error('Error removing ' + phone, e); }
     }
     
-    if(window.showToast) window.showToast('طھظ… ط¥ط²ط§ظ„ط© ' + processed + ' ط·ط§ظ„ط¨ ط¨ظ†ط¬ط§ط­.', 'success');
-    else alert('طھظ… ط¥ط²ط§ظ„ط© ' + processed + ' ط·ط§ظ„ط¨ ط¨ظ†ط¬ط§ط­.');
+    if(window.showToast) window.showToast('تم إزالة ' + processed + ' طالب بنجاح.', 'success');
+    else alert('تم إزالة ' + processed + ' طالب بنجاح.');
     
     window.openCourseSubscribers(currentCourseSubscribersId);
 }
@@ -1314,12 +1314,12 @@ window.requireAdminPassword = function() {
         modal.style.cssText = 'background:var(--primary-navy, #071326);padding:30px;border-radius:15px;border:1px solid var(--royal-gold, #d4af37);text-align:center;max-width:350px;width:90%;box-shadow:0 0 20px rgba(212,175,55,0.2);';
         
         modal.innerHTML = `
-            <h3 style="color:var(--royal-gold, #d4af37);margin-bottom:15px;"><i class="fas fa-lock"></i> طھط£ظƒظٹط¯ ط§ظ„ط£ظ…ط§ظ†</h3>
-            <p style="color:#fff;margin-bottom:20px;font-size:0.95rem;">ظٹط±ط¬ظ‰ ط¥ط¯ط®ط§ظ„ ظƒظ„ظ…ط© ظ…ط±ظˆط± ط§ظ„ظ…ط§ظ„ظƒ ظ„ظ„ظ…طھط§ط¨ط¹ط©:</p>
-            <input type="password" id="tempAdminPwd" autocomplete="new-password" class="form-control" style="width:100%;margin-bottom:20px;text-align:center;letter-spacing:5px;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.1);color:#fff;" placeholder="ط£ط¯ط®ظ„ ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط± ظ‡ظ†ط§">
+            <h3 style="color:var(--royal-gold, #d4af37);margin-bottom:15px;"><i class="fas fa-lock"></i> تأكيد الأمان</h3>
+            <p style="color:#fff;margin-bottom:20px;font-size:0.95rem;">يرجى إدخال كلمة مرور المالك للمتابعة:</p>
+            <input type="password" id="tempAdminPwd" autocomplete="new-password" class="form-control" style="width:100%;margin-bottom:20px;text-align:center;letter-spacing:5px;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.1);color:#fff;" placeholder="أدخل كلمة المرور هنا">
             <div style="display:flex;gap:10px;justify-content:center;">
-                <button id="btnPwdCancel" class="btn btn-outline" style="flex:1;border-color:#e74c3c;color:#e74c3c;">ط¥ظ„ط؛ط§ط،</button>
-                <button id="btnPwdConfirm" class="btn btn-gold" style="flex:1;">طھط£ظƒظٹط¯</button>
+                <button id="btnPwdCancel" class="btn btn-outline" style="flex:1;border-color:#e74c3c;color:#e74c3c;">إلغاء</button>
+                <button id="btnPwdConfirm" class="btn btn-gold" style="flex:1;">تأكيد</button>
             </div>
         `;
         
@@ -1344,20 +1344,20 @@ window.exportSubscribersCSV = async function() {
     const pwd = await window.requireAdminPassword();
     if (pwd === null) return;
     if (pwd !== "My@36_172001") {
-        alert("ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط± ط؛ظٹط± طµط­ظٹط­ط©!");
+        alert("كلمة المرور غير صحيحة!");
         return;
     }
 
     if(currentCourseSubscribersData.length === 0) {
-        alert("ظ„ط§ ظٹظˆط¬ط¯ ظ…ط´طھط±ظƒظˆظ† ظپظٹ ظ‡ط°ط§ ط§ظ„ظƒظˆط±ط³ ظ„طھطµط¯ظٹط± ط¨ظٹط§ظ†ط§طھظ‡ظ….");
+        alert("لا يوجد مشتركون في هذا الكورس لتصدير بياناتهم.");
         return;
     }
     
     let aoa = [];
-    aoa.push(["ط§ظ„ط§ط³ظ…", "ط±ظ‚ظ… ط§ظ„ظ…ظˆط¨ط§ظٹظ„", "ط±ظ‚ظ… ظˆظ„ظٹ ط§ظ„ط£ظ…ط±", "ط§ظ„طµظپ"]);
+    aoa.push(["الاسم", "رقم الموبايل", "رقم ولي الأمر", "الصف"]);
     
     currentCourseSubscribersData.forEach(s => {
-        aoa.push([s.name, s.phone, s.parentPhone || 'ط؛ظٹط± ظ…ط³ط¬ظ„', s.grade]);
+        aoa.push([s.name, s.phone, s.parentPhone || 'غير مسجل', s.grade]);
     });
     
     const ws = XLSX.utils.aoa_to_sheet(aoa);
@@ -1399,14 +1399,13 @@ window.exportSubscribersCSV = async function() {
     ws['!dir'] = 'rtl'; // RTL support
     
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "ط§ظ„ظ…ط´طھط±ظƒظٹظ†");
+    XLSX.utils.book_append_sheet(wb, ws, "المشتركين");
     
     XLSX.writeFile(wb, `subscribers_course_${currentCourseSubscribersId}_${new Date().toISOString().split('T')[0]}.xlsx`);
 };
 </script>
 </body>
 </html>
-
 
 
 

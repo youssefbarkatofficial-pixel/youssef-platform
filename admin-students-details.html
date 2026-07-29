@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <script>
@@ -7,9 +7,9 @@
     </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ط¥ط­طµط§ط¦ظٹط§طھ ط§ظ„ط·ظ„ط§ط¨ ط§ظ„طھظپطµظٹظ„ظٹط© - ظ„ظˆط­ط© ط§ظ„ط¥ط¯ط§ط±ط©</title>
+    <title>إحصائيات الطلاب التفصيلية - لوحة الإدارة</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="css/style.css?v=2.2">
+    <link rel="stylesheet" href="css/style.css?v=1785339977362">
     <link rel="stylesheet" href="css/dashboard.css">
     <style>
         .filter-panel { background: var(--bg-secondary); padding: 20px; border-radius: 12px; border: 1px solid var(--border-color); margin-bottom: 25px; display: flex; gap: 15px; align-items: flex-end; }
@@ -28,82 +28,82 @@
 
     <header class="navbar glass-panel" style="border-bottom-color: var(--royal-gold);">
         <a href="index.html" class="nav-brand">
-            <div class="logo-circle" style="color: #fff; background: var(--royal-gold);">ظٹ</div>
-            <span class="nav-brand-text text-gold">ظ„ظˆط­ط© ط§ظ„ط¥ط¯ط§ط±ط© - ظٹظˆط³ظپ ط¨ط±ظƒط§طھ</span>
+            <div class="logo-circle" style="color: #fff; background: var(--royal-gold);">ي</div>
+            <span class="nav-brand-text text-gold">لوحة الإدارة - يوسف بركات</span>
         </a>
         <div class="nav-actions">
-            <a href="#" id="logoutBtn" class="btn btn-outline" style="border-color: #e74c3c; color: #e74c3c; padding: 8px 15px; border-radius: 20px;">ط®ط±ظˆط¬ <i class="fas fa-sign-out-alt"></i></a>
+            <a href="#" id="logoutBtn" class="btn btn-outline" style="border-color: #e74c3c; color: #e74c3c; padding: 8px 15px; border-radius: 20px;">خروج <i class="fas fa-sign-out-alt"></i></a>
         </div>
     </header>
 
     <div class="dashboard-layout">
         <aside class="sidebar" id="sidebar" style="border-left-color: var(--royal-gold);">
             <ul class="sidebar-nav" style="margin-top: 20px;">
-                <li><a href="admin-dashboard.html"><i class="fas fa-chart-line"></i> ط§ظ„ط¥ط­طµط§ط¦ظٹط§طھ ط§ظ„ط¹ط§ظ…ط©</a></li>
-                <li><a href="admin-students.html"><i class="fas fa-users"></i> ط¥ط¯ط§ط±ط© ط§ظ„ط·ظ„ط§ط¨</a></li>
-                <li><a href="admin-students-details.html" class="active"><i class="fas fa-user-graduate"></i> ط¥ط­طµط§ط¦ظٹط§طھ ط§ظ„ط·ظ„ط§ط¨ (طھظپطµظٹظ„ظٹ)</a></li>
-                <li><a href="admin-courses.html"><i class="fas fa-book-open"></i> ط¥ط¯ط§ط±ط© ط§ظ„ظƒظˆط±ط³ط§طھ</a></li>
-                <li><a href="admin-upload.html"><i class="fas fa-bolt"></i> ط§ظ„ط±ظپط¹ ط§ظ„ط³ط±ظٹط¹</a></li>
-                <li><a href="admin-payments.html"><i class="fas fa-money-check-alt"></i> ظ…ط±ط§ط¬ط¹ط© ط§ظ„ظ…ط¯ظپظˆط¹ط§طھ</a></li>
-                <li><a href="admin-compass.html"><i class="fas fa-compass"></i> ط¨ظˆطھ ط§ظ„ط¨ظˆطµظ„ط©</a></li>
-                <li><a href="admin-bot-monitor.html"><i class="fas fa-eye"></i> ظ…ط±ط§ظ‚ط¨ط© ط´ط§طھ ط§ظ„ط¨ظˆطµظ„ط©</a></li>
-                <li><a href="admin-notifications.html"><i class="fas fa-bell"></i> ط¥ط±ط³ط§ظ„ ط§ظ„ط¥ط´ط¹ط§ط±ط§طھ</a></li>
-                <li><a href="admin-settings.html"><i class="fas fa-cog"></i> ط¥ط¹ط¯ط§ط¯ط§طھ ط§ظ„ظ…ظ†طµط©</a></li>
+                <li><a href="admin-dashboard.html"><i class="fas fa-chart-line"></i> الإحصائيات العامة</a></li>
+                <li><a href="admin-students.html"><i class="fas fa-users"></i> إدارة الطلاب</a></li>
+                <li><a href="admin-students-details.html" class="active"><i class="fas fa-user-graduate"></i> إحصائيات الطلاب (تفصيلي)</a></li>
+                <li><a href="admin-courses.html"><i class="fas fa-book-open"></i> إدارة الكورسات</a></li>
+                <li><a href="admin-upload.html"><i class="fas fa-bolt"></i> الرفع السريع</a></li>
+                <li><a href="admin-payments.html"><i class="fas fa-money-check-alt"></i> مراجعة المدفوعات</a></li>
+                <li><a href="admin-compass.html"><i class="fas fa-compass"></i> بوت البوصلة</a></li>
+                <li><a href="admin-bot-monitor.html"><i class="fas fa-eye"></i> مراقبة شات البوصلة</a></li>
+                <li><a href="admin-notifications.html"><i class="fas fa-bell"></i> إرسال الإشعارات</a></li>
+                <li><a href="admin-settings.html"><i class="fas fa-cog"></i> إعدادات المنصة</a></li>
             </ul>
         </aside>
 
         <main class="main-content">
             <div class="page-header">
-                <h1 class="page-title"><i class="fas fa-user-graduate mr-2"></i> ط¥ط­طµط§ط¦ظٹط§طھ ط§ظ„ط·ظ„ط§ط¨ ط§ظ„طھظپطµظٹظ„ظٹط© ط¨ط§ظ„طµظپظˆظپ</h1>
+                <h1 class="page-title"><i class="fas fa-user-graduate mr-2"></i> إحصائيات الطلاب التفصيلية بالصفوف</h1>
             </div>
 
             <div class="filter-panel">
                 <div style="flex:1;">
-                    <label style="display:block; margin-bottom:8px; color:var(--text-secondary);">ط§ط®طھط± ط§ظ„طµظپ ط§ظ„ط¯ط±ط§ط³ظٹ ظ„ظ…ط¹ط§ظٹظ†ط© ط¨ظٹط§ظ†ط§طھظ‡ ط§ظ„طھظپطµظٹظ„ظٹط©</label>
+                    <label style="display:block; margin-bottom:8px; color:var(--text-secondary);">اختر الصف الدراسي لمعاينة بياناته التفصيلية</label>
                     <select id="gradeFilter" class="form-control" style="font-size:1.1rem; padding:10px;">
-                        <option value="">-- ط§ط®طھط± ط§ظ„طµظپ --</option>
-                        <option value="prep1">ط§ظ„طµظپ ط§ظ„ط£ظˆظ„ ط§ظ„ط¥ط¹ط¯ط§ط¯ظٹ</option>
-                        <option value="prep2">ط§ظ„طµظپ ط§ظ„ط«ط§ظ†ظٹ ط§ظ„ط¥ط¹ط¯ط§ط¯ظٹ</option>
-                        <option value="prep3">ط§ظ„طµظپ ط§ظ„ط«ط§ظ„ط« ط§ظ„ط¥ط¹ط¯ط§ط¯ظٹ</option>
-                        <option value="sec1">ط§ظ„طµظپ ط§ظ„ط£ظˆظ„ ط§ظ„ط«ط§ظ†ظˆظٹ</option>
+                        <option value="">-- اختر الصف --</option>
+                        <option value="prep1">الصف الأول الإعدادي</option>
+                        <option value="prep2">الصف الثاني الإعدادي</option>
+                        <option value="prep3">الصف الثالث الإعدادي</option>
+                        <option value="sec1">الصف الأول الثانوي</option>
                     </select>
                 </div>
                 <div>
-                    <button class="btn btn-gold" id="btnExportCSV" style="display:none;"><i class="fas fa-download mr-2"></i> طھط­ظ…ظٹظ„ ط§ظ„ط³ط¬ظ„ (CSV)</button>
+                    <button class="btn btn-gold" id="btnExportCSV" style="display:none;"><i class="fas fa-download mr-2"></i> تحميل السجل (CSV)</button>
                 </div>
             </div>
 
             <div class="stats-grid" id="gradeStatsGrid" style="display:none;">
                 <div class="stat-card">
-                    <h3>ط¥ط¬ظ…ط§ظ„ظٹ ط§ظ„ط·ظ„ط§ط¨</h3>
+                    <h3>إجمالي الطلاب</h3>
                     <div class="val" id="stTotal">0</div>
                 </div>
                 <div class="stat-card" style="border-color: rgba(46, 204, 113, 0.4);">
-                    <h3>ط§ظ„ط·ظ„ط§ط¨ ط§ظ„ظ…طھظپط§ط¹ظ„ظٹظ† (ظ†ط´ط· ظ…ط¤ط®ط±ط§ظ‹)</h3>
+                    <h3>الطلاب المتفاعلين (نشط مؤخراً)</h3>
                     <div class="val" id="stActive" style="color: #2ecc71;">0</div>
                 </div>
                 <div class="stat-card" style="border-color: rgba(231, 76, 60, 0.4);">
-                    <h3>ط§ظ„ط؛ظٹط§ط¨ ط§ظ„ط¹ط§ظ„ظٹ (ط§ط­طھظ…ط§ظ„ظٹط© ط§ظ†ظ‚ط·ط§ط¹)</h3>
+                    <h3>الغياب العالي (احتمالية انقطاع)</h3>
                     <div class="val" id="stAbsent" style="color: #e74c3c;">0</div>
                 </div>
                 <div class="stat-card" style="border-color: rgba(52, 152, 219, 0.4);">
-                    <h3>ظ…طھظˆط³ط· ط§ظ„ط§ط´طھط±ط§ظƒط§طھ</h3>
+                    <h3>متوسط الاشتراكات</h3>
                     <div class="val" id="stAvgCourses" style="color: #3498db;">0</div>
                 </div>
             </div>
 
             <div class="glass-panel dash-panel" id="studentsListContainer" style="display:none;">
-                <h3 style="color: var(--accent-cyan); margin-bottom: 20px;"><i class="fas fa-list mr-2"></i> ظ‚ط§ط¦ظ…ط© ط·ظ„ط§ط¨ ط§ظ„طµظپ ط§ظ„ظ…ط­ط¯ط¯</h3>
+                <h3 style="color: var(--accent-cyan); margin-bottom: 20px;"><i class="fas fa-list mr-2"></i> قائمة طلاب الصف المحدد</h3>
                 <div style="overflow-x: auto;">
                     <table class="admin-table" id="detailsTable">
                         <thead>
                             <tr>
-                                <th>ط§ط³ظ… ط§ظ„ط·ط§ظ„ط¨</th>
-                                <th>ط±ظ‚ظ… ط§ظ„ظ‡ط§طھظپ</th>
-                                <th>طھط§ط±ظٹط® ط§ظ„ط§ظ†ط¶ظ…ط§ظ…</th>
-                                <th>ط§ظ„ظƒظˆط±ط³ط§طھ ط§ظ„ظ…ط´طھط±ظƒ ط¨ظ‡ط§</th>
-                                <th>طھظ‚ظٹظٹظ… ط§ظ„طھظپط§ط¹ظ„</th>
-                                <th>ط¢ط®ط± ظ†ط´ط§ط·</th>
+                                <th>اسم الطالب</th>
+                                <th>رقم الهاتف</th>
+                                <th>تاريخ الانضمام</th>
+                                <th>الكورسات المشترك بها</th>
+                                <th>تقييم التفاعل</th>
+                                <th>آخر نشاط</th>
                             </tr>
                         </thead>
                         <tbody id="detailsTableBody"></tbody>
@@ -123,5 +123,4 @@
     <script src="js/admin-auth.js?v=5.5"></script>`n    <script src="js/admin-students-details.js?v=5.5"></script>
 </body>
 </html>
-
 

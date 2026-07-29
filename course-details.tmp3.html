@@ -1,11 +1,11 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ - ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½</title>
+    <title>������� ������ - ���� �����</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="css/style.css?v=2.2">
+    <link rel="stylesheet" href="css/style.css?v=1785339977372">
     <link rel="stylesheet" href="css/courses.css">
     <link rel="stylesheet" href="css/auth.css">
 </head>
@@ -15,13 +15,13 @@
     <!-- Header -->
     <header class="navbar glass-panel">
         <a href="index.html" class="nav-brand">
-            <div class="logo-circle">ï؟½</div>
-            <span class="nav-brand-text">ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½</span>
+            <div class="logo-circle">�</div>
+            <span class="nav-brand-text">���� ���� �����</span>
         </a>
         <ul class="nav-links">
-            <li><a href="index.html">ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½</a></li>
-            <li><a href="courses.html">ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½</a></li>
-            <li><a href="dashboard.html">ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½</a></li>
+            <li><a href="index.html">��������</a></li>
+            <li><a href="courses.html">��������</a></li>
+            <li><a href="dashboard.html">���� ������</a></li>
         </ul>
         <div class="nav-actions">
             
@@ -32,14 +32,14 @@
         <div class="glass-panel" style="padding: 40px; border-radius: 20px; max-width: 800px; margin: 0 auto;">
             
             <a href="courses.html" style="color: var(--accent-cyan); text-decoration: none; font-size: 0.9rem; margin-bottom: 20px; display: inline-block;">
-                <i class="fas fa-arrow-right mr-2"></i> ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½
+                <i class="fas fa-arrow-right mr-2"></i> ������ ��������
             </a>
 
             <div style="display: flex; flex-wrap: wrap; gap: 30px; margin-bottom: 40px; align-items: flex-start;">
                 <img id="cdImage" src="" style="width: 100%; max-width: 300px; height: 200px; object-fit: cover; border-radius: 15px; border: 1px solid var(--border-color);" alt="Course">
                 <div style="flex: 1; min-width: 250px;">
                     <span id="cdGrade" class="badge" style="background: rgba(212, 166, 79, 0.2); color: var(--royal-gold); padding: 5px 15px; border-radius: 20px; font-size: 0.9rem; margin-bottom: 15px; display: inline-block;"></span>
-                    <h1 id="cdTitle" class="heading-luxury mb-1" style="font-size: 2rem;">ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½...</h1>
+                    <h1 id="cdTitle" class="heading-luxury mb-1" style="font-size: 2rem;">���� ����� ������...</h1>
                     <p id="cdDesc" style="color: rgba(255,255,255,0.8); line-height: 1.6; margin-bottom: 20px;"></p>
                     <div style="display: flex; align-items: center; gap: 20px;">
                         <div style="font-size: 1.5rem; font-weight: bold; color: var(--royal-gold);" id="cdPrice"></div>
@@ -50,22 +50,22 @@
 
             <div id="cdLecturesSection">
                 <h3 style="color: var(--text-primary); border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; margin-bottom: 20px; margin-top: 40px; display: flex; align-items: baseline; gap: 10px;">
-                    <div><i class="fas fa-play-circle mr-2 text-gold"></i> ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½</div>
-                    <span style="font-size: 0.8rem; color: rgba(255,255,255,0.5); font-weight: normal;">(3 ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ - 4 ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½)</span>
+                    <div><i class="fas fa-play-circle mr-2 text-gold"></i> ���������</div>
+                    <span style="font-size: 0.8rem; color: rgba(255,255,255,0.5); font-weight: normal;">(3 ������� - 4 ����� ��� ����)</span>
                 </h3>
                 <div id="cdLecturesList" style="display: flex; flex-direction: column; gap: 15px;"></div>
             </div>
 
             <div id="cdHomeworksSection">
                 <h3 style="color: var(--text-primary); border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; margin-bottom: 20px; margin-top: 40px;">
-                    <i class="fas fa-tasks mr-2 text-gold"></i> ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½
+                    <i class="fas fa-tasks mr-2 text-gold"></i> ��������
                 </h3>
                 <div id="cdHomeworksList" style="display: flex; flex-direction: column; gap: 15px;"></div>
             </div>
 
             <div id="cdExamsSection">
                 <h3 style="color: var(--text-primary); border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; margin-bottom: 20px; margin-top: 40px;">
-                    <i class="fas fa-clipboard-list mr-2 text-gold"></i> ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½
+                    <i class="fas fa-clipboard-list mr-2 text-gold"></i> ����������
                 </h3>
                 <div id="cdExamsList" style="display: flex; flex-direction: column; gap: 15px;"></div>
             </div>
@@ -77,48 +77,48 @@
     <div class="modal-overlay" id="paymentModal">
         <div class="glass-panel modal-content" style="padding: 30px; max-width: 500px;">
             <button class="close-modal" onclick="document.getElementById('paymentModal').classList.remove('active')"><i class="fas fa-times"></i></button>
-            <h2 class="text-gold mb-2 text-center">ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½</h2>
+            <h2 class="text-gold mb-2 text-center">����� �������� ������</h2>
             
-            <p style="margin-bottom: 20px; text-align: center;">ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½:</p>
+            <p style="margin-bottom: 20px; text-align: center;">���� ����� ����� �������� ��:</p>
             
             <div class="payment-methods">
                 <div class="pay-method active" data-type="vodafone">
                     <i class="fas fa-mobile-alt" style="font-size: 2rem; color: #e60000; margin-bottom: 10px;"></i>
-                    <h4>ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½</h4>
+                    <h4>������� ���</h4>
                 </div>
                 <div class="pay-method" data-type="fawry" style="opacity: 0.5; pointer-events: none; filter: grayscale(100%); position: relative;">
-                    <span style="position: absolute; top: 5px; left: 5px; background: rgba(0,0,0,0.5); font-size: 0.7rem; padding: 2px 5px; border-radius: 3px;">ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½</span>
+                    <span style="position: absolute; top: 5px; left: 5px; background: rgba(0,0,0,0.5); font-size: 0.7rem; padding: 2px 5px; border-radius: 3px;">������</span>
                     <i class="fas fa-store" style="font-size: 2rem; color: #f1c40f; margin-bottom: 10px;"></i>
-                    <h4>ï؟½ï؟½ï؟½ï؟½</h4>
+                    <h4>����</h4>
                 </div>
             </div>
 
             <div class="payment-details" id="vodafoneDetails">
-                <p>ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½:</p>
+                <p>�� ������ ������ ��� ����� ������ ��� ������� ���:</p>
                 <div class="copy-box">
                     <span id="vCashNum" style="font-size: 1.2rem; font-weight: bold; letter-spacing: 2px;">01023675235</span>
                     <button class="copy-btn" data-target="vCashNum"><i class="fas fa-copy"></i></button>
                 </div>
-                <p style="font-size: 0.85rem; margin-top: 10px; color: var(--accent-cyan);">* ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ (ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½) ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½.</p>
+                <p style="font-size: 0.85rem; margin-top: 10px; color: var(--accent-cyan);">* ����� �������� ����� ������� (�������� ���) ������ ��� �����.</p>
             </div>
 
             <div class="payment-details" id="fawryDetails" style="display: none;">
-                <p>ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½:</p>
+                <p>���� ����� ������ ���� ������� ��� ����� ������:</p>
                 <div class="copy-box">
                     <span id="fawryCode" style="font-size: 1.2rem; font-weight: bold; letter-spacing: 2px;">784512</span>
                     <button class="copy-btn" data-target="fawryCode"><i class="fas fa-copy"></i></button>
                 </div>
-                <p style="font-size: 0.85rem; margin-top: 10px; color: var(--accent-cyan);">* ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ 24 ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½.</p>
+                <p style="font-size: 0.85rem; margin-top: 10px; color: var(--accent-cyan);">* ����� ���� ���� 24 ���� ���.</p>
             </div>
 
             <div class="form-group" style="margin-top: 20px;">
-                <label>ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½</label>
+                <label>���� ���� �������</label>
                 <input type="file" id="paymentProofImage" class="form-control" style="padding: 10px;" accept="image/*">
             </div>
 
             <div style="display: flex; gap: 10px; margin-top: 20px;">
-                <button class="btn btn-outline" style="flex: 1;" onclick="document.getElementById('paymentModal').classList.remove('active')">ï؟½ï؟½ï؟½ï؟½ï؟½</button>
-                <button type="button" class="btn btn-green" style="flex: 1;" id="confirmPayment" onclick="submitPaymentRequest()">ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½</button>
+                <button class="btn btn-outline" style="flex: 1;" onclick="document.getElementById('paymentModal').classList.remove('active')">�����</button>
+                <button type="button" class="btn btn-green" style="flex: 1;" id="confirmPayment" onclick="submitPaymentRequest()">�������</button>
             </div>
         </div>
     </div>
@@ -139,68 +139,68 @@
             <button class="close-modal" onclick="document.getElementById('loginModal').classList.remove('active')"><i class="fas fa-times"></i></button>
             <div class="auth-header">
                 <div class="auth-logo"><i class="fas fa-user-graduate"></i></div>
-                <h2>ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½</h2>
-                <p>ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½</p>
+                <h2>����� ������</h2>
+                <p>������ �� ������ �� �����</p>
             </div>
             <form id="loginForm">
                 <div class="form-group">
-                    <label>ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½</label>
-                    <input type="text" id="loginPhone" class="form-control" placeholder="ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½" required>
+                    <label>��� ��������</label>
+                    <input type="text" id="loginPhone" class="form-control" placeholder="���� ��� ��������" required>
                 </div>
                 <div class="form-group">
-                    <label>ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½</label>
-                    <input type="password" id="loginPassword" class="form-control" placeholder="ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½" required>
+                    <label>���� ������</label>
+                    <input type="password" id="loginPassword" class="form-control" placeholder="���� ���� ������" required>
                 </div>
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <a href="#" id="forgotPasswordLink" style="color: var(--accent-cyan); font-weight: 700;">ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ر؟</a>
-                    <span style="color: rgba(0,0,0,0.6); font-size: 0.92rem;">ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½</span>
+                    <a href="#" id="forgotPasswordLink" style="color: var(--accent-cyan); font-weight: 700;">���� ���� �����ѿ</a>
+                    <span style="color: rgba(0,0,0,0.6); font-size: 0.92rem;">����� ������ �����</span>
                 </div>
-                <button type="submit" class="btn btn-green btn-block">ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½</button>
+                <button type="submit" class="btn btn-green btn-block">����� ������</button>
             </form>
             <div id="forgotPasswordModal" class="modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 10000; justify-content: center; align-items: center; padding: 20px;">
                 <div class="glass-panel" style="max-width: 520px; width: 100%; padding: 30px; position: relative; border-radius: 20px;">
                     <button onclick="document.getElementById('forgotPasswordModal').style.display='none'" style="position: absolute; top: 18px; right: 18px; background: transparent; border: none; color: var(--text-primary); font-size: 1.4rem; cursor: pointer;"><i class="fas fa-times"></i></button>
-                    <h2 style="margin-bottom: 20px; color: var(--royal-gold);">ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½</h2>
-                    <p style="margin-bottom: 20px; color: var(--text-secondary);">ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½.</p>
+                    <h2 style="margin-bottom: 20px; color: var(--royal-gold);">������� ���� ������</h2>
+                    <p style="margin-bottom: 20px; color: var(--text-secondary);">���� ��� ��� ����� ������� ������ ����� ����� ��� ����� ������ ���� ����.</p>
                     <div id="fpStatusText" style="display:none; margin-bottom: 20px; padding: 12px 14px; border-radius: 16px; font-size: 0.95rem; line-height:1.5;"></div>
                     <form id="forgotPasswordForm">
                         <div class="form-group">
-                            <label>ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½</label>
-                            <input type="tel" id="fpStudentPhone" class="form-control" placeholder="ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½" required>
+                            <label>��� ������</label>
+                            <input type="tel" id="fpStudentPhone" class="form-control" placeholder="��� ������" required>
                         </div>
                         <div class="form-group">
-                            <label>ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½</label>
-                            <input type="tel" id="fpParentPhone" class="form-control" placeholder="ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½" required>
-                            <span id="fpParentError" class="error-message" style="display:none;">ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½.</span>
+                            <label>��� ��� �����</label>
+                            <input type="tel" id="fpParentPhone" class="form-control" placeholder="��� ��� �����" required>
+                            <span id="fpParentError" class="error-message" style="display:none;">����� ��� ����� ���� ����� ������.</span>
                         <div id="fpStep2" style="display:none;">
                             <div class="form-group">
-                                <label>ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½</label>
+                                <label>���� ��� ������</label>
                                 <input type="text" id="fpOtpCode" class="form-control" placeholder="xxxxx" maxlength="5">
                             </div>
                             <div class="form-group" style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
-                                <button type="button" id="fpResendBtn" class="btn btn-outline" style="display:none; padding: 10px 14px; min-width:150px;">ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½</button>
-                                <span id="fpOtpHelp" style="flex:1 1 100%; color: rgba(0,0,0,0.72); font-size: 0.92rem;">ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ 10 ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ ï؟½ï؟½ ï؟½ï؟½ï؟½.</span>
+                                <button type="button" id="fpResendBtn" class="btn btn-outline" style="display:none; padding: 10px 14px; min-width:150px;">����� ����� �����</button>
+                                <span id="fpOtpHelp" style="flex:1 1 100%; color: rgba(0,0,0,0.72); font-size: 0.92rem;">����� ���� ���� 10 ����� ��� ��� ������� �� �� ���.</span>
                             </div>
                             <div class="form-group">
-                                <label>ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½</label>
-                                <input type="password" id="fpNewPassword" class="form-control" placeholder="ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½">
+                                <label>���� ������ �������</label>
+                                <input type="password" id="fpNewPassword" class="form-control" placeholder="���� ������ �������">
                             </div>
                             <div class="form-group">
-                                <label>ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½</label>
-                                <input type="password" id="fpConfirmPassword" class="form-control" placeholder="ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½">
-                                <span id="fpPasswordError" class="error-message" style="display:none;">ï؟½ï؟½ï؟½ ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½.</span>
+                                <label>����� ���� ������ �������</label>
+                                <input type="password" id="fpConfirmPassword" class="form-control" placeholder="����� ���� ������ �������">
+                                <span id="fpPasswordError" class="error-message" style="display:none;">��� �� ������ ����� ������ ��� ���� ����.</span>
                             </div>
                         </div>
                         </div>
                         <div style="display:flex; justify-content: space-between; gap: 10px; margin-top: 20px;">
-                            <button type="button" class="btn btn-outline" onclick="document.getElementById('forgotPasswordModal').style.display='none'">ï؟½ï؟½ï؟½ï؟½ï؟½</button>
-                            <button type="submit" id="fpSubmitBtn" class="btn btn-green">ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½</button>
+                            <button type="button" class="btn btn-outline" onclick="document.getElementById('forgotPasswordModal').style.display='none'">�����</button>
+                            <button type="submit" id="fpSubmitBtn" class="btn btn-green">����� ����� ��� ������</button>
                         </div>
                     </form>
                 </div>
             </div>
             <div class="auth-footer">
-                <p>ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ب؟ <a href="register.html">ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½</a></p>
+                <p>��� ���� ���ȿ <a href="register.html">����� ���� ����</a></p>
             </div>
         </div>
     </div>
@@ -226,22 +226,22 @@
             let course = adminCourses.find(c => c.id === courseId);
             
             if(!course) {
-                alert('ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½');
+                alert('��� ������ ��� �����');
                 window.location.href = 'courses.html';
                 return;
             }
 
             const grades = {
-                'prep1': 'ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½',
-                'prep2': 'ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½',
-                'prep3': 'ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½',
-                'sec1': 'ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½'
+                'prep1': '���� ������',
+                'prep2': '����� ������',
+                'prep3': '����� ������',
+                'sec1': '���� �����'
             };
 
             document.getElementById('cdImage').src = course.image;
             document.getElementById('cdTitle').textContent = course.title;
             document.getElementById('cdDesc').textContent = course.desc;
-            document.getElementById('cdPrice').textContent = course.price + ' ï؟½.ï؟½';
+            document.getElementById('cdPrice').textContent = course.price + ' �.�';
             document.getElementById('cdGrade').textContent = grades[course.grade] || course.grade;
 
             let userStr = sessionStorage.getItem('currentStudent');
@@ -273,10 +273,10 @@
             if (isAdmin) {
                 actionContainer.innerHTML = 
                     <button class="btn btn-outline" style="border-color: var(--accent-cyan); color: var(--accent-cyan); margin-left: 10px;" onclick="openAdminCourseEdit()">
-                        <i class="fas fa-edit mr-2"></i> ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½
+                        <i class="fas fa-edit mr-2"></i> ����� ������ ������
                     </button>
                     <button class="btn btn-outline" style="border-color: var(--royal-gold); color: var(--royal-gold);" onclick="window.location.href='admin-courses.html?edit='+'+course.id+'">
-                        <i class="fas fa-layer-group mr-2"></i> ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½
+                        <i class="fas fa-layer-group mr-2"></i> ����� �������
                     </button>
                 ;
                 
@@ -285,20 +285,20 @@
                 <div class="modal-overlay" id="adminEditCourseModal">
                     <div class="glass-panel modal-content" style="padding: 30px; max-width: 500px;">
                         <button class="close-modal" onclick="document.getElementById('adminEditCourseModal').classList.remove('active')"><i class="fas fa-times"></i></button>
-                        <h2 class="text-gold mb-2 text-center">ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½</h2>
+                        <h2 class="text-gold mb-2 text-center">����� ������ ������</h2>
                         <div class="form-group mt-2">
-                            <label>ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½</label>
+                            <label>��� ������</label>
                             <input type="text" id="adminEditCourseTitle" class="form-control" value="+course.title+">
                         </div>
                         <div class="form-group">
-                            <label>ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½</label>
+                            <label>���� ������</label>
                             <input type="text" id="adminEditCourseImage" class="form-control" value="+course.image+">
                         </div>
                         <div class="form-group">
-                            <label>ï؟½ï؟½ï؟½ï؟½ï؟½</label>
+                            <label>�����</label>
                             <textarea id="adminEditCourseDesc" class="form-control" rows="3">+course.desc+</textarea>
                         </div>
-                        <button class="btn btn-green btn-block mt-2" onclick="saveAdminCourseEdit()">ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½</button>
+                        <button class="btn btn-green btn-block mt-2" onclick="saveAdminCourseEdit()">��� ���������</button>
                     </div>
                 </div>;
                 const div = document.createElement('div');
@@ -334,11 +334,11 @@
                 };
             }
             else if (isOwned) {
-                actionContainer.innerHTML = `<button class="btn btn-green"><i class="fas fa-check-circle mr-2"></i> ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½</button>`;
+                actionContainer.innerHTML = `<button class="btn btn-green"><i class="fas fa-check-circle mr-2"></i> ������� ����� ��</button>`;
             } else if (isPending) {
-                actionContainer.innerHTML = `<button class="btn btn-outline" style="color:var(--accent-orange); border-color:var(--accent-orange);" onclick="showPendingMessageDetails()"><i class="fas fa-clock mr-2"></i> ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½</button>`;
+                actionContainer.innerHTML = `<button class="btn btn-outline" style="color:var(--accent-orange); border-color:var(--accent-orange);" onclick="showPendingMessageDetails()"><i class="fas fa-clock mr-2"></i> ���� ��� ��������</button>`;
             } else {
-                actionContainer.innerHTML = `<button class="btn btn-gold" onclick="openPaymentModalDetails('${course.id}')"><i class="fas fa-lock-open mr-2"></i> ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½</button>`;
+                actionContainer.innerHTML = `<button class="btn btn-gold" onclick="openPaymentModalDetails('${course.id}')"><i class="fas fa-lock-open mr-2"></i> �������� ���� �������</button>`;
             }
 
             const rawContents = course.contents || {};
@@ -364,7 +364,7 @@
                 }
                 return {
                     id: item.id || 'lec_' + Date.now() + '_' + index,
-                    title: item.title || ('ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ' + (index + 1)),
+                    title: item.title || ('������ ' + (index + 1)),
                     type: 'lecture',
                     createdAt: item.createdAt || Date.now(),
                     children: [ item ]
@@ -406,13 +406,13 @@
 
             function openCourseResource(item, isLocked, lockReason) {
                 if(!isOwned) {
-                    if(window.showToast) window.showToast('ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½','error');
-                    else alert('ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½');
+                    if(window.showToast) window.showToast('��� ������� ��� ���� ��� ����� �������','error');
+                    else alert('��� ������� ��� ���� ��� ����� �������');
                     return;
                 }
                 if(isLocked) {
-                    if(window.showToast) window.showToast(lockReason || 'ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½', 'error');
-                    else alert(lockReason || 'ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½');
+                    if(window.showToast) window.showToast(lockReason || '��� ������� ����� ������', 'error');
+                    else alert(lockReason || '��� ������� ����� ������');
                     return;
                 }
                 
@@ -437,14 +437,14 @@
                                 window.open(item.youtubeUrl, '_blank');
                             }
                         } else if (item.videoUrl) {
-                            container.innerHTML = <video width="100%" height="100%" controls controlsList="nodownload" autoplay><source src=" + item.videoUrl + " type="video/mp4">ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½.</video>;
+                            container.innerHTML = <video width="100%" height="100%" controls controlsList="nodownload" autoplay><source src=" + item.videoUrl + " type="video/mp4">������ �� ���� ����� �������.</video>;
                             
                             // Auto-complete video on end
                             const vidEl = container.querySelector('video');
                             if(vidEl) {
                                 vidEl.onended = () => {
                                     markItemCompleted(item.id);
-                                    if(window.showToast) window.showToast('ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½!', 'success');
+                                    if(window.showToast) window.showToast('�� ������ ������ ����� �����!', 'success');
                                     setTimeout(() => window.location.reload(), 1500);
                                 };
                             }
@@ -486,8 +486,8 @@
                     return;
                 }
                 
-                if(window.showToast) window.showToast('ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½: ' + item.title, 'success');
-                else alert('ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½: ' + item.title);
+                if(window.showToast) window.showToast('���� �������: ' + item.title, 'success');
+                else alert('���� �������: ' + item.title);
             }
 
             function createResourceRow(item) {
@@ -500,7 +500,7 @@
                     <i class="fas ${toItemIcon(item)}" style="color: var(--accent-cyan); font-size: 1.2rem;"></i>
                     <div style="min-width:0;">
                         <div style="color: var(--text-primary); font-weight: 700; white-space: normal;">${item.title}</div>
-                        <div style="font-size:0.85rem; color: rgba(255,255,255,0.65);">${item.source === 'youtube' ? 'ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½' : item.source === 'link' ? 'ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½' : item.source === 'upload' ? 'ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½' : 'ï؟½ï؟½ï؟½ï؟½'}${item.type === 'training' ? ' ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½' : ''}</div>
+                        <div style="font-size:0.85rem; color: rgba(255,255,255,0.65);">${item.source === 'youtube' ? '������' : item.source === 'link' ? '���� �����' : item.source === 'upload' ? '����� �����' : '����'}${item.type === 'training' ? ' � ����� �����' : ''}</div>
                     </div>
                 `;
                 row.appendChild(meta);
@@ -509,7 +509,7 @@
                 actionBtn.type = 'button';
                 actionBtn.className = 'btn btn-outline';
                 actionBtn.style.cssText = 'padding: 9px 14px; white-space: nowrap;';
-                actionBtn.textContent = isOwned ? 'ï؟½ï؟½ï؟½' : 'ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½';
+                actionBtn.textContent = isOwned ? '���' : '������ ����';
                 actionBtn.addEventListener('click', () => openCourseResource(item));
                 row.appendChild(actionBtn);
 
@@ -528,10 +528,10 @@
                         <i class="fas fa-play-circle text-gold" style="font-size:1.4rem;"></i>
                         <div style="text-align:right; min-width:0;">
                             <div style="font-size:1.05rem; font-weight:700; white-space:normal;">${index + 1}. ${lecture.title}</div>
-                            <div style="color: rgba(255,255,255,0.65); font-size:0.9rem; margin-top:6px;">${(lecture.children || []).length} ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½</div>
+                            <div style="color: rgba(255,255,255,0.65); font-size:0.9rem; margin-top:6px;">${(lecture.children || []).length} ����� ������</div>
                         </div>
                     </div>
-                    <span class="badge" style="background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.8);">${isOwned ? 'ï؟½ï؟½ï؟½ï؟½' : 'ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½'}</span>
+                    <span class="badge" style="background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.8);">${isOwned ? '����' : '��� ����'}</span>
                 `;
 
                 const details = document.createElement('div');
@@ -543,7 +543,7 @@
                 if((lecture.children || []).length === 0) {
                     const emptyNode = document.createElement('p');
                     emptyNode.style.cssText = 'color: rgba(255,255,255,0.55); margin: 0;';
-                    emptyNode.textContent = 'ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½.';
+                    emptyNode.textContent = '�� ���� ����� ������ ���� �������� ���.';
                     detailsInner.appendChild(emptyNode);
                 } else {
                     lecture.children.forEach(child => detailsInner.appendChild(createResourceRow(child)));
@@ -553,7 +553,7 @@
                 if(attachedTrainings.length) {
                     const trainingsHeader = document.createElement('div');
                     trainingsHeader.style.cssText = 'padding-top: 10px; color: var(--accent-cyan); font-weight: 700;';
-                    trainingsHeader.textContent = 'ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½:';
+                    trainingsHeader.textContent = '������� ������ ���������:';
                     detailsInner.appendChild(trainingsHeader);
                     attachedTrainings.forEach(training => detailsInner.appendChild(createResourceRow(training)));
                 }
@@ -584,18 +584,18 @@
             function renderLectures(items) {
                 const container = document.getElementById('cdLecturesList');
                 const countNode = document.querySelector('#cdLecturesSection h3 span');
-                if(countNode) countNode.textContent = `(${items.length} ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½)`;
+                if(countNode) countNode.textContent = `(${items.length} �������)`;
                 container.innerHTML = '';
                 if(!items.length) {
-                    container.innerHTML = `<p style="color: rgba(255,255,255,0.5);">ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½. ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½.</p>`;
+                    container.innerHTML = `<p style="color: rgba(255,255,255,0.5);">�� ������ �� ������� ���. ����� ��������� ��� ��� �������.</p>`;
                     return;
                 }
                 items.forEach((lecture, idx) => container.appendChild(createLectureCard(lecture, idx)));
             }
 
                         renderLectures(lectures);
-            renderList('cdHomeworksList', homeworks, 'ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½');
-            renderList('cdExamsList', exams, 'ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½');
+            renderList('cdHomeworksList', homeworks, '������');
+            renderList('cdExamsList', exams, '��������');
 
             // Render Custom Sections
             if(normalizedContents.customSections.length > 0) {
@@ -618,7 +618,7 @@
                 const container = document.getElementById(containerId);
                 container.innerHTML = '';
                 if(!items || items.length === 0) {
-                    container.innerHTML = `<p style="color: rgba(255,255,255,0.5);">ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ ${sectionName} ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½.</p>`;
+                    container.innerHTML = `<p style="color: rgba(255,255,255,0.5);">�� ���� ${sectionName} ������.</p>`;
                     return;
                 }
                 items.forEach((item, index) => {
@@ -631,7 +631,7 @@
                             ${itemIcon}
                             <span style="color: var(--text-primary); font-weight: bold; font-size: 1.1rem;">${index + 1}. ${item.title}</span>
                         </div>
-                        ${isOwned ? `<span class="badge" style="background: rgba(46, 204, 113, 0.1); color: #2ecc71;">ï؟½ï؟½ï؟½ï؟½</span>` : ``}
+                        ${isOwned ? `<span class="badge" style="background: rgba(46, 204, 113, 0.1); color: #2ecc71;">����</span>` : ``}
                     `;
                     if (isOwned) {
                         div.addEventListener('click', () => openCourseResource(item));
@@ -654,11 +654,11 @@
                 <div class="modal-overlay" id="examModal">
                   <div class="glass-panel modal-content" style="padding: 20px; max-width: 800px;">
                     <button class="close-modal" onclick="document.getElementById('examModal').classList.remove('active')"><i class="fas fa-times"></i></button>
-                    <h2 id="examModalTitle" style="margin-bottom:10px;">ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½</h2>
+                    <h2 id="examModalTitle" style="margin-bottom:10px;">������</h2>
                     <div id="examQuestionsContainer" style="display:block; max-height:50vh; overflow:auto; gap:10px; margin-bottom:12px;"></div>
                     <div style="display:flex; gap:10px; justify-content:flex-end;">
-                      <button class="btn btn-outline" onclick="document.getElementById('examModal').classList.remove('active')">ï؟½ï؟½ï؟½ï؟½ï؟½</button>
-                      <button class="btn btn-green" id="submitExamBtn">ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½</button>
+                      <button class="btn btn-outline" onclick="document.getElementById('examModal').classList.remove('active')">�����</button>
+                      <button class="btn btn-green" id="submitExamBtn">����� ��������</button>
                     </div>
                     <div id="examResultContainer" style="margin-top:12px; display:none;"></div>
                   </div>
@@ -671,9 +671,9 @@
                     const course = adminCourses.find(c=>c.id===courseId);
                     let exam = null;
                     if(course && course.contents && Array.isArray(course.contents.exams)) exam = course.contents.exams[examIndex];
-                    if(!exam) { if(window.showToast) window.showToast('ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½','error'); else alert('ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½.'); return; }
+                    if(!exam) { if(window.showToast) window.showToast('�� ���� ������ ���� �������','error'); else alert('�� ���� ������.'); return; }
                     const modal = document.getElementById('examModal');
-                    document.getElementById('examModalTitle').textContent = exam.title || 'ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½';
+                    document.getElementById('examModalTitle').textContent = exam.title || '������';
 
                     const container = document.getElementById('examQuestionsContainer'); container.innerHTML = '';
                     const questions = exam.questions || [];
@@ -684,11 +684,11 @@
                         if(q.type === 'choose'){
                             inputHtml = `<div>` + ['a','b','c','d'].map(k=>`<label style="display:block;margin-bottom:6px;"><input type=radio name=qa_${idx} value='${k}'/> ${q.options && q.options[k] ? q.options[k] : k}</label>`).join('') + `</div>`;
                         } else if(q.type === 'tf'){
-                            inputHtml = `<label><input type=radio name=qa_${idx} value='ï؟½ï؟½'/> ï؟½ï؟½</label><label style='margin-right:10px;'><input type=radio name=qa_${idx} value='ï؟½ï؟½ï؟½'/> ï؟½ï؟½ï؟½</label>`;
+                            inputHtml = `<label><input type=radio name=qa_${idx} value='��'/> ��</label><label style='margin-right:10px;'><input type=radio name=qa_${idx} value='���'/> ���</label>`;
                         } else {
-                            inputHtml = `<textarea name=qa_${idx} rows=3 style="width:100%;" placeholder="ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½"></textarea>`;
+                            inputHtml = `<textarea name=qa_${idx} rows=3 style="width:100%;" placeholder="���� ������ ���"></textarea>`;
                         }
-                        qDiv.innerHTML = `<p style="margin:0 0 8px 0;"><strong>ï؟½${idx+1}:</strong> ${q.text}</p>` + inputHtml;
+                        qDiv.innerHTML = `<p style="margin:0 0 8px 0;"><strong>�${idx+1}:</strong> ${q.text}</p>` + inputHtml;
                         container.appendChild(qDiv);
                     });
 
@@ -697,7 +697,7 @@
                     const resultBox = document.getElementById('examResultContainer'); resultBox.style.display='none'; resultBox.innerHTML='';
                     submitBtn.onclick = function(){
                         const studentStr = sessionStorage.getItem('currentStudent');
-                        if(!studentStr){ alert('ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½'); return; }
+                        if(!studentStr){ alert('��� ����� ������ ������ �������'); return; }
                         const student = JSON.parse(studentStr);
                         const answers = [];
                         questions.forEach((q, idx)=>{
@@ -720,13 +720,13 @@
                             try{
                                 if(window.PF_Grader && typeof window.PF_Grader.scoreAnswer === 'function'){
                                     const res = window.PF_Grader.scoreAnswer(item.answer, item.q.answer, item.q.type || 'explain');
-                                    return { question: item.q.text, rawAnswer: item.answer, score: res.score || 0, feedback: res.feedback || (res.score===1? 'ï؟½ï؟½ï؟½':'ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½') };
+                                    return { question: item.q.text, rawAnswer: item.answer, score: res.score || 0, feedback: res.feedback || (res.score===1? '���':'���� �������') };
                                 }
                             }catch(e){}
                             // fallback simple exact match
                             const correct = (item.q.answer||'').toString().trim();
                             const ok = String((item.answer||'')).trim() === correct;
-                            return { question: item.q.text, rawAnswer: item.answer, score: ok?1:0, feedback: ok? 'ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½':'ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½' };
+                            return { question: item.q.text, rawAnswer: item.answer, score: ok?1:0, feedback: ok? '����� �����':'����� ��� �����' };
                         });
 
                         // aggregate score
@@ -735,11 +735,11 @@
 
                         // show result
                         resultBox.style.display = 'block';
-                        resultBox.innerHTML = `<div style="background:rgba(0,0,0,0.06); padding:12px; border-radius:8px;"><strong>ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½: ${percent}%</strong><div style="margin-top:8px;"></div></div>`;
+                        resultBox.innerHTML = `<div style="background:rgba(0,0,0,0.06); padding:12px; border-radius:8px;"><strong>������: ${percent}%</strong><div style="margin-top:8px;"></div></div>`;
                         const details = document.createElement('div'); details.style.marginTop='8px';
                         results.forEach((r, i)=>{
                             const p = document.createElement('div'); p.style.padding='8px 0'; p.style.borderBottom='1px solid rgba(255,255,255,0.03)';
-                            p.innerHTML = `<strong>ï؟½${i+1}:</strong> ${r.question}<br/><em>ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½:</em> ${r.rawAnswer || '-'}<br/><em>ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½:</em> ${r.feedback} <span style='margin-left:12px;'>(${Math.round(r.score*100)}%)</span>`;
+                            p.innerHTML = `<strong>�${i+1}:</strong> ${r.question}<br/><em>������:</em> ${r.rawAnswer || '-'}<br/><em>�������:</em> ${r.feedback} <span style='margin-left:12px;'>(${Math.round(r.score*100)}%)</span>`;
                             details.appendChild(p);
                         });
                         resultBox.appendChild(details);
@@ -780,7 +780,7 @@
                         const vodafoneDetails = document.getElementById('vodafoneDetails');
                         if(vodafoneDetails) {
                             const p = vodafoneDetails.querySelector('p');
-                            if(p) p.textContent = paymentSettings.paymentInstructions || 'ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½:';
+                            if(p) p.textContent = paymentSettings.paymentInstructions || '�� ������ ������ ��� ����� ������ ��� ������� ���:';
                         }
                         const fawryMethodBtn = document.querySelector('.pay-method[data-type="fawry"]');
                         if(fawryMethodBtn) {
@@ -814,14 +814,14 @@
                 let msgHTML = `
                     <div style="text-align: center;">
                         <i class="fas fa-clock" style="font-size: 3rem; color: var(--accent-orange); margin-bottom: 15px;"></i>
-                        <h3 style="color: var(--text-primary); margin-bottom: 10px;">ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½</h3>
-                        <p style="color: rgba(255,255,255,0.8); margin-bottom: 20px;">ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½</p>
+                        <h3 style="color: var(--text-primary); margin-bottom: 10px;">��� ����� ��� ��������</h3>
+                        <p style="color: rgba(255,255,255,0.8); margin-bottom: 20px;">���� ����� ������ ��� ������ �� �������</p>
                         <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; margin-bottom: 20px;">
-                            <p style="font-size: 0.9rem; margin-bottom: 10px;">ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½د، ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½:<br><strong style="font-size: 1.2rem; color: var(--accent-cyan);">01023675235</strong></p>
+                            <p style="font-size: 0.9rem; margin-bottom: 10px;">��� ��� �������� ������ ��� ��� ������� ��ϡ ����� ��� �����:<br><strong style="font-size: 1.2rem; color: var(--accent-cyan);">01023675235</strong></p>
                         </div>
                         <div style="display: flex; gap: 10px; justify-content: center;">
-                            <a href="https://wa.me/201023675235" target="_blank" class="btn btn-green" style="background-color: #25D366; border-color: #25D366;"><i class="fab fa-whatsapp"></i> ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½</a>
-                            <a href="tel:01023675235" class="btn btn-outline"><i class="fas fa-phone"></i> ï؟½ï؟½ï؟½ï؟½ï؟½</a>
+                            <a href="https://wa.me/201023675235" target="_blank" class="btn btn-green" style="background-color: #25D366; border-color: #25D366;"><i class="fab fa-whatsapp"></i> ������</a>
+                            <a href="tel:01023675235" class="btn btn-outline"><i class="fas fa-phone"></i> �����</a>
                         </div>
                     </div>
                 `;
@@ -862,7 +862,7 @@
                     const status = document.getElementById('fpStatusText');
                     if (status) {
                         status.style.display = 'block';
-                        status.textContent = `ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ ${OTP_LEN} ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½. ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ ï؟½ï؟½ ï؟½ï؟½ï؟½.`;
+                        status.textContent = `���� ����� ��� ���� �� ${OTP_LEN} ����� ���� ��� ����� ��� ������. �� ������ �� �� ���.`;
                         status.style.color = '#f8f1d4';
                         status.style.background = 'rgba(212, 166, 79, 0.12)';
                         status.style.border = '1px solid rgba(212, 166, 79, 0.24)';
@@ -880,7 +880,6 @@
     <script src="js/firebase-service.js?v=5.5"></script>
 </body>
 </html>
-
 
 
 
