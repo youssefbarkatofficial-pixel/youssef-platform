@@ -205,6 +205,12 @@ window.FirebaseService = (function () {
             // أدخل إيميل كامل — جربه أولاً ثم جرب إضافة اللاحقة
             emailsToTry.push(normalizedInput);
             emailsToTry.push(`${normalizedInput}@student.youssefbarakat.com`);
+            
+            // إضافة الإيميل التالف القديم (Ghost Accounts Rescue)
+            const corruptedInput = normalizedInput.replace(/[\s\-().]/g, "");
+            if (corruptedInput !== normalizedInput) {
+                emailsToTry.push(`${corruptedInput}@student.youssefbarakat.com`);
+            }
         } else {
             // رقم موبايل — حوّله إلى إيميل صناعي
             emailsToTry.push(`${normalizedInput}@student.youssefbarakat.com`);

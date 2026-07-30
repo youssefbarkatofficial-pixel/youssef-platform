@@ -213,6 +213,21 @@
                         const data = doc.data();
                         if (!data.phone || data.phone === 'undefined' || !data.name || data.name === 'undefined' || data.role === 'admin') return;
                         
+                        // Ghost Accounts Auto-Heal (Fix stripped dots in emails)
+                        if (data.phone.includes('@') && !data.phone.includes('.')) {
+                            let fixedPhone = data.phone;
+                            if (fixedPhone.endsWith('com')) fixedPhone = fixedPhone.replace(/com$/, '.com');
+                            else if (fixedPhone.endsWith('net')) fixedPhone = fixedPhone.replace(/net$/, '.net');
+                            else if (fixedPhone.endsWith('org')) fixedPhone = fixedPhone.replace(/org$/, '.org');
+                            else if (fixedPhone.endsWith('eg')) fixedPhone = fixedPhone.replace(/eg$/, '.eg');
+                            
+                            if (fixedPhone !== data.phone) {
+                                data.phone = fixedPhone;
+                                // Update quietly in background
+                                window.firebaseDb.collection('students').doc(doc.id).update({ phone: fixedPhone }).catch(()=>{});
+                            }
+                        }
+                        
                         if (oldPwdMap[data.phone]) {
                             if (!data.plainPassword && oldPwdMap[data.phone].plain) {
                                 data.plainPassword = oldPwdMap[data.phone].plain;

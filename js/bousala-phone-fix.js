@@ -8,8 +8,9 @@ window.BousalaPhoneFix = (function() {
     const STUDENTS = "students";
 
     function normPhone(input) {
-        let p = String(input || "").trim()
-            .replace(/[٠-٩]/g, d => "٠١٢٣٤٥٦٧٨٩".indexOf(d))  // أرقام عربي → إنجليزي
+        let p = String(input || "").trim();
+        if (p.includes('@')) return p; // لا تعدل الإيميلات
+        p = p.replace(/[٠-٩]/g, d => "٠١٢٣٤٥٦٧٨٩".indexOf(d))  // أرقام عربي → إنجليزي
             .replace(/[\s\-().]/g, "");                        // مسافات وشرط وأقواس
         p = p.replace(/^\+?20/, "0").replace(/^0020/, "0");  // +20 / 0020 → 0
         if (/^1[0125]\d{8}$/.test(p)) p = "0" + p;           // نسي الصفر؟ رجعه
