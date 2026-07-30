@@ -320,7 +320,12 @@
                             <td><strong style="color: var(--royal-gold);">${price} ج.م</strong></td>
                             <td><span style="font-size: 0.85rem; color: rgba(255,255,255,0.7);">${date}</span></td>
                             <td id="proof-${req.id}">
-                                ${imgSrc ? `<img src="${imgSrc}" onclick="window.openProof('${imgSrc}')" style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px; cursor: zoom-in; border: 1px solid var(--border-color);">` : '<span style="color: #e74c3c; font-size: 0.8rem;"><i class="fas fa-exclamation-circle"></i> مفقودة</span>'}
+                                ${imgSrc ? `
+                                <div style="position:relative; display:inline-block;">
+                                    <img src="${imgSrc}" onclick="window.openProof('${imgSrc}')" style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px; cursor: zoom-in; border: 1px solid var(--border-color);">
+                                    <a href="${imgSrc}" download="receipt_${req.id}.png" style="position:absolute; bottom:-5px; right:-5px; background:var(--accent-cyan); color:#fff; border-radius:50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center; text-decoration:none; font-size:0.7rem; box-shadow: 0 2px 5px rgba(0,0,0,0.5); transition: 0.2s;" title="تحميل"><i class="fas fa-download"></i></a>
+                                </div>
+                                ` : '<span style="color: rgba(255,255,255,0.3); font-size: 0.8rem;">-</span>'}
                             </td>
                             <td>${statusBadge}</td>
                             <td style="display: flex; flex-direction: column; gap: 5px;">${actionButtons}</td>
