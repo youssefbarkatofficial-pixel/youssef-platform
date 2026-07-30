@@ -460,6 +460,9 @@
                 const adminUser = JSON.parse(adminStr);
                 if (adminUser.role === 'admin') isAdmin = true;
             }
+            
+            // Allow master preview for admin OR the test user (0000)
+            const isMasterPreview = isAdmin || (userStr && (JSON.parse(userStr).phone === '0000' || String(JSON.parse(userStr).email).startsWith('0000')));
 
             if (isAdmin) {
                 actionContainer.innerHTML = `
@@ -672,7 +675,7 @@
                 let userStr = sessionStorage.getItem('currentStudent');
                 let isFreeCourse = (course.isFree || course.price == '0' || course.price === 0);
 
-                if (!isOwned && !isAdmin) {
+                if (!isOwned && !isMasterPreview) {
                     if (isFreeCourse) {
                         if (!userStr) {
                             window.location.href = 'index.html?login=true';
@@ -689,8 +692,8 @@
                     }
                 }
                 
-                if(isLocked && !isAdmin) {
-                    if(window.showToast) window.showToast(lockReason || 'هذا المحتوى مقفول حالياً', 'error');
+                if(isLocked && !isMasterPreview) {
+                    if(window.showToast) window.showToast(lockReason || 'هذا المحتوى مغلق حالياً', 'error');
                     else alert(lockReason || 'هذا المحتوى مقفول حالياً');
                     return;
                 }
@@ -920,7 +923,7 @@
                                     isLocked = true;
                                     const dateStr = new Date(availStr).toLocaleDateString('ar-EG');
                                     lockReason = `سيكون متاحاً يوم ${dateStr}`;
-                                    if(!isAdmin && !isOwned) return; 
+                                    if(!isMasterPreview && !isOwned) return; 
                                 }
                             }
                             
@@ -929,7 +932,7 @@
                                 if (Date.now() > untilTime) {
                                     isLocked = true;
                                     lockReason = `انتهى وقت إتاحة المحتوى`;
-                                    if(!isAdmin && !isOwned) return; 
+                                    if(!isMasterPreview && !isOwned) return; 
                                 }
                             }
 
@@ -965,7 +968,7 @@
                                 actionBtn.style.color = 'rgba(255,255,255,0.5)';
                             } else {
                                 let isFreeCourse = (course.isFree || course.price == '0' || course.price === 0);
-                                if (isOwned || isAdmin) {
+                                if (isOwned || isMasterPreview) {
                                     actionBtn.textContent = isCompleted ? 'مراجعة' : 'بدء';
                                     if (isCompleted) {
                                         actionBtn.style.borderColor = '#2ecc71';

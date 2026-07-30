@@ -500,22 +500,23 @@ window.FirebaseService = (function () {
         }
 
         try {
-            const addPromise = getDb().collection('paymentRequests').add(payload);
-            const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Firestore timeout')), 10000));
-            const docRef = await Promise.race([addPromise, timeoutPromise]);
-
-            console.log('[PAYMENT REQUEST SAVED]', docRef.id);
+            const newDocRef = getDb().collection('paymentRequests').doc();
+            // Background save to avoid hanging the UI on slow connections
+            newDocRef.set(payload).catch(e => console.warn('Payment request background sync failed:', e));
+            
+            const docId = newDocRef.id;
+            console.log('[PAYMENT REQUEST QUEUED]', docId);
 
             // Cache locally
             let reqs = JSON.parse(localStorage.getItem('paymentRequests') || '[]');
             let cachedPayload = { ...payload };
             delete cachedPayload.proofImage;
-            reqs.push({ id: docRef.id, ...cachedPayload });
+            reqs.push({ id: docId, ...cachedPayload });
             localStorage.setItem('paymentRequests', JSON.stringify(reqs));
 
             return {
                 success: true,
-                id: docRef.id
+                id: docId
             };
         } catch(error) {
             console.error(
