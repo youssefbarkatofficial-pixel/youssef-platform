@@ -10,14 +10,13 @@ const style_tag = `    <style>
     </style>
 </head>`;
 
-const profile_html = `            <div class="user-profile-mini" style="text-align: center; margin-bottom: 20px; padding: 15px;">
+const profile_html = `            <div class="user-profile-mini" style="text-align: center;">
                 <div class="avatar-name" style="display:flex; justify-content:center; margin-bottom: 12px;">
-                    <div style="width:70px; height:70px; border-radius:50%; background: linear-gradient(135deg, var(--royal-gold), #b8860b); display:flex; align-items:center; justify-content:center; border: 3px solid rgba(212,175,55,0.3); box-shadow: 0 4px 15px rgba(212,175,55,0.2);">
-                        <i class="fas fa-user-tie" style="font-size: 2rem; color: #fff;"></i>
-                    </div>
+                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Ccircle cx='40' cy='40' r='40' fill='%23071326'/%3E%3Ccircle cx='40' cy='30' r='16' fill='%23D4A64F'/%3E%3Cellipse cx='40' cy='70' rx='24' ry='18' fill='%23D4A64F'/%3E%3C/svg%3E" alt="المدير العام" style="width:65px; height:65px; border-radius:50%; object-fit:cover; border:2px solid var(--royal-gold);">
                 </div>
-                <h4 style="margin:0; font-size: 1.2rem; color: var(--royal-gold);">يوسف بركات</h4>
-                <p style="margin:5px 0 0; color: rgba(255,255,255,0.6); font-size: 0.85rem;">المدير العام (Owner)</p>
+                <h4 style="margin:0; font-size: 1.1rem; color: #fff;">يوسف بركات</h4>
+                <p style="margin:5px 0 0; color: var(--accent-cyan); font-size: 0.85rem;">المدير العام (Owner)</p>
+                <div class="badge badge-active" style="display: inline-block; margin-top: 10px; background: rgba(212,175,55,0.2); color: var(--royal-gold); border: 1px solid var(--royal-gold);">مالك المنصة</div>
             </div>
             <ul class="sidebar-nav"`;
 

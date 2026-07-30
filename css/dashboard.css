@@ -234,8 +234,8 @@
   .sidebar {
     transform: translateX(120%);
     width: clamp(250px, 75vw, 320px);
-    top: 130px !important;
-    height: calc(100vh - 130px) !important;
+    top: 70px !important;
+    height: calc(100vh - 70px) !important;
     box-shadow: -10px 0 30px rgba(0, 0, 0, 0.1); /* Lighter shadow */
     z-index: 999999 !important; /* Extremely high z-index */
     transition: transform 0.3s ease-in-out;
@@ -251,10 +251,10 @@
   
   .sidebar-overlay {
     position: fixed;
-    top: 130px;
+    top: 70px;
     left: 0;
     width: 100%;
-    height: calc(100vh - 130px);
+    height: calc(100vh - 70px);
     background: transparent; /* Removed the black shadow */
     z-index: 99998 !important;
     opacity: 0;
