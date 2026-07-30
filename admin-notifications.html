@@ -10,6 +10,12 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/style.css?v=1785347365020">
     <link rel="stylesheet" href="css/dashboard.css">
+    <style>
+        @media (max-width: 768px) {
+            .desktop-text { display: none !important; }
+            .mobile-only-text { display: inline !important; }
+        }
+    </style>
 </head>
 <body>
     <div class="bg-effects"></div>
@@ -17,16 +23,34 @@
     <header class="navbar glass-panel" style="border-bottom-color: var(--royal-gold);">
         <a href="index.html" class="nav-brand">
             <div class="logo-circle" style="color: #fff; background: var(--royal-gold);">ي</div>
-            <span class="nav-brand-text text-gold">لوحة الإدارة - يوسف بركات</span>
+            <span class="nav-brand-text text-gold"><span class="desktop-text">لوحة الإدارة - يوسف بركات</span><span class="mobile-only-text" style="display: none;">لوحة الإدارة</span></span>
         </a>
         <div class="nav-actions">
-            <a href="#" id="logoutBtn" class="btn btn-outline" style="border-color: #e74c3c; color: #e74c3c; padding: 8px 15px; border-radius: 20px;">خروج <i class="fas fa-sign-out-alt"></i></a>
+            <a href="#" id="logoutBtn" class="btn btn-outline" style="border-color: #e74c3c; color: #e74c3c; padding: 8px 15px; border-radius: 20px;"><span class="desktop-text">خروج</span> <i class="fas fa-sign-out-alt"></i></a>
         </div>
     </header>
 
     <div class="dashboard-layout">
         <aside class="sidebar" id="sidebar" style="border-left-color: var(--royal-gold);">
-            <ul class="sidebar-nav" style="margin-top: 20px;">
+                        <div class="user-profile-mini" style="text-align: center; margin-bottom: 20px; padding: 15px;">
+                <div class="avatar-name" style="display:flex; justify-content:center; margin-bottom: 12px;">
+                    <div style="width:70px; height:70px; border-radius:50%; background: linear-gradient(135deg, var(--royal-gold), #b8860b); display:flex; align-items:center; justify-content:center; border: 3px solid rgba(212,175,55,0.3); box-shadow: 0 4px 15px rgba(212,175,55,0.2);">
+                        <i class="fas fa-user-tie" style="font-size: 2rem; color: #fff;"></i>
+                    </div>
+                </div>
+                <h4 style="margin:0; font-size: 1.2rem; color: var(--royal-gold);">يوسف بركات</h4>
+                <p style="margin:5px 0 0; color: rgba(255,255,255,0.6); font-size: 0.85rem;">المدير العام (Owner)</p>
+            </div>
+                        <div class="user-profile-mini" style="text-align: center; margin-bottom: 20px; padding: 15px;">
+                <div class="avatar-name" style="display:flex; justify-content:center; margin-bottom: 12px;">
+                    <div style="width:70px; height:70px; border-radius:50%; background: linear-gradient(135deg, var(--royal-gold), #b8860b); display:flex; align-items:center; justify-content:center; border: 3px solid rgba(212,175,55,0.3); box-shadow: 0 4px 15px rgba(212,175,55,0.2);">
+                        <i class="fas fa-user-tie" style="font-size: 2rem; color: #fff;"></i>
+                    </div>
+                </div>
+                <h4 style="margin:0; font-size: 1.2rem; color: var(--royal-gold);">يوسف بركات</h4>
+                <p style="margin:5px 0 0; color: rgba(255,255,255,0.6); font-size: 0.85rem;">المدير العام (Owner)</p>
+            </div>
+            <ul class="sidebar-nav">
                 <li><a href="admin-dashboard.html"><i class="fas fa-chart-line"></i> الإحصائيات العامة</a></li>
                 <li><a href="admin-students.html"><i class="fas fa-users"></i> إدارة الطلاب</a></li>
                 <li><a href="admin-students-details.html"><i class="fas fa-user-graduate"></i> إحصائيات الطلاب (تفصيلي)</a></li>
@@ -306,6 +330,48 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
     <script src="js/firebase-config.js?v=5.5"></script>
     <script src="js/firebase-service.js?v=5.5"></script>
+    <!-- Mobile Sidebar Toggle Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const sidebar = document.getElementById('sidebar');
+            const navActions = document.querySelector('.nav-actions');
+            if (sidebar && navActions && !document.getElementById('mobileSidebarToggle')) {
+                if (!document.getElementById('sidebarOverlay')) {
+                    const overlay = document.createElement('div');
+                    overlay.className = 'sidebar-overlay';
+                    overlay.id = 'sidebarOverlay';
+                    overlay.addEventListener('click', () => {
+                        sidebar.classList.remove('active');
+                        sidebar.style.cssText = '';
+                        overlay.classList.remove('active');
+                        document.body.style.overflow = '';
+                    });
+                    sidebar.parentNode.insertBefore(overlay, sidebar);
+                }
+                
+                const toggleBtn = document.createElement('button');
+                toggleBtn.id = 'mobileSidebarToggle';
+                toggleBtn.className = 'btn btn-outline mobile-only-btn';
+                toggleBtn.style.cssText = 'border: none; font-size: 1.5rem; padding: 5px 10px; margin-right: auto; order: -1; display: inline-flex;';
+                toggleBtn.innerHTML = '<i class="fas fa-bars"></i>';
+                toggleBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    sidebar.classList.toggle('active');
+                    if (sidebar.classList.contains('active')) {
+                        sidebar.style.cssText = 'right: 0 !important; visibility: visible !important; transform: none !important; opacity: 1 !important; display: block !important;';
+                        document.body.style.overflow = 'hidden';
+                        document.getElementById('sidebarOverlay').classList.add('active');
+                    } else {
+                        sidebar.style.cssText = '';
+                        document.body.style.overflow = '';
+                        document.getElementById('sidebarOverlay').classList.remove('active');
+                    }
+                });
+                
+                navActions.insertBefore(toggleBtn, navActions.firstChild);
+            }
+        });
+    </script>
 </body>
 </html>
 

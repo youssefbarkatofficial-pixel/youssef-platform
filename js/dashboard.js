@@ -472,14 +472,29 @@ document.addEventListener('DOMContentLoaded', async () => {
               const storageRef = window.firebase.storage().ref().child(`payment_proofs/${proofImageKey}.jpg`);
               
               const uploadPromise = storageRef.put(blob);
-              const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Storage upload timeout')), 15000));
+              // Increase timeout to 45 seconds for slower connections
+              const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Storage upload timeout')), 45000));
               
               const snapshot = await Promise.race([uploadPromise, timeoutPromise]);
               proofImageUrl = await snapshot.ref.getDownloadURL();
               console.log('[UPLOAD] Image uploaded to Storage:', proofImageUrl);
           } catch(e) {
               console.error('Failed to upload to Firebase Storage', e);
+              if (confirmBtn) {
+                  confirmBtn.innerHTML = originalText;
+                  confirmBtn.disabled = false;
+              }
+              if (window.showToast) window.showToast('فشل رفع صورة الإيصال. يرجى التأكد من اتصالك بالإنترنت والمحاولة مرة أخرى.', 'error');
+              return; // Stop the process here
           }
+      } else {
+           if (window.showToast) window.showToast('خطأ في إعدادات المنصة. يرجى إبلاغ الإدارة.', 'error');
+           return;
+      }
+
+      if (!proofImageUrl) {
+           if (window.showToast) window.showToast('لم يتم الحصول على رابط الصورة. يرجى المحاولة مرة أخرى.', 'error');
+           return;
       }
 
       let courseName = 'غير معروف';
