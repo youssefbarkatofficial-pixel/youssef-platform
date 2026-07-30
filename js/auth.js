@@ -289,7 +289,8 @@ document.addEventListener('DOMContentLoaded', () => {
           grade: document.getElementById('grade')?.value,
           gov: govValue,
           date: new Date().toISOString(),
-          role: 'student'
+          role: 'student',
+          studentCode: 'ST-' + Math.random().toString(36).substring(2, 8).toUpperCase()
         };
         const email = `${userData.phone}@student.youssefbarakat.com`;
         userData.email = email;

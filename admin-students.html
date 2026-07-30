@@ -313,8 +313,23 @@
                     document.getElementById('sExamAvg').textContent = `${stats.examAverage || 0}%`;
                 }
                 
+                // Fallback to strictUsers if data is missing
+                let fallbackParentPhone = null;
+                let fallbackGov = null;
+                try {
+                    const strictUsers = JSON.parse(localStorage.getItem('strictUsers') || '[]');
+                    const fallbackUser = strictUsers.find(u => 
+                        (u.phone && student.phone && u.phone.trim() === student.phone.trim()) || 
+                        (u.email && student.email && u.email === student.email)
+                    );
+                    if (fallbackUser) {
+                        fallbackParentPhone = fallbackUser.parentPhone;
+                        fallbackGov = fallbackUser.gov;
+                    }
+                } catch(e) {}
+
                 // Show parent phone
-                document.getElementById('sParentPhone').textContent = student.parentPhone || dbUser.parentPhone || 'غير مسجل';
+                document.getElementById('sParentPhone').textContent = student.parentPhone || dbUser.parentPhone || fallbackParentPhone || 'غير مسجل';
 
                 // Show password
                 let finalPwd = student.plainPassword || student.password || dbUser.plainPassword || dbUser.password || 'مخفية';

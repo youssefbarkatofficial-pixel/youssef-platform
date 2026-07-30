@@ -322,8 +322,8 @@
                 const user = JSON.parse(userStr);
                 
                 const watermark = document.createElement('div');
-                watermark.textContent = 'الكود: ' + (user.phone || user.id || 'Unknown');
-                watermark.style.cssText = 'position: absolute; top: 10%; left: 10%; color: rgba(255,255,255,0.4); font-size: 1.2rem; font-weight: bold; pointer-events: none; z-index: 999999; text-shadow: 1px 1px 2px #000, -1px -1px 2px #000, 1px -1px 2px #000, -1px 1px 2px #000; user-select: none; transition: all 7s linear; white-space: nowrap; font-family: monospace; opacity: 0.7;';
+                watermark.textContent = (user.studentCode || user.phone || user.id || 'Student');
+                watermark.style.cssText = 'position: absolute; top: 10%; left: 10%; color: rgba(255,255,255,0.25); font-size: 1.2rem; font-weight: bold; pointer-events: none; z-index: 999999; text-shadow: 1px 1px 2px #000; user-select: none; transition: all 7s linear; white-space: nowrap; font-family: monospace; opacity: 0.6;';
                 container.style.position = 'relative';
                 container.appendChild(watermark);
                 
@@ -566,8 +566,8 @@
                     document.getElementById('adminEditCourseModal').classList.remove('active');
                 };
             }
-            else if (isOwned) {
-                actionContainer.innerHTML = `<button class="btn btn-green"><i class="fas fa-check-circle mr-2"></i> المحتوى مفتوح لك</button>`;
+            else if (isOwned || isMasterPreview) {
+                actionContainer.innerHTML = `<button class="btn btn-green"><i class="fas fa-check-circle mr-2"></i> المحتوى مفتوح لك (وضع المالك)</button>`;
             } else if (isPending) {
                 actionContainer.innerHTML = `<button class="btn btn-outline" style="color:var(--accent-orange); border-color:var(--accent-orange);" onclick="showPendingMessageDetails()"><i class="fas fa-clock mr-2"></i> طلبك قيد المراجعة</button>`;
             } else if (course.isFree || course.price == '0' || course.price === 0) {
@@ -789,34 +789,51 @@
                                 window.open(item.youtubeUrl, '_blank');
                             }
                         } else if (item.videoUrl) {
-                            const posterAttr = item.thumbnail ? `poster="${item.thumbnail}"` : '';
-                            container.innerHTML = `<video width="100%" height="100%" controls controlsList="nodownload" autoplay ${posterAttr}><source src="${item.videoUrl}" type="video/mp4">متصفحك لا يدعم تشغيل الفيديو.</video>`;
-                            if (window.injectVideoWatermark) window.injectVideoWatermark(container);
-                            const vidEl = container.querySelector('video');
-                            if(vidEl) {
-                                vidEl.onended = () => {
-                                    markItemCompleted(item.id);
-                                    if(window.showToast) window.showToast('تم اكتمال مشاهدة الدرس بنجاح!', 'success');
-                                    
-                                    // Find next attached training
-                                    let parentId = item._parentLecId || item.id;
-                                    let nextItem = null;
-                                    normalizedContents.sections.forEach(sec => {
-                                        sec.items.forEach(i => {
-                                            if (i.attachedToLectureId === parentId && (i.type === 'training' || i.type === 'quiz' || i.type === 'task')) {
-                                                nextItem = i;
-                                            }
-                                        });
-                                    });
-                                    
-                                    if (nextItem) {
-                                        document.getElementById('videoModal').classList.remove('active');
-                                        container.innerHTML = '';
-                                        setTimeout(() => openCourseResource(nextItem, false, ''), 500);
-                                    } else {
-                                        setTimeout(() => window.location.reload(), 1500);
+                            if (item.videoUrl.includes('vimeo.com')) {
+                                let vimeoUrl = item.videoUrl;
+                                if (!vimeoUrl.includes('player.vimeo.com')) {
+                                    const vMatch = vimeoUrl.match(/vimeo\.com\/(\d+)/);
+                                    if (vMatch && vMatch[1]) {
+                                        vimeoUrl = `https://player.vimeo.com/video/${vMatch[1]}`;
                                     }
-                                };
+                                }
+                                container.innerHTML = `<iframe src="${vimeoUrl}" width="100%" height="100%" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>`;
+                                if (window.injectVideoWatermark) window.injectVideoWatermark(container);
+                                // For iframe we can't easily track ended event without Vimeo API, so mark it completed after a delay
+                                setTimeout(() => {
+                                    markItemCompleted(item.id);
+                                    if(window.showToast) window.showToast('تم إكمال الدرس!', 'success');
+                                }, 30000);
+                            } else {
+                                const posterAttr = item.thumbnail ? `poster="${item.thumbnail}"` : '';
+                                container.innerHTML = `<video width="100%" height="100%" controls controlsList="nodownload" autoplay ${posterAttr}><source src="${item.videoUrl}" type="video/mp4">متصفحك لا يدعم تشغيل الفيديو.</video>`;
+                                if (window.injectVideoWatermark) window.injectVideoWatermark(container);
+                                const vidEl = container.querySelector('video');
+                                if(vidEl) {
+                                    vidEl.onended = () => {
+                                        markItemCompleted(item.id);
+                                        if(window.showToast) window.showToast('تم اكتمال مشاهدة الدرس بنجاح!', 'success');
+                                        
+                                        // Find next attached training
+                                        let parentId = item._parentLecId || item.id;
+                                        let nextItem = null;
+                                        normalizedContents.sections.forEach(sec => {
+                                            sec.items.forEach(i => {
+                                                if (i.attachedToLectureId === parentId && (i.type === 'training' || i.type === 'quiz' || i.type === 'task')) {
+                                                    nextItem = i;
+                                                }
+                                            });
+                                        });
+                                        
+                                        if (nextItem) {
+                                            document.getElementById('videoModal').classList.remove('active');
+                                            container.innerHTML = '';
+                                            setTimeout(() => openCourseResource(nextItem, false, ''), 500);
+                                        } else {
+                                            setTimeout(() => window.location.reload(), 1500);
+                                        }
+                                    };
+                                }
                             }
                         }
                         modal.classList.add('active');
@@ -930,10 +947,12 @@
                             let availStr = item.availabilityDate || item.availableFrom;
                             let untilStr = item.availableUntil;
                             
+                            let isScheduled = false;
                             if (availStr) {
                                 const availTime = new Date(availStr).getTime();
                                 if (Date.now() < availTime) {
                                     isLocked = true;
+                                    isScheduled = true;
                                     const dateStr = new Date(availStr).toLocaleDateString('ar-EG', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
                                     lockReason = `سيكون متاحاً: ${dateStr}`;
                                 }
@@ -954,24 +973,43 @@
                             }
 
 
-                            const row = document.createElement('div');
-                            row.style.cssText = `display:flex; align-items:center; justify-content:space-between; gap:12px; padding:14px 16px; border-radius:12px; background: rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.05); margin-bottom: 8px; ${isLocked ? 'opacity: 0.6; filter: grayscale(0.8); cursor: not-allowed;' : ''}`;
-
                             const isCompleted = isItemCompleted(item.id);
-                            const iconColor = isLocked ? 'rgba(255,255,255,0.4)' : (isCompleted ? '#2ecc71' : 'var(--accent-cyan)');
+                            
+                            let glowStyle = '';
+                            let iconColor = 'var(--accent-cyan)';
+                            
+                            if (isScheduled && !isMasterPreview) {
+                                iconColor = '#f1c40f';
+                                glowStyle = `box-shadow: 0 0 15px rgba(241, 196, 15, 0.2); border-color: rgba(241, 196, 15, 0.4);`;
+                            } else if (isCompleted) {
+                                iconColor = '#2ecc71';
+                                glowStyle = `box-shadow: 0 0 15px rgba(46, 204, 113, 0.2); border-color: rgba(46, 204, 113, 0.4);`;
+                            } else {
+                                iconColor = '#3498db';
+                                glowStyle = `box-shadow: 0 0 15px rgba(52, 152, 219, 0.2); border-color: rgba(52, 152, 219, 0.4);`;
+                            }
+                            
+                            if (isLocked && !isScheduled) {
+                                iconColor = 'rgba(255,255,255,0.4)';
+                                glowStyle = ''; // No glow if just permanently locked/not purchased
+                            }
+
+                            const row = document.createElement('div');
+                            row.style.cssText = `display:flex; align-items:center; justify-content:space-between; gap:12px; padding:14px 16px; border-radius:12px; background: rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.05); margin-bottom: 8px; transition: all 0.3s ease; ${glowStyle} ${isLocked ? 'opacity: 0.6; filter: grayscale(0.8); cursor: not-allowed;' : ''}`;
+
                             const statusBadge = isCompleted ? `<span style="background:#2ecc71; color:#000; font-size:0.7rem; padding:2px 6px; border-radius:4px; margin-right:8px;">مكتمل</span>` : '';
 
                             row.innerHTML = `
                                 <div style="display:flex; align-items:center; gap:15px; flex:1;">
                                     <div style="width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center;">
-                                        <i class="fas ${toItemIcon(item.type)}" style="color: ${iconColor}; font-size: 1.2rem;"></i>
+                                        <i class="fas ${toItemIcon(item.type)}" style="color: ${iconColor}; font-size: 1.2rem; filter: drop-shadow(0 0 5px ${iconColor});"></i>
                                     </div>
                                     <div style="min-width:0;">
                                         <div style="color: var(--text-primary); font-weight: 700; font-size: 1.05rem;">${item.title} ${statusBadge}</div>
                                         <div style="font-size:0.8rem; color: rgba(255,255,255,0.5); margin-top: 4px;">
                                             ${item.type === 'video' ? 'فيديو مسجل' : item.type === 'pdf' ? 'مذكرة' : item.type === 'task' ? 'واجب وتدريب' : 'امتحان'}
                                             ${item.deadlineDate ? ` <span style="color: #e74c3c; margin-right: 10px;"><i class="fas fa-clock"></i> الديدلاين: ${new Date(item.deadlineDate).toLocaleDateString('ar-EG')}</span>` : ''}
-                                            ${lockReason ? ` <br><span style="color: var(--accent-orange);"><i class="fas fa-info-circle"></i> ${lockReason}</span>` : ''}
+                                            ${lockReason ? ` <br><span style="color: ${isScheduled ? '#f1c40f' : 'var(--accent-orange)'};"><i class="fas fa-info-circle"></i> ${lockReason}</span>` : ''}
                                         </div>
                                     </div>
                                 </div>
@@ -983,8 +1021,8 @@
                             
                             if (isLocked) {
                                 actionBtn.innerHTML = '<i class="fas fa-lock"></i> مقفول';
-                                actionBtn.style.borderColor = 'rgba(255,255,255,0.2)';
-                                actionBtn.style.color = 'rgba(255,255,255,0.5)';
+                                actionBtn.style.borderColor = isScheduled ? '#f1c40f' : 'rgba(255,255,255,0.2)';
+                                actionBtn.style.color = isScheduled ? '#f1c40f' : 'rgba(255,255,255,0.5)';
                             } else {
                                 let isFreeCourse = (course.isFree || course.price == '0' || course.price === 0);
                                 if (isOwned || isMasterPreview) {
@@ -1254,7 +1292,7 @@
                         rHtml += '<div style="font-size:1.3rem;font-weight:bold;color:' + encColor + ';margin-bottom:10px;">' + encouragement + '</div>';
                         rHtml += '<div style="font-size:1.1rem;"><strong>درجتك: ' + percent + '%</strong>' + (penaltyApplied ? ' <span style="color:#e74c3c;">(بعد خصم التأخير: ' + effectivePercent + '%)</span>' : '') + '</div>';
                         if(autoSubmit) rHtml += '<div style="margin-top:8px;color:#e74c3c;font-size:0.9rem;">⏰ تم التسليم التلقائي بعد انتهاء الوقت.</div>';
-                        if(penaltyApplied) rHtml += '<div style="margin-top:10px;padding:10px;background:rgba(231,76,60,0.15);border-radius:8px;color:#e74c3c;font-size:0.9rem;">⚠️ <strong>تم خصم ' + penaltyAmount + '% من درجتك بسبب التأخر في التسليم بعد الموعد النهائي.</strong></div>';
+                        if(penaltyApplied) rHtml += '<div style="margin-top:10px;padding:10px;background:rgba(231,76,60,0.15);border-radius:8px;color:#e74c3c;font-size:0.9rem;">⚠️ <strong>تم خصم 20% من درجتك بسبب التأخر في التسليم بعد الموعد النهائي.</strong></div>';
                         rHtml += '<hr style="border-color:rgba(255,255,255,0.08);margin:14px 0;"><div id="_examResDetails"></div></div>';
                         resultBox.innerHTML = rHtml;
 
@@ -1387,7 +1425,7 @@
                 }
             };
 
-            window.showPendingMessageDetails = function() {
+            window.showPendingMessageDetails = function(courseId) {
                 let msgHTML = `
                     <div style="text-align: center;">
                         <i class="fas fa-clock" style="font-size: 3rem; color: var(--accent-orange); margin-bottom: 15px;"></i>
@@ -1474,7 +1512,7 @@ window.injectVideoWatermark = function(container) {
         const updateText = () => {
             const now = new Date();
             const timeStr = now.toLocaleTimeString('ar-EG');
-            wm.textContent = `${student.name || ''} - ${student.phone} - ${timeStr}`;
+            wm.textContent = `${student.name || ''} - ${student.studentCode || student.phone} - ${timeStr}`;
         };
         updateText();
         setInterval(updateText, 10000);

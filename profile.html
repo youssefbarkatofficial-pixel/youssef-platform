@@ -248,6 +248,21 @@
             if (userStr) {
                 const user = JSON.parse(userStr);
                 
+                // Fallback to strictUsers if data is missing in current session
+                if (!user.parentPhone || !user.gov) {
+                    try {
+                        const strictUsers = JSON.parse(localStorage.getItem('strictUsers') || '[]');
+                        const fallbackUser = strictUsers.find(u => 
+                            (u.phone && user.phone && u.phone.trim() === user.phone.trim()) || 
+                            (u.email && user.email && u.email === user.email)
+                        );
+                        if (fallbackUser) {
+                            if (!user.parentPhone && fallbackUser.parentPhone) user.parentPhone = fallbackUser.parentPhone;
+                            if (!user.gov && fallbackUser.gov) user.gov = fallbackUser.gov;
+                        }
+                    } catch(e) {}
+                }
+
                 // Set Profile Information
                 document.getElementById('profileName').textContent = user.name;
                 document.getElementById('profilePhone').textContent = user.phone;

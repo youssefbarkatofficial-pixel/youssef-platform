@@ -242,7 +242,17 @@
                         </div>
                         <div class="form-group">
                             <label>الإجابة الصحيحة أو التوضيح</label>
-                            <input type="text" id="correctAnswer" class="form-control" placeholder="مثال: أ" required>
+                            <input type="text" id="correctAnswer" class="form-control" placeholder="اكتب الإجابة النموذجية هنا" required>
+                            <select id="correctAnswerTf" class="form-control" style="display:none;">
+                                <option value="صح">صح</option>
+                                <option value="خطأ">خطأ</option>
+                            </select>
+                            <select id="correctAnswerChoose" class="form-control" style="display:none;">
+                                <option value="a">أ</option>
+                                <option value="b">ب</option>
+                                <option value="c">ج</option>
+                                <option value="d">د</option>
+                            </select>
                         </div>
                         <button type="button" id="btnGenerateRubric" class="btn btn-outline" style="margin-bottom: 15px; border-color: #9b59b6; color: #9b59b6; display: none;"><i class="fas fa-magic mr-2"></i> توليد تقييم ذكي بالذكاء الاصطناعي</button>
                         <div id="rubricPreviewContainer" style="display: none; margin-bottom: 15px; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px; font-size: 0.9rem; color: #d4af37; white-space: pre-wrap;"></div>
@@ -387,8 +397,19 @@
                     const val = e.target.value;
                     if(val === 'choose') {
                         document.getElementById('chooseOptionsGroup').style.display = 'block';
+                        document.getElementById('correctAnswer').style.display = 'none';
+                        document.getElementById('correctAnswerTf').style.display = 'none';
+                        document.getElementById('correctAnswerChoose').style.display = 'block';
+                    } else if(val === 'tf') {
+                        document.getElementById('chooseOptionsGroup').style.display = 'none';
+                        document.getElementById('correctAnswer').style.display = 'none';
+                        document.getElementById('correctAnswerTf').style.display = 'block';
+                        document.getElementById('correctAnswerChoose').style.display = 'none';
                     } else {
                         document.getElementById('chooseOptionsGroup').style.display = 'none';
+                        document.getElementById('correctAnswer').style.display = 'block';
+                        document.getElementById('correctAnswerTf').style.display = 'none';
+                        document.getElementById('correctAnswerChoose').style.display = 'none';
                     }
 
                     // Show rubric generator for essay questions
@@ -513,10 +534,17 @@
                     e.preventDefault();
                     const qType = document.getElementById('questionType').value;
                     const qText = document.getElementById('questionText').value;
-                    const qAnswer = document.getElementById('correctAnswer').value;
+                    let qAnswer = '';
+                    if (qType === 'choose') {
+                        qAnswer = document.getElementById('correctAnswerChoose').value;
+                    } else if (qType === 'tf') {
+                        qAnswer = document.getElementById('correctAnswerTf').value;
+                    } else {
+                        qAnswer = document.getElementById('correctAnswer').value;
+                    }
 
                     if(!qText || !qAnswer) {
-                        alert('يرجى إدخال السؤال والإجابة');
+                        alert('يجب إدخال نص السؤال والإجابة الصحيحة');
                         return;
                     }
 
@@ -547,6 +575,8 @@
                     renderQuestionsList();
                     document.getElementById('questionText').value = '';
                     document.getElementById('correctAnswer').value = '';
+                    document.getElementById('correctAnswerChoose').value = 'a';
+                    document.getElementById('correctAnswerTf').value = 'صح';
                     if(qType === 'choose') {
                         document.getElementById('optA').value = '';
                         document.getElementById('optB').value = '';

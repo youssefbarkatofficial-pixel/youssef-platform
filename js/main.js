@@ -877,6 +877,39 @@ document.addEventListener('DOMContentLoaded', () => {
           heroSubscribeBtn.href = 'courses.html';
           heroSubscribeBtn.innerHTML = 'تصفح كورساتك <i class="fas fa-arrow-left mr-2" style="margin-right: 10px;"></i>';
       }
+  } else if (sessionStorage.getItem('currentAdmin') && !window.location.pathname.includes('admin-')) {
+      const navActions = document.querySelector('.nav-actions');
+      if (navActions) {
+          const themeBtn = document.getElementById('themeToggle');
+          const mobileBtn = document.querySelector('.mobile-menu-btn');
+          navActions.innerHTML = '';
+          
+          if (themeBtn) navActions.appendChild(themeBtn);
+          
+          const adminDashBtn = document.createElement('a');
+          adminDashBtn.href = 'admin-dashboard.html';
+          adminDashBtn.className = 'btn btn-gold';
+          adminDashBtn.style.borderRadius = '20px';
+          adminDashBtn.style.marginRight = '5px';
+          adminDashBtn.innerHTML = '<i class="fas fa-user-shield" style="margin-left: 5px;"></i><span class="desktop-text"> لوحة التحكم</span>';
+          navActions.appendChild(adminDashBtn);
+          
+          const logoutBtn = document.createElement('a');
+          logoutBtn.href = '#';
+          logoutBtn.id = 'logoutBtn';
+          logoutBtn.className = 'btn btn-outline';
+          logoutBtn.style.cssText = 'border-color: #e74c3c; color: #e74c3c; padding: 8px 15px; border-radius: 20px; margin-right: 5px;';
+          logoutBtn.innerHTML = '<span class="desktop-text" style="margin-left: 5px;">خروج</span><i class="fas fa-sign-out-alt mobile-icon"></i>';
+          logoutBtn.addEventListener('click', (e) => {
+              e.preventDefault();
+              sessionStorage.removeItem('currentAdmin');
+              localStorage.removeItem('currentAdmin');
+              window.location.href = 'index.html';
+          });
+          navActions.appendChild(logoutBtn);
+          
+          if (mobileBtn) navActions.appendChild(mobileBtn);
+      }
   }
 
   // --- Global Student Avatar Loader ---

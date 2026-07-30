@@ -138,7 +138,10 @@ window.FirebaseService = (function () {
             const extraData = {
                 name: userData.name,
                 phone: userData.phone,
+                parentPhone: userData.parentPhone || '',
+                gov: userData.gov || '',
                 grade: userData.grade,
+                studentCode: userData.studentCode || ('ST-' + Math.random().toString(36).substring(2, 8).toUpperCase()),
                 plainPassword: password || userData.password,
                 courses: [],
                 notifications: []

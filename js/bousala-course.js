@@ -90,9 +90,13 @@ export function mountCourse(containerId, courseObj, sectionsArray, userStr, save
     if (vidUrl) {
       const v = embedUrl(vidUrl);
       if (v) {
-          html += v.type === "iframe"
-            ? `<div class="bc-video"><iframe src="${v.src}" allowfullscreen frameborder="0"></iframe></div>`
-            : `<div class="bc-video"><video src="${v.src}" controls controlsList="nodownload"></video></div>`;
+          if (v.type === "iframe") {
+              // Add enablejsapi for YouTube
+              const ytSrc = v.src.includes('?') ? v.src + '&enablejsapi=1' : v.src + '?enablejsapi=1';
+              html += `<div class="bc-video"><iframe id="ytplayer_${les.id}" src="${ytSrc}" allowfullscreen frameborder="0"></iframe></div>`;
+          } else {
+              html += `<div class="bc-video"><video id="vidplayer_${les.id}" src="${v.src}" controls controlsList="nodownload"></video></div>`;
+          }
       }
     }
     
@@ -127,22 +131,101 @@ export function mountCourse(containerId, courseObj, sectionsArray, userStr, save
     root.querySelector(".bc-next").onclick = () => i < all.length - 1 && show(all[i+1].id);
     
     const doneBtn = root.querySelector(".bc-done");
-    if(progress.done.includes(id)) {
-        doneBtn.style.display = 'none';
+    doneBtn.style.display = 'none'; // Hide manual button permanently
+    
+    const markCompleted = () => {
+        if (!progress.done.includes(id)) {
+            progress.done.push(id);
+            if (saveProgressFn) saveProgressFn(id);
+            root.querySelector(`.bc-les[data-id="${id}"] .bc-check`).textContent = "✔";
+            refreshBar();
+            if(window.showToast) window.showToast('تم اكتمال الدرس بنجاح', 'success');
+            
+            // Auto open next item if it exists
+            if(i < all.length - 1) {
+                setTimeout(() => show(all[i+1].id), 2000);
+            }
+        }
+    };
+    
+    // If not video, allow manual completion after 5 seconds
+    if (!vidUrl) {
+        setTimeout(markCompleted, 5000);
     } else {
-        doneBtn.style.display = 'inline-block';
-        doneBtn.onclick = () => {
-          if (!progress.done.includes(id)) progress.done.push(id);
-          progress.last = id;
-          if (saveProgressFn) saveProgressFn(id); // calls markItemCompleted
-          root.querySelector(`.bc-les[data-id="${id}"] .bc-check`).textContent = "✔";
-          refreshBar();
-          doneBtn.style.display = 'none';
-          
-          if(i < all.length - 1) {
-              setTimeout(() => show(all[i+1].id), 500); // Auto go to next
-          }
-        };
+        // Watch time tracking
+        const vidElem = document.getElementById(`vidplayer_${les.id}`);
+        if (vidElem) {
+            let watchTime = 0;
+            let lastTime = 0;
+            vidElem.addEventListener('timeupdate', (e) => {
+                let current = vidElem.currentTime;
+                let diff = current - lastTime;
+                if (diff > 0 && diff < 2.0 && !vidElem.paused && vidElem.playbackRate <= 1.5) {
+                    watchTime += diff;
+                }
+                lastTime = current;
+                if (vidElem.duration && (watchTime / vidElem.duration) >= 0.9) {
+                    markCompleted();
+                }
+            });
+            vidElem.addEventListener('ended', markCompleted);
+        } else {
+            // It's a YouTube iframe. We need YT API.
+            // Simplified approximation for YT: fallback to time based on message API or just 90% of a predefined duration.
+            // Since we don't have YT API fully loaded here reliably, we'll auto complete YT videos when they send 'ended' via API or fallback.
+            // For robust YT tracking, we load the IFrame Player API.
+            if (!window.YT) {
+                const tag = document.createElement('script');
+                tag.src = "https://www.youtube.com/iframe_api";
+                const firstScriptTag = document.getElementsByTagName('script')[0];
+                firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+            }
+            
+            const checkYT = setInterval(() => {
+                if (window.YT && window.YT.Player) {
+                    clearInterval(checkYT);
+                    try {
+                        let ytWatchTime = 0;
+                        let ytLastTime = 0;
+                        let ytInterval = null;
+                        
+                        new YT.Player(`ytplayer_${les.id}`, {
+                            events: {
+                                'onStateChange': (event) => {
+                                    if (event.data == YT.PlayerState.PLAYING) {
+                                        ytInterval = setInterval(() => {
+                                            const player = event.target;
+                                            if(!player || !player.getCurrentTime) return;
+                                            let current = player.getCurrentTime();
+                                            let diff = current - ytLastTime;
+                                            if (diff > 0 && diff < 2.0 && player.getPlaybackRate() <= 1.5) {
+                                                ytWatchTime += diff;
+                                            }
+                                            ytLastTime = current;
+                                            
+                                            let duration = player.getDuration();
+                                            if (duration && (ytWatchTime / duration) >= 0.9) {
+                                                markCompleted();
+                                                clearInterval(ytInterval);
+                                            }
+                                        }, 1000);
+                                    } else {
+                                        if(ytInterval) clearInterval(ytInterval);
+                                    }
+                                    if (event.data == YT.PlayerState.ENDED) {
+                                        markCompleted();
+                                    }
+                                }
+                            }
+                        });
+                    } catch (e) {
+                        console.warn("YT API Error", e);
+                        // Fallback: auto complete after a long time just in case
+                        setTimeout(markCompleted, 60000); 
+                    }
+                }
+            }, 500);
+        }
     }
     
     progress.last = id;
