@@ -36,12 +36,15 @@ export function mountCourse(containerId, courseObj, sectionsArray, userStr, save
   }
 
   root.classList.add("bcourse");
+  const studentCode = user.studentCode || user.phone || '';
   root.innerHTML = `
     <aside class="bc-side">
-      <div class="bc-head">
-        <b>${courseObj.name || courseObj.title || 'الكورس'}</b>
-      <div class="bc-head">
-        <b>${courseObj.name || courseObj.title || 'الكورس'}</b>
+      <div class="bc-head" style="padding: 10px 14px; border-bottom:1px solid rgba(255,255,255,0.05);">
+        <b style="display:block; color:var(--royal-gold); font-size:0.95rem; text-align:center;">📚 قائمة المحاضرات</b>
+        ${studentCode ? `<div style="text-align:center; margin-top:6px; background:rgba(212,175,55,0.1); border:1px dashed rgba(212,175,55,0.4); border-radius:6px; padding:3px 8px;">
+          <small style="color:rgba(255,255,255,0.5); font-size:0.65rem; display:block;">كود الطالب</small>
+          <span style="color:var(--royal-gold); font-family:monospace; font-weight:bold; font-size:0.85rem; letter-spacing:1px;">${studentCode}</span>
+        </div>` : ''}
       </div>
       <div class="bc-list"></div>
     </aside>
@@ -74,18 +77,25 @@ export function mountCourse(containerId, courseObj, sectionsArray, userStr, save
       
       let attemptsText = '';
       if(progress.done.includes(les.id) && les.type !== 'video' && les.type !== 'pdf') {
-          let scoreText = 'مكتمل';
           try {
               const dbRec = JSON.parse(localStorage.getItem(`db_${user.phone}`) || '{}');
               const results = (dbRec.examResults || []).filter(r => r.courseId === courseObj.id && r.examTitle === les.title);
               if (results.length > 0) {
-                  // Actually the user wants the first attempt to be the official one: "اول مرة هي اللي تنحسب والباقي ينكتب بس فى المحتوى لكن الداش بورد ينكتب الدرجة الاولى"
-                  // I'll show the official score (attempt 1) or best score here
-                  const official = results.find(r => r.isOfficial || r.attemptNumber === 1);
-                  scoreText = `${official ? official.effectivePercent || official.percent : results[0].percent}%`;
+                  const official = results.find(r => r.isOfficial || r.attemptNumber === 1) || results[0];
+                  const officialScore = official.effectivePercent || official.percent;
+                  attemptsText += `<span style="font-size:0.75rem; color:var(--accent-cyan); margin-right:5px; background:rgba(0,255,255,0.1); padding:2px 6px; border-radius:4px;">(${officialScore}%)</span>`;
+                  
+                  const otherAttempts = results.filter(r => r !== official);
+                  if (otherAttempts.length > 0) {
+                      const othersText = otherAttempts.map(r => `${r.effectivePercent || r.percent}%`).join(' - ');
+                      attemptsText += `<span style="font-size:0.65rem; color:rgba(255,255,255,0.3); margin-right:4px;">[ ${othersText} ]</span>`;
+                  }
+              } else {
+                  attemptsText = `<span style="font-size:0.75rem; color:var(--accent-cyan); margin-right:5px; background:rgba(0,255,255,0.1); padding:2px 6px; border-radius:4px;">(مكتمل)</span>`;
               }
-          } catch(e) {}
-          attemptsText = `<span style="font-size:0.75rem; color:var(--accent-cyan); margin-right:5px; background:rgba(0,255,255,0.1); padding:2px 6px; border-radius:4px;">(${scoreText})</span>`;
+          } catch(e) {
+              attemptsText = `<span style="font-size:0.75rem; color:var(--accent-cyan); margin-right:5px; background:rgba(0,255,255,0.1); padding:2px 6px; border-radius:4px;">(مكتمل)</span>`;
+          }
       }
 
       btn.innerHTML = `<span>${icon} ${les.title} ${attemptsText}</span>
@@ -123,7 +133,7 @@ export function mountCourse(containerId, courseObj, sectionsArray, userStr, save
     if(i === -1) return;
     const les = all[i];
     const stage = root.querySelector(".bc-stage");
-    let html = `<h3 style="color:var(--royal-gold);margin-bottom:15px;font-size:1.4rem;">${les.title}</h3>`;
+    let html = `<h3 style="color:var(--royal-gold); margin-bottom:15px; font-size:1.1rem; line-height:1.4;">${les.title}</h3>`;
 
     const vidUrl = les.videoUrl || les.youtubeUrl;
     if (vidUrl) {

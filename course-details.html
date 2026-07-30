@@ -900,7 +900,7 @@
                             <div style="text-align:right; min-width:0;">
                                 <div style="font-size:1.2rem; font-weight:bold; color: var(--accent-cyan); white-space:normal;">${sec.title}</div>
                                 ${scheduleHtml}
-                                <div style="color: rgba(255,255,255,0.5); font-size:0.9rem; margin-top:4px;">${(sec.items || []).filter(i => i.type !== 'header').length} محتويات</div>
+                                <div style="color: rgba(255,255,255,0.5); font-size:0.9rem; margin-top:4px;">${(sec.items || []).filter(i => i.type === 'video').length} محاضرات</div>
                             </div>
                         </div>
                         <i class="fas fa-chevron-down" style="color: rgba(255,255,255,0.5); transition: transform 0.3s;" id="chevron_${sIdx}"></i>
