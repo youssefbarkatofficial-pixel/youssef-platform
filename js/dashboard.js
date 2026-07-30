@@ -62,19 +62,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     return;
   }
   
-  if(userStr) {
-    const user = JSON.parse(userStr);
-    const userNameEl = document.getElementById('userNameDisplay');
-    const userGradeEl = document.getElementById('userGradeDisplay');
-    
-    if(userNameEl) userNameEl.textContent = user.name;
-    if(userGradeEl) {
-        // استخدام الدوال المشتركة من main.js للحصول على المرحلة الفعلية المحدّثة
-        const effectiveGrade = (window.getEffectiveStudentGrade && window.getGradeLabel)
-            ? window.getGradeLabel(window.getEffectiveStudentGrade(user))
-            : (user.grade || 'طالب');
-        userGradeEl.textContent = effectiveGrade || 'طالب';
-    }
+    if(userStr) {
+      const user = JSON.parse(userStr);
+      const userNameEl = document.getElementById('userNameDisplay');
+      const userGradeEl = document.getElementById('userGradeDisplay');
+      const userCodeEl = document.getElementById('userCodeDisplay');
+      
+      if(userNameEl) userNameEl.textContent = user.name;
+      if(userCodeEl && user.studentCode) userCodeEl.textContent = user.studentCode;
+      
+      if(userGradeEl) {
+          // استخدام الدوال المشتركة من main.js للحصول على المرحلة الفعلية المحدّثة
+          const effectiveGrade = (window.getEffectiveStudentGrade && window.getGradeLabel)
+              ? window.getGradeLabel(window.getEffectiveStudentGrade(user))
+              : (user.grade || 'طالب');
+          userGradeEl.textContent = effectiveGrade || 'طالب';
+      }
 
     // Load Profile Picture if exists
     const avatarImg = document.getElementById('userAvatarImg');

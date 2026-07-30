@@ -290,7 +290,16 @@ document.addEventListener('DOMContentLoaded', () => {
           gov: govValue,
           date: new Date().toISOString(),
           role: 'student',
-          studentCode: 'ST-' + Math.random().toString(36).substring(2, 8).toUpperCase()
+          studentCode: (function(){
+              const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+              const symbols = '!@#$%^&*()_+-=[]{}|;:,.<>?';
+              const numbers = '0123456789';
+              let code = '';
+              for(let i=0; i<3; i++) code += letters.charAt(Math.floor(Math.random()*letters.length));
+              for(let i=0; i<2; i++) code += symbols.charAt(Math.floor(Math.random()*symbols.length));
+              for(let i=0; i<5; i++) code += numbers.charAt(Math.floor(Math.random()*numbers.length));
+              return code.split('').sort(()=>0.5-Math.random()).join('');
+          })()
         };
         const email = `${userData.phone}@student.youssefbarakat.com`;
         userData.email = email;
@@ -854,6 +863,21 @@ document.addEventListener('DOMContentLoaded', () => {
           try {
               const user = await window.FirebaseService.loginStudent(phone, pwd);
               if (user && user.role === 'student') {
+                if (!user.studentCode) {
+                    user.studentCode = (function(){
+                        const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+                        const symbols = '!@#$%^&*()_+-=[]{}|;:,.<>?';
+                        const numbers = '0123456789';
+                        let code = '';
+                        for(let i=0; i<3; i++) code += letters.charAt(Math.floor(Math.random()*letters.length));
+                        for(let i=0; i<2; i++) code += symbols.charAt(Math.floor(Math.random()*symbols.length));
+                        for(let i=0; i<5; i++) code += numbers.charAt(Math.floor(Math.random()*numbers.length));
+                        return code.split('').sort(()=>0.5-Math.random()).join('');
+                    })();
+                    if (window.FirebaseService.updateStudentData) {
+                        window.FirebaseService.updateStudentData(user.phone, { studentCode: user.studentCode });
+                    }
+                }
                 localStorage.setItem(`db_${user.phone}`, JSON.stringify(user));
                 if (window.PlatformStorage && user.lastUpdatedAcademicYear) {
                   const state = window.PlatformStorage.getStoredState(user.phone);
@@ -880,6 +904,21 @@ document.addEventListener('DOMContentLoaded', () => {
                   if (rescue.ok) {
                       const rescuedUser = await window.FirebaseService.getStudentByPhone(rescue.normPhone);
                       if (rescuedUser && rescuedUser.role === 'student') {
+                          if (!rescuedUser.studentCode) {
+                              rescuedUser.studentCode = (function(){
+                                  const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+                                  const symbols = '!@#$%^&*()_+-=[]{}|;:,.<>?';
+                                  const numbers = '0123456789';
+                                  let code = '';
+                                  for(let i=0; i<3; i++) code += letters.charAt(Math.floor(Math.random()*letters.length));
+                                  for(let i=0; i<2; i++) code += symbols.charAt(Math.floor(Math.random()*symbols.length));
+                                  for(let i=0; i<5; i++) code += numbers.charAt(Math.floor(Math.random()*numbers.length));
+                                  return code.split('').sort(()=>0.5-Math.random()).join('');
+                              })();
+                              if (window.FirebaseService.updateStudentData) {
+                                  window.FirebaseService.updateStudentData(rescuedUser.phone, { studentCode: rescuedUser.studentCode });
+                              }
+                          }
                           localStorage.setItem(`db_${rescuedUser.phone}`, JSON.stringify(rescuedUser));
                           if (window.PlatformStorage && rescuedUser.lastUpdatedAcademicYear) {
                             const state = window.PlatformStorage.getStoredState(rescuedUser.phone);

@@ -40,7 +40,8 @@ export function mountCourse(containerId, courseObj, sectionsArray, userStr, save
     <aside class="bc-side">
       <div class="bc-head">
         <b>${courseObj.name || courseObj.title || 'الكورس'}</b>
-        <div class="bc-bar"><i></i></div><small class="bc-pct"></small>
+      <div class="bc-head">
+        <b>${courseObj.name || courseObj.title || 'الكورس'}</b>
       </div>
       <div class="bc-list"></div>
     </aside>
@@ -55,28 +56,66 @@ export function mountCourse(containerId, courseObj, sectionsArray, userStr, save
   const list = root.querySelector(".bc-list");
   sectionsArray.forEach(sec => {
     if(!sec.items || sec.items.length === 0) return;
-    const box = document.createElement("div");
-    box.innerHTML = `<div class="bc-sec">${sec.title || 'قسم بدون عنوان'}</div>`;
+    const secBox = document.createElement("div");
+    secBox.innerHTML = `<div class="bc-sec" style="color:var(--royal-gold); border-bottom:1px solid rgba(212,175,55,0.3); padding-bottom:5px; margin-bottom:10px;">${sec.title || 'قسم بدون عنوان'}</div>`;
+    
+    let currentLecBox = null;
+
     sec.items.forEach(les => {
       if (les.type === 'header') return;
+      
       const btn = document.createElement("button");
       btn.className = "bc-les";
       btn.dataset.id = les.id;
+      
       let icon = "📄";
       if (les.type === 'video') icon = "▶️";
-      if (les.type === 'quiz' || les.type === 'task' || les.type === 'training') icon = "📝";
-      btn.innerHTML = `<span>${icon} ${les.title}</span>
+      if (les.type === 'quiz' || les.type === 'task' || les.type === 'training' || les.type === 'تدريب') icon = "📝";
+      
+      let attemptsText = '';
+      if(progress.done.includes(les.id) && les.type !== 'video' && les.type !== 'pdf') {
+          let scoreText = 'مكتمل';
+          try {
+              const dbRec = JSON.parse(localStorage.getItem(`db_${user.phone}`) || '{}');
+              const results = (dbRec.examResults || []).filter(r => r.courseId === courseObj.id && r.examTitle === les.title);
+              if (results.length > 0) {
+                  // Actually the user wants the first attempt to be the official one: "اول مرة هي اللي تنحسب والباقي ينكتب بس فى المحتوى لكن الداش بورد ينكتب الدرجة الاولى"
+                  // I'll show the official score (attempt 1) or best score here
+                  const official = results.find(r => r.isOfficial || r.attemptNumber === 1);
+                  scoreText = `${official ? official.effectivePercent || official.percent : results[0].percent}%`;
+              }
+          } catch(e) {}
+          attemptsText = `<span style="font-size:0.75rem; color:var(--accent-cyan); margin-right:5px; background:rgba(0,255,255,0.1); padding:2px 6px; border-radius:4px;">(${scoreText})</span>`;
+      }
+
+      btn.innerHTML = `<span>${icon} ${les.title} ${attemptsText}</span>
         <b class="bc-check">${progress.done.includes(les.id) ? "✔" : ""}</b>`;
       btn.onclick = () => show(les.id);
-      box.appendChild(btn);
+
+      // Nesting logic based on parent lecture
+      if (les._parentLecId) {
+          if (!currentLecBox) {
+              currentLecBox = document.createElement("div");
+              currentLecBox.style.cssText = "background: rgba(255,255,255,0.02); border-right: 2px solid var(--accent-cyan); margin-bottom: 10px; padding-right: 5px;";
+              secBox.appendChild(currentLecBox);
+          }
+          btn.style.fontSize = "0.85rem";
+          btn.style.opacity = "0.9";
+          currentLecBox.appendChild(btn);
+      } else {
+          // This is a main item (e.g. video lecture)
+          currentLecBox = document.createElement("div");
+          currentLecBox.style.cssText = "background: rgba(0,0,0,0.3); border-radius: 8px; margin-bottom: 10px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05); padding: 5px;";
+          btn.style.fontWeight = "bold";
+          currentLecBox.appendChild(btn);
+          secBox.appendChild(currentLecBox);
+      }
     });
-    list.appendChild(box);
+    list.appendChild(secBox);
   });
 
   function refreshBar() {
-    const pct = Math.round(progress.done.length / Math.max(all.length, 1) * 100);
-    root.querySelector(".bc-bar i").style.width = pct + "%";
-    root.querySelector(".bc-pct").textContent = `أنجزت ${pct}%`;
+      // Global bar removed as requested, keeping function stub for compatibility
   }
 
   function show(id) {
@@ -91,12 +130,15 @@ export function mountCourse(containerId, courseObj, sectionsArray, userStr, save
       const v = embedUrl(vidUrl);
       if (v) {
           if (v.type === "iframe") {
-              // Add enablejsapi for YouTube
               const ytSrc = v.src.includes('?') ? v.src + '&enablejsapi=1' : v.src + '?enablejsapi=1';
               html += `<div class="bc-video"><iframe id="ytplayer_${les.id}" src="${ytSrc}" allowfullscreen frameborder="0"></iframe></div>`;
           } else {
               html += `<div class="bc-video"><video id="vidplayer_${les.id}" src="${v.src}" controls controlsList="nodownload"></video></div>`;
           }
+          // Thermometer Progress
+          html += `<div style="width:100%; height:6px; background:rgba(255,255,255,0.1); border-radius:3px; margin-top:8px; overflow:hidden;">
+                     <div id="vid_thermometer_${les.id}" style="height:100%; width:0%; background:linear-gradient(90deg, #2ecc71, #27ae60); transition:width 0.3s ease;"></div>
+                   </div>`;
       }
     }
     
@@ -105,8 +147,13 @@ export function mountCourse(containerId, courseObj, sectionsArray, userStr, save
         <a href="${les.pdfUrl}" target="_blank" class="bc-file">📄 فتح المذكرة (PDF)</a></div>`;
     }
     
-    if (les.type === 'quiz' || les.type === 'task' || les.type === 'training') {
-      html += `<div style="margin-top: 20px;"><button class="bc-quiz">📝 ابدأ التدريبات / الامتحان</button></div>`;
+    if (les.type === 'quiz' || les.type === 'task' || les.type === 'training' || les.type === 'تدريب') {
+      let btnText = "📝 ابدأ";
+      if (les.type === 'training' || les.type === 'تدريب' || (les.title && les.title.includes('تدريب'))) btnText = "📝 ابدأ التدريب";
+      else if (les.type === 'homework' || les.type === 'واجب' || (les.title && les.title.includes('واجب'))) btnText = "📝 ابدأ الواجب";
+      else if (les.type === 'quiz' || les.type === 'امتحان' || (les.title && les.title.includes('امتحان'))) btnText = "📝 ابدأ الامتحان";
+      
+      html += `<div style="margin-top: 20px;"><button class="bc-quiz btn btn-gold btn-block" style="font-size: 1.1rem; padding: 12px;">${btnText}</button></div>`;
     }
 
     stage.innerHTML = html;
@@ -137,12 +184,17 @@ export function mountCourse(containerId, courseObj, sectionsArray, userStr, save
         if (!progress.done.includes(id)) {
             progress.done.push(id);
             if (saveProgressFn) saveProgressFn(id);
-            root.querySelector(`.bc-les[data-id="${id}"] .bc-check`).textContent = "✔";
-            refreshBar();
+            const chk = root.querySelector(`.bc-les[data-id="${id}"] .bc-check`);
+            if(chk) chk.textContent = "✔";
             if(window.showToast) window.showToast('تم اكتمال الدرس بنجاح', 'success');
-            
-            // Auto open next item if it exists
-            if(i < all.length - 1) {
+        }
+        // Auto open next item or attached training if it exists
+        if (vidUrl) {
+            // Find if this video has a training attached
+            let attachedTraining = all.find(l => l._parentLecId === id && (l.type === 'training' || l.type === 'تدريب'));
+            if (attachedTraining) {
+                show(attachedTraining.id);
+            } else if (i < all.length - 1) {
                 setTimeout(() => show(all[i+1].id), 2000);
             }
         }
@@ -152,7 +204,11 @@ export function mountCourse(containerId, courseObj, sectionsArray, userStr, save
     if (!vidUrl) {
         setTimeout(markCompleted, 5000);
     } else {
-        // Watch time tracking
+        const updateThermometer = (pct) => {
+            const th = document.getElementById(`vid_thermometer_${les.id}`);
+            if(th) th.style.width = Math.min(100, Math.max(0, pct)) + "%";
+        };
+
         const vidElem = document.getElementById(`vidplayer_${les.id}`);
         if (vidElem) {
             let watchTime = 0;
@@ -164,16 +220,14 @@ export function mountCourse(containerId, courseObj, sectionsArray, userStr, save
                     watchTime += diff;
                 }
                 lastTime = current;
-                if (vidElem.duration && (watchTime / vidElem.duration) >= 0.9) {
-                    markCompleted();
+                if (vidElem.duration) {
+                    let pct = (watchTime / vidElem.duration) * 100;
+                    updateThermometer(pct);
+                    if (pct >= 90) markCompleted();
                 }
             });
-            vidElem.addEventListener('ended', markCompleted);
+            vidElem.addEventListener('ended', () => { updateThermometer(100); markCompleted(); });
         } else {
-            // It's a YouTube iframe. We need YT API.
-            // Simplified approximation for YT: fallback to time based on message API or just 90% of a predefined duration.
-            // Since we don't have YT API fully loaded here reliably, we'll auto complete YT videos when they send 'ended' via API or fallback.
-            // For robust YT tracking, we load the IFrame Player API.
             if (!window.YT) {
                 const tag = document.createElement('script');
                 tag.src = "https://www.youtube.com/iframe_api";
@@ -202,17 +256,21 @@ export function mountCourse(containerId, courseObj, sectionsArray, userStr, save
                                                 ytWatchTime += diff;
                                             }
                                             ytLastTime = current;
-                                            
                                             let duration = player.getDuration();
-                                            if (duration && (ytWatchTime / duration) >= 0.9) {
-                                                markCompleted();
-                                                clearInterval(ytInterval);
+                                            if (duration) {
+                                                let pct = (ytWatchTime / duration) * 100;
+                                                updateThermometer(pct);
+                                                if (pct >= 90) {
+                                                    markCompleted();
+                                                    clearInterval(ytInterval);
+                                                }
                                             }
                                         }, 1000);
                                     } else {
                                         if(ytInterval) clearInterval(ytInterval);
                                     }
                                     if (event.data == YT.PlayerState.ENDED) {
+                                        updateThermometer(100);
                                         markCompleted();
                                     }
                                 }
@@ -220,7 +278,6 @@ export function mountCourse(containerId, courseObj, sectionsArray, userStr, save
                         });
                     } catch (e) {
                         console.warn("YT API Error", e);
-                        // Fallback: auto complete after a long time just in case
                         setTimeout(markCompleted, 60000); 
                     }
                 }

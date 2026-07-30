@@ -618,12 +618,16 @@
                         let hasChildren = (lec.children && lec.children.length) || attachedFromOtherSections.length > 0;
                         
                         if (hasChildren) {
-                            items.push({ id: lec.id || 'lec_'+Date.now(), title: lec.title, type: 'header', thumbnail: lec.thumbnail });
+                            // Don't replace the lecture with a header, push the lecture itself as the main content!
+                            items.push(lec);
                             if (lec.children) lec.children.forEach(child => {
                                 child._parentLecId = lec.id;
                                 items.push(child);
                             });
-                            attachedFromOtherSections.forEach(child => items.push(child));
+                            attachedFromOtherSections.forEach(child => {
+                                child._parentLecId = lec.id;
+                                items.push(child);
+                            });
                         } else {
                             items.push(lec);
                         }
@@ -1175,7 +1179,20 @@
                     }
 
                     const modal = document.getElementById('examModal');
-                    document.getElementById('examModalTitle').textContent = exam.title || 'امتحان';
+                    
+                    // Check Attempts (Max 3)
+                    const studentStr = sessionStorage.getItem('currentStudent');
+                    const studentObj = studentStr ? JSON.parse(studentStr) : { phone: 'guest' };
+                    const dbKey = 'db_' + studentObj.phone;
+                    const dbRec = JSON.parse(localStorage.getItem(dbKey) || '{}') || {};
+                    const prevAttempts = (dbRec.examResults || []).filter(r => r.courseId === courseId && r.examTitle === (exam.title || ''));
+                    if (prevAttempts.length >= 3 && !isMasterPreview) {
+                        if(window.showToast) window.showToast('لقد استنفذت الحد الأقصى للمحاولات (3 محاولات).', 'error');
+                        else alert('لقد استنفذت الحد الأقصى للمحاولات (3 محاولات).');
+                        return;
+                    }
+                    
+                    document.getElementById('examModalTitle').textContent = (exam.title || 'امتحان') + ` (محاولة ${prevAttempts.length + 1} من 3)`;
 
                     const container = document.getElementById('examQuestionsContainer');
                     container.innerHTML = '';
@@ -1201,7 +1218,25 @@
                     const cancelBtn = document.getElementById('examCancelBtn');
                     const resultBox = document.getElementById('examResultContainer');
                     resultBox.style.display = 'none'; resultBox.innerHTML = '';
-                    submitBtn.disabled = false; submitBtn.innerHTML = 'تسليم الإجابات';
+                    submitBtn.disabled = true; submitBtn.innerHTML = 'تسليم الإجابات'; // Disabled by default until all solved
+                    
+                    function checkAllAnswered() {
+                        let allAnswered = true;
+                        questions.forEach((q, idx) => {
+                            const name = 'qa_' + idx;
+                            const els = document.getElementsByName(name);
+                            let hasVal = false;
+                            if(els && els.length) {
+                                if(els[0].tagName === 'TEXTAREA') { hasVal = !!els[0].value.trim(); }
+                                else { for(const el of els) if(el.checked){ hasVal = true; break; } }
+                            }
+                            if(!hasVal) allAnswered = false;
+                        });
+                        submitBtn.disabled = !allAnswered;
+                    }
+                    
+                    container.addEventListener('input', checkAllAnswered);
+                    container.addEventListener('change', checkAllAnswered);
 
                     async function doSubmit(autoSubmit) {
                         _stopTimer();
@@ -1209,6 +1244,7 @@
                         if(!studentStr){ alert('يجب تسجيل الدخول لتسليم الإجابة'); return; }
                         const student = JSON.parse(studentStr);
                         const answers = [];
+                        let unansweredCount = 0;
                         questions.forEach((q, idx) => {
                             const name = 'qa_' + idx;
                             const els = document.getElementsByName(name);
@@ -1217,8 +1253,25 @@
                                 if(els[0].tagName === 'TEXTAREA') { val = els[0].value || ''; }
                                 else { for(const el of els) if(el.checked){ val = el.value; break; } }
                             }
+                            if (!val.trim()) unansweredCount++;
                             answers.push({ q, answer: val });
                         });
+
+                        if (!autoSubmit) {
+                            let summaryHtml = '<div style="text-align:right;"><strong>ملخص إجاباتك قبل التسليم النهائي:</strong><ul style="margin-top:10px;">';
+                            answers.forEach((ans, i) => {
+                                let ansText = ans.answer.trim() ? ans.answer : '<span style="color:#e74c3c">لم تتم الإجابة</span>';
+                                summaryHtml += `<li>س${i+1}: ${ansText}</li>`;
+                            });
+                            summaryHtml += '</ul>هل أنت متأكد من تسليم هذا الامتحان نهائياً؟ لا يمكن التراجع!</div>';
+                            
+                            const confirmSubmit = confirm("ملخص الإجابات سيظهر الآن.\n" + summaryHtml.replace(/<[^>]*>?/gm, ' '));
+                            if (!confirmSubmit) {
+                                // Resume strict mode if it was on
+                                if(exam.strictMode) _activateStrict();
+                                return;
+                            }
+                        }
 
                         submitBtn.disabled = true;
                         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري التصحيح...';
@@ -1362,7 +1415,7 @@
                             timerEl.style.color = urg ? '#e74c3c' : 'var(--royal-gold)';
                             timerEl.style.borderColor = urg ? 'rgba(231,76,60,0.4)' : 'rgba(212,166,79,0.2)';
                             timerEl.innerHTML = '⏱️ الوقت المتبقي: <span>' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0') + '</span>';
-                            if(secsLeft <= 0) { _stopTimer(); timerEl.innerHTML = '⏰ <span style="color:#e74c3c;">انتهى الوقت! جاري التسليم التلقائي...</span>'; setTimeout(() => doSubmit(true), 500); }
+                            if(secsLeft <= 0) { _stopTimer(); timerEl.innerHTML = '⏰ <span style="color:#e74c3c;">انتهى الوقت! جاري التسليم التلقائي لما تم إجابته...</span>'; setTimeout(() => doSubmit(true), 500); }
                             secsLeft--;
                         }
                         updTm(); _examTimerInterval = setInterval(updTm, 1000);
@@ -1370,14 +1423,28 @@
 
                     // ===== STRICT MODE =====
                     if(exam.strictMode) {
-                        _examStrictBeforeUnload = function(e) { e.preventDefault(); e.returnValue = '⚠️ لو غلقت الصفحة هيتم تسليم الامتحان تلقائياً!'; return e.returnValue; };
-                        _examStrictVisibility = function() { if(document.hidden && !submitBtn.disabled) { if(window.showToast) window.showToast('⚠️ تحذير: تغيير التبويب محظور أثناء الامتحان الصارم!', 'error'); } };
+                        _examStrictBeforeUnload = function(e) {
+                            e.preventDefault();
+                            e.returnValue = 'إذا غادرت الآن سيتم تسجيل نتيجة صفر!';
+                            return e.returnValue;
+                        };
+                        _examStrictVisibility = function() {
+                            if(document.hidden && !submitBtn.disabled && !submitBtn.innerHTML.includes('جاري')) {
+                                const confirm1 = confirm('تحذير: لقد غادرت شاشة الامتحان! هل أنت متأكد أنك تريد إلغاء الامتحان وتسجيل درجة (صفر)؟');
+                                if (confirm1) {
+                                    const confirm2 = confirm('تأكيد أخير: الضغط على موافق سيلغي امتحانك نهائياً بـ 0. هل تريد الاستمرار في الإلغاء؟');
+                                    if (confirm2) {
+                                        doSubmit(true);
+                                    }
+                                }
+                            }
+                        };
                         window.addEventListener('beforeunload', _examStrictBeforeUnload);
                         document.addEventListener('visibilitychange', _examStrictVisibility);
                         const sb = document.createElement('div');
                         sb.id = 'examStrictBadge';
                         sb.style.cssText = 'background:rgba(231,76,60,0.15);border:1px solid rgba(231,76,60,0.3);color:#e74c3c;padding:10px 14px;border-radius:8px;font-size:0.9rem;margin-bottom:12px;';
-                        sb.innerHTML = '🔒 <strong>وضع الامتحان الصارم مفعّل</strong> — الخروج أو تغيير التبويب محظور أثناء الامتحان.';
+                        sb.innerHTML = '🔒 <strong>نظام صارم (ممنوع الخروج)</strong> — تغيير التبويب سيلغي الامتحان بدرجة 0.';
                         container.parentElement.insertBefore(sb, container);
                     }
 
