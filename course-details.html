@@ -408,6 +408,19 @@
                 let existingReq = [...paymentRequests].reverse().find(req => req.courseId === courseId && (req.userId === user.phone || req.userPhone === user.phone));
                 if (existingReq && existingReq.status === 'pending') {
                     isPending = true;
+                    // Verify pending status with Firestore in case admin rejected/approved it recently
+                    if (window.firebaseDb && existingReq.id && !existingReq.id.startsWith('local_')) {
+                        window.firebaseDb.collection('paymentRequests').doc(existingReq.id).get().then(doc => {
+                            if (doc.exists) {
+                                const realStatus = doc.data().status;
+                                if (realStatus !== 'pending') {
+                                    existingReq.status = realStatus;
+                                    localStorage.setItem('paymentRequests', JSON.stringify(paymentRequests));
+                                    window.location.reload(); // Reload to reflect new status (unlocked or rejected)
+                                }
+                            }
+                        }).catch(e => console.warn('Failed to verify payment status', e));
+                    }
                 }
             }
 
