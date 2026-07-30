@@ -1637,6 +1637,48 @@
       });
     })();
     </script>
+    <!-- Mobile Sidebar Toggle Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const sidebar = document.getElementById('sidebar');
+            const navActions = document.querySelector('.nav-actions');
+            if (sidebar && navActions && !document.getElementById('mobileSidebarToggle')) {
+                if (!document.getElementById('sidebarOverlay')) {
+                    const overlay = document.createElement('div');
+                    overlay.className = 'sidebar-overlay';
+                    overlay.id = 'sidebarOverlay';
+                    overlay.addEventListener('click', () => {
+                        sidebar.classList.remove('active');
+                        sidebar.style.cssText = '';
+                        overlay.classList.remove('active');
+                        document.body.style.overflow = '';
+                    });
+                    sidebar.parentNode.insertBefore(overlay, sidebar);
+                }
+                
+                const toggleBtn = document.createElement('button');
+                toggleBtn.id = 'mobileSidebarToggle';
+                toggleBtn.className = 'btn btn-outline mobile-only-btn';
+                toggleBtn.style.cssText = 'border: none; font-size: 1.5rem; padding: 5px 10px; margin-right: auto; order: -1; display: inline-flex;';
+                toggleBtn.innerHTML = '<i class="fas fa-bars"></i>';
+                toggleBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    sidebar.classList.toggle('active');
+                    if (sidebar.classList.contains('active')) {
+                        sidebar.style.cssText = 'right: 0 !important; visibility: visible !important; transform: none !important; opacity: 1 !important; display: block !important;';
+                        document.body.style.overflow = 'hidden';
+                        document.getElementById('sidebarOverlay').classList.add('active');
+                    } else {
+                        sidebar.style.cssText = '';
+                        document.body.style.overflow = '';
+                        document.getElementById('sidebarOverlay').classList.remove('active');
+                    }
+                });
+                
+                navActions.insertBefore(toggleBtn, navActions.firstChild);
+            }
+        });
+    </script>
 </body>
 </html>
 

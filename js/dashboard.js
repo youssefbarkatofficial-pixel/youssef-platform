@@ -467,11 +467,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       let proofImageUrl = null;
       if (window.firebase && window.firebase.storage) {
           try {
-              const response = await fetch(proofImageBase64);
-              const blob = await response.blob();
               const storageRef = window.firebase.storage().ref().child(`payment_proofs/${proofImageKey}.jpg`);
               
-              const uploadPromise = storageRef.put(blob);
+              // Upload the raw File object directly instead of converting to Base64 and back
+              const uploadPromise = storageRef.put(file);
               // Increase timeout to 45 seconds for slower connections
               const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Storage upload timeout')), 45000));
               
@@ -509,8 +508,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         userPhone: user.phone,
         userEmail: user.email || `${user.phone}@student.youssefbarakat.com`,
         proofImageKey: proofImageKey,
-        proofImageUrl: proofImageUrl,
-        proofImage: proofImageBase64
+        proofImageUrl: proofImageUrl
       };
 
       console.log('[PAYMENT DATA]', requestData);

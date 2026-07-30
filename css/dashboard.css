@@ -303,13 +303,22 @@
 }
 
 @media (max-width: 480px) {
+  .navbar {
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    padding: 10px 4% !important;
+  }
+  .navbar .nav-brand {
+    width: auto !important;
+    justify-content: flex-start !important;
+  }
   .dashboard-layout {
-    padding-top: 170px; /* Increased space for taller mobile navbar and welcome text */
+    padding-top: 90px !important; /* Adjusted for horizontal navbar */
   }
   
   .sidebar {
-    top: 110px !important;
-    height: calc(100vh - 110px) !important;
+    top: 70px !important;
+    height: calc(100vh - 70px) !important;
   }
 
   .dash-card {
