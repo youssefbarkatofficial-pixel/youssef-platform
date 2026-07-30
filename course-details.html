@@ -1042,22 +1042,43 @@
                                 </div>
                             `;
 
-                            const actionBtn = document.createElement('button');
+                            const actionBtn = document.createElement('a');
                             actionBtn.className = 'btn btn-outline';
-                            actionBtn.style.cssText = 'padding: 8px 16px; border-radius: 8px; font-size: 0.9rem; white-space: nowrap;';
+                            actionBtn.style.cssText = 'padding: 6px 12px; border-radius: 6px; font-size: 0.85rem; white-space: nowrap; text-decoration: none; display: inline-block; text-align: center;';
                             
                             if (isLocked) {
                                 actionBtn.innerHTML = '<i class="fas fa-lock"></i> مقفول';
                                 actionBtn.style.borderColor = isScheduled ? '#f1c40f' : 'rgba(255,255,255,0.2)';
                                 actionBtn.style.color = isScheduled ? '#f1c40f' : 'rgba(255,255,255,0.5)';
+                                actionBtn.href = "#";
+                                actionBtn.addEventListener('click', (e) => { e.preventDefault(); openCourseResource(item, isLocked, lockReason); });
                             } else {
                                 let isFreeCourse = (course.isFree || course.price == '0' || course.price === 0);
                                 if (isOwned || isMasterPreview) {
-                                    actionBtn.textContent = isCompleted ? 'مراجعة' : 'بدء';
-                                    if (isCompleted) {
+                                    if (item.type === 'video') {
+                                        actionBtn.textContent = isCompleted ? 'مراجعة' : 'بدء';
+                                    } else if (item.type === 'تدريب' || item.type === 'training' || item.type === 'exam') {
+                                        actionBtn.textContent = (item.type === 'exam') ? 'دخول الامتحان' : 'دخول التدريب';
+                                    } else if (item.type === 'task') {
+                                        actionBtn.textContent = 'تقديم الواجب';
+                                    } else if (item.type === 'pdf') {
+                                        actionBtn.innerHTML = '<i class="fas fa-download"></i> تحميل الملف';
+                                        if (item.url) {
+                                            let downloadUrl = item.url;
+                                            if (downloadUrl.includes('drive.google.com/file/d/')) {
+                                                const fileId = downloadUrl.split('/d/')[1].split('/')[0];
+                                                downloadUrl = `https://drive.google.com/uc?export=download&id=${fileId}`;
+                                            }
+                                            actionBtn.href = downloadUrl;
+                                            actionBtn.target = "_blank";
+                                            actionBtn.download = item.title;
+                                        }
+                                    }
+                                    
+                                    if (isCompleted && item.type !== 'pdf') {
                                         actionBtn.style.borderColor = '#2ecc71';
                                         actionBtn.style.color = '#2ecc71';
-                                    } else {
+                                    } else if (item.type !== 'pdf') {
                                         actionBtn.style.borderColor = 'var(--accent-cyan)';
                                         actionBtn.style.color = 'var(--accent-cyan)';
                                     }
@@ -1069,27 +1090,32 @@
                                     }
                                     actionBtn.style.borderColor = 'var(--accent-orange)';
                                     actionBtn.style.color = 'var(--accent-orange)';
+                                    actionBtn.href = "#";
                                 }
                             }
                             
-                            actionBtn.addEventListener('click', () => openCourseResource(item, isLocked, lockReason));
+                            if (item.type !== 'pdf' || isLocked || !(isOwned || isMasterPreview)) {
+                                actionBtn.addEventListener('click', (e) => { e.preventDefault(); openCourseResource(item, isLocked, lockReason); });
+                            }
                             row.appendChild(actionBtn);
                             
                             if (item._parentLecId || item.attachedToLectureId) {
                                 if (!currentLecGroup) {
                                     currentLecGroup = document.createElement('div');
-                                    currentLecGroup.style.cssText = 'background: rgba(0,0,0,0.15); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 5px; margin-bottom: 15px; display: flex; flex-direction: column; gap: 4px;';
+                                    currentLecGroup.style.cssText = 'background: rgba(0,0,0,0.1); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 4px; margin-bottom: 10px; display: flex; flex-direction: column; gap: 2px; max-height: 300px; overflow-y: auto;';
                                     detailsInner.appendChild(currentLecGroup);
                                 }
-                                row.style.margin = "0 10px 0 0";
-                                row.style.borderRight = "2px dashed var(--accent-cyan)";
+                                row.style.margin = "0 8px 0 0";
+                                row.style.padding = "8px 12px";
+                                row.style.borderRight = "2px dashed rgba(0,255,255,0.4)";
                                 currentLecGroup.appendChild(row);
                             } else {
                                 if (currentLecGroup) {
                                     detailsInner.appendChild(currentLecGroup);
                                 }
+                                row.style.padding = "10px 14px";
                                 currentLecGroup = document.createElement('div');
-                                currentLecGroup.style.cssText = 'background: rgba(0,0,0,0.15); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 6px; margin-bottom: 15px; display: flex; flex-direction: column; gap: 6px;';
+                                currentLecGroup.style.cssText = 'background: rgba(0,0,0,0.15); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 4px; margin-bottom: 10px; display: flex; flex-direction: column; gap: 2px; max-height: 350px; overflow-y: auto;';
                                 currentLecGroup.appendChild(row);
                             }
                         });
