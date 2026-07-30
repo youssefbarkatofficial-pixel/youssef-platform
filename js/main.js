@@ -996,30 +996,7 @@ document.addEventListener('DOMContentLoaded', () => {
               }, 500);
       }
 
-      // --- Celebration Check (Payment Approved) ---
-      if (dbUser.celebrateCourse) {
-          setTimeout(() => {
-              // Trigger elegant Left/Right Confetti
-              if (window.confetti) {
-                  const end = Date.now() + 2.5 * 1000;
-                  const colors = ['#d4a64f', '#f1c40f', '#e74c3c'];
-                  (function frame() {
-                      confetti({ particleCount: 4, angle: 60, spread: 55, origin: { x: 0, y: 0.8 }, colors: colors, zIndex: 10001 });
-                      confetti({ particleCount: 4, angle: 120, spread: 55, origin: { x: 1, y: 0.8 }, colors: colors, zIndex: 10001 });
-                      if (Date.now() < end) requestAnimationFrame(frame);
-                  }());
-              } else {
-                  window.triggerConfetti();
-              }
-              
-              window.showToast(`تم تفعيل كورس: ${dbUser.celebrateCourse} بنجاح!`, 'success', { title: 'تهانينا! 🎉', duration: 6000, isMajestic: true });
-              window.audioManager.play('celebration');
-
-              // Remove flag
-              delete dbUser.celebrateCourse;
-              localStorage.setItem(`db_${user.phone}`, JSON.stringify(dbUser));
-          }, 1500);
-      }
+      // (Celebration Check logic moved to course page directly)
 
       // --- Notifications System ---
       let notifications = dbUser.notifications || [];
@@ -1071,18 +1048,22 @@ document.addEventListener('DOMContentLoaded', () => {
           // Floating notification bell removed per user request (prefers top navbar)
 
       }, 150);
-      // If redirected here from an approval notification, show fireworks on course page
+      // Celebrate newly unlocked courses (only ONCE per course)
       try {
           const curPath = window.location.pathname || '';
           if (curPath.includes('course-details') || curPath.includes('courses.html')) {
               const u = new URL(window.location.href);
               const courseId = u.searchParams.get('id') || u.searchParams.get('highlight');
-              if (courseId && sessionStorage.getItem('celebrate_course_' + courseId)) {
-                  try { sessionStorage.removeItem('celebrate_course_' + courseId); } catch(e){}
-                  setTimeout(() => {
-                      try { if (window.triggerFireworks) window.triggerFireworks(4500); } catch(e){}
-                      try { if (window.showToast) window.showToast('تهانينا! الكورس الخاص بك متاح الآن 🎉', 'majestic', { duration: 5000, isMajestic: true, playSound: 'celebration' }); } catch(e){}
-                  }, 600);
+              
+              if (courseId && dbUser && dbUser.courses && dbUser.courses.includes(courseId)) {
+                  const hasCelebrated = localStorage.getItem('has_celebrated_' + courseId);
+                  if (!hasCelebrated) {
+                      localStorage.setItem('has_celebrated_' + courseId, '1');
+                      setTimeout(() => {
+                          try { if (window.triggerFireworks) window.triggerFireworks(4500); } catch(e){}
+                          try { if (window.showToast) window.showToast('تهانينا! الكورس الخاص بك متاح الآن 🎉', 'majestic', { duration: 5000, isMajestic: true, playSound: 'celebration' }); } catch(e){}
+                      }, 600);
+                  }
               }
           }
       } catch(e) {}
@@ -1110,12 +1091,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   window.openApprovedCourseNotification = function(courseId) {
       if (!courseId) return;
-      try { 
-          if (!localStorage.getItem('has_celebrated_' + courseId)) {
-              sessionStorage.setItem('celebrate_course_' + courseId, '1'); 
-              localStorage.setItem('has_celebrated_' + courseId, '1');
-          }
-      } catch(e){}
       const url = `courses.html?highlight=${encodeURIComponent(courseId)}`;
       window.location.href = url;
   };
