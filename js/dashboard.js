@@ -114,17 +114,55 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     } catch(e) { console.warn('Failed to fetch user from Firebase', e); }
 
-    if (!dbUser.stats) {
-        dbUser.stats = { commitment: 0, videosWatched: 0, homeworkCompleted: 0, homeworkTotal: 0 };
+    let totalVideosWatched = 0;
+    let totalExamsCompleted = 0;
+    let sumExamScores = 0;
+    let examsCountForAvg = 0;
+
+    let adminCourses = JSON.parse(localStorage.getItem('adminCourses')) || [];
+
+    if (dbUser.examResults) {
+        const uniqueExams = {};
+        dbUser.examResults.forEach(r => {
+            const key = `${r.courseId}_${r.examTitle}`;
+            if (!uniqueExams[key]) uniqueExams[key] = [];
+            uniqueExams[key].push(r);
+        });
+
+        Object.values(uniqueExams).forEach(results => {
+            const official = results.find(r => r.isOfficial || r.attemptNumber === 1) || results[0];
+            totalExamsCompleted++;
+            sumExamScores += (official.effectivePercent || official.percent);
+            examsCountForAvg++;
+        });
     }
 
-    // Update Stats
+    if (dbUser.progress) {
+        Object.keys(dbUser.progress).forEach(courseId => {
+            const course = adminCourses.find(c => c.id == courseId);
+            const done = dbUser.progress[courseId].done || [];
+            if (course && course.sections) {
+                course.sections.forEach(sec => {
+                    if (sec.items) {
+                        sec.items.forEach(item => {
+                            if (done.includes(item.id) && item.type === 'video') {
+                                totalVideosWatched++;
+                            }
+                        });
+                    }
+                });
+            }
+        });
+    }
+
+    const commitmentPct = examsCountForAvg > 0 ? Math.round(sumExamScores / examsCountForAvg) : 0; // Using avg score as commitment for now or you can calculate completion %
+
     const statCommitment = document.getElementById('statCommitment');
     const statVideosWatched = document.getElementById('statVideosWatched');
     const statHomework = document.getElementById('statHomework');
-    if(statCommitment) statCommitment.textContent = `${dbUser.stats.commitment}%`;
-    if(statVideosWatched) statVideosWatched.textContent = dbUser.stats.videosWatched;
-    if(statHomework) statHomework.textContent = `${dbUser.stats.homeworkCompleted}/${dbUser.stats.homeworkTotal}`;
+    if(statCommitment) statCommitment.textContent = `${commitmentPct}%`;
+    if(statVideosWatched) statVideosWatched.textContent = totalVideosWatched;
+    if(statHomework) statHomework.textContent = `${totalExamsCompleted}`;
 
     // Update Courses Progress (My Courses)
     const coursesProgressContainer = document.getElementById('coursesProgressContainer');

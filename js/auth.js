@@ -292,13 +292,21 @@ document.addEventListener('DOMContentLoaded', () => {
           role: 'student',
           studentCode: (function(){
               const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
-              const symbols = '!@#$%^&*()_+-=[]{}|;:,.<>?';
+              const symbols = '@#$&*';
               const numbers = '0123456789';
-              let code = '';
-              for(let i=0; i<3; i++) code += letters.charAt(Math.floor(Math.random()*letters.length));
-              for(let i=0; i<2; i++) code += symbols.charAt(Math.floor(Math.random()*symbols.length));
-              for(let i=0; i<5; i++) code += numbers.charAt(Math.floor(Math.random()*numbers.length));
-              return code.split('').sort(()=>0.5-Math.random()).join('');
+              const generateCode = () => {
+                  let code = '';
+                  for(let i=0; i<3; i++) code += letters.charAt(Math.floor(Math.random()*letters.length));
+                  for(let i=0; i<2; i++) code += symbols.charAt(Math.floor(Math.random()*symbols.length));
+                  for(let i=0; i<5; i++) code += numbers.charAt(Math.floor(Math.random()*numbers.length));
+                  return code.split('').sort(()=>0.5-Math.random()).join('');
+              };
+              let newCode;
+              const existingStudents = JSON.parse(localStorage.getItem('adminStudents') || '[]');
+              do {
+                  newCode = generateCode();
+              } while(existingStudents.some(s => s.studentCode === newCode));
+              return newCode;
           })()
         };
         const email = `${userData.phone}@student.youssefbarakat.com`;
@@ -866,13 +874,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!user.studentCode) {
                     user.studentCode = (function(){
                         const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
-                        const symbols = '!@#$%^&*()_+-=[]{}|;:,.<>?';
+                        const symbols = '@#$&*';
                         const numbers = '0123456789';
-                        let code = '';
-                        for(let i=0; i<3; i++) code += letters.charAt(Math.floor(Math.random()*letters.length));
-                        for(let i=0; i<2; i++) code += symbols.charAt(Math.floor(Math.random()*symbols.length));
-                        for(let i=0; i<5; i++) code += numbers.charAt(Math.floor(Math.random()*numbers.length));
-                        return code.split('').sort(()=>0.5-Math.random()).join('');
+                        const generateCode = () => {
+                            let code = '';
+                            for(let i=0; i<3; i++) code += letters.charAt(Math.floor(Math.random()*letters.length));
+                            for(let i=0; i<2; i++) code += symbols.charAt(Math.floor(Math.random()*symbols.length));
+                            for(let i=0; i<5; i++) code += numbers.charAt(Math.floor(Math.random()*numbers.length));
+                            return code.split('').sort(()=>0.5-Math.random()).join('');
+                        };
+                        let newCode;
+                        const existingStudents = JSON.parse(localStorage.getItem('adminStudents') || '[]');
+                        do {
+                            newCode = generateCode();
+                        } while(existingStudents.some(s => s.studentCode === newCode));
+                        return newCode;
                     })();
                     if (window.FirebaseService.updateStudentData) {
                         window.FirebaseService.updateStudentData(user.phone, { studentCode: user.studentCode });
@@ -907,13 +923,21 @@ document.addEventListener('DOMContentLoaded', () => {
                           if (!rescuedUser.studentCode) {
                               rescuedUser.studentCode = (function(){
                                   const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
-                                  const symbols = '!@#$%^&*()_+-=[]{}|;:,.<>?';
+                                  const symbols = '@#$&*';
                                   const numbers = '0123456789';
-                                  let code = '';
-                                  for(let i=0; i<3; i++) code += letters.charAt(Math.floor(Math.random()*letters.length));
-                                  for(let i=0; i<2; i++) code += symbols.charAt(Math.floor(Math.random()*symbols.length));
-                                  for(let i=0; i<5; i++) code += numbers.charAt(Math.floor(Math.random()*numbers.length));
-                                  return code.split('').sort(()=>0.5-Math.random()).join('');
+                                  const generateCode = () => {
+                                      let code = '';
+                                      for(let i=0; i<3; i++) code += letters.charAt(Math.floor(Math.random()*letters.length));
+                                      for(let i=0; i<2; i++) code += symbols.charAt(Math.floor(Math.random()*symbols.length));
+                                      for(let i=0; i<5; i++) code += numbers.charAt(Math.floor(Math.random()*numbers.length));
+                                      return code.split('').sort(()=>0.5-Math.random()).join('');
+                                  };
+                                  let newCode;
+                                  const existingStudents = JSON.parse(localStorage.getItem('adminStudents') || '[]');
+                                  do {
+                                      newCode = generateCode();
+                                  } while(existingStudents.some(s => s.studentCode === newCode));
+                                  return newCode;
                               })();
                               if (window.FirebaseService.updateStudentData) {
                                   window.FirebaseService.updateStudentData(rescuedUser.phone, { studentCode: rescuedUser.studentCode });

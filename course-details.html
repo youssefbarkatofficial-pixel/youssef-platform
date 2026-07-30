@@ -920,20 +920,18 @@
                     if(!sec.items || sec.items.length === 0) {
                         detailsInner.innerHTML = '<div style="text-align:center; padding: 30px; background: rgba(0,0,0,0.2); border-radius: 12px; margin-top: 10px;"><i class="fas fa-laptop-code mb-3" style="font-size: 2.5rem; color: var(--accent-cyan); opacity: 0.8;"></i><h3 style="color: var(--royal-gold); margin-bottom: 10px;">المحتوى قيد التجهيز 🚀</h3><p style="color: rgba(255,255,255,0.7); line-height: 1.6; font-size: 0.95rem;">يتم الآن إعداد وتجهيز محتوى هذا القسم بأفضل جودة ليكون متاحاً قريباً، ابقوا متابعين ولا تفوتوا الجديد!</p></div>';
                     } else {
-                        let currentHeaderGroup = null;
+                        let currentLecGroup = null;
 
                         sec.items.forEach(item => {
                             if (item.type === 'header') {
-                                if (currentHeaderGroup) {
-                                    detailsInner.appendChild(currentHeaderGroup);
+                                if (currentLecGroup) {
+                                    detailsInner.appendChild(currentLecGroup);
+                                    currentLecGroup = null;
                                 }
-                                currentHeaderGroup = document.createElement('div');
-                                currentHeaderGroup.style.cssText = 'background: rgba(0,0,0,0.15); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 15px; margin-bottom: 15px; border-right: 3px solid var(--accent-cyan); position: relative;';
-                                
                                 const hDiv = document.createElement('div');
-                                hDiv.style.cssText = 'padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--royal-gold); font-weight: bold; font-size: 1.1rem; display: flex; align-items: center; gap: 10px; margin-bottom: 10px;';
+                                hDiv.style.cssText = 'padding: 12px 15px; border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--royal-gold); font-weight: bold; font-size: 1.1rem; display: flex; align-items: center; gap: 10px; margin-bottom: 10px; background: rgba(0,0,0,0.15); border-radius:12px; border-right: 3px solid var(--accent-cyan);';
                                 hDiv.innerHTML = `<i class="fas fa-bookmark"></i> ${item.title}`;
-                                currentHeaderGroup.appendChild(hDiv);
+                                detailsInner.appendChild(hDiv);
                                 return;
                             }
 
@@ -1005,9 +1003,28 @@
                             }
 
                             const row = document.createElement('div');
-                            row.style.cssText = `display:flex; align-items:center; justify-content:space-between; gap:12px; padding:14px 16px; border-radius:12px; background: rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.05); margin-bottom: 8px; transition: all 0.3s ease; ${glowStyle} ${isLocked ? 'opacity: 0.6; filter: grayscale(0.8); cursor: not-allowed;' : ''}`;
+                            row.style.cssText = `display:flex; align-items:center; justify-content:space-between; gap:12px; padding:14px 16px; border-radius:8px; background: rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.05); transition: all 0.3s ease; ${glowStyle} ${isLocked ? 'opacity: 0.6; filter: grayscale(0.8); cursor: not-allowed;' : ''}`;
 
-                            const statusBadge = isCompleted ? `<span style="background:#2ecc71; color:#000; font-size:0.7rem; padding:2px 6px; border-radius:4px; margin-right:8px;">مكتمل</span>` : '';
+                            let attemptsText = '';
+                            if(isCompleted && item.type !== 'video' && item.type !== 'pdf' && typeof userStr !== 'undefined' && userStr) {
+                                try {
+                                    const userObj = JSON.parse(userStr);
+                                    const dbRec = JSON.parse(localStorage.getItem(`db_${userObj.phone}`) || '{}');
+                                    const results = (dbRec.examResults || []).filter(r => r.courseId === course.id && r.examTitle === item.title);
+                                    if (results.length > 0) {
+                                        const official = results.find(r => r.isOfficial || r.attemptNumber === 1) || results[0];
+                                        const officialScore = official.effectivePercent || official.percent;
+                                        attemptsText += `<span style="font-size:0.75rem; color:var(--accent-cyan); margin-right:5px; background:rgba(0,255,255,0.1); padding:2px 6px; border-radius:4px;">(${officialScore}%)</span>`;
+                                        
+                                        const otherAttempts = results.filter(r => r !== official);
+                                        if (otherAttempts.length > 0) {
+                                            const othersText = otherAttempts.map(r => `${r.effectivePercent || r.percent}%`).join(' - ');
+                                            attemptsText += `<span style="font-size:0.65rem; color:rgba(255,255,255,0.3); margin-right:4px;">[ ${othersText} ]</span>`;
+                                        }
+                                    }
+                                } catch(e) {}
+                            }
+                            const statusBadge = isCompleted ? `<span style="background:#2ecc71; color:#000; font-size:0.7rem; padding:2px 6px; border-radius:4px; margin-right:8px;">مكتمل</span> ${attemptsText}` : '';
 
                             row.innerHTML = `
                                 <div style="display:flex; align-items:center; gap:15px; flex:1;">
@@ -1058,19 +1075,27 @@
                             actionBtn.addEventListener('click', () => openCourseResource(item, isLocked, lockReason));
                             row.appendChild(actionBtn);
                             
-                            if (currentHeaderGroup && (item._parentLecId || item.attachedToLectureId)) {
-                                currentHeaderGroup.appendChild(row);
-                            } else {
-                                if (currentHeaderGroup) {
-                                    detailsInner.appendChild(currentHeaderGroup);
-                                    currentHeaderGroup = null;
+                            if (item._parentLecId || item.attachedToLectureId) {
+                                if (!currentLecGroup) {
+                                    currentLecGroup = document.createElement('div');
+                                    currentLecGroup.style.cssText = 'background: rgba(0,0,0,0.15); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 5px; margin-bottom: 15px; display: flex; flex-direction: column; gap: 4px;';
+                                    detailsInner.appendChild(currentLecGroup);
                                 }
-                                detailsInner.appendChild(row);
+                                row.style.margin = "0 10px 0 0";
+                                row.style.borderRight = "2px dashed var(--accent-cyan)";
+                                currentLecGroup.appendChild(row);
+                            } else {
+                                if (currentLecGroup) {
+                                    detailsInner.appendChild(currentLecGroup);
+                                }
+                                currentLecGroup = document.createElement('div');
+                                currentLecGroup.style.cssText = 'background: rgba(0,0,0,0.15); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 6px; margin-bottom: 15px; display: flex; flex-direction: column; gap: 6px;';
+                                currentLecGroup.appendChild(row);
                             }
                         });
                         
-                        if (currentHeaderGroup) {
-                            detailsInner.appendChild(currentHeaderGroup);
+                        if (currentLecGroup) {
+                            detailsInner.appendChild(currentLecGroup);
                         }
                     }
 
