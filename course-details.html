@@ -947,6 +947,12 @@
                             let availStr = item.availabilityDate || item.availableFrom;
                             let untilStr = item.availableUntil;
                             
+                            // إلغاء قيود الوقت للتدريبات (تفتح بعد المحاضرة مباشرة)
+                            if (item.type === 'تدريب' || item.type === 'training') {
+                                availStr = null;
+                                untilStr = null;
+                            }
+                            
                             let isScheduled = false;
                             if (availStr) {
                                 const availTime = new Date(availStr).getTime();
@@ -1151,9 +1157,10 @@
                     }
                     if(!exam) { if(window.showToast) window.showToast('لا يوجد امتحان قابل للتشغيل','error'); else alert('لا يوجد امتحان.'); return; }
 
-                    // Check availability window
+                    // Check availability window (Skip for training)
                     const nowMs = Date.now();
-                    if (!isMasterPreview) {
+                    const isTraining = (exam.type === 'تدريب' || exam.type === 'training' || (exam.title && exam.title.includes('تدريب')));
+                    if (!isMasterPreview && !isTraining) {
                         if(exam.availableFrom && new Date(exam.availableFrom).getTime() > nowMs) {
                             const fromStr = new Date(exam.availableFrom).toLocaleString('ar-EG');
                             if(window.showToast) window.showToast('الامتحان لم يفتح بعد. يفتح في: ' + fromStr, 'error');
