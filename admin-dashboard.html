@@ -865,16 +865,28 @@
                     if (req.proofImage) return req.proofImage;
                     if (req.proofImageKey) {
                         return new Promise((resolve) => {
-                            const request = indexedDB.open('platformPaymentDB', 1);
-                            request.onsuccess = function() {
-                                const db = request.result;
-                                const tx = db.transaction('paymentProofs', 'readonly');
-                                const store = tx.objectStore('paymentProofs');
-                            const getReq = store.get(req.proofImageKey);
-                            getReq.onsuccess = function() { resolve(getReq.result ? getReq.result.dataUrl : null); };
-                            getReq.onerror = function() { resolve(null); };
-                        };
-                        request.onerror = function() { resolve(null); };
+                            try {
+                                const request = indexedDB.open('platformPaymentDB', 1);
+                                request.onsuccess = function() {
+                                    const db = request.result;
+                                    if (!db.objectStoreNames.contains('paymentProofs')) {
+                                        resolve(null);
+                                        return;
+                                    }
+                                    try {
+                                        const tx = db.transaction('paymentProofs', 'readonly');
+                                        const store = tx.objectStore('paymentProofs');
+                                        const getReq = store.get(req.proofImageKey);
+                                        getReq.onsuccess = function() { resolve(getReq.result ? getReq.result.dataUrl : null); };
+                                        getReq.onerror = function() { resolve(null); };
+                                    } catch (err) {
+                                        resolve(null);
+                                    }
+                                };
+                                request.onerror = function() { resolve(null); };
+                            } catch (e) {
+                                resolve(null);
+                            }
                         });
                     }
                     
