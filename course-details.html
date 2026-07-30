@@ -854,8 +854,8 @@
                     }
                 }
                 
-                if(item.type === 'pdf' && item.pdfUrl) {
-                    window.open(item.pdfUrl, '_blank');
+                if(item.type === 'pdf' && (item.pdfUrl || item.url)) {
+                    window.open(item.pdfUrl || item.url, '_blank');
                     return;
                 }
                 
@@ -915,7 +915,7 @@
                     }
 
                     const detailsInner = document.createElement('div');
-                    detailsInner.style.cssText = 'display:flex; flex-direction:column; gap:12px; padding: 20px;';
+                    detailsInner.style.cssText = 'display:flex; flex-direction:column; gap:8px; padding: 15px;';
 
                     if(!sec.items || sec.items.length === 0) {
                         detailsInner.innerHTML = '<div style="text-align:center; padding: 30px; background: rgba(0,0,0,0.2); border-radius: 12px; margin-top: 10px;"><i class="fas fa-laptop-code mb-3" style="font-size: 2.5rem; color: var(--accent-cyan); opacity: 0.8;"></i><h3 style="color: var(--royal-gold); margin-bottom: 10px;">المحتوى قيد التجهيز 🚀</h3><p style="color: rgba(255,255,255,0.7); line-height: 1.6; font-size: 0.95rem;">يتم الآن إعداد وتجهيز محتوى هذا القسم بأفضل جودة ليكون متاحاً قريباً، ابقوا متابعين ولا تفوتوا الجديد!</p></div>';
@@ -1003,7 +1003,7 @@
                             }
 
                             const row = document.createElement('div');
-                            row.style.cssText = `display:flex; align-items:center; justify-content:space-between; gap:12px; padding:14px 16px; border-radius:8px; background: rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.05); transition: all 0.3s ease; ${glowStyle} ${isLocked ? 'opacity: 0.6; filter: grayscale(0.8); cursor: not-allowed;' : ''}`;
+                            row.style.cssText = `display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 14px; border-radius:8px; background: rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.05); transition: all 0.3s ease; ${glowStyle} ${isLocked ? 'opacity: 0.6; filter: grayscale(0.8); cursor: not-allowed;' : ''}`;
 
                             let attemptsText = '';
                             if(isCompleted && item.type !== 'video' && item.type !== 'pdf' && typeof userStr !== 'undefined' && userStr) {
@@ -1063,16 +1063,6 @@
                                         actionBtn.textContent = 'تقديم الواجب';
                                     } else if (item.type === 'pdf') {
                                         actionBtn.innerHTML = '<i class="fas fa-download"></i> تحميل الملف';
-                                        if (item.url) {
-                                            let downloadUrl = item.url;
-                                            if (downloadUrl.includes('drive.google.com/file/d/')) {
-                                                const fileId = downloadUrl.split('/d/')[1].split('/')[0];
-                                                downloadUrl = `https://drive.google.com/uc?export=download&id=${fileId}`;
-                                            }
-                                            actionBtn.href = downloadUrl;
-                                            actionBtn.target = "_blank";
-                                            actionBtn.download = item.title;
-                                        }
                                     }
                                     
                                     if (isCompleted && item.type !== 'pdf') {
@@ -1094,9 +1084,7 @@
                                 }
                             }
                             
-                            if (item.type !== 'pdf' || isLocked || !(isOwned || isMasterPreview)) {
-                                actionBtn.addEventListener('click', (e) => { e.preventDefault(); openCourseResource(item, isLocked, lockReason); });
-                            }
+                            actionBtn.addEventListener('click', (e) => { e.preventDefault(); openCourseResource(item, isLocked, lockReason); });
                             row.appendChild(actionBtn);
                             
                             if (item._parentLecId || item.attachedToLectureId) {
