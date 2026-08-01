@@ -235,9 +235,17 @@ async function loadStudents() {
     }
     
     try {
+        let cached = JSON.parse(localStorage.getItem('cached_students') || '[]');
+        if (cached && cached.length > 0) {
+            allStudentsData = cached.map(s => { s._uid = s.id || s._uid; return s; });
+            if (grade) allStudentsData = allStudentsData.filter(s => s.grade === grade);
+            renderStudentsTable(allStudentsData);
+            return;
+        }
+
         let query = window.firebaseDb.collection('students');
         if (grade) query = query.where('grade', '==', grade);
-        const snap = await query.limit(200).get();
+        const snap = await query.limit(300).get({ source: 'server' });
         
         allStudentsData = [];
         snap.forEach(doc => {
@@ -420,15 +428,27 @@ async function loadLateStudents() {
     if (!window.firebaseDb) { container.innerHTML = '<p style="color:#e74c3c;">Firebase غير متاح</p>'; return; }
     
     try {
-        let query = window.firebaseDb.collection('students');
-        if (grade) query = query.where('grade', '==', grade);
-        const snap = await query.limit(200).get();
+        let cached = JSON.parse(localStorage.getItem('cached_students') || '[]');
+        let students = [];
+        
+        if (cached && cached.length > 0) {
+            students = cached.map(s => { s._uid = s.id || s._uid; return s; });
+            if (grade) students = students.filter(s => s.grade === grade);
+        } else {
+            let query = window.firebaseDb.collection('students');
+            if (grade) query = query.where('grade', '==', grade);
+            const snap = await query.limit(300).get({ source: 'server' });
+            snap.forEach(doc => {
+                const d = doc.data();
+                d._uid = doc.id;
+                students.push(d);
+            });
+        }
         
         const courses = JSON.parse(localStorage.getItem('adminCourses') || '[]');
         const lateItems = [];
         
-        snap.forEach(doc => {
-            const s = doc.data();
+        students.forEach(s => {
             if (!s.name) return;
             const completed = s.completedItems || [];
             const examResults = s.examResults || [];
@@ -507,7 +527,15 @@ async function loadLevels() {
     
     if (!window.firebaseDb) return;
     try {
-        const snap = await window.firebaseDb.collection('students').where('grade', '==', grade).limit(200).get();
+        let cached = JSON.parse(localStorage.getItem('cached_students') || '[]');
+        if (cached && cached.length > 0) {
+            allStudentsData = cached.map(s => { s._uid = s.id || s._uid; return s; });
+            if (grade) allStudentsData = allStudentsData.filter(s => s.grade === grade);
+            filterLevel(currentLevelFilter);
+            return;
+        }
+
+        const snap = await window.firebaseDb.collection('students').where('grade', '==', grade).limit(300).get({ source: 'server' });
         allStudentsData = [];
         snap.forEach(doc => { const d = doc.data(); d._uid = doc.id; allStudentsData.push(d); });
         filterLevel(currentLevelFilter);
