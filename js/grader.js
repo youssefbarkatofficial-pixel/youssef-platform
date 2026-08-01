@@ -72,8 +72,30 @@
     return 1 - (d / max);
   }
 
+  // Parse multiple accepted answers separated by *
+  function parseMultipleAnswers(answerRaw) {
+    if (!answerRaw || typeof answerRaw !== 'string') return [answerRaw || ''];
+    if (!answerRaw.includes('*')) return [answerRaw];
+    return answerRaw.split('*').map(a => a.trim()).filter(Boolean);
+  }
+
+  function scoreAnswer(studentRaw, correctRaw, qType) {
+    // Support multiple correct answers separated by *
+    const allCorrects = parseMultipleAnswers(correctRaw);
+    if (allCorrects.length > 1) {
+      let bestResult = null;
+      for (const alt of allCorrects) {
+        const res = _scoreAnswerSingle(studentRaw, alt, qType);
+        if (!bestResult || res.score > bestResult.score) bestResult = res;
+        if (bestResult.score >= 1) break;
+      }
+      return bestResult;
+    }
+    return _scoreAnswerSingle(studentRaw, correctRaw, qType);
+  }
+
   // Main scoring function — returns score 0..1 and feedback
-  function scoreAnswer(studentRaw, correctRaw, qType){
+  function _scoreAnswerSingle(studentRaw, correctRaw, qType){
     const student = (studentRaw||'').toString();
     const correct = (correctRaw||'').toString();
     const sn = normalizeArabic(student);

@@ -8,6 +8,22 @@ document.addEventListener('DOMContentLoaded', () => {
     sessionStorage.setItem('currentStudent', savedStudent);
   }
 
+  // === AUTO-FILL REMEMBERED CREDENTIALS ===
+  const loginPhoneEl = document.getElementById('loginPhone');
+  const loginPasswordEl = document.getElementById('loginPassword');
+  const rememberMeEl = document.getElementById('rememberMe');
+  if (loginPhoneEl && loginPasswordEl) {
+    const remembered = localStorage.getItem('rememberedCredentials');
+    if (remembered) {
+      try {
+        const creds = JSON.parse(remembered);
+        if (creds.phone) loginPhoneEl.value = creds.phone;
+        if (creds.pwd) loginPasswordEl.value = creds.pwd;
+        if (rememberMeEl) rememberMeEl.checked = true;
+      } catch(e) { localStorage.removeItem('rememberedCredentials'); }
+    }
+  }
+
   // Add password visibility toggles
   ['loginPassword', 'password', 'confirmPassword', 'fpNewPassword', 'fpConfirmPassword', 'adminPassword', 'tempAdminPwd'].forEach(id => {
     const input = document.getElementById(id);
@@ -831,11 +847,14 @@ document.addEventListener('DOMContentLoaded', () => {
           };
           sessionStorage.setItem('currentAdmin', JSON.stringify(ownerAdmin));
           if (rememberMe) {
+            localStorage.setItem('rememberedCredentials', JSON.stringify({ phone: rawId, pwd }));
             localStorage.setItem('currentAdmin', JSON.stringify(ownerAdmin));
             let savedAccounts = JSON.parse(localStorage.getItem('savedLocalAccounts') || '[]');
             savedAccounts = savedAccounts.filter(a => a.phone !== rawId);
             savedAccounts.push({ phone: rawId, pwd, name: 'المالك - الإدارة' });
             localStorage.setItem('savedLocalAccounts', JSON.stringify(savedAccounts));
+          } else {
+            localStorage.removeItem('rememberedCredentials');
           }
           if (window.showToast) window.showToast('أهلا بك يا صانع المجد في مملكتك.\nمنصتك جاهزة لإبداعك اليومي.', 'majestic', { title: '👑 مرحبا بك يا أستاذ يوسف', duration: 1500 });
           setTimeout(() => { window.location.href = 'admin-dashboard.html'; }, 1500);
@@ -852,11 +871,14 @@ document.addEventListener('DOMContentLoaded', () => {
           sessionStorage.setItem('currentStudent', JSON.stringify(supportStudent));
           sessionStorage.setItem('pfJustLoggedIn', 'true');
           if (rememberMe) {
+            localStorage.setItem('rememberedCredentials', JSON.stringify({ phone: rawId, pwd }));
             localStorage.setItem('currentStudent', JSON.stringify(supportStudent));
             let savedAccounts = JSON.parse(localStorage.getItem('savedLocalAccounts') || '[]');
             savedAccounts = savedAccounts.filter(a => a.phone !== rawId);
             savedAccounts.push({ phone: rawId, pwd, name: 'الدعم الفني' });
             localStorage.setItem('savedLocalAccounts', JSON.stringify(savedAccounts));
+          } else {
+            localStorage.removeItem('rememberedCredentials');
           }
           if (typeof window.pfTransferGuestSupportSessionToAccount === 'function') {
             window.pfTransferGuestSupportSessionToAccount(supportStudent);
@@ -901,7 +923,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 sessionStorage.setItem('currentStudent', JSON.stringify(user));
                 sessionStorage.setItem('pfJustLoggedIn', 'true');
-                if (rememberMe) localStorage.setItem('currentStudent', JSON.stringify(user));
+                if (rememberMe) {
+                  localStorage.setItem('rememberedCredentials', JSON.stringify({ phone: rawId, pwd }));
+                  localStorage.setItem('currentStudent', JSON.stringify(user));
+                } else {
+                  localStorage.removeItem('rememberedCredentials');
+                }
                 if (typeof window.pfTransferGuestSupportSessionToAccount === 'function') {
                   window.pfTransferGuestSupportSessionToAccount(user);
                 }
@@ -950,7 +977,12 @@ document.addEventListener('DOMContentLoaded', () => {
                           }
                           sessionStorage.setItem('currentStudent', JSON.stringify(rescuedUser));
                           sessionStorage.setItem('pfJustLoggedIn', 'true');
-                          if (rememberMe) localStorage.setItem('currentStudent', JSON.stringify(rescuedUser));
+                          if (rememberMe) {
+                            localStorage.setItem('rememberedCredentials', JSON.stringify({ phone: rawId, pwd }));
+                            localStorage.setItem('currentStudent', JSON.stringify(rescuedUser));
+                          } else {
+                            localStorage.removeItem('rememberedCredentials');
+                          }
                           if (typeof window.pfTransferGuestSupportSessionToAccount === 'function') {
                               window.pfTransferGuestSupportSessionToAccount(rescuedUser);
                           }
@@ -1005,7 +1037,12 @@ document.addEventListener('DOMContentLoaded', () => {
           // Local fallback success!
           sessionStorage.setItem('currentStudent', JSON.stringify(user));
           sessionStorage.setItem('pfJustLoggedIn', 'true');
-          if (rememberMe) localStorage.setItem('currentStudent', JSON.stringify(user));
+          if (rememberMe) {
+            localStorage.setItem('rememberedCredentials', JSON.stringify({ phone: rawId, pwd }));
+            localStorage.setItem('currentStudent', JSON.stringify(user));
+          } else {
+            localStorage.removeItem('rememberedCredentials');
+          }
           if (typeof window.pfTransferGuestSupportSessionToAccount === 'function') {
             window.pfTransferGuestSupportSessionToAccount(user);
           }

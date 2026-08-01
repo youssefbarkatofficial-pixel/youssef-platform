@@ -44,9 +44,13 @@ function isNegated(text, concept) {
 // ============================================================
 export function gradeObjective(studentAns, correctAns, opts = {}) {
   const s = cleanAnswer(studentAns), c = cleanAnswer(correctAns);
-  const accepted = [c, ...(opts.altAnswers || []).map(cleanAnswer)];
+  // Support multiple correct answers separated by *  
+  const allCorrects = correctAns.includes('*') 
+    ? correctAns.split('*').map(a => cleanAnswer(a.trim())).filter(Boolean)
+    : [c];
+  const allAccepted = [...allCorrects, ...(opts.altAnswers || []).map(cleanAnswer)];
 
-  for (const acc of accepted) {
+  for (const acc of allAccepted) {
     if (s === acc) return { score: 1, why: "إجابة صحيحة" };
     // حرف الاختيار: أ = ا = a = 1 حسب ترتيب الاختيارات
     if (opts.choices) {

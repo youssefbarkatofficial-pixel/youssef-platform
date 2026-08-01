@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <script>
+        if (!sessionStorage.getItem('currentAdmin')) { window.location.replace('admin-login.html'); }
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تحليلات الطلاب التفصيلية - لوحة الإدارة</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css?v=10">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <style>
+        .filter-bar { display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin-bottom:20px; }
+        .filter-bar select, .filter-bar input { background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.15); color:#fff; padding:9px 14px; border-radius:8px; font-family:inherit; font-size:0.9rem; }
+        .filter-bar button { padding:9px 18px; border-radius:8px; border:none; cursor:pointer; font-family:inherit; font-size:0.9rem; font-weight:600; }
+        .btn-gold { background:var(--royal-gold); color:#000; }
+        .btn-danger { background:#e74c3c; color:#fff; }
+        .btn-info { background:#3498db; color:#fff; }
+        .tabs { display:flex; gap:8px; margin-bottom:20px; }
+        .tab-btn { padding:10px 20px; border-radius:20px; border:1px solid rgba(255,255,255,0.2); background:transparent; color:#fff; cursor:pointer; font-family:inherit; font-size:0.9rem; transition:all 0.2s; }
+        .tab-btn.active { background:var(--royal-gold); color:#000; border-color:var(--royal-gold); font-weight:700; }
+        .level-badge { padding:3px 10px; border-radius:12px; font-size:0.78rem; font-weight:700; }
+        .level-top { background:rgba(46,204,113,0.2); color:#2ecc71; }
+        .level-mid { background:rgba(241,196,15,0.2); color:#f1c40f; }
+        .level-low { background:rgba(231,76,60,0.2); color:#e74c3c; }
+        .admin-table th, .admin-table td { padding:10px 12px; }
+        .admin-table tbody tr { cursor:pointer; transition:background 0.15s; }
+        .admin-table tbody tr:hover { background:rgba(212,175,55,0.07); }
+        .big-modal { position:fixed; inset:0; background:rgba(0,0,0,0.92); z-index:3000; display:none; overflow-y:auto; padding:20px; }
+        .big-modal.active { display:block; }
+        .big-modal-inner { max-width:900px; margin:0 auto; background:var(--primary-navy); border-radius:15px; padding:30px; border:1px solid var(--royal-gold); position:relative; }
+        .section-block { background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:16px; margin-bottom:16px; }
+        .section-block h3 { color:var(--royal-gold); margin:0 0 12px 0; font-size:1rem; }
+        .score-input { width:70px; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); color:#fff; padding:4px 8px; border-radius:6px; text-align:center; }
+        .late-card { background:rgba(231,76,60,0.08); border:1px solid rgba(231,76,60,0.2); border-radius:10px; padding:14px 16px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; gap:10px; }
+        .late-card .late-msg { font-size:0.9rem; color:rgba(255,255,255,0.85); }
+        .late-card .copy-btn { padding:5px 12px; border-radius:6px; border:none; background:var(--royal-gold); color:#000; cursor:pointer; font-size:0.8rem; white-space:nowrap; font-weight:600; }
+        .progress-bar-wrap { background:rgba(255,255,255,0.1); border-radius:20px; height:8px; overflow:hidden; width:100px; display:inline-block; vertical-align:middle; margin-right:6px; }
+        .progress-bar-fill { height:100%; border-radius:20px; background:var(--royal-gold); transition:width 0.4s; }
+    </style>
+</head>
+<body>
+<div class="bg-effects"></div>
+
+<header class="navbar glass-panel" style="border-bottom-color: var(--royal-gold);">
+    <a href="index.html" class="nav-brand">
+        <div class="logo-circle" style="color:#fff; background:var(--royal-gold);">ي</div>
+        <span class="nav-brand-text text-gold">تحليلات الطلاب</span>
+    </a>
+    <div class="nav-actions">
+        <a href="admin-dashboard.html" class="btn btn-outline" style="padding:8px 15px; border-radius:20px;"><i class="fas fa-arrow-right"></i> الداش بورد</a>
+        <a href="#" id="logoutBtn" class="btn btn-outline" style="border-color:#e74c3c; color:#e74c3c; padding:8px 15px; border-radius:20px;">خروج <i class="fas fa-sign-out-alt"></i></a>
+    </div>
+</header>
+
+<div class="dashboard-layout">
+    <aside class="sidebar" id="sidebar">
+        <div class="user-profile-mini" style="text-align:center; margin-bottom:20px; padding:15px;">
+            <div style="width:60px; height:60px; border-radius:50%; background:linear-gradient(135deg,var(--royal-gold),#b8860b); display:flex; align-items:center; justify-content:center; margin:0 auto 10px;"><i class="fas fa-user-tie" style="font-size:1.8rem; color:#fff;"></i></div>
+            <h4 style="margin:0; color:var(--royal-gold);">يوسف بركات</h4>
+            <p style="margin:4px 0 0; color:rgba(255,255,255,0.6); font-size:0.8rem;">المدير العام</p>
+        </div>
+        <ul class="sidebar-nav">
+            <li><a href="admin-dashboard.html"><i class="fas fa-chart-line"></i> الإحصائيات العامة</a></li>
+            <li><a href="admin-students.html"><i class="fas fa-users"></i> إدارة الطلاب</a></li>
+            <li><a href="admin-student-analytics.html" class="active"><i class="fas fa-chart-bar"></i> تحليلات تفصيلية</a></li>
+            <li><a href="admin-courses.html"><i class="fas fa-book-open"></i> إدارة الكورسات</a></li>
+            <li><a href="admin-upload.html"><i class="fas fa-bolt"></i> الرفع السريع</a></li>
+            <li><a href="admin-payments.html"><i class="fas fa-money-check-alt"></i> مراجعة المدفوعات</a></li>
+            <li><a href="admin-notifications.html"><i class="fas fa-bell"></i> إرسال الإشعارات</a></li>
+            <li><a href="admin-settings.html"><i class="fas fa-cog"></i> إعدادات المنصة</a></li>
+        </ul>
+    </aside>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1 class="page-title"><i class="fas fa-chart-bar" style="color:var(--royal-gold);"></i> تحليلات الطلاب التفصيلية</h1>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('students', this)">قائمة الطلاب</button>
+            <button class="tab-btn" onclick="switchTab('late', this)">المتأخرات</button>
+            <button class="tab-btn" onclick="switchTab('levels', this)">المستويات</button>
+        </div>
+
+        <!-- TAB: Students -->
+        <div id="tab-students">
+            <div class="filter-bar">
+                <select id="gradeFilter" onchange="loadStudents()">
+                    <option value="">كل الصفوف</option>
+                    <option value="prep1">الصف الأول الإعدادي</option>
+                    <option value="prep2">الصف الثاني الإعدادي</option>
+                    <option value="prep3">الصف الثالث الإعدادي</option>
+                    <option value="sec1">الصف الأول الثانوي</option>
+                    <option value="sec2">الصف الثاني الثانوي</option>
+                    <option value="sec3">الصف الثالث الثانوي</option>
+                </select>
+                <input type="text" id="studentSearch" placeholder="ابحث باسم الطالب..." oninput="filterStudentsTable()" style="width:200px;">
+                <button class="btn-gold" onclick="loadStudents()"><i class="fas fa-sync"></i> تحديث</button>
+            </div>
+            <div class="glass-panel dash-panel">
+                <div style="overflow-x:auto;">
+                    <table class="admin-table" id="studentsTable">
+                        <thead>
+                            <tr>
+                                <th>الطالب</th>
+                                <th>الصف</th>
+                                <th>نسبة المشاهدة</th>
+                                <th>متوسط التدريب</th>
+                                <th>متوسط الواجب</th>
+                                <th>متوسط الامتحان</th>
+                                <th>المستوى</th>
+                                <th>إجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentsTableBody">
+                            <tr><td colspan="8" style="text-align:center; padding:30px;"><i class="fas fa-spinner fa-spin"></i> جاري التحميل...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB: Late -->
+        <div id="tab-late" style="display:none;">
+            <div class="filter-bar">
+                <select id="lateGradeFilter" onchange="loadLateStudents()">
+                    <option value="">كل الصفوف</option>
+                    <option value="prep1">الصف الأول الإعدادي</option>
+                    <option value="prep2">الصف الثاني الإعدادي</option>
+                    <option value="prep3">الصف الثالث الإعدادي</option>
+                    <option value="sec1">الصف الأول الثانوي</option>
+                    <option value="sec2">الصف الثاني الثانوي</option>
+                    <option value="sec3">الصف الثالث الثانوي</option>
+                </select>
+                <button class="btn-gold" onclick="loadLateStudents()"><i class="fas fa-sync"></i> تحديث</button>
+                <button class="btn-info" onclick="copyAllLateMessages()"><i class="fas fa-copy"></i> نسخ كل الرسائل</button>
+            </div>
+            <div id="lateContainer">
+                <div style="text-align:center; padding:40px; color:rgba(255,255,255,0.5);">اختر صفاً لعرض المتأخرات</div>
+            </div>
+        </div>
+
+        <!-- TAB: Levels -->
+        <div id="tab-levels" style="display:none;">
+            <div class="filter-bar">
+                <select id="levelGradeFilter" onchange="loadLevels()">
+                    <option value="">كل الصفوف</option>
+                    <option value="prep1">الصف الأول الإعدادي</option>
+                    <option value="prep2">الصف الثاني الإعدادي</option>
+                    <option value="prep3">الصف الثالث الإعدادي</option>
+                    <option value="sec1">الصف الأول الثانوي</option>
+                    <option value="sec2">الصف الثاني الثانوي</option>
+                    <option value="sec3">الصف الثالث الثانوي</option>
+                </select>
+                <div style="display:flex; gap:6px;">
+                    <button class="tab-btn active" id="lvl-top" onclick="filterLevel('top', this)" style="border-radius:8px;">⭐ متفوقون</button>
+                    <button class="tab-btn" id="lvl-mid" onclick="filterLevel('mid', this)" style="border-radius:8px;">📊 متوسطون</button>
+                    <button class="tab-btn" id="lvl-low" onclick="filterLevel('low', this)" style="border-radius:8px;">📉 ضعاف</button>
+                </div>
+            </div>
+            <div id="levelsContainer">
+                <div style="text-align:center; padding:40px; color:rgba(255,255,255,0.5);">اختر صفاً ومستوى لعرض الطلاب</div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Student Detail Modal -->
+<div class="big-modal" id="studentDetailModal">
+    <div class="big-modal-inner">
+        <button onclick="closeDetailModal()" style="position:absolute; top:15px; left:15px; background:rgba(231,76,60,0.15); border:none; color:#e74c3c; width:36px; height:36px; border-radius:50%; cursor:pointer; font-size:1.1rem;"><i class="fas fa-times"></i></button>
+        <h2 id="modalStudentName" style="color:var(--royal-gold); margin:0 0 6px 0;"></h2>
+        <p id="modalStudentMeta" style="color:rgba(255,255,255,0.5); margin:0 0 20px 0; font-size:0.85rem;"></p>
+        <div id="modalContent"></div>
+    </div>
+</div>
+
+<script src="js/firebase-config.js?v=10"></script>
+<script src="js/admin-auth.js"></script>
+<script>
+let allStudentsData = [];
+let currentLevelFilter = 'top';
+const gradeNames = { prep1:'الصف الأول الإعدادي', prep2:'الصف الثاني الإعدادي', prep3:'الصف الثالث الإعدادي', sec1:'الصف الأول الثانوي', sec2:'الصف الثاني الثانوي', sec3:'الصف الثالث الثانوي' };
+
+function switchTab(tab, btn) {
+    ['students','late','levels'].forEach(t => document.getElementById('tab-'+t).style.display = 'none');
+    document.getElementById('tab-'+tab).style.display = 'block';
+    document.querySelectorAll('.tabs .tab-btn').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    if (tab === 'late') loadLateStudents();
+    if (tab === 'levels') loadLevels();
+}
+
+function getLevelInfo(avg) {
+    if (avg >= 80) return { label:'متفوق', cls:'level-top', key:'top' };
+    if (avg >= 50) return { label:'متوسط', cls:'level-mid', key:'mid' };
+    return { label:'ضعيف', cls:'level-low', key:'low' };
+}
+
+function calcStudentStats(s) {
+    const examResults = s.examResults || [];
+    const exams = examResults.filter(r => !r.isTraining && !r.isHomework);
+    const trainings = examResults.filter(r => r.isTraining);
+    const homeworks = examResults.filter(r => r.isHomework);
+    
+    // Keep only first attempt (official)
+    const uniqueExams = {};
+    examResults.forEach(r => {
+        const key = r.courseId + '_' + r.examTitle;
+        if (!uniqueExams[key] || r.attemptNumber === 1) uniqueExams[key] = r;
+    });
+    const official = Object.values(uniqueExams);
+    
+    const avgExam = official.length ? Math.round(official.reduce((s,r) => s + (r.percent||0), 0) / official.length) : null;
+    const completed = s.completedItems || [];
+    const watchPct = s._totalItems ? Math.round((completed.length / s._totalItems) * 100) : null;
+    
+    return { avgExam, watchPct, official };
+}
+
+async function loadStudents() {
+    const grade = document.getElementById('gradeFilter').value;
+    const tbody = document.getElementById('studentsTableBody');
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:20px;"><i class="fas fa-spinner fa-spin"></i> جاري التحميل...</td></tr>';
+    
+    if (!window.firebaseDb) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#e74c3c;">Firebase غير متاح</td></tr>';
+        return;
+    }
+    
+    try {
+        let query = window.firebaseDb.collection('users');
+        if (grade) query = query.where('grade', '==', grade);
+        const snap = await query.limit(200).get();
+        
+        allStudentsData = [];
+        snap.forEach(doc => {
+            const d = doc.data();
+            d._uid = doc.id;
+            allStudentsData.push(d);
+        });
+        
+        renderStudentsTable(allStudentsData);
+    } catch(e) {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:#e74c3c;">خطأ: ${e.message}</td></tr>`;
+    }
+}
+
+function renderStudentsTable(students) {
+    const tbody = document.getElementById('studentsTableBody');
+    if (!students.length) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:30px;">لا يوجد طلاب</td></tr>';
+        return;
+    }
+    
+    let html = '';
+    students.forEach(s => {
+        const stats = calcStudentStats(s);
+        const avgAll = [stats.avgExam].filter(v => v !== null);
+        const overall = avgAll.length ? Math.round(avgAll.reduce((a,b) => a+b, 0) / avgAll.length) : 0;
+        const lvl = getLevelInfo(overall);
+        
+        const watchBar = stats.watchPct !== null ? `<div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${stats.watchPct}%"></div></div>${stats.watchPct}%` : '<span style="color:rgba(255,255,255,0.4);">-</span>';
+        
+        html += `<tr onclick="openStudentDetail('${s._uid}')">
+            <td><strong>${s.name || 'بدون اسم'}</strong><br><span style="font-size:0.78rem; color:rgba(255,255,255,0.5);">${s.phone || ''}</span></td>
+            <td>${gradeNames[s.grade] || s.grade || '-'}</td>
+            <td>${watchBar}</td>
+            <td><span style="color:var(--royal-gold); font-weight:700;">${stats.avgExam !== null ? stats.avgExam + '%' : '-'}</span></td>
+            <td><span style="color:var(--royal-gold); font-weight:700;">-</span></td>
+            <td><span style="color:var(--royal-gold); font-weight:700;">${stats.avgExam !== null ? stats.avgExam + '%' : '-'}</span></td>
+            <td><span class="level-badge ${lvl.cls}">${lvl.label}</span></td>
+            <td><button onclick="event.stopPropagation(); openStudentDetail('${s._uid}')" class="btn btn-gold" style="padding:5px 12px; font-size:0.8rem;"><i class="fas fa-eye"></i> تفاصيل</button></td>
+        </tr>`;
+    });
+    tbody.innerHTML = html;
+}
+
+function filterStudentsTable() {
+    const search = document.getElementById('studentSearch').value.trim().toLowerCase();
+    const filtered = allStudentsData.filter(s => !search || (s.name || '').toLowerCase().includes(search) || (s.phone || '').includes(search));
+    renderStudentsTable(filtered);
+}
+
+async function openStudentDetail(uid) {
+    document.getElementById('studentDetailModal').classList.add('active');
+    document.getElementById('modalStudentName').textContent = 'جاري التحميل...';
+    document.getElementById('modalStudentMeta').textContent = '';
+    document.getElementById('modalContent').innerHTML = '<div style="text-align:center; padding:40px;"><i class="fas fa-spinner fa-spin" style="font-size:2rem; color:var(--royal-gold);"></i></div>';
+    
+    let s = allStudentsData.find(x => x._uid === uid);
+    if (!s && window.firebaseDb) {
+        const doc = await window.firebaseDb.collection('users').doc(uid).get();
+        if (doc.exists) { s = doc.data(); s._uid = uid; }
+    }
+    if (!s) { document.getElementById('modalContent').innerHTML = '<p style="color:#e74c3c;">لم يتم العثور على الطالب</p>'; return; }
+    
+    document.getElementById('modalStudentName').textContent = s.name || 'بدون اسم';
+    document.getElementById('modalStudentMeta').textContent = `${s.phone || ''} | ${gradeNames[s.grade] || s.grade || ''} | آخر دخول: ${s.lastSeen ? new Date(s.lastSeen).toLocaleString('ar-EG') : 'غير معروف'}`;
+    
+    const examResults = s.examResults || [];
+    const completed = s.completedItems || [];
+    
+    // Group exam results by title keeping all attempts
+    const byTitle = {};
+    examResults.forEach(r => {
+        const key = r.examTitle || 'غير معنون';
+        if (!byTitle[key]) byTitle[key] = [];
+        byTitle[key].push(r);
+    });
+    
+    let html = '';
+    
+    // Completed Items
+    html += `<div class="section-block">
+        <h3><i class="fas fa-check-circle"></i> العناصر المكتملة (${completed.length})</h3>
+        <p style="color:rgba(255,255,255,0.6); font-size:0.85rem;">${completed.join(' | ') || 'لا توجد عناصر مكتملة'}</p>
+    </div>`;
+    
+    // Exam Results
+    if (Object.keys(byTitle).length > 0) {
+        html += `<div class="section-block"><h3><i class="fas fa-file-alt"></i> نتائج الامتحانات والتدريبات</h3>`;
+        for (const [title, attempts] of Object.entries(byTitle)) {
+            const firstAttempt = attempts.find(a => a.attemptNumber === 1) || attempts[0];
+            html += `<div style="border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:12px; margin-bottom:10px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <strong>${title}</strong>
+                    <div style="display:flex; gap:8px; align-items:center;">
+                        <span style="color:var(--royal-gold); font-weight:700;">${firstAttempt.percent || 0}% <span style="color:rgba(255,255,255,0.4); font-size:0.78rem;">(المحاولة الأولى - رسمية)</span></span>
+                        <div>
+                            <label style="font-size:0.8rem; color:rgba(255,255,255,0.6);">تعديل الدرجة:</label>
+                            <input type="number" class="score-input" id="score_${uid}_${title.replace(/\s/g,'_')}" value="${firstAttempt.percent || 0}" min="0" max="100">
+                            <button onclick="saveGradeOverride('${uid}', '${title}', this)" style="padding:4px 10px; border-radius:6px; border:none; background:var(--royal-gold); color:#000; cursor:pointer; font-size:0.8rem; font-weight:700;">حفظ</button>
+                        </div>
+                    </div>
+                </div>`;
+            
+            // Show all attempts
+            if (attempts.length > 1) {
+                html += `<details style="margin-bottom:8px;"><summary style="cursor:pointer; color:rgba(255,255,255,0.6); font-size:0.85rem;">كل المحاولات (${attempts.length})</summary><div style="margin-top:8px;">`;
+                attempts.forEach((a, i) => {
+                    html += `<div style="padding:4px 0; font-size:0.82rem; color:rgba(255,255,255,0.7);">محاولة ${a.attemptNumber || i+1}: ${a.percent || 0}% - ${a.ts ? new Date(a.ts).toLocaleString('ar-EG') : ''}</div>`;
+                });
+                html += '</div></details>';
+            }
+            
+            // Show detailed answers of first attempt
+            if (firstAttempt.details && firstAttempt.details.length) {
+                html += `<details><summary style="cursor:pointer; color:rgba(255,255,255,0.6); font-size:0.85rem;">عرض الإجابات التفصيلية</summary><div style="margin-top:10px;">`;
+                firstAttempt.details.forEach((d, i) => {
+                    const isCorrect = (d.score >= 0.5);
+                    html += `<div style="padding:8px; margin-bottom:6px; border-radius:6px; background:${isCorrect ? 'rgba(46,204,113,0.07)' : 'rgba(231,76,60,0.07)'}; border:1px solid ${isCorrect ? 'rgba(46,204,113,0.2)' : 'rgba(231,76,60,0.2)'}; font-size:0.85rem;">
+                        <strong>س${i+1}:</strong> ${d.question || ''}<br>
+                        <span style="color:rgba(255,255,255,0.6);">إجابة الطالب: </span><span style="color:${isCorrect ? '#2ecc71' : '#e74c3c'};">${d.rawAnswer || '(بدون إجابة)'}</span>
+                        <span style="color:rgba(255,255,255,0.4); font-size:0.78rem;"> | ${Math.round((d.score||0)*100)}%</span>
+                    </div>`;
+                });
+                html += '</div></details>';
+            }
+            html += '</div>';
+        }
+        html += '</div>';
+    } else {
+        html += '<div class="section-block"><h3>لا توجد نتائج امتحانات</h3></div>';
+    }
+    
+    document.getElementById('modalContent').innerHTML = html;
+}
+
+async function saveGradeOverride(uid, examTitle, btn) {
+    const inputId = `score_${uid}_${examTitle.replace(/\s/g,'_')}`;
+    const newScore = parseInt(document.getElementById(inputId)?.value);
+    if (isNaN(newScore) || newScore < 0 || newScore > 100) { alert('الدرجة يجب أن تكون بين 0 و 100'); return; }
+    
+    btn.textContent = '...';
+    try {
+        const doc = await window.firebaseDb.collection('users').doc(uid).get();
+        if (!doc.exists) throw new Error('لم يتم العثور على الطالب');
+        const data = doc.data();
+        const results = data.examResults || [];
+        // Update first attempt
+        let updated = false;
+        results.forEach(r => {
+            if (r.examTitle === examTitle && (r.attemptNumber === 1 || !r.attemptNumber)) {
+                r.percent = newScore;
+                r.effectivePercent = newScore;
+                r._adminOverride = true;
+                r._overridedAt = Date.now();
+                updated = true;
+            }
+        });
+        if (!updated) { alert('لم يتم العثور على هذا الامتحان في سجلات الطالب'); btn.textContent = 'حفظ'; return; }
+        await window.firebaseDb.collection('users').doc(uid).update({ examResults: results });
+        // Update local data
+        const local = allStudentsData.find(x => x._uid === uid);
+        if (local) local.examResults = results;
+        btn.textContent = '✅';
+        setTimeout(() => { btn.textContent = 'حفظ'; }, 2000);
+    } catch(e) {
+        alert('خطأ في الحفظ: ' + e.message);
+        btn.textContent = 'حفظ';
+    }
+}
+
+function closeDetailModal() {
+    document.getElementById('studentDetailModal').classList.remove('active');
+}
+
+async function loadLateStudents() {
+    const grade = document.getElementById('lateGradeFilter').value;
+    const container = document.getElementById('lateContainer');
+    container.innerHTML = '<div style="text-align:center; padding:30px;"><i class="fas fa-spinner fa-spin"></i></div>';
+    
+    if (!window.firebaseDb) { container.innerHTML = '<p style="color:#e74c3c;">Firebase غير متاح</p>'; return; }
+    
+    try {
+        let query = window.firebaseDb.collection('users');
+        if (grade) query = query.where('grade', '==', grade);
+        const snap = await query.limit(200).get();
+        
+        const courses = JSON.parse(localStorage.getItem('adminCourses') || '[]');
+        const lateItems = [];
+        
+        snap.forEach(doc => {
+            const s = doc.data();
+            if (!s.name) return;
+            const completed = s.completedItems || [];
+            const examResults = s.examResults || [];
+            
+            // Check each course the student is enrolled in
+            const enrolledCourses = s.enrolledCourses || s.courses || [];
+            enrolledCourses.forEach(courseId => {
+                const course = courses.find(c => c.id === courseId);
+                if (!course || !course.contents) return;
+                
+                const lectures = course.contents.lectures || [];
+                const trainings = course.contents.trainings || [];
+                const homeworks = course.contents.homeworks || [];
+                const exams = course.contents.exams || [];
+                
+                lectures.forEach(lec => {
+                    if (!completed.includes(lec.id)) {
+                        lateItems.push({ student: s.name, type: 'lecture', title: lec.title || 'محاضرة', course: course.title });
+                    }
+                });
+                trainings.forEach(tr => {
+                    if (!examResults.some(r => r.examTitle === tr.title)) {
+                        lateItems.push({ student: s.name, type: 'training', title: tr.title || 'تدريب', course: course.title });
+                    }
+                });
+                homeworks.forEach(hw => {
+                    if (!examResults.some(r => r.examTitle === hw.title)) {
+                        lateItems.push({ student: s.name, type: 'homework', title: hw.title || 'واجب', course: course.title });
+                    }
+                });
+                exams.forEach(ex => {
+                    if (!examResults.some(r => r.examTitle === ex.title)) {
+                        lateItems.push({ student: s.name, type: 'exam', title: ex.title || 'امتحان', course: course.title });
+                    }
+                });
+            });
+        });
+        
+        if (!lateItems.length) {
+            container.innerHTML = '<div style="text-align:center; padding:40px; color:#2ecc71;"><i class="fas fa-check-circle" style="font-size:2rem;"></i><br>لا توجد متأخرات! 🎉</div>';
+            return;
+        }
+        
+        const typeLabels = { lecture: 'مشاهدة المحاضرة', training: 'حل التدريب', homework: 'تسليم الواجب', exam: 'حل الامتحان' };
+        container.innerHTML = lateItems.map((item, i) => {
+            const msg = `ابنك ${item.student} لسه م${item.type==='lecture'?'شافش':'حلش'} ${typeLabels[item.type]}: ${item.title} في كورس: ${item.course}`;
+            return `<div class="late-card">
+                <div class="late-msg"><strong>${item.student}</strong> — ${typeLabels[item.type]}: <em>${item.title}</em></div>
+                <button class="copy-btn" onclick="copyMsg('${msg.replace(/'/g,"&#39;")}', this)"><i class="fas fa-copy"></i> نسخ</button>
+            </div>`;
+        }).join('');
+    } catch(e) {
+        container.innerHTML = `<p style="color:#e74c3c;">خطأ: ${e.message}</p>`;
+    }
+}
+
+function copyMsg(msg, btn) {
+    navigator.clipboard.writeText(msg).then(() => {
+        btn.textContent = '✅ تم النسخ';
+        setTimeout(() => { btn.innerHTML = '<i class="fas fa-copy"></i> نسخ'; }, 1500);
+    });
+}
+
+function copyAllLateMessages() {
+    const cards = document.querySelectorAll('.late-card .late-msg');
+    const msgs = Array.from(cards).map(c => c.textContent.trim()).join('\n');
+    if (!msgs) { alert('لا توجد متأخرات لنسخها'); return; }
+    navigator.clipboard.writeText(msgs).then(() => alert('تم نسخ كل الرسائل!'));
+}
+
+async function loadLevels() {
+    const grade = document.getElementById('levelGradeFilter').value;
+    if (!grade) { document.getElementById('levelsContainer').innerHTML = '<div style="text-align:center; padding:40px; color:rgba(255,255,255,0.5);">اختر صفاً أولاً</div>'; return; }
+    
+    document.getElementById('levelsContainer').innerHTML = '<div style="text-align:center; padding:30px;"><i class="fas fa-spinner fa-spin"></i></div>';
+    
+    if (!window.firebaseDb) return;
+    try {
+        const snap = await window.firebaseDb.collection('users').where('grade', '==', grade).limit(200).get();
+        allStudentsData = [];
+        snap.forEach(doc => { const d = doc.data(); d._uid = doc.id; allStudentsData.push(d); });
+        filterLevel(currentLevelFilter);
+    } catch(e) {
+        document.getElementById('levelsContainer').innerHTML = `<p style="color:#e74c3c;">خطأ: ${e.message}</p>`;
+    }
+}
+
+function filterLevel(level, btn) {
+    currentLevelFilter = level;
+    document.querySelectorAll('#tab-levels .tab-btn').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    else { const el = document.getElementById('lvl-'+level); if(el) el.classList.add('active'); }
+    
+    const container = document.getElementById('levelsContainer');
+    const filtered = allStudentsData.filter(s => {
+        const stats = calcStudentStats(s);
+        const avg = stats.avgExam !== null ? stats.avgExam : 0;
+        const lvl = getLevelInfo(avg);
+        return lvl.key === level;
+    });
+    
+    if (!filtered.length) {
+        container.innerHTML = `<div style="text-align:center; padding:40px; color:rgba(255,255,255,0.5);">لا يوجد طلاب في هذا المستوى</div>`;
+        return;
+    }
+    
+    const lvlInfo = { top: { label:'متفوقون', cls:'level-top', icon:'⭐' }, mid: { label:'متوسطون', cls:'level-mid', icon:'📊' }, low: { label:'ضعاف', cls:'level-low', icon:'📉' } }[level];
+    
+    container.innerHTML = `<div style="margin-bottom:14px;"><span class="level-badge ${lvlInfo.cls}" style="font-size:1rem; padding:6px 16px;">${lvlInfo.icon} ${lvlInfo.label} — ${filtered.length} طالب</span></div>` +
+        filtered.sort((a,b) => (calcStudentStats(b).avgExam||0) - (calcStudentStats(a).avgExam||0)).map(s => {
+            const stats = calcStudentStats(s);
+            return `<div class="section-block" style="display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="openStudentDetail('${s._uid}')">
+                <div><strong>${s.name || 'بدون اسم'}</strong><br><span style="font-size:0.8rem; color:rgba(255,255,255,0.5);">${s.phone || ''}</span></div>
+                <div style="text-align:center;"><div style="font-size:1.4rem; font-weight:700; color:var(--royal-gold);">${stats.avgExam !== null ? stats.avgExam + '%' : '-'}</div><div style="font-size:0.75rem; color:rgba(255,255,255,0.4);">متوسط الدرجات</div></div>
+            </div>`;
+        }).join('');
+}
+
+// Init
+document.addEventListener('DOMContentLoaded', () => {
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) logoutBtn.addEventListener('click', e => { e.preventDefault(); sessionStorage.removeItem('currentAdmin'); localStorage.removeItem('currentAdmin'); window.location.href = 'admin-login.html'; });
+    
+    // Wait for Firebase
+    let attempts = 0;
+    const waitFB = setInterval(() => {
+        attempts++;
+        if (window.firebaseDb || attempts > 30) {
+            clearInterval(waitFB);
+            loadStudents();
+        }
+    }, 300);
+});
+
+// Close modal on outside click
+document.getElementById('studentDetailModal').addEventListener('click', function(e) {
+    if (e.target === this) closeDetailModal();
+});
+</script>
+</body>
+</html>

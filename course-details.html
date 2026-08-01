@@ -848,6 +848,37 @@
                 }
                 
                 if(item.type === 'task' || item.type === 'quiz' || item.type === 'training') {
+                    // STRICT SYSTEM: Cannot start training unless lecture is completed
+                    if (!isMasterPreview) {
+                        const parentLecId = item.attachedToLectureId || item._parentLecId;
+                        if (parentLecId && !isItemCompleted(parentLecId)) {
+                            if(window.showToast) window.showToast('🔒 يجب مشاهدة المحاضرة كاملاً قبل الدخول للتدريب', 'error');
+                            else alert('يجب مشاهدة المحاضرة كاملاً قبل الدخول للتدريب');
+                            return;
+                        }
+                        const tempStudentStr = sessionStorage.getItem('currentStudent');
+                        const tempStudent = tempStudentStr ? JSON.parse(tempStudentStr) : {phone:'guest'};
+                        const dbUser = JSON.parse(localStorage.getItem('db_' + tempStudent.phone) || '{}');
+                        
+                        // Cannot do homework unless training is submitted
+                        if (item.type === 'task' && item._requiresTraining) {
+                            const trainingDone = (dbUser.examResults || []).some(r => r.courseId === course.id && r.isTraining);
+                            if (!trainingDone) {
+                                if(window.showToast) window.showToast('🔒 يجب تسليم التدريب أولاً قبل الواجب', 'error');
+                                else alert('يجب تسليم التدريب أولاً قبل الواجب');
+                                return;
+                            }
+                        }
+                        // Cannot do exam unless homework submitted
+                        if (item.type === 'quiz' && item._requiresHomework) {
+                            const hwDone = (dbUser.examResults || []).some(r => r.courseId === course.id && r.isHomework);
+                            if (!hwDone) {
+                                if(window.showToast) window.showToast('🔒 يجب تسليم الواجب أولاً قبل الامتحان', 'error');
+                                else alert('يجب تسليم الواجب أولاً قبل الامتحان');
+                                return;
+                            }
+                        }
+                    }
                     if (window.openExamModal) {
                         window.openExamModal(course.id, item);
                         return;
@@ -855,6 +886,15 @@
                 }
                 
                 if(item.type === 'pdf' && (item.pdfUrl || item.url)) {
+                    // STRICT SYSTEM: Cannot download PDF unless lecture is watched
+                    if (!isMasterPreview) {
+                        const parentLecId = item.attachedToLectureId || item._parentLecId;
+                        if (parentLecId && !isItemCompleted(parentLecId)) {
+                            if(window.showToast) window.showToast('🔒 يجب مشاهدة المحاضرة كاملاً قبل تحميل الملف', 'error');
+                            else alert('يجب مشاهدة المحاضرة كاملاً قبل تحميل الملف');
+                            return;
+                        }
+                    }
                     window.open(item.pdfUrl || item.url, '_blank');
                     return;
                 }
@@ -1433,12 +1473,23 @@
                     }
 
                     submitBtn.onclick = function() { doSubmit(false); };
-                    cancelBtn.onclick = function() {
-                        if(exam.strictMode && !submitBtn.disabled) {
-                            if(confirm('⚠️ الامتحان في الوضع الصارم. هل تريد الخروج وتسليم إجاباتك الحالية؟')) { doSubmit(true); setTimeout(() => modal.classList.remove('active'), 700); }
-                        } else { _stopTimer(); _deactivateStrict(); modal.classList.remove('active'); }
-                    };
-                    document.getElementById('examModalCloseBtn').onclick = cancelBtn.onclick;
+                    function confirmAndExitExam() {
+                        if (submitBtn.disabled) {
+                            // Already submitted
+                            _stopTimer(); _deactivateStrict(); modal.classList.remove('active');
+                            return;
+                        }
+                        // WARNING 1
+                        const w1 = confirm('⚠️ تحذير أول: إذا خرجت الآن، سيتم تسليم إجاباتك الحالية تلقائياً حتى لو لم تكمل. هل تريد الاستمرار في الخروج؟');
+                        if (!w1) return;
+                        // WARNING 2
+                        const w2 = confirm('⚠️ تحذير أخير: هذا الإجراء نهائي ولا رجعة فيه. إجاباتك ستُسلّم الآن وسيُحسب عليك كمحاولة. هل أنت متأكد تماماً؟');
+                        if (!w2) return;
+                        doSubmit(true);
+                        setTimeout(() => modal.classList.remove('active'), 700);
+                    }
+                    cancelBtn.onclick = confirmAndExitExam;
+                    document.getElementById('examModalCloseBtn').onclick = confirmAndExitExam;
 
                     // ===== TIMER =====
                     if(exam.duration && parseInt(exam.duration) > 0) {
@@ -1460,8 +1511,8 @@
                         updTm(); _examTimerInterval = setInterval(updTm, 1000);
                     }
 
-                    // ===== STRICT MODE =====
-                    if(exam.strictMode) {
+                    // ===== STRICT MODE - applied to ALL exams =====
+                    {
                         _examStrictBeforeUnload = function(e) {
                             e.preventDefault();
                             e.returnValue = 'إذا غادرت الآن سيتم تسجيل نتيجة صفر!';
@@ -1469,9 +1520,10 @@
                         };
                         _examStrictVisibility = function() {
                             if(document.hidden && !submitBtn.disabled && !submitBtn.innerHTML.includes('جاري')) {
-                                const confirm1 = confirm('تحذير: لقد غادرت شاشة الامتحان! هل أنت متأكد أنك تريد إلغاء الامتحان وتسجيل درجة (صفر)؟');
-                                if (confirm1) {
-                                    const confirm2 = confirm('تأكيد أخير: الضغط على موافق سيلغي امتحانك نهائياً بـ 0. هل تريد الاستمرار في الإلغاء؟');
+                                // Use double warning for tab switch too
+                                const confirm1 = confirm('⚠️ تحذير: لقد غادرت شاشة الامتحان! إذا تركته، سيُسلَّم تلقائياً بالإجابات الحالية. هل تريد العودة للامتحان؟');
+                                if (!confirm1) {
+                                    const confirm2 = confirm('⚠️ تأكيد أخير: الضغط على موافق سيسلّم امتحانك فوراً بما أجبته. استمر؟');
                                     if (confirm2) {
                                         doSubmit(true);
                                     }
