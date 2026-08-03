@@ -982,7 +982,7 @@
                             <td>${courseName}${courseGradeHtml}</td>
                             <td>${price} ج.م</td>
                             <td>${date}</td>
-                            <td>${imgSrc ? `<div style="display:flex;flex-direction:column;align-items:center;gap:6px;"><a href="${imgSrc}" target="_blank"><img src="${imgSrc}" style="width:50px;height:50px;object-fit:cover;border-radius:5px;cursor:pointer;border:1px solid var(--border-color);"></a><button class="btn btn-outline" style="padding:4px 6px;font-size:0.75rem; margin-top:4px;" onclick='window.downloadProof(${JSON.stringify(imgSrc)}, "proof_${req.id}.png")'><i class='fas fa-download'></i> تحميل</button></div>` : '<span style="color: #e74c3c; font-size: 0.8rem;"><i class="fas fa-exclamation-circle"></i> مفقودة</span>'}</td>
+                            <td>${imgSrc ? `<div style="display:flex;flex-direction:column;align-items:center;gap:6px;"><a href="${imgSrc}" target="_blank"><img src="${imgSrc}" style="width:70px;height:70px;object-fit:cover;border-radius:8px;cursor:pointer;border:2px solid var(--royal-gold);box-shadow:0 0 10px rgba(212,166,79,0.3);" onerror="this.style.display='none'"></a><button class="btn btn-outline" style="padding:4px 8px;font-size:0.75rem;" onclick='window.downloadProof(${JSON.stringify(imgSrc)}, "proof_${req.id}.png")'><i class='fas fa-download'></i> تحميل</button></div>` : `<button class="btn btn-outline" style="padding:5px 10px;font-size:0.78rem;border-color:var(--royal-gold);color:var(--royal-gold);" onclick="window.fetchProofImageAndShow('${req.id}', this)"><i class="fas fa-image mr-1"></i> عرض الصورة</button>`}</td>
                             <td>${statusBadge}</td>
                             <td style="display: flex; flex-direction: column; gap: 5px;">${actionButtons}</td>
                         `;
@@ -1009,6 +1009,33 @@
                 } catch(e) {
                     console.warn('Download fetch failed, opening in new tab', e);
                     window.open(src, '_blank');
+                }
+            };
+
+            window.fetchProofImageAndShow = async function(reqId, btn) {
+                if (!window.firebaseDb) { btn.textContent = 'غير متاح'; return; }
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                btn.disabled = true;
+                try {
+                    const doc = await window.firebaseDb.collection('paymentRequests').doc(reqId).get();
+                    if (!doc.exists) { btn.innerHTML = '<i class="fas fa-times"></i> لا توجد'; btn.disabled = false; return; }
+                    const data = doc.data();
+                    const imgSrc = data.proofImage || data.proofImageUrl || null;
+                    if (imgSrc) {
+                        const cell = btn.closest('td');
+                        cell.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+                            <a href="${imgSrc}" target="_blank">
+                                <img src="${imgSrc}" style="width:70px;height:70px;object-fit:cover;border-radius:8px;cursor:pointer;border:2px solid var(--royal-gold);box-shadow:0 0 10px rgba(212,166,79,0.3);">
+                            </a>
+                            <button class="btn btn-outline" style="padding:4px 8px;font-size:0.75rem;" onclick='window.downloadProof(${JSON.stringify(imgSrc)}, "proof_${reqId}.png")'><i class='fas fa-download'></i> تحميل</button>
+                        </div>`;
+                    } else {
+                        btn.innerHTML = '<i class="fas fa-times"></i> لا توجد صورة';
+                        btn.disabled = false;
+                    }
+                } catch(e) {
+                    btn.innerHTML = '<i class="fas fa-exclamation"></i> خطأ';
+                    btn.disabled = false;
                 }
             };
 

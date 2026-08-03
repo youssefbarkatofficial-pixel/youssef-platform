@@ -82,8 +82,9 @@
         <main class="main-content">
             <div class="page-header">
                 <h1 class="page-title">إدارة الطلاب</h1>
-                <div style="display: flex; gap: 10px;">
+                <div style="display: flex; gap: 10px; align-items: center;">
                     <button class="btn btn-gold" onclick="openDecoderModal()" style="white-space: nowrap;"><i class="fas fa-search-plus mr-2"></i> فك شفرة تسريب</button>
+                    <button id="sortToggleBtn" class="btn btn-outline" onclick="toggleSort()" style="white-space: nowrap;"><i class="fas fa-sort-amount-down mr-2"></i> الأحدث</button>
                     <input type="text" id="studentSearch" class="form-control" placeholder="ابحث برقم الموبايل..." style="width: 250px;">
                 </div>
             </div>
@@ -194,6 +195,26 @@
             let currentStudentPhone = null;
             let tempStudentCourses = [];
             let hasUnsavedChanges = false;
+            let sortMode = 'alpha'; // 'alpha' or 'newest'
+
+            window.toggleSort = function() {
+                sortMode = sortMode === 'alpha' ? 'newest' : 'alpha';
+                const btn = document.getElementById('sortToggleBtn');
+                if (btn) {
+                    if (sortMode === 'newest') {
+                        btn.innerHTML = '<i class="fas fa-sort-alpha-down mr-2"></i> أبجدي';
+                        btn.style.background = 'var(--royal-gold)';
+                        btn.style.color = '#000';
+                        btn.style.borderColor = 'var(--royal-gold)';
+                    } else {
+                        btn.innerHTML = '<i class="fas fa-sort-amount-down mr-2"></i> الأحدث';
+                        btn.style.background = '';
+                        btn.style.color = '';
+                        btn.style.borderColor = '';
+                    }
+                }
+                renderStudentsTable(document.getElementById('studentSearch')?.value || '');
+            };
 
             function markUnsaved() {
                 hasUnsavedChanges = true;
@@ -256,8 +277,17 @@
                 if (!tbody) return;
                 tbody.innerHTML = '';
                 
-                users.forEach(u => {
-                    if (filter && !u.phone.includes(filter)) return;
+                let displayUsers = [...users];
+                
+                // Apply sort
+                if (sortMode === 'alpha') {
+                    displayUsers.sort((a, b) => (a.name || '').localeCompare(b.name || '', 'ar'));
+                } else {
+                    displayUsers.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+                }
+                
+                displayUsers.forEach(u => {
+                    if (filter && !u.phone.includes(filter) && !(u.name || '').toLowerCase().includes(filter.toLowerCase())) return;
 
                     let dbUser = JSON.parse(localStorage.getItem(`db_${u.phone}`)) || { courses: [] };
                     const coursesCount = dbUser.courses ? dbUser.courses.length : 0;

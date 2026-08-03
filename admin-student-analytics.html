@@ -267,8 +267,11 @@ function renderStudentsTable(students) {
         return;
     }
     
+    // Sort alphabetically by name (Arabic-aware)
+    const sorted = [...students].sort((a, b) => (a.name || '').localeCompare(b.name || '', 'ar'));
+    
     let html = '';
-    students.forEach(s => {
+    sorted.forEach(s => {
         const stats = calcStudentStats(s);
         const avgAll = [stats.avgExam].filter(v => v !== null);
         const overall = avgAll.length ? Math.round(avgAll.reduce((a,b) => a+b, 0) / avgAll.length) : 0;
