@@ -209,19 +209,24 @@ function calcStudentStats(s) {
     const trainings = examResults.filter(r => r.isTraining);
     const homeworks = examResults.filter(r => r.isHomework);
     
-    // Keep only first attempt (official)
-    const uniqueExams = {};
-    examResults.forEach(r => {
-        const key = r.courseId + '_' + r.examTitle;
-        if (!uniqueExams[key] || r.attemptNumber === 1) uniqueExams[key] = r;
-    });
-    const official = Object.values(uniqueExams);
+    const getAvg = (arr) => {
+        const unique = {};
+        arr.forEach(r => {
+            const key = r.courseId + '_' + r.examTitle;
+            if (!unique[key] || r.attemptNumber === 1) unique[key] = r;
+        });
+        const official = Object.values(unique);
+        return official.length ? Math.round(official.reduce((s,r) => s + (r.percent||0), 0) / official.length) : null;
+    };
     
-    const avgExam = official.length ? Math.round(official.reduce((s,r) => s + (r.percent||0), 0) / official.length) : null;
+    const avgExam = getAvg(exams);
+    const avgTraining = getAvg(trainings);
+    const avgHomework = getAvg(homeworks);
+    
     const completed = s.completedItems || [];
     const watchPct = s._totalItems ? Math.round((completed.length / s._totalItems) * 100) : null;
     
-    return { avgExam, watchPct, official };
+    return { avgExam, avgTraining, avgHomework, watchPct };
 }
 
 async function loadStudents() {
@@ -283,8 +288,8 @@ function renderStudentsTable(students) {
             <td><strong>${s.name || 'بدون اسم'}</strong><br><span style="font-size:0.78rem; color:rgba(255,255,255,0.5);">${s.phone || ''}</span></td>
             <td>${gradeNames[s.grade] || s.grade || '-'}</td>
             <td>${watchBar}</td>
-            <td><span style="color:var(--royal-gold); font-weight:700;">${stats.avgExam !== null ? stats.avgExam + '%' : '-'}</span></td>
-            <td><span style="color:var(--royal-gold); font-weight:700;">-</span></td>
+            <td><span style="color:var(--royal-gold); font-weight:700;">${stats.avgTraining !== null ? stats.avgTraining + '%' : '-'}</span></td>
+            <td><span style="color:var(--royal-gold); font-weight:700;">${stats.avgHomework !== null ? stats.avgHomework + '%' : '-'}</span></td>
             <td><span style="color:var(--royal-gold); font-weight:700;">${stats.avgExam !== null ? stats.avgExam + '%' : '-'}</span></td>
             <td><span class="level-badge ${lvl.cls}">${lvl.label}</span></td>
             <td><button onclick="event.stopPropagation(); openStudentDetail('${s._uid}')" class="btn btn-gold" style="padding:5px 12px; font-size:0.8rem;"><i class="fas fa-eye"></i> تفاصيل</button></td>
@@ -318,14 +323,6 @@ async function openStudentDetail(uid) {
     const examResults = s.examResults || [];
     const completed = s.completedItems || [];
     
-    // Group exam results by title keeping all attempts
-    const byTitle = {};
-    examResults.forEach(r => {
-        const key = r.examTitle || 'غير معنون';
-        if (!byTitle[key]) byTitle[key] = [];
-        byTitle[key].push(r);
-    });
-    
     let html = '';
     
     // Completed Items
@@ -334,59 +331,86 @@ async function openStudentDetail(uid) {
         <p style="color:rgba(255,255,255,0.6); font-size:0.85rem;">${completed.join(' | ') || 'لا توجد عناصر مكتملة'}</p>
     </div>`;
     
-    // Exam Results
-    if (Object.keys(byTitle).length > 0) {
-        html += `<div class="section-block"><h3><i class="fas fa-file-alt"></i> نتائج الامتحانات والتدريبات</h3>`;
-        for (const [title, attempts] of Object.entries(byTitle)) {
-            const firstAttempt = attempts.find(a => a.attemptNumber === 1) || attempts[0];
-            html += `<div style="border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:12px; margin-bottom:10px;">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                    <strong>${title}</strong>
-                    <div style="display:flex; gap:8px; align-items:center;">
-                        <span id="officialPercent_${uid}_${title.replace(/\s/g,'_')}" style="color:var(--royal-gold); font-weight:700;">${firstAttempt.percent || 0}% <span style="color:rgba(255,255,255,0.4); font-size:0.78rem;">(المحاولة الأولى - رسمية)</span></span>
-                        <div>
-                            <label style="font-size:0.8rem; color:rgba(255,255,255,0.6);">تعديل الدرجة:</label>
-                            <input type="number" class="score-input" id="score_${uid}_${title.replace(/\s/g,'_')}" value="${firstAttempt.percent || 0}" min="0" max="100">
-                            <button id="saveBtn_${uid}_${title.replace(/\s/g,'_')}" onclick="saveGradeOverride('${uid}', '${title.replace(/'/g, "\\'")}', this)" style="padding:4px 10px; border-radius:6px; border:none; background:var(--royal-gold); color:#000; cursor:pointer; font-size:0.8rem; font-weight:700;">حفظ التعديلات</button>
-                        </div>
-                    </div>
-                </div>`;
-            
-            // Show all attempts
-            if (attempts.length > 1) {
-                html += `<details style="margin-bottom:8px;"><summary style="cursor:pointer; color:rgba(255,255,255,0.6); font-size:0.85rem;">كل المحاولات (${attempts.length})</summary><div style="margin-top:8px;">`;
-                attempts.forEach((a, i) => {
-                    html += `<div style="padding:4px 0; font-size:0.82rem; color:rgba(255,255,255,0.7);">محاولة ${a.attemptNumber || i+1}: ${a.percent || 0}% - ${a.ts ? new Date(a.ts).toLocaleString('ar-EG') : ''}</div>`;
-                });
-                html += '</div></details>';
-            }
-            
-            // Show detailed answers of first attempt
-            if (firstAttempt.details && firstAttempt.details.length) {
-                html += `<details><summary style="cursor:pointer; color:rgba(255,255,255,0.6); font-size:0.85rem;">عرض الإجابات التفصيلية</summary><div style="margin-top:10px;">`;
-                firstAttempt.details.forEach((d, i) => {
-                    const isCorrect = (d.score >= 0.5);
-                    html += `<div style="padding:8px; margin-bottom:6px; border-radius:6px; background:${isCorrect ? 'rgba(46,204,113,0.07)' : 'rgba(231,76,60,0.07)'}; border:1px solid ${isCorrect ? 'rgba(46,204,113,0.2)' : 'rgba(231,76,60,0.2)'}; font-size:0.85rem;">
-                        <div style="display:flex; justify-content:space-between; align-items:start;">
+    // Tabs
+    html += `<div class="section-block" style="padding-bottom:0; margin-bottom:10px;">
+        <div style="display:flex; gap:15px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:10px;">
+            <button onclick="document.querySelectorAll('.modal-cat').forEach(el=>el.style.display='none'); document.getElementById('cat-exams').style.display='block'; document.querySelectorAll('.cat-btn').forEach(b=>b.style.opacity='0.5'); this.style.opacity='1';" class="cat-btn" style="background:none; border:none; color:var(--royal-gold); font-size:1.1rem; font-weight:bold; cursor:pointer; opacity:1;">الامتحانات</button>
+            <button onclick="document.querySelectorAll('.modal-cat').forEach(el=>el.style.display='none'); document.getElementById('cat-trainings').style.display='block'; document.querySelectorAll('.cat-btn').forEach(b=>b.style.opacity='0.5'); this.style.opacity='1';" class="cat-btn" style="background:none; border:none; color:var(--royal-gold); font-size:1.1rem; font-weight:bold; cursor:pointer; opacity:0.5;">التدريبات</button>
+            <button onclick="document.querySelectorAll('.modal-cat').forEach(el=>el.style.display='none'); document.getElementById('cat-homeworks').style.display='block'; document.querySelectorAll('.cat-btn').forEach(b=>b.style.opacity='0.5'); this.style.opacity='1';" class="cat-btn" style="background:none; border:none; color:var(--royal-gold); font-size:1.1rem; font-weight:bold; cursor:pointer; opacity:0.5;">الواجبات</button>
+        </div>
+    </div>`;
+
+    const renderCategory = (id, items, typeStr, isVisible) => {
+        const byTitle = {};
+        items.forEach(r => {
+            const key = r.examTitle || 'غير معنون';
+            if (!byTitle[key]) byTitle[key] = [];
+            byTitle[key].push(r);
+        });
+        
+        // Sort by Title based on ts of first attempt (oldest first)
+        const sortedTitles = Object.entries(byTitle).sort((a,b) => {
+            const tsA = (a[1][0].ts || 0);
+            const tsB = (b[1][0].ts || 0);
+            return tsA - tsB;
+        });
+
+        let cHtml = `<div id="${id}" class="modal-cat section-block" style="display:${isVisible ? 'block' : 'none'}; border:none; padding-top:0;">`;
+        if (sortedTitles.length === 0) {
+            cHtml += `<div style="text-align:center; padding:20px; color:rgba(255,255,255,0.4);">لا توجد ${typeStr}</div>`;
+        } else {
+            for (const [title, attempts] of sortedTitles) {
+                const firstAttempt = attempts.find(a => a.attemptNumber === 1) || attempts[0];
+                cHtml += `<div style="border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:12px; margin-bottom:10px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                        <strong>${title}</strong>
+                        <div style="display:flex; gap:8px; align-items:center;">
+                            <span id="officialPercent_${uid}_${title.replace(/\s/g,'_')}" style="color:var(--royal-gold); font-weight:700;">${firstAttempt.percent || 0}% <span style="color:rgba(255,255,255,0.4); font-size:0.78rem;">(المحاولة الأولى)</span></span>
                             <div>
-                                <strong>س${i+1}:</strong> ${d.question || ''}<br>
-                                <span style="color:rgba(255,255,255,0.6);">إجابة الطالب: </span><span style="color:${isCorrect ? '#2ecc71' : '#e74c3c'};">${d.rawAnswer || '(بدون إجابة)'}</span>
-                                <span style="color:rgba(255,255,255,0.4); font-size:0.78rem;"> | ${Math.round((d.score||0)*100)}% (${d.pointsEarned||0} / ${d.totalPoints||1} نقطة)</span>
+                                <label style="font-size:0.8rem; color:rgba(255,255,255,0.6);">تعديل الدرجة:</label>
+                                <input type="number" class="score-input" id="score_${uid}_${title.replace(/\s/g,'_')}" value="${firstAttempt.percent || 0}" min="0" max="100">
+                                <button id="saveBtn_${uid}_${title.replace(/\s/g,'_')}" onclick="saveGradeOverride('${uid}', '${title.replace(/'/g, "\\'")}', this)" style="padding:4px 10px; border-radius:6px; border:none; background:var(--royal-gold); color:#000; cursor:pointer; font-size:0.8rem; font-weight:700;">حفظ التعديلات</button>
                             </div>
-                            <button onclick="window.toggleQuestionScore('${uid}', '${title.replace(/'/g, "\\'")}', ${i}, this)" style="padding:4px 8px; border-radius:6px; border:1px solid rgba(255,255,255,0.1); background:rgba(0,0,0,0.2); color:white; cursor:pointer; font-size:0.8rem; flex-shrink:0;">
-                                ${isCorrect ? '❌ اجعله خطأ' : '✅ اجعله صحيح'}
-                            </button>
                         </div>
                     </div>`;
-                });
-                html += '</div></details>';
+                
+                if (attempts.length > 1) {
+                    cHtml += `<details style="margin-bottom:8px;"><summary style="cursor:pointer; color:rgba(255,255,255,0.6); font-size:0.85rem;">كل المحاولات (${attempts.length})</summary><div style="margin-top:8px;">`;
+                    attempts.forEach((a, i) => {
+                        cHtml += `<div style="padding:4px 0; font-size:0.82rem; color:rgba(255,255,255,0.7);">محاولة ${a.attemptNumber || i+1}: ${a.percent || 0}% - ${a.ts ? new Date(a.ts).toLocaleString('ar-EG') : ''}</div>`;
+                    });
+                    cHtml += '</div></details>';
+                }
+                
+                if (firstAttempt.details && firstAttempt.details.length) {
+                    cHtml += `<details><summary style="cursor:pointer; color:rgba(255,255,255,0.6); font-size:0.85rem;">عرض الإجابات التفصيلية</summary><div style="margin-top:10px;">`;
+                    firstAttempt.details.forEach((d, i) => {
+                        const isCorrect = (d.score >= 0.5);
+                        cHtml += `<div style="padding:8px; margin-bottom:6px; border-radius:6px; background:${isCorrect ? 'rgba(46,204,113,0.07)' : 'rgba(231,76,60,0.07)'}; border:1px solid ${isCorrect ? 'rgba(46,204,113,0.2)' : 'rgba(231,76,60,0.2)'}; font-size:0.85rem;">
+                            <div style="display:flex; justify-content:space-between; align-items:start;">
+                                <div>
+                                    <strong>س${i+1}:</strong> ${d.question || ''}<br>
+                                    <span style="color:rgba(255,255,255,0.6);">إجابة الطالب: </span><span style="color:${isCorrect ? '#2ecc71' : '#e74c3c'};">${d.rawAnswer || '(بدون إجابة)'}</span>
+                                    <span style="color:rgba(255,255,255,0.4); font-size:0.78rem;"> | ${Math.round((d.score||0)*100)}% (${d.pointsEarned||0} / ${d.totalPoints||1} نقطة)</span>
+                                </div>
+                                <button onclick="window.toggleQuestionScore('${uid}', '${title.replace(/'/g, "\\'")}', ${i}, this)" style="padding:4px 8px; border-radius:6px; border:1px solid rgba(255,255,255,0.1); background:rgba(0,0,0,0.2); color:white; cursor:pointer; font-size:0.8rem; flex-shrink:0;">
+                                    ${isCorrect ? '❌ اجعله خطأ' : '✅ اجعله صحيح'}
+                                </button>
+                            </div>
+                        </div>`;
+                    });
+                    cHtml += '</div></details>';
+                }
+                cHtml += '</div>';
             }
-            html += '</div>';
         }
-        html += '</div>';
-    } else {
-        html += '<div class="section-block"><h3>لا توجد نتائج امتحانات</h3></div>';
-    }
+        cHtml += '</div>';
+        return cHtml;
+    };
+
+    html += renderCategory('cat-exams', examResults.filter(r => !r.isTraining && !r.isHomework), 'امتحانات', true);
+    html += renderCategory('cat-trainings', examResults.filter(r => r.isTraining), 'تدريبات', false);
+    html += renderCategory('cat-homeworks', examResults.filter(r => r.isHomework), 'واجبات', false);
     
     document.getElementById('modalContent').innerHTML = html;
 }
@@ -428,7 +452,11 @@ async function saveGradeOverride(uid, examTitle, btn) {
             notifications: local.notifications
         });
         
-        try { localStorage.setItem('cached_students', JSON.stringify(allStudentsData)); } catch(e) {}
+        try { 
+            localStorage.setItem('cached_students', JSON.stringify(allStudentsData)); 
+        } catch(e) {
+            localStorage.removeItem('cached_students');
+        }
         
         const officialSpan = document.getElementById(`officialPercent_${uid}_${examTitle.replace(/\s/g,'_')}`);
         if (officialSpan) {
@@ -510,7 +538,7 @@ window.toggleQuestionScore = function(uid, examTitle, qIndex, btn) {
                 
                 const officialSpan = document.getElementById(`officialPercent_${uid}_${examTitle.replace(/\s/g,'_')}`);
                 if (officialSpan) {
-                    officialSpan.innerHTML = `${r.percent}% <span style="color:rgba(255,255,255,0.4); font-size:0.78rem;">(المحاولة الأولى - رسمية)</span>`;
+                    officialSpan.innerHTML = `${r.percent}% <span style="color:rgba(255,255,255,0.4); font-size:0.78rem;">(المحاولة الأولى)</span>`;
                 }
             }
         }
