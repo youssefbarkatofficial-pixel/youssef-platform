@@ -72,11 +72,11 @@
     return 1 - (d / max);
   }
 
-  // Parse multiple accepted answers separated by *
+  // Parse multiple accepted answers separated by *, / or ،
   function parseMultipleAnswers(answerRaw) {
     if (!answerRaw || typeof answerRaw !== 'string') return [answerRaw || ''];
-    if (!answerRaw.includes('*')) return [answerRaw];
-    return answerRaw.split('*').map(a => a.trim()).filter(Boolean);
+    if (!answerRaw.match(/[*\/،]/)) return [answerRaw];
+    return answerRaw.split(/[*\/،]/).map(a => a.trim()).filter(Boolean);
   }
 
   function scoreAnswer(studentRaw, correctRaw, qType) {
@@ -105,11 +105,12 @@
     if(['choose','tf','fill'].includes(qType)){
       if(!sn && !cn) return { score:0, feedback:'لم يتم إدخال إجابة.' };
       if(sn === cn) return { score:1, feedback:'إجابة صحيحة بالضبط.' };
+      
       const lev = normalizedLevenshtein(sn, cn);
       if(lev >= 0.85) return { score:1, feedback:'إجابة صحيحة (تفاوت إملائي بسيط تم تسامحه).' };
       // check single-character option match (A/B/C) or letter
       if(cn.length===1 && sn.length===1 && cn === sn) return { score:1, feedback:'إجابة صحيحة.' };
-      return { score:0, feedback:'الإجابة غير صحيحة.' };
+      return { score:0, feedback:'الإجابة غير صحيحة. الإجابة الصحيحة: ' + correctRaw };
     }
 
     // For essay-like questions: weighted keyword + semantic overlap

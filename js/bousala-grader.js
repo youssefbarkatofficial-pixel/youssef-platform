@@ -44,9 +44,9 @@ function isNegated(text, concept) {
 // ============================================================
 export function gradeObjective(studentAns, correctAns, opts = {}) {
   const s = cleanAnswer(studentAns), c = cleanAnswer(correctAns);
-  // Support multiple correct answers separated by *  
-  const allCorrects = correctAns.includes('*') 
-    ? correctAns.split('*').map(a => cleanAnswer(a.trim())).filter(Boolean)
+  // Support multiple correct answers separated by *, / or ،
+  const allCorrects = correctAns.match(/[*\/،]/) 
+    ? correctAns.split(/[*\/،]/).map(a => cleanAnswer(a.trim())).filter(Boolean)
     : [c];
   const allAccepted = [...allCorrects, ...(opts.altAnswers || []).map(cleanAnswer)];
 

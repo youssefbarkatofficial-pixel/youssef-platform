@@ -1203,6 +1203,23 @@
             // Add exam modal UI — Full Featured (Timer, Auto-Submit, Strict Mode, Encouragement, Attempts)
             (function(){
                 const examModalHtml = `
+                <div class="modal-overlay" id="examWarningModal" style="z-index: 10001;">
+                  <div class="glass-panel modal-content" style="padding: 30px; max-width: 500px; text-align: center;">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #f39c12; margin-bottom: 20px;"></i>
+                    <h2 id="ewmTitle" style="margin-bottom: 15px; color: #f39c12;">تنبيه هام قبل بدء الامتحان</h2>
+                    <div style="text-align: right; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; margin-bottom: 20px; font-size: 0.95rem; line-height: 1.6;">
+                        <p style="margin-bottom: 10px;">⚠️ <strong>دخولك يعني بدء المحاولة رسمياً.</strong></p>
+                        <p style="margin-bottom: 10px;" id="ewmAttempts">⚠️ لديك <strong>X</strong> محاولات متبقية.</p>
+                        <p style="margin-bottom: 10px; color: #e74c3c;">🚫 <strong>يُمنع الخروج أو التبديل بين التطبيقات!</strong> أي محاولة لفتح تطبيق آخر ستؤدي إلى <strong>تسليم الامتحان فوراً بدرجة صفر</strong>.</p>
+                        <p style="margin-bottom: 0;">⏱️ سيستمر العداد حتى لو انقطع الإنترنت.</p>
+                    </div>
+                    <div style="display: flex; gap: 10px; justify-content: center;">
+                        <button class="btn btn-outline" id="ewmCancelBtn">رجوع</button>
+                        <button class="btn btn-gold" id="ewmStartBtn">فاهم وموافق — ابدأ الامتحان</button>
+                    </div>
+                  </div>
+                </div>
+
                 <div class="modal-overlay" id="examModal">
                   <div class="glass-panel modal-content" style="padding: 20px; max-width: 800px; position:relative;">
                     <button class="close-modal" id="examModalCloseBtn"><i class="fas fa-times"></i></button>
@@ -1270,12 +1287,45 @@
                         else alert('لقد استنفذت الحد الأقصى للمحاولات (3 محاولات).');
                         return;
                     }
-                    
-                    document.getElementById('examModalTitle').textContent = (exam.title || 'امتحان') + ` (محاولة ${prevAttempts.length + 1} من 3)`;
 
-                    const container = document.getElementById('examQuestionsContainer');
-                    container.innerHTML = '';
-                    ['examTimer','examStrictBadge'].forEach(id => { const el = document.getElementById(id); if(el) el.remove(); });
+                    const warningModal = document.getElementById('examWarningModal');
+                    const examModal = document.getElementById('examModal');
+                    
+                    const ewmAttempts = document.getElementById('ewmAttempts');
+                    if(ewmAttempts) {
+                        ewmAttempts.innerHTML = `⚠️ لديك <strong>${3 - prevAttempts.length}</strong> محاولات متبقية.`;
+                    }
+
+                    const ewmStartBtn = document.getElementById('ewmStartBtn');
+                    const ewmCancelBtn = document.getElementById('ewmCancelBtn');
+                    
+                    if(ewmCancelBtn) {
+                        const newCancelBtn = ewmCancelBtn.cloneNode(true);
+                        ewmCancelBtn.parentNode.replaceChild(newCancelBtn, ewmCancelBtn);
+                        newCancelBtn.onclick = () => warningModal.classList.remove('active');
+                    }
+
+                    if(ewmStartBtn) {
+                        const newStartBtn = ewmStartBtn.cloneNode(true);
+                        ewmStartBtn.parentNode.replaceChild(newStartBtn, ewmStartBtn);
+                        newStartBtn.onclick = () => {
+                            warningModal.classList.remove('active');
+                            startActualExam();
+                        };
+                    }
+                    
+                    if (isMasterPreview) {
+                        startActualExam();
+                    } else {
+                        warningModal.classList.add('active');
+                    }
+
+                    function startActualExam() {
+                        document.getElementById('examModalTitle').textContent = (exam.title || 'امتحان') + (isMasterPreview ? '' : ` (محاولة ${prevAttempts.length + 1} من 3)`);
+
+                        const container = document.getElementById('examQuestionsContainer');
+                        container.innerHTML = '';
+                        ['examTimer','examStrictBadge'].forEach(id => { const el = document.getElementById(id); if(el) el.remove(); });
 
                     const questions = exam.questions || [];
                     questions.forEach((q, idx) => {
@@ -1289,7 +1339,7 @@
                         } else {
                             inputHtml = '<textarea name=qa_' + idx + ' rows=3 style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);color:#fff;border-radius:6px;padding:8px;" placeholder="اكتب إجابتك هنا"></textarea>';
                         }
-                        qDiv.innerHTML = '<p style="margin:0 0 10px 0;font-weight:600;"><span style="color:var(--royal-gold);">س' + (idx+1) + ':</span> ' + q.text + '</p>' + inputHtml;
+                        qDiv.innerHTML = '<p style="margin:0 0 10px 0;font-weight:600;"><span style="color:var(--royal-gold);">س' + (idx+1) + ':</span> <span style="font-size:0.8rem; color:#f39c12; margin-right:10px;">(' + (q.points || 1) + ' درجة)</span><br>' + q.text + '</p>' + inputHtml;
                         container.appendChild(qDiv);
                     });
 
@@ -1370,8 +1420,12 @@
                         };
 
                         const results = [];
+                        let earnedPoints = 0;
+                        let totalPoints = 0;
                         for (const item of answers) {
                             let r = null;
+                            const qPts = parseFloat(item.q.points) || 1;
+                            totalPoints += qPts;
                             try {
                                 if (BousalaGrader) {
                                     if (item.q.type === 'explain') {
@@ -1381,9 +1435,9 @@
                                             rubric.push({ concept: item.q.answer, weight: 1 });
                                         }
                                         const res = await BousalaGrader.gradeEssayFair(
-                                            item.answer, rubric, item.q.maxScore || 1, item.q.answer, callAI
+                                            item.answer, rubric, qPts, item.q.answer, callAI
                                         );
-                                        r = { score: res.score, feedback: res.feedback.join(' | '), needsReview: res.needsReview, method: res.method };
+                                        r = { score: res.score / qPts, feedback: res.feedback.join(' | '), needsReview: res.needsReview, method: res.method };
                                     } else {
                                         const opts = { choices: item.q.options ? Object.values(item.q.options) : null, altAnswers: item.q.altAnswers };
                                         const res = BousalaGrader.gradeObjective(item.answer, item.q.answer, opts);
@@ -1408,12 +1462,14 @@
                                 const ok = given !== '' && given === correct;
                                 r = { score: ok ? 1 : 0, feedback: ok ? 'إجابة صحيحة ✅' : ('إجابة غير صحيحة ❌ — الإجابة الصحيحة: ' + item.q.answer), needsReview: false };
                             }
+                            
+                            const pEarned = r.score * qPts;
+                            earnedPoints += pEarned;
 
-                            results.push({ question: item.q.text, rawAnswer: item.answer, score: r.score, feedback: r.feedback, needsReview: !!r.needsReview, method: r.method || "قديم" });
+                            results.push({ question: item.q.text, rawAnswer: item.answer, score: r.score, pointsEarned: pEarned, totalPoints: qPts, feedback: r.feedback, needsReview: !!r.needsReview, method: r.method || "قديم" });
                         }
 
-                        const total = results.reduce((s, r) => s + (r.score || 0), 0);
-                        const percent = Math.round((total / (results.length || 1)) * 100);
+                        const percent = Math.round((earnedPoints / (totalPoints || 1)) * 100);
 
                         let penaltyApplied = false;
                         if(exam.availableUntil && new Date(exam.availableUntil).getTime() < Date.now()) { penaltyApplied = true; }
@@ -1430,6 +1486,7 @@
                         rHtml += '<div style="font-size:2.5rem;margin-bottom:6px;">' + encIcon + '</div>';
                         rHtml += '<div style="font-size:1.3rem;font-weight:bold;color:' + encColor + ';margin-bottom:10px;">' + encouragement + '</div>';
                         rHtml += '<div style="font-size:1.1rem;"><strong>درجتك: ' + percent + '%</strong>' + (penaltyApplied ? ' <span style="color:#e74c3c;">(بعد خصم التأخير: ' + effectivePercent + '%)</span>' : '') + '</div>';
+                        rHtml += '<div style="font-size:1rem;color:#f39c12;margin-top:5px;"><strong>مجموع النقاط: ' + earnedPoints + ' من ' + totalPoints + '</strong></div>';
                         if(autoSubmit) rHtml += '<div style="margin-top:8px;color:#e74c3c;font-size:0.9rem;">⏰ تم التسليم التلقائي بعد انتهاء الوقت.</div>';
                         if(penaltyApplied) rHtml += '<div style="margin-top:10px;padding:10px;background:rgba(231,76,60,0.15);border-radius:8px;color:#e74c3c;font-size:0.9rem;">⚠️ <strong>تم خصم 20% من درجتك بسبب التأخر في التسليم بعد الموعد النهائي.</strong></div>';
                         rHtml += '<hr style="border-color:rgba(255,255,255,0.08);margin:14px 0;"><div id="_examResDetails"></div></div>';
@@ -1439,7 +1496,7 @@
                         results.forEach((r, i) => {
                             const p = document.createElement('div');
                             p.style.cssText = 'padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.06);font-size:0.9rem;line-height:1.6;';
-                            p.innerHTML = '<strong>س' + (i+1) + ':</strong> ' + r.question + '<br/><em style="color:rgba(255,255,255,0.6);">إجابتك:</em> <span style="color:' + (r.score >= 0.5 ? '#2ecc71' : '#e74c3c') + ';">' + (r.rawAnswer || '(بدون إجابة)') + '</span><br/><em style="color:rgba(255,255,255,0.6);">التعليق:</em> ' + r.feedback;
+                            p.innerHTML = '<strong>س' + (i+1) + ':</strong> ' + r.question + ' <span style="color:#f39c12;">(' + (r.pointsEarned||0) + '/' + (r.totalPoints||1) + ' نقطة)</span><br/><em style="color:rgba(255,255,255,0.6);">إجابتك:</em> <span style="color:' + (r.score >= 0.5 ? '#2ecc71' : '#e74c3c') + ';">' + (r.rawAnswer || '(بدون إجابة)') + '</span><br/><em style="color:rgba(255,255,255,0.6);">التعليق:</em> ' + r.feedback;
                             detEl.appendChild(p);
                         });
 
@@ -1454,7 +1511,7 @@
                             dbRec.examResults = dbRec.examResults || [];
                             const prev = dbRec.examResults.filter(r => r.courseId === courseId && r.examTitle === (exam.title || ''));
                             const aNum = prev.length + 1;
-                            dbRec.examResults.push({ courseId, examTitle: exam.title||'', percent, effectivePercent, penalized: penaltyApplied, attemptNumber: aNum, isOfficial: aNum===1, autoSubmit:!!autoSubmit, ts:Date.now(), details:results });
+                            dbRec.examResults.push({ courseId, examTitle: exam.title||'', percent, earnedPoints, totalPoints, effectivePercent, penalized: penaltyApplied, attemptNumber: aNum, isOfficial: aNum===1, autoSubmit:!!autoSubmit, ts:Date.now(), details:results });
                             
                             if(window.FirebaseService && typeof window.FirebaseService.updateStudentData === 'function') {
                                 window.FirebaseService.updateStudentData(student.phone, { examResults: dbRec.examResults }).then(() => {
@@ -1476,7 +1533,8 @@
                     function confirmAndExitExam() {
                         if (submitBtn.disabled) {
                             // Already submitted
-                            _stopTimer(); _deactivateStrict(); modal.classList.remove('active');
+                            _stopTimer(); _deactivateStrict(); 
+                            if(examModal) examModal.classList.remove('active');
                             return;
                         }
                         // WARNING 1
@@ -1486,27 +1544,29 @@
                         const w2 = confirm('⚠️ تحذير أخير: هذا الإجراء نهائي ولا رجعة فيه. إجاباتك ستُسلّم الآن وسيُحسب عليك كمحاولة. هل أنت متأكد تماماً؟');
                         if (!w2) return;
                         doSubmit(true);
-                        setTimeout(() => modal.classList.remove('active'), 700);
+                        setTimeout(() => { if(examModal) examModal.classList.remove('active'); }, 700);
                     }
                     cancelBtn.onclick = confirmAndExitExam;
                     document.getElementById('examModalCloseBtn').onclick = confirmAndExitExam;
 
                     // ===== TIMER =====
                     if(exam.duration && parseInt(exam.duration) > 0) {
-                        let secsLeft = parseInt(exam.duration) * 60;
+                        let totalSecs = parseInt(exam.duration) * 60;
+                        let startTime = performance.now();
                         const timerEl = document.createElement('div');
                         timerEl.id = 'examTimer';
                         timerEl.style.cssText = 'text-align:center;font-size:1.5rem;font-weight:bold;color:var(--royal-gold);padding:12px 16px;background:rgba(212,166,79,0.1);border-radius:10px;margin-bottom:14px;border:1px solid rgba(212,166,79,0.2);';
                         container.parentElement.insertBefore(timerEl, container);
 
                         function updTm() {
+                            const elapsed = (performance.now() - startTime) / 1000;
+                            let secsLeft = Math.max(0, Math.floor(totalSecs - elapsed));
                             const m = Math.floor(secsLeft / 60), s = secsLeft % 60;
                             const urg = secsLeft <= 60;
                             timerEl.style.color = urg ? '#e74c3c' : 'var(--royal-gold)';
                             timerEl.style.borderColor = urg ? 'rgba(231,76,60,0.4)' : 'rgba(212,166,79,0.2)';
                             timerEl.innerHTML = '⏱️ الوقت المتبقي: <span>' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0') + '</span>';
                             if(secsLeft <= 0) { _stopTimer(); timerEl.innerHTML = '⏰ <span style="color:#e74c3c;">انتهى الوقت! جاري التسليم التلقائي لما تم إجابته...</span>'; setTimeout(() => doSubmit(true), 500); }
-                            secsLeft--;
                         }
                         updTm(); _examTimerInterval = setInterval(updTm, 1000);
                     }
@@ -1518,14 +1578,29 @@
                             e.returnValue = 'إذا غادرت الآن سيتم تسجيل نتيجة صفر!';
                             return e.returnValue;
                         };
+                        
+                        let _offlineStartTime = null;
+
                         _examStrictVisibility = function() {
-                            if(document.hidden && !submitBtn.disabled && !submitBtn.innerHTML.includes('جاري')) {
-                                // Use double warning for tab switch too
-                                const confirm1 = confirm('⚠️ تحذير: لقد غادرت شاشة الامتحان! إذا تركته، سيُسلَّم تلقائياً بالإجابات الحالية. هل تريد العودة للامتحان؟');
-                                if (!confirm1) {
-                                    const confirm2 = confirm('⚠️ تأكيد أخير: الضغط على موافق سيسلّم امتحانك فوراً بما أجبته. استمر؟');
-                                    if (confirm2) {
+                            if(submitBtn.disabled && submitBtn.innerHTML.includes('جاري')) return;
+                            if(document.hidden) {
+                                if (!navigator.onLine) {
+                                    _offlineStartTime = Date.now();
+                                } else {
+                                    if(isMasterPreview) {
+                                        alert("تحذير غش: لا تقم بتبديل التطبيقات أثناء الامتحان.");
+                                    } else {
                                         doSubmit(true);
+                                        alert("تم تسليم الامتحان تلقائياً بسبب الخروج من صفحة الامتحان (محاولة غش).");
+                                    }
+                                }
+                            } else {
+                                if (_offlineStartTime) {
+                                    const offlineDur = Date.now() - _offlineStartTime;
+                                    _offlineStartTime = null;
+                                    if (offlineDur > 5 * 60 * 1000) {
+                                        doSubmit(true);
+                                        alert("تم تسليم الامتحان لأن انقطاع الإنترنت تجاوز 5 دقائق.");
                                     }
                                 }
                             }
@@ -1539,8 +1614,9 @@
                         container.parentElement.insertBefore(sb, container);
                     }
 
-                    modal.classList.add('active');
-                };
+                    if(examModal) examModal.classList.add('active');
+                } // end startActualExam function
+            };
             })();
 
             // Make sure these functions are defined locally if courses-renderer is not loaded or for specific use
