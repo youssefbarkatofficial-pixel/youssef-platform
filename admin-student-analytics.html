@@ -347,7 +347,7 @@ async function openStudentDetail(uid) {
                         <div>
                             <label style="font-size:0.8rem; color:rgba(255,255,255,0.6);">تعديل الدرجة:</label>
                             <input type="number" class="score-input" id="score_${uid}_${title.replace(/\s/g,'_')}" value="${firstAttempt.percent || 0}" min="0" max="100">
-                            <button onclick="saveGradeOverride('${uid}', '${title}', this)" style="padding:4px 10px; border-radius:6px; border:none; background:var(--royal-gold); color:#000; cursor:pointer; font-size:0.8rem; font-weight:700;">حفظ</button>
+                            <button id="saveBtn_${uid}_${title.replace(/\s/g,'_')}" onclick="saveGradeOverride('${uid}', '${title.replace(/'/g, "\\'")}', this)" style="padding:4px 10px; border-radius:6px; border:none; background:var(--royal-gold); color:#000; cursor:pointer; font-size:0.8rem; font-weight:700;">حفظ التعديلات</button>
                         </div>
                     </div>
                 </div>`;
@@ -373,7 +373,7 @@ async function openStudentDetail(uid) {
                                 <span style="color:rgba(255,255,255,0.6);">إجابة الطالب: </span><span style="color:${isCorrect ? '#2ecc71' : '#e74c3c'};">${d.rawAnswer || '(بدون إجابة)'}</span>
                                 <span style="color:rgba(255,255,255,0.4); font-size:0.78rem;"> | ${Math.round((d.score||0)*100)}% (${d.pointsEarned||0} / ${d.totalPoints||1} نقطة)</span>
                             </div>
-                            <button onclick="window.toggleQuestionScore('${uid}', '${title.replace(/'/g, "\\'")}', ${i})" style="padding:4px 8px; border-radius:6px; border:1px solid rgba(255,255,255,0.1); background:rgba(0,0,0,0.2); color:white; cursor:pointer; font-size:0.8rem; flex-shrink:0;">
+                            <button onclick="window.toggleQuestionScore('${uid}', '${title.replace(/'/g, "\\'")}', ${i}, this)" style="padding:4px 8px; border-radius:6px; border:1px solid rgba(255,255,255,0.1); background:rgba(0,0,0,0.2); color:white; cursor:pointer; font-size:0.8rem; flex-shrink:0;">
                                 ${isCorrect ? '❌ اجعله خطأ' : '✅ اجعله صحيح'}
                             </button>
                         </div>
@@ -398,89 +398,109 @@ async function saveGradeOverride(uid, examTitle, btn) {
     
     btn.textContent = '...';
     try {
-        const doc = await window.firebaseDb.collection('students').doc(uid).get();
-        if (!doc.exists) throw new Error('لم يتم العثور على الطالب');
-        const data = doc.data();
-        const results = data.examResults || [];
-        // Update first attempt
+        const local = allStudentsData.find(x => x._uid === uid);
+        if (!local) throw new Error('الطالب غير موجود في الذاكرة');
+        
         let updated = false;
-        results.forEach(r => {
+        local.examResults.forEach(r => {
             if (r.examTitle === examTitle && (r.attemptNumber === 1 || !r.attemptNumber)) {
                 r.percent = newScore;
                 r.effectivePercent = newScore;
+                if (r.penalized) r.effectivePercent = Math.max(0, r.percent - 20);
                 r._adminOverride = true;
                 r._overridedAt = Date.now();
                 updated = true;
             }
         });
+        
         if (!updated) { alert('لم يتم العثور على هذا الامتحان في سجلات الطالب'); btn.textContent = 'حفظ'; return; }
-        await window.firebaseDb.collection('students').doc(uid).update({ examResults: results });
-        // Update local data
-        const local = allStudentsData.find(x => x._uid === uid);
-        if (local) local.examResults = results;
-        btn.textContent = '✅';
-        setTimeout(() => { btn.textContent = 'حفظ'; }, 2000);
+        
+        local.notifications = local.notifications || [];
+        local.notifications.push({
+            title: 'تعديل درجة امتحان',
+            body: `قام الأستاذ بمراجعة وتعديل درجتك في امتحان "${examTitle}". درجتك الجديدة هي ${newScore}%.`,
+            ts: Date.now(),
+            read: false
+        });
+
+        await window.firebaseDb.collection('students').doc(uid).update({ 
+            examResults: local.examResults,
+            notifications: local.notifications
+        });
+        
+        btn.style.background = 'var(--royal-gold)';
+        btn.style.color = '#000';
+        btn.style.boxShadow = 'none';
+        btn.textContent = '✅ تم الحفظ';
+        setTimeout(() => { btn.textContent = 'حفظ التعديلات'; }, 2000);
     } catch(e) {
         alert('خطأ في الحفظ: ' + e.message);
         btn.textContent = 'حفظ';
     }
 }
 
-window.toggleQuestionScore = async function(uid, examTitle, qIndex) {
-    if(!confirm('هل أنت متأكد من تغيير درجة هذا السؤال للطالب؟ سيتم إشعار الطالب بالدرجة الجديدة.')) return;
-    try {
-        const doc = await window.firebaseDb.collection('students').doc(uid).get();
-        if (!doc.exists) throw new Error('لم يتم العثور على الطالب');
-        const data = doc.data();
-        const results = data.examResults || [];
-        let updated = false;
-        let newPercent = 0;
-        
-        results.forEach(r => {
-            if (r.examTitle === examTitle && (r.attemptNumber === 1 || !r.attemptNumber)) {
-                if(r.details && r.details[qIndex]) {
-                    const q = r.details[qIndex];
-                    const isCurrentlyCorrect = (q.score >= 0.5);
-                    const newScore = isCurrentlyCorrect ? 0 : 1;
-                    
-                    q.score = newScore;
-                    q.pointsEarned = newScore * (q.totalPoints || 1);
-                    q.feedback = newScore === 1 ? 'تم تصحيح الدرجة يدوياً بواسطة الأستاذ ✅' : 'تم خصم الدرجة يدوياً بواسطة الأستاذ ❌';
-                    
-                    let totalPoints = r.totalPoints;
-                    let earnedPoints = r.details.reduce((sum, det) => sum + (det.pointsEarned || (det.score * (det.totalPoints || 1))), 0);
-                    if (!totalPoints) totalPoints = r.details.reduce((sum, det) => sum + (det.totalPoints || 1), 0);
-                    
-                    r.earnedPoints = earnedPoints;
-                    r.totalPoints = totalPoints;
-                    r.percent = Math.round((earnedPoints / (totalPoints || 1)) * 100);
-                    if (r.penalized) r.effectivePercent = Math.max(0, r.percent - 20);
-                    else r.effectivePercent = r.percent;
-                    
-                    newPercent = r.percent;
-                    updated = true;
-                    
-                    data.notifications = data.notifications || [];
-                    data.notifications.push({
-                        title: 'تعديل درجة امتحان',
-                        body: `قام الأستاذ بمراجعة وتعديل درجتك في امتحان "${examTitle}". درجتك الجديدة هي ${r.percent}%.`,
-                        ts: Date.now(),
-                        read: false
-                    });
+window.toggleQuestionScore = function(uid, examTitle, qIndex, btn) {
+    const local = allStudentsData.find(x => x._uid === uid);
+    if(!local || !local.examResults) return;
+    
+    local.examResults.forEach(r => {
+        if (r.examTitle === examTitle && (r.attemptNumber === 1 || !r.attemptNumber)) {
+            if(r.details && r.details[qIndex]) {
+                const q = r.details[qIndex];
+                const isCurrentlyCorrect = (q.score >= 0.5);
+                const newScore = isCurrentlyCorrect ? 0 : 1;
+                
+                q.score = newScore;
+                q.pointsEarned = newScore * (q.totalPoints || 1);
+                q.feedback = newScore === 1 ? 'تم تصحيح الدرجة يدوياً بواسطة الأستاذ ✅' : 'تم خصم الدرجة يدوياً بواسطة الأستاذ ❌';
+                
+                let totalPoints = r.totalPoints;
+                let earnedPoints = r.details.reduce((sum, det) => sum + (det.pointsEarned || (det.score * (det.totalPoints || 1))), 0);
+                if (!totalPoints) totalPoints = r.details.reduce((sum, det) => sum + (det.totalPoints || 1), 0);
+                
+                r.earnedPoints = earnedPoints;
+                r.totalPoints = totalPoints;
+                r.percent = Math.round((earnedPoints / (totalPoints || 1)) * 100);
+                if (r.penalized) r.effectivePercent = Math.max(0, r.percent - 20);
+                else r.effectivePercent = r.percent;
+                
+                // Visual update
+                const isCorrect = (newScore >= 0.5);
+                const parentDiv = btn.parentElement.parentElement;
+                parentDiv.style.background = isCorrect ? 'rgba(46,204,113,0.07)' : 'rgba(231,76,60,0.07)';
+                parentDiv.style.borderColor = isCorrect ? 'rgba(46,204,113,0.2)' : 'rgba(231,76,60,0.2)';
+                
+                btn.innerHTML = isCorrect ? '❌ اجعله خطأ' : '✅ اجعله صحيح';
+                
+                const textDiv = parentDiv.querySelector('div > div');
+                if(textDiv) {
+                    textDiv.innerHTML = `
+                        <strong>س${qIndex+1}:</strong> ${q.question || ''}<br>
+                        <span style="color:rgba(255,255,255,0.6);">إجابة الطالب: </span><span style="color:${isCorrect ? '#2ecc71' : '#e74c3c'};">${q.rawAnswer || '(بدون إجابة)'}</span>
+                        <span style="color:rgba(255,255,255,0.4); font-size:0.78rem;"> | ${Math.round((q.score||0)*100)}% (${q.pointsEarned||0} / ${q.totalPoints||1} نقطة)</span>
+                    `;
+                }
+                
+                // Update the overall percent input
+                const inputId = `score_${uid}_${examTitle.replace(/\s/g,'_')}`;
+                const inputEl = document.getElementById(inputId);
+                if (inputEl) {
+                    inputEl.value = r.percent;
+                    inputEl.style.boxShadow = '0 0 10px rgba(212,175,55,0.5)';
+                    setTimeout(() => inputEl.style.boxShadow = 'none', 1000);
+                }
+                
+                // Highlight the save button
+                const saveBtn = document.getElementById(`saveBtn_${uid}_${examTitle.replace(/\s/g,'_')}`);
+                if (saveBtn) {
+                    saveBtn.style.background = '#e74c3c';
+                    saveBtn.style.color = '#fff';
+                    saveBtn.textContent = 'احفظ الآن!';
+                    saveBtn.style.boxShadow = '0 0 15px rgba(231,76,60,0.6)';
                 }
             }
-        });
-        
-        if (updated) {
-            await window.firebaseDb.collection('students').doc(uid).update({ examResults: results, notifications: data.notifications });
-            const local = allStudentsData.find(x => x._uid === uid);
-            if (local) { local.examResults = results; local.notifications = data.notifications; }
-            alert(`تم تعديل الدرجة بنجاح! النسبة المئوية الجديدة: ${newPercent}%`);
-            openStudentDetail(uid); // Refresh
         }
-    } catch(e) {
-        alert('حدث خطأ: ' + e.message);
-    }
+    });
 };
 
 
