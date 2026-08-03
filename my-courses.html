@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -86,12 +86,14 @@
             let user = JSON.parse(userStr);
             document.getElementById('userNameDisplay').textContent = user.name;
             const grades = {
-                'prep1': '���� ������',
-                'prep2': '����� ������',
-                'prep3': '����� ������',
-                'sec1': '���� �����'
+                'prep1': 'الأول الإعدادي',
+                'prep2': 'الثاني الإعدادي',
+                'prep3': 'الثالث الإعدادي',
+                'sec1': 'الأول الثانوي',
+                'sec2': 'الثاني الثانوي',
+                'sec3': 'الثالث الثانوي'
             };
-            document.getElementById('userGradeDisplay').textContent = grades[user.grade] || '����';
+            document.getElementById('userGradeDisplay').textContent = grades[user.grade] || 'طالب';
 
             const container = document.getElementById('myCoursesList');
             const emptyState = document.getElementById('noCoursesState');
@@ -136,9 +138,9 @@
                                 <img src="${c.image || ''}" style="width: 100%; height: 100%; object-fit: cover; object-position: center; display: block;" onerror="this.style.display='none'">
                             </div>
                             <div style="padding: 20px; flex: 1; display: flex; flex-direction: column;">
-                                <h3 style="color: var(--text-primary); margin-bottom: 10px;">${c.title || '����'}</h3>
+                                <h3 style="color: var(--text-primary); margin-bottom: 10px;">${c.title || 'بدون عنوان'}</h3>
                                 <p style="color: rgba(255,255,255,0.6); font-size: 0.9rem; margin-bottom: 15px; flex: 1;">${(c.desc || '').substring(0, 80)}...</p>
-                                <a href="course-details.html?id=${c.id}" class="btn btn-green" style="width: 100%; justify-content: center;"><i class="fas fa-play-circle mr-2"></i> ���� ������</a>
+                                <a href="course-details.html?id=${c.id}" class="btn btn-green" style="width: 100%; justify-content: center;"><i class="fas fa-play-circle mr-2"></i> دخول الكورس</a>
                             </div>
                         `;
                         container.appendChild(card);
