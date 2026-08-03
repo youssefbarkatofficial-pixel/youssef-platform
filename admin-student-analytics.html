@@ -252,7 +252,7 @@ async function loadStudents() {
 
         let query = window.firebaseDb.collection('students');
         if (grade) query = query.where('grade', '==', grade);
-        const snap = await query.limit(300).get({ source: 'server' });
+        const snap = await query.limit(300).get();
         
         allStudentsData = [];
         snap.forEach(doc => {
@@ -579,7 +579,7 @@ async function loadLateStudents() {
 
     try {
         // 1. جلب الكورسات من Firebase مباشرة (لا نعتمد على localStorage الناقص)
-        const coursesSnap = await window.firebaseDb.collection('courses').get({ source: 'server' });
+        const coursesSnap = await window.firebaseDb.collection('courses').get();
         let allCourses = [];
         coursesSnap.forEach(doc => { const d = doc.data(); d.id = doc.id; allCourses.push(d); });
         if (grade) allCourses = allCourses.filter(c => c.grade === grade || c.targetGrade === grade);
@@ -632,7 +632,7 @@ async function loadLateStudents() {
         if (!students.length) {
             let q = window.firebaseDb.collection('students');
             if (grade) q = q.where('grade', '==', grade);
-            const sSnap = await q.limit(500).get({ source: 'server' });
+            const sSnap = await q.limit(500).get();
             sSnap.forEach(doc => { const d = doc.data(); d._uid = doc.id; students.push(d); });
         }
         if (grade) students = students.filter(s => s.grade === grade);
@@ -744,7 +744,7 @@ async function loadLevels() {
             return;
         }
 
-        const snap = await window.firebaseDb.collection('students').where('grade', '==', grade).limit(300).get({ source: 'server' });
+        const snap = await window.firebaseDb.collection('students').where('grade', '==', grade).limit(300).get();
         allStudentsData = [];
         snap.forEach(doc => { const d = doc.data(); d._uid = doc.id; allStudentsData.push(d); });
         filterLevel(currentLevelFilter);
