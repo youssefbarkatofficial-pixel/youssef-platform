@@ -177,34 +177,13 @@
                         <div class="form-group" style="margin-bottom: 15px; margin-top: 15px;">
                             <label style="color:var(--text-primary); display:flex; align-items:center; gap:8px; cursor:pointer;">
                                 <input type="checkbox" id="fcTimerToggle" onchange="markUnsaved(); document.getElementById('fcDiscountTimerOptions').style.display = this.checked ? 'block' : 'none';"> 
-                                <span style="font-weight: bold; color: var(--royal-gold);">تفعيل عداد مؤقت للخصم</span>
+                                <span style="font-weight: bold; color: var(--royal-gold);">تحديد موعد انتهاء الخصم</span>
                             </label>
                         </div>
                         
                         <div id="fcDiscountTimerOptions" style="display: none;">
-                            <label style="color: var(--text-secondary); margin-bottom: 12px; display: block; font-size: 0.95rem;">حدد المدة المتبقية لانتهاء الخصم:</label>
-                            <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px;">
-                                <div class="form-group" style="margin-bottom: 0;">
-                                    <label style="color:var(--text-secondary);font-size:0.75rem; text-align: center; display: block; margin-bottom: 5px;">سنة</label>
-                                    <input type="number" id="fcYears" class="form-control" min="0" placeholder="0" style="text-align:center; padding: 8px 4px;" oninput="markUnsaved()">
-                                </div>
-                                <div class="form-group" style="margin-bottom: 0;">
-                                    <label style="color:var(--text-secondary);font-size:0.75rem; text-align: center; display: block; margin-bottom: 5px;">شهر</label>
-                                    <input type="number" id="fcMonths" class="form-control" min="0" placeholder="0" style="text-align:center; padding: 8px 4px;" oninput="markUnsaved()">
-                                </div>
-                                <div class="form-group" style="margin-bottom: 0;">
-                                    <label style="color:var(--text-secondary);font-size:0.75rem; text-align: center; display: block; margin-bottom: 5px;">أسبوع</label>
-                                    <input type="number" id="fcWeeks" class="form-control" min="0" placeholder="0" style="text-align:center; padding: 8px 4px;" oninput="markUnsaved()">
-                                </div>
-                                <div class="form-group" style="margin-bottom: 0;">
-                                    <label style="color:var(--text-secondary);font-size:0.75rem; text-align: center; display: block; margin-bottom: 5px;">يوم</label>
-                                    <input type="number" id="fcDays" class="form-control" min="0" placeholder="0" style="text-align:center; padding: 8px 4px;" oninput="markUnsaved()">
-                                </div>
-                                <div class="form-group" style="margin-bottom: 0;">
-                                    <label style="color:var(--text-secondary);font-size:0.75rem; text-align: center; display: block; margin-bottom: 5px;">ساعة</label>
-                                    <input type="number" id="fcHours" class="form-control" min="0" placeholder="0" style="text-align:center; padding: 8px 4px;" oninput="markUnsaved()">
-                                </div>
-                            </div>
+                            <label style="color: var(--text-secondary); margin-bottom: 12px; display: block; font-size: 0.95rem;">اختر التاريخ والوقت:</label>
+                            <input type="datetime-local" id="fcDiscountExpiryDate" class="form-control" oninput="markUnsaved()">
                         </div>
                     </div>
                 </div>
@@ -799,24 +778,16 @@ window.openCourseEditor = function(id = null) {
         
         if (c.isFree) document.getElementById('fcPrice').disabled = true;
         
-        document.getElementById('fcYears').value = '';
-        document.getElementById('fcMonths').value = '';
-        document.getElementById('fcWeeks').value = '';
-        document.getElementById('fcDays').value = '';
-        document.getElementById('fcHours').value = '';
+        document.getElementById('fcDiscountExpiryDate').value = '';
         
         if (c.discountExpiry) {
             document.getElementById('fcTimerToggle').checked = true;
             document.getElementById('fcDiscountTimerOptions').style.display = 'block';
             
-            const remainingMs = c.discountExpiry - Date.now();
-            if (remainingMs > 0) {
-                let seconds = Math.floor(remainingMs / 1000);
-                let d = Math.floor(seconds / (3600 * 24));
-                let h = Math.floor((seconds % (3600 * 24)) / 3600);
-                document.getElementById('fcDays').value = d;
-                document.getElementById('fcHours').value = h;
-            }
+            const d = new Date(c.discountExpiry);
+            const offsetMs = d.getTimezoneOffset() * 60000;
+            const localIso = new Date(d.getTime() - offsetMs).toISOString().slice(0, 16);
+            document.getElementById('fcDiscountExpiryDate').value = localIso;
         } else {
             document.getElementById('fcTimerToggle').checked = false;
             document.getElementById('fcDiscountTimerOptions').style.display = 'none';
@@ -1010,19 +981,9 @@ window.updateItemUrl = function(sIdx, iIdx, type, val) {
                 
                 let discountExpiry = null;
                 if (hasDiscount && document.getElementById('fcTimerToggle') && document.getElementById('fcTimerToggle').checked) {
-                    const y = parseInt(document.getElementById('fcYears').value) || 0;
-                    const m = parseInt(document.getElementById('fcMonths').value) || 0;
-                    const w = parseInt(document.getElementById('fcWeeks').value) || 0;
-                    const d = parseInt(document.getElementById('fcDays').value) || 0;
-                    const h = parseInt(document.getElementById('fcHours').value) || 0;
-                    
-                    const totalMs = (y * 365 * 24 * 3600 * 1000) +
-                                    (m * 30 * 24 * 3600 * 1000) +
-                                    (w * 7 * 24 * 3600 * 1000) +
-                                    (d * 24 * 3600 * 1000) +
-                                    (h * 3600 * 1000);
-                    if (totalMs > 0) {
-                        discountExpiry = Date.now() + totalMs;
+                    const expiryStr = document.getElementById('fcDiscountExpiryDate').value;
+                    if (expiryStr) {
+                        discountExpiry = new Date(expiryStr).getTime();
                     }
                 }
                 

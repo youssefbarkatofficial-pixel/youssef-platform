@@ -81,6 +81,7 @@
                 </div>
                 <div style="flex: 1; min-width: 250px;">
                     <span id="cdGrade" class="badge" style="background: rgba(212, 166, 79, 0.2); color: var(--royal-gold); padding: 5px 15px; border-radius: 20px; font-size: 0.9rem; margin-bottom: 15px; display: inline-block;"></span>
+                    <div id="cdSchedule" style="margin-bottom: 15px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.05); padding: 10px 15px; border-radius: 8px; font-size: 0.9rem; color: #e0e0e0; display: none; align-items: center; justify-content: center; text-align: center; gap: 10px; flex-wrap: wrap;"></div>
                     <h1 id="cdTitle" class="heading-luxury mb-1"></h1>
                     <p id="cdDesc" style="color: rgba(255,255,255,0.8); line-height: 1.6; margin-bottom: 20px;"></p>
                     <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px; margin-bottom: 20px; text-align: center; width: 100%;">
@@ -462,6 +463,17 @@
             }
             
             document.getElementById('cdGrade').textContent = grades[course.grade] || course.grade;
+            
+            const scheduleEl = document.getElementById('cdSchedule');
+            if (course.grade && course.grade.startsWith('prep')) {
+                scheduleEl.style.display = 'flex';
+                scheduleEl.innerHTML = '<span style="color:var(--royal-gold);"><i class="fas fa-calendar-alt"></i> الشرح والتدريب: الخميس</span> <span style="color:rgba(255,255,255,0.3);">|</span> <span style="color:#3498db;"><i class="fas fa-edit"></i> الواجب: الثلاثاء</span> <span style="color:rgba(255,255,255,0.3);">|</span> <span style="color:#e74c3c;"><i class="fas fa-trophy"></i> الامتحان: الأربعاء 9 م</span>';
+            } else if (course.grade && course.grade.startsWith('sec')) {
+                scheduleEl.style.display = 'flex';
+                scheduleEl.innerHTML = '<span style="color:var(--royal-gold);"><i class="fas fa-calendar-alt"></i> الشرح والتدريب: الجمعة</span> <span style="color:rgba(255,255,255,0.3);">|</span> <span style="color:#3498db;"><i class="fas fa-edit"></i> الواجب: الثلاثاء</span> <span style="color:rgba(255,255,255,0.3);">|</span> <span style="color:#e74c3c;"><i class="fas fa-trophy"></i> الامتحان: الأربعاء 9 م</span>';
+            } else {
+                scheduleEl.style.display = 'none';
+            }
 
 
                         const actionContainer = document.getElementById('cdActionBtnContainer');
@@ -562,8 +574,18 @@
                     
                     document.getElementById('cdTitle').textContent = newTitle;
                     document.getElementById('cdImage').src = newImage;
-                    document.getElementById('cdDesc').textContent = newDesc;
-                    document.getElementById('adminEditCourseModal').classList.remove('active');
+                    document.getElementById('cdDesc').textContent = course.description || 'لا يوجد وصف متاح';
+                    
+                    const scheduleEl = document.getElementById('cdSchedule');
+                    if (course.grade && course.grade.startsWith('prep')) {
+                        scheduleEl.style.display = 'flex';
+                        scheduleEl.innerHTML = '<span style="color:var(--royal-gold);"><i class="fas fa-calendar-alt"></i> الشرح والتدريب: الخميس</span> <span style="color:rgba(255,255,255,0.3);">|</span> <span style="color:#3498db;"><i class="fas fa-edit"></i> الواجب: الثلاثاء</span> <span style="color:rgba(255,255,255,0.3);">|</span> <span style="color:#e74c3c;"><i class="fas fa-trophy"></i> الامتحان: الأربعاء 9 م</span>';
+                    } else if (course.grade && course.grade.startsWith('sec')) {
+                        scheduleEl.style.display = 'flex';
+                        scheduleEl.innerHTML = '<span style="color:var(--royal-gold);"><i class="fas fa-calendar-alt"></i> الشرح والتدريب: الجمعة</span> <span style="color:rgba(255,255,255,0.3);">|</span> <span style="color:#3498db;"><i class="fas fa-edit"></i> الواجب: الثلاثاء</span> <span style="color:rgba(255,255,255,0.3);">|</span> <span style="color:#e74c3c;"><i class="fas fa-trophy"></i> الامتحان: الأربعاء 9 م</span>';
+                    } else {
+                        scheduleEl.style.display = 'none';
+                    }               document.getElementById('adminEditCourseModal').classList.remove('active');
                 };
             }
             else if (isOwned || isMasterPreview) {

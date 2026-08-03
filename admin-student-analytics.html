@@ -280,7 +280,7 @@ function renderStudentsTable(students) {
     let html = '';
     sorted.forEach(s => {
         const stats = calcStudentStats(s);
-        const avgAll = [stats.avgExam].filter(v => v !== null);
+        const avgAll = [stats.avgExam, stats.avgTraining, stats.avgHomework].filter(v => v !== null);
         const overall = avgAll.length ? Math.round(avgAll.reduce((a,b) => a+b, 0) / avgAll.length) : 0;
         const lvl = getLevelInfo(overall);
         
