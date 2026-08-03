@@ -270,12 +270,11 @@
       sessionStorage.setItem('pf_tutor_memory', JSON.stringify(mem));
   }
 
-  // 2. HARD SEPARATION & PRIORITY SYSTEM
+  // STATEFUL DIALOGUE — الآن يمر مباشرة للذكاء الاصطناعي بدون استجواب الطالب
   function processInput(rawText) {
       const normalized = normalizeText(rawText);
-      const mem = getMemory();
 
-      // SPECIFIC SOLUTIONS FOR PLATFORM SUGGESTED QUESTIONS
+      // منصة: حلول خاصة مباشرة للأسئلة الشائعة
       if (/(باسورد|كلمة السر|نسيت الباسورد)/.test(normalized)) {
           return "لو نسيت الباسورد، اخرج لصفحة تسجيل الدخول واضغط على 'نسيت كلمة المرور؟' واكتب رقمك ورقم ولي الأمر وهيتبعتلك كود على الواتس آب لتغييره.";
       }
@@ -283,7 +282,7 @@
           return "عشان تغير الإيميل أو بياناتك، تقدر تدخل على 'حسابي' وتعدلها، أو تتواصل مع الدعم الفني وهما هيساعدوك.";
       }
       if (/(اشترك ازاي|ازاي اشترك|طريقة الاشتراك|الاشتراك)/.test(normalized)) {
-          return "تقدر تشترك بالضغط على 'الكورسات' أو 'اشتراك في كورسات' من القائمة، تختار الكورس المناسب وتدفع وتنتظر التفعيل.";
+          return "تقدر تشترك بالضغط على 'الكورسات'، تختار الكورس المناسب وتدفع وتنتظر التفعيل.";
       }
       if (/(مشكلة في الدفع|الدفع|فودافون كاش)/.test(normalized)) {
           return "لو واجهتك مشكلة في الدفع أو الكورس ماتفعلش، اتأكد إنك رفعت صورة إيصال التحويل في صفحة الكورس. لو لسه المشكلة مستمرة تواصل مع الدعم.";
@@ -292,7 +291,7 @@
           return "كورساتك اللي اشتركت فيها هتلاقيها في صفحة 'لوحة التحكم' أو 'حسابي' وتقدر تفتحها وتبدأ مذاكرة على طول.";
       }
       if (/(الواجبات|فين الواجبات)/.test(normalized)) {
-          return "الواجبات بتنزل في لوحة التحكم بتاعتك أو داخل صفحة الكورس نفسه، وتقدر تتابعها كمان من خلال جروبات الواتس آب.";
+          return "الواجبات بتنزل في لوحة التحكم بتاعتك أو داخل صفحة الكورس نفسه.";
       }
       if (/(موعد الحصة|ميعاد الحصة|الحصة الجاية)/.test(normalized)) {
           return "مواعيد الحصص واللايفات بتتبعت دايماً على جروبات الواتس آب الخاصة بالكورس، راجع الجروب لمعرفة المواعيد.";
@@ -301,130 +300,28 @@
           return "لو محتاج مساعدة ضرورية من فريق الدعم، تقدر تتواصل معاهم مباشرة على رقم الواتس آب: 01023675235 📞";
       }
 
-      // INTERRUPT SYSTEM: Detect hard technical issues anytime to escape to support
-      if (/(بايظ|مش شغال|عطلان|مشكلة|تسجيل|منصة|حساب|موقع|اختفى|صفحة)/.test(normalized)) {
-          if (mem.state.flow !== 'support') {
-              mem.state.stack.push(mem.state.flow);
-              mem.state.flow = 'support';
-              mem.state.pendingQuestion = null;
-          }
-          saveMemory(mem);
-          return "الواضح إن دي مشكلة تقنية. لو مستعجل على حل المشكلة اكتب مشكلة والدعم هيتواصل معاك في أقرب وقت 🙏";
+      // تحيات بسيطة
+      if (/^(سلام|اهلا|هلا|صباح|مساء|هاي|ازيك|عامل ايه|مرحبا|كيفك|بقولك عامل ايه)$/.test(normalized)) {
+          return "الحمد لله تمام! 😊 أنا البوصلة، جاهز أساعدك في أي سؤال أو موضوع دراسي. اسأل براحتك!";
       }
 
-      // PENDING RESOLUTION SYSTEM: IGNORE INTENTS if there's a pending question
-      if (mem.state.pendingQuestion) {
-          return resolvePendingAnswer(normalized, mem);
-      }
-
-      // INTENT ROUTING (Only if no pending question)
-      if (/(ازيك|عامل ايه|صباح|مساء|هاي|مرحبا|سلام|كيفك|اهلا|بقولك عامل ايه)/.test(normalized)) {
-          return "الحمد لله تمام. تحب أساعدك في إيه دلوقتي؟";
-      }
-
-      if (/(تاريخ)/.test(normalized)) {
-          mem.state.flow = 'teaching';
-          mem.state.topic = 'تاريخ';
-          mem.state.pendingQuestion = 'ask_teach_or_quiz';
-          saveMemory(mem);
-          return "تمام، تاريخ. تحب شرح ولا أسئلة؟";
-      }
-
-      if (/(جغرافيا)/.test(normalized)) {
-          mem.state.flow = 'teaching';
-          mem.state.topic = 'جغرافيا';
-          mem.state.pendingQuestion = 'ask_teach_or_quiz';
-          saveMemory(mem);
-          return "تمام، جغرافيا. تحب شرح ولا أسئلة؟";
-      }
-
-      if (/(شرح|فاهم|درس|سؤال|يعني ايه|ازاي|ليه|محمد علي)/.test(normalized)) {
-          mem.state.pendingQuestion = 'ask_subject';
-          saveMemory(mem);
-          return "تاريخ ولا جغرافيا؟";
-      }
-
-      // Fallback
+      // ادمن fallback
       if (sessionStorage.getItem('currentAdmin') || localStorage.getItem('currentAdmin')) {
-          return "⚠️ تنبيه للمسؤول: الذكاء الاصطناعي معطل حالياً لأن مفاتيح الـ API (Gemini) غير موجودة أو انتهت حصتها على هذا المتصفح. برجاء إضافتها من إعدادات الذكاء الاصطناعي في لوحة الإدارة ليعمل البوت بذكاء كامل.";
+          return "⚠️ تنبيه للمسؤول: الذكاء الاصطناعي معطل حالياً لأن مفاتيح الـ API غير موجودة أو انتهت حصتها. برجاء إضافتها من إعدادات الذكاء الاصطناعي في لوحة الإدارة.";
       }
-      return "أنا هنا لمساعدتك، بس معلش كلامك مش واضح بالنسبة لي أوي. ممكن توضح سؤالك أو مشكلتك أكتر؟";
+
+      // أي سؤال تاني — البوصلة ترد مباشرة بدون أسئلة
+      return null; // null = اسمح للذكاء الاصطناعي يتكلم
   }
 
   function resolvePendingAnswer(normalized, mem) {
-      const q = mem.state.pendingQuestion;
-      mem.state.pendingQuestion = null; // Clear it, we are resolving it
-
-      if (q === 'ask_subject') {
-          if (/(تاريخ)/.test(normalized)) {
-              mem.state.topic = 'تاريخ';
-              mem.state.flow = 'teaching';
-              mem.state.pendingQuestion = 'ask_teach_or_quiz';
-              saveMemory(mem);
-              return "شرح ولا أسئلة؟";
-          } else if (/(جغرافيا)/.test(normalized)) {
-              mem.state.topic = 'جغرافيا';
-              mem.state.flow = 'teaching';
-              mem.state.pendingQuestion = 'ask_teach_or_quiz';
-              saveMemory(mem);
-              return "شرح ولا أسئلة؟";
-          } else {
-              mem.state.pendingQuestion = 'ask_subject';
-              saveMemory(mem);
-              return "معلش، حددلي بس تاريخ ولا جغرافيا؟";
-          }
-      }
-
-      if (q === 'ask_teach_or_quiz') {
-          if (/(شرح)/.test(normalized)) {
-              mem.state.flow = 'teaching';
-              saveMemory(mem);
-              return `يلا نبدأ شرح ${mem.state.topic}. أنهي درس واقف قدامك؟`;
-          } else if (/(اسئلة|أسئلة|سؤال|امتحان)/.test(normalized)) {
-              mem.state.flow = 'quiz';
-              saveMemory(mem);
-              return `جاهز لأسئلة الـ ${mem.state.topic}؟ السؤال الأول بيقول...`;
-          } else {
-              mem.state.pendingQuestion = 'ask_teach_or_quiz';
-              saveMemory(mem);
-              return "شرح ولا أسئلة؟";
-          }
-      }
-
-      if (q === 'return_from_support') {
-          if (/(اه|ايوه|نعم|يلا|جاهز)/.test(normalized)) {
-              const prevFlow = mem.state.stack.pop() || 'idle';
-              mem.state.flow = prevFlow;
-              saveMemory(mem);
-              return "تمام، نكمل اللي كنا بنعمله.";
-          } else {
-              mem.state.flow = 'idle';
-              saveMemory(mem);
-              return "براحتك، لو احتجت حاجة أنا موجود.";
-          }
-      }
-
-      saveMemory(mem);
-      return "مش متأكد تقصد إيه. تحب نبدأ من الأول تاريخ ولا جغرافيا؟";
+      // لم يعد هناك pending questions — pass through
+      return null;
   }
 
   function getTemporarySafeBotReply(text) {
-      // Small logic to recover from tech support if issue is "resolved" (mocked via a keyword for now)
-      const normalized = normalizeText(text);
-      const mem = getMemory();
-      if (mem.state.flow === 'support' && /(شكرا|خلاص|تمام|اتحلت)/.test(normalized)) {
-           if (mem.state.stack.length > 0) {
-               mem.state.pendingQuestion = 'return_from_support';
-               saveMemory(mem);
-               return "العفو. تحب نرجع للشرح اللي كنا فيه؟";
-           } else {
-               mem.state.flow = 'idle';
-               saveMemory(mem);
-               return "العفو! تحت أمرك.";
-           }
-      }
-
-      return processInput(text);
+      const result = processInput(text);
+      return result; // null means AI handles it
   }
 
   // Placeholder for missing legacy functions that might be called inside uiLogic
