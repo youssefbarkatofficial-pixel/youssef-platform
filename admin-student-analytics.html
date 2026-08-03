@@ -343,7 +343,7 @@ async function openStudentDetail(uid) {
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
                     <strong>${title}</strong>
                     <div style="display:flex; gap:8px; align-items:center;">
-                        <span style="color:var(--royal-gold); font-weight:700;">${firstAttempt.percent || 0}% <span style="color:rgba(255,255,255,0.4); font-size:0.78rem;">(المحاولة الأولى - رسمية)</span></span>
+                        <span id="officialPercent_${uid}_${title.replace(/\s/g,'_')}" style="color:var(--royal-gold); font-weight:700;">${firstAttempt.percent || 0}% <span style="color:rgba(255,255,255,0.4); font-size:0.78rem;">(المحاولة الأولى - رسمية)</span></span>
                         <div>
                             <label style="font-size:0.8rem; color:rgba(255,255,255,0.6);">تعديل الدرجة:</label>
                             <input type="number" class="score-input" id="score_${uid}_${title.replace(/\s/g,'_')}" value="${firstAttempt.percent || 0}" min="0" max="100">
@@ -428,6 +428,15 @@ async function saveGradeOverride(uid, examTitle, btn) {
             notifications: local.notifications
         });
         
+        try { localStorage.setItem('cached_students', JSON.stringify(allStudentsData)); } catch(e) {}
+        
+        const officialSpan = document.getElementById(`officialPercent_${uid}_${examTitle.replace(/\s/g,'_')}`);
+        if (officialSpan) {
+            officialSpan.innerHTML = `${newScore}% <span style="color:rgba(255,255,255,0.4); font-size:0.78rem;">(المحاولة الأولى - رسمية)</span>`;
+        }
+        
+        filterStudentsTable();
+        
         btn.style.background = 'var(--royal-gold)';
         btn.style.color = '#000';
         btn.style.boxShadow = 'none';
@@ -497,6 +506,11 @@ window.toggleQuestionScore = function(uid, examTitle, qIndex, btn) {
                     saveBtn.style.color = '#fff';
                     saveBtn.textContent = 'احفظ الآن!';
                     saveBtn.style.boxShadow = '0 0 15px rgba(231,76,60,0.6)';
+                }
+                
+                const officialSpan = document.getElementById(`officialPercent_${uid}_${examTitle.replace(/\s/g,'_')}`);
+                if (officialSpan) {
+                    officialSpan.innerHTML = `${r.percent}% <span style="color:rgba(255,255,255,0.4); font-size:0.78rem;">(المحاولة الأولى - رسمية)</span>`;
                 }
             }
         }
