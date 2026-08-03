@@ -388,12 +388,40 @@ async function openStudentDetail(uid) {
                     cHtml += `<details><summary style="cursor:pointer; color:rgba(255,255,255,0.6); font-size:0.85rem;">عرض الإجابات التفصيلية</summary><div style="margin-top:10px;">`;
                     firstAttempt.details.forEach((d, i) => {
                         const isCorrect = (d.score >= 0.5);
+                        
+                        const letters = ['أ', 'ب', 'ج', 'د', 'ه', 'ا'];
+                        const getFullAns = (ans) => {
+                            if (ans === undefined || ans === null || ans === '') return '(بدون إجابة)';
+                            const ansStr = String(ans).trim();
+                            if (d.options && Array.isArray(d.options)) {
+                                let idx = letters.indexOf(ansStr);
+                                if (idx === 5) idx = 0; // 'ا' === 'أ'
+                                if (idx >= 0 && d.options[idx]) return `${ansStr} - (${d.options[idx]})`;
+                                
+                                const numIdx = parseInt(ansStr);
+                                if (!isNaN(numIdx) && numIdx >= 0 && numIdx < d.options.length) {
+                                    return `${letters[numIdx]} - (${d.options[numIdx]})`;
+                                }
+                            }
+                            return ansStr;
+                        };
+
+                        let displayStudent = getFullAns(d.rawAnswer);
+                        let correctRaw = (d.correctAnswer !== undefined) ? d.correctAnswer : (d.correct !== undefined) ? d.correct : (d.answer !== undefined) ? d.answer : '';
+                        let displayCorrect = correctRaw !== '' ? getFullAns(correctRaw) : '';
+                        
+                        let correctAnsHtml = '';
+                        if (!isCorrect && displayCorrect) {
+                            correctAnsHtml = `<br><span style="color:rgba(255,255,255,0.6);">الإجابة الصحيحة: </span><span style="color:#2ecc71;">${displayCorrect}</span>`;
+                        }
+                        // Also show it always for clarity? User said "يظهر لي انا فى التفاصيل الاجابة الصحيحة إن أخطأ الطالب"
+                        
                         cHtml += `<div style="padding:8px; margin-bottom:6px; border-radius:6px; background:${isCorrect ? 'rgba(46,204,113,0.07)' : 'rgba(231,76,60,0.07)'}; border:1px solid ${isCorrect ? 'rgba(46,204,113,0.2)' : 'rgba(231,76,60,0.2)'}; font-size:0.85rem;">
                             <div style="display:flex; justify-content:space-between; align-items:start;">
                                 <div>
                                     <strong>س${i+1}:</strong> ${d.question || ''}<br>
-                                    <span style="color:rgba(255,255,255,0.6);">إجابة الطالب: </span><span style="color:${isCorrect ? '#2ecc71' : '#e74c3c'};">${d.rawAnswer || '(بدون إجابة)'}</span>
-                                    <span style="color:rgba(255,255,255,0.4); font-size:0.78rem;"> | ${Math.round((d.score||0)*100)}% (${d.pointsEarned||0} / ${d.totalPoints||1} نقطة)</span>
+                                    <span style="color:rgba(255,255,255,0.6);">إجابة الطالب: </span><span style="color:${isCorrect ? '#2ecc71' : '#e74c3c'};">${displayStudent}</span>${correctAnsHtml}
+                                    <br><span style="color:rgba(255,255,255,0.4); font-size:0.78rem;"> | ${Math.round((d.score||0)*100)}% (${d.pointsEarned||0} / ${d.totalPoints||1} نقطة)</span>
                                 </div>
                                 <button onclick="window.toggleQuestionScore('${uid}', '${title.replace(/'/g, "\\'")}', ${i}, this)" style="padding:4px 8px; border-radius:6px; border:1px solid rgba(255,255,255,0.1); background:rgba(0,0,0,0.2); color:white; cursor:pointer; font-size:0.8rem; flex-shrink:0;">
                                     ${isCorrect ? '❌ اجعله خطأ' : '✅ اجعله صحيح'}
@@ -443,10 +471,13 @@ async function saveGradeOverride(uid, examTitle, btn) {
         
         if (!updated) { alert('لم يتم العثور على هذا الامتحان في سجلات الطالب'); btn.textContent = 'حفظ'; return; }
         
+        const isTrain = (examTitle && examTitle.includes('تدريب'));
+        const examTypeStr = isTrain ? 'تدريب' : 'امتحان';
+        
         local.notifications = local.notifications || [];
         local.notifications.push({
-            title: 'تعديل درجة امتحان',
-            body: `قام الأستاذ بمراجعة وتعديل درجتك في امتحان "${examTitle}". درجتك الجديدة هي ${newScore}%.`,
+            title: `تعديل درجة ${examTypeStr}`,
+            body: `قام الأستاذ بمراجعة وتعديل درجتك في ${examTypeStr} "${examTitle}". درجتك الجديدة هي ${newScore}%.`,
             ts: Date.now(),
             read: false
         });
@@ -515,10 +546,33 @@ window.toggleQuestionScore = function(uid, examTitle, qIndex, btn) {
                 
                 const textDiv = parentDiv.querySelector('div > div');
                 if(textDiv) {
+                    const letters = ['أ', 'ب', 'ج', 'د', 'ه', 'ا'];
+                    const getFullAns = (ans) => {
+                        if (ans === undefined || ans === null || ans === '') return '(بدون إجابة)';
+                        const ansStr = String(ans).trim();
+                        if (q.options && Array.isArray(q.options)) {
+                            let idx = letters.indexOf(ansStr);
+                            if (idx === 5) idx = 0;
+                            if (idx >= 0 && q.options[idx]) return `${ansStr} - (${q.options[idx]})`;
+                            const numIdx = parseInt(ansStr);
+                            if (!isNaN(numIdx) && numIdx >= 0 && numIdx < q.options.length) {
+                                return `${letters[numIdx]} - (${q.options[numIdx]})`;
+                            }
+                        }
+                        return ansStr;
+                    };
+                    let displayStudent = getFullAns(q.rawAnswer);
+                    let correctRaw = (q.correctAnswer !== undefined) ? q.correctAnswer : (q.correct !== undefined) ? q.correct : (q.answer !== undefined) ? q.answer : '';
+                    let displayCorrect = correctRaw !== '' ? getFullAns(correctRaw) : '';
+                    let correctAnsHtml = '';
+                    if (!isCorrect && displayCorrect) {
+                        correctAnsHtml = `<br><span style="color:rgba(255,255,255,0.6);">الإجابة الصحيحة: </span><span style="color:#2ecc71;">${displayCorrect}</span>`;
+                    }
+                    
                     textDiv.innerHTML = `
                         <strong>س${qIndex+1}:</strong> ${q.question || ''}<br>
-                        <span style="color:rgba(255,255,255,0.6);">إجابة الطالب: </span><span style="color:${isCorrect ? '#2ecc71' : '#e74c3c'};">${q.rawAnswer || '(بدون إجابة)'}</span>
-                        <span style="color:rgba(255,255,255,0.4); font-size:0.78rem;"> | ${Math.round((q.score||0)*100)}% (${q.pointsEarned||0} / ${q.totalPoints||1} نقطة)</span>
+                        <span style="color:rgba(255,255,255,0.6);">إجابة الطالب: </span><span style="color:${isCorrect ? '#2ecc71' : '#e74c3c'};">${displayStudent}</span>${correctAnsHtml}
+                        <br><span style="color:rgba(255,255,255,0.4); font-size:0.78rem;"> | ${Math.round((q.score||0)*100)}% (${q.pointsEarned||0} / ${q.totalPoints||1} نقطة)</span>
                     `;
                 }
                 

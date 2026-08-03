@@ -229,6 +229,12 @@
                                 <option value="meaning">ما المقصود</option>
                             </select>
                         </div>
+                        <div class="form-group" id="essayAsMcqGroup" style="display: none; margin-top: -10px; margin-bottom: 15px;">
+                            <label style="display:flex; align-items:center; gap:10px; cursor:pointer;">
+                                <input type="checkbox" id="essayAsMcqCheckbox" style="width:18px; height:18px;">
+                                <span style="color:#f39c12; font-weight:bold;">تحويل كسؤال اختياري (يتم عرض الاختيارات للطالب ولكن يظل كسؤال مقالي في النظام)</span>
+                            </label>
+                        </div>
                         <div class="form-group">
                             <label>السؤال</label>
                             <textarea id="questionText" class="form-control" rows="3" placeholder="اكتب نص السؤال هنا"></textarea>
@@ -418,12 +424,43 @@
 
                     // Show rubric generator for essay questions
                     const isEssay = ['explain', 'result', 'prove', 'relation', 'whatif', 'meaning'].includes(val);
+                    const essayAsMcqGroup = document.getElementById('essayAsMcqGroup');
+                    const essayAsMcqCheckbox = document.getElementById('essayAsMcqCheckbox');
+                    
+                    if(isEssay) {
+                        if (essayAsMcqGroup) essayAsMcqGroup.style.display = 'block';
+                    } else {
+                        if (essayAsMcqGroup) essayAsMcqGroup.style.display = 'none';
+                        if (essayAsMcqCheckbox) {
+                            essayAsMcqCheckbox.checked = false;
+                            essayAsMcqCheckbox.dispatchEvent(new Event('change'));
+                        }
+                    }
+
                     if(isEssay && btnGenerateRubric) {
                         btnGenerateRubric.style.display = 'inline-block';
                     } else if (btnGenerateRubric) {
                         btnGenerateRubric.style.display = 'none';
                         rubricPreviewContainer.style.display = 'none';
                         currentGeneratedRubric = null;
+                    }
+                });
+            }
+
+            const essayAsMcqCheckbox = document.getElementById('essayAsMcqCheckbox');
+            if(essayAsMcqCheckbox) {
+                essayAsMcqCheckbox.addEventListener('change', (e) => {
+                    const isEssay = ['explain', 'result', 'prove', 'relation', 'whatif', 'meaning'].includes(questionTypeSelect ? questionTypeSelect.value : '');
+                    if(e.target.checked && isEssay) {
+                        document.getElementById('chooseOptionsGroup').style.display = 'block';
+                        document.getElementById('correctAnswer').style.display = 'none';
+                        document.getElementById('correctAnswerChoose').style.display = 'block';
+                    } else {
+                        if (questionTypeSelect && questionTypeSelect.value !== 'choose') {
+                            document.getElementById('chooseOptionsGroup').style.display = 'none';
+                            document.getElementById('correctAnswer').style.display = 'block';
+                            document.getElementById('correctAnswerChoose').style.display = 'none';
+                        }
                     }
                 });
             }
@@ -540,7 +577,9 @@
                     const qText = document.getElementById('questionText').value;
                     const qPoints = parseFloat(document.getElementById('questionPoints').value) || 1;
                     let qAnswer = '';
-                    if (qType === 'choose') {
+                    const isMcqEssay = document.getElementById('essayAsMcqCheckbox') && document.getElementById('essayAsMcqCheckbox').checked && ['explain', 'result', 'prove', 'relation', 'whatif', 'meaning'].includes(qType);
+                    
+                    if (qType === 'choose' || isMcqEssay) {
                         qAnswer = document.getElementById('correctAnswerChoose').value;
                     } else if (qType === 'tf') {
                         qAnswer = document.getElementById('correctAnswerTf').value;
@@ -553,9 +592,9 @@
                         return;
                     }
 
-                    let qObj = { type: qType, text: qText, answer: qAnswer, points: qPoints, id: 'q_' + Date.now() };
+                    let qObj = { type: qType, text: qText, answer: qAnswer, points: qPoints, id: 'q_' + Date.now(), asMcq: isMcqEssay || undefined };
 
-                    if(qType === 'choose') {
+                    if(qType === 'choose' || isMcqEssay) {
                         qObj.options = {
                             a: document.getElementById('optA').value || 'أ',
                             b: document.getElementById('optB').value || 'ب',
