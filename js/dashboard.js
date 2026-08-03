@@ -187,6 +187,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             } catch(e) {}
 
+            if (window.StorageService) {
+                for (let c of adminCourses) {
+                    if (c.image && c.image.startsWith('__local__')) {
+                        try {
+                            const img = await window.StorageService.getFile(c.image);
+                            c.image = img || 'https://via.placeholder.com/400x250/071326/D4A64F?text=Course';
+                        } catch(e) {}
+                    }
+                }
+            }
+
             coursesProgressContainer.innerHTML = '';
             
             dbUser.courses.forEach(cId => {

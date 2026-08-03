@@ -122,6 +122,17 @@
 
             let adminCourses = JSON.parse(localStorage.getItem('adminCourses')) || [];
 
+            if (window.StorageService) {
+                for (let c of adminCourses) {
+                    if (c.image && c.image.startsWith('__local__')) {
+                        try {
+                            const img = await window.StorageService.getFile(c.image);
+                            c.image = img || 'https://via.placeholder.com/400x250/071326/D4A64F?text=Course';
+                        } catch(e) {}
+                    }
+                }
+            }
+
             if (dbUser.courses && dbUser.courses.length > 0) {
                 container.style.display = 'grid';
                 emptyState.style.display = 'none';
