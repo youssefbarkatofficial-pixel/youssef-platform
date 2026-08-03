@@ -1511,7 +1511,8 @@
                             dbRec.examResults = dbRec.examResults || [];
                             const prev = dbRec.examResults.filter(r => r.courseId === courseId && r.examTitle === (exam.title || ''));
                             const aNum = prev.length + 1;
-                            dbRec.examResults.push({ courseId, examTitle: exam.title||'', percent, earnedPoints, totalPoints, effectivePercent, penalized: penaltyApplied, attemptNumber: aNum, isOfficial: aNum===1, autoSubmit:!!autoSubmit, ts:Date.now(), details:results });
+                            const isH = (exam.type === 'واجب' || exam.type === 'homework' || (exam.title && exam.title.includes('واجب')));
+                            dbRec.examResults.push({ courseId, examTitle: exam.title||'', percent, earnedPoints, totalPoints, effectivePercent, penalized: penaltyApplied, attemptNumber: aNum, isOfficial: aNum===1, autoSubmit:!!autoSubmit, ts:Date.now(), details:results, isTraining: isTraining, isHomework: isH });
                             
                             if(window.FirebaseService && typeof window.FirebaseService.updateStudentData === 'function') {
                                 window.FirebaseService.updateStudentData(student.phone, { examResults: dbRec.examResults }).then(() => {

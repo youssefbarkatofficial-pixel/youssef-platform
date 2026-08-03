@@ -205,9 +205,11 @@ function getLevelInfo(avg) {
 
 function calcStudentStats(s) {
     const examResults = s.examResults || [];
-    const exams = examResults.filter(r => !r.isTraining && !r.isHomework);
-    const trainings = examResults.filter(r => r.isTraining);
-    const homeworks = examResults.filter(r => r.isHomework);
+    const isT = (r) => r.isTraining || (r.examTitle && r.examTitle.includes('تدريب'));
+    const isH = (r) => r.isHomework || (r.examTitle && r.examTitle.includes('واجب'));
+    const exams = examResults.filter(r => !isT(r) && !isH(r));
+    const trainings = examResults.filter(r => isT(r));
+    const homeworks = examResults.filter(r => isH(r));
     
     const getAvg = (arr) => {
         const unique = {};
@@ -408,9 +410,11 @@ async function openStudentDetail(uid) {
         return cHtml;
     };
 
-    html += renderCategory('cat-exams', examResults.filter(r => !r.isTraining && !r.isHomework), 'امتحانات', true);
-    html += renderCategory('cat-trainings', examResults.filter(r => r.isTraining), 'تدريبات', false);
-    html += renderCategory('cat-homeworks', examResults.filter(r => r.isHomework), 'واجبات', false);
+    const isT = (r) => r.isTraining || (r.examTitle && r.examTitle.includes('تدريب'));
+    const isH = (r) => r.isHomework || (r.examTitle && r.examTitle.includes('واجب'));
+    html += renderCategory('cat-exams', examResults.filter(r => !isT(r) && !isH(r)), 'امتحانات', true);
+    html += renderCategory('cat-trainings', examResults.filter(r => isT(r)), 'تدريبات', false);
+    html += renderCategory('cat-homeworks', examResults.filter(r => isH(r)), 'واجبات', false);
     
     document.getElementById('modalContent').innerHTML = html;
 }
