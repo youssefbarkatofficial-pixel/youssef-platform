@@ -284,6 +284,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                   setTimeout(() => {
                       window.location.href = `courses.html?highlight=${encodeURIComponent(n.courseId)}`;
                   }, isPositive ? 1500 : 500);
+                } else if (n.link) {
+                  window.location.href = n.link;
                 } else {
                   try { if (window.showToast) window.showToast(n.message || 'تم استلام الإشعار', 'success', { playSound: 'notifArrive' }); } catch(e){}
                 }

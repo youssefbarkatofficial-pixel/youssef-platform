@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -146,31 +146,85 @@
                 container.style.display = 'block';
                 emptyState.style.display = 'none';
                 
+                const examResults = dbUser.examResults || [];
+                
                 let adminCourses = JSON.parse(localStorage.getItem('adminCourses')) || [];
                 
                 dbUser.courses.forEach(cId => {
                     const c = adminCourses.find(course => course.id === cId);
                     if(c) {
+                        const courseResults = examResults.filter(r => r.courseId === cId).sort((a,b) => a.ts - b.ts);
+                        
+                        // Group by type and then by exam title
+                        const groups = { exam: {}, training: {}, homework: {} };
+                        
+                        courseResults.forEach(r => {
+                            let type = 'exam';
+                            if (r.isTraining || (r.examTitle && r.examTitle.includes('تدريب'))) type = 'training';
+                            if (r.isHomework || (r.examTitle && r.examTitle.includes('واجب'))) type = 'homework';
+                            
+                            const title = r.examTitle || 'امتحان غير مسمى';
+                            if (!groups[type][title]) groups[type][title] = [];
+                            groups[type][title].push(r);
+                        });
+
                         const row = document.createElement('div');
                         row.className = 'course-exam-row';
                         
+                        const renderGroup = (groupObj, icon, title, color) => {
+                            const keys = Object.keys(groupObj);
+                            if (keys.length === 0) return '';
+                            let html = `<div class="exam-category"><h4 style="color: ${color};"><i class="${icon}"></i> ${title}</h4>`;
+                            keys.forEach(examTitle => {
+                                const attempts = groupObj[examTitle];
+                                html += `<div style="background: rgba(0,0,0,0.15); padding: 10px; border-radius: 8px; margin-bottom: 10px; border: 1px solid rgba(255,255,255,0.05);">`;
+                                html += `<h5 style="color: var(--royal-gold); margin-bottom: 10px;">${examTitle}</h5>`;
+                                html += `<div style="display: flex; gap: 10px; flex-wrap: wrap;">`;
+                                attempts.forEach(att => {
+                                    const aNum = att.attemptNumber || 1;
+                                    const overrideMark = att._adminOverride ? ' <i class="fas fa-check-double text-success" title="تم تعديلها من قبل المعلم"></i>' : '';
+                                    const label = aNum === 1 ? 'الأساسية' : `المحاولة ${aNum}`;
+                                    const dateStr = att.ts ? new Date(att.ts).toLocaleString('ar-EG') : '';
+                                    html += `<div style="background: rgba(255,255,255,0.05); padding: 8px 12px; border-radius: 5px; flex: 1; min-width: 120px; text-align: center;">
+                                        <div style="font-size: 0.8rem; color: #aaa; margin-bottom: 5px;">${label}</div>
+                                        <div style="font-weight: bold; color: ${aNum === 1 ? '#2ecc71' : '#fff'}; font-size: 1.1rem;">${att.percent}%${overrideMark}</div>
+                                        <div style="font-size: 0.7rem; color: #777; margin-top: 5px;">${dateStr}</div>
+                                    </div>`;
+                                });
+                                html += `</div></div>`;
+                            });
+                            html += `</div>`;
+                            return html;
+                        };
+
+                        const examsHtml = renderGroup(groups.exam, 'fas fa-file-alt', 'الامتحانات', '#3498db');
+                        const trainingsHtml = renderGroup(groups.training, 'fas fa-dumbbell', 'التدريبات', '#e67e22');
+                        const homeworksHtml = renderGroup(groups.homework, 'fas fa-home', 'الواجبات', '#9b59b6');
+                        
+                        const hasAny = examsHtml || trainingsHtml || homeworksHtml;
+
                         row.innerHTML = `
                             <div class="course-exam-header">
                                 <div style="display: flex; align-items: center; gap: 15px;">
                                     <i class="fas fa-star text-gold" style="font-size: 1.5rem;"></i>
                                     <h3 style="margin: 0; color: var(--text-primary);">${c.title}</h3>
                                 </div>
-                                <button class="btn btn-outline toggle-btn">عرض الامتحانات <i class="fas fa-chevron-down ml-2" style="margin-right: 8px;"></i></button>
+                                <button class="btn btn-outline toggle-btn">عرض النتائج <i class="fas fa-chevron-down ml-2" style="margin-right: 8px;"></i></button>
                             </div>
                             <div class="course-exam-body">
-                                <div class="exam-category">
-                                    <h4 style="color: #2ecc71;"><i class="fas fa-check-circle"></i> الامتحانات المكتملة</h4>
-                                    <div class="empty-message">لا توجد امتحانات مكتملة بعد</div>
+                                <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                                    <button class="btn btn-gold filter-btn" data-target="exam" style="flex:1;">الامتحانات</button>
+                                    <button class="btn btn-outline filter-btn" data-target="training" style="flex:1;">التدريبات</button>
+                                    <button class="btn btn-outline filter-btn" data-target="homework" style="flex:1;">الواجبات</button>
                                 </div>
-                                
-                                <div class="exam-category">
-                                    <h4 style="color: var(--accent-cyan);"><i class="fas fa-clock"></i> الامتحانات المتاحة</h4>
-                                    <div class="empty-message">لا توجد امتحانات متاحة الآن</div>
+                                <div class="filter-section" id="section-exam">
+                                    ${examsHtml || '<div class="empty-message">لا توجد امتحانات مكتملة بعد</div>'}
+                                </div>
+                                <div class="filter-section" id="section-training" style="display:none;">
+                                    ${trainingsHtml || '<div class="empty-message">لا توجد تدريبات مكتملة بعد</div>'}
+                                </div>
+                                <div class="filter-section" id="section-homework" style="display:none;">
+                                    ${homeworksHtml || '<div class="empty-message">لا توجد واجبات مكتملة بعد</div>'}
                                 </div>
                             </div>
                         `;
@@ -179,10 +233,22 @@
                         toggleBtn.addEventListener('click', () => {
                             row.classList.toggle('active');
                             if(row.classList.contains('active')) {
-                                toggleBtn.innerHTML = `إخفاء الامتحانات <i class="fas fa-chevron-up ml-2" style="margin-right: 8px;"></i>`;
+                                toggleBtn.innerHTML = `إخفاء النتائج <i class="fas fa-chevron-up ml-2" style="margin-right: 8px;"></i>`;
                             } else {
-                                toggleBtn.innerHTML = `عرض الامتحانات <i class="fas fa-chevron-down ml-2" style="margin-right: 8px;"></i>`;
+                                toggleBtn.innerHTML = `عرض النتائج <i class="fas fa-chevron-down ml-2" style="margin-right: 8px;"></i>`;
                             }
+                        });
+                        
+                        const filterBtns = row.querySelectorAll('.filter-btn');
+                        filterBtns.forEach(btn => {
+                            btn.addEventListener('click', () => {
+                                filterBtns.forEach(b => { b.classList.remove('btn-gold'); b.classList.add('btn-outline'); });
+                                btn.classList.remove('btn-outline');
+                                btn.classList.add('btn-gold');
+                                
+                                row.querySelectorAll('.filter-section').forEach(sec => sec.style.display = 'none');
+                                row.querySelector('#section-' + btn.getAttribute('data-target')).style.display = 'block';
+                            });
                         });
                         
                         container.appendChild(row);

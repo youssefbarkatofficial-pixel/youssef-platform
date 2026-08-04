@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>إصلاح الإشعارات</title>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+    
+    <!-- Config -->
+    <script src="js/firebase-config.js"></script>
+    
+    <style>
+        body { font-family: Arial, sans-serif; padding: 50px; background: #111; color: #fff; }
+        button { padding: 15px 30px; font-size: 1.2rem; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>إصلاح إشعارات تعديل الدرجة القديمة</h1>
+    <button id="fixBtn">ابدأ الإصلاح الآن</button>
+    <p id="status"></p>
+
+    <script>
+        document.getElementById('fixBtn').addEventListener('click', async () => {
+            const btn = document.getElementById('fixBtn');
+            const status = document.getElementById('status');
+            btn.disabled = true;
+            status.innerHTML = 'جاري البحث في قاعدة البيانات...';
+            
+            try {
+                const snapshot = await window.firebaseDb.collection('students').get();
+                let updatedCount = 0;
+
+                for (const doc of snapshot.docs) {
+                    const data = doc.data();
+                    let changed = false;
+                    
+                    if (data.notifications && Array.isArray(data.notifications)) {
+                        const newNotifs = data.notifications.map(n => {
+                            if (n.title && n.title.includes('تعديل درجة')) {
+                                changed = true;
+                                let type = 'امتحان';
+                                if (n.title.includes('تدريب')) type = 'تدريب';
+                                if (n.title.includes('واجب')) type = 'واجب';
+                                
+                                return {
+                                    title: `تم إعادة تصحيح ${type}`,
+                                    message: n.body || n.message || `تم إعادة تصحيح ${type} الخاص بك وتعديل درجتك.`,
+                                    timestamp: n.ts || n.timestamp || Date.now(),
+                                    read: false,
+                                    link: 'exams.html'
+                                };
+                            }
+                            return n;
+                        });
+
+                        if (changed) {
+                            await doc.ref.update({ notifications: newNotifs });
+                            updatedCount++;
+                            status.innerHTML += `<br>تم تحديث بيانات الطالب ${data.name || doc.id}`;
+                        }
+                    }
+                }
+                
+                status.innerHTML += `<br><br><b>انتهى! تم تحديث إشعارات ${updatedCount} طالب بنجاح.</b>`;
+            } catch(e) {
+                status.innerHTML += `<br><span style="color:red">خطأ: ${e.message}</span>`;
+            }
+            
+            btn.disabled = false;
+        });
+    </script>
+</body>
+</html>

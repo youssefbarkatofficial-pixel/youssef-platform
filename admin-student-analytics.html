@@ -472,14 +472,16 @@ async function saveGradeOverride(uid, examTitle, btn) {
         if (!updated) { alert('لم يتم العثور على هذا الامتحان في سجلات الطالب'); btn.textContent = 'حفظ'; return; }
         
         const isTrain = (examTitle && examTitle.includes('تدريب'));
-        const examTypeStr = isTrain ? 'تدريب' : 'امتحان';
+        const isHomework = (examTitle && examTitle.includes('واجب'));
+        const examTypeStr = isTrain ? 'تدريب' : (isHomework ? 'واجب' : 'امتحان');
         
         local.notifications = local.notifications || [];
         local.notifications.push({
-            title: `تعديل درجة ${examTypeStr}`,
-            body: `قام الأستاذ بمراجعة وتعديل درجتك في ${examTypeStr} "${examTitle}". درجتك الجديدة هي ${newScore}%.`,
-            ts: Date.now(),
-            read: false
+            title: `تم إعادة تصحيح ${examTypeStr}`,
+            message: `تم إعادة تصحيح ${examTypeStr} "${examTitle}". درجتك الجديدة هي ${newScore}%.`,
+            timestamp: Date.now(),
+            read: false,
+            link: 'exams.html'
         });
 
         await window.firebaseDb.collection('students').doc(uid).update({ 
