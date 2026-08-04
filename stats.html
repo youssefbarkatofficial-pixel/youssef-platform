@@ -292,11 +292,9 @@
                 <table class="exam-table" id="examTable">
                     <thead>
                         <tr>
-                            <th>الاختبار</th>
+                            <th>اسم الاختبار والكورس</th>
                             <th>النوع</th>
-                            <th>الكورس</th>
                             <th>الدرجة</th>
-                            <th>الاتجاه</th>
                             <th>التاريخ</th>
                         </tr>
                     </thead>
@@ -417,28 +415,44 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!uniqueExamMap[key]) uniqueExamMap[key] = [];
         uniqueExamMap[key].push(r);
 
+        // Use effectivePercent always (reflects admin override as the real score)
         const pct = r.effectivePercent ?? r.percent ?? 0;
-        scoreHistory.push({ title: r.examTitle, pct, ts: r.ts || 0, type: r.isTraining ? 'training' : r.isHomework ? 'homework' : 'exam', courseId: r.courseId });
+        scoreHistory.push({
+            title: r.examTitle, pct, ts: r.ts || 0,
+            type: r.isTraining ? 'training' : r.isHomework ? 'homework' : 'exam',
+            courseId: r.courseId,
+            isOverride: !!r._adminOverride
+        });
 
-        if (r.questions) {
-            r.questions.forEach(q => {
-                if (!q.studentAnswer && q.studentAnswer !== 0) totalSkipped++;
-                else if (q.isCorrect || q.studentAnswer === q.correctAnswer) totalCorrect++;
-                else totalWrong++;
-            });
-        } else {
-            if (r.correctCount) totalCorrect += r.correctCount;
-            if (r.wrongCount) totalWrong += r.wrongCount;
+        // Only count answer stats from the OFFICIAL attempt (attemptNumber===1 or override)
+        const isOfficial = (r.attemptNumber === 1) || r._adminOverride;
+        if (isOfficial) {
+            if (r.questions) {
+                r.questions.forEach(q => {
+                    if (!q.studentAnswer && q.studentAnswer !== 0) totalSkipped++;
+                    else if (q.isCorrect || q.studentAnswer === q.correctAnswer) totalCorrect++;
+                    else totalWrong++;
+                });
+            } else {
+                if (r.correctCount) totalCorrect += r.correctCount;
+                if (r.wrongCount) totalWrong += r.wrongCount;
+            }
         }
     });
 
+    // For average: per unique exam use the OVERRIDE score if exists, else attempt-1, else first
     Object.values(uniqueExamMap).forEach(arr => {
-        const official = arr.find(r => r.attemptNumber === 1) || arr[0];
+        // Priority: admin override > attempt 1 > first
+        const override  = arr.find(r => r._adminOverride);
+        const attempt1  = arr.find(r => r.attemptNumber === 1);
+        const official  = override || attempt1 || arr[0];
         sumScores += (official.effectivePercent ?? official.percent ?? 0);
         scoreCount++;
     });
 
     const avgScore = scoreCount > 0 ? Math.round(sumScores / scoreCount) : 0;
+    // For chart: remove duplicate re-grading entries — keep only official per exam per ts
+    // We show ALL entries chronologically so student can see their journey
     scoreHistory.sort((a, b) => a.ts - b.ts);
 
     // ===== CHECK IF ANY DATA =====
@@ -500,30 +514,36 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }, 150);
 
-    // ===== EXAM TABLE =====
+    // ===== EXAM TABLE (simplified, student-friendly) =====
     const tbody = document.getElementById('examTableBody');
     const sortedHistory = [...scoreHistory].sort((a,b) => b.ts - a.ts).slice(0, 20);
     sortedHistory.forEach((r, idx) => {
         const pct = r.pct;
         const pillClass = pct >= 85 ? 'ex' : pct >= 60 ? 'good' : pct >= 40 ? 'avg' : 'low';
-        const typeLabel = r.type === 'training' ? '<span style="color:#e67e22;">تدريب</span>' : r.type === 'homework' ? '<span style="color:#9b59b6;">واجب</span>' : '<span style="color:#3498db;">امتحان</span>';
+        const scoreEmoji = pct >= 85 ? '🌟' : pct >= 60 ? '👍' : pct >= 40 ? '📖' : '❌';
+        const typeIcon = r.type === 'training' ? '🏋️ تدريب' : r.type === 'homework' ? '📝 واجب' : '📋 امتحان';
         const courseTitle = (adminCourses.find(c => c.id === r.courseId) || {}).title || '-';
-        const dateStr = r.ts ? new Date(r.ts).toLocaleDateString('ar-EG', { month: 'short', day: 'numeric', year: 'numeric' }) : '-';
+        const dateStr = r.ts ? new Date(r.ts).toLocaleDateString('ar-EG', { month: 'short', day: 'numeric' }) : '-';
+        const overrideBadge = r.isOverride ? ' <span style="font-size:0.65rem;background:rgba(46,204,113,0.15);color:#2ecc71;border-radius:4px;padding:1px 5px;">✓ معدّل</span>' : '';
 
-        // Trend: compare with previous attempt of same exam
-        const prev = sortedHistory.slice(idx + 1).find(x => x.title === r.title);
-        let trendHtml = '<span class="trend-flat">—</span>';
-        if (prev) {
-            if (pct > prev.pct) trendHtml = `<span class="trend-up"><i class="fas fa-arrow-up mr-1"></i>+${pct - prev.pct}%</span>`;
-            else if (pct < prev.pct) trendHtml = `<span class="trend-down"><i class="fas fa-arrow-down mr-1"></i>${pct - prev.pct}%</span>`;
+        // Trend vs same exam's PREVIOUS chronological entry
+        const prevSame = sortedHistory.slice(idx + 1).find(x => x.title === r.title);
+        let trendHtml = '';
+        if (prevSame) {
+            const diff = pct - prevSame.pct;
+            if (diff > 0)       trendHtml = `<div style="color:#2ecc71;font-size:0.78rem;margin-top:3px;">⬆ تحسّنت بـ ${diff}% عن المرة اللي فاتت (${prevSame.pct}% → ${pct}%)</div>`;
+            else if (diff < 0)  trendHtml = `<div style="color:#e74c3c;font-size:0.78rem;margin-top:3px;">⬇ انخفضت ${Math.abs(diff)}% عن المرة اللي فاتت (${prevSame.pct}% → ${pct}%)</div>`;
+            else                trendHtml = `<div style="color:#aaa;font-size:0.78rem;margin-top:3px;">↔ نفس الدرجة زي المرة اللي فاتت</div>`;
         }
 
         tbody.innerHTML += `<tr>
-            <td>${r.title || '-'}</td>
-            <td>${typeLabel}</td>
-            <td style="font-size:0.8rem;color:rgba(255,255,255,0.5);">${courseTitle}</td>
-            <td><span class="score-pill ${pillClass}">${pct}%</span></td>
-            <td>${trendHtml}</td>
+            <td>
+                <div style="font-weight:bold;">${r.title || '-'}${overrideBadge}</div>
+                <div style="font-size:0.75rem;color:rgba(255,255,255,0.4);margin-top:2px;">${courseTitle}</div>
+                ${trendHtml}
+            </td>
+            <td style="font-size:0.82rem;">${typeIcon}</td>
+            <td><span class="score-pill ${pillClass}">${scoreEmoji} ${pct}%</span></td>
             <td style="font-size:0.78rem;color:rgba(255,255,255,0.4);">${dateStr}</td>
         </tr>`;
     });
@@ -584,8 +604,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (scoreHistory.length > 0) {
         const ctx1 = document.getElementById('scoresChart');
         if (ctx1) {
-            const labels = scoreHistory.map((r, i) => `${i+1}. ${(r.title||'').slice(0,10)}`);
+            // X-axis: just numbers 1,2,3... Tooltip shows the full name + score + type
+            const labels = scoreHistory.map((r, i) => `${i+1}`);
             const data   = scoreHistory.map(r => r.pct);
+            const fullLabels = scoreHistory.map(r => r.title || 'اختبار');
+            const typeLabels = scoreHistory.map(r => r.type === 'training' ? 'تدريب' : r.type === 'homework' ? 'واجب' : 'امتحان');
             const pointColors = data.map(v => v >= 85 ? '#2ecc71' : v >= 60 ? '#3498db' : v >= 40 ? '#f39c12' : '#e74c3c');
             const grad = ctx1.getContext('2d').createLinearGradient(0, 0, 0, 220);
             grad.addColorStop(0, 'rgba(212,166,79,0.4)');
@@ -597,15 +620,47 @@ document.addEventListener('DOMContentLoaded', async () => {
                     datasets: [{
                         data, label: 'الدرجة',
                         borderColor: '#D4A64F', backgroundColor: grad, borderWidth: 2.5,
-                        pointBackgroundColor: pointColors, pointBorderColor: '#fff', pointRadius: 5, fill: true, tension: 0.4
+                        pointBackgroundColor: pointColors, pointBorderColor: '#fff',
+                        pointRadius: 6, pointHoverRadius: 9, fill: true, tension: 0.4
                     }]
                 },
                 options: {
                     responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => `${ctx.parsed.y}%` } } },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            rtl: true,
+                            callbacks: {
+                                title: items => {
+                                    const i = items[0].dataIndex;
+                                    return `${typeLabels[i]}: ${fullLabels[i]}`;
+                                },
+                                label: ctx => {
+                                    const v = ctx.parsed.y;
+                                    const emoji = v >= 85 ? '🌟 ممتاز' : v >= 60 ? '👍 جيد' : v >= 40 ? '📖 متوسط' : '❌ ضعيف';
+                                    return `الدرجة: ${v}% — ${emoji}`;
+                                }
+                            },
+                            backgroundColor: 'rgba(10,20,35,0.95)',
+                            titleColor: '#D4A64F', bodyColor: '#fff',
+                            borderColor: 'rgba(212,166,79,0.3)', borderWidth: 1,
+                            padding: 12, cornerRadius: 8
+                        }
+                    },
                     scales: {
-                        y: { beginAtZero: true, max: 100, grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: 'rgba(255,255,255,0.45)', callback: v => v+'%' } },
-                        x: { grid: { display: false }, ticks: { color: 'rgba(255,255,255,0.35)', maxRotation: 40, font: { size: 9 } } }
+                        y: {
+                            beginAtZero: true, max: 100,
+                            grid: { color: 'rgba(255,255,255,0.04)' },
+                            ticks: { color: 'rgba(255,255,255,0.45)', callback: v => v+'%', stepSize: 20 }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: {
+                                color: 'rgba(255,255,255,0.5)', font: { size: 11 },
+                                callback: (val, i) => `#${i+1}`
+                            },
+                            title: { display: true, text: 'مرر على النقطة لتعرف اسم الاختبار ↑', color: 'rgba(255,255,255,0.25)', font: { size: 9 } }
+                        }
                     }
                 }
             });
@@ -655,29 +710,45 @@ function buildInsight(avg, videos, totalVids, examsCount, history) {
     const text  = document.getElementById('insightText');
 
     let insights = [];
-    if (avg >= 85) insights.push('أداؤك في الامتحانات ممتاز! 🎉 استمر في هذا المستوى الرائع.');
-    else if (avg >= 60) insights.push('أداؤك جيد. يمكنك الوصول للتميز بمراجعة النقاط التي أخطأت فيها.');
-    else if (avg > 0) insights.push('درجاتك تحتاج تطوير. راجع الدروس ذات الصلة وأعد المحاولة.');
 
+    // Avg score insight — plain language
+    if (avg >= 85)      insights.push(`متوسط درجاتك ${avg}% — ده مستوى ممتاز جداً! 🎉 استمر كده.`);
+    else if (avg >= 60) insights.push(`متوسط درجاتك ${avg}% — كويس، بس تقدر توصل لأحسن من كده لو راجعت الأخطاء.`);
+    else if (avg >= 40) insights.push(`متوسط درجاتك ${avg}% — محتاج تذاكر أكتر وتراجع الدروس اللي صعبة عليك.`);
+    else if (avg > 0)   insights.push(`متوسط درجاتك ${avg}% — الدرجات منخفضة، راجع المحاضرات وابدأ من الأول.`);
+
+    // Video progress insight
     if (totalVids > 0) {
         const vidPct = Math.round(videos / totalVids * 100);
-        if (vidPct < 30) insights.push(`شاهدت ${vidPct}% من المحاضرات فقط — حاول إكمال الباقي لتفهم المادة بالكامل.`);
-        else if (vidPct >= 90) insights.push(`أحسنت! أتممت ${vidPct}% من المحاضرات.`);
+        const remaining = totalVids - videos;
+        if (vidPct === 100)        insights.push(`شاهدت كل المحاضرات (${videos} محاضرة) — أحسنت! 👏`);
+        else if (vidPct >= 70)     insights.push(`شاهدت ${videos} من ${totalVids} محاضرة (${vidPct}%) — قرّبت تخلص!`);
+        else if (vidPct >= 30)     insights.push(`شاهدت ${videos} من ${totalVids} محاضرة — لسه فيه ${remaining} محاضرة، أكمل!`);
+        else                       insights.push(`لسه شاهدت ${videos} محاضرة بس من أصل ${totalVids} — اشتغل أكتر على المحاضرات!`);
     }
 
+    // Trend insight — crystal clear comparison
     if (history.length >= 2) {
-        const last = history[history.length - 1].pct;
-        const prev = history[history.length - 2].pct;
-        if (last > prev) insights.push(`درجتك الأخيرة (${last}%) أعلى من السابقة (${prev}%) ↑ أنت تتحسن!`);
-        else if (last < prev) insights.push(`درجتك الأخيرة (${last}%) أقل من السابقة (${prev}%) — راجع أخطاءك.`);
+        const last     = history[history.length - 1];
+        const prev     = history[history.length - 2];
+        const diff     = last.pct - prev.pct;
+        const lastName = last.title || 'الاختبار الأخير';
+        const prevName = prev.title || 'الاختبار اللي قبله';
+        if (diff > 0) {
+            insights.push(`في "${lastName}" جبت ${last.pct}%، وكانت درجتك في "${prevName}" ${prev.pct}% — يعني اتحسّنت بـ ${diff}% 🚀 جميل!`);
+        } else if (diff < 0) {
+            insights.push(`في "${lastName}" جبت ${last.pct}%، وكانت درجتك في "${prevName}" ${prev.pct}% — انخفضت ${Math.abs(diff)}%، راجع أخطاءك.`);
+        } else {
+            insights.push(`درجتك في "${lastName}" (${last.pct}%) نفس اللي قبلها تماماً — حاول تتحسن المرة الجاية.`);
+        }
     }
 
-    if (insights.length === 0) insights.push('واصل الدراسة وأكمل المزيد من الدروس والامتحانات لتظهر تحليلاتك هنا.');
+    if (insights.length === 0) insights.push('واصل الدراسة وأكمل امتحانات أكتر عشان تشوف تحليلاتك هنا.');
 
     const emojis = avg >= 85 ? '🏆' : avg >= 60 ? '📈' : avg > 0 ? '📚' : '💡';
     icon.textContent = emojis;
     title.textContent = 'تحليل أدائك الشخصي';
-    text.innerHTML = insights.map(t => `• ${t}`).join('<br>');
+    text.innerHTML = insights.map(t => `• ${t}`).join('<br><br>');
     card.style.display = 'flex';
 }
 </script>
