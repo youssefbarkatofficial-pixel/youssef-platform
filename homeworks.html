@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -167,7 +167,11 @@
                     const row = document.createElement('div');
                     row.className = 'course-hw-row';
                     const hwItems = homeworks.length > 0
-                        ? homeworks.map(hw => `<div class="hw-item"><span style="font-weight:bold">${hw.title || 'واجب'}</span><a href="${hw.link || '#'}" target="_blank" class="btn btn-outline" style="padding:4px 12px;font-size:0.85rem;"><i class="fas fa-external-link-alt"></i> فتح</a></div>`).join('')
+                        ? homeworks.map(hw => {
+                            const isExternal = !!hw.link;
+                            const targetUrl = isExternal ? hw.link : ('course-details.html?id=' + c.id);
+                            return `<div class="hw-item"><span style="font-weight:bold">${hw.title || 'واجب'}</span><a href="${targetUrl}" ${isExternal ? 'target="_blank"' : ''} class="btn btn-outline" style="padding:4px 12px;font-size:0.85rem;"><i class="fas fa-external-link-alt"></i> فتح</a></div>`;
+                        }).join('')
                         : `<div class="empty-message">لا توجد واجبات في هذا الكورس حالياً</div>`;
                     row.innerHTML = `
                         <div class="course-hw-header">

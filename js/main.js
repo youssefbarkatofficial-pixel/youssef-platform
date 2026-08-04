@@ -837,7 +837,7 @@ document.addEventListener('DOMContentLoaded', () => {
           const profileBtn = document.createElement('a');
           profileBtn.href = 'profile.html';
           profileBtn.id = 'profileNavBtn';
-          profileBtn.className = 'btn btn-green';
+          profileBtn.className = 'btn btn-green mobile-hidden';
           profileBtn.style.borderRadius = '20px';
           profileBtn.style.marginRight = '5px';
           profileBtn.innerHTML = '<i class="fas fa-user" style="margin-left: 5px;"></i><span class="desktop-text"> حسابي</span>';
@@ -847,7 +847,7 @@ document.addEventListener('DOMContentLoaded', () => {
           ytBtn.href = 'https://www.youtube.com/@youssefstudies';
           ytBtn.target = '_blank';
           ytBtn.id = 'ytNavBtn';
-          ytBtn.className = 'btn';
+          ytBtn.className = 'btn mobile-hidden';
           ytBtn.style.cssText = 'background-color: #FF0000 !important; color: #ffffff !important; padding: 8px 15px; border-radius: 20px; text-decoration: none; border: none; font-weight: bold; margin-right: 5px;';
           ytBtn.innerHTML = '<i class="fab fa-youtube" style="margin-left: 5px;"></i> <span class="desktop-text">قناة اليوتيوب</span>';
           navActions.appendChild(ytBtn);
@@ -863,7 +863,7 @@ document.addEventListener('DOMContentLoaded', () => {
           const logoutBtn = document.createElement('a');
           logoutBtn.href = '#';
           logoutBtn.id = 'logoutBtn';
-          logoutBtn.className = 'btn btn-outline';
+          logoutBtn.className = 'btn btn-outline mobile-hidden';
           logoutBtn.style.cssText = 'border-color: #e74c3c; color: #e74c3c; padding: 8px 15px; border-radius: 20px; margin-right: 5px;';
           logoutBtn.innerHTML = '<span class="desktop-text" style="margin-left: 5px;">خروج</span><i class="fas fa-sign-out-alt mobile-icon"></i>';
           navActions.appendChild(logoutBtn);

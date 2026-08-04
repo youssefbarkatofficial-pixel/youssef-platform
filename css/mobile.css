@@ -231,6 +231,10 @@
     font-size: 0.9rem !important;
     margin: 0 !important;
   }
+  
+  .mobile-hidden {
+    display: none !important;
+  }
 
   /* Sidebar menu toggle */
   #mobileSidebarToggle {
