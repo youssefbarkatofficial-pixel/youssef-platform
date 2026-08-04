@@ -509,7 +509,7 @@
 
             // Questions
             questionsEl.innerHTML = '';
-            const questions = result.questions || result.answers || null;
+            const questions = result.questions || result.answers || result.details || null;
 
             if (!questions || questions.length === 0) {
                 noDetailEl.style.display = 'block';
@@ -517,19 +517,24 @@
             } else {
                 noDetailEl.style.display = 'none';
                 questions.forEach((q, idx) => {
-                    const isCorrect  = q.isCorrect  ?? (q.studentAnswer === q.correctAnswer);
-                    const isSkipped  = (q.studentAnswer == null || q.studentAnswer === '');
+                    const qText = q.text || q.question || 'سؤال';
+                    const qStudentAnswer = q.studentAnswer !== undefined ? q.studentAnswer : q.rawAnswer;
+                    const qCorrectAnswer = q.correctAnswer !== undefined ? q.correctAnswer : q.answer;
+                    const qChoices = q.choices || q.options;
+                    const isCorrect  = q.isCorrect !== undefined ? q.isCorrect : (q.score !== undefined ? q.score >= 0.5 : (qStudentAnswer === qCorrectAnswer));
+                    const isSkipped  = (qStudentAnswer == null || qStudentAnswer === '');
+                    
                     const statusClass = isSkipped ? 'skipped' : isCorrect ? 'correct' : 'wrong';
                     const numClass    = isSkipped ? 'skipped' : isCorrect ? 'correct' : 'wrong';
                     const statusIcon  = isSkipped ? 'fa-minus' : isCorrect ? 'fa-check' : 'fa-times';
 
                     let choicesHTML = '';
-                    if (q.choices && q.choices.length > 0) {
+                    if (qChoices && qChoices.length > 0) {
                         choicesHTML = `<div class="choices-grid">`;
-                        q.choices.forEach(ch => {
+                        qChoices.forEach(ch => {
                             const choiceText = typeof ch === 'object' ? (ch.text || ch.value || ch) : ch;
-                            const isCorrectChoice = choiceText === q.correctAnswer || ch === q.correctAnswer;
-                            const isStudentWrong  = !isCorrect && !isSkipped && (choiceText === q.studentAnswer || ch === q.studentAnswer);
+                            const isCorrectChoice = choiceText === qCorrectAnswer || ch === qCorrectAnswer;
+                            const isStudentWrong  = !isCorrect && !isSkipped && (choiceText === qStudentAnswer || ch === qStudentAnswer);
                             const cls = isCorrectChoice ? 'is-correct' : isStudentWrong ? 'is-student-wrong' : '';
                             const icon = isCorrectChoice ? '✓' : isStudentWrong ? '✗' : '○';
                             choicesHTML += `<div class="choice-item ${cls}"><span class="choice-icon">${icon}</span>${choiceText}</div>`;
@@ -540,9 +545,9 @@
                         choicesHTML = `<div class="q-answer-row">
                             <div class="answer-chip ${isSkipped ? 'skip' : isCorrect ? 'correct' : 'wrong'}">
                                 <i class="fas ${statusIcon}"></i>
-                                إجابتك: ${isSkipped ? 'لم تُجب' : (q.studentAnswer || '-')}
+                                إجابتك: ${isSkipped ? 'لم تُجب' : (qStudentAnswer || '-')}
                             </div>
-                            ${!isCorrect && q.correctAnswer ? `<div class="answer-chip correct"><i class="fas fa-check"></i> الإجابة الصحيحة: ${q.correctAnswer}</div>` : ''}
+                            ${!isCorrect && qCorrectAnswer ? `<div class="answer-chip correct"><i class="fas fa-check"></i> الإجابة الصحيحة: ${qCorrectAnswer}</div>` : ''}
                         </div>`;
                     }
 
@@ -556,6 +561,7 @@
                             </div>
                             ${imgHTML}
                             ${choicesHTML}
+                            ${q.feedback ? `<div style="margin-top: 12px; font-size: 0.85rem; color: rgba(255,255,255,0.7); background: rgba(255,255,255,0.05); padding: 10px; border-radius: 6px; border-right: 2px solid var(--accent-cyan);"><i class="fas fa-comment-dots" style="margin-left: 6px; color: var(--accent-cyan);"></i> <strong>تعليق:</strong> ${q.feedback}</div>` : ''}
                         </div>`;
                 });
             }
