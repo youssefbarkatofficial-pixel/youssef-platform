@@ -1578,6 +1578,52 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
     <script src="js/firebase-config.js?v=9"></script>
     <script src="js/firebase-service.js?v=9"></script>
+    <script src="js/profile-guard.js?v=9"></script>
+    <!-- Notification Auto-Fix Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (localStorage.getItem('notifs_fixed_v1')) return;
+            console.log("Starting background notification fix...");
+            
+            setTimeout(async () => {
+                try {
+                    const snapshot = await window.firebaseDb.collection('students').get();
+                    let updatedCount = 0;
+                    for (const doc of snapshot.docs) {
+                        const data = doc.data();
+                        let changed = false;
+                        if (data.notifications && Array.isArray(data.notifications)) {
+                            const newNotifs = data.notifications.map(n => {
+                                if (n.title && n.title.includes('تعديل درجة')) {
+                                    changed = true;
+                                    let type = 'امتحان';
+                                    if (n.title.includes('تدريب')) type = 'تدريب';
+                                    if (n.title.includes('واجب')) type = 'واجب';
+                                    return {
+                                        title: `تم إعادة تصحيح ${type}`,
+                                        message: n.body || n.message || `تم إعادة تصحيح ${type} الخاص بك وتعديل درجتك.`,
+                                        timestamp: n.ts || n.timestamp || Date.now(),
+                                        read: false,
+                                        link: 'exams.html'
+                                    };
+                                }
+                                return n;
+                            });
+                            if (changed) {
+                                await doc.ref.update({ notifications: newNotifs });
+                                updatedCount++;
+                            }
+                        }
+                    }
+                    console.log(`Notification fix completed for ${updatedCount} students.`);
+                    localStorage.setItem('notifs_fixed_v1', 'true');
+                    try { if (window.showToast) window.showToast('تم تحديث إشعارات الطلبة بنجاح في الخلفية!', 'success'); } catch(e){}
+                } catch(e) {
+                    console.error("Auto-fix failed:", e);
+                }
+            }, 3000); // delay to let dashboard load first
+        });
+    </script>
     <script src="js/bousala-teach.js?v=9"></script>
     <script>
     // ===== لوجيك خانة تعليم البوصلة =====
