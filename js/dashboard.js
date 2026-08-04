@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 document.addEventListener('DOMContentLoaded', async () => {
   // Check auth
-  const userStr = sessionStorage.getItem('currentStudent');
+  const userStr = sessionStorage.getItem('currentStudent') || localStorage.getItem('currentStudent');
   const isDashboardPage = window.location.pathname.includes('dashboard.html') && !window.location.pathname.includes('admin-dashboard.html');
   
   if(!userStr && isDashboardPage) {
@@ -512,7 +512,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const file = proofInput.files[0];
       const proofImageBase64 = await readImageFileAsDataUrl(file);
 
-      const userStr = sessionStorage.getItem('currentStudent');
+      const userStr = sessionStorage.getItem('currentStudent') || localStorage.getItem('currentStudent');
       const user = userStr ? JSON.parse(userStr) : { name: 'زائر', phone: 'غير معروف' };
 
       const proofImageKey = 'proof_' + Date.now() + '_' + encodeURIComponent(user.phone);

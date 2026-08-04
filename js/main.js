@@ -1,4 +1,4 @@
-﻿// ============================================================
+// ============================================================
 //  دالة عرض المرحلة الدراسية — مشتركة بين كل صفحات المنصة
 //  تقبل كود المرحلة (prep1, sec2...) أو النص الكامل
 // ============================================================
@@ -139,7 +139,7 @@ document.addEventListener('DOMContentLoaded', () => {
   dashboardLinks.forEach(link => {
       if (sessionStorage.getItem('currentAdmin')) {
           link.href = 'admin-dashboard.html';
-      } else if (sessionStorage.getItem('currentStudent')) {
+      } else if (sessionStorage.getItem('currentStudent') || localStorage.getItem('currentStudent')) {
           link.href = 'dashboard.html';
       } else {
           if (link.parentElement && link.parentElement.tagName.toLowerCase() === 'li') {
@@ -241,7 +241,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const stored = localStorage.getItem('siteTheme');
     if (stored === 'light') return 'light';
     if (stored === 'dark') return 'dark';
-    const student = sessionStorage.getItem('currentStudent');
+    const student = sessionStorage.getItem('currentStudent') || localStorage.getItem('currentStudent');
     if (student) {
       try {
         const prefs = JSON.parse(localStorage.getItem(`prefs_${JSON.parse(student).phone}`) || '{}');
@@ -575,7 +575,7 @@ document.addEventListener('DOMContentLoaded', () => {
       play(soundName) {
           // Check user specific mute settings dynamically
           let muted = false;
-          let userStr = sessionStorage.getItem('currentStudent');
+          let userStr = sessionStorage.getItem('currentStudent') || localStorage.getItem('currentStudent');
           if (userStr) {
               let user = JSON.parse(userStr);
               let prefs = JSON.parse(localStorage.getItem(`prefs_${user.phone}`) || '{"sound":true,"globalSound":true}');
@@ -816,8 +816,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
   // --- Dynamic Navbar Standardization for Students ---
-  const currentStudentStr = sessionStorage.getItem('currentStudent');
-  if (currentStudentStr && !sessionStorage.getItem('currentAdmin') && !window.location.pathname.includes('admin-')) {
+  const currentStudentStr = sessionStorage.getItem('currentStudent') || localStorage.getItem('currentStudent');
+  if (currentStudentStr && !(sessionStorage.getItem('currentAdmin') || localStorage.getItem('currentAdmin')) && !window.location.pathname.includes('admin-')) {
       const navActions = document.querySelector('.nav-actions');
       if (navActions) {
           const themeBtn = document.getElementById('themeToggle');
@@ -877,7 +877,7 @@ document.addEventListener('DOMContentLoaded', () => {
           heroSubscribeBtn.href = 'courses.html';
           heroSubscribeBtn.innerHTML = 'تصفح كورساتك <i class="fas fa-arrow-left mr-2" style="margin-right: 10px;"></i>';
       }
-  } else if (sessionStorage.getItem('currentAdmin') && !window.location.pathname.includes('admin-')) {
+  } else if ((sessionStorage.getItem('currentAdmin') || localStorage.getItem('currentAdmin')) && !window.location.pathname.includes('admin-')) {
       const navActions = document.querySelector('.nav-actions');
       if (navActions) {
           const themeBtn = document.getElementById('themeToggle');
@@ -913,14 +913,14 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // --- Global Student Avatar Loader ---
-  let userStr = sessionStorage.getItem('currentStudent');
+  let userStr = sessionStorage.getItem('currentStudent') || localStorage.getItem('currentStudent');
   if (userStr) {
       let user = JSON.parse(userStr);
       let dbUser = JSON.parse(localStorage.getItem(`db_${user.phone}`)) || {};
       
-      const profilePic = localStorage.getItem(`profilePic_${user.phone}`) || user.profilePic;
+      const profilePic = localStorage.getItem(`profilePic_${user.phone}`) || user.profilePic || dbUser.profilePic;
       if (profilePic) {
-          const avatarImgs = document.querySelectorAll('.avatar img, #userAvatarImg, .avatar-name img');
+          const avatarImgs = document.querySelectorAll('.avatar img, #userAvatarImg, .avatar-name img, .sidebar .avatar img, .user-profile-pic, .profile-pic, .user-info img');
           avatarImgs.forEach(img => {
               img.src = profilePic;
               img.style.display = 'block';
@@ -1301,7 +1301,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let devtools = function() {};
   devtools.toString = function() {
       if (!window.location.pathname.includes('admin-')) {
-          const studentStr = sessionStorage.getItem('currentStudent');
+          const studentStr = sessionStorage.getItem('currentStudent') || localStorage.getItem('currentStudent');
           if (studentStr) {
               try {
                   const st = JSON.parse(studentStr);

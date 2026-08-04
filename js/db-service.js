@@ -24,7 +24,7 @@ window.PlatformDB = {
     // Authentication Logic Interface
     auth: {
         getCurrentUser() {
-            return JSON.parse(sessionStorage.getItem('currentStudent') || sessionStorage.getItem('currentAdmin') || 'null');
+            return JSON.parse(sessionStorage.getItem('currentStudent') || localStorage.getItem('currentStudent') || sessionStorage.getItem('currentAdmin') || localStorage.getItem('currentAdmin') || 'null');
         },
         login(user, role = 'student') {
             if (role === 'admin') sessionStorage.setItem('currentAdmin', JSON.stringify(user));

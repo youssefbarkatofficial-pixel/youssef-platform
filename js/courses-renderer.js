@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const gradeName = grades[course.grade] || course.grade;
         
         let actionBtnHTML = `<a href="#" class="btn btn-gold btn-subscribe" onclick="openPaymentModal(event, '${course.id}')">الاشتراك في الكورس</a>`;
-        let userStr = sessionStorage.getItem('currentStudent');
+        let userStr = sessionStorage.getItem('currentStudent') || localStorage.getItem('currentStudent');
         if(userStr) {
             let user = JSON.parse(userStr);
             let paymentRequests = JSON.parse(localStorage.getItem('paymentRequests')) || [];
@@ -176,7 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.openPaymentModal = function(e, courseId) {
         e.preventDefault();
         
-        let userStr = sessionStorage.getItem('currentStudent');
+        let userStr = sessionStorage.getItem('currentStudent') || localStorage.getItem('currentStudent');
         if(!userStr) {
             const loginModal = document.getElementById('loginModal');
             if(loginModal) loginModal.classList.add('active');
