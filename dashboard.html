@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/style.css?v=1785347365046">
     <link rel="stylesheet" href="css/dashboard.css?v=1785347365046">
+    <link rel="stylesheet" href="css/mobile.css?v=3">
 </head>
 <body>
     <div class="bg-effects"></div>
@@ -67,27 +68,27 @@
 
             <!-- Stats Cards -->
             <div class="dash-cards">
-                <div class="glass-panel dash-card">
+                <a href="stats.html" class="glass-panel dash-card stat-link">
                     <div class="dash-card-info">
                         <h3>نسبة الالتزام</h3>
                         <span class="value text-gold" id="statCommitment">0%</span>
                     </div>
                     <div class="dash-card-icon"><i class="fas fa-fire"></i></div>
-                </div>
-                <div class="glass-panel dash-card">
+                </a>
+                <a href="my-courses.html" class="glass-panel dash-card stat-link">
                     <div class="dash-card-info">
                         <h3>فيديوهات تمت مشاهدتها</h3>
                         <span class="value text-gold" id="statVideosWatched">0</span>
                     </div>
                     <div class="dash-card-icon"><i class="fas fa-play-circle"></i></div>
-                </div>
-                <div class="glass-panel dash-card">
+                </a>
+                <a href="homeworks.html" class="glass-panel dash-card stat-link">
                     <div class="dash-card-info">
                         <h3>الواجبات المكتملة</h3>
                         <span class="value text-gold" id="statHomework">0/0</span>
                     </div>
                     <div class="dash-card-icon"><i class="fas fa-check-square"></i></div>
-                </div>
+                </a>
             </div>
 
             <div class="dashboard-grid">
@@ -158,14 +159,7 @@
             }
         });
 
-        // Simple sidebar toggle for mobile
-        const mobileBtn = document.querySelector('.mobile-menu-btn');
-        const sidebar = document.getElementById('sidebar');
-        if(mobileBtn) {
-            mobileBtn.addEventListener('click', () => {
-                sidebar.classList.toggle('active');
-            });
-        }
+        // Sidebar toggle handled by mobile.js
     </script>
     <!-- Game Widget Modal (صِراع البوصلة) -->
     <div id="gameWidgetModal" class="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 999999999; padding: 0; margin: 0; overflow: hidden;">
@@ -207,8 +201,11 @@
     <script src="js/firebase-config.js?v=9"></script>
     <script src="js/firebase-service.js?v=9"></script>
     <script src="js/profile-guard.js?v=9"></script>
+    <script src="js/mobile.js?v=3"></script>
+
 </body>
 </html>
+
 
 
 

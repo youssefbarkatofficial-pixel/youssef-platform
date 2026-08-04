@@ -1,56 +1,4 @@
-document.addEventListener('DOMContentLoaded', () => {
-    // Inject mobile sidebar toggle and overlay if sidebar exists
-    const sidebar = document.getElementById('sidebar');
-    const navActions = document.querySelector('.nav-actions');
-    if (sidebar && navActions) {
-        if (!document.getElementById('sidebarOverlay')) {
-            const overlay = document.createElement('div');
-            overlay.className = 'sidebar-overlay';
-            overlay.id = 'sidebarOverlay';
-                overlay.addEventListener('click', () => {
-                    sidebar.classList.remove('active');
-                    sidebar.style.cssText = '';
-                    overlay.classList.remove('active');
-                    document.body.style.overflow = '';
-                });
-            sidebar.parentNode.insertBefore(overlay, sidebar);
-        }
-        
-        if (!document.getElementById('mobileSidebarToggle')) {
-            const toggleBtn = document.createElement('button');
-            toggleBtn.id = 'mobileSidebarToggle';
-            toggleBtn.className = 'btn btn-outline mobile-only-btn';
-            toggleBtn.style.cssText = 'border: none; font-size: 1.5rem; padding: 5px 10px; margin-right: auto; order: -1;';
-            toggleBtn.innerHTML = '<i class="fas fa-bars"></i>';
-            toggleBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                sidebar.classList.toggle('active');
-                if (sidebar.classList.contains('active')) {
-                    sidebar.style.cssText = 'right: 0 !important; visibility: visible !important; transform: none !important; opacity: 1 !important; display: block !important;';
-                    document.body.style.overflow = 'hidden';
-                } else {
-                    sidebar.style.cssText = '';
-                    document.body.style.overflow = '';
-                }
-                document.getElementById('sidebarOverlay').classList.toggle('active');
-            });
-
-            // Close sidebar when clicking a link inside it
-            const sidebarLinks = sidebar.querySelectorAll('.sidebar-nav a');
-            sidebarLinks.forEach(link => {
-                link.addEventListener('click', () => {
-                    if (window.innerWidth <= 992 && sidebar.classList.contains('active')) {
-                        sidebar.classList.remove('active');
-                        sidebar.style.cssText = '';
-                        document.getElementById('sidebarOverlay').classList.remove('active');
-                        document.body.style.overflow = '';
-                    }
-                });
-            });
-            navActions.appendChild(toggleBtn);
-        }
-    }
-});
+// Sidebar toggle logic moved to mobile.js
 
 document.addEventListener('DOMContentLoaded', async () => {
   // Check auth
@@ -279,10 +227,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                   const isPositive = n.title && (n.title.includes('قبول') || n.title.includes('تفعيل') || n.title.includes('مبروك') || n.title.includes('نجاح'));
                   
                   if (isPositive) {
-                      try { if (window.triggerConfetti) window.triggerConfetti(); } catch(e){}
-                      try { if (window.showToast) window.showToast('تهانينا! تم تفعيل كورسك. توجه الآن لمحتوى الكورس.', 'majestic', { title: '🎉 مبروك!', duration: 4500, isMajestic: true, playSound: 'celebration' }); } catch(e){}
                       try { 
                           if (!localStorage.getItem('has_celebrated_' + n.courseId)) {
+                              if (window.triggerConfetti) window.triggerConfetti();
+                              if (window.showToast) window.showToast('تهانينا! تم تفعيل كورسك. توجه الآن لمحتوى الكورس.', 'majestic', { title: '🎉 مبروك!', duration: 4500, isMajestic: true, playSound: 'celebration' });
                               sessionStorage.setItem('celebrate_course_' + n.courseId, '1'); 
                               localStorage.setItem('has_celebrated_' + n.courseId, '1');
                           }

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/style.css?v=1785347365071">
     <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/mobile.css?v=3">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         /* ===== STATS PAGE PREMIUM STYLES ===== */
@@ -199,7 +200,7 @@
 
         <!-- KPI CARDS -->
         <div class="kpi-grid" id="kpiGrid" style="display:none;">
-            <div class="kpi-card gold">
+            <div class="kpi-card gold" style="cursor:pointer;" onclick="if(window.showToast) window.showToast('قريباً: تقارير تفصيلية لتحليل مستواك!', 'majestic')">
                 <div class="kpi-icon gold"><i class="fas fa-star"></i></div>
                 <div class="kpi-data">
                     <div class="kpi-val" id="kAvg" style="color:var(--gold);">-</div>
@@ -207,7 +208,7 @@
                     <div class="kpi-sub" id="kAvgSub"></div>
                 </div>
             </div>
-            <div class="kpi-card cyan">
+            <div class="kpi-card cyan" style="cursor:pointer;" onclick="if(window.showToast) window.showToast('قريباً: مكافآت للملتزمين بمشاهدة المحاضرات!', 'majestic')">
                 <div class="kpi-icon cyan"><i class="fas fa-video"></i></div>
                 <div class="kpi-data">
                     <div class="kpi-val" id="kVideos" style="color:var(--cyan);">-</div>
@@ -215,7 +216,7 @@
                     <div class="kpi-sub" id="kVideosSub"></div>
                 </div>
             </div>
-            <div class="kpi-card green">
+            <div class="kpi-card green" style="cursor:pointer;" onclick="if(window.showToast) window.showToast('استمر في التقدم! كل اختبار يزيد من خبرتك', 'majestic')">
                 <div class="kpi-icon green"><i class="fas fa-clipboard-check"></i></div>
                 <div class="kpi-data">
                     <div class="kpi-val" id="kExams" style="color:var(--green);">-</div>
@@ -223,28 +224,12 @@
                     <div class="kpi-sub" id="kExamsSub"></div>
                 </div>
             </div>
-            <div class="kpi-card blue">
+            <div class="kpi-card blue" style="cursor:pointer;" onclick="if(window.showToast) window.showToast('قريباً: استبيان سريع لتقييم الكورسات', 'majestic')">
                 <div class="kpi-icon blue"><i class="fas fa-book-open"></i></div>
                 <div class="kpi-data">
                     <div class="kpi-val" id="kCourses" style="color:var(--blue);">-</div>
-                    <div class="kpi-lbl">كورسات مشترك فيها</div>
+                    <div class="kpi-lbl">كورسات مسجل بها</div>
                     <div class="kpi-sub" id="kCoursesSub"></div>
-                </div>
-            </div>
-            <div class="kpi-card green">
-                <div class="kpi-icon green"><i class="fas fa-check-circle"></i></div>
-                <div class="kpi-data">
-                    <div class="kpi-val" id="kCorrect" style="color:#2ecc71;">-</div>
-                    <div class="kpi-lbl">إجابات صحيحة</div>
-                    <div class="kpi-sub" id="kCorrectSub"></div>
-                </div>
-            </div>
-            <div class="kpi-card red">
-                <div class="kpi-icon red"><i class="fas fa-times-circle"></i></div>
-                <div class="kpi-data">
-                    <div class="kpi-val" id="kWrong" style="color:#e74c3c;">-</div>
-                    <div class="kpi-lbl">إجابات خاطئة</div>
-                    <div class="kpi-sub" id="kWrongSub"></div>
                 </div>
             </div>
         </div>
@@ -265,13 +250,6 @@
                     <i class="fas fa-chart-line"></i> منحنى الدرجات
                 </div>
                 <div style="height:220px;"><canvas id="scoresChart"></canvas></div>
-            </div>
-            <div class="chart-box">
-                <div class="section-title" style="margin-bottom:16px;">
-                    <i class="fas fa-chart-pie"></i> توزيع الإجابات
-                </div>
-                <div style="height:180px;"><canvas id="donutChart"></canvas></div>
-                <div class="radar-label" id="donutLegend"></div>
             </div>
         </div>
 
@@ -481,11 +459,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('kExamsSub').textContent = `${Object.keys(uniqueExamMap).length} اختبار فريد`;
     animCount('kCourses', courses.length);
     document.getElementById('kCoursesSub').textContent = courseProgressData.map(c => `${c.pct}%`).join('  •  ');
-    animCount('kCorrect', totalCorrect);
-    const totalAnswered = totalCorrect + totalWrong + totalSkipped;
-    document.getElementById('kCorrectSub').textContent = totalAnswered > 0 ? `${Math.round(totalCorrect/totalAnswered*100)}% من الإجمالي` : '';
-    animCount('kWrong', totalWrong);
-    document.getElementById('kWrongSub').textContent = totalAnswered > 0 ? `${Math.round(totalWrong/totalAnswered*100)}% من الإجمالي` : '';
 
     // ===== INSIGHT =====
     buildInsight(avgScore, totalVideos, totalVideosPossible, examResults.length, scoreHistory);
@@ -516,7 +489,21 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // ===== EXAM TABLE (simplified, student-friendly) =====
     const tbody = document.getElementById('examTableBody');
-    const sortedHistory = [...scoreHistory].sort((a,b) => b.ts - a.ts).slice(0, 20);
+    
+    // To avoid duplicates (e.g. taking the same training multiple times), 
+    // we only show the LATEST attempt for each unique exam.
+    const latestAttemptsOnly = [];
+    const seenExams = new Set();
+    const historySortedByTimeDesc = [...scoreHistory].sort((a,b) => b.ts - a.ts);
+    historySortedByTimeDesc.forEach(r => {
+        const uniqueKey = r.courseId + '_' + r.title;
+        if (!seenExams.has(uniqueKey)) {
+            seenExams.add(uniqueKey);
+            latestAttemptsOnly.push(r);
+        }
+    });
+    
+    const sortedHistory = latestAttemptsOnly.slice(0, 20);
     sortedHistory.forEach((r, idx) => {
         const pct = r.pct;
         const pillClass = pct >= 85 ? 'ex' : pct >= 60 ? 'good' : pct >= 40 ? 'avg' : 'low';
@@ -667,25 +654,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // ===== DONUT CHART =====
-    if (totalCorrect + totalWrong + totalSkipped > 0) {
-        const ctx2 = document.getElementById('donutChart');
-        if (ctx2) {
-            new Chart(ctx2, {
-                type: 'doughnut',
-                data: {
-                    labels: ['صحيحة', 'خاطئة', 'لم يُجب'],
-                    datasets: [{ data: [totalCorrect, totalWrong, totalSkipped || 0], backgroundColor: ['#2ecc71', '#e74c3c', '#f39c12'], borderWidth: 0, hoverOffset: 8 }]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false, cutout: '68%',
-                    plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => `${ctx.label}: ${ctx.parsed}` } } }
-                }
-            });
-            document.getElementById('donutLegend').innerHTML = `
-                <span style="color:#2ecc71;">● صحيحة ${totalCorrect}</span>&ensp;
-                <span style="color:#e74c3c;">● خاطئة ${totalWrong}</span>&ensp;
-                ${totalSkipped > 0 ? `<span style="color:#f39c12;">● لم يُجب ${totalSkipped}</span>` : ''}`;
         }
     }
 });
@@ -712,10 +680,10 @@ function buildInsight(avg, videos, totalVids, examsCount, history) {
     let insights = [];
 
     // Avg score insight — plain language
-    if (avg >= 85)      insights.push(`متوسط درجاتك ${avg}% — ده مستوى ممتاز جداً! 🎉 استمر كده.`);
-    else if (avg >= 60) insights.push(`متوسط درجاتك ${avg}% — كويس، بس تقدر توصل لأحسن من كده لو راجعت الأخطاء.`);
-    else if (avg >= 40) insights.push(`متوسط درجاتك ${avg}% — محتاج تذاكر أكتر وتراجع الدروس اللي صعبة عليك.`);
-    else if (avg > 0)   insights.push(`متوسط درجاتك ${avg}% — الدرجات منخفضة، راجع المحاضرات وابدأ من الأول.`);
+    if (avg >= 85)      insights.push(`متوسط درجاتك ${avg}% — ممتاز جداً! 🎉 استمر في الحفاظ على هذا المستوى.`);
+    else if (avg >= 60) insights.push(`متوسط درجاتك ${avg}% — أنت ناجح! 👍 لكن حاول مراجعة أخطائك للوصول للامتياز.`);
+    else if (avg > 0)   insights.push(`متوسط درجاتك ${avg}% — لم تصل لنسبة النجاح (60%). ❌ ركز أكثر وراجع دروسك.`);
+    else                insights.push(`لم تنجز أي اختبارات بعد. تذكر أن نسبة النجاح المطلوبة هي 60%.`);
 
     // Video progress insight
     if (totalVids > 0) {
@@ -752,5 +720,8 @@ function buildInsight(avg, videos, totalVids, examsCount, history) {
     card.style.display = 'flex';
 }
 </script>
+    <script src="js/mobile.js?v=3"></script>
 </body>
 </html>
+
+

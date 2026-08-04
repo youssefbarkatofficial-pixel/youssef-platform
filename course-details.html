@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -24,6 +24,7 @@
     <link rel="preconnect" href="https://www.gstatic.com">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/style.css?v=1785347365036">
+    <link rel="stylesheet" href="css/mobile.css?v=3">
     <link rel="stylesheet" href="css/courses.css">
     <link rel="stylesheet" href="css/auth.css">
     <!-- Dynamic SEO title/OG per course -->
@@ -48,6 +49,37 @@
         } catch(e) {}
     })();
     </script>
+    <style>
+    @keyframes gentlePulse {
+        0% { opacity: 1; transform: scale(1); box-shadow: 0 0 0px rgba(52, 152, 219, 0); }
+        50% { opacity: 0.9; transform: scale(0.99); box-shadow: 0 0 10px rgba(52, 152, 219, 0.2); }
+        100% { opacity: 1; transform: scale(1); box-shadow: 0 0 0px rgba(52, 152, 219, 0); }
+    }
+    .schedule-pulse {
+        animation: gentlePulse 3s infinite ease-in-out;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 12px;
+        padding: 12px 18px !important;
+        line-height: 1.8;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    .schedule-pulse:hover {
+        background: rgba(255, 255, 255, 0.06);
+        border-color: rgba(52, 152, 219, 0.3);
+    }
+    .schedule-time-badge {
+        display: block;
+        margin-top: 8px;
+        font-size: 0.85rem;
+        background: rgba(52, 152, 219, 0.1);
+        color: #3498db;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-weight: bold;
+    }
+    </style>
 </head>
 <body>
     <div class="bg-effects"></div>
@@ -467,10 +499,12 @@
             const scheduleEl = document.getElementById('cdSchedule');
             if (course.grade && course.grade.startsWith('prep')) {
                 scheduleEl.style.display = 'flex';
-                scheduleEl.innerHTML = '<span style="color:var(--royal-gold);"><i class="fas fa-calendar-alt"></i> الشرح والتدريب: الخميس</span> <span style="color:rgba(255,255,255,0.3);">|</span> <span style="color:#3498db;"><i class="fas fa-edit"></i> الواجب: الثلاثاء</span> <span style="color:rgba(255,255,255,0.3);">|</span> <span style="color:#e74c3c;"><i class="fas fa-trophy"></i> الامتحان: الأربعاء 9 م</span>';
+                scheduleEl.className = 'schedule-pulse';
+                scheduleEl.innerHTML = '<div style="display:flex; justify-content:center; align-items:center; gap:12px; flex-wrap:wrap; width:100%;"><span style="color:var(--royal-gold);"><i class="fas fa-calendar-alt"></i> الشرح والتدريب: الخميس</span> <span style="color:rgba(255,255,255,0.3);">|</span> <span style="color:#3498db;"><i class="fas fa-edit"></i> الواجب: الثلاثاء</span> <span style="color:rgba(255,255,255,0.3);">|</span> <span style="color:#e74c3c;"><i class="fas fa-trophy"></i> الامتحان: الأربعاء</span></div><span class="schedule-time-badge"><i class="far fa-clock"></i> جميع المواعيد المذكورة الساعة 9 مساءً</span>';
             } else if (course.grade && course.grade.startsWith('sec')) {
                 scheduleEl.style.display = 'flex';
-                scheduleEl.innerHTML = '<span style="color:var(--royal-gold);"><i class="fas fa-calendar-alt"></i> الشرح والتدريب: الجمعة</span> <span style="color:rgba(255,255,255,0.3);">|</span> <span style="color:#3498db;"><i class="fas fa-edit"></i> الواجب: الثلاثاء</span> <span style="color:rgba(255,255,255,0.3);">|</span> <span style="color:#e74c3c;"><i class="fas fa-trophy"></i> الامتحان: الأربعاء 9 م</span>';
+                scheduleEl.className = 'schedule-pulse';
+                scheduleEl.innerHTML = '<div style="display:flex; justify-content:center; align-items:center; gap:12px; flex-wrap:wrap; width:100%;"><span style="color:var(--royal-gold);"><i class="fas fa-calendar-alt"></i> الشرح والتدريب: الجمعة</span> <span style="color:rgba(255,255,255,0.3);">|</span> <span style="color:#3498db;"><i class="fas fa-edit"></i> الواجب: الثلاثاء</span> <span style="color:rgba(255,255,255,0.3);">|</span> <span style="color:#e74c3c;"><i class="fas fa-trophy"></i> الامتحان: الأربعاء</span></div><span class="schedule-time-badge"><i class="far fa-clock"></i> جميع المواعيد المذكورة الساعة 9 مساءً</span>';
             } else {
                 scheduleEl.style.display = 'none';
             }
@@ -579,10 +613,12 @@
                     const scheduleEl = document.getElementById('cdSchedule');
                     if (course.grade && course.grade.startsWith('prep')) {
                         scheduleEl.style.display = 'flex';
-                        scheduleEl.innerHTML = '<span style="color:var(--royal-gold);"><i class="fas fa-calendar-alt"></i> الشرح والتدريب: الخميس</span> <span style="color:rgba(255,255,255,0.3);">|</span> <span style="color:#3498db;"><i class="fas fa-edit"></i> الواجب: الثلاثاء</span> <span style="color:rgba(255,255,255,0.3);">|</span> <span style="color:#e74c3c;"><i class="fas fa-trophy"></i> الامتحان: الأربعاء 9 م</span>';
+                        scheduleEl.className = 'schedule-pulse';
+                        scheduleEl.innerHTML = '<div style="display:flex; justify-content:center; align-items:center; gap:12px; flex-wrap:wrap; width:100%;"><span style="color:var(--royal-gold);"><i class="fas fa-calendar-alt"></i> الشرح والتدريب: الخميس</span> <span style="color:rgba(255,255,255,0.3);">|</span> <span style="color:#3498db;"><i class="fas fa-edit"></i> الواجب: الثلاثاء</span> <span style="color:rgba(255,255,255,0.3);">|</span> <span style="color:#e74c3c;"><i class="fas fa-trophy"></i> الامتحان: الأربعاء</span></div><span class="schedule-time-badge"><i class="far fa-clock"></i> جميع المواعيد المذكورة الساعة 9 مساءً</span>';
                     } else if (course.grade && course.grade.startsWith('sec')) {
                         scheduleEl.style.display = 'flex';
-                        scheduleEl.innerHTML = '<span style="color:var(--royal-gold);"><i class="fas fa-calendar-alt"></i> الشرح والتدريب: الجمعة</span> <span style="color:rgba(255,255,255,0.3);">|</span> <span style="color:#3498db;"><i class="fas fa-edit"></i> الواجب: الثلاثاء</span> <span style="color:rgba(255,255,255,0.3);">|</span> <span style="color:#e74c3c;"><i class="fas fa-trophy"></i> الامتحان: الأربعاء 9 م</span>';
+                        scheduleEl.className = 'schedule-pulse';
+                        scheduleEl.innerHTML = '<div style="display:flex; justify-content:center; align-items:center; gap:12px; flex-wrap:wrap; width:100%;"><span style="color:var(--royal-gold);"><i class="fas fa-calendar-alt"></i> الشرح والتدريب: الجمعة</span> <span style="color:rgba(255,255,255,0.3);">|</span> <span style="color:#3498db;"><i class="fas fa-edit"></i> الواجب: الثلاثاء</span> <span style="color:rgba(255,255,255,0.3);">|</span> <span style="color:#e74c3c;"><i class="fas fa-trophy"></i> الامتحان: الأربعاء</span></div><span class="schedule-time-badge"><i class="far fa-clock"></i> جميع المواعيد المذكورة الساعة 9 مساءً</span>';
                     } else {
                         scheduleEl.style.display = 'none';
                     }               document.getElementById('adminEditCourseModal').classList.remove('active');
@@ -955,6 +991,19 @@
                     if (scheduleText) {
                         scheduleHtml = `<div style="color: rgba(255,255,255,0.6); font-size: 0.85rem; margin-top: 5px; font-weight: normal;"><i class="fas fa-clock mr-1"></i> موعد النزول: ${scheduleText}</div>`;
                     }
+                    
+                    const itemsArr = sec.items || [];
+                    let countText = '';
+                    if (sec.id === 'sec_homeworks') countText = `${itemsArr.length} واجبات`;
+                    else if (sec.id === 'sec_exams') countText = `${itemsArr.length} امتحانات`;
+                    else countText = `${itemsArr.filter(i => i.type === 'video').length} محاضرات`;
+                    
+                    let latestBadge = '';
+                    if (itemsArr.length > 0) {
+                        const lastItem = itemsArr[itemsArr.length - 1];
+                        const badgeLabel = sec.id === 'sec_homeworks' ? 'واجب جديد' : (sec.id === 'sec_exams' ? 'امتحان جديد' : 'أحدث إضافة');
+                        latestBadge = `<div style="display:inline-block; margin-top:8px; padding: 4px 10px; background: rgba(52, 152, 219, 0.15); border: 1px solid rgba(52, 152, 219, 0.3); border-radius: 6px; color: #3498db; font-size: 0.8rem; font-weight: bold;"><i class="fas fa-star" style="color:var(--royal-gold); margin-left:5px; font-size:0.75rem;"></i>${badgeLabel}: ${lastItem.title || 'بدون عنوان'}</div>`;
+                    }
 
                     header.innerHTML = `
                         <div style="display:flex; align-items:center; gap:16px; flex:1;">
@@ -962,7 +1011,8 @@
                             <div style="text-align:right; min-width:0;">
                                 <div style="font-size:1.2rem; font-weight:bold; color: var(--accent-cyan); white-space:normal;">${sec.title}</div>
                                 ${scheduleHtml}
-                                <div style="color: rgba(255,255,255,0.5); font-size:0.9rem; margin-top:4px;">${(sec.items || []).filter(i => i.type === 'video').length} محاضرات</div>
+                                <div style="color: rgba(255,255,255,0.5); font-size:0.9rem; margin-top:4px;">${countText}</div>
+                                ${latestBadge}
                             </div>
                         </div>
                         <i class="fas fa-chevron-down" style="color: rgba(255,255,255,0.5); transition: transform 0.3s;" id="chevron_${sIdx}"></i>
@@ -1902,8 +1952,11 @@ setInterval(() => {
 }, 1000);
 
 </script>
+    <script src="js/mobile.js?v=3"></script>
 </body>
 </html>
+
+
 
 
 
