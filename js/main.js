@@ -886,6 +886,15 @@ document.addEventListener('DOMContentLoaded', () => {
           
           if (themeBtn) navActions.appendChild(themeBtn);
           
+          const ytBtn = document.createElement('a');
+          ytBtn.href = 'https://www.youtube.com/@youssefstudies';
+          ytBtn.target = '_blank';
+          ytBtn.id = 'ytNavBtn';
+          ytBtn.className = 'btn';
+          ytBtn.style.cssText = 'background-color: #FF0000 !important; color: #ffffff !important; padding: 8px 15px; border-radius: 20px; text-decoration: none; border: none; font-weight: bold; margin-right: 5px;';
+          ytBtn.innerHTML = '<i class="fab fa-youtube mobile-icon" style="margin-left: 5px;"></i><span class="desktop-text">قناة اليوتيوب</span>';
+          navActions.appendChild(ytBtn);
+          
           const adminDashBtn = document.createElement('a');
           adminDashBtn.href = 'admin-dashboard.html';
           adminDashBtn.className = 'btn btn-gold';
