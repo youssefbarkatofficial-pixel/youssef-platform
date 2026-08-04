@@ -1393,11 +1393,17 @@ document.addEventListener('DOMContentLoaded', () => {
                                   if(window.showToast) window.showToast('تم تحديث بيانات حسابك من الخادم الأساسي.', 'warning');
                                   setTimeout(() => window.location.reload(), 2000);
                               } 
-                              // Silent Sync (e.g. Admin approved a payment or sent a notification)
-                              else if (localCourses.length < remoteCourses.length || localNotifs.length !== remoteNotifs.length) {
+                              // Silent Sync (e.g. Admin approved a payment, sent a notification, or fixed notifications)
+                              const notifsChanged = JSON.stringify(localNotifs) !== JSON.stringify(remoteNotifs);
+                              if (localCourses.length < remoteCourses.length || notifsChanged) {
                                   sessionStorage.setItem('currentStudent', JSON.stringify(remoteUser));
                                   if (localStorage.getItem('currentStudent')) {
                                       localStorage.setItem('currentStudent', JSON.stringify(remoteUser));
+                                  }
+                                  if (remoteUser.phone) {
+                                      let dbLocal = JSON.parse(localStorage.getItem(`db_${remoteUser.phone}`) || '{}');
+                                      dbLocal = { ...dbLocal, ...remoteUser };
+                                      localStorage.setItem(`db_${remoteUser.phone}`, JSON.stringify(dbLocal));
                                   }
                                   
                                   // Auto-clear rejected pending requests reliably

@@ -471,8 +471,15 @@ async function saveGradeOverride(uid, examTitle, btn) {
         
         if (!updated) { alert('لم يتم العثور على هذا الامتحان في سجلات الطالب'); btn.textContent = 'حفظ'; return; }
         
-        const isTrain = (examTitle && examTitle.includes('تدريب'));
-        const isHomework = (examTitle && examTitle.includes('واجب'));
+        let isTrain = false;
+        let isHomework = false;
+        local.examResults.forEach(r => {
+            if (r.examTitle === examTitle && (r.attemptNumber === 1 || !r.attemptNumber)) {
+                if (r.isTraining) isTrain = true;
+                if (r.isHomework) isHomework = true;
+            }
+        });
+        
         const examTypeStr = isTrain ? 'تدريب' : (isHomework ? 'واجب' : 'امتحان');
         
         local.notifications = local.notifications || [];
