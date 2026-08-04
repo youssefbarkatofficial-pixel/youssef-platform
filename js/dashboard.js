@@ -252,7 +252,7 @@ document.addEventListener('DOMContentLoaded', async () => {
               item.appendChild(right);
               item.addEventListener('click', (e) => {
                 e.preventDefault();
-                try { if (window.audioManager) window.audioManager.play('whatsapp'); } catch(e){}
+                // No click sound - sound plays only on notification arrival
                 
                 if (!n.read) {
                     n.read = true;

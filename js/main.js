@@ -1,4 +1,4 @@
-// ============================================================
+﻿// ============================================================
 //  دالة عرض المرحلة الدراسية — مشتركة بين كل صفحات المنصة
 //  تقبل كود المرحلة (prep1, sec2...) أو النص الكامل
 // ============================================================
@@ -1113,9 +1113,7 @@ document.addEventListener('DOMContentLoaded', () => {
                   bellIcon.style.animation = 'none';
               }
               
-              if(!document.getElementById('studentNotifDropdown')) {
-                  window.audioManager.play('notifOpen');
-              }
+              // No sound on bell click - sound only plays on notification arrival
               
               openStudentNotifications(user.phone, notifications, btn);
           }
@@ -1408,6 +1406,57 @@ document.addEventListener('DOMContentLoaded', () => {
                                   
                                   // Auto-clear rejected pending requests reliably
                                   try {
+                                       // Detect truly NEW notifications (not seen before) and play sound once
+                                       try {
+                                           const announcedKey = 'announced_notif_ids';
+                                           const announced = JSON.parse(localStorage.getItem(announcedKey) || '[]');
+                                           const newArrivals = remoteNotifs.filter(n => {
+                                               const id = n.id || (n.title + '_' + (n.timestamp || ''));
+                                               return !n.read && !announced.includes(id);
+                                           });
+                                           if (newArrivals.length > 0) {
+                                               // Mark them as announced
+                                               newArrivals.forEach(n => {
+                                                   const id = n.id || (n.title + '_' + (n.timestamp || ''));
+                                                   if (!announced.includes(id)) announced.push(id);
+                                               });
+                                               // Keep list trimmed to last 100
+                                               if (announced.length > 100) announced.splice(0, announced.length - 100);
+                                               localStorage.setItem(announcedKey, JSON.stringify(announced));
+                                               
+                                               // Play arrival sound using a persistent global Audio (survives GC)
+                                               if (!window._notifArrivalAudio) {
+                                                   window._notifArrivalAudio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+                                                   window._notifArrivalAudio.volume = 0.7;
+                                               }
+                                               try {
+                                                   window._notifArrivalAudio.currentTime = 0;
+                                                   window._notifArrivalAudio.play().catch(()=>{});
+                                               } catch(e) {}
+                                               
+                                               // Animate bell icon with a burst effect
+                                               const bells = document.querySelectorAll('.fa-bell');
+                                               bells.forEach(bell => {
+                                                   if (!bell.closest('a') || bell.closest('a').href.includes('admin-')) return;
+                                                   bell.style.transition = 'transform 0.15s ease';
+                                                   bell.style.color = '#f0c040';
+                                                   bell.style.animation = 'none';
+                                                   let t = 0;
+                                                   const seq = [10,-10,8,-8,6,-6,4,-4,0];
+                                                   function nextStep() {
+                                                       if (t >= seq.length) {
+                                                           bell.style.transform = 'rotate(0deg)';
+                                                           bell.style.animation = 'gentleShake 4s infinite ease-in-out';
+                                                           return;
+                                                       }
+                                                       bell.style.transform = `rotate(${seq[t]}deg)`;
+                                                       t++;
+                                                       setTimeout(nextStep, 70);
+                                                   }
+                                                   nextStep();
+                                               });
+                                           }
+                                       } catch(e) {}
                                       let hasRejection = false;
                                       let pReqs = JSON.parse(localStorage.getItem('paymentRequests') || '[]');
                                       remoteNotifs.forEach(n => {
@@ -1433,10 +1482,10 @@ document.addEventListener('DOMContentLoaded', () => {
                                   } else {
                                       // Just update notifications badge in background if possible
                                       const unreadCount = remoteNotifs.filter(n => !n.read).length;
-                                      if (unreadCount > 0 && typeof window.audioManager !== 'undefined') {
-                                          try { window.audioManager.play('whatsapp'); } catch(e){}
-                                      }
-                                      // If rejection was processed, we might want to reload to show the subscribe button again
+                                       if ($false) {
+
+
+
                                       if (remoteNotifs.some(n => n.title && n.title.includes('مشكلة في تأكيد الدفع') && !n.read)) {
                                           if (window.location.pathname.includes('courses.html') || window.location.pathname.includes('course-details.html')) {
                                               setTimeout(() => window.location.reload(), 1500);
