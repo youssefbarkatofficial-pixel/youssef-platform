@@ -1482,10 +1482,6 @@ document.addEventListener('DOMContentLoaded', () => {
                                   } else {
                                       // Just update notifications badge in background if possible
                                       const unreadCount = remoteNotifs.filter(n => !n.read).length;
-                                       if ($false) {
-
-
-
                                       if (remoteNotifs.some(n => n.title && n.title.includes('مشكلة في تأكيد الدفع') && !n.read)) {
                                           if (window.location.pathname.includes('courses.html') || window.location.pathname.includes('course-details.html')) {
                                               setTimeout(() => window.location.reload(), 1500);
