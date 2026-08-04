@@ -87,6 +87,7 @@
 
     nav.appendChild(ul);
     document.body.appendChild(nav);
+    document.body.classList.add('has-bottom-nav');
   }
 
   /* ----------------------------------------------------------------
