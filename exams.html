@@ -448,6 +448,16 @@
 
                 container.appendChild(row);
             });
+            
+            // Check for openExam parameter
+            const urlParams = new URLSearchParams(window.location.search);
+            const openExamTitle = urlParams.get('openExam');
+            if (openExamTitle) {
+                const targetResult = examResults.find(r => r.examTitle === openExamTitle);
+                if (targetResult) {
+                    setTimeout(() => showExamDetailModal(targetResult), 100);
+                }
+            }
         } else {
             container.style.display = 'none';
             emptyState.style.display = 'block';

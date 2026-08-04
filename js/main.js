@@ -1225,58 +1225,105 @@ document.addEventListener('DOMContentLoaded', () => {
           if (filtered.length === 0) {
               container.innerHTML = '<div style="text-align:center; padding:20px; color:rgba(255,255,255,0.5);"><i class="fas fa-bell-slash" style="font-size:2rem; margin-bottom:10px;"></i><p style="font-size:0.9rem;">لا توجد إشعارات</p></div>';
           } else {
-                  filtered.forEach(n => {
+              filtered.forEach(n => {
                   const targetId = n.courseId || n.targetCourseId || null;
-                  const targetAttr = targetId ? `data-course-id="${targetId}" data-notif-title="${n.title.replace(/"/g, '&quot;')}"` : '';
-                  const clickableStyle = targetId ? 'cursor:pointer;' : '';
+                  const targetAttr = targetId ? `data-course-id="${targetId}" data-notif-title="${(n.title||'').replace(/"/g, '&quot;')}"` : '';
+                  const clickableStyle = (targetId || n.link) ? 'cursor:pointer;' : '';
                   const d = new Date(n.timestamp || n.date || Date.now());
-                  container.innerHTML += `
-                      <div class="notif-item" ${targetAttr} style="background:rgba(255,255,255,0.05); border-right: 3px solid ${n.read ? 'transparent' : 'var(--accent-cyan)'}; padding:12px; border-radius:5px; transition: all 0.3s; ${clickableStyle}">
-                          <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-                              <h4 style="color:${n.read ? 'var(--text-primary)' : 'var(--accent-cyan)'}; margin-bottom:5px; font-size:0.95rem;">${n.title}</h4>
-                          </div>
-                          <p style="color:rgba(255,255,255,0.7); font-size:0.85rem; margin:0; line-height:1.4;">${n.message}</p>
-                          <span style="font-size:0.75rem; color:rgba(255,255,255,0.4); display:block; margin-top:8px;"><i class="far fa-clock mr-1"></i> ${d.toLocaleDateString('ar-EG', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+                  
+                  const itemDiv = document.createElement('div');
+                  itemDiv.className = 'notif-item';
+                  itemDiv.setAttribute('data-timestamp', n.timestamp || '');
+                  if (targetId) {
+                      itemDiv.setAttribute('data-course-id', targetId);
+                      itemDiv.setAttribute('data-notif-title', n.title || '');
+                  }
+                  itemDiv.style.cssText = `background:rgba(255,255,255,0.05); border-right: 3px solid ${n.read ? 'transparent' : 'var(--accent-cyan)'}; padding:12px; border-radius:5px; transition: all 0.3s; margin-bottom: 10px; ${clickableStyle}`;
+                  
+                  itemDiv.innerHTML = `
+                      <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                          <h4 class="notif-title-text" style="color:${n.read ? 'var(--text-primary)' : 'var(--accent-cyan)'}; margin-bottom:5px; font-size:0.95rem;">${n.title}</h4>
                       </div>
+                      <p style="color:rgba(255,255,255,0.7); font-size:0.85rem; margin:0; line-height:1.4;">${n.message}</p>
+                      <span style="font-size:0.75rem; color:rgba(255,255,255,0.4); display:block; margin-top:8px;"><i class="far fa-clock mr-1"></i> ${d.toLocaleDateString('ar-EG', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
                   `;
-              });
-
-              const clickableItems = container.querySelectorAll('[data-course-id]');
-              clickableItems.forEach(item => {
-                  item.addEventListener('click', () => {
-                      const courseId = item.getAttribute('data-course-id');
-                      const title = item.getAttribute('data-notif-title') || '';
+                  
+                  itemDiv.addEventListener('click', () => {
+                      if (!n.read) {
+                          n.read = true;
+                          itemDiv.style.borderRight = '3px solid transparent';
+                          const h4 = itemDiv.querySelector('.notif-title-text');
+                          if (h4) h4.style.color = 'var(--text-primary)';
+                          
+                          window.dispatchEvent(new CustomEvent('notificationRead', { detail: n.timestamp }));
+                          
+                          let dbUser = JSON.parse(localStorage.getItem(`db_${phone}`)) || {};
+                          dbUser.notifications = notifications;
+                          localStorage.setItem(`db_${phone}`, JSON.stringify(dbUser));
+                          if (window.FirebaseService && window.FirebaseService.updateStudentData) {
+                              window.FirebaseService.updateStudentData(phone, { notifications: notifications }).catch(e => console.error(e));
+                          }
+                          
+                          // Update badges
+                          const unreadCount = notifications.filter(x => !x.read).length;
+                          const badges = document.querySelectorAll('#notifBadge');
+                          if (unreadCount === 0) {
+                              badges.forEach(b => b.remove());
+                          } else {
+                              badges.forEach(b => b.textContent = unreadCount);
+                          }
+                      }
+                      
+                      const courseId = targetId;
+                      const title = n.title || '';
                       if (courseId) {
                           if (title.includes('قبول') || title.includes('تفعيل') || title.includes('مبروك') || title.includes('نجاح')) {
                               window.openApprovedCourseNotification(courseId);
                           } else {
                               window.location.href = `courses.html?highlight=${encodeURIComponent(courseId)}`;
                           }
+                      } else if (n.link) {
+                          if (n.link === 'exams.html' && n.title && n.title.includes('تصحيح') && n.message) {
+                              const match = n.message.match(/"([^"]+)"/);
+                              if (match && match[1]) {
+                                  window.location.href = `exams.html?openExam=${encodeURIComponent(match[1])}`;
+                              } else {
+                                  window.location.href = n.link;
+                              }
+                          } else {
+                              window.location.href = n.link;
+                          }
                       }
                   });
+                  
+                  container.appendChild(itemDiv);
               });
           }
       }
 
       // Initial render (shows all)
       dropdown.querySelector('.notif-filter-btn[data-filter="all"]').click();
-
-      // Mark all as read
-      let hasUnread = notifications.some(n => !n.read);
-      if (hasUnread) {
-          notifications.forEach(n => n.read = true);
-          let dbUser = JSON.parse(localStorage.getItem(`db_${phone}`)) || {};
-          dbUser.notifications = notifications;
-          localStorage.setItem(`db_${phone}`, JSON.stringify(dbUser));
+      
+      // Listen for notification read events from other places (like dashboard)
+      window.addEventListener('notificationRead', (ev) => {
+          const timestamp = ev.detail;
+          const items = dropdown.querySelectorAll(`.notif-item[data-timestamp="${timestamp}"]`);
+          items.forEach(item => {
+              item.style.borderRight = '3px solid transparent';
+              const h4 = item.querySelector('.notif-title-text');
+              if (h4) h4.style.color = 'var(--text-primary)';
+          });
+          const notif = notifications.find(n => n.timestamp === timestamp);
+          if (notif) notif.read = true;
           
-          if (window.FirebaseService && window.FirebaseService.updateStudentData) {
-              window.FirebaseService.updateStudentData(phone, { notifications: notifications }).catch(e => console.error(e));
-          }
-          
-          // Remove red badges globally
+          const unreadCount = notifications.filter(x => !x.read).length;
           const badges = document.querySelectorAll('#notifBadge');
-          badges.forEach(b => b.remove());
-      }
+          if (unreadCount === 0) {
+              badges.forEach(b => b.remove());
+          } else {
+              badges.forEach(b => b.textContent = unreadCount);
+          }
+      });
   };
   // --- SAFE UI PERFORMANCE & UX POLISH ---
   // 1. Lazy load all images

@@ -242,7 +242,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             notifs.forEach(n => {
               const item = document.createElement('div');
               item.className = 'notification-item';
-              item.style.cssText = 'padding:12px; border-bottom:1px solid rgba(255,255,255,0.03); cursor:pointer; display:flex; justify-content:space-between; align-items:center; gap:12px;';
+              item.style.cssText = `padding:12px; border-bottom:1px solid rgba(255,255,255,0.03); cursor:pointer; display:flex; justify-content:space-between; align-items:center; gap:12px; border-right: 3px solid ${n.read ? 'transparent' : 'var(--accent-cyan)'}; transition: all 0.3s;`;
+              item.setAttribute('data-timestamp', n.timestamp || '');
               const left = document.createElement('div');
               left.style.cssText = 'flex:1;';
               left.innerHTML = `<div style="font-weight:700;color:var(--text-primary)">${n.title || 'إشعار جديد'}</div><div style="font-size:0.9rem;color:var(--text-secondary);margin-top:4px;">${n.message || ''}</div>`;
@@ -250,12 +251,22 @@ document.addEventListener('DOMContentLoaded', async () => {
               right.innerHTML = `<small style="color:var(--text-secondary);font-size:0.8rem;">${n.timestamp ? new Date(n.timestamp).toLocaleString() : ''}</small>`;
               item.appendChild(left);
               item.appendChild(right);
+              
+              window.addEventListener('notificationRead', (ev) => {
+                  if (ev.detail === n.timestamp) {
+                      n.read = true;
+                      item.style.borderRight = '3px solid transparent';
+                  }
+              });
+
               item.addEventListener('click', (e) => {
                 e.preventDefault();
                 // No click sound - sound plays only on notification arrival
                 
                 if (!n.read) {
                     n.read = true;
+                    item.style.borderRight = '3px solid transparent';
+                    window.dispatchEvent(new CustomEvent('notificationRead', { detail: n.timestamp }));
                     let u = JSON.parse(localStorage.getItem(`db_${user.phone}`)) || dbUser;
                     u.notifications = dbUser.notifications;
                     localStorage.setItem(`db_${user.phone}`, JSON.stringify(u));
@@ -285,7 +296,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                       window.location.href = `courses.html?highlight=${encodeURIComponent(n.courseId)}`;
                   }, isPositive ? 1500 : 500);
                 } else if (n.link) {
-                  window.location.href = n.link;
+                  if (n.link === 'exams.html' && n.title && n.title.includes('تصحيح') && n.message) {
+                      const match = n.message.match(/"([^"]+)"/);
+                      if (match && match[1]) {
+                          window.location.href = `exams.html?openExam=${encodeURIComponent(match[1])}`;
+                      } else {
+                          window.location.href = n.link;
+                      }
+                  } else {
+                      window.location.href = n.link;
+                  }
                 } else {
                   try { if (window.showToast) window.showToast(n.message || 'تم استلام الإشعار', 'success', { playSound: 'notifArrive' }); } catch(e){}
                 }
