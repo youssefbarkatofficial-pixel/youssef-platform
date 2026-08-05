@@ -143,15 +143,15 @@
     right: 0 !important;
     width: 100% !important;
     height: auto !important;
-    min-height: 70px !important;
-    padding: 12px 15px 15px 15px !important;
+    min-height: 120px !important;
+    padding: 15px !important;
     display: flex !important;
     flex-direction: column !important;
     align-items: center !important;
-    justify-content: center !important;
+    justify-content: flex-start !important;
     gap: 12px !important;
     border-radius: 0 0 20px 20px !important;
-    background: rgba(10, 20, 35, 0.90) !important;
+    background: rgba(10, 20, 35, 0.95) !important;
     backdrop-filter: blur(25px) !important;
     -webkit-backdrop-filter: blur(25px) !important;
     border-bottom: 1px solid rgba(212, 166, 79, 0.2) !important;
@@ -185,12 +185,33 @@
     flex-shrink: 1 !important;
   }
 
-  /* Hide desktop nav-links completely on mobile */
+  /* Show desktop nav-links on mobile as scrollable */
   .nav-links {
+    display: flex !important;
+    flex-direction: row !important;
+    overflow-x: auto !important;
+    white-space: nowrap !important;
+    width: 100% !important;
+    gap: 15px !important;
+    padding-bottom: 5px !important;
+    justify-content: center !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+    order: 3 !important;
+    margin: 0 !important;
+  }
+  .nav-links::-webkit-scrollbar {
     display: none !important;
   }
+  .nav-links li {
+    margin: 0 !important;
+  }
+  .nav-links li a {
+    font-size: 1rem !important;
+    padding: 5px 0 !important;
+  }
 
-  /* Nav actions: compact row */
+  /* Nav actions: full row with text */
   .nav-actions {
     display: flex !important;
     flex-direction: row !important;
@@ -201,31 +222,33 @@
     flex-wrap: nowrap !important;
     width: 100% !important;
     margin-top: 5px !important;
+    order: 2 !important;
   }
 
-  /* All nav buttons: compact icon buttons */
+  /* All nav buttons: pill buttons */
   .nav-actions .btn {
-    width: 34px !important;
-    height: 34px !important;
-    min-width: 34px !important;
-    min-height: 34px !important;
-    padding: 0 !important;
-    border-radius: 10px !important;
+    width: auto !important;
+    height: auto !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    padding: 6px 16px !important;
+    border-radius: 20px !important;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
     font-size: 0.9rem !important;
+    gap: 6px !important;
     flex-shrink: 0 !important;
   }
 
-  /* Hide text inside nav buttons, show only icons */
+  /* Show text inside nav buttons */
   .nav-actions .btn .desktop-text,
   .nav-actions .btn span:not(.notif-badge):not(#notifBadge) {
-    display: none !important;
+    display: inline !important;
   }
 
   .nav-actions .btn i {
-    font-size: 0.9rem !important;
+    font-size: 1rem !important;
     margin: 0 !important;
   }
   
@@ -238,16 +261,17 @@
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-    width: 34px !important;
-    height: 34px !important;
-    min-width: 34px !important;
-    border-radius: 10px !important;
+    width: auto !important;
+    height: auto !important;
+    padding: 6px 16px !important;
+    border-radius: 20px !important;
     background: rgba(212, 166, 79, 0.1) !important;
     border: 1px solid rgba(212, 166, 79, 0.3) !important;
     color: var(--royal-gold, #D4A64F) !important;
     font-size: 0.9rem !important;
     cursor: pointer !important;
     flex-shrink: 0 !important;
+    gap: 6px !important;
     min-height: unset !important;
     padding: 0 !important;
   }

@@ -1612,7 +1612,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // 5. Maintenance Overlay (Temporary)
-  const maintenanceActive = true; // Set to false to disable
+  const maintenanceActive = false; // Set to false to disable
   if (maintenanceActive && !window.location.href.includes('admin')) {
       const overlay = document.createElement('div');
       overlay.style.cssText = `

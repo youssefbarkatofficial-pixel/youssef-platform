@@ -124,14 +124,34 @@ body {
   opacity: 0.03;
 }
 
-/* Glassmorphism Classes */
+/* Custom Scrollbar for Smooth UX */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-main); 
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(212, 166, 79, 0.4); 
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--royal-gold); 
+}
+
+/* Glassmorphism Classes (Improved Shadows & Borders) */
 .glass-panel {
   background: var(--glass-bg);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: var(--glass-glow);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  border: 1px solid rgba(212, 166, 79, 0.15);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
   border-radius: 20px;
+  transition: var(--transition-smooth);
+}
+.glass-panel:hover {
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.3);
 }
 
 /* Typography Classes */
