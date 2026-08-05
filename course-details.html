@@ -1336,6 +1336,7 @@
                 function _deactivateStrict() {
                     if(_examStrictBeforeUnload){ window.removeEventListener('beforeunload', _examStrictBeforeUnload); _examStrictBeforeUnload = null; }
                     if(_examStrictVisibility){ document.removeEventListener('visibilitychange', _examStrictVisibility); _examStrictVisibility = null; }
+                    if(window._cleanupStrictListeners) { window._cleanupStrictListeners(); window._cleanupStrictListeners = null; }
                 }
 
                 window.openExamModal = function(courseId, examObjOrIndex) {
@@ -1755,40 +1756,114 @@
                         
                         let _offlineStartTime = null;
 
-                        _examStrictVisibility = function() {
+                        const failExam = (reason) => {
                             if(submitBtn.disabled && submitBtn.innerHTML.includes('جاري')) return;
+                            if(isMasterPreview) {
+                                if(window.showToast) window.showToast(`وضع المعاينة (أدمن): الطالب سيتم سحبه لسبب: ${reason}`, 'warning');
+                                else alert(`وضع المعاينة (أدمن): الطالب سيتم سحب الامتحان منه لسبب: ${reason}`);
+                            } else {
+                                doSubmit(true);
+                                alert(`تم تسليم الامتحان تلقائياً بدرجة صفر. السبب: ${reason} (الوضع الصارم).`);
+                            }
+                        };
+
+                        _examStrictVisibility = function() {
                             if(document.hidden) {
                                 if (!navigator.onLine) {
                                     _offlineStartTime = Date.now();
                                 } else {
-                                    if(isMasterPreview) {
-                                        alert("وضع المعاينة (أدمن): الطالب سيتم سحب الامتحان منه بصفر بمجرد خروجه من النافذة بهذا الشكل.");
-                                    } else {
-                                        doSubmit(true);
-                                        alert("تم تسليم الامتحان تلقائياً بدرجة صفر بسبب الخروج من نافذة الامتحان (الوضع الصارم مفعل).");
-                                    }
+                                    failExam('الخروج من نافذة الامتحان (تبديل التبويبات أو إخفاء المتصفح)');
                                 }
                             } else {
                                 if (_offlineStartTime) {
                                     const offlineDur = Date.now() - _offlineStartTime;
                                     _offlineStartTime = null;
                                     if (offlineDur > 5 * 60 * 1000) {
-                                        if (!isMasterPreview) {
-                                            doSubmit(true);
-                                            alert("تم تسليم الامتحان تلقائياً لأن انقطاع الإنترنت تجاوز 5 دقائق (الوضع الصارم).");
-                                        } else {
-                                            alert("وضع المعاينة (أدمن): الإنترنت انقطع أكثر من 5 دقائق، الطالب سيتم سحب الامتحان منه.");
-                                        }
+                                        failExam('انقطاع الإنترنت لأكثر من 5 دقائق');
                                     }
                                 }
                             }
                         };
+
+                        const _examStrictBlur = function() {
+                            if (!navigator.onLine) return; // Allow blur if offline (maybe checking connection)
+                            failExam('فقدان التركيز على النافذة (فتح تطبيق آخر أو النقر خارج المتصفح)');
+                        };
+
+                        const _examStrictFullscreenChange = function() {
+                            if (!document.fullscreenElement && !document.webkitIsFullScreen && !document.mozFullScreen) {
+                                failExam('الخروج من وضع ملء الشاشة');
+                            }
+                        };
+
+                        const _examStrictContextMenu = function(e) {
+                            e.preventDefault();
+                        };
+
+                        const _examStrictCopy = function(e) {
+                            e.preventDefault();
+                        };
+
+                        const _examStrictKeydown = function(e) {
+                            // Prevent F12, Ctrl+Shift+I, Ctrl+C, Ctrl+V, PrintScreen
+                            if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && e.key === 'I') || (e.ctrlKey && e.key === 'c') || (e.ctrlKey && e.key === 'v') || e.key === 'PrintScreen') {
+                                e.preventDefault();
+                                if (window.showToast) window.showToast('⚠️ محاولة استخدام اختصار ممنوع!', 'error');
+                            }
+                        };
+
+                        // Request Fullscreen
+                        try {
+                            const elem = document.documentElement;
+                            if (elem.requestFullscreen) {
+                                elem.requestFullscreen().catch(err => console.log('Fullscreen rejected by browser', err));
+                            } else if (elem.webkitRequestFullscreen) {
+                                elem.webkitRequestFullscreen();
+                            } else if (elem.msRequestFullscreen) {
+                                elem.msRequestFullscreen();
+                            }
+                        } catch(e){}
+
                         window.addEventListener('beforeunload', _examStrictBeforeUnload);
                         document.addEventListener('visibilitychange', _examStrictVisibility);
+                        window.addEventListener('blur', _examStrictBlur);
+                        document.addEventListener('fullscreenchange', _examStrictFullscreenChange);
+                        document.addEventListener('webkitfullscreenchange', _examStrictFullscreenChange);
+                        document.addEventListener('mozfullscreenchange', _examStrictFullscreenChange);
+                        document.addEventListener('contextmenu', _examStrictContextMenu);
+                        document.addEventListener('copy', _examStrictCopy);
+                        document.addEventListener('cut', _examStrictCopy);
+                        document.addEventListener('paste', _examStrictCopy);
+                        document.addEventListener('keydown', _examStrictKeydown);
+
+                        // Attach cleanup function to window to remove listeners when exam is done
+                        window._cleanupStrictListeners = function() {
+                            window.removeEventListener('beforeunload', _examStrictBeforeUnload);
+                            document.removeEventListener('visibilitychange', _examStrictVisibility);
+                            window.removeEventListener('blur', _examStrictBlur);
+                            document.removeEventListener('fullscreenchange', _examStrictFullscreenChange);
+                            document.removeEventListener('webkitfullscreenchange', _examStrictFullscreenChange);
+                            document.removeEventListener('mozfullscreenchange', _examStrictFullscreenChange);
+                            document.removeEventListener('contextmenu', _examStrictContextMenu);
+                            document.removeEventListener('copy', _examStrictCopy);
+                            document.removeEventListener('cut', _examStrictCopy);
+                            document.removeEventListener('paste', _examStrictCopy);
+                            document.removeEventListener('keydown', _examStrictKeydown);
+                            
+                            // Exit fullscreen if active
+                            try {
+                                if (document.fullscreenElement || document.webkitIsFullScreen || document.mozFullScreen) {
+                                    if (document.exitFullscreen) document.exitFullscreen();
+                                    else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+                                    else if (document.msExitFullscreen) document.msExitFullscreen();
+                                }
+                            } catch(e){}
+                        };
+
                         const sb = document.createElement('div');
                         sb.id = 'examStrictBadge';
                         sb.style.cssText = 'background:rgba(231,76,60,0.15);border:1px solid rgba(231,76,60,0.3);color:#e74c3c;padding:10px 14px;border-radius:8px;font-size:0.9rem;margin-bottom:12px; font-weight: bold;';
-                        sb.innerHTML = '<i class="fas fa-shield-alt"></i> <strong>الوضع الصارم مفعل</strong> — أي خروج من النافذة سيسحب الامتحان بدرجة صفر.';
+                        sb.innerHTML = '<i class="fas fa-shield-alt"></i> <strong>الوضع الصارم مفعل (مستوى الصعوبة القصوى)</strong> — يُمنع الخروج، النقر خارج النافذة، الإغلاق، وضع ملء الشاشة إجباري، ولا يمكن استخدام النسخ واللصق.';
                         container.parentElement.insertBefore(sb, container);
                     }
 
