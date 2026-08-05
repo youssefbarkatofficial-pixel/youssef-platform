@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -348,47 +348,74 @@
                 if (!c) return;
 
                 const courseResults = examResults.filter(r => r.courseId === cId).sort((a, b) => a.ts - b.ts);
-                const groups = { exam: {}, training: {}, homework: {} };
+                const groups = { exam: [], training: [], homework: [] };
+
+                function getCourseTasks(courseObj) {
+                    let tasks = [];
+                    if (courseObj.lectures) courseObj.lectures.forEach(l => { if(l.children) tasks.push(...l.children); });
+                    if (courseObj.exams) tasks.push(...courseObj.exams);
+                    if (courseObj.homeworks) tasks.push(...courseObj.homeworks);
+                    if (courseObj.trainings) tasks.push(...courseObj.trainings);
+                    if (courseObj.customSections) courseObj.customSections.forEach(s => { if(s.items) tasks.push(...s.items); });
+                    return tasks.filter(t => t.type === 'exam' || t.type === 'تدريب' || t.type === 'training' || t.type === 'واجب' || t.type === 'homework' || t.type === 'task' || t.type === 'quiz' || t.questions);
+                }
+
+                let allTasks = getCourseTasks(c);
+                allTasks = allTasks.filter((v,i,a) => a.findIndex(t=>(t.id === v.id)) === i);
+
+                allTasks.forEach(task => {
+                    let type = 'exam';
+                    const title = task.title || 'بدون اسم';
+                    if (task.type === 'تدريب' || task.type === 'training' || title.includes('تدريب')) type = 'training';
+                    if (task.type === 'واجب' || task.type === 'homework' || task.type === 'task' || title.includes('واجب')) type = 'homework';
+                    
+                    let taskAttempts = courseResults.filter(r => (r.examId && r.examId === task.id) || (!r.examId && r.examTitle === title));
+                    groups[type].push({ task, attempts: taskAttempts });
+                });
 
                 courseResults.forEach(r => {
-                    let type = 'exam';
-                    if (r.isTraining || (r.examTitle && r.examTitle.includes('تدريب'))) type = 'training';
-                    if (r.isHomework || (r.examTitle && r.examTitle.includes('واجب'))) type = 'homework';
-                    const title = r.examTitle || 'امتحان غير مسمى';
-                    if (!groups[type][title]) groups[type][title] = [];
-                    groups[type][title].push(r);
+                    if (!allTasks.some(t => t.id === r.examId || (!r.examId && t.title === r.examTitle))) {
+                        let type = 'exam';
+                        if (r.isTraining || (r.examTitle && r.examTitle.includes('تدريب'))) type = 'training';
+                        if (r.isHomework || (r.examTitle && r.examTitle.includes('واجب'))) type = 'homework';
+                        groups[type].push({ task: { id: r.examId, title: r.examTitle, _deleted: true }, attempts: [r] });
+                    }
                 });
 
                 const row = document.createElement('div');
                 row.className = 'course-exam-row';
 
-                const renderGroup = (groupObj, icon, title, color) => {
-                    const keys = Object.keys(groupObj);
-                    if (keys.length === 0) return '';
+                const renderGroup = (groupArr, icon, title, color) => {
+                    if (groupArr.length === 0) return '';
                     let html = `<div class="exam-category"><h4 style="color:${color};"><i class="${icon} mr-2"></i>${title}</h4>`;
-                    keys.forEach(examTitle => {
-                        const attempts = groupObj[examTitle];
+                    groupArr.forEach(item => {
                         html += `<div class="exam-item-card">`;
-                        html += `<div class="exam-item-title"><i class="fas fa-file-alt mr-2" style="opacity:0.5;"></i>${examTitle}</div>`;
+                        html += `<div class="exam-item-title"><i class="fas fa-file-alt mr-2" style="opacity:0.5;"></i>${item.task.title || 'امتحان غير مسمى'}</div>`;
                         html += `<div class="attempts-row">`;
-                        attempts.forEach((att, idx) => {
-                            const aNum = att.attemptNumber || (idx + 1);
-                            const label = aNum === 1 ? 'الأساسية' : `المحاولة ${aNum}`;
-                            const pct = att.effectivePercent ?? att.percent ?? 0;
-                            const overrideMark = att._adminOverride ? ' <i class="fas fa-check-double" style="color:#2ecc71;font-size:0.7rem;" title="معدلة من المعلم"></i>' : '';
-                            const dateStr = att.ts ? new Date(att.ts).toLocaleDateString('ar-EG', { month: 'short', day: 'numeric' }) : '';
-                            const scoreColor = pct >= 85 ? '#2ecc71' : pct >= 60 ? '#3498db' : pct >= 40 ? '#f39c12' : '#e74c3c';
+                        
+                        if (item.attempts.length === 0) {
+                            html += `<div style="padding: 10px; width: 100%; text-align: center; color: #fff; background: rgba(231, 76, 60, 0.1); border: 1px dashed #e74c3c; border-radius: 8px;">
+                                        <div style="margin-bottom:8px; font-weight:bold; color: #e74c3c;"><i class="fas fa-exclamation-circle"></i> غير مكتمل</div>
+                                        <button onclick="window.location.href='course-details.html?id=${cId}'" class="btn btn-outline" style="padding:5px 15px; font-size:0.9rem; border-color:#e74c3c; color:#e74c3c;">الذهاب للمهمة</button>
+                                     </div>`;
+                        } else {
+                            item.attempts.forEach((att, idx) => {
+                                const aNum = att.attemptNumber || (idx + 1);
+                                const label = aNum === 1 ? 'الأساسية' : \`المحاولة \${aNum}\`;
+                                const pct = att.effectivePercent ?? att.percent ?? 0;
+                                const overrideMark = att._adminOverride ? ' <i class="fas fa-check-double" style="color:#2ecc71;font-size:0.7rem;" title="معدلة من المعلم"></i>' : '';
+                                const dateStr = att.ts ? new Date(att.ts).toLocaleDateString('ar-EG', { month: 'short', day: 'numeric' }) : '';
+                                const scoreColor = pct >= 85 ? '#2ecc71' : pct >= 60 ? '#3498db' : pct >= 40 ? '#f39c12' : '#e74c3c';
 
-                            // Encode attempt data safely for onclick
-                            const attData = JSON.stringify(att).replace(/'/g, "\\'").replace(/"/g, '&quot;');
-                            html += `
-                                <div class="attempt-badge" onclick="openExamDetail(this)" 
-                                     data-result='${JSON.stringify(att).replace(/'/g, "&#39;")}'>
-                                    <div class="attempt-label">${label}</div>
-                                    <div class="attempt-score" style="color:${scoreColor};">${pct}%${overrideMark}</div>
-                                    <div class="attempt-date">${dateStr}</div>
-                                </div>`;
-                        });
+                                html += `
+                                    <div class="attempt-badge" onclick="openExamDetail(this)" 
+                                         data-result='${JSON.stringify(att).replace(/'/g, "&#39;")}'>
+                                        <div class="attempt-label">${label}</div>
+                                        <div class="attempt-score" style="color:${scoreColor};">${pct}%${overrideMark}</div>
+                                        <div class="attempt-date">${dateStr}</div>
+                                    </div>`;
+                            });
+                        }
                         html += `</div></div>`;
                     });
                     html += `</div>`;

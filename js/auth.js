@@ -916,16 +916,36 @@ document.addEventListener('DOMContentLoaded', () => {
                         window.FirebaseService.updateStudentData(user.phone, { studentCode: user.studentCode });
                     }
                 }
-                localStorage.setItem(`db_${user.phone}`, JSON.stringify(user));
+                try {
+                    localStorage.setItem(`db_${user.phone}`, JSON.stringify(user));
+                } catch(e) {
+                    console.warn("Quota exceeded for db_", e);
+                }
+                
                 if (window.PlatformStorage && user.lastUpdatedAcademicYear) {
                   const state = window.PlatformStorage.getStoredState(user.phone);
                   window.PlatformStorage.saveState(user.phone, { ...state, lastUpdatedYear: user.lastUpdatedAcademicYear, promotionCompleted: true, grade: user.grade || state.grade });
                 }
-                sessionStorage.setItem('currentStudent', JSON.stringify(user));
+                
+                const safeSetStudent = (storageObj, key, userData) => {
+                    try {
+                        storageObj.setItem(key, JSON.stringify(userData));
+                    } catch(e) {
+                        console.warn(`Quota exceeded for ${key}, trimming data...`);
+                        let slimUser = {...userData};
+                        if (slimUser.notifications) slimUser.notifications = slimUser.notifications.slice(-10);
+                        if (slimUser.examResults) slimUser.examResults = slimUser.examResults.slice(-20);
+                        if (slimUser.image && slimUser.image.length > 100000) slimUser.image = 'img/default-avatar.png';
+                        if (slimUser.recentLectures) slimUser.recentLectures = slimUser.recentLectures.slice(-5);
+                        try { storageObj.setItem(key, JSON.stringify(slimUser)); } catch(e2) { console.error("Still exceeding quota!", e2); }
+                    }
+                };
+
+                safeSetStudent(sessionStorage, 'currentStudent', user);
                 sessionStorage.setItem('pfJustLoggedIn', 'true');
                 if (rememberMe) {
                   localStorage.setItem('rememberedCredentials', JSON.stringify({ phone: rawId, pwd }));
-                  localStorage.setItem('currentStudent', JSON.stringify(user));
+                  safeSetStudent(localStorage, 'currentStudent', user);
                 } else {
                   localStorage.removeItem('rememberedCredentials');
                 }
@@ -970,16 +990,28 @@ document.addEventListener('DOMContentLoaded', () => {
                                   window.FirebaseService.updateStudentData(rescuedUser.phone, { studentCode: rescuedUser.studentCode });
                               }
                           }
-                          localStorage.setItem(`db_${rescuedUser.phone}`, JSON.stringify(rescuedUser));
+                          try {
+                              localStorage.setItem(`db_${rescuedUser.phone}`, JSON.stringify(rescuedUser));
+                          } catch(e) { console.warn("Quota exceeded db_"); }
+                          
                           if (window.PlatformStorage && rescuedUser.lastUpdatedAcademicYear) {
                             const state = window.PlatformStorage.getStoredState(rescuedUser.phone);
                             window.PlatformStorage.saveState(rescuedUser.phone, { ...state, lastUpdatedYear: rescuedUser.lastUpdatedAcademicYear, promotionCompleted: true, grade: rescuedUser.grade || state.grade });
                           }
-                          sessionStorage.setItem('currentStudent', JSON.stringify(rescuedUser));
+                          const safeSet = (storageObj, key, userData) => {
+                              try { storageObj.setItem(key, JSON.stringify(userData)); } catch(e) {
+                                  let slim = {...userData};
+                                  if (slim.notifications) slim.notifications = slim.notifications.slice(-10);
+                                  if (slim.examResults) slim.examResults = slim.examResults.slice(-20);
+                                  if (slim.image && slim.image.length > 100000) slim.image = 'img/default-avatar.png';
+                                  try { storageObj.setItem(key, JSON.stringify(slim)); } catch(e2) {}
+                              }
+                          };
+                          safeSet(sessionStorage, 'currentStudent', rescuedUser);
                           sessionStorage.setItem('pfJustLoggedIn', 'true');
                           if (rememberMe) {
                             localStorage.setItem('rememberedCredentials', JSON.stringify({ phone: rawId, pwd }));
-                            localStorage.setItem('currentStudent', JSON.stringify(rescuedUser));
+                            safeSet(localStorage, 'currentStudent', rescuedUser);
                           } else {
                             localStorage.removeItem('rememberedCredentials');
                           }
