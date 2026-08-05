@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -111,17 +111,29 @@
                 }
             } catch (e) { console.warn('Firebase user sync failed:', e); }
 
+            let adminCourses = [];
             // 2. Sync courses list from Firebase
             try {
                 if (window.FirebaseService && typeof window.FirebaseService.getCourses === 'function') {
                     const onlineCourses = await window.FirebaseService.getCourses();
                     if (onlineCourses && onlineCourses.length > 0) {
-                        // FirebaseService already handles safeStorageSaveCourses internally
+                        adminCourses = onlineCourses;
+                    } else {
+                        adminCourses = JSON.parse(localStorage.getItem('adminCourses')) || [];
                     }
+                } else {
+                    adminCourses = JSON.parse(localStorage.getItem('adminCourses')) || [];
                 }
-            } catch (e) { console.warn('Firebase courses sync failed:', e); }
-
-            let adminCourses = JSON.parse(localStorage.getItem('adminCourses')) || [];
+            } catch (e) {
+                console.warn('Firebase courses sync failed:', e);
+                adminCourses = JSON.parse(localStorage.getItem('adminCourses')) || [];
+            }
+            
+            // ADMIN BYPASS
+            const isAdmin = (user.phone === '0000' || user.phone === '01099616091');
+            if (isAdmin) {
+                dbUser.courses = adminCourses.map(c => c.id);
+            }
 
             if (window.StorageService) {
                 for (let c of adminCourses) {
@@ -137,6 +149,7 @@
             if (dbUser.courses && dbUser.courses.length > 0) {
                 container.style.display = 'grid';
                 emptyState.style.display = 'none';
+
 
                 dbUser.courses.forEach(cId => {
                     const c = adminCourses.find(course => course.id === cId);

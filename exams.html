@@ -335,6 +335,13 @@
         let dbUser = JSON.parse(localStorage.getItem(`db_${user.phone}`)) || { courses: [] };
         const container = document.getElementById('examListContainer');
         const emptyState = document.getElementById('noExamState');
+        let adminCourses = JSON.parse(localStorage.getItem('adminCourses')) || [];
+
+        // ADMIN BYPASS
+        const isAdmin = (user.phone === '0000' || user.phone === '01099616091');
+        if (isAdmin) {
+            dbUser.courses = adminCourses.map(c => c.id);
+        }
 
         if (dbUser.courses && dbUser.courses.length > 0) {
             container.style.display = 'block';

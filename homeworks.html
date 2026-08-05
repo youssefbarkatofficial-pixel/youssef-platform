@@ -148,18 +148,32 @@
                     if (onlineUser) { dbUser = onlineUser; localStorage.setItem(`db_${user.phone}`, JSON.stringify(dbUser)); }
                 }
             } catch(e) {}
+            let adminCourses = [];
             try {
                 if (window.FirebaseService && typeof window.FirebaseService.getCourses === 'function') {
                     const onlineCourses = await window.FirebaseService.getCourses();
-                    if (onlineCourses && onlineCourses.length > 0) localStorage.setItem('adminCourses', JSON.stringify(onlineCourses));
+                    if (onlineCourses && onlineCourses.length > 0) {
+                        localStorage.setItem('adminCourses', JSON.stringify(onlineCourses));
+                        adminCourses = onlineCourses;
+                    } else {
+                        adminCourses = JSON.parse(localStorage.getItem('adminCourses')) || [];
+                    }
                 }
-            } catch(e) {}
+            } catch(e) {
+                adminCourses = JSON.parse(localStorage.getItem('adminCourses')) || [];
+            }
+            
+            // ADMIN BYPASS
+            const isAdmin = (user.phone === '0000' || user.phone === '01099616091');
+            if (isAdmin) {
+                dbUser.courses = adminCourses.map(c => c.id);
+            }
+
             const container = document.getElementById('hwListContainer');
             const emptyState = document.getElementById('noHwState');
             if (dbUser.courses && dbUser.courses.length > 0) {
                 container.style.display = 'block';
                 emptyState.style.display = 'none';
-                let adminCourses = JSON.parse(localStorage.getItem('adminCourses')) || [];
                 dbUser.courses.forEach(cId => {
                     const c = adminCourses.find(course => course.id === cId);
                     if (!c) return;
