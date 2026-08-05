@@ -1438,10 +1438,12 @@
                     }
                     
                     if (isMasterPreview) {
-                        startActualExam();
-                    } else {
-                        warningModal.classList.add('active');
+                        const mNote = document.createElement('p');
+                        mNote.style.color = '#3498db';
+                        mNote.innerHTML = 'ℹ️ <strong>ملاحظة (حساب الماستر 0000):</strong> هذه هي شاشة التعليمات التي تظهر للطالب.';
+                        ewmAttempts.appendChild(mNote);
                     }
+                    warningModal.classList.add('active');
 
                     function startActualExam() {
                         document.getElementById('examModalTitle').textContent = (exam.title || examTypeName) + (isMasterPreview ? '' : ` (محاولة ${prevAttempts.length + 1} من 3)`);
@@ -1717,7 +1719,17 @@
                         }, 700);
                     }
                     cancelBtn.onclick = confirmAndExitExam;
-                    document.getElementById('examModalCloseBtn').onclick = confirmAndExitExam;
+                    const closeBtnEl = document.getElementById('examModalCloseBtn');
+                    if(closeBtnEl) closeBtnEl.onclick = confirmAndExitExam;
+
+                    // Hide exit buttons in strict mode
+                    if(exam.strictMode && !isMasterPreview) {
+                        cancelBtn.style.display = 'none';
+                        if(closeBtnEl) closeBtnEl.style.display = 'none';
+                    } else {
+                        cancelBtn.style.display = 'inline-block';
+                        if(closeBtnEl) closeBtnEl.style.display = 'inline-block';
+                    }
 
                     // ===== TIMER =====
                     let durationMins = parseInt(exam.duration) || 0;
