@@ -905,7 +905,11 @@
                     return;
                 }
                 
-                if(item.type === 'task' || item.type === 'quiz' || item.type === 'training') {
+                const isQuizType = ['quiz', 'exam', 'امتحان'].includes(item.type);
+                const isHomeworkType = ['task', 'homework', 'واجب'].includes(item.type);
+                const isTrainingType = ['training', 'تدريب'].includes(item.type);
+
+                if(isQuizType || isHomeworkType || isTrainingType) {
                     // STRICT SYSTEM: Cannot start training unless lecture is completed
                     if (!isMasterPreview) {
                         const parentLecId = item.attachedToLectureId || item._parentLecId;
@@ -919,8 +923,8 @@
                         const dbUser = JSON.parse(localStorage.getItem('db_' + tempStudent.phone) || '{}');
                         
                         // Cannot do homework unless training is submitted
-                        if (item.type === 'task' && item._requiresTraining) {
-                            const trainingDone = (dbUser.examResults || []).some(r => r.courseId === course.id && r.isTraining);
+                        if (isHomeworkType && item._requiresTraining) {
+                            const trainingDone = (dbUser.examResults || []).some(r => r.courseId === course.id && (r.isTraining || ['training', 'تدريب'].includes(r.examType)));
                             if (!trainingDone) {
                                 if(window.showToast) window.showToast('🔒 يجب تسليم التدريب أولاً قبل الواجب', 'error');
                                 else alert('يجب تسليم التدريب أولاً قبل الواجب');
@@ -928,8 +932,8 @@
                             }
                         }
                         // Cannot do exam unless homework submitted
-                        if (item.type === 'quiz' && item._requiresHomework) {
-                            const hwDone = (dbUser.examResults || []).some(r => r.courseId === course.id && r.isHomework);
+                        if (isQuizType && item._requiresHomework) {
+                            const hwDone = (dbUser.examResults || []).some(r => r.courseId === course.id && (r.isHomework || ['task', 'homework', 'واجب'].includes(r.examType)));
                             if (!hwDone) {
                                 if(window.showToast) window.showToast('🔒 يجب تسليم الواجب أولاً قبل الامتحان', 'error');
                                 else alert('يجب تسليم الواجب أولاً قبل الامتحان');
@@ -1146,7 +1150,7 @@
                                     <div style="min-width:0;">
                                         <div style="color: var(--text-primary); font-weight: 700; font-size: 1.05rem;">${item.title} ${statusBadge}</div>
                                         <div style="font-size:0.8rem; color: rgba(255,255,255,0.5); margin-top: 4px;">
-                                            ${item.type === 'video' ? 'فيديو مسجل' : item.type === 'pdf' ? 'مذكرة' : item.type === 'task' ? 'واجب وتدريب' : 'امتحان'}
+                                            ${item.type === 'video' ? 'فيديو مسجل' : item.type === 'pdf' ? 'مذكرة' : ['task', 'homework', 'واجب'].includes(item.type) ? 'واجب' : ['training', 'تدريب'].includes(item.type) ? 'تدريب' : 'امتحان'}
                                             ${item.deadlineDate ? ` <span style="color: #e74c3c; margin-right: 10px;"><i class="fas fa-clock"></i> الديدلاين: ${new Date(item.deadlineDate).toLocaleDateString('ar-EG')}</span>` : ''}
                                             ${lockReason ? ` <br><span style="color: ${isScheduled ? '#f1c40f' : 'var(--accent-orange)'};"><i class="fas fa-info-circle"></i> ${lockReason}</span>` : ''}
                                         </div>
@@ -1170,10 +1174,14 @@
                                 if (isOwned || isMasterPreview) {
                                     if (item.type === 'video') {
                                         actionBtn.textContent = isCompleted ? 'مراجعة' : 'بدء';
-                                    } else if (item.type === 'تدريب' || item.type === 'training' || item.type === 'exam') {
-                                        actionBtn.textContent = (item.type === 'exam') ? 'دخول الامتحان' : 'دخول التدريب';
-                                    } else if (item.type === 'task') {
-                                        actionBtn.textContent = 'تقديم الواجب';
+                                    } else if (['تدريب', 'training', 'exam', 'quiz', 'امتحان', 'task', 'homework', 'واجب'].includes(item.type)) {
+                                        if (['exam', 'quiz', 'امتحان'].includes(item.type)) {
+                                            actionBtn.textContent = 'دخول الامتحان';
+                                        } else if (['training', 'تدريب'].includes(item.type)) {
+                                            actionBtn.textContent = 'دخول التدريب';
+                                        } else {
+                                            actionBtn.textContent = 'دخول الواجب';
+                                        }
                                     } else if (item.type === 'pdf') {
                                         actionBtn.innerHTML = '<i class="fas fa-download"></i> تحميل الملف';
                                     }
@@ -1333,16 +1341,19 @@
                     // Check availability window (Skip for training)
                     const nowMs = Date.now();
                     const isTraining = (exam.type === 'تدريب' || exam.type === 'training' || (exam.title && exam.title.includes('تدريب')));
+                    const isHomework = (exam.type === 'واجب' || exam.type === 'homework' || exam.type === 'task' || (exam.title && exam.title.includes('واجب')));
+                    const examTypeName = isTraining ? 'التدريب' : isHomework ? 'الواجب' : 'الامتحان';
+
                     if (!isMasterPreview && !isTraining) {
                         if(exam.availableFrom && new Date(exam.availableFrom).getTime() > nowMs) {
                             const fromStr = new Date(exam.availableFrom).toLocaleString('ar-EG');
-                            if(window.showToast) window.showToast('الامتحان لم يفتح بعد. يفتح في: ' + fromStr, 'error');
-                            else alert('الامتحان لم يفتح بعد. يفتح في: ' + fromStr);
+                            if(window.showToast) window.showToast(`${examTypeName} لم يفتح بعد. يفتح في: ` + fromStr, 'error');
+                            else alert(`${examTypeName} لم يفتح بعد. يفتح في: ` + fromStr);
                             return;
                         }
                         if(exam.availableUntil && new Date(exam.availableUntil).getTime() < nowMs) {
-                            if(window.showToast) window.showToast('انتهى وقت هذا الامتحان ولا يمكن الدخول إليه.', 'error');
-                            else alert('انتهى وقت هذا الامتحان ولا يمكن الدخول إليه.');
+                            if(window.showToast) window.showToast(`انتهى وقت هذا ${examTypeName} ولا يمكن الدخول إليه.`, 'error');
+                            else alert(`انتهى وقت هذا ${examTypeName} ولا يمكن الدخول إليه.`);
                             return;
                         }
                     }
@@ -1364,6 +1375,11 @@
                     const warningModal = document.getElementById('examWarningModal');
                     const examModal = document.getElementById('examModal');
                     
+                    const ewmTitle = document.getElementById('ewmTitle');
+                    if(ewmTitle) {
+                        ewmTitle.innerHTML = `تنبيه هام قبل بدء ${examTypeName}`;
+                    }
+
                     const ewmAttempts = document.getElementById('ewmAttempts');
                     if(ewmAttempts) {
                         ewmAttempts.innerHTML = `⚠️ لديك <strong>${3 - prevAttempts.length}</strong> محاولات متبقية.`;
@@ -1394,7 +1410,7 @@
                     }
 
                     function startActualExam() {
-                        document.getElementById('examModalTitle').textContent = (exam.title || 'امتحان') + (isMasterPreview ? '' : ` (محاولة ${prevAttempts.length + 1} من 3)`);
+                        document.getElementById('examModalTitle').textContent = (exam.title || examTypeName) + (isMasterPreview ? '' : ` (محاولة ${prevAttempts.length + 1} من 3)`);
 
                         const container = document.getElementById('examQuestionsContainer');
                         container.innerHTML = '';
