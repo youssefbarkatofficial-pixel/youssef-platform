@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>Migrate Exam</title>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/firebase-service.js"></script>
+</head>
+<body style="font-family: sans-serif; text-align: center; padding: 50px;">
+    <h1>جاري التحديث...</h1>
+    <p id="status">الرجاء الانتظار</p>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const courses = await window.fbService.getCourses();
+                const prep3 = courses.find(c => c.id === 'prep3');
+                if (!prep3) {
+                    document.getElementById('status').innerText = 'لم يتم العثور على كورس prep3.';
+                    return;
+                }
+
+                // Find the homework we want to copy
+                let hwItem = null;
+                for (const sec of prep3.sections) {
+                    if (sec.items) {
+                        const found = sec.items.find(i => i.title === 'واجب المحاضرة التعريفية');
+                        if (found) { hwItem = found; break; }
+                    }
+                }
+
+                if (!hwItem) {
+                    document.getElementById('status').innerText = 'لم يتم العثور على الواجب لنسخه.';
+                    return;
+                }
+
+                // Make sure Exams section exists
+                let examsSec = prep3.sections.find(s => s.title === 'الامتحانات' || s.id === 'exams-section');
+                if (!examsSec) {
+                    examsSec = { id: 'sec-' + Date.now(), title: 'الامتحانات', items: [] };
+                    prep3.sections.push(examsSec);
+                }
+                
+                if (!examsSec.items) examsSec.items = [];
+
+                // Check if already migrated
+                const existingExam = examsSec.items.find(i => i.title === 'امتحان المحاضرة التعريفية');
+                if (existingExam) {
+                    document.getElementById('status').innerText = 'تم إنشاء الامتحان مسبقاً.';
+                    return;
+                }
+
+                // Next Wednesday at 9 PM
+                const nextWed = new Date();
+                nextWed.setDate(nextWed.getDate() + ((3 - nextWed.getDay() + 7) % 7 || 7)); // Next Wednesday
+                nextWed.setHours(21, 0, 0, 0); // 9:00 PM
+
+                // Clone the homework into an exam
+                const newExam = JSON.parse(JSON.stringify(hwItem));
+                newExam.id = 'exam-' + Date.now();
+                newExam.title = 'امتحان المحاضرة التعريفية';
+                newExam.type = 'exam';
+                newExam.availableFrom = nextWed.toISOString();
+                
+                // Format questions to clearly show their type if they don't have it
+                if (newExam.questions) {
+                    newExam.questions.forEach(q => {
+                        if (q.text) {
+                            if (q.text.includes('بم تفسر') && !q.text.includes('[بم تفسر]')) {
+                                q.text = '[بم تفسر] ' + q.text.replace('بم تفسر', '').trim();
+                            } else if (q.text.includes('ما النتائج') && !q.text.includes('[ما النتائج]')) {
+                                q.text = '[ما النتائج] ' + q.text.replace('ما النتائج', '').trim();
+                            }
+                        }
+                    });
+                }
+
+                examsSec.items.push(newExam);
+                
+                await window.fbService.saveCourse(prep3);
+                document.getElementById('status').innerHTML = '<b>تم بنجاح! تم إنشاء امتحان المحاضرة التعريفية ليفتح الأربعاء 9 مساءً. يمكنك حذف هذا الملف الآن.</b>';
+            } catch (err) {
+                console.error(err);
+                document.getElementById('status').innerText = 'حدث خطأ: ' + err.message;
+            }
+        });
+    </script>
+</body>
+</html>

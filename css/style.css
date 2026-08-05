@@ -907,6 +907,15 @@ input:not([type="radio"]):not([type="checkbox"]):focus, select:focus, textarea:f
     opacity: 0;
   }
 }
- . h e r o   . h e a d i n g - l u x u r y   {   f o n t - s i z e :   c l a m p ( 2 . 5 r e m ,   7 v w ,   4 r e m )   ! i m p o r t a n t ;   } 
-  
- 
+
+/* Hide Bousala Clash globally */
+button[title="إلعب صراع البوصلة"],
+#gameWidgetModal {
+  display: none !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+}
+
+ . h e r o   . h e a d i n g - l u x u r y   {   f o n t - s i z e :   c l a m p ( 2 . 5 r e m ,   7 v w ,   4 r e m )   ! i m p o r t a n t ;   } 
+  
+ 
