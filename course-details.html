@@ -1666,6 +1666,19 @@
                         container.querySelectorAll('input, textarea').forEach(el => el.disabled = true);
                         submitBtn.disabled = true; submitBtn.innerHTML = '<i class="fas fa-check-circle"></i> تم التسليم';
                         _deactivateStrict();
+                        
+                        // Show exit buttons again so user can close the result screen
+                        cancelBtn.innerHTML = 'إغلاق نافذة النتيجة';
+                        cancelBtn.onclick = function() {
+                            if(examModal) { examModal.classList.remove('active'); document.body.style.overflow = ''; }
+                        };
+                        cancelBtn.style.display = 'inline-block';
+                        const cBtn = document.getElementById('examModalCloseBtn');
+                        if (cBtn) {
+                            cBtn.style.display = 'inline-block';
+                            cBtn.onclick = cancelBtn.onclick;
+                        }
+
                         markItemCompleted(exam.id || ('exam_' + (typeof examObjOrIndex === 'number' ? examObjOrIndex : Date.now())));
 
                         try {
