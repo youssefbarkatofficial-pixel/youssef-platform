@@ -1768,19 +1768,24 @@
                         
                         let _offlineStartTime = null;
                         let _strictViolationsCount = 0;
+                        let _awayTimeout = null;
+
+                        const _clearAwayTimer = () => {
+                            if (_awayTimeout) { clearTimeout(_awayTimeout); _awayTimeout = null; }
+                        };
+
+                        const failExamDirectly = (reason) => {
+                            if(submitBtn.disabled && submitBtn.innerHTML.includes('جاري')) return;
+                            doSubmit(true);
+                            alert(`تم تسليم الامتحان تلقائياً بدرجة صفر. السبب: ${reason}`);
+                        };
 
                         const warnOrFailExam = (reason) => {
                             if(submitBtn.disabled && submitBtn.innerHTML.includes('جاري')) return;
                             _strictViolationsCount++;
                             
                             if (_strictViolationsCount >= 3) {
-                                if(isMasterPreview) {
-                                    if(window.showToast) window.showToast(`وضع المعاينة (أدمن): تجاوزت 3 مخالفات. الطالب سيتم سحب الامتحان منه الآن لسبب: ${reason}`, 'error');
-                                    else alert(`وضع المعاينة (أدمن): تجاوزت 3 مخالفات. الطالب سيتم سحب الامتحان منه الآن لسبب: ${reason}`);
-                                } else {
-                                    doSubmit(true);
-                                    alert(`لقد تجاوزت الحد الأقصى للمخالفات (3 مرات). تم تسليم الامتحان تلقائياً بدرجة صفر. السبب الأخير: ${reason}.`);
-                                }
+                                failExamDirectly(`تجاوزت الحد الأقصى للمخالفات (3 مرات) - السبب الأخير: ${reason}`);
                             } else {
                                 const remaining = 3 - _strictViolationsCount;
                                 const msg = `⚠️ تحذير مخالفة (${_strictViolationsCount}/3): ${reason}\n\nيُرجى عدم تكرار ذلك وإلا سيتم سحب الامتحان منك! يتبقى لك ${remaining} تحذيرات.`;
@@ -1802,14 +1807,20 @@
                                 if (!navigator.onLine) {
                                     _offlineStartTime = Date.now();
                                 } else {
-                                    warnOrFailExam('الخروج من نافذة الامتحان (تبديل التبويبات أو إخفاء المتصفح)');
+                                    _awayTimeout = setTimeout(() => {
+                                        failExamDirectly('الخروج من نافذة الامتحان لمدة تزيد عن 15 ثانية متواصلة');
+                                    }, 15000);
                                 }
                             } else {
+                                if (_awayTimeout) {
+                                    _clearAwayTimer();
+                                    warnOrFailExam('الخروج من نافذة الامتحان (تبديل التبويبات أو إخفاء المتصفح)');
+                                }
                                 if (_offlineStartTime) {
                                     const offlineDur = Date.now() - _offlineStartTime;
                                     _offlineStartTime = null;
                                     if (offlineDur > 5 * 60 * 1000) {
-                                        warnOrFailExam('انقطاع الإنترنت لأكثر من 5 دقائق');
+                                        failExamDirectly('انقطاع الإنترنت لأكثر من 5 دقائق');
                                     }
                                 }
                             }
@@ -1817,7 +1828,18 @@
 
                         const _examStrictBlur = function() {
                             if (!navigator.onLine) return; // Allow blur if offline
-                            warnOrFailExam('فقدان التركيز على النافذة (فتح تطبيق آخر أو النقر خارج المتصفح)');
+                            if (!_awayTimeout) {
+                                _awayTimeout = setTimeout(() => {
+                                    failExamDirectly('فقدان التركيز على النافذة لمدة تزيد عن 15 ثانية متواصلة');
+                                }, 15000);
+                            }
+                        };
+
+                        const _examStrictFocus = function() {
+                            if (_awayTimeout) {
+                                _clearAwayTimer();
+                                warnOrFailExam('فقدان التركيز على النافذة (فتح تطبيق آخر أو النقر خارج المتصفح)');
+                            }
                         };
 
                         const _examStrictFullscreenChange = function() {
@@ -1854,9 +1876,19 @@
                             }
                         } catch(e){}
 
+                        // Prevent Swipe-Back (Trap in history state)
+                        history.pushState({ strictExam: true }, null, window.location.href);
+                        _examStrictPopstate = function(e) {
+                            history.pushState({ strictExam: true }, null, window.location.href);
+                            if(window.showToast) window.showToast('⚠️ لا يمكنك الرجوع للخلف أثناء الامتحان!', 'error');
+                            warnOrFailExam('محاولة الرجوع للخلف (Swipe Back)');
+                        };
+                        window.addEventListener('popstate', _examStrictPopstate);
+
                         window.addEventListener('beforeunload', _examStrictBeforeUnload);
                         document.addEventListener('visibilitychange', _examStrictVisibility);
                         window.addEventListener('blur', _examStrictBlur);
+                        window.addEventListener('focus', _examStrictFocus);
                         document.addEventListener('fullscreenchange', _examStrictFullscreenChange);
                         document.addEventListener('webkitfullscreenchange', _examStrictFullscreenChange);
                         document.addEventListener('mozfullscreenchange', _examStrictFullscreenChange);
@@ -1871,6 +1903,8 @@
                             window.removeEventListener('beforeunload', _examStrictBeforeUnload);
                             document.removeEventListener('visibilitychange', _examStrictVisibility);
                             window.removeEventListener('blur', _examStrictBlur);
+                            window.removeEventListener('focus', _examStrictFocus);
+                            window.removeEventListener('popstate', _examStrictPopstate);
                             document.removeEventListener('fullscreenchange', _examStrictFullscreenChange);
                             document.removeEventListener('webkitfullscreenchange', _examStrictFullscreenChange);
                             document.removeEventListener('mozfullscreenchange', _examStrictFullscreenChange);
