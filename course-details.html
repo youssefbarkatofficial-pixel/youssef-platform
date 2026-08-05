@@ -1492,7 +1492,7 @@
                     container.addEventListener('input', checkAllAnswered);
                     container.addEventListener('change', checkAllAnswered);
 
-                    async function doSubmit(autoSubmit) {
+                    async function doSubmit(autoSubmit, isStrictViolation = false) {
                         _stopTimer();
                         const studentStr = sessionStorage.getItem('currentStudent');
                         if(!studentStr){ alert('يجب تسجيل الدخول لتسليم الإجابة'); return; }
@@ -1605,7 +1605,11 @@
                             });
                         }
 
-                        const percent = Math.round((earnedPoints / (totalPoints || 1)) * 100);
+                        let percent = Math.round((earnedPoints / (totalPoints || 1)) * 100);
+                        if (isStrictViolation) {
+                            earnedPoints = 0;
+                            percent = 0;
+                        }
 
                         let penaltyApplied = false;
                         if(exam.availableUntil && new Date(exam.availableUntil).getTime() < Date.now()) { penaltyApplied = true; }
@@ -1613,9 +1617,17 @@
                         const dispPct = penaltyApplied ? effectivePercent : percent;
 
                         let encouragement = '', encColor = '', encIcon = '';
-                        if(dispPct >= 85) { encouragement = 'برافو! أداء ممتاز، استمر! 🎉'; encColor = '#2ecc71'; encIcon = '🏆'; }
-                        else if(dispPct >= 60) { encouragement = 'عاش! أداء كويس، راجع الأخطاء وهتوصل! 👏'; encColor = '#f39c12'; encIcon = '👍'; }
-                        else { encouragement = 'كمل! مش ناقصك غير مذاكرة أكتر، هتقدر إن شاء الله! 💪'; encColor = '#e74c3c'; encIcon = '📚'; }
+                        if (isStrictViolation) {
+                            encouragement = '❌ نتيجة مُلغاة بسبب مخالفة الوضع الصارم ❌<br><span style="font-size:1rem;color:#fff;">(محاولة غش أو خروج من الامتحان)</span>';
+                            encColor = '#e74c3c';
+                            encIcon = '⛔';
+                        } else {
+                            if(dispPct >= 90) { encouragement = 'طالب البوصلة! أداء استثنائي ومثالي! 👑'; encColor = '#f1c40f'; encIcon = '🧭'; }
+                            else if(dispPct >= 80) { encouragement = 'جيد جداً! مستوى مبشر ومتميز! 🌟'; encColor = '#2ecc71'; encIcon = '🏆'; }
+                            else if(dispPct >= 65) { encouragement = 'جيد! أداء كويس بس تقدر تعمل أحسن! 👏'; encColor = '#3498db'; encIcon = '👍'; }
+                            else if(dispPct >= 50) { encouragement = 'مقبول. محتاج تذاكر أكتر وتركز المرة الجاية! 📚'; encColor = '#f39c12'; encIcon = '⚠️'; }
+                            else { encouragement = 'ضعيف جداً! هذا المستوى لا يليق بك، راجع دروسك فوراً! ❌'; encColor = '#e74c3c'; encIcon = '💔'; }
+                        }
 
                         resultBox.style.display = 'block';
                         let rHtml = '<div style="background:rgba(255,255,255,0.04);padding:20px;border-radius:14px;border:1px solid rgba(255,255,255,0.1);">';
@@ -1623,7 +1635,8 @@
                         rHtml += '<div style="font-size:1.3rem;font-weight:bold;color:' + encColor + ';margin-bottom:10px;">' + encouragement + '</div>';
                         rHtml += '<div style="font-size:1.1rem;"><strong>درجتك: ' + percent + '%</strong>' + (penaltyApplied ? ' <span style="color:#e74c3c;">(بعد خصم التأخير: ' + effectivePercent + '%)</span>' : '') + '</div>';
                         rHtml += '<div style="font-size:1rem;color:#f39c12;margin-top:5px;"><strong>مجموع النقاط: ' + earnedPoints + ' من ' + totalPoints + '</strong></div>';
-                        if(autoSubmit) rHtml += '<div style="margin-top:8px;color:#e74c3c;font-size:0.9rem;">⏰ تم التسليم التلقائي بعد انتهاء الوقت.</div>';
+                        if(isStrictViolation) rHtml += '<div style="margin-top:8px;color:#e74c3c;font-size:0.9rem;font-weight:bold;">🚨 تم سحب الامتحان منك تلقائياً لخرق قواعد الوضع الصارم.</div>';
+                        else if(autoSubmit) rHtml += '<div style="margin-top:8px;color:#e74c3c;font-size:0.9rem;">⏰ تم التسليم التلقائي بعد انتهاء الوقت.</div>';
                         if(penaltyApplied) rHtml += '<div style="margin-top:10px;padding:10px;background:rgba(231,76,60,0.15);border-radius:8px;color:#e74c3c;font-size:0.9rem;">⚠️ <strong>تم خصم 20% من درجتك بسبب التأخر في التسليم بعد الموعد النهائي.</strong></div>';
                         rHtml += '<hr style="border-color:rgba(255,255,255,0.08);margin:14px 0;"><div id="_examResDetails"></div></div>';
                         resultBox.innerHTML = rHtml;
@@ -1789,7 +1802,7 @@
 
                         const failExamDirectly = (reason) => {
                             if(submitBtn.disabled && submitBtn.innerHTML.includes('جاري')) return;
-                            doSubmit(true);
+                            doSubmit(true, true);
                             alert(`تم تسليم الامتحان تلقائياً بدرجة صفر. السبب: ${reason}`);
                         };
 
