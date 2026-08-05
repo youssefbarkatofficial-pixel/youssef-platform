@@ -1396,7 +1396,7 @@
 
                     const ewmAttempts = document.getElementById('ewmAttempts');
                     if(ewmAttempts) {
-                        let warningsHtml = `<p style="margin-bottom: 10px;">⚠️ لديك <strong>${3 - prevAttempts.length}</strong> محاولات متبقية.</p>`;
+                        let warningsHtml = `<p style="margin-bottom: 10px;">⚠️ لديك <strong>${3 - prevAttempts.length}</strong> محاولات متبقية. <br><small style="color: #f39c12;">(المحاولة الأولى فقط هي المحسوبة في التقييم، والمحاولات الإضافية هي لتحسين درجتك وتدريبك ولكنها غير محسوبة رسمياً).</small></p>`;
                         
                         let durationMins = parseInt(exam.duration) || 0;
                         if (exam.strictMode && durationMins === 0) durationMins = 5;
@@ -1723,7 +1723,7 @@
                     if(closeBtnEl) closeBtnEl.onclick = confirmAndExitExam;
 
                     // Hide exit buttons in strict mode
-                    if(exam.strictMode && !isMasterPreview) {
+                    if(exam.strictMode) {
                         cancelBtn.style.display = 'none';
                         if(closeBtnEl) closeBtnEl.style.display = 'none';
                     } else {
@@ -1767,15 +1767,33 @@
                         };
                         
                         let _offlineStartTime = null;
+                        let _strictViolationsCount = 0;
 
-                        const failExam = (reason) => {
+                        const warnOrFailExam = (reason) => {
                             if(submitBtn.disabled && submitBtn.innerHTML.includes('جاري')) return;
-                            if(isMasterPreview) {
-                                if(window.showToast) window.showToast(`وضع المعاينة (أدمن): الطالب سيتم سحبه لسبب: ${reason}`, 'warning');
-                                else alert(`وضع المعاينة (أدمن): الطالب سيتم سحب الامتحان منه لسبب: ${reason}`);
+                            _strictViolationsCount++;
+                            
+                            if (_strictViolationsCount >= 3) {
+                                if(isMasterPreview) {
+                                    if(window.showToast) window.showToast(`وضع المعاينة (أدمن): تجاوزت 3 مخالفات. الطالب سيتم سحب الامتحان منه الآن لسبب: ${reason}`, 'error');
+                                    else alert(`وضع المعاينة (أدمن): تجاوزت 3 مخالفات. الطالب سيتم سحب الامتحان منه الآن لسبب: ${reason}`);
+                                } else {
+                                    doSubmit(true);
+                                    alert(`لقد تجاوزت الحد الأقصى للمخالفات (3 مرات). تم تسليم الامتحان تلقائياً بدرجة صفر. السبب الأخير: ${reason}.`);
+                                }
                             } else {
-                                doSubmit(true);
-                                alert(`تم تسليم الامتحان تلقائياً بدرجة صفر. السبب: ${reason} (الوضع الصارم).`);
+                                const remaining = 3 - _strictViolationsCount;
+                                const msg = `⚠️ تحذير مخالفة (${_strictViolationsCount}/3): ${reason}\n\nيُرجى عدم تكرار ذلك وإلا سيتم سحب الامتحان منك! يتبقى لك ${remaining} تحذيرات.`;
+                                if(window.showToast) window.showToast(msg, 'warning', 7000);
+                                else alert(msg);
+                                
+                                // Try to force fullscreen back
+                                try {
+                                    const elem = document.documentElement;
+                                    if (elem.requestFullscreen) elem.requestFullscreen().catch(()=>{});
+                                    else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
+                                    else if (elem.msRequestFullscreen) elem.msRequestFullscreen();
+                                } catch(e){}
                             }
                         };
 
@@ -1784,27 +1802,27 @@
                                 if (!navigator.onLine) {
                                     _offlineStartTime = Date.now();
                                 } else {
-                                    failExam('الخروج من نافذة الامتحان (تبديل التبويبات أو إخفاء المتصفح)');
+                                    warnOrFailExam('الخروج من نافذة الامتحان (تبديل التبويبات أو إخفاء المتصفح)');
                                 }
                             } else {
                                 if (_offlineStartTime) {
                                     const offlineDur = Date.now() - _offlineStartTime;
                                     _offlineStartTime = null;
                                     if (offlineDur > 5 * 60 * 1000) {
-                                        failExam('انقطاع الإنترنت لأكثر من 5 دقائق');
+                                        warnOrFailExam('انقطاع الإنترنت لأكثر من 5 دقائق');
                                     }
                                 }
                             }
                         };
 
                         const _examStrictBlur = function() {
-                            if (!navigator.onLine) return; // Allow blur if offline (maybe checking connection)
-                            failExam('فقدان التركيز على النافذة (فتح تطبيق آخر أو النقر خارج المتصفح)');
+                            if (!navigator.onLine) return; // Allow blur if offline
+                            warnOrFailExam('فقدان التركيز على النافذة (فتح تطبيق آخر أو النقر خارج المتصفح)');
                         };
 
                         const _examStrictFullscreenChange = function() {
                             if (!document.fullscreenElement && !document.webkitIsFullScreen && !document.mozFullScreen) {
-                                failExam('الخروج من وضع ملء الشاشة');
+                                warnOrFailExam('الخروج من وضع ملء الشاشة');
                             }
                         };
 
