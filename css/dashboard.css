@@ -303,15 +303,6 @@
 }
 
 @media (max-width: 480px) {
-  .navbar {
-    flex-direction: row !important;
-    justify-content: space-between !important;
-    padding: 10px 4% !important;
-  }
-  .navbar .nav-brand {
-    width: auto !important;
-    justify-content: flex-start !important;
-  }
   .dashboard-layout {
     padding-top: 90px !important; /* Adjusted for horizontal navbar */
   }
@@ -355,4 +346,9 @@ a.stat-link h3 {
 }
 a.stat-link:hover h3 {
   color: var(--royal-gold);
+}
+
+/* Hide Bousala Game Temporarily */
+.owner-compass-summary {
+  display: none !important;
 }

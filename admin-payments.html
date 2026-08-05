@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <script>
@@ -167,6 +167,14 @@
             }
 
             let adminCourses = JSON.parse(localStorage.getItem('adminCourses') || '[]');
+
+            // جلب الكورسات من Firebase
+            if (window.firebaseDb) {
+                window.firebaseDb.collection('courses').onSnapshot(snap => {
+                    adminCourses = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                    try { localStorage.setItem('adminCourses', JSON.stringify(adminCourses)); } catch(e) {}
+                }, () => {});
+            }
 
             let paymentRequests = JSON.parse(localStorage.getItem('cached_payment_requests') || localStorage.getItem('paymentRequests') || '[]');
 
@@ -376,85 +384,87 @@
 
             document.getElementById('btnRefreshPayments').addEventListener('click', async () => {
                 await renderPayments();
-                await calculatePaymentStats();
+                calculatePaymentStats();
             });
 
             document.getElementById('pStatusFilter').addEventListener('change', () => renderPayments());
 
             window.approvePayment = async function(id) {
-                if(!confirm('هل أنت متأكد من قبول هذا الطلب؟ سيتم تفعيل الكورس للطالب وفتح محتوياته فوراً.')) return;
-                
+                if(!confirm('هل أنت متأكد من قبول هذا الطلب؟ سيتم تفعيل الكورس للطالب فوراً.')) return;
+
                 if (!window.firebaseDb) {
                     if(window.showToast) window.showToast('فشل الاتصال السحابي، تأكد من اتصال الإنترنت.', 'error');
                     return;
                 }
 
+                // تعطيل الزر لمنع الضغط المزدوج
+                const allBtns = document.querySelectorAll('button');
+                allBtns.forEach(b => { if(b.textContent.includes('قبول') && b.onclick && b.onclick.toString().includes(id)) { b.disabled = true; b.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; } });
+
                 try {
-                    // 1. Get payment request from Firestore directly
+                    // 1. جلب طلب الدفع
                     const payDocRef = window.firebaseDb.collection('paymentRequests').doc(id);
                     const payDoc = await payDocRef.get();
                     if (!payDoc.exists) {
-                        alert('طلب الدفع غير موجود.');
+                        alert('طلب الدفع غير موجود في قاعدة البيانات.');
                         return;
                     }
-                    
+
                     const payData = payDoc.data();
-                    const userId = payData.userId;
-                    const courseId = payData.courseId;
+                    const userId    = payData.userId    || '';
+                    const userPhone = payData.userPhone || payData.userId || '';
+                    const courseId  = payData.courseId;
 
-                    // 2. Update Payment Status in Firestore
-                    await payDocRef.update({ status: 'approved' });
-                    
-                    // 3. Find User Document (Try ID first, then Phone)
-                    let userDocRef = window.firebaseDb.collection('students').doc(userId);
-                    let userDoc = await userDocRef.get();
-                    let userData = null;
+                    // 2. تحديث حالة الدفع
+                    await payDocRef.update({ status: 'approved', approvedAt: new Date().toISOString() });
 
-                    if (userDoc.exists) {
-                        userData = userDoc.data();
-                    } else {
-                        // Fallback to phone search
-                        const snap = await window.firebaseDb.collection('students').where('phone', '==', userId).limit(1).get();
-                        if (!snap.empty) {
-                            userDoc = snap.docs[0];
-                            userDocRef = userDoc.ref;
-                            userData = userDoc.data();
+                    // 3. البحث عن الطالب بثلاث طرق
+                    let userDocRef = null;
+                    let userData   = null;
+
+                    // طريقة 1: بالهاتف مباشرة
+                    const phoneToSearch = userPhone || userId;
+                    if (phoneToSearch) {
+                        const s1 = await window.firebaseDb.collection('students')
+                            .where('phone', '==', phoneToSearch).limit(1).get();
+                        if (!s1.empty) { userDocRef = s1.docs[0].ref; userData = s1.docs[0].data(); }
+                    }
+
+                    // طريقة 2: بالـ UID (إذا كان طويلاً)
+                    if (!userData && userId && userId.length > 10) {
+                        const d2 = await window.firebaseDb.collection('students').doc(userId).get();
+                        if (d2.exists) { userDocRef = d2.ref; userData = d2.data(); }
+                    }
+
+                    // طريقة 3: تطبيع رقم الهاتف (إزالة +20 وإضافة 0)
+                    if (!userData && phoneToSearch) {
+                        const norm = phoneToSearch.replace(/^\+20/, '0').replace(/^00201/, '01');
+                        if (norm !== phoneToSearch) {
+                            const s3 = await window.firebaseDb.collection('students')
+                                .where('phone', '==', norm).limit(1).get();
+                            if (!s3.empty) { userDocRef = s3.docs[0].ref; userData = s3.docs[0].data(); }
                         }
                     }
 
-                    if (userData) {
-                        const courses = userData.courses || [];
+                    if (userData && userDocRef) {
+                        const courses = Array.isArray(userData.courses) ? [...userData.courses] : [];
                         if (!courses.includes(courseId)) courses.push(courseId);
-                        
-                        const notifications = userData.notifications || [];
+
+                        const notifications = Array.isArray(userData.notifications) ? [...userData.notifications] : [];
                         const course = adminCourses.find(c => c.id === courseId);
                         const courseName = course ? course.title : 'الكورس';
-                        
+
                         notifications.push({
                             id: 'n' + Date.now(),
                             title: 'تم قبول اشتراكك بنجاح 🎉',
-                            message: `تم تفعيل ${courseName} لك بنجاح. نتمنى لك التوفيق، يمكنك الآن بدء المذاكرة من قسم كورساتي.`,
+                            message: 'تم تفعيل ' + courseName + ' لك بنجاح. نتمنى لك التوفيق، يمكنك الآن بدء المذاكرة من قسم كورساتي.',
                             timestamp: new Date().toISOString(),
                             read: false,
-                            courseId: courseId,
-                            proofImageKey: payData.proofImageKey || null
+                            courseId: courseId
                         });
-                        
-                        // Update in Firestore
+
+                        // تحديث في Firestore
                         await userDocRef.update({ courses, notifications });
-                        
-                        // Cache locally
-                        localStorage.setItem(`db_${userId}`, JSON.stringify({...userData, courses, notifications}));
-                    } else {
-                        console.warn("User not found for payment approval.");
-                    }
-
-                    // Refresh global cache and UI
-                    const snapReqs = await window.firebaseDb.collection('paymentRequests').get();
-                    const updatedReqs = snapReqs.docs.map(doc => ({id: doc.id, ...doc.data()}));
-                    localStorage.setItem('paymentRequests', JSON.stringify(updatedReqs));
-
-                    await renderPayments();
                     await calculatePaymentStats();
 
                     if(window.audioManager && typeof window.audioManager.play === 'function') {

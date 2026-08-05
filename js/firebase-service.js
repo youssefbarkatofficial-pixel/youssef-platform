@@ -416,24 +416,44 @@ window.FirebaseService = (function () {
     async function getStudentData(phone) {
         const cached = JSON.parse(localStorage.getItem(`db_${phone}`) || 'null');
         if (!isFirebaseReady()) return cached || { courses: [], notifications: [] };
+        
+        const normPhone = phone ? phone.replace(/^\+20/, '0').replace(/^00201/, '01') : phone;
+        
         try {
             if (!studentListeners[phone]) {
                 studentListeners[phone] = getDb().collection('students')
                     .where('phone', '==', phone).limit(1)
                     .onSnapshot(snap => {
                         if (!snap.empty) {
-                            const data = snap.docs[0].data();
-                            cacheStudentData(phone, data);
+                            cacheStudentData(phone, snap.docs[0].data());
                         }
                     }, err => console.warn('Student listener error', err));
             }
 
-            const snap = await getDb().collection('students')
-                .where('phone', '==', phone).limit(1).get();
-            if (snap.empty) return cached || { courses: [], notifications: [] };
-            const data = snap.docs[0].data();
-            cacheStudentData(phone, data);
-            return data;
+            // 1. Direct phone match
+            let snap = await getDb().collection('students').where('phone', '==', phone).limit(1).get();
+            let data = null;
+            
+            if (!snap.empty) {
+                data = snap.docs[0].data();
+            } else {
+                // 2. Try doc ID (UID)
+                if (phone && phone.length > 10) {
+                    const doc = await getDb().collection('students').doc(phone).get();
+                    if (doc.exists) data = doc.data();
+                }
+                // 3. Try normalized phone
+                if (!data && normPhone !== phone) {
+                    const snap2 = await getDb().collection('students').where('phone', '==', normPhone).limit(1).get();
+                    if (!snap2.empty) data = snap2.docs[0].data();
+                }
+            }
+
+            if (data) {
+                cacheStudentData(phone, data);
+                return data;
+            }
+            return cached || { courses: [], notifications: [] };
         } catch (e) {
             console.warn('getStudentData failed', e);
             return cached || { courses: [], notifications: [] };
@@ -450,10 +470,31 @@ window.FirebaseService = (function () {
 
         if (!isFirebaseReady()) return cached;
         try {
-            const snap = await getDb().collection('students')
-                .where('phone', '==', phone).limit(1).get();
+            let docRef = null;
+            const normPhone = phone ? phone.replace(/^\+20/, '0').replace(/^00201/, '01') : phone;
+
+            // 1. Direct phone match
+            const snap = await getDb().collection('students').where('phone', '==', phone).limit(1).get();
             if (!snap.empty) {
-                await snap.docs[0].ref.update(updates);
+                docRef = snap.docs[0].ref;
+            } else {
+                // 2. Try doc ID (UID)
+                if (phone && phone.length > 10) {
+                    const doc = await getDb().collection('students').doc(phone).get();
+                    if (doc.exists) docRef = doc.ref;
+                }
+                // 3. Try normalized phone
+                if (!docRef && normPhone !== phone) {
+                    const snap2 = await getDb().collection('students').where('phone', '==', normPhone).limit(1).get();
+                    if (!snap2.empty) docRef = snap2.docs[0].ref;
+                }
+            }
+
+            if (docRef) {
+                await docRef.update(updates);
+                console.log(`[Firebase] Student data updated successfully for ${phone}`);
+            } else {
+                console.warn(`[Firebase] updateStudentData: User not found for ${phone}`);
             }
         } catch (e) { 
             console.warn('updateStudentData failed', e); 

@@ -1437,27 +1437,28 @@ document.addEventListener('DOMContentLoaded', () => {
                               const localNotifs = Array.isArray(currentLocalUser.notifications) ? currentLocalUser.notifications : [];
                               const remoteNotifs = Array.isArray(remoteUser.notifications) ? remoteUser.notifications : [];
                               
-                              // If local has more courses than remote, or remote has been disabled (Anti-Cheat)
-                              if (localCourses.length > remoteCourses.length || remoteUser.status === 'blocked') {
-                                  console.warn("Security Alert: Course manipulation detected or account blocked. Syncing with server...");
-                                  sessionStorage.setItem('currentStudent', JSON.stringify(remoteUser));
-                                  if (localStorage.getItem('currentStudent')) {
-                                      localStorage.setItem('currentStudent', JSON.stringify(remoteUser));
-                                  }
-                                  if(window.showToast) window.showToast('تم تحديث بيانات حسابك من الخادم الأساسي.', 'warning');
-                                  setTimeout(() => window.location.reload(), 2000);
-                              } 
-                              // Silent Sync (e.g. Admin approved a payment, sent a notification, or fixed notifications)
+                              const coursesChanged = JSON.stringify(localCourses) !== JSON.stringify(remoteCourses);
                               const notifsChanged = JSON.stringify(localNotifs) !== JSON.stringify(remoteNotifs);
-                              if (localCourses.length < remoteCourses.length || notifsChanged) {
+                              
+                              if (coursesChanged || notifsChanged || remoteUser.status === 'blocked') {
+                                  // Update session & local auth
                                   sessionStorage.setItem('currentStudent', JSON.stringify(remoteUser));
                                   if (localStorage.getItem('currentStudent')) {
                                       localStorage.setItem('currentStudent', JSON.stringify(remoteUser));
                                   }
+                                  
+                                  // CRITICAL: Update db_ cache which is used across the app
                                   if (remoteUser.phone) {
                                       let dbLocal = JSON.parse(localStorage.getItem(`db_${remoteUser.phone}`) || '{}');
                                       dbLocal = { ...dbLocal, ...remoteUser };
                                       localStorage.setItem(`db_${remoteUser.phone}`, JSON.stringify(dbLocal));
+                                  }
+
+                                  // If courses were removed or user blocked (Anti-Cheat / Admin Revoke)
+                                  if (localCourses.length > remoteCourses.length || remoteUser.status === 'blocked') {
+                                      console.warn("Security Alert / Admin Change: Syncing with server...");
+                                      if(window.showToast) window.showToast('تم تحديث بيانات حسابك من الخادم الأساسي.', 'warning');
+                                      setTimeout(() => window.location.reload(), 2000);
                                   }
                                   
                                   // Auto-clear rejected pending requests reliably
@@ -1609,5 +1610,39 @@ document.addEventListener('DOMContentLoaded', () => {
           setTimeout(() => circle.remove(), 600);
       });
   });
+
+  // 5. Maintenance Overlay (Temporary)
+  const maintenanceActive = true; // Set to false to disable
+  if (maintenanceActive && !window.location.href.includes('admin')) {
+      const overlay = document.createElement('div');
+      overlay.style.cssText = `
+          position: fixed;
+          top: 0; left: 0; right: 0; bottom: 0;
+          background: rgba(7, 19, 38, 0.98);
+          backdrop-filter: blur(15px);
+          -webkit-backdrop-filter: blur(15px);
+          z-index: 9999999;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          color: #fff;
+          font-family: 'Cairo', sans-serif;
+          text-align: center;
+          padding: 20px;
+      `;
+      
+      overlay.innerHTML = `
+          <i class="fas fa-tools" style="font-size: 4rem; color: #D4A64F; margin-bottom: 20px;"></i>
+          <h2 style="font-size: 1.8rem; margin-bottom: 15px; line-height: 1.4; font-weight: 700;">انتظر 30 دقيقة</h2>
+          <p style="font-size: 1.2rem; color: rgba(255,255,255,0.8); line-height: 1.6; max-width: 400px; margin-bottom: 30px;">
+              المنصة تحت التحديث لتجربة أفضل.
+          </p>
+          <button onclick="this.parentElement.style.display='none'" style="padding: 10px 25px; background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; font-family: 'Cairo', sans-serif; cursor: pointer; font-size: 0.8rem;">
+              إخفاء (للمسؤول)
+          </button>
+      `;
+      document.body.appendChild(overlay);
+  }
 
 });

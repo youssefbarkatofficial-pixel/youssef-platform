@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -1157,6 +1157,7 @@
                             const actionBtn = document.createElement('a');
                             actionBtn.className = 'btn btn-outline';
                             actionBtn.style.cssText = 'padding: 6px 12px; border-radius: 6px; font-size: 0.85rem; white-space: nowrap; text-decoration: none; display: inline-block; text-align: center;';
+                            if (item.id) actionBtn.dataset.itemId = item.id;
                             
                             if (isLocked) {
                                 actionBtn.innerHTML = '<i class="fas fa-lock"></i> مقفول';
@@ -1950,8 +1951,22 @@ setInterval(() => {
         }
     });
 }, 1000);
-
 </script>
+    <script>
+        window.addEventListener('load', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('open')) {
+                const openId = urlParams.get('open');
+                setTimeout(() => {
+                    const btn = document.querySelector(`a[data-item-id="${openId}"]`);
+                    if (btn) {
+                        btn.click();
+                        btn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                }, 800);
+            }
+        });
+    </script>
     <script src="js/mobile.js?v=3"></script>
 </body>
 </html>
