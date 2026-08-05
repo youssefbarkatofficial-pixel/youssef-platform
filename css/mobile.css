@@ -1412,7 +1412,7 @@
     min-height: 50px !important;
   }
 
-  /* Accordion section headers */
+    /* Accordion section headers */
   [class*="section-header"],
   [class*="accordion-header"] {
     padding: 14px 16px !important;
@@ -1420,5 +1420,79 @@
     overflow: visible !important;
     font-size: 0.92rem !important;
     line-height: 1.4 !important;
+  }
+
+  /* ======================================================================
+     ADMIN DASHBOARD COMPREHENSIVE REDESIGN
+     ====================================================================== */
+  
+  /* Dash cards force to 1 or 2 columns based on screen, no squishing */
+  .dash-cards {
+    grid-template-columns: repeat(auto-fit, minmax(100%, 1fr)) !important;
+    gap: 15px !important;
+  }
+
+  /* Reduce padding on admin panels */
+  .dash-panel, .glass-panel {
+    padding: 15px !important;
+    margin-bottom: 20px !important;
+    border-radius: 12px !important;
+  }
+
+  /* Welcome Banner layout */
+  #ownerWelcomeBanner {
+    flex-direction: column !important;
+    text-align: center !important;
+    align-items: center !important;
+    gap: 15px !important;
+    padding: 25px 15px !important;
+  }
+  
+  #ownerWelcomeBanner h3 {
+    justify-content: center !important;
+    font-size: 1.3rem !important;
+  }
+
+  /* Close button on welcome banner */
+  #closeOwnerWelcome {
+    position: absolute !important;
+    top: 10px !important;
+    left: 10px !important;
+  }
+
+  /* Compass summary section buttons stacking */
+  .owner-compass-summary {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    text-align: center !important;
+    gap: 15px !important;
+  }
+  
+  .owner-compass-summary > div:last-child {
+    flex-direction: column !important;
+    width: 100% !important;
+  }
+  
+  .owner-compass-summary .btn {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+
+  /* Table elements - Prevent wrapping and enforce scrolling */
+  .admin-table {
+    min-width: 600px !important; /* Forces scroll on mobile */
+  }
+  
+  .admin-table th, .admin-table td {
+    white-space: nowrap !important;
+    padding: 12px 10px !important;
+    font-size: 0.85rem !important;
+  }
+
+  /* Modals inside dashboard */
+  .confirm-modal-content, .big-modal-inner {
+    padding: 20px 15px !important;
+    width: 95% !important;
+    max-width: 100% !important;
   }
 }
