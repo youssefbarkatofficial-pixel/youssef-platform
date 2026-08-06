@@ -338,10 +338,8 @@
                     const avatarSrc = validProfilePic || defaultAvatar;
                     const hasRealPic = validProfilePic && validProfilePic.length > 10;
 
-                    let displayName = u.fullName || u.name || 'بدون اسم';
-                    if (typeof displayName === 'object') displayName = JSON.stringify(displayName);
+                    let displayName = u.fullName || u.name;
                     let displayPhone = u.phone;
-                    if (typeof displayPhone === 'object') displayPhone = JSON.stringify(displayPhone);
                     const safePhone = String(displayPhone).replace(/'/g, "\\'");
                     const safeName = String(displayName).replace(/'/g, "\\'").replace(/"/g, '&quot;');
 

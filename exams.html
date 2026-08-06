@@ -514,6 +514,7 @@
             const questionsEl = document.getElementById('questionsContainer');
             const noDetailEl = document.getElementById('modalNoDetail');
 
+            const questionsArr = result.questions || result.answers || result.details || [];
             const pct = result.effectivePercent ?? result.percent ?? 0;
             const aNum = result.attemptNumber || 1;
             const label = aNum === 1 ? 'الدرجة الأساسية' : `المحاولة ${aNum}`;
@@ -523,10 +524,18 @@
             attemptEl.textContent = `${label}  •  ${dateStr}`;
 
             // Score banner
-            const total  = result.totalQuestions || result.questions?.length || 0;
-            const correct= result.correctCount   ?? (result.questions ? result.questions.filter(q => q.isCorrect).length : null);
-            const wrong  = result.wrongCount      ?? (result.questions ? result.questions.filter(q => !q.isCorrect && q.studentAnswer != null && q.studentAnswer !== '').length : null);
-            const skip   = (result.questions ? result.questions.filter(q => q.studentAnswer == null || q.studentAnswer === '').length : null);
+            const getIsCorrect = (q) => {
+                if (q.isCorrect !== undefined) return q.isCorrect;
+                if (q.score !== undefined) return q.score >= 0.5;
+                const sAns = q.studentAnswer !== undefined ? q.studentAnswer : q.rawAnswer;
+                const cAns = q.correctAnswer !== undefined ? q.correctAnswer : q.answer;
+                return sAns === cAns;
+            };
+
+            const total  = result.totalQuestions || questionsArr.length || 0;
+            const correct= result.correctCount ?? (questionsArr.length > 0 ? questionsArr.filter(q => getIsCorrect(q)).length : null);
+            const wrong  = result.wrongCount ?? (questionsArr.length > 0 ? questionsArr.filter(q => !getIsCorrect(q) && (q.studentAnswer != null || q.rawAnswer != null) && q.studentAnswer !== '' && q.rawAnswer !== '').length : null);
+            const skip   = questionsArr.length > 0 ? questionsArr.filter(q => (q.studentAnswer == null || q.studentAnswer === '') && (q.rawAnswer == null || q.rawAnswer === '')).length : null;
 
             const scoreClass = pct >= 85 ? 'excellent' : pct >= 60 ? 'good' : pct >= 40 ? 'average' : 'weak';
             const scoreColor = pct >= 85 ? '#2ecc71' : pct >= 60 ? '#3498db' : pct >= 40 ? '#f39c12' : '#e74c3c';
@@ -551,7 +560,7 @@
                 questionsEl.innerHTML = '';
             } else {
                 noDetailEl.style.display = 'none';
-                questions.forEach((q, idx) => {
+                questionsArr.forEach((q, idx) => {
                     const qText = q.text || q.question || 'سؤال';
                     const qStudentAnswer = q.studentAnswer !== undefined ? q.studentAnswer : q.rawAnswer;
                     const qCorrectAnswer = q.correctAnswer !== undefined ? q.correctAnswer : q.answer;

@@ -89,6 +89,13 @@
                     </div>
                     <div class="dash-card-icon"><i class="fas fa-check-square"></i></div>
                 </a>
+                <a href="exams.html" class="glass-panel dash-card stat-link">
+                    <div class="dash-card-info">
+                        <h3>الامتحانات المكتملة</h3>
+                        <span class="value text-gold" id="statExams">0</span>
+                    </div>
+                    <div class="dash-card-icon"><i class="fas fa-clipboard-check"></i></div>
+                </a>
             </div>
 
             <div class="dashboard-grid">
@@ -102,11 +109,41 @@
                         <!-- User courses will be rendered here dynamically -->
                     </div>
 
-                    <!-- Empty State for Courses -->
+                <!-- Empty State for Courses -->
                     <div id="coursesEmptyState" style="display: none; text-align: center; padding: 20px;">
                         <i class="fas fa-book-reader text-gold" style="font-size: 3rem; margin-bottom: 15px; opacity: 0.5;"></i>
                         <p style="color: rgba(255,255,255,0.7);">لم تشترك في أي كورسات بعد</p>
                         <a href="courses.html" class="btn btn-outline" style="margin-top: 15px;">تصفح الكورسات</a>
+                    </div>
+                </div>
+
+                <!-- Homeworks Section -->
+                <div class="glass-panel dash-panel">
+                    <div class="panel-header">
+                        <h2 class="panel-title"><i class="fas fa-tasks mr-2"></i> الواجبات الأخيرة</h2>
+                        <a href="homeworks.html" style="color: var(--accent-cyan); font-size: 0.9rem; text-decoration: none;">عرض الكل</a>
+                    </div>
+                    <div id="homeworksProgressContainer" style="display: grid; grid-template-columns: 1fr; gap: 15px;">
+                        <!-- User homeworks will be rendered here dynamically -->
+                    </div>
+                    <div id="homeworksEmptyState" style="display: none; text-align: center; padding: 20px;">
+                        <i class="fas fa-check-circle text-gold" style="font-size: 3rem; margin-bottom: 15px; opacity: 0.5;"></i>
+                        <p style="color: rgba(255,255,255,0.7);">لا توجد واجبات قادمة</p>
+                    </div>
+                </div>
+
+                <!-- Exams Section -->
+                <div class="glass-panel dash-panel">
+                    <div class="panel-header">
+                        <h2 class="panel-title"><i class="fas fa-clipboard-list mr-2"></i> الامتحانات الأخيرة</h2>
+                        <a href="exams.html" style="color: var(--accent-cyan); font-size: 0.9rem; text-decoration: none;">عرض الكل</a>
+                    </div>
+                    <div id="examsProgressContainer" style="display: grid; grid-template-columns: 1fr; gap: 15px;">
+                        <!-- User exams will be rendered here dynamically -->
+                    </div>
+                    <div id="examsEmptyState" style="display: none; text-align: center; padding: 20px;">
+                        <i class="fas fa-shield-alt text-gold" style="font-size: 3rem; margin-bottom: 15px; opacity: 0.5;"></i>
+                        <p style="color: rgba(255,255,255,0.7);">لا توجد امتحانات قادمة</p>
                     </div>
                 </div>
 

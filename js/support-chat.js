@@ -135,17 +135,17 @@
                 }
             } else {
                 // محرك Gemini
-                var models = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
-                for (var i=0;i<models.length;i++){
+                var geminiModels = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
+                for (var i=0;i<geminiModels.length;i++){
                     try {
-                        var r = await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+models[i]+':generateContent?key='+k, {
+                        var r = await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+geminiModels[i]+':generateContent?key='+k, {
                             method:'POST', headers:{'Content-Type':'application/json'},
                             body: JSON.stringify({system_instruction:{parts:[{text:sp}]},contents:contentsArr,generationConfig:{temperature:0.2,maxOutputTokens:4096}})
                         });
                         if (!r.ok) continue;
                         var d = await r.json();
                         var t = d.candidates && d.candidates[0] && d.candidates[0].content && d.candidates[0].content.parts && d.candidates[0].content.parts[0] && d.candidates[0].content.parts[0].text;
-                        if (t) return {reply:t,fallback:false,provider:'gemini-'+models[i]};
+                        if (t) return {reply:t,fallback:false,provider:'gemini-'+geminiModels[i]};
                     } catch(e){}
                 }
             }

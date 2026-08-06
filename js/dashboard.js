@@ -95,6 +95,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     let adminCourses = JSON.parse(localStorage.getItem('adminCourses')) || [];
 
+    let totalHomeworksCompleted = 0;
+    
     if (dbUser.examResults) {
         const uniqueExams = {};
         dbUser.examResults.forEach(r => {
@@ -105,9 +107,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         Object.values(uniqueExams).forEach(results => {
             const official = results.find(r => r.isOfficial || r.attemptNumber === 1) || results[0];
-            totalExamsCompleted++;
-            sumExamScores += (official.effectivePercent || official.percent);
-            examsCountForAvg++;
+            // To properly distinguish, we check if it is a homework based on course structure,
+            // but as a fallback, if the title contains 'واجب' or 'تدريب' we count it as homework.
+            if (official.examTitle.includes('واجب') || official.examTitle.includes('تدريب')) {
+                totalHomeworksCompleted++;
+            } else {
+                totalExamsCompleted++;
+                sumExamScores += (official.effectivePercent || official.percent);
+                examsCountForAvg++;
+            }
         });
     }
 
@@ -134,9 +142,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     const statCommitment = document.getElementById('statCommitment');
     const statVideosWatched = document.getElementById('statVideosWatched');
     const statHomework = document.getElementById('statHomework');
+    const statExams = document.getElementById('statExams');
+    
     if(statCommitment) statCommitment.textContent = `${commitmentPct}%`;
     if(statVideosWatched) statVideosWatched.textContent = totalVideosWatched;
-    if(statHomework) statHomework.textContent = `${totalExamsCompleted}`;
+    if(statHomework) statHomework.textContent = `${totalHomeworksCompleted}`;
+    if(statExams) statExams.textContent = `${totalExamsCompleted}`;
 
     // Update Courses Progress (My Courses)
     const coursesProgressContainer = document.getElementById('coursesProgressContainer');
@@ -198,6 +209,91 @@ document.addEventListener('DOMContentLoaded', async () => {
         } else {
             coursesProgressContainer.style.display = 'none';
             coursesEmptyState.style.display = 'block';
+        }
+    }
+
+    // Update Homeworks and Exams Progress (Recent Tasks)
+    const homeworksContainer = document.getElementById('homeworksProgressContainer');
+    const homeworksEmpty = document.getElementById('homeworksEmptyState');
+    const examsContainer = document.getElementById('examsProgressContainer');
+    const examsEmpty = document.getElementById('examsEmptyState');
+
+    if (dbUser.examResults && dbUser.examResults.length > 0) {
+        let recentHomeworks = [];
+        let recentExams = [];
+        
+        // Filter unique by courseId + examTitle, get most recent attempt
+        const uniqueResults = {};
+        dbUser.examResults.forEach(r => {
+            const key = `${r.courseId}_${r.examTitle}`;
+            if (!uniqueResults[key] || r.ts > uniqueResults[key].ts) {
+                uniqueResults[key] = r;
+            }
+        });
+
+        Object.values(uniqueResults).sort((a,b) => b.ts - a.ts).forEach(r => {
+            if (r.examTitle.includes('واجب') || r.examTitle.includes('تدريب')) {
+                recentHomeworks.push(r);
+            } else {
+                recentExams.push(r);
+            }
+        });
+
+        // Render Homeworks (limit to 3)
+        if (homeworksContainer && homeworksEmpty) {
+            if (recentHomeworks.length > 0) {
+                homeworksContainer.style.display = 'grid';
+                homeworksEmpty.style.display = 'none';
+                homeworksContainer.innerHTML = '';
+                recentHomeworks.slice(0, 3).forEach(hw => {
+                    const card = document.createElement('div');
+                    card.style.cssText = 'background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; border: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;';
+                    card.innerHTML = `
+                        <div>
+                            <h4 style="color: var(--text-primary); margin-bottom: 5px;">${hw.examTitle}</h4>
+                            <span style="color: var(--accent-cyan); font-size: 0.85rem;">الدرجة: ${hw.percent}%</span>
+                        </div>
+                        <a href="homeworks.html" class="btn btn-outline" style="padding: 6px 12px; font-size: 0.8rem;">عرض</a>
+                    `;
+                    homeworksContainer.appendChild(card);
+                });
+            } else {
+                homeworksContainer.style.display = 'none';
+                homeworksEmpty.style.display = 'block';
+            }
+        }
+
+        // Render Exams (limit to 3)
+        if (examsContainer && examsEmpty) {
+            if (recentExams.length > 0) {
+                examsContainer.style.display = 'grid';
+                examsEmpty.style.display = 'none';
+                examsContainer.innerHTML = '';
+                recentExams.slice(0, 3).forEach(ex => {
+                    const card = document.createElement('div');
+                    card.style.cssText = 'background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; border: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;';
+                    card.innerHTML = `
+                        <div>
+                            <h4 style="color: var(--text-primary); margin-bottom: 5px;">${ex.examTitle}</h4>
+                            <span style="color: var(--accent-cyan); font-size: 0.85rem;">الدرجة: ${ex.percent}%</span>
+                        </div>
+                        <a href="exams.html?openExam=${encodeURIComponent(ex.examTitle)}" class="btn btn-outline" style="padding: 6px 12px; font-size: 0.8rem;">النتيجة</a>
+                    `;
+                    examsContainer.appendChild(card);
+                });
+            } else {
+                examsContainer.style.display = 'none';
+                examsEmpty.style.display = 'block';
+            }
+        }
+    } else {
+        if (homeworksContainer && homeworksEmpty) {
+            homeworksContainer.style.display = 'none';
+            homeworksEmpty.style.display = 'block';
+        }
+        if (examsContainer && examsEmpty) {
+            examsContainer.style.display = 'none';
+            examsEmpty.style.display = 'block';
         }
     }
 

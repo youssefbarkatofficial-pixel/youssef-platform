@@ -1486,9 +1486,10 @@
      ADMIN DASHBOARD COMPREHENSIVE REDESIGN
      ====================================================================== */
   
-  /* Dash cards force to 1 or 2 columns based on screen, no squishing */
+  /* Dash cards force to flex column to prevent squishing and overlaps */
   .dash-cards {
-    grid-template-columns: repeat(auto-fit, minmax(100%, 1fr)) !important;
+    display: flex !important;
+    flex-direction: column !important;
     gap: 15px !important;
   }
 
@@ -1538,9 +1539,17 @@
     justify-content: center !important;
   }
 
-  /* Table elements - Prevent wrapping and enforce scrolling */
+  /* Table elements - Prevent wrapping and enforce scrolling horizontally only */
+  .table-responsive {
+    overflow-x: auto !important;
+    overflow-y: visible !important;
+    -webkit-overflow-scrolling: touch !important;
+    margin-bottom: 0 !important;
+  }
+  
   .admin-table {
-    min-width: 600px !important; /* Forces scroll on mobile */
+    min-width: 600px !important; 
+    margin-bottom: 0 !important;
   }
   
   .admin-table th, .admin-table td {
