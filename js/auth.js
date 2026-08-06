@@ -865,21 +865,30 @@ document.addEventListener('DOMContentLoaded', () => {
         if ((checkId === 'youssefbarkatofficial@gmail.com' && pwd === 'YoussefMBarakat175235') || 
             (checkId === 'youssef@barakat.com' && pwd === 'YoussefMBarakat175235')) {
           const ownerAdmin = {
+            id: 'admin_001',
             name: 'يوسف محمد بركات',
-            email: checkId,
+            email: 'youssefbarkatofficial@gmail.com',
+            password: 'YoussefMBarakat175235',
             role: 'admin'
           };
-          sessionStorage.setItem('currentAdmin', JSON.stringify(ownerAdmin));
+          
+          try {
+            sessionStorage.setItem('currentAdmin', JSON.stringify(ownerAdmin));
+          } catch(e) { console.warn("Admin session save failed", e); }
+          
           if (rememberMe) {
-            localStorage.setItem('rememberedCredentials', JSON.stringify({ phone: rawId, pwd }));
-            localStorage.setItem('currentAdmin', JSON.stringify(ownerAdmin));
-            let savedAccounts = JSON.parse(localStorage.getItem('savedLocalAccounts') || '[]');
-            savedAccounts = savedAccounts.filter(a => a.phone !== rawId);
-            savedAccounts.push({ phone: rawId, pwd, name: 'المالك - الإدارة' });
-            localStorage.setItem('savedLocalAccounts', JSON.stringify(savedAccounts));
+            try { localStorage.setItem('rememberedCredentials', JSON.stringify({ phone: rawId, pwd })); } catch(e){}
+            try { localStorage.setItem('currentAdmin', JSON.stringify(ownerAdmin)); } catch(e){}
+            try {
+              let savedAccounts = JSON.parse(localStorage.getItem('savedLocalAccounts') || '[]');
+              savedAccounts = savedAccounts.filter(a => a.phone !== rawId);
+              savedAccounts.push({ phone: rawId, pwd, name: 'المالك - الإدارة' });
+              localStorage.setItem('savedLocalAccounts', JSON.stringify(savedAccounts));
+            } catch(e){}
           } else {
             localStorage.removeItem('rememberedCredentials');
           }
+          
           if (window.showToast) window.showToast('أهلا بك يا صانع المجد في مملكتك.\nمنصتك جاهزة لإبداعك اليومي.', 'majestic', { title: '👑 مرحبا بك يا أستاذ يوسف', duration: 1500 });
           setTimeout(() => { window.location.href = 'admin-dashboard.html'; }, 1500);
           return;
