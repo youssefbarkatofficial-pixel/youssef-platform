@@ -338,6 +338,13 @@
                     const avatarSrc = validProfilePic || defaultAvatar;
                     const hasRealPic = validProfilePic && validProfilePic.length > 10;
 
+                    let displayName = u.fullName || u.name || 'بدون اسم';
+                    if (typeof displayName === 'object') displayName = JSON.stringify(displayName);
+                    let displayPhone = u.phone;
+                    if (typeof displayPhone === 'object') displayPhone = JSON.stringify(displayPhone);
+                    const safePhone = String(displayPhone).replace(/'/g, "\\'");
+                    const safeName = String(displayName).replace(/'/g, "\\'").replace(/"/g, '&quot;');
+
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
                         <td>
@@ -345,18 +352,18 @@
                                 <img src="${avatarSrc}" 
                                     class="student-avatar-clickable"
                                     style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid var(--royal-gold); background: #071326; padding: ${hasRealPic ? '0' : '4px'};"
-                                    onclick="${hasRealPic ? `openImgLightbox('${avatarSrc.replace(/'/g, "\\'")}',' ${u.name}')` : 'void(0)'}"
+                                    onclick="${hasRealPic ? `openImgLightbox('${avatarSrc.replace(/'/g, "\\'")}',' ${safeName}')` : 'void(0)'}"
                                     title="${hasRealPic ? 'انقر لعرض الصورة' : ''}"
                                 >
-                                <strong>${u.name}</strong>
+                                <strong>${displayName}</strong>
                             </div>
                         </td>
-                        <td dir="ltr" style="text-align: right;">${u.phone}</td>
+                        <td dir="ltr" style="text-align: right;">${displayPhone}</td>
                         <td><span class="badge" style="background: rgba(255,255,255,0.1);">${grades[u.grade] || u.grade || '-'}</span></td>
                         <td>${statusBadge}</td>
                         <td><span class="badge" style="background: rgba(212, 166, 79, 0.2); color: var(--royal-gold);">${coursesCount} كورسات</span></td>
                         <td>
-                            <button class="btn btn-outline" style="padding: 5px 10px; font-size: 0.8rem;" onclick="openStudentEditor('${u.phone}')"><i class="fas fa-cog"></i> إدارة</button>
+                            <button class="btn btn-outline" style="padding: 5px 10px; font-size: 0.8rem;" onclick="openStudentEditor('${safePhone}')"><i class="fas fa-cog"></i> إدارة</button>
                         </td>
                     `;
                     tbody.appendChild(tr);
@@ -377,7 +384,7 @@
             };
 
             window.openStudentEditor = function(phone) {
-                const student = users.find(u => u.phone === phone);
+                const student = users.find(u => String(u.phone) === String(phone));
                 if(!student) return;
 
                 currentStudentPhone = phone;

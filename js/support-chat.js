@@ -413,7 +413,7 @@
         // Update Bot Pause state based on Admin Heartbeat
         if (data.botPaused && data.adminActive) {
             const timeDiff = Date.now() - data.adminActive;
-            isBotPausedByAdmin = timeDiff < 60000; // 60 seconds heartbeat
+            isBotPausedByAdmin = (timeDiff >= -5000 && timeDiff < 60000); // 60 seconds heartbeat, tolerate slight clock drift
         } else {
             isBotPausedByAdmin = false;
         }
@@ -2390,7 +2390,8 @@
     try{
       const key = getStorageKey(BASE_HISTORY_KEY);
       const storage = getStorageForKey(key);
-      return JSON.parse(storage.getItem(key) || '[]');
+      const parsed = JSON.parse(storage.getItem(key) || '[]');
+      return Array.isArray(parsed) ? parsed : [];
     } catch(e){ return []; }
   }
 
@@ -2641,7 +2642,7 @@
       }
   }
 
-  function renderHistory(scrollToBottom = false){ const h = loadHistory(); const box = document.getElementById('pfChatMessages'); if(!box) return; const wasAtBottom = box.scrollHeight - box.clientHeight - box.scrollTop < 20; box.innerHTML=''; h.forEach(it=> appendMessage(it)); if(scrollToBottom || wasAtBottom){ box.scrollTop = box.scrollHeight; } }
+  function renderHistory(scrollToBottom = false){ const h = loadHistory(); const box = document.getElementById('pfChatMessages'); if(!box) return; const wasAtBottom = box.scrollHeight - box.clientHeight - box.scrollTop < 20; box.innerHTML=''; if(Array.isArray(h)) h.forEach(it=> appendMessage(it)); if(scrollToBottom || wasAtBottom){ box.scrollTop = box.scrollHeight; } }
 
   // Prevent duplicate welcome message
   function ensureWelcome(){ const h = loadHistory(); if(h.length === 0){ h.push({ who:'bot', text: WELCOME, ts: nowTs(), status:'delivered', noTime: true }); saveHistory(h); } }
@@ -2673,13 +2674,14 @@
   // send workflow
   function sendMessageRaw(text){ 
     let hist = loadHistory(); 
+    if (!Array.isArray(hist)) hist = [];
     const user = { who:'user', text, ts: nowTs(), status:'sent' }; 
     hist.push(user); 
     // Remove noTime from bot messages when user sends first reply
     hist.forEach(msg => { if(msg.who === 'bot' && msg.noTime) delete msg.noTime; });
     if (hist.length > 50) hist = hist.slice(hist.length - 50);
     saveHistory(hist); 
-    renderHistory(hist, false); // optimistic
+    renderHistory(false); // optimistic
     // generate reply
     addTyping(); 
     setTimeout(async ()=>{
