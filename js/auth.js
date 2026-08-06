@@ -838,11 +838,35 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       setButtonState(submitBtn, 'جاري تسجيل الدخول...', true);
       try {
-        if ((rawId === 'youssefbarkatofficial@gmail.com' && pwd === 'YoussefMBarakat175235') || 
-            (rawId === 'youssef@barakat.com' && pwd === 'YoussefMBarakat175235')) {
+        const checkId = rawId.toLowerCase();
+        
+        // STUDENT PREVIEW BYPASS
+        if ((rawId === '0000' && pwd === '0000') || (rawId === '01099616091' && pwd === '0000')) {
+          const fakeStudent = {
+            name: 'حساب الفحص السريع',
+            phone: rawId,
+            grade: '3',
+            password: pwd,
+            timestamp: new Date().toISOString()
+          };
+          sessionStorage.setItem('currentStudent', JSON.stringify(fakeStudent));
+          sessionStorage.setItem('pfJustLoggedIn', 'true');
+          if (rememberMe) {
+            localStorage.setItem('rememberedCredentials', JSON.stringify({ phone: rawId, pwd }));
+            localStorage.setItem('currentStudent', JSON.stringify(fakeStudent));
+          } else {
+            localStorage.removeItem('rememberedCredentials');
+          }
+          window.location.href = 'dashboard.html';
+          return;
+        }
+        
+        // ADMIN DASHBOARD BYPASS
+        if ((checkId === 'youssefbarkatofficial@gmail.com' && pwd === 'YoussefMBarakat175235') || 
+            (checkId === 'youssef@barakat.com' && pwd === 'YoussefMBarakat175235')) {
           const ownerAdmin = {
             name: 'يوسف محمد بركات',
-            email: rawId,
+            email: checkId,
             role: 'admin'
           };
           sessionStorage.setItem('currentAdmin', JSON.stringify(ownerAdmin));
