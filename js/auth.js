@@ -829,7 +829,7 @@ document.addEventListener('DOMContentLoaded', () => {
       showLoginError('');
       const submitBtn = loginForm.querySelector('button[type="submit"]');
       const rawId = document.getElementById('loginPhone')?.value.trim();
-      const pwd = document.getElementById('loginPassword')?.value || '';
+      const pwd = (document.getElementById('loginPassword')?.value || '').trim();
       const isEmailInput = rawId?.includes('@');
       const rememberMe = document.getElementById('rememberMe') ? document.getElementById('rememberMe').checked : false;
       if (!rawId || !pwd) {
@@ -1107,7 +1107,7 @@ document.addEventListener('DOMContentLoaded', () => {
         showLoginError('لم يتم العثور على حساب بهذا الرقم أو البريد الإلكتروني. يمكنك إنشاء حساب جديد.');
         return;
       } finally {
-        setButtonState(submitBtn, 'دخول للمنصة', false);
+        setButtonState(submitBtn, 'تسجيل الدخول', false);
       }
     });
   }
