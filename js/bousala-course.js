@@ -98,9 +98,43 @@ export function mountCourse(containerId, courseObj, sectionsArray, userStr, save
           }
       }
 
-      btn.innerHTML = `<span>${icon} ${les.title} ${attemptsText}</span>
-        <b class="bc-check">${progress.done.includes(les.id) ? "✔" : ""}</b>`;
-      btn.onclick = () => show(les.id);
+      let statusIcon = progress.done.includes(les.id) ? "✔" : "";
+      let lockStyle = "";
+      let legacyBadge = "";
+
+      if (window.LearningFlowSystem && user && user.phone !== 'guest') {
+          let dbUserFull = JSON.parse(localStorage.getItem(`db_${user.phone}`) || '{}');
+          dbUserFull.phone = user.phone; // ensuring it's available
+          if(dbUserFull.completedItems === undefined && user.completedItems) dbUserFull.completedItems = user.completedItems;
+
+          let flowCheck = window.LearningFlowSystem.checkItemAccess(les, dbUserFull, courseObj);
+          if (flowCheck.isLegacy) {
+              legacyBadge = `<span style="font-size:0.6rem; color:#aaa; background:rgba(255,255,255,0.1); padding:2px 4px; border-radius:3px; margin-right:5px;" title="محتوى قديم اختياري">قديم</span>`;
+          }
+          if (!flowCheck.allowed) {
+              statusIcon = "🔒";
+              lockStyle = "opacity: 0.5;";
+          }
+      }
+
+      btn.innerHTML = `<span>${icon} ${les.title} ${attemptsText} ${legacyBadge}</span>
+        <b class="bc-check" style="font-size:1rem; color:${statusIcon === '🔒' ? '#e74c3c' : 'var(--accent-green)'};">${statusIcon}</b>`;
+      if(lockStyle) btn.style.cssText += lockStyle;
+
+      btn.onclick = () => {
+          if (window.LearningFlowSystem && user && user.phone !== 'guest') {
+              let dbUserFull = JSON.parse(localStorage.getItem(`db_${user.phone}`) || '{}');
+              dbUserFull.phone = user.phone;
+              if(dbUserFull.completedItems === undefined && user.completedItems) dbUserFull.completedItems = user.completedItems;
+              
+              let flowCheck = window.LearningFlowSystem.checkItemAccess(les, dbUserFull, courseObj);
+              if (!flowCheck.allowed) {
+                  window.LearningFlowSystem.showSmartModal(flowCheck, les.title);
+                  return;
+              }
+          }
+          show(les.id);
+      };
 
       // Nesting logic based on parent lecture
       if (les._parentLecId) {
@@ -202,8 +236,10 @@ export function mountCourse(containerId, courseObj, sectionsArray, userStr, save
         if (vidUrl) {
             // Find if this video has a training attached
             let attachedTraining = all.find(l => l._parentLecId === id && (l.type === 'training' || l.type === 'تدريب'));
-            if (attachedTraining) {
-                show(attachedTraining.id);
+            if (attachedTraining && window.LearningFlowSystem) {
+                window.LearningFlowSystem.showPracticeModal(() => {
+                    show(attachedTraining.id);
+                });
             } else if (i < all.length - 1) {
                 setTimeout(() => show(all[i+1].id), 2000);
             }
@@ -219,24 +255,37 @@ export function mountCourse(containerId, courseObj, sectionsArray, userStr, save
             if(th) th.style.width = Math.min(100, Math.max(0, pct)) + "%";
         };
 
+        let storedProg = JSON.parse(localStorage.getItem(`vid_prog_${les.id}_${user.phone}`) || '{"watchTime":0, "reachedEnd":false}');
+        let watchTime = storedProg.watchTime || 0;
+        let reachedEnd = storedProg.reachedEnd || false;
+
+        const saveVideoProgress = (duration) => {
+            if (!duration) return;
+            localStorage.setItem(`vid_prog_${les.id}_${user.phone}`, JSON.stringify({ watchTime, reachedEnd }));
+            let pct = (watchTime / duration) * 100;
+            updateThermometer(pct);
+            if (pct >= 90 && reachedEnd) markCompleted();
+        };
+
         const vidElem = document.getElementById(`vidplayer_${les.id}`);
         if (vidElem) {
-            let watchTime = 0;
             let lastTime = 0;
             vidElem.addEventListener('timeupdate', (e) => {
                 let current = vidElem.currentTime;
                 let diff = current - lastTime;
+                let duration = vidElem.duration;
                 if (diff > 0 && diff < 2.0 && !vidElem.paused && vidElem.playbackRate <= 1.5) {
                     watchTime += diff;
                 }
                 lastTime = current;
-                if (vidElem.duration) {
-                    let pct = (watchTime / vidElem.duration) * 100;
-                    updateThermometer(pct);
-                    if (pct >= 90) markCompleted();
+                if (duration && current >= duration - 5) reachedEnd = true;
+                
+                // Sync every 5 seconds or if near end
+                if (Math.floor(current) % 5 === 0 || reachedEnd) {
+                    saveVideoProgress(duration);
                 }
             });
-            vidElem.addEventListener('ended', () => { updateThermometer(100); markCompleted(); });
+            vidElem.addEventListener('ended', () => { reachedEnd = true; saveVideoProgress(vidElem.duration); });
         } else {
             if (!window.YT) {
                 const tag = document.createElement('script');
@@ -249,7 +298,6 @@ export function mountCourse(containerId, courseObj, sectionsArray, userStr, save
                 if (window.YT && window.YT.Player) {
                     clearInterval(checkYT);
                     try {
-                        let ytWatchTime = 0;
                         let ytLastTime = 0;
                         let ytInterval = null;
                         
@@ -262,26 +310,25 @@ export function mountCourse(containerId, courseObj, sectionsArray, userStr, save
                                             if(!player || !player.getCurrentTime) return;
                                             let current = player.getCurrentTime();
                                             let diff = current - ytLastTime;
+                                            let duration = player.getDuration();
                                             if (diff > 0 && diff < 2.0 && player.getPlaybackRate() <= 1.5) {
-                                                ytWatchTime += diff;
+                                                watchTime += diff;
                                             }
                                             ytLastTime = current;
-                                            let duration = player.getDuration();
-                                            if (duration) {
-                                                let pct = (ytWatchTime / duration) * 100;
-                                                updateThermometer(pct);
-                                                if (pct >= 90) {
-                                                    markCompleted();
-                                                    clearInterval(ytInterval);
-                                                }
+                                            if (duration && current >= duration - 5) reachedEnd = true;
+                                            
+                                            if (Math.floor(current) % 5 === 0 || reachedEnd) {
+                                                saveVideoProgress(duration);
                                             }
                                         }, 1000);
                                     } else {
                                         if(ytInterval) clearInterval(ytInterval);
                                     }
                                     if (event.data == YT.PlayerState.ENDED) {
-                                        updateThermometer(100);
-                                        markCompleted();
+                                        reachedEnd = true;
+                                        if(event.target.getDuration) {
+                                            saveVideoProgress(event.target.getDuration());
+                                        }
                                     }
                                 }
                             }

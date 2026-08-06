@@ -772,6 +772,16 @@
                     else alert(lockReason || 'هذا المحتوى مقفول حالياً');
                     return;
                 }
+
+                // --- NEW: Strict Flow System Interception ---
+                if (!isMasterPreview && window.LearningFlowSystem) {
+                    let flowCheck = window.LearningFlowSystem.checkItemAccess(item, dbUser, course);
+                    if (!flowCheck.allowed) {
+                        window.LearningFlowSystem.showSmartModal(flowCheck, item.title);
+                        return;
+                    }
+                }
+                // --------------------------------------------
                 
                 if(item.type === 'video' && (item.youtubeUrl || item.videoUrl)) {
                     const modal = document.getElementById('videoModal');
@@ -805,7 +815,13 @@
                                         });
                                     });
                                     
-                                    if (nextItem) {
+                                    if (nextItem && window.LearningFlowSystem) {
+                                        window.LearningFlowSystem.showPracticeModal(() => {
+                                            document.getElementById('videoModal').classList.remove('active');
+                                            container.innerHTML = '';
+                                            setTimeout(() => openCourseResource(nextItem, false, ''), 500);
+                                        });
+                                    } else if (nextItem) {
                                         document.getElementById('videoModal').classList.remove('active');
                                         container.innerHTML = '';
                                         setTimeout(() => openCourseResource(nextItem, false, ''), 500);
@@ -1305,7 +1321,7 @@
                         }
                     }
                     
-                    const { mountCourse } = await import('./js/bousala-course.js');
+                    const { mountCourse } = await import('./js/bousala-course.js?v=2');
                     mountCourse('bousala-course-area', course, normalizedContents.sections, userStr, markItemCompleted, (item) => {
                         if (window.openExamModal) window.openExamModal(course.id, item);
                     });
@@ -2213,6 +2229,7 @@ setInterval(() => {
             }
         });
     </script>
+    <script src="js/flow-system.js?v=1"></script>
     <script src="js/mobile.js?v=3"></script>
 </body>
 </html>
