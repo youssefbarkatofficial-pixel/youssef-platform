@@ -2191,7 +2191,7 @@
     if (/ط¹ط§ظˆط².*ط§ظƒظ„ظ… ط§ظ„ط¯ط¹ظ…|ط¹ط§ظٹط².*ط§ظƒظ„ظ… ط§ظ„ط¯ط¹ظ…|ط¹ط§ظˆط² ط£ظƒظ„ظ… ط§ظ„ط¯ط¹ظ…|ط§ظ„ظƒظ„ط§ظ… ظ…ط¹ ط§ظ„ط¯ط¹ظ…/.test(normalized)) {
       return { text: 'طھظ‚ط¯ط± طھظپطھط­ طµظپط­ط© ط§ظ„ظ…ط³ط§ط¹ط¯ط© ط£ظˆ طھط³طھط®ط¯ظ… ظˆط§طھط³ط§ط¨ ط§ظ„ط¯ط¹ظ… ط§ظ„ظ…ظˆط¬ظˆط¯ ظپظٹ ط§ظ„ظ…ظ†طµط©. ط£ظ†ط§ ظ…ظˆط¬ظˆط¯ ط£ط³ط§ط¹ط¯ظƒ ظپظٹ ط£ظٹ ط­ط§ط¬ط© ط¨ط¹ط¯ظٹظ†.' };
     }
-    if (/ط£ظپط¶ظ„ ط·ط±ظٹظ‚ط©.*ط£ط°ط§ظƒط±|ط§ظپط¶ظ„ ط·ط±ظٹظ‚ط©.*ط§ط°ط§ظƒط±|ط§ط²ط§ظٹ ط£ط°ط§ظƒط±|ط§ط²ط§ظٹ ط§ط°ط§ظƒط±/.test(normalized)) {
+    if (/أفضل طريقة.*أذاكر|افضل طريقة.*اذاكر|ازاي أذاكر|ازاي اذاكر/.test(normalized)) {
       return { text: 'ط§ط¨ط¯ط£ ط¨ط´ط±ط­ ط§ظ„ط¯ط±ط³ ظˆط¨ط¹ط¯ظ‡ط§ ط­ظ„ ط§ظ„ظˆط§ط¬ط¨ ظپظˆط±ظ‹ط§طŒ ظˆط±ط§ط¬ط¹ ط£ط®ط·ط§ط،ظƒ ط£ظˆظ„ ط¨ط£ظˆظ„ ط¹ط´ط§ظ† ط§ظ„طھط±ط§ظƒظ…ط§طھ ظ…طھط²ظٹط¯ط´ ط¹ظ„ظٹظƒ.' };
     }
     if (/ط§ظ†ط§ ظ…ط´ ظپط§ظ‡ظ… ط§ظ„ط¯ط±ط³|ط§ظ†ط§ ظ…ط´ ظپط§ظ‡ظ…|ظ…ط´ ظپط§ظ‡ظ… ط§ظ„ط¯ط±ط³|ظ…ط´ ظپط§ظ‡ظ…/.test(normalized)) {
@@ -2395,6 +2395,7 @@
   }
 
   function saveHistory(h){ 
+    if (h && h.length > 50) h = h.slice(h.length - 50);
     const key = getStorageKey(BASE_HISTORY_KEY); 
     const storage = getStorageForKey(key); 
     safeSetItem(storage, key, JSON.stringify(h)); 
@@ -2671,13 +2672,14 @@
 
   // send workflow
   function sendMessageRaw(text){ 
-    const hist = loadHistory(); 
+    let hist = loadHistory(); 
     const user = { who:'user', text, ts: nowTs(), status:'sent' }; 
     hist.push(user); 
     // Remove noTime from bot messages when user sends first reply
     hist.forEach(msg => { if(msg.who === 'bot' && msg.noTime) delete msg.noTime; });
+    if (hist.length > 50) hist = hist.slice(hist.length - 50);
     saveHistory(hist); 
-    renderHistory(false); // optimistic
+    renderHistory(hist, false); // optimistic
     // generate reply
     addTyping(); 
     setTimeout(async ()=>{
@@ -2825,10 +2827,11 @@
       enrichChatContext(text, replyText, { timestamp: nowTs() });
       
       const botMsg = { who:'bot', text: replyText, ts: nowTs(), status:'delivered', typingEffect: true };
-      const finalHist = loadHistory(); 
+      let finalHist = loadHistory(); 
       finalHist.push(botMsg); 
+      if (finalHist.length > 50) finalHist = finalHist.slice(finalHist.length - 50);
       saveHistory(finalHist); 
-      renderHistory();
+      renderHistory(finalHist);
     }, 700 + Math.random()*900);
   }
 
