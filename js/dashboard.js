@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           let localReqs = JSON.parse(localStorage.getItem('paymentRequests')) || [];
           let hasSynced = false;
           for (let r of localReqs) {
-              if (String(r.id).startsWith('local_') && r.status === 'pending' && (r.userId === user.phone || r.userPhone === user.phone)) {
+              if (String(r.id).startsWith('local_') && (r.status === 'pending' || !r.status) && (r.userId === user.phone || r.userPhone === user.phone)) {
                   try {
                       // Attempt to send again without the image (since it failed last time)
                       let fallbackReq = { ...r };
@@ -34,6 +34,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                       const res = await window.FirebaseService.addPaymentRequest(fallbackReq);
                       if (res && res.success) {
                           r.id = res.id;
+                          r.status = 'pending';
                           hasSynced = true;
                       }
                   } catch (e) { console.warn('Background payment sync failed:', e); }
