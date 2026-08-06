@@ -74,6 +74,18 @@
             learningContext = ' ' + window.BousalaTeach.getGlobalLearningRules();
         }
         var sp = 'أنت المساعد الذكي (البوصلة) في منصة الأستاذ يوسف بركات لتعليم الدراسات الاجتماعية للمرحلة الإعدادية والثانوية بمصر. ' + userContext + examGuardRule + scheduleContext + behaviorContext + ' قاعدة صارمة: امتص غضب الطالب واحتويه، تحدث معه بذكاء وأسلوب راقٍ ومباشر ولا تستفزه. إذا واجهته مشكلة، حاول طمأنته وناقشه بذكاء لتهدئته ولا تقم بتحويله فوراً للإدارة بل ساعده بقدر الإمكان. أجب وتناقش مع الطالب بشكل مباشر فوري، ممنوع منعاً باتاً أن تطرح أسئلة اختبارية أو استرجاعية (لا تسأل في التاريخ ولا الجغرافيا). قدم إجابة كافية وافية بلغة ودودة. مميزات المنصة: أسرع منصة، شرح مبسط. إذا أصر الطالب بشدة على التحدث للإدارة، يمكنك منحه رقم الدعم الفني: 01023675235. يجب كتابة روابط بصيغة Markdown مثل [قناة الأستاذ يوسف بركات](الرابط).' + learningContext;
+        
+        // --- ترقية السلوك (ChatGPT-like Contextual AI) ---
+        sp += `
+        تعべيمات صارمة جداً (يجب الالتزام بها حرفياً):
+        1. فهم السياق كالطبيعة البشرية: استخدم تاريخ المحادثة الكامل لفهم مراد الطالب. إذا قال "طيب"، "يعني أطلع"، "مين؟"، "ليه؟" أو أرسل كلمة مبهمة، استنتج المقصود فوراً من آخر موضوع أو سؤال ولا تعاملها كرسالة جديدة.
+        2. الاستنتاج الذكي ومنع الاستفزاز: ممنوع أن تسأل أسئلة توضيحية مزعجة مثل "هل تقصد كذا أم كذا؟" أو "هل تقصد المادة الفلانية؟". استنتج بنفسك وأجب مباشرة.
+        3. منع التأليف (Hallucination): ممنوع منعاً باتاً تأليف واختراع أسماء كورسات، مدرسين، فيديوهات، أو إجابات. إذا لم تجد المعلومة في النظام قل فقط "لا أملك هذه المعلومة حالياً".
+        4. منع التكرار: ممنوع تكرار نفس الاعتذار (مثل "أعتذر"، "أواجه ضغطاً") في نفس المحادثة.
+        5. الردود المباشرة: الرد يجب أن يكون طبيعي، قصير، مباشر، واثق، وبدون حشو.
+        6. سياسة الامتحانات: إذا كان الامتحان جارياً، ارفض المساعدة بحزم وبأدب وأخبره بسياسة المنصة. إذا كان منتهياً، يمكنك الشرح بحرية.
+        `;
+        
         window.bousalaSystemPrompt = sp;
         
         // --- دمج محرك النوايا (Semantic Intents) ---
@@ -98,7 +110,15 @@
         var groqMessages = [{role: 'system', content: sp}];
         
         if (history && Array.isArray(history)) {
-            var recent = history.slice(-6);
+            var recent = history.slice(-25); // Increased context window to 25 messages
+            var internalStateStr = "";
+            if (typeof chatContext !== 'undefined') {
+                internalStateStr = `[INTERNAL STATE] LastTopic: ${chatContext.lastTopic || 'None'}, LastIntent: ${chatContext.lastIntent || 'None'}. (استخدم هذه الحالة لربط الجمل القصيرة والمبهمة بالسياق بشكل ذكي)`;
+                groqMessages[0].content += '\n' + internalStateStr;
+                contentsArr.push({role: 'user', parts: [{text: internalStateStr}]});
+                contentsArr.push({role: 'model', parts: [{text: 'علم، سأعتمد على هذا السياق في إجاباتي دون الإشارة إليه.'}]});
+            }
+            
             for (var j=0; j<recent.length; j++) {
                 if (recent[j] && recent[j].text) {
                     var role = (recent[j].who === 'bot' || recent[j].sender === 'bot') ? 'model' : 'user';
@@ -164,7 +184,8 @@
   const ESCALATION_SUGGESTION = 'لو مستعجل على حل المشكلة اكتب مشكلة والدعم هيتواصل معاك في أقرب وقت 🙏';
   let complaintCaptureMode = false;
   let escalationSuggested = false;
-  const chatContext = { lastTopic: null, lastIssue: null, lastQuestion: null, lastCourse: null };
+  window.chatContext = { lastTopic: null, lastIssue: null, lastQuestion: null, lastCourse: null, lastIntent: null, lastExam: null, lastVideo: null, lastOperation: null, metadata: null, timestamp: null };
+  const chatContext = window.chatContext; // Reference mapping for backwards compatibility
 
   function nowTs(){ return Date.now(); }
   function fmtTimestamp(ts){
@@ -1007,6 +1028,12 @@
     chatContext.lastResponse = response;
     chatContext.metadata = metadata;
     chatContext.timestamp = Date.now();
+    
+    // Extract intelligent state
+    if (metadata.intent) chatContext.lastIntent = metadata.intent;
+    if (metadata.topic) chatContext.lastTopic = metadata.topic;
+    if (metadata.courseId) chatContext.lastCourse = metadata.courseId;
+    if (metadata.examId) chatContext.lastExam = metadata.examId;
   }
 
   function getContextAwareResponse(question) {
@@ -2323,10 +2350,11 @@
     return null;
   }
 
-  function setLastContext(topic, issue, course) {
+  function setLastContext(topic, issue, course, intent) {
     chatContext.lastTopic = topic || chatContext.lastTopic;
     chatContext.lastIssue = issue || chatContext.lastIssue;
     chatContext.lastCourse = course || chatContext.lastCourse;
+    chatContext.lastIntent = intent || chatContext.lastIntent;
   }
 
   function ruleAnswerFor(text){
