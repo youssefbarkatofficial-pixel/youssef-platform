@@ -577,36 +577,7 @@ document.addEventListener('DOMContentLoaded', async () => {
               }
           } else {
               console.error(result ? result.error : 'Unknown error');
-              console.log('[PAYMENT] Retrying without image...');
-              let fallbackReq = { ...requestData };
-              delete fallbackReq.proofImage;
-              fallbackReq.proofImageKey = 'failed_upload_fallback';
-              
-              const retryResult = await window.FirebaseService.addPaymentRequest(fallbackReq);
-              if (retryResult && retryResult.success) {
-                  console.log('[FIRESTORE FALLBACK SUCCESS]');
-                  if (window.showToast) window.showToast('تم إرسال الطلب بدون الصورة بسبب حجمها، يرجى التواصل مع الدعم', 'success');
-                  
-                  let localRequests = JSON.parse(localStorage.getItem('paymentRequests')) || [];
-                  let savedReq = { ...fallbackReq, status: 'pending', id: retryResult.id || Date.now() };
-                  localRequests.push(savedReq);
-                  try { localStorage.setItem('paymentRequests', JSON.stringify(localRequests)); } catch(e) {}
-                  
-                  const pModal = document.getElementById('paymentModal');
-                  if (pModal) pModal.classList.remove('active');
-
-                  const courseCardBtn = document.querySelector(`.course-card[data-course-id="${courseId}"] .btn-subscribe`) || document.querySelector(`.btn-subscribe[onclick*="${courseId}"]`);
-                  if (courseCardBtn) {
-                      courseCardBtn.innerText = 'قيد مراجعة الطلب';
-                      courseCardBtn.disabled = true;
-                      courseCardBtn.style.backgroundColor = '#64748b';
-                      courseCardBtn.style.color = '#fff';
-                      courseCardBtn.style.cursor = 'not-allowed';
-                      courseCardBtn.style.pointerEvents = 'none';
-                  }
-              } else {
-                  if (window.showToast) window.showToast('تعذر الاتصال بالسحابة نهائياً. تم حفظ طلبك محلياً مؤقتاً.', 'error');
-              }
+              if (window.showToast) window.showToast('تعذر الاتصال بالسحابة نهائياً. تم حفظ طلبك محلياً مؤقتاً.', 'error');
           }
       } else {
           if (window.showToast) window.showToast('خدمة قاعدة البيانات غير متوفرة حالياً.', 'error');

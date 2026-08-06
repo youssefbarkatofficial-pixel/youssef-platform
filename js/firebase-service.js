@@ -575,9 +575,7 @@ window.FirebaseService = (function () {
             );
 
             let reqs = JSON.parse(localStorage.getItem('paymentRequests') || '[]');
-            let cachedPayload = { ...payload };
-            delete cachedPayload.proofImage;
-            reqs.push({ id: 'local_' + Date.now(), ...cachedPayload });
+            reqs.push({ id: 'local_' + Date.now(), ...payload });
             localStorage.setItem('paymentRequests', JSON.stringify(reqs));
 
             return {
