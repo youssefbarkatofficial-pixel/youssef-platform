@@ -129,7 +129,7 @@
    * ---------------------------------------------------------------- */
   body {
     overflow-x: hidden !important;
-    padding-top: 110px !important;
+    padding-top: 85px !important; /* Adapted for sleeker header */
     padding-bottom: 90px !important; /* Make sure there's enough room for bottom nav */
   }
 
@@ -143,13 +143,14 @@
     right: 0 !important;
     width: 100% !important;
     height: auto !important;
-    min-height: 120px !important;
-    padding: 15px !important;
+    min-height: 70px !important; /* Sleeker header */
+    padding: 12px 15px !important;
     display: flex !important;
-    flex-direction: column !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
     align-items: center !important;
-    justify-content: flex-start !important;
-    gap: 12px !important;
+    justify-content: space-between !important;
+    gap: 8px !important;
     border-radius: 0 0 20px 20px !important;
     background: rgba(10, 20, 35, 0.95) !important;
     backdrop-filter: blur(25px) !important;
@@ -162,10 +163,10 @@
   .nav-brand {
     display: flex !important;
     gap: 8px !important;
-    width: 100% !important;
-    justify-content: center !important;
+    width: auto !important;
+    justify-content: flex-start !important;
     min-width: 0 !important;
-    margin: 0 auto !important;
+    margin: 0 !important;
   }
 
   .logo-circle {
@@ -194,10 +195,10 @@
     width: 100% !important;
     gap: 15px !important;
     padding-bottom: 5px !important;
-    justify-content: center !important;
+    justify-content: flex-start !important;
     -webkit-overflow-scrolling: touch !important;
     scrollbar-width: none !important;
-    order: 2 !important;
+    order: 3 !important;
     margin: 0 !important;
   }
   .nav-links::-webkit-scrollbar {
@@ -216,13 +217,13 @@
     display: flex !important;
     flex-direction: row !important;
     align-items: center !important;
-    justify-content: center !important;
+    justify-content: flex-end !important;
     gap: 10px !important;
     flex-shrink: 0 !important;
     flex-wrap: nowrap !important;
-    width: 100% !important;
-    margin-top: 5px !important;
-    order: 3 !important;
+    width: auto !important;
+    margin-top: 0 !important;
+    order: 2 !important;
   }
 
   /* All nav buttons: pill buttons */
@@ -242,8 +243,10 @@
   }
 
   /* Show text inside nav buttons */
-  .nav-actions .btn .desktop-text,
-  .nav-actions .btn span:not(.notif-badge):not(#notifBadge) {
+  .nav-actions .btn .desktop-text {
+    display: none !important;
+  }
+  .nav-actions .btn span:not(.notif-badge):not(#notifBadge):not(.desktop-text) {
     display: inline !important;
   }
 
@@ -280,8 +283,8 @@
      DASHBOARD LAYOUT
      ===================== */
   .dashboard-layout {
-    padding-top: 60px !important;
-    padding-bottom: 68px !important; /* Room for bottom nav */
+    padding-top: 85px !important;
+    padding-bottom: 90px !important; /* Room for bottom nav */
     flex-direction: column !important;
     min-height: 100vh !important;
   }
@@ -289,10 +292,10 @@
   /* Sidebar: hidden by default, slides from right (RTL) */
   .sidebar {
     position: fixed !important;
-    top: 60px !important;
+    top: 70px !important;
     right: 0 !important;
     width: min(280px, 82vw) !important;
-    height: calc(100vh - 60px) !important;
+    height: calc(100vh - 70px) !important;
     transform: translateX(100%) !important;
     visibility: hidden !important;
     z-index: 99999 !important;
@@ -321,19 +324,25 @@
      ===================== */
   .dash-cards {
     display: grid !important;
-    grid-template-columns: repeat(3, 1fr) !important;
-    gap: 10px !important;
-    margin-bottom: 18px !important;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)) !important;
+    gap: 12px !important;
+    margin-bottom: 20px !important;
   }
 
   .dash-card {
-    padding: 14px 10px !important;
+    padding: 16px !important;
     flex-direction: column !important;
     align-items: flex-start !important;
     justify-content: space-between !important;
-    gap: 6px !important;
-    border-radius: 14px !important;
-    min-height: 90px !important;
+    gap: 8px !important;
+    border-radius: 16px !important;
+    min-height: 100px !important;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3) !important;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease !important;
+  }
+  
+  .dash-card:active {
+    transform: scale(0.96) !important;
   }
 
   .dash-card-info {
@@ -376,7 +385,8 @@
   .dash-panel {
     padding: 16px !important;
     border-radius: 16px !important;
-    margin-bottom: 0 !important;
+    margin-bottom: 20px !important;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3) !important;
   }
 
   /* =====================
@@ -590,7 +600,10 @@
   .table-responsive,
   .dash-panel:has(.admin-table) {
     overflow-x: auto !important;
+    overflow-y: visible !important;
+    max-height: none !important;
     -webkit-overflow-scrolling: touch !important;
+    scroll-snap-type: x mandatory !important;
   }
 
   .admin-table {
@@ -600,8 +613,33 @@
 
   .admin-table th,
   .admin-table td {
-    padding: 10px 8px !important;
+    padding: 12px 10px !important;
     white-space: normal !important;
+    vertical-align: middle !important;
+    scroll-snap-align: start !important;
+  }
+
+  .admin-table td .btn,
+  .admin-table td button,
+  .admin-table td a.btn {
+    min-height: 48px !important;
+    padding: 10px 14px !important;
+    margin: 4px 0 !important;
+    display: inline-flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    white-space: nowrap !important;
+    width: 100% !important; /* Full width on mobile for easy tap */
+    box-sizing: border-box !important;
+    border-radius: 12px !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  }
+
+  .admin-table td .btn-group {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    width: 100% !important;
   }
 
   /* =====================
@@ -619,7 +657,9 @@
   .sidebar-nav li a,
   select,
   input[type="submit"] {
-    min-height: 44px !important;
+    min-height: 48px !important;
+    border-radius: 12px !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
   }
 
   input[type="text"],
@@ -700,6 +740,26 @@
      ===================== */
   .glass-panel {
     border-radius: 16px !important;
+  }
+
+  /* Ensure panel headers and flex containers wrap properly */
+  .panel-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+  }
+  
+  .panel-header > div,
+  .owner-compass-summary > div {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+    width: 100% !important;
+  }
+
+  .owner-compass-summary {
+    flex-direction: column !important;
+    align-items: flex-start !important;
   }
 
   /* =====================
