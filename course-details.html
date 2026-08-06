@@ -994,6 +994,9 @@
             if (sectionsContainer) {
                 sectionsContainer.innerHTML = '';
                 
+                let globalLastExamCompleted = true;
+                let lastExamName = '';
+
                 normalizedContents.sections.forEach((sec, sIdx) => {
                     const secWrapper = document.createElement('div');
                     secWrapper.style.cssText = 'border:1px solid rgba(255,255,255,0.1); border-radius: 18px; overflow: hidden; background: rgba(255,255,255,0.02); margin-bottom: 20px;';
@@ -1071,6 +1074,18 @@
                             let isLocked = false;
                             let lockReason = '';
                             
+                            // Exam lock logic for videos
+                            const isExamType = item.type === 'exam' || item.type === 'quiz' || item.type === 'امتحان' || (!['video', 'pdf', 'task', 'homework', 'واجب', 'training', 'تدريب', 'header'].includes(item.type));
+                            if (isExamType) {
+                                globalLastExamCompleted = isItemCompleted(item.id);
+                                lastExamName = item.title;
+                            }
+                            
+                            if (item.type === 'video' && !globalLastExamCompleted) {
+                                isLocked = true;
+                                lockReason = `يجب اجتياز (${lastExamName}) أولاً لفتح المحاضرة`;
+                            }
+
                             if (item.dependsOn) {
                                 if (!isItemCompleted(item.dependsOn)) {
                                     isLocked = true;

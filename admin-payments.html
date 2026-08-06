@@ -284,7 +284,9 @@
                         const courseGrade = course ? (gradeMap[course.grade] || course.grade || '') : '';
                         const courseGradeHtml = courseGrade ? `<br><small style="color:var(--text-muted); font-size:0.8rem;">${courseGrade}</small>` : '';
                         const price = course ? course.price : '0';
-                        const date = new Date(req.createdAt || req.timestamp).toLocaleDateString('ar-EG', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+                        const validTs = req.createdAt || req.timestamp || Date.now();
+                        const dateObj = new Date(validTs);
+                        const date = isNaN(dateObj) ? 'تاريخ غير معروف' : dateObj.toLocaleDateString('ar-EG', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 
                         // fetch proof image (if any)
                         const imgSrc = await fetchProofImage(req);

@@ -259,8 +259,8 @@
                         if (data.role === 'admin') return;
                         
                         // Ghost Accounts Auto-Heal (Fix stripped dots in emails)
-                        if (data.phone.includes('@') && !data.phone.includes('.')) {
-                            let fixedPhone = data.phone;
+                        if (String(data.phone).includes('@') && !String(data.phone).includes('.')) {
+                            let fixedPhone = String(data.phone);
                             if (fixedPhone.endsWith('com')) fixedPhone = fixedPhone.replace(/com$/, '.com');
                             else if (fixedPhone.endsWith('net')) fixedPhone = fixedPhone.replace(/net$/, '.net');
                             else if (fixedPhone.endsWith('org')) fixedPhone = fixedPhone.replace(/org$/, '.org');
@@ -328,9 +328,15 @@
                     const grades = {'prep1':'أولى إعدادي', 'prep2':'تانية إعدادي', 'prep3':'تالتة إعدادي', 'sec1':'أولى ثانوي'};
 
                     // Default SVG avatar
-                    const defaultAvatar = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23D4A64F"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>';
-                    const avatarSrc = u.profilePic || defaultAvatar;
-                    const hasRealPic = u.profilePic && u.profilePic.length > 10;
+                    const defaultAvatar = "data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23D4A64F'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E";
+                    
+                    let validProfilePic = u.profilePic;
+                    if (validProfilePic && validProfilePic.trim().startsWith('<svg')) {
+                        validProfilePic = null; // Ignore old broken HTML strings saved in DB
+                    }
+                    
+                    const avatarSrc = validProfilePic || defaultAvatar;
+                    const hasRealPic = validProfilePic && validProfilePic.length > 10;
 
                     const tr = document.createElement('tr');
                     tr.innerHTML = `

@@ -551,8 +551,8 @@ window.FirebaseService = (function () {
 
         try {
             const newDocRef = getDb().collection('paymentRequests').doc();
-            // Background save to avoid hanging the UI on slow connections
-            newDocRef.set(payload).catch(e => console.warn('Payment request background sync failed:', e));
+            // Await the set operation to catch errors (e.g. Payload too large)
+            await newDocRef.set(payload);
             
             const docId = newDocRef.id;
             console.log('[PAYMENT REQUEST QUEUED]', docId);

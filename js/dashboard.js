@@ -19,6 +19,31 @@ document.addEventListener('DOMContentLoaded', async () => {
       if(userNameEl) userNameEl.textContent = user.name;
       if(userCodeEl && user.studentCode) userCodeEl.textContent = user.studentCode;
       
+      // Auto-sync failed local payments
+      setTimeout(async () => {
+          if (!window.FirebaseService || !window.FirebaseService.addPaymentRequest) return;
+          let localReqs = JSON.parse(localStorage.getItem('paymentRequests')) || [];
+          let hasSynced = false;
+          for (let r of localReqs) {
+              if (String(r.id).startsWith('local_') && r.status === 'pending' && (r.userId === user.phone || r.userPhone === user.phone)) {
+                  try {
+                      // Attempt to send again without the image (since it failed last time)
+                      let fallbackReq = { ...r };
+                      delete fallbackReq.proofImage;
+                      fallbackReq.proofImageKey = 'failed_upload_fallback';
+                      const res = await window.FirebaseService.addPaymentRequest(fallbackReq);
+                      if (res && res.success) {
+                          r.id = res.id;
+                          hasSynced = true;
+                      }
+                  } catch (e) { console.warn('Background payment sync failed:', e); }
+              }
+          }
+          if (hasSynced) {
+              localStorage.setItem('paymentRequests', JSON.stringify(localReqs));
+          }
+      }, 3000);
+      
       if(userGradeEl) {
           // استخدام الدوال المشتركة من main.js للحصول على المرحلة الفعلية المحدّثة
           const effectiveGrade = (window.getEffectiveStudentGrade && window.getGradeLabel)
@@ -349,61 +374,56 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   function readImageFileAsDataUrl(file) {
     return new Promise((resolve, reject) => {
-      if (!file) {
-        return reject('لا يوجد ملف لاستخدامه.');
-      }
-      if (!file.type.startsWith('image/')) {
-        return reject('يجب رفع صورة بصيغة صحيحة.');
-      }
+      if (!file) return reject('لا يوجد ملف لاستخدامه.');
+      if (!file.type.startsWith('image/')) return reject('يجب رفع صورة بصيغة صحيحة.');
 
       const maxBytes = 500 * 1024; // 500 KB to fit within Firestore 1MB limit safely
-      const reader = new FileReader();
-      reader.onerror = () => reject('فشل قراءة الصورة. حاول مرة أخرى.');
-      reader.onabort = () => reject('تم إيقاف قراءة الصورة.');
-      reader.onload = () => {
-        const dataUrl = reader.result;
-        if (file.size <= maxBytes) {
-          return resolve(dataUrl);
+      const objectUrl = URL.createObjectURL(file);
+      
+      const img = new Image();
+      img.onerror = () => {
+          URL.revokeObjectURL(objectUrl);
+          reject('تعذر فتح الصورة للضغط. حاول رفع صورة أخرى.');
+      };
+      img.onload = () => {
+        URL.revokeObjectURL(objectUrl);
+        
+        let maxDim = 800; // Smaller dimension for aggressive compression
+        let width = img.width;
+        let height = img.height;
+        
+        if (width > height && width > maxDim) {
+          height = Math.round((height * maxDim) / width);
+          width = maxDim;
+        } else if (height > width && height > maxDim) {
+          width = Math.round((width * maxDim) / height);
+          height = maxDim;
+        } else if (width > maxDim) {
+          height = Math.round((height * maxDim) / width);
+          width = maxDim;
         }
 
-        const img = new Image();
-        img.onload = () => {
-          const maxDim = 800; // Smaller dimension for better compression
-          let width = img.width;
-          let height = img.height;
-          if (width > height && width > maxDim) {
-            height = Math.round((height * maxDim) / width);
-            width = maxDim;
-          } else if (height > width && height > maxDim) {
-            width = Math.round((width * maxDim) / height);
-            height = maxDim;
-          } else if (width > maxDim) {
-            height = Math.round((height * maxDim) / width);
-            width = maxDim;
-          }
-
-          const canvas = document.createElement('canvas');
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext('2d');
-          if (!ctx) {
-            return reject('تعذر معالجة الصورة.');
-          }
-          ctx.drawImage(img, 0, 0, width, height);
-          canvas.toBlob((blob) => {
-            if (!blob) {
-              return reject('فشل ضغط الصورة. حاول بحجم أقل.');
-            }
-            const reader2 = new FileReader();
-            reader2.onerror = () => reject('فشل تحويل الصورة بعد الضغط.');
-            reader2.onload = () => resolve(reader2.result);
-            reader2.readAsDataURL(blob);
-          }, 'image/jpeg', 0.6);
-        };
-        img.onerror = () => reject('تعذر فتح الصورة للضغط. حاول رفع صورة أخرى.');
-        img.src = dataUrl;
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return reject('تعذر معالجة الصورة.');
+        
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        let quality = 0.6;
+        let dataUrl = canvas.toDataURL('image/jpeg', quality);
+        
+        // Force compression loop to guarantee < 500KB
+        while (dataUrl.length > maxBytes && quality > 0.1) {
+            quality -= 0.1;
+            dataUrl = canvas.toDataURL('image/jpeg', quality);
+        }
+        
+        resolve(dataUrl);
       };
-      reader.readAsDataURL(file);
+      
+      img.src = objectUrl;
     });
   }
 
