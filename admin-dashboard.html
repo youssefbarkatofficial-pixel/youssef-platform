@@ -802,7 +802,7 @@
                             if(data.uid) localStorage.setItem(`db_${data.uid}`, JSON.stringify(data));
                         } catch(e) {}
                     });
-                    const leanStudents = students.map(s => ({
+                    const leanStudents = students.filter(s => s && s.phone && s.phone !== 'undefined' && s.name && s.name !== 'undefined').map(s => ({
                         phone: s.phone,
                         name: s.name,
                         courses: s.courses || [],

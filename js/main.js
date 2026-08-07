@@ -961,14 +961,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
                       dbUser.grade = newGrade;
                       dbUser.lastUpdatedAcademicYear = promotionState.currentAcademicYear;
-                      dbUser.courses = []; // Clear courses on promotion
                       localStorage.setItem(`db_${user.phone}`, JSON.stringify(dbUser));
                       
                       if (window.FirebaseService && typeof window.FirebaseService.updateStudentData === 'function') {
                           window.FirebaseService.updateStudentData(user.phone, {
                               grade: newGrade,
-                              lastUpdatedAcademicYear: promotionState.currentAcademicYear,
-                              courses: []
+                              lastUpdatedAcademicYear: promotionState.currentAcademicYear
                           });
                       }
                       

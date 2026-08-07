@@ -507,10 +507,37 @@ window.FirebaseService = (function () {
      * إضافة كورس للطالب بعد قبول الدفع
      */
     async function addCourseToStudent(phone, courseId) {
-        const data = await getStudentData(phone);
-        const courses = data.courses || [];
+        let cached = JSON.parse(localStorage.getItem(`db_${phone}`)) || {};
+        const courses = cached.courses || [];
         if (!courses.includes(courseId)) courses.push(courseId);
-        return await updateStudentData(phone, { courses });
+        cached.courses = courses;
+        localStorage.setItem(`db_${phone}`, JSON.stringify(cached));
+        if (cached.uid) localStorage.setItem(`db_${cached.uid}`, JSON.stringify(cached));
+
+        try {
+            const normPhone = (phone || '').replace(/[^0-9]/g, '');
+            let docRef = null;
+            const snap = await getDb().collection('students').where('phone', '==', phone).limit(1).get();
+            if (!snap.empty) docRef = snap.docs[0].ref;
+            else if (phone && phone.length > 10) {
+                const doc = await getDb().collection('students').doc(phone).get();
+                if (doc.exists) docRef = doc.ref;
+            }
+            if (!docRef && normPhone !== phone) {
+                const snap2 = await getDb().collection('students').where('phone', '==', normPhone).limit(1).get();
+                if (!snap2.empty) docRef = snap2.docs[0].ref;
+            }
+
+            if (docRef) {
+                await docRef.update({
+                    courses: firebase.firestore.FieldValue.arrayUnion(courseId)
+                });
+                console.log(`[Firebase] Course added successfully via arrayUnion for ${phone}`);
+            }
+        } catch (e) {
+            console.warn('addCourseToStudent arrayUnion failed', e);
+        }
+        return cached;
     }
 
     /**

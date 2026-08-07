@@ -210,7 +210,12 @@
                 return;
             }
 
-            let users = JSON.parse(localStorage.getItem('cached_students') || localStorage.getItem('strictUsers') || '[]');
+            let rawUsers = [];
+            try { rawUsers = JSON.parse(localStorage.getItem('cached_students') || localStorage.getItem('strictUsers') || '[]'); } catch(e){}
+            let users = rawUsers.filter(u => u && u.phone && u.phone !== 'undefined' && u.name && u.name !== 'undefined');
+            // Remove duplicates
+            const uMap = {};
+            users = users.filter(u => { if(!uMap[u.phone]){ uMap[u.phone] = true; return true; } return false; });
             const adminCourses = JSON.parse(localStorage.getItem('adminCourses') || '[]');
             let currentStudentPhone = null;
             let tempStudentCourses = [];
@@ -243,9 +248,11 @@
             if (window.firebaseDb) {
                 console.log('[ADMIN] fetching students');
                 window.firebaseDb.collection('students').onSnapshot(snapshot => {
-                    const oldUsers = JSON.parse(localStorage.getItem('strictUsers') || '[]');
+                    let oldUsers = [];
+                    try { oldUsers = JSON.parse(localStorage.getItem('strictUsers') || '[]'); } catch(e){}
                     const oldPwdMap = {};
                     oldUsers.forEach(u => {
+                        if (!u || !u.phone) return;
                         if (u.plainPassword) oldPwdMap[u.phone] = { plain: u.plainPassword, hash: u.password };
                         else if (u.password) oldPwdMap[u.phone] = { hash: u.password };
                     });
@@ -292,9 +299,12 @@
                         delete copy.profilePic;
                         return copy;
                     });
+                    
+                    // Filter again just in case
+                    const safeLean = leanUsers.filter(u => u && u.phone && u.phone !== 'undefined' && u.name && u.name !== 'undefined');
                     try {
-                        localStorage.setItem('cached_students', JSON.stringify(leanUsers));
-                        localStorage.setItem('strictUsers', JSON.stringify(leanUsers));
+                        localStorage.setItem('cached_students', JSON.stringify(safeLean));
+                        localStorage.setItem('strictUsers', JSON.stringify(safeLean));
                     } catch (e) {
                         console.warn('Cache limit reached, skipping save', e);
                     }

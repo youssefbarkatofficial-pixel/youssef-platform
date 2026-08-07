@@ -2177,7 +2177,9 @@ window.enrollFreeCourse = async function(courseId) {
         dbUser.courses.push(courseId);
         localStorage.setItem('db_' + user.phone, JSON.stringify(dbUser));
         
-        if (window.FirebaseService && typeof window.FirebaseService.updateStudentData === 'function') {
+        if (window.FirebaseService && typeof window.FirebaseService.addCourseToStudent === 'function') {
+            await window.FirebaseService.addCourseToStudent(user.phone, courseId);
+        } else if (window.FirebaseService && typeof window.FirebaseService.updateStudentData === 'function') {
             await window.FirebaseService.updateStudentData(user.phone, { courses: dbUser.courses });
         }
     }
