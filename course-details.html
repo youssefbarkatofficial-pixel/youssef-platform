@@ -1833,8 +1833,20 @@
 
                         const failExamDirectly = (reason) => {
                             if(submitBtn.disabled && submitBtn.innerHTML.includes('جاري')) return;
+                            const confirmExit = confirm(`تحذير نهائي: ${reason}\n\nهل أنت مصر على الخروج وتسليم الدرجة (صفر) أم استكمال الحل؟\n\n- اضغط OK/حسناً للخروج بـ (صفر)\n- اضغط Cancel/إلغاء لاستكمال الحل`);
+                            if (!confirmExit) {
+                                if(window.showToast) window.showToast('✅ تم التراجع عن الخروج، استكمل الامتحان.', 'success');
+                                _strictViolationsCount = Math.max(0, _strictViolationsCount - 1);
+                                try {
+                                    const elem = document.documentElement;
+                                    if (elem.requestFullscreen) elem.requestFullscreen().catch(()=>{});
+                                    else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
+                                    else if (elem.msRequestFullscreen) elem.msRequestFullscreen();
+                                } catch(e){}
+                                return;
+                            }
                             doSubmit(true, true);
-                            alert(`تم تسليم الامتحان تلقائياً بدرجة صفر. السبب: ${reason}`);
+                            alert(`تم تسليم الامتحان تلقائياً بدرجة صفر بناءً على تأكيدك أو خروجك المتعمد.`);
                         };
 
                         const warnOrFailExam = (reason) => {
