@@ -578,7 +578,7 @@
                 try {
                     const pwd = await window.requireAdminPassword();
                     if (pwd === null) return;
-                    if (pwd !== "My@36_172001") {
+                    if (pwd.trim() !== "My@36_172001") {
                         alert("كلمة المرور غير صحيحة!");
                         return;
                     }

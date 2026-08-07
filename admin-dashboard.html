@@ -562,7 +562,7 @@
         window.executeFactoryReset = async function() {
             const pwd = await window.requireAdminPassword();
             if (pwd === null) return; // Cancelled
-            if (pwd !== "My@36_172001") {
+            if (pwd.trim() !== "My@36_172001") {
                 alert("كلمة المرور غير صحيحة!");
                 return;
             }
@@ -619,7 +619,7 @@
         window.executeIncomeReset = async function(type) {
             const pwd = await window.requireAdminPassword();
             if (pwd === null) return; // Cancelled
-            if (pwd !== "My@36_172001") {
+            if (pwd.trim() !== "My@36_172001") {
                 alert("كلمة المرور غير صحيحة!");
                 return;
             }

@@ -474,7 +474,7 @@
         window.deleteCourseSecure = async function(id) {
             const pwd = await window.requireAdminPassword();
             if (pwd === null) return;
-            if (pwd !== "My@36_172001") {
+            if (pwd.trim() !== "My@36_172001") {
                 alert("كلمة المرور غير صحيحة!");
                 return;
             }
@@ -727,7 +727,7 @@ window.removeSection = async function(sIdx) {
     
     const pwd = await window.requireAdminPassword();
     if (pwd === null) return;
-    if (pwd !== "My@36_172001") {
+    if (pwd.trim() !== "My@36_172001") {
         alert("كلمة المرور غير صحيحة!");
         return;
     }
@@ -835,7 +835,7 @@ window.openCourseEditor = function(id = null) {
 window.removeItem = async function(sIdx, iIdx) {
     const pwd = await window.requireAdminPassword();
     if (pwd === null) return;
-    if (pwd !== "My@36_172001") {
+    if (pwd.trim() !== "My@36_172001") {
         alert("كلمة المرور غير صحيحة!");
         return;
     }
@@ -1350,7 +1350,7 @@ window.requireAdminPassword = function() {
 window.exportSubscribersCSV = async function() {
     const pwd = await window.requireAdminPassword();
     if (pwd === null) return;
-    if (pwd !== "My@36_172001") {
+    if (pwd.trim() !== "My@36_172001") {
         alert("كلمة المرور غير صحيحة!");
         return;
     }
