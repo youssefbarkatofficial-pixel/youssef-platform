@@ -286,8 +286,18 @@
                     newUsers.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
                     users = newUsers;
                     console.log('[SYNC] current student count:', users.length);
-                    localStorage.setItem('cached_students', JSON.stringify(users));
-                    localStorage.setItem('strictUsers', JSON.stringify(users));
+                    const leanUsers = users.map(u => {
+                        let copy = { ...u };
+                        delete copy.examResults;
+                        delete copy.profilePic;
+                        return copy;
+                    });
+                    try {
+                        localStorage.setItem('cached_students', JSON.stringify(leanUsers));
+                        localStorage.setItem('strictUsers', JSON.stringify(leanUsers));
+                    } catch (e) {
+                        console.warn('Cache limit reached, skipping save', e);
+                    }
                     renderStudentsTable(document.getElementById('studentSearch')?.value || '');
                 }, err => {
                     console.error('[ADMIN] Firestore sync error:', err);

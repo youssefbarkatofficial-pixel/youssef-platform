@@ -797,10 +797,20 @@
                         
                         students.push(data);
                         // Update cache for calculateStats
-                        localStorage.setItem(`db_${data.phone}`, JSON.stringify(data));
-                        if(data.uid) localStorage.setItem(`db_${data.uid}`, JSON.stringify(data));
+                        try {
+                            localStorage.setItem(`db_${data.phone}`, JSON.stringify(data));
+                            if(data.uid) localStorage.setItem(`db_${data.uid}`, JSON.stringify(data));
+                        } catch(e) {}
                     });
-                    localStorage.setItem('strictUsers', JSON.stringify(students));
+                    const leanStudents = students.map(s => ({
+                        phone: s.phone,
+                        name: s.name,
+                        courses: s.courses || [],
+                        grade: s.grade,
+                        role: s.role
+                    }));
+                    try { localStorage.setItem('strictUsers', JSON.stringify(leanStudents)); } catch(e) {}
+
                     calculateStats();
                 });
             }
