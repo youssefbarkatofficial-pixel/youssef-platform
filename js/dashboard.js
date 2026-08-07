@@ -109,7 +109,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             const official = results.find(r => r.isOfficial || r.attemptNumber === 1) || results[0];
             // To properly distinguish, we check if it is a homework based on course structure,
             // but as a fallback, if the title contains 'واجب' or 'تدريب' we count it as homework.
-            if (official.examTitle.includes('واجب') || official.examTitle.includes('تدريب')) {
+            const title = official.examTitle || official.title || '';
+            if (title.includes('واجب') || title.includes('تدريب')) {
                 totalHomeworksCompleted++;
             } else {
                 totalExamsCompleted++;
@@ -232,7 +233,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
 
         Object.values(uniqueResults).sort((a,b) => b.ts - a.ts).forEach(r => {
-            if (r.examTitle.includes('واجب') || r.examTitle.includes('تدريب')) {
+            const title = r.examTitle || r.title || '';
+            if (title.includes('واجب') || title.includes('تدريب')) {
                 recentHomeworks.push(r);
             } else {
                 recentExams.push(r);
