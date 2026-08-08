@@ -527,6 +527,10 @@ window.FirebaseService = (function () {
                 const snap2 = await getDb().collection('students').where('phone', '==', normPhone).limit(1).get();
                 if (!snap2.empty) docRef = snap2.docs[0].ref;
             }
+            if (!docRef && phone && phone.includes('@')) {
+                const snapEmail = await getDb().collection('students').where('email', '==', phone).limit(1).get();
+                if (!snapEmail.empty) docRef = snapEmail.docs[0].ref;
+            }
 
             if (docRef) {
                 await docRef.update({

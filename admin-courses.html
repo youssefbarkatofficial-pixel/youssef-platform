@@ -1536,7 +1536,8 @@ window.renderFlatContents = function() {
 
 window.deleteFlatItem = async function(listKey, idx) {
     const pwd = await window.requireAdminPassword();
-    if(pwd !== '0000') return alert('كلمة المرور خاطئة');
+    if(pwd === null) return;
+    if(pwd.trim() !== 'My@36_172001') return alert('كلمة المرور خاطئة');
     
     if(!confirm('هل أنت متأكد من مسح هذا العنصر نهائياً؟')) return;
     
@@ -1556,7 +1557,8 @@ window.deleteFlatItem = async function(listKey, idx) {
 
 window.deleteFlatChildItem = async function(listKey, parentIdx, childIdx) {
     const pwd = await window.requireAdminPassword();
-    if(pwd !== '0000') return alert('كلمة المرور خاطئة');
+    if(pwd === null) return;
+    if(pwd.trim() !== 'My@36_172001') return alert('كلمة المرور خاطئة');
     
     if(!confirm('هل أنت متأكد من مسح هذا العنصر الفرعي نهائياً؟')) return;
     

@@ -260,9 +260,9 @@
                     const newUsers = [];
                     snapshot.forEach(doc => {
                         const data = doc.data();
-                        // فلترة صارمة: تجاهل أي حساب بيانات ناقصة أو ادمن
-                        if (!data.phone || data.phone === 'undefined' || String(data.phone).trim() === '') return;
-                        if (!data.name || data.name === 'undefined' || String(data.name).trim() === '') return;
+                        // Provide fallback values instead of strict filtering to prevent ghost accounts disappearing
+                        if (!data.phone || data.phone === 'undefined' || String(data.phone).trim() === '') data.phone = data.email || 'بدون هاتف';
+                        if (!data.name || data.name === 'undefined' || String(data.name).trim() === '') data.name = 'طالب مسجل بالإيميل';
                         if (data.role === 'admin') return;
                         
                         // Ghost Accounts Auto-Heal (Fix stripped dots in emails)

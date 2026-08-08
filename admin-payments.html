@@ -406,7 +406,7 @@
                     // 2. Update Payment Status in Firestore
                     await payDocRef.update({ status: 'approved' });
                     
-                    // 3. Find User Document (Try ID first, then Phone)
+                    // 3. Find User Document (Try ID first, then Phone, then Email)
                     let userDocRef = window.firebaseDb.collection('students').doc(userId);
                     let userDoc = await userDocRef.get();
                     let userData = null;
@@ -442,7 +442,7 @@
                         });
                         
                         // Update in Firestore
-                        await userDocRef.update({ courses, notifications });
+                        await userDocRef.update({ notifications });
                         
                         // Cache locally
                         localStorage.setItem(`db_${userId}`, JSON.stringify({...userData, courses, notifications}));

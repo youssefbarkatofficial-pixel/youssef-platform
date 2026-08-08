@@ -27,13 +27,28 @@ document.addEventListener('DOMContentLoaded', () => {
             // Load all students and DBs
             let cachedUsers = JSON.parse(localStorage.getItem('cached_students') || localStorage.getItem('strictUsers') || '[]');
             
+            // Wait for Firebase to be ready (up to 3 seconds)
+            let attempts = 0;
+            while ((!window.FirebaseService || typeof window.FirebaseService.isReady !== 'function' || !window.FirebaseService.isReady()) && attempts < 30) {
+                await new Promise(r => setTimeout(r, 100));
+                attempts++;
+            }
+            
             // Try fetch real from Firebase
             if (window.FirebaseService && typeof window.FirebaseService.isReady === 'function' && window.FirebaseService.isReady()) {
                 const snap = await window.firebaseDb.collection('students').get();
                 let remoteUsers = [];
                 snap.forEach(doc => {
                     const data = doc.data();
-                    if (!data.phone || data.phone === 'undefined' || !data.name || data.name === 'undefined' || data.role === 'admin') return;
+                    let phone = data.phone;
+                    let name = data.name;
+                    if (!phone || phone === 'undefined' || String(phone).trim() === '') phone = data.email || 'بدون هاتف';
+                    if (!name || name === 'undefined' || String(name).trim() === '') name = 'طالب مسجل بالإيميل';
+                    if (data.role === 'admin') return;
+                    
+                    data.phone = phone;
+                    data.name = name;
+                    data.id = doc.id;
                     remoteUsers.push(data);
                 });
                 if(remoteUsers.length > 0) {
