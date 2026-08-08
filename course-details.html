@@ -1431,6 +1431,11 @@
                         
                         let durationMins = parseInt(exam.duration) || 0;
                         if (exam.strictMode && durationMins === 0) durationMins = 5;
+                        
+                        // Force strict mode for all actual exams (not homework/training)
+                        if (!isHomework && !isTraining) {
+                            exam.strictMode = true;
+                        }
 
                         if (exam.strictMode) {
                             warningsHtml += `<p style="margin-bottom: 10px; color: #e74c3c;">🚫 <strong>الوضع الصارم مفعل! يُمنع الخروج أو التبديل بين التطبيقات!</strong> أي محاولة لفتح تطبيق آخر أو الخروج من النافذة ستؤدي إلى <strong>تسليم الامتحان فوراً بدرجة صفر</strong>.</p>`;
@@ -1484,6 +1489,15 @@
                         ['examTimer','examStrictBadge'].forEach(id => { const el = document.getElementById(id); if(el) el.remove(); });
 
                     const questions = exam.questions || [];
+                    
+                    // --- AUTOSAVE & RESTORE LOGIC ---
+                    const attemptId = `attempt_${studentObj.phone}_${courseId}_${exam.title}`;
+                    let savedAttempt = JSON.parse(localStorage.getItem(attemptId));
+                    if (!savedAttempt) {
+                        savedAttempt = { startTime: Date.now(), answers: [] };
+                    }
+                    // ---------------------------------
+                    
                     questions.forEach((q, idx) => {
                         const qDiv = document.createElement('div');
                         qDiv.style.cssText = 'background: rgba(0,0,0,0.06); padding:14px; margin-bottom:10px; border-radius:10px; border:1px solid rgba(255,255,255,0.08);';
@@ -1498,7 +1512,21 @@
                         qDiv.innerHTML = '<p style="margin:0 0 10px 0;font-weight:600;"><span style="color:var(--royal-gold);">س' + (idx+1) + ':</span> <span style="font-size:0.8rem; color:#f39c12; margin-right:10px;">(' + (q.points || 1) + ' درجة)</span><br>' + q.text + '</p>' + inputHtml;
                         container.appendChild(qDiv);
                     });
-
+                    
+                    // Restore inputs
+                    if (savedAttempt && savedAttempt.answers) {
+                        questions.forEach((q, idx) => {
+                            const val = savedAttempt.answers[idx];
+                            if (val) {
+                                const name = 'qa_' + idx;
+                                const els = document.getElementsByName(name);
+                                if(els && els.length) {
+                                    if(els[0].tagName === 'TEXTAREA') els[0].value = val;
+                                    else { for(const el of els) if(el.value === val) el.checked = true; }
+                                }
+                            }
+                        });
+                    }
                     const submitBtn = document.getElementById('submitExamBtn');
                     const cancelBtn = document.getElementById('examCancelBtn');
                     const resultBox = document.getElementById('examResultContainer');
@@ -1518,6 +1546,21 @@
                             if(!hasVal) allAnswered = false;
                         });
                         submitBtn.disabled = !allAnswered;
+                        
+                        // Save to local storage
+                        const answers = [];
+                        questions.forEach((q, idx) => {
+                            const name = 'qa_' + idx;
+                            const els = document.getElementsByName(name);
+                            let val = '';
+                            if(els && els.length) {
+                                if(els[0].tagName === 'TEXTAREA') val = els[0].value;
+                                else { for(const el of els) if(el.checked) { val = el.value; break; } }
+                            }
+                            answers.push(val);
+                        });
+                        savedAttempt.answers = answers;
+                        localStorage.setItem(attemptId, JSON.stringify(savedAttempt));
                     }
                     
                     container.addEventListener('input', checkAllAnswered);
@@ -1638,8 +1681,7 @@
 
                         let percent = Math.round((earnedPoints / (totalPoints || 1)) * 100);
                         if (isStrictViolation) {
-                            earnedPoints = 0;
-                            percent = 0;
+                            // Strict violations no longer set score to 0. They are handled by monitoring status.
                         }
 
                         let penaltyApplied = false;
@@ -1817,6 +1859,16 @@
 
                     // ===== STRICT MODE =====
                     if(exam.strictMode) {
+                        
+                        // Block Links
+                        const _preventNavigation = (e) => {
+                            e.preventDefault();
+                            if(window.showToast) window.showToast('⚠️ ممنوع الخروج من الامتحان!', 'error');
+                        };
+                        document.querySelectorAll('a').forEach(link => {
+                            link.addEventListener('click', _preventNavigation);
+                        });
+
                         _examStrictBeforeUnload = function(e) {
                             e.preventDefault();
                             e.returnValue = 'إذا غادرت الآن سيتم تسجيل نتيجة صفر!';
@@ -1982,6 +2034,13 @@
                             document.removeEventListener('cut', _examStrictCopy);
                             document.removeEventListener('paste', _examStrictCopy);
                             document.removeEventListener('keydown', _examStrictKeydown);
+                            
+                            // Remove link blockers if any
+                            if (typeof _preventNavigation !== 'undefined') {
+                                document.querySelectorAll('a').forEach(link => {
+                                    link.removeEventListener('click', _preventNavigation);
+                                });
+                            }
                             
                             // Exit fullscreen if active
                             try {
