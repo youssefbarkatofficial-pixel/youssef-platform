@@ -38,6 +38,29 @@
         .late-card .copy-btn { padding:5px 12px; border-radius:6px; border:none; background:var(--royal-gold); color:#000; cursor:pointer; font-size:0.8rem; white-space:nowrap; font-weight:600; }
         .progress-bar-wrap { background:rgba(255,255,255,0.1); border-radius:20px; height:8px; overflow:hidden; width:100px; display:inline-block; vertical-align:middle; margin-right:6px; }
         .progress-bar-fill { height:100%; border-radius:20px; background:var(--royal-gold); transition:width 0.4s; }
+        .wa-btn { display:inline-flex; align-items:center; justify-content:center; width:30px; height:30px; border-radius:50%; background:rgba(37,211,102,0.15); color:#25d366; border:1px solid rgba(37,211,102,0.3); text-decoration:none; font-size:0.85rem; transition:all 0.2s; }
+        .wa-btn:hover { background:rgba(37,211,102,0.3); }
+        .score-chip { display:inline-flex; align-items:center; gap:4px; padding:3px 10px; border-radius:12px; font-size:0.8rem; font-weight:700; }
+        .chip-exam { background:rgba(52,152,219,0.15); color:#3498db; }
+        .chip-hw { background:rgba(155,89,182,0.15); color:#9b59b6; }
+        .chip-train { background:rgba(46,204,113,0.15); color:#2ecc71; }
+        .q-card { padding:12px; margin-bottom:8px; border-radius:8px; border:1px solid rgba(255,255,255,0.08); }
+        .q-card.correct { background:rgba(46,204,113,0.08); border-color:rgba(46,204,113,0.25); }
+        .q-card.wrong { background:rgba(231,76,60,0.08); border-color:rgba(231,76,60,0.25); }
+        .toggle-score-btn { padding:5px 12px; border-radius:6px; border:1px solid rgba(255,255,255,0.15); background:rgba(0,0,0,0.3); color:white; cursor:pointer; font-size:0.82rem; flex-shrink:0; transition:all 0.2s; white-space:nowrap; }
+        .toggle-score-btn:hover { border-color:var(--royal-gold); }
+        .save-grade-btn { padding:7px 16px; border-radius:8px; border:none; background:var(--royal-gold); color:#000; cursor:pointer; font-weight:700; font-size:0.88rem; transition:all 0.2s; }
+        .save-grade-btn.urgent { background:#e74c3c !important; color:#fff !important; box-shadow:0 0 14px rgba(231,76,60,0.5); }
+        .cat-tab-btn { padding:8px 18px; border-radius:10px; border:none; cursor:pointer; font-family:inherit; font-size:0.95rem; font-weight:600; background:rgba(255,255,255,0.06); color:rgba(255,255,255,0.6); transition:all 0.2s; }
+        .cat-tab-btn.active { background:var(--royal-gold); color:#000; }
+        .modal-section-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:10px; }
+        /* Skeleton Loaders */
+        @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+        .skeleton-cell { height:18px; border-radius:6px; background:linear-gradient(90deg,rgba(255,255,255,0.04) 25%,rgba(255,255,255,0.1) 50%,rgba(255,255,255,0.04) 75%); background-size:200% 100%; animation:shimmer 1.6s ease-in-out infinite; }
+        /* Sortable headers */
+        .admin-table th[data-sort] { cursor:pointer; user-select:none; white-space:nowrap; }
+        .admin-table th[data-sort]:hover { color:var(--royal-gold); }
+        .sort-icon { margin-right:4px; font-size:0.75rem; opacity:0.6; }
     </style>
     <link rel="stylesheet" href="css/mobile.css?v=3">
 </head>
@@ -105,14 +128,14 @@
                     <table class="admin-table" id="studentsTable">
                         <thead>
                             <tr>
-                                <th>الطالب</th>
+                                <th data-sort="name" onclick="sortBy('name')"><span class="sort-icon">⇅</span>الطالب والتواصل</th>
                                 <th>الصف</th>
-                                <th>نسبة المشاهدة</th>
-                                <th>متوسط التدريب</th>
-                                <th>متوسط الواجب</th>
-                                <th>متوسط الامتحان</th>
-                                <th>المستوى</th>
-                                <th>إجراءات</th>
+                                <th data-sort="avgExam" onclick="sortBy('avgExam')"><span class="sort-icon">⇅</span>📄 متوسط الامتحانات</th>
+                                <th data-sort="avgHw" onclick="sortBy('avgHw')"><span class="sort-icon">⇅</span>📚 متوسط الواجبات</th>
+                                <th data-sort="avgTrain" onclick="sortBy('avgTrain')"><span class="sort-icon">⇅</span>📝 متوسط التدريبات</th>
+                                <th data-sort="watch" onclick="sortBy('watch')"><span class="sort-icon">⇅</span>🎥 نسبة المشاهدة</th>
+                                <th data-sort="level" onclick="sortBy('level')"><span class="sort-icon">⇅</span>المستوى</th>
+                                <th>تفاصيل وتصحيح</th>
                             </tr>
                         </thead>
                         <tbody id="studentsTableBody">
@@ -168,7 +191,6 @@
     </main>
 </div>
 
-<!-- Student Detail Modal -->
 <div class="big-modal" id="studentDetailModal">
     <div class="big-modal-inner">
         <button onclick="closeDetailModal()" style="position:absolute; top:15px; left:15px; background:rgba(231,76,60,0.15); border:none; color:#e74c3c; width:36px; height:36px; border-radius:50%; cursor:pointer; font-size:1.1rem;"><i class="fas fa-times"></i></button>
@@ -207,627 +229,504 @@ function getLevelInfo(avg) {
 function calcStudentStats(s) {
     const examResults = s.examResults || [];
     const isT = (r) => r.isTraining || (r.examTitle && r.examTitle.includes('تدريب'));
-    const isH = (r) => r.isHomework || (r.examTitle && r.examTitle.includes('واجب'));
-    const exams = examResults.filter(r => !isT(r) && !isH(r));
-    const trainings = examResults.filter(r => isT(r));
-    const homeworks = examResults.filter(r => isH(r));
-    
+    const isH = (r) => r.isHomework  || (r.examTitle && r.examTitle.includes('واجب'));
+    const exams     = examResults.filter(r => !isT(r) && !isH(r));
+    const trainings = examResults.filter(r =>  isT(r));
+    const homeworks = examResults.filter(r =>  isH(r));
+
     const getAvg = (arr) => {
         const unique = {};
         arr.forEach(r => {
-            const key = r.courseId + '_' + r.examTitle;
+            const key = (r.courseId||'') + '_' + r.examTitle;
             if (!unique[key] || r.attemptNumber === 1) unique[key] = r;
         });
         const official = Object.values(unique);
         return official.length ? Math.round(official.reduce((s,r) => s + (r.percent||0), 0) / official.length) : null;
     };
-    
-    const avgExam = getAvg(exams);
+
+    const avgExam     = getAvg(exams);
     const avgTraining = getAvg(trainings);
     const avgHomework = getAvg(homeworks);
-    
+
     const completed = s.completedItems || [];
-    const watchPct = s._totalItems ? Math.round((completed.length / s._totalItems) * 100) : null;
-    
+    let totalItems  = 0;
+    const enrolled  = Array.isArray(s.enrolledCourses) ? s.enrolledCourses : (Array.isArray(s.courses) ? s.courses : []);
+    enrolled.forEach(cId => {
+        if (window._courseTotalsMap && window._courseTotalsMap[cId]) totalItems += window._courseTotalsMap[cId];
+    });
+    if (!totalItems && s._totalItems) totalItems = s._totalItems;
+    const watchPct = totalItems > 0 ? Math.min(100, Math.round((completed.length / totalItems) * 100)) : null;
+
     return { avgExam, avgTraining, avgHomework, watchPct };
+}
+
+function calcOverallLevel(stats) {
+    let sum = 0, weight = 0;
+    if (stats.avgExam     !== null) { sum += stats.avgExam     * 0.4; weight += 0.4; }
+    if (stats.avgHomework !== null) { sum += stats.avgHomework * 0.3; weight += 0.3; }
+    if (stats.avgTraining !== null) { sum += stats.avgTraining * 0.2; weight += 0.2; }
+    if (stats.watchPct    !== null) { sum += stats.watchPct    * 0.1; weight += 0.1; }
+    return weight > 0 ? Math.round(sum / weight) : 0;
+}
+
+const CACHE_KEY = 'analytics_students_v2';
+const CACHE_TTL = 5 * 60 * 1000;
+
+function getCachedStudents() {
+    try {
+        const raw = localStorage.getItem(CACHE_KEY);
+        if (!raw) return null;
+        const obj = JSON.parse(raw);
+        if (Date.now() - obj.ts > CACHE_TTL) { localStorage.removeItem(CACHE_KEY); return null; }
+        return obj.data || null;
+    } catch(e) { return null; }
+}
+function setCachedStudents(data) {
+    try { localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), data })); }
+    catch(e) { try { localStorage.removeItem(CACHE_KEY); } catch(e2) {} }
+}
+function invalidateCache() { try { localStorage.removeItem(CACHE_KEY); } catch(e) {} }
+
+let _sortCol = null, _sortDir = -1;
+function sortBy(col) {
+    _sortDir = (_sortCol === col) ? -_sortDir : -1;
+    _sortCol = col;
+    document.querySelectorAll('.admin-table th[data-sort] .sort-icon').forEach(ic => ic.textContent = '⇅');
+    const th = document.querySelector(`.admin-table th[data-sort="${col}"] .sort-icon`);
+    if (th) th.textContent = _sortDir === 1 ? '↑' : '↓';
+    renderStudentsTable(filterBySearch(allStudentsData));
+}
+
+function filterBySearch(students) {
+    const search = (document.getElementById('studentSearch')?.value || '').trim().toLowerCase();
+    return search ? students.filter(s => (s.name||'').toLowerCase().includes(search) || (s.phone||'').includes(search)) : students;
+}
+
+window._courseTotalsMap = {};
+function _countCourseItems(course) {
+    const con = course.contents || {};
+    let count = 0;
+    if (Array.isArray(con.sections)) {
+        con.sections.forEach(sec => (sec.items||[]).forEach(item => { if (item.id && item.type !== 'header') count++; }));
+        if (count > 0) return count;
+    }
+    (con.lectures ||[]).forEach(lec => { if (lec.id) count++; (lec.children||[]).forEach(ch => { if (ch.id) count++; }); });
+    (con.trainings||[]).forEach(tr => { if (tr.id) count++; });
+    (con.homeworks||[]).forEach(hw => { if (hw.id) count++; });
+    (con.exams    ||[]).forEach(ex => { if (ex.id) count++; });
+    return count;
+}
+async function prefetchCourseTotals() {
+    if (!window.firebaseDb) return;
+    try {
+        const snap = await window.firebaseDb.collection('courses').get();
+        snap.forEach(doc => { window._courseTotalsMap[doc.id] = _countCourseItems(doc.data()); });
+    } catch(e) { console.warn('prefetchCourseTotals:', e); }
+}
+
+function showSkeletonRows() {
+    const tbody = document.getElementById('studentsTableBody');
+    if (!tbody) return;
+    tbody.innerHTML = Array.from({length:7}).map(() =>
+        `<tr>${Array.from({length:8}).map(()=>`<td><div class="skeleton-cell"></div></td>`).join('')}</tr>`
+    ).join('');
+}
+
+let _studentsUnsubscribe = null;
+function subscribeStudents(grade) {
+    if (_studentsUnsubscribe) { _studentsUnsubscribe(); _studentsUnsubscribe = null; }
+    if (!window.firebaseDb) return;
+    showSkeletonRows();
+    let q = window.firebaseDb.collection('students');
+    if (grade) q = q.where('grade', '==', grade);
+    _studentsUnsubscribe = q.limit(300).onSnapshot(snap => {
+        allStudentsData = [];
+        snap.forEach(doc => { const d = doc.data(); d._uid = doc.id; allStudentsData.push(d); });
+        setCachedStudents(allStudentsData);
+        renderStudentsTable(filterBySearch(allStudentsData));
+    }, err => {
+        const tbody = document.getElementById('studentsTableBody');
+        if (tbody) tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:#e74c3c;">خطأ: ${err.message}</td></tr>`;
+    });
 }
 
 async function loadStudents() {
     const grade = document.getElementById('gradeFilter').value;
-    const tbody = document.getElementById('studentsTableBody');
-    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:20px;"><i class="fas fa-spinner fa-spin"></i> جاري التحميل...</td></tr>';
-    
     if (!window.firebaseDb) {
-        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#e74c3c;">Firebase غير متاح</td></tr>';
+        document.getElementById('studentsTableBody').innerHTML = '<tr><td colspan="8" style="text-align:center;color:#e74c3c;">Firebase غير متاح</td></tr>';
         return;
     }
-    
-    try {
-        let cached = JSON.parse(localStorage.getItem('cached_students') || '[]');
-        if (cached && cached.length > 0) {
-            allStudentsData = cached.map(s => { s._uid = s.id || s._uid; return s; });
-            if (grade) allStudentsData = allStudentsData.filter(s => s.grade === grade);
-            renderStudentsTable(allStudentsData);
-            return;
-        }
-
-        let query = window.firebaseDb.collection('students');
-        if (grade) query = query.where('grade', '==', grade);
-        const snap = await query.limit(300).get();
-        
-        allStudentsData = [];
-        snap.forEach(doc => {
-            const d = doc.data();
-            d._uid = doc.id;
-            allStudentsData.push(d);
-        });
-        
-        renderStudentsTable(allStudentsData);
-    } catch(e) {
-        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:#e74c3c;">خطأ: ${e.message}</td></tr>`;
+    const cached = getCachedStudents();
+    if (cached && cached.length) {
+        allStudentsData = cached.map(s => { s._uid = s.id||s._uid; return s; });
+        const filtered = grade ? allStudentsData.filter(s => s.grade === grade) : allStudentsData;
+        renderStudentsTable(filterBySearch(filtered));
     }
+    subscribeStudents(grade);
 }
+
+function filterStudentsTable() { renderStudentsTable(filterBySearch(allStudentsData)); }
 
 function renderStudentsTable(students) {
     const tbody = document.getElementById('studentsTableBody');
-    if (!students.length) {
-        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:30px;">لا يوجد طلاب</td></tr>';
+    if (!tbody) return;
+    if (!students || !students.length) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:30px;">لا يوجد طلاب</td></tr>';
         return;
     }
-    
-    // Sort alphabetically by name (Arabic-aware)
-    const sorted = [...students].sort((a, b) => (a.name || '').localeCompare(b.name || '', 'ar'));
-    
-    let html = '';
-    sorted.forEach(s => {
-        const stats = calcStudentStats(s);
-        const avgAll = [stats.avgExam, stats.avgTraining, stats.avgHomework].filter(v => v !== null);
-        const overall = avgAll.length ? Math.round(avgAll.reduce((a,b) => a+b, 0) / avgAll.length) : 0;
-        const lvl = getLevelInfo(overall);
-        
-        const watchBar = stats.watchPct !== null ? `<div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${stats.watchPct}%"></div></div>${stats.watchPct}%` : '<span style="color:rgba(255,255,255,0.4);">-</span>';
-        
-        html += `<tr onclick="openStudentDetail('${s._uid}')">
-            <td><strong>${s.name || 'بدون اسم'}</strong><br><span style="font-size:0.78rem; color:rgba(255,255,255,0.5);">${s.phone || ''}</span></td>
-            <td>${gradeNames[s.grade] || s.grade || '-'}</td>
-            <td>${watchBar}</td>
-            <td><span style="color:var(--royal-gold); font-weight:700;">${stats.avgTraining !== null ? stats.avgTraining + '%' : '-'}</span></td>
-            <td><span style="color:var(--royal-gold); font-weight:700;">${stats.avgHomework !== null ? stats.avgHomework + '%' : '-'}</span></td>
-            <td><span style="color:var(--royal-gold); font-weight:700;">${stats.avgExam !== null ? stats.avgExam + '%' : '-'}</span></td>
-            <td><span class="level-badge ${lvl.cls}">${lvl.label}</span></td>
-            <td><button onclick="event.stopPropagation(); openStudentDetail('${s._uid}')" class="btn btn-gold" style="padding:5px 12px; font-size:0.8rem;"><i class="fas fa-eye"></i> تفاصيل</button></td>
-        </tr>`;
-    });
-    tbody.innerHTML = html;
-}
 
-function filterStudentsTable() {
-    const search = document.getElementById('studentSearch').value.trim().toLowerCase();
-    const filtered = allStudentsData.filter(s => !search || (s.name || '').toLowerCase().includes(search) || (s.phone || '').includes(search));
-    renderStudentsTable(filtered);
+    let sorted = [...students];
+    if (_sortCol) {
+        sorted.sort((a, b) => {
+            const sa = calcStudentStats(a), sb = calcStudentStats(b);
+            if (_sortCol === 'name')     return _sortDir * (a.name||'').localeCompare(b.name||'', 'ar');
+            if (_sortCol === 'avgExam')  return _sortDir * ((sa.avgExam||0)     - (sb.avgExam||0));
+            if (_sortCol === 'avgHw')    return _sortDir * ((sa.avgHomework||0)  - (sb.avgHomework||0));
+            if (_sortCol === 'avgTrain') return _sortDir * ((sa.avgTraining||0)  - (sb.avgTraining||0));
+            if (_sortCol === 'watch')    return _sortDir * ((sa.watchPct||0)     - (sb.watchPct||0));
+            if (_sortCol === 'level')    return _sortDir * (calcOverallLevel(sa) - calcOverallLevel(sb));
+            return 0;
+        });
+    } else {
+        sorted.sort((a, b) => (a.name||'').localeCompare(b.name||'', 'ar'));
+    }
+
+    tbody.innerHTML = sorted.map(s => {
+        const stats   = calcStudentStats(s);
+        const overall = calcOverallLevel(stats);
+        const lvl     = getLevelInfo(overall);
+
+        const watchBar = stats.watchPct !== null
+            ? `<div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${stats.watchPct}%"></div></div>${stats.watchPct}%`
+            : '<span style="color:rgba(255,255,255,0.4);">-</span>';
+
+        const rawPhone = (s.phone||'').replace(/\D/g,'');
+        const waPhone  = rawPhone ? '2'+rawPhone.replace(/^0/,'') : '';
+        const waBtnHtml = waPhone ? `<a href="https://wa.me/${waPhone}" target="_blank" class="wa-btn" onclick="event.stopPropagation()"><i class="fab fa-whatsapp"></i></a>` : '';
+
+        const col = v => v !== null ? (v>=70?'#2ecc71':v>=50?'#f1c40f':'#e74c3c') : 'rgba(255,255,255,0.35)';
+        const fmt = v => v !== null ? `${v}%` : '<span style="color:rgba(255,255,255,0.3);">—</span>';
+
+        return `<tr onclick="openStudentDetail('${s._uid}')">
+            <td><div style="display:flex;align-items:center;gap:8px;">${waBtnHtml}<div><strong>${s.name||'بدون اسم'}</strong><br><span style="font-size:0.75rem;color:rgba(255,255,255,0.45);">${s.phone||''}</span></div></div></td>
+            <td>${gradeNames[s.grade]||s.grade||'-'}</td>
+            <td><span style="color:${col(stats.avgExam)};font-weight:700;font-size:1rem;">${fmt(stats.avgExam)}</span></td>
+            <td><span style="color:${col(stats.avgHomework)};font-weight:700;font-size:1rem;">${fmt(stats.avgHomework)}</span></td>
+            <td><span style="color:${col(stats.avgTraining)};font-weight:700;font-size:1rem;">${fmt(stats.avgTraining)}</span></td>
+            <td>${watchBar}</td>
+            <td><span class="level-badge ${lvl.cls}">${lvl.label}</span><br><span style="font-size:0.72rem;color:rgba(255,255,255,0.35);">${overall}%</span></td>
+            <td><button onclick="event.stopPropagation();openStudentDetail('${s._uid}')" class="btn btn-gold" style="padding:6px 14px;font-size:0.82rem;border-radius:8px;"><i class="fas fa-edit"></i> تفاصيل وتصحيح</button></td>
+        </tr>`;
+    }).join('');
 }
 
 async function openStudentDetail(uid) {
     document.getElementById('studentDetailModal').classList.add('active');
     document.getElementById('modalStudentName').textContent = 'جاري التحميل...';
     document.getElementById('modalStudentMeta').textContent = '';
-    document.getElementById('modalContent').innerHTML = '<div style="text-align:center; padding:40px;"><i class="fas fa-spinner fa-spin" style="font-size:2rem; color:var(--royal-gold);"></i></div>';
-    
+    document.getElementById('modalContent').innerHTML = '<div style="text-align:center;padding:40px;"><i class="fas fa-spinner fa-spin" style="font-size:2rem;color:var(--royal-gold);"></i></div>';
+
     let s = allStudentsData.find(x => x._uid === uid);
     if (!s && window.firebaseDb) {
         const doc = await window.firebaseDb.collection('students').doc(uid).get();
         if (doc.exists) { s = doc.data(); s._uid = uid; }
     }
     if (!s) { document.getElementById('modalContent').innerHTML = '<p style="color:#e74c3c;">لم يتم العثور على الطالب</p>'; return; }
-    
-    document.getElementById('modalStudentName').textContent = s.name || 'بدون اسم';
-    document.getElementById('modalStudentMeta').textContent = `${s.phone || ''} | ${gradeNames[s.grade] || s.grade || ''} | آخر دخول: ${s.lastSeen ? new Date(s.lastSeen).toLocaleString('ar-EG') : 'غير معروف'}`;
-    
+
+    const rawPhone = (s.phone||'').replace(/\D/g,'');
+    const waPhone  = rawPhone ? '2'+rawPhone.replace(/^0/,'') : '';
+    const waHref   = waPhone  ? `https://wa.me/${waPhone}` : '';
+
+    document.getElementById('modalStudentName').innerHTML = `${s.name||'بدون اسم'} ${waPhone?`<a href="${waHref}" target="_blank" style="margin-right:10px;color:#25d366;font-size:1rem;"><i class="fab fa-whatsapp"></i> واتساب</a>`:''}`;
+    document.getElementById('modalStudentMeta').textContent = `${s.phone||''} | ${gradeNames[s.grade]||s.grade||''} | آخر دخول: ${s.lastSeen?new Date(s.lastSeen).toLocaleString('ar-EG'):'غير معروف'}`;
+
     const examResults = s.examResults || [];
-    const completed = s.completedItems || [];
-    
-    let html = '';
-    
-    // Completed Items
-    html += `<div class="section-block">
-        <h3><i class="fas fa-check-circle"></i> العناصر المكتملة (${completed.length})</h3>
-        <p style="color:rgba(255,255,255,0.6); font-size:0.85rem;">${completed.join(' | ') || 'لا توجد عناصر مكتملة'}</p>
+    const isT = r => r.isTraining || (r.examTitle&&r.examTitle.includes('تدريب'));
+    const isH = r => r.isHomework  || (r.examTitle&&r.examTitle.includes('واجب'));
+    const exams     = examResults.filter(r => !isT(r)&&!isH(r));
+    const trainings = examResults.filter(r =>  isT(r));
+    const homeworks = examResults.filter(r =>  isH(r));
+
+    const stats   = calcStudentStats(s);
+    const overall = calcOverallLevel(stats);
+    const lvl     = getLevelInfo(overall);
+
+    const lvlRGB = lvl.cls==='level-top'?'46,204,113':lvl.cls==='level-mid'?'241,196,15':'231,76,60';
+
+    const statBar = `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:18px;">
+        <div style="background:rgba(52,152,219,0.1);border:1px solid rgba(52,152,219,0.25);border-radius:10px;padding:12px;text-align:center;"><div style="font-size:1.6rem;font-weight:800;color:#3498db;">${stats.avgExam!==null?stats.avgExam+'%':'—'}</div><div style="font-size:0.75rem;color:rgba(255,255,255,0.5);">متوسط الامتحانات</div></div>
+        <div style="background:rgba(155,89,182,0.1);border:1px solid rgba(155,89,182,0.25);border-radius:10px;padding:12px;text-align:center;"><div style="font-size:1.6rem;font-weight:800;color:#9b59b6;">${stats.avgHomework!==null?stats.avgHomework+'%':'—'}</div><div style="font-size:0.75rem;color:rgba(255,255,255,0.5);">متوسط الواجبات</div></div>
+        <div style="background:rgba(46,204,113,0.1);border:1px solid rgba(46,204,113,0.25);border-radius:10px;padding:12px;text-align:center;"><div style="font-size:1.6rem;font-weight:800;color:#2ecc71;">${stats.avgTraining!==null?stats.avgTraining+'%':'—'}</div><div style="font-size:0.75rem;color:rgba(255,255,255,0.5);">متوسط التدريبات</div></div>
+        <div style="background:rgba(212,175,55,0.1);border:1px solid rgba(212,175,55,0.25);border-radius:10px;padding:12px;text-align:center;"><div style="font-size:1.6rem;font-weight:800;color:var(--royal-gold);">${stats.watchPct!==null?stats.watchPct+'%':'—'}</div><div style="font-size:0.75rem;color:rgba(255,255,255,0.5);">نسبة المشاهدة</div></div>
+        <div style="background:rgba(${lvlRGB},0.1);border:1px solid rgba(${lvlRGB},0.25);border-radius:10px;padding:12px;text-align:center;"><div style="font-size:1.6rem;font-weight:800;" class="${lvl.cls}">${overall}%</div><div style="font-size:0.75rem;color:rgba(255,255,255,0.5);">المستوى: ${lvl.label}</div></div>
     </div>`;
-    
-    // Tabs
-    html += `<div class="section-block" style="padding-bottom:0; margin-bottom:10px;">
-        <div style="display:flex; gap:15px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:10px;">
-            <button onclick="document.querySelectorAll('.modal-cat').forEach(el=>el.style.display='none'); document.getElementById('cat-exams').style.display='block'; document.querySelectorAll('.cat-btn').forEach(b=>b.style.opacity='0.5'); this.style.opacity='1';" class="cat-btn" style="background:none; border:none; color:var(--royal-gold); font-size:1.1rem; font-weight:bold; cursor:pointer; opacity:1;">الامتحانات</button>
-            <button onclick="document.querySelectorAll('.modal-cat').forEach(el=>el.style.display='none'); document.getElementById('cat-trainings').style.display='block'; document.querySelectorAll('.cat-btn').forEach(b=>b.style.opacity='0.5'); this.style.opacity='1';" class="cat-btn" style="background:none; border:none; color:var(--royal-gold); font-size:1.1rem; font-weight:bold; cursor:pointer; opacity:0.5;">التدريبات</button>
-            <button onclick="document.querySelectorAll('.modal-cat').forEach(el=>el.style.display='none'); document.getElementById('cat-homeworks').style.display='block'; document.querySelectorAll('.cat-btn').forEach(b=>b.style.opacity='0.5'); this.style.opacity='1';" class="cat-btn" style="background:none; border:none; color:var(--royal-gold); font-size:1.1rem; font-weight:bold; cursor:pointer; opacity:0.5;">الواجبات</button>
-        </div>
+
+    const catTabs = `<div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+        <button class="cat-tab-btn active" id="catBtn-exams"     onclick="switchModalCat('exams',this)">📄 الامتحانات (${[...new Set(exams.map(r=>r.examTitle))].length})</button>
+        <button class="cat-tab-btn"        id="catBtn-homeworks"  onclick="switchModalCat('homeworks',this)">📚 الواجبات (${[...new Set(homeworks.map(r=>r.examTitle))].length})</button>
+        <button class="cat-tab-btn"        id="catBtn-trainings"  onclick="switchModalCat('trainings',this)">📝 التدريبات (${[...new Set(trainings.map(r=>r.examTitle))].length})</button>
     </div>`;
 
     const renderCategory = (id, items, typeStr, isVisible) => {
         const byTitle = {};
-        items.forEach(r => {
-            const key = r.examTitle || 'غير معنون';
-            if (!byTitle[key]) byTitle[key] = [];
-            byTitle[key].push(r);
-        });
-        
-        // Sort by Title based on ts of first attempt (oldest first)
-        const sortedTitles = Object.entries(byTitle).sort((a,b) => {
-            const tsA = (a[1][0].ts || 0);
-            const tsB = (b[1][0].ts || 0);
-            return tsA - tsB;
-        });
-
-        let cHtml = `<div id="${id}" class="modal-cat section-block" style="display:${isVisible ? 'block' : 'none'}; border:none; padding-top:0;">`;
-        if (sortedTitles.length === 0) {
-            cHtml += `<div style="text-align:center; padding:20px; color:rgba(255,255,255,0.4);">لا توجد ${typeStr}</div>`;
+        items.forEach(r => { const k = r.examTitle||'غير معنون'; (byTitle[k]=byTitle[k]||[]).push(r); });
+        const sortedTitles = Object.entries(byTitle).sort((a,b)=>(a[1][0].ts||0)-(b[1][0].ts||0));
+        let cHtml = `<div id="${id}" class="modal-cat" style="display:${isVisible?'block':'none'};">`;
+        if (!sortedTitles.length) {
+            cHtml += `<div style="text-align:center;padding:30px;color:rgba(255,255,255,0.35);"><i class="fas fa-inbox" style="font-size:2rem;display:block;margin-bottom:10px;"></i>لا توجد ${typeStr}</div>`;
         } else {
-            for (const [title, attempts] of sortedTitles) {
-                const firstAttempt = attempts.find(a => a.attemptNumber === 1) || attempts[0];
-                cHtml += `<div style="border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:12px; margin-bottom:10px;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                        <strong>${title}</strong>
-                        <div style="display:flex; gap:8px; align-items:center;">
-                            <span id="officialPercent_${uid}_${title.replace(/\s/g,'_')}" style="color:var(--royal-gold); font-weight:700;">${firstAttempt.percent || 0}% <span style="color:rgba(255,255,255,0.4); font-size:0.78rem;">(المحاولة الأولى)</span></span>
-                            <div>
-                                <label style="font-size:0.8rem; color:rgba(255,255,255,0.6);">تعديل الدرجة:</label>
-                                <input type="number" class="score-input" id="score_${uid}_${title.replace(/\s/g,'_')}" value="${firstAttempt.percent || 0}" min="0" max="100">
-                                <button id="saveBtn_${uid}_${title.replace(/\s/g,'_')}" onclick="saveGradeOverride('${uid}', '${title.replace(/'/g, "\\'")}', this)" style="padding:4px 10px; border-radius:6px; border:none; background:var(--royal-gold); color:#000; cursor:pointer; font-size:0.8rem; font-weight:700;">حفظ التعديلات</button>
-                            </div>
-                        </div>
-                    </div>`;
-                
-                if (attempts.length > 1) {
-                    cHtml += `<details style="margin-bottom:8px;"><summary style="cursor:pointer; color:rgba(255,255,255,0.6); font-size:0.85rem;">كل المحاولات (${attempts.length})</summary><div style="margin-top:8px;">`;
-                    attempts.forEach((a, i) => {
-                        cHtml += `<div style="padding:4px 0; font-size:0.82rem; color:rgba(255,255,255,0.7);">محاولة ${a.attemptNumber || i+1}: ${a.percent || 0}% - ${a.ts ? new Date(a.ts).toLocaleString('ar-EG') : ''}</div>`;
-                    });
-                    cHtml += '</div></details>';
+            const letters = ['أ','ب','ج','د','ه','ا'];
+            const getFullAns = (ans, opts) => {
+                if (ans===undefined||ans===null||ans==='') return '(بدون إجابة)';
+                const ansStr = String(ans).trim();
+                if (opts && Array.isArray(opts)) {
+                    let idx = letters.indexOf(ansStr); if (idx===5) idx=0;
+                    if (idx>=0&&opts[idx]) return `${ansStr} — ${opts[idx]}`;
+                    const numIdx = parseInt(ansStr);
+                    if (!isNaN(numIdx)&&numIdx>=0&&numIdx<opts.length) return `${letters[numIdx]} — ${opts[numIdx]}`;
                 }
-                
-                if (firstAttempt.details && firstAttempt.details.length) {
-                    cHtml += `<details><summary style="cursor:pointer; color:rgba(255,255,255,0.6); font-size:0.85rem;">عرض الإجابات التفصيلية</summary><div style="margin-top:10px;">`;
-                    firstAttempt.details.forEach((d, i) => {
-                        const isCorrect = (d.score >= 0.5);
-                        
-                        const letters = ['أ', 'ب', 'ج', 'د', 'ه', 'ا'];
-                        const getFullAns = (ans) => {
-                            if (ans === undefined || ans === null || ans === '') return '(بدون إجابة)';
-                            const ansStr = String(ans).trim();
-                            if (d.options && Array.isArray(d.options)) {
-                                let idx = letters.indexOf(ansStr);
-                                if (idx === 5) idx = 0; // 'ا' === 'أ'
-                                if (idx >= 0 && d.options[idx]) return `${ansStr} - (${d.options[idx]})`;
-                                
-                                const numIdx = parseInt(ansStr);
-                                if (!isNaN(numIdx) && numIdx >= 0 && numIdx < d.options.length) {
-                                    return `${letters[numIdx]} - (${d.options[numIdx]})`;
-                                }
-                            }
-                            return ansStr;
-                        };
+                return ansStr;
+            };
 
-                        let displayStudent = getFullAns(d.rawAnswer);
-                        let correctRaw = (d.correctAnswer !== undefined) ? d.correctAnswer : (d.correct !== undefined) ? d.correct : (d.answer !== undefined) ? d.answer : '';
-                        let displayCorrect = correctRaw !== '' ? getFullAns(correctRaw) : '';
-                        
-                        let correctAnsHtml = '';
-                        if (!isCorrect && displayCorrect) {
-                            correctAnsHtml = `<br><span style="color:rgba(255,255,255,0.6);">الإجابة الصحيحة: </span><span style="color:#2ecc71;">${displayCorrect}</span>`;
-                        }
-                        // Also show it always for clarity? User said "يظهر لي انا فى التفاصيل الاجابة الصحيحة إن أخطأ الطالب"
-                        
-                        cHtml += `<div style="padding:8px; margin-bottom:6px; border-radius:6px; background:${isCorrect ? 'rgba(46,204,113,0.07)' : 'rgba(231,76,60,0.07)'}; border:1px solid ${isCorrect ? 'rgba(46,204,113,0.2)' : 'rgba(231,76,60,0.2)'}; font-size:0.85rem;">
-                            <div style="display:flex; justify-content:space-between; align-items:start;">
-                                <div>
-                                    <strong>س${i+1}:</strong> ${d.question || ''}<br>
-                                    <span style="color:rgba(255,255,255,0.6);">إجابة الطالب: </span><span style="color:${isCorrect ? '#2ecc71' : '#e74c3c'};">${displayStudent}</span>${correctAnsHtml}
-                                    <br><span style="color:rgba(255,255,255,0.4); font-size:0.78rem;"> | ${Math.round((d.score||0)*100)}% (${d.pointsEarned||0} / ${d.totalPoints||1} نقطة)</span>
-                                </div>
-                                <button onclick="window.toggleQuestionScore('${uid}', '${title.replace(/'/g, "\\'")}', ${i}, this)" style="padding:4px 8px; border-radius:6px; border:1px solid rgba(255,255,255,0.1); background:rgba(0,0,0,0.2); color:white; cursor:pointer; font-size:0.8rem; flex-shrink:0;">
-                                    ${isCorrect ? '❌ اجعله خطأ' : '✅ اجعله صحيح'}
-                                </button>
-                            </div>
-                        </div>`;
-                    });
-                    cHtml += '</div></details>';
+            for (const [title, attempts] of sortedTitles) {
+                const fa   = attempts.find(a=>a.attemptNumber===1)||attempts[0];
+                const cPct = fa.effectivePercent??fa.percent??0;
+                const pCol = cPct>=70?'#2ecc71':cPct>=50?'#f1c40f':'#e74c3c';
+                const safe = title.replace(/'/g,"\\'").replace(/"/g,'&quot;');
+                const tId  = (uid+'_'+title).replace(/\s/g,'_').replace(/[^a-zA-Z0-9_\u0600-\u06FF]/g,'');
+
+                cHtml += `<div style="border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:14px 16px;margin-bottom:12px;background:rgba(0,0,0,0.2);">
+                    <div class="modal-section-header">
+                        <div><strong style="font-size:1rem;">${title}</strong>${fa._adminOverride?` <span style="background:rgba(212,175,55,0.15);color:var(--royal-gold);font-size:0.72rem;padding:2px 7px;border-radius:10px;margin-right:6px;">✏️ معدّلة</span>`:''}<br><span style="font-size:0.78rem;color:rgba(255,255,255,0.4);">${fa.ts?new Date(fa.ts).toLocaleString('ar-EG'):''}</span></div>
+                        <div style="display:flex;align-items:center;gap:10px;"><span style="font-size:1.5rem;font-weight:800;color:${pCol};">${cPct}%</span><span style="font-size:0.75rem;color:rgba(255,255,255,0.4);">الدرجة الرسمية</span></div>
+                    </div>`;
+
+                if (attempts.length>1) {
+                    cHtml += `<div style="margin-bottom:10px;padding:8px 12px;background:rgba(255,255,255,0.03);border-radius:8px;display:flex;flex-wrap:wrap;gap:8px;"><span style="font-size:0.78rem;color:rgba(255,255,255,0.45);">كل المحاولات:</span>`;
+                    attempts.forEach((a,i)=>{ const p=a.effectivePercent??a.percent??0; cHtml+=`<span style="font-size:0.78rem;padding:2px 8px;border-radius:8px;background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.7);">م${a.attemptNumber||i+1}: ${p}%</span>`; });
+                    cHtml += `</div>`;
                 }
-                cHtml += '</div>';
+
+                cHtml += `<div style="background:rgba(212,175,55,0.07);border:1px solid rgba(212,175,55,0.2);border-radius:8px;padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                    <span style="font-size:0.85rem;color:var(--royal-gold);font-weight:600;"><i class="fas fa-edit"></i> تعديل الدرجة الرسمية:</span>
+                    <input type="number" class="score-input" id="score_${tId}" value="${cPct}" min="0" max="100" style="width:80px;font-size:1rem;">
+                    <span style="color:rgba(255,255,255,0.4);font-size:0.8rem;">/100</span>
+                    <button id="saveBtn_${tId}" class="save-grade-btn" onclick="saveGradeOverride('${uid}','${safe}',this)">💾 حفظ الدرجة</button>
+                    <span id="officialPercent_${tId}" style="font-size:0.78rem;color:rgba(255,255,255,0.4);">الحالية: ${cPct}%</span>
+                </div>`;
+
+                if (fa.details && fa.details.length) {
+                    cHtml += `<div style="margin-top:4px;"><div style="font-size:0.85rem;color:rgba(255,255,255,0.5);margin-bottom:8px;">إجابات الطالب (${fa.details.length} سؤال) — اضغط لتغيير الحكم:</div>`;
+                    fa.details.forEach((d,i)=>{
+                        const ok = d.score>=0.5;
+                        const dS = getFullAns(d.rawAnswer,d.options);
+                        const cR = d.correctAnswer??d.correct??d.answer??'';
+                        const dC = cR!==''?getFullAns(cR,d.options):'';
+                        cHtml+=`<div class="q-card ${ok?'correct':'wrong'}"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">
+                            <div style="flex:1;"><div style="font-size:0.88rem;margin-bottom:5px;"><strong>س${i+1}:</strong> ${d.question||''}</div>
+                            <div style="font-size:0.83rem;"><span style="color:rgba(255,255,255,0.55);">إجابة الطالب: </span><span style="color:${ok?'#2ecc71':'#e74c3c'};font-weight:600;">${dS}</span></div>
+                            ${!ok&&dC?`<div style="font-size:0.82rem;margin-top:3px;"><span style="color:rgba(255,255,255,0.45);">الإجابة الصحيحة: </span><span style="color:#2ecc71;">${dC}</span></div>`:''}
+                            <div style="font-size:0.73rem;color:rgba(255,255,255,0.3);margin-top:3px;">${Math.round((d.score||0)*100)}% — (${d.pointsEarned||0}/${d.totalPoints||1} نقطة)</div></div>
+                            <button class="toggle-score-btn" onclick="window.toggleQuestionScore('${uid}','${safe}',${i},this)">${ok?'❌ اجعله خطأ':'✅ اجعله صحيح'}</button>
+                        </div></div>`;
+                    });
+                    cHtml += `</div>`;
+                } else {
+                    cHtml += `<div style="color:rgba(255,255,255,0.3);font-size:0.82rem;padding:6px 0;">لا توجد تفاصيل إجابات محفوظة لهذه المحاولة</div>`;
+                }
+                cHtml += `</div>`;
             }
         }
-        cHtml += '</div>';
-        return cHtml;
+        return cHtml + `</div>`;
     };
 
-    const isT = (r) => r.isTraining || (r.examTitle && r.examTitle.includes('تدريب'));
-    const isH = (r) => r.isHomework || (r.examTitle && r.examTitle.includes('واجب'));
-    html += renderCategory('cat-exams', examResults.filter(r => !isT(r) && !isH(r)), 'امتحانات', true);
-    html += renderCategory('cat-trainings', examResults.filter(r => isT(r)), 'تدريبات', false);
-    html += renderCategory('cat-homeworks', examResults.filter(r => isH(r)), 'واجبات', false);
-    
-    document.getElementById('modalContent').innerHTML = html;
+    document.getElementById('modalContent').innerHTML = statBar + catTabs
+        + renderCategory('cat-exams',    exams,    'امتحانات', true)
+        + renderCategory('cat-homeworks', homeworks,'واجبات',   false)
+        + renderCategory('cat-trainings', trainings,'تدريبات',  false);
 }
 
+window.switchModalCat = function(cat, btn) {
+    document.querySelectorAll('.modal-cat').forEach(el => el.style.display='none');
+    document.getElementById('cat-'+cat).style.display='block';
+    document.querySelectorAll('.cat-tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+};
+
 async function saveGradeOverride(uid, examTitle, btn) {
-    const inputId = `score_${uid}_${examTitle.replace(/\s/g,'_')}`;
-    const newScore = parseInt(document.getElementById(inputId)?.value);
-    if (isNaN(newScore) || newScore < 0 || newScore > 100) { alert('الدرجة يجب أن تكون بين 0 و 100'); return; }
-    
+    const tId = (uid+'_'+examTitle).replace(/\s/g,'_').replace(/[^a-zA-Z0-9_\u0600-\u06FF]/g,'');
+    const newScore = parseInt(document.getElementById(`score_${tId}`)?.value);
+    if (isNaN(newScore)||newScore<0||newScore>100) { alert('الدرجة يجب أن تكون بين 0 و 100'); return; }
     btn.textContent = '...';
     try {
-        const local = allStudentsData.find(x => x._uid === uid);
+        const local = allStudentsData.find(x => x._uid===uid);
         if (!local) throw new Error('الطالب غير موجود في الذاكرة');
-        
-        let updated = false;
+        let updated=false, isTrain=false, isHomework=false;
         local.examResults.forEach(r => {
-            if (r.examTitle === examTitle && (r.attemptNumber === 1 || !r.attemptNumber)) {
-                r.percent = newScore;
-                r.effectivePercent = newScore;
-                if (r.penalized) r.effectivePercent = Math.max(0, r.percent - 20);
-                r._adminOverride = true;
-                r._overridedAt = Date.now();
-                updated = true;
+            if (r.examTitle===examTitle && (r.attemptNumber===1||!r.attemptNumber)) {
+                r.percent=newScore; r.effectivePercent=newScore;
+                if (r.penalized) r.effectivePercent=Math.max(0,r.percent-20);
+                r._adminOverride=true; r._overridedAt=Date.now(); updated=true;
+                if (r.isTraining) isTrain=true;
+                if (r.isHomework) isHomework=true;
             }
         });
-        
-        if (!updated) { alert('لم يتم العثور على هذا الامتحان في سجلات الطالب'); btn.textContent = 'حفظ'; return; }
-        
-        let isTrain = false;
-        let isHomework = false;
-        local.examResults.forEach(r => {
-            if (r.examTitle === examTitle && (r.attemptNumber === 1 || !r.attemptNumber)) {
-                if (r.isTraining) isTrain = true;
-                if (r.isHomework) isHomework = true;
-            }
-        });
-        
-        const examTypeStr = isTrain ? 'تدريب' : (isHomework ? 'واجب' : 'امتحان');
-        
-        local.notifications = local.notifications || [];
-        local.notifications.push({
-            title: `تم إعادة تصحيح ${examTypeStr}`,
-            message: `تم إعادة تصحيح ${examTypeStr} "${examTitle}". درجتك الجديدة هي ${newScore}%.`,
-            timestamp: Date.now(),
-            read: false,
-            link: 'exams.html'
-        });
-
-        await window.firebaseDb.collection('students').doc(uid).update({ 
-            examResults: local.examResults,
-            notifications: local.notifications
-        });
-        
-        try { 
-            localStorage.setItem('cached_students', JSON.stringify(allStudentsData)); 
-        } catch(e) {
-            localStorage.removeItem('cached_students');
-        }
-        
-        const officialSpan = document.getElementById(`officialPercent_${uid}_${examTitle.replace(/\s/g,'_')}`);
-        if (officialSpan) {
-            officialSpan.innerHTML = `${newScore}% <span style="color:rgba(255,255,255,0.4); font-size:0.78rem;">(المحاولة الأولى - رسمية)</span>`;
-        }
-        
+        if (!updated) { alert('لم يتم العثور على هذا الامتحان في سجلات الطالب'); btn.textContent='حفظ'; return; }
+        const typeStr = isTrain?'تدريب':(isHomework?'واجب':'امتحان');
+        local.notifications = local.notifications||[];
+        local.notifications.push({ title:`تم إعادة تصحيح ${typeStr}`, message:`تم إعادة تصحيح ${typeStr} "${examTitle}". درجتك الجديدة هي ${newScore}%.`, timestamp:Date.now(), read:false, link:'exams.html' });
+        await window.firebaseDb.collection('students').doc(uid).update({ examResults:local.examResults, notifications:local.notifications });
+        invalidateCache();
+        const off = document.getElementById(`officialPercent_${tId}`); if (off) off.innerHTML=`الحالية: ${newScore}%`;
         filterStudentsTable();
-        
-        btn.style.background = 'var(--royal-gold)';
-        btn.style.color = '#000';
-        btn.style.boxShadow = 'none';
-        btn.textContent = '✅ تم الحفظ';
-        setTimeout(() => { btn.textContent = 'حفظ التعديلات'; }, 2000);
-    } catch(e) {
-        alert('خطأ في الحفظ: ' + e.message);
-        btn.textContent = 'حفظ';
-    }
+        const sb = document.getElementById(`saveBtn_${tId}`);
+        if (sb) { sb.classList.remove('urgent'); sb.textContent='✅ تم الحفظ'; setTimeout(()=>{ sb.textContent='💾 حفظ الدرجة'; },2000); }
+    } catch(e) { alert('خطأ في الحفظ: '+e.message); btn.textContent='حفظ'; }
 }
 
 window.toggleQuestionScore = function(uid, examTitle, qIndex, btn) {
-    const local = allStudentsData.find(x => x._uid === uid);
-    if(!local || !local.examResults) return;
-    
+    const local = allStudentsData.find(x => x._uid===uid);
+    if (!local||!local.examResults) return;
     local.examResults.forEach(r => {
-        if (r.examTitle === examTitle && (r.attemptNumber === 1 || !r.attemptNumber)) {
-            if(r.details && r.details[qIndex]) {
-                const q = r.details[qIndex];
-                const isCurrentlyCorrect = (q.score >= 0.5);
-                const newScore = isCurrentlyCorrect ? 0 : 1;
-                
-                q.score = newScore;
-                q.pointsEarned = newScore * (q.totalPoints || 1);
-                q.feedback = newScore === 1 ? 'تم تصحيح الدرجة يدوياً بواسطة الأستاذ ✅' : 'تم خصم الدرجة يدوياً بواسطة الأستاذ ❌';
-                
-                let totalPoints = r.totalPoints;
-                let earnedPoints = r.details.reduce((sum, det) => sum + (det.pointsEarned || (det.score * (det.totalPoints || 1))), 0);
-                if (!totalPoints) totalPoints = r.details.reduce((sum, det) => sum + (det.totalPoints || 1), 0);
-                
-                r.earnedPoints = earnedPoints;
-                r.totalPoints = totalPoints;
-                r.percent = Math.round((earnedPoints / (totalPoints || 1)) * 100);
-                if (r.penalized) r.effectivePercent = Math.max(0, r.percent - 20);
-                else r.effectivePercent = r.percent;
-                
-                // Visual update
-                const isCorrect = (newScore >= 0.5);
-                const parentDiv = btn.parentElement.parentElement;
-                parentDiv.style.background = isCorrect ? 'rgba(46,204,113,0.07)' : 'rgba(231,76,60,0.07)';
-                parentDiv.style.borderColor = isCorrect ? 'rgba(46,204,113,0.2)' : 'rgba(231,76,60,0.2)';
-                
-                btn.innerHTML = isCorrect ? '❌ اجعله خطأ' : '✅ اجعله صحيح';
-                
-                const textDiv = parentDiv.querySelector('div > div');
-                if(textDiv) {
-                    const letters = ['أ', 'ب', 'ج', 'د', 'ه', 'ا'];
-                    const getFullAns = (ans) => {
-                        if (ans === undefined || ans === null || ans === '') return '(بدون إجابة)';
-                        const ansStr = String(ans).trim();
-                        if (q.options && Array.isArray(q.options)) {
-                            let idx = letters.indexOf(ansStr);
-                            if (idx === 5) idx = 0;
-                            if (idx >= 0 && q.options[idx]) return `${ansStr} - (${q.options[idx]})`;
-                            const numIdx = parseInt(ansStr);
-                            if (!isNaN(numIdx) && numIdx >= 0 && numIdx < q.options.length) {
-                                return `${letters[numIdx]} - (${q.options[numIdx]})`;
-                            }
-                        }
-                        return ansStr;
-                    };
-                    let displayStudent = getFullAns(q.rawAnswer);
-                    let correctRaw = (q.correctAnswer !== undefined) ? q.correctAnswer : (q.correct !== undefined) ? q.correct : (q.answer !== undefined) ? q.answer : '';
-                    let displayCorrect = correctRaw !== '' ? getFullAns(correctRaw) : '';
-                    let correctAnsHtml = '';
-                    if (!isCorrect && displayCorrect) {
-                        correctAnsHtml = `<br><span style="color:rgba(255,255,255,0.6);">الإجابة الصحيحة: </span><span style="color:#2ecc71;">${displayCorrect}</span>`;
-                    }
-                    
-                    textDiv.innerHTML = `
-                        <strong>س${qIndex+1}:</strong> ${q.question || ''}<br>
-                        <span style="color:rgba(255,255,255,0.6);">إجابة الطالب: </span><span style="color:${isCorrect ? '#2ecc71' : '#e74c3c'};">${displayStudent}</span>${correctAnsHtml}
-                        <br><span style="color:rgba(255,255,255,0.4); font-size:0.78rem;"> | ${Math.round((q.score||0)*100)}% (${q.pointsEarned||0} / ${q.totalPoints||1} نقطة)</span>
-                    `;
-                }
-                
-                // Update the overall percent input
-                const inputId = `score_${uid}_${examTitle.replace(/\s/g,'_')}`;
-                const inputEl = document.getElementById(inputId);
-                if (inputEl) {
-                    inputEl.value = r.percent;
-                    inputEl.style.boxShadow = '0 0 10px rgba(212,175,55,0.5)';
-                    setTimeout(() => inputEl.style.boxShadow = 'none', 1000);
-                }
-                
-                // Highlight the save button
-                const saveBtn = document.getElementById(`saveBtn_${uid}_${examTitle.replace(/\s/g,'_')}`);
-                if (saveBtn) {
-                    saveBtn.style.background = '#e74c3c';
-                    saveBtn.style.color = '#fff';
-                    saveBtn.textContent = 'احفظ الآن!';
-                    saveBtn.style.boxShadow = '0 0 15px rgba(231,76,60,0.6)';
-                }
-                
-                const officialSpan = document.getElementById(`officialPercent_${uid}_${examTitle.replace(/\s/g,'_')}`);
-                if (officialSpan) {
-                    officialSpan.innerHTML = `${r.percent}% <span style="color:rgba(255,255,255,0.4); font-size:0.78rem;">(المحاولة الأولى)</span>`;
-                }
-            }
+        if (r.examTitle===examTitle && (r.attemptNumber===1||!r.attemptNumber) && r.details?.[qIndex]) {
+            const q=r.details[qIndex], wasOk=(q.score>=0.5), newS=wasOk?0:1;
+            q.score=newS; q.pointsEarned=newS*(q.totalPoints||1);
+            q.feedback=newS===1?'تم تصحيح الدرجة يدوياً ✅':'تم خصم الدرجة يدوياً ❌';
+            let tot=r.totalPoints||r.details.reduce((s,d)=>s+(d.totalPoints||1),0);
+            let earned=r.details.reduce((s,d)=>s+(d.pointsEarned||(d.score*(d.totalPoints||1))),0);
+            r.earnedPoints=earned; r.totalPoints=tot;
+            r.percent=Math.round((earned/(tot||1))*100);
+            r.effectivePercent=r.penalized?Math.max(0,r.percent-20):r.percent;
+            const isOk=(newS>=0.5);
+            const par=btn.parentElement.parentElement;
+            par.style.background=isOk?'rgba(46,204,113,0.08)':'rgba(231,76,60,0.08)';
+            par.style.borderColor=isOk?'rgba(46,204,113,0.25)':'rgba(231,76,60,0.25)';
+            btn.innerHTML=isOk?'❌ اجعله خطأ':'✅ اجعله صحيح';
+            const letters=['أ','ب','ج','د','ه','ا'];
+            const gA=ans=>{
+                if(ans===undefined||ans===null||ans==='') return '(بدون إجابة)';
+                const a=String(ans).trim();
+                if(q.options&&Array.isArray(q.options)){let i=letters.indexOf(a);if(i===5)i=0;if(i>=0&&q.options[i])return`${a} - (${q.options[i]})`;const n=parseInt(a);if(!isNaN(n)&&n>=0&&n<q.options.length)return`${letters[n]} - (${q.options[n]})`;}
+                return a;
+            };
+            const dS=gA(q.rawAnswer), cR=q.correctAnswer!==undefined?q.correctAnswer:q.correct!==undefined?q.correct:q.answer!==undefined?q.answer:'', dC=cR!==''?gA(cR):'';
+            const td=par.querySelector('div>div');
+            if(td) td.innerHTML=`<strong>س${qIndex+1}:</strong> ${q.question||''}<br><span style="color:rgba(255,255,255,0.6);">إجابة الطالب: </span><span style="color:${isOk?'#2ecc71':'#e74c3c'};">${dS}</span>${(!isOk&&dC)?`<br><span style="color:rgba(255,255,255,0.45);">الإجابة الصحيحة: </span><span style="color:#2ecc71;">${dC}</span>`:''}<br><span style="color:rgba(255,255,255,0.4);font-size:0.78rem;"> | ${Math.round((q.score||0)*100)}% (${q.pointsEarned||0}/${q.totalPoints||1} نقطة)</span>`;
+            const tId=(uid+'_'+examTitle).replace(/\s/g,'_').replace(/[^a-zA-Z0-9_\u0600-\u06FF]/g,'');
+            const inp=document.getElementById(`score_${tId}`); if(inp){inp.value=r.percent;inp.style.boxShadow='0 0 10px rgba(212,175,55,0.5)';setTimeout(()=>inp.style.boxShadow='none',1000);}
+            const sb=document.getElementById(`saveBtn_${tId}`); if(sb){sb.classList.add('urgent');sb.textContent='⚠️ احفظ الآن!';}
+            const off=document.getElementById(`officialPercent_${tId}`); if(off) off.innerHTML=`الحالية: ${r.percent}%`;
         }
     });
 };
 
-
-function closeDetailModal() {
-    document.getElementById('studentDetailModal').classList.remove('active');
-}
+function closeDetailModal() { document.getElementById('studentDetailModal').classList.remove('active'); }
 
 async function loadLateStudents() {
     const grade = document.getElementById('lateGradeFilter').value;
     const container = document.getElementById('lateContainer');
-    container.innerHTML = '<div style="text-align:center; padding:30px;"><i class="fas fa-spinner fa-spin"></i> جاري التحليل الحقيقي من Firebase...</div>';
+    container.innerHTML = '<div style="text-align:center;padding:30px;"><i class="fas fa-spinner fa-spin"></i> جاري التحليل الحقيقي من Firebase...</div>';
+    if (!window.firebaseDb) { container.innerHTML='<p style="color:#e74c3c;">Firebase غير متاح</p>'; return; }
 
-    if (!window.firebaseDb) { container.innerHTML = '<p style="color:#e74c3c;">Firebase غير متاح</p>'; return; }
-
-    // الصفوف التي لا يوجد فيها محتوى منشور بعد
-    const NO_CONTENT_GRADES = ['prep1', 'prep2', 'sec1', 'sec2', 'sec3'];
+    const NO_CONTENT_GRADES = ['prep1','prep2','sec1','sec2','sec3'];
     if (grade && NO_CONTENT_GRADES.includes(grade)) {
-        const GL = { prep1:'الأول الإعدادي', prep2:'الثاني الإعدادي', sec1:'الأول الثانوي', sec2:'الثاني الثانوي', sec3:'الثالث الثانوي' };
-        container.innerHTML = `
-            <div style="text-align:center; padding:40px;">
-                <i class="fas fa-calendar-times" style="font-size:2.5rem; color:var(--royal-gold); opacity:0.6; display:block; margin-bottom:14px;"></i>
-                <h3 style="color:rgba(255,255,255,0.8); margin:0 0 8px;">لم يُنشر محتوى بعد</h3>
-                <p style="color:rgba(255,255,255,0.45); max-width:340px; margin:auto; line-height:1.7;">
-                    صف <strong>${GL[grade]}</strong> — لم يتم نشر أي محاضرات أو تدريبات حتى الآن،
-                    لذلك لا توجد متأخرات. عند نشر المحتوى ستظهر النتائج هنا تلقائياً.
-                </p>
-            </div>`;
+        const GL={prep1:'الأول الإعدادي',prep2:'الثاني الإعدادي',sec1:'الأول الثانوي',sec2:'الثاني الثانوي',sec3:'الثالث الثانوي'};
+        container.innerHTML=`<div style="text-align:center;padding:40px;"><i class="fas fa-calendar-times" style="font-size:2.5rem;color:var(--royal-gold);opacity:0.6;display:block;margin-bottom:14px;"></i><h3 style="color:rgba(255,255,255,0.8);margin:0 0 8px;">لم يُنشر محتوى بعد</h3><p style="color:rgba(255,255,255,0.45);max-width:340px;margin:auto;line-height:1.7;">صف <strong>${GL[grade]}</strong> — لم يتم نشر أي محاضرات أو تدريبات حتى الآن، لذلك لا توجد متأخرات. عند نشر المحتوى ستظهر النتائج هنا تلقائياً.</p></div>`;
         return;
     }
 
     try {
-        // 1. جلب الكورسات من Firebase مباشرة (لا نعتمد على localStorage الناقص)
         const coursesSnap = await window.firebaseDb.collection('courses').get();
-        let allCourses = [];
-        coursesSnap.forEach(doc => { const d = doc.data(); d.id = doc.id; allCourses.push(d); });
-        if (grade) allCourses = allCourses.filter(c => c.grade === grade || c.targetGrade === grade);
+        let allCourses=[];
+        coursesSnap.forEach(doc=>{ const d=doc.data(); d.id=doc.id; allCourses.push(d); });
+        if (grade) allCourses=allCourses.filter(c=>c.grade===grade||c.targetGrade===grade);
 
-        // 2. استخراج كل العناصر القابلة للتتبع (يدعم كلا النظامين)
         function extractItems(course) {
-            const out = [];
-            const con = course.contents || {};
-            const cId = course.id, cTitle = course.title || 'كورس';
-
-            // نظام sections[] الجديد
+            const out=[], con=course.contents||{}, cId=course.id, cT=course.title||'كورس';
             if (Array.isArray(con.sections)) {
-                con.sections.forEach(sec => {
-                    (sec.items || []).forEach(item => {
-                        if (item.id && item.type !== 'header')
-                            out.push({ id: item.id, title: item.title || 'عنصر', type: item.type || 'video', courseId: cId, courseTitle: cTitle });
-                    });
-                });
-                if (out.length) return out; // إذا وُجد sections نوقف هنا
+                con.sections.forEach(sec=>(sec.items||[]).forEach(item=>{ if(item.id&&item.type!=='header') out.push({id:item.id,title:item.title||'عنصر',type:item.type||'video',courseId:cId,courseTitle:cT}); }));
+                if (out.length) return out;
             }
-
-            // نظام قديم: lectures / trainings / homeworks / exams
-            (con.lectures || []).forEach(lec => {
-                if (lec.id) out.push({ id: lec.id, title: lec.title || 'محاضرة', type: 'video', courseId: cId, courseTitle: cTitle });
-                (lec.children || []).forEach(ch => {
-                    if (ch.id) out.push({ id: ch.id, title: ch.title || 'عنصر', type: ch.type || 'training', courseId: cId, courseTitle: cTitle });
-                });
-            });
-            (con.trainings || []).forEach(tr => { if (tr.id) out.push({ id: tr.id, title: tr.title || 'تدريب', type: 'training', courseId: cId, courseTitle: cTitle }); });
-            (con.homeworks || []).forEach(hw => { if (hw.id) out.push({ id: hw.id, title: hw.title || 'واجب', type: 'homework', courseId: cId, courseTitle: cTitle }); });
-            (con.exams    || []).forEach(ex => { if (ex.id) out.push({ id: ex.id, title: ex.title || 'امتحان', type: 'exam', courseId: cId, courseTitle: cTitle }); });
+            (con.lectures||[]).forEach(lec=>{ if(lec.id) out.push({id:lec.id,title:lec.title||'محاضرة',type:'video',courseId:cId,courseTitle:cT}); (lec.children||[]).forEach(ch=>{ if(ch.id) out.push({id:ch.id,title:ch.title||'عنصر',type:ch.type||'training',courseId:cId,courseTitle:cT}); }); });
+            (con.trainings||[]).forEach(tr=>{ if(tr.id) out.push({id:tr.id,title:tr.title||'تدريب',type:'training',courseId:cId,courseTitle:cT}); });
+            (con.homeworks||[]).forEach(hw=>{ if(hw.id) out.push({id:hw.id,title:hw.title||'واجب',type:'homework',courseId:cId,courseTitle:cT}); });
+            (con.exams||[]).forEach(ex=>{ if(ex.id) out.push({id:ex.id,title:ex.title||'امتحان',type:'exam',courseId:cId,courseTitle:cT}); });
             return out;
         }
 
-        const courseMap = {}; // courseId → { course, items[] }
-        let totalItems = 0;
-        allCourses.forEach(c => {
-            const items = extractItems(c);
-            if (items.length) { courseMap[c.id] = { course: c, items }; totalItems += items.length; }
-        });
+        const courseMap={};let totalCourseItems=0;
+        allCourses.forEach(c=>{ const items=extractItems(c); if(items.length){courseMap[c.id]={course:c,items};totalCourseItems+=items.length;} });
 
-        if (!totalItems) {
-            container.innerHTML = `<div style="text-align:center;padding:40px;"><i class="fas fa-box-open" style="font-size:2.5rem;color:rgba(255,255,255,0.2);display:block;margin-bottom:14px;"></i><p style="color:rgba(255,255,255,0.45);">لا يوجد محتوى منشور في الكورسات المحددة حتى الآن.</p></div>`;
-            return;
-        }
+        if (!totalCourseItems) { container.innerHTML=`<div style="text-align:center;padding:40px;"><i class="fas fa-box-open" style="font-size:2.5rem;color:rgba(255,255,255,0.2);display:block;margin-bottom:14px;"></i><p style="color:rgba(255,255,255,0.45);">لا يوجد محتوى منشور في الكورسات المحددة حتى الآن.</p></div>`; return; }
 
-        // 3. جلب الطلاب
-        let students = [];
-        try { students = JSON.parse(localStorage.getItem('cached_students') || '[]').map(s => { s._uid = s.id || s._uid; return s; }); } catch(e) {}
-        if (!students.length) {
-            let q = window.firebaseDb.collection('students');
-            if (grade) q = q.where('grade', '==', grade);
-            const sSnap = await q.limit(500).get();
-            sSnap.forEach(doc => { const d = doc.data(); d._uid = doc.id; students.push(d); });
-        }
-        if (grade) students = students.filter(s => s.grade === grade);
+        let students=[];
+        let q=window.firebaseDb.collection('students');
+        if (grade) q=q.where('grade','==',grade);
+        const sSnap=await q.limit(500).get();
+        sSnap.forEach(doc=>{ const d=doc.data(); d._uid=doc.id; students.push(d); });
 
-        // 4. تحليل المتأخرات
-        const lateMap = {};
-        students.forEach(s => {
+        const lateMap={};
+        students.forEach(s=>{
             if (!s.name) return;
-            const done = new Set(Array.isArray(s.completedItems) ? s.completedItems : []);
-            const examTitles = new Set((Array.isArray(s.examResults) ? s.examResults : []).map(r => r.examTitle || r.title || '').filter(Boolean));
-            const enrolled = Array.isArray(s.enrolledCourses) ? s.enrolledCourses : (Array.isArray(s.courses) ? s.courses : []);
-
-            const missed = [];
-            enrolled.forEach(cId => {
-                const entry = courseMap[cId];
-                if (!entry) return;
-                entry.items.forEach(item => {
-                    const isVid = item.type === 'video';
-                    const isTest = ['training','quiz','task','homework','exam','تدريب','واجب','امتحان'].includes(item.type);
-                    if (isVid && !done.has(item.id)) missed.push(item);
-                    else if (isTest && !done.has(item.id) && !examTitles.has(item.title)) missed.push(item);
-                });
-            });
-
-            if (missed.length) lateMap[s._uid || s.phone] = { student: s, missed };
+            const done=new Set(Array.isArray(s.completedItems)?s.completedItems:[]);
+            const examTitles=new Set((Array.isArray(s.examResults)?s.examResults:[]).map(r=>r.examTitle||r.title||'').filter(Boolean));
+            const enrolled=Array.isArray(s.enrolledCourses)?s.enrolledCourses:(Array.isArray(s.courses)?s.courses:[]);
+            const missed=[];
+            enrolled.forEach(cId=>{ const entry=courseMap[cId]; if(!entry) return; entry.items.forEach(item=>{ const isVid=item.type==='video',isTest=['training','quiz','task','homework','exam','تدريب','واجب','امتحان'].includes(item.type); if(isVid&&!done.has(item.id)) missed.push(item); else if(isTest&&!done.has(item.id)&&!examTitles.has(item.title)) missed.push(item); }); });
+            if (missed.length) lateMap[s._uid||s.phone]={student:s,missed};
         });
 
-        const lateList = Object.values(lateMap).sort((a, b) => b.missed.length - a.missed.length);
+        const lateList=Object.values(lateMap).sort((a,b)=>b.missed.length-a.missed.length);
+        if (!lateList.length) { container.innerHTML=`<div style="text-align:center;padding:40px;color:#2ecc71;"><i class="fas fa-check-circle" style="font-size:2.5rem;display:block;margin-bottom:10px;"></i><h3 style="margin:0 0 8px;">رائع! لا توجد متأخرات 🎉</h3><p style="color:rgba(255,255,255,0.45);">جميع الطلاب أكملوا المحتوى المنشور</p></div>`; return; }
 
-        if (!lateList.length) {
-            container.innerHTML = `<div style="text-align:center;padding:40px;color:#2ecc71;"><i class="fas fa-check-circle" style="font-size:2.5rem;display:block;margin-bottom:10px;"></i><h3 style="margin:0 0 8px;">رائع! لا توجد متأخرات 🎉</h3><p style="color:rgba(255,255,255,0.45);">جميع الطلاب أكملوا المحتوى المنشور</p></div>`;
-            return;
-        }
+        const T={video:'🎥 مشاهدة المحاضرة',training:'📝 حل التدريب',تدريب:'📝 حل التدريب',quiz:'📋 حل الاختبار',homework:'📚 تسليم الواجب',واجب:'📚 تسليم الواجب',exam:'📄 حل الامتحان',امتحان:'📄 حل الامتحان',task:'✏️ إنجاز المهمة'};
 
-        // 5. عرض النتائج
-        const T = { video:'🎥 مشاهدة المحاضرة', training:'📝 حل التدريب', تدريب:'📝 حل التدريب', quiz:'📋 حل الاختبار', homework:'📚 تسليم الواجب', واجب:'📚 تسليم الواجب', exam:'📄 حل الامتحان', امتحان:'📄 حل الامتحان', task:'✏️ إنجاز المهمة' };
-
-        const summaryHtml = `<div style="background:rgba(231,76,60,0.1);border:1px solid rgba(231,76,60,0.3);border-radius:10px;padding:14px 20px;margin-bottom:16px;display:flex;gap:20px;flex-wrap:wrap;align-items:center;">
+        const summaryHtml=`<div style="background:rgba(231,76,60,0.1);border:1px solid rgba(231,76,60,0.3);border-radius:10px;padding:14px 20px;margin-bottom:16px;display:flex;gap:20px;flex-wrap:wrap;align-items:center;">
             <div><i class="fas fa-users" style="color:#e74c3c;margin-left:6px;"></i><strong style="color:#e74c3c;">${lateList.length}</strong> طالب متأخر</div>
             <div><i class="fas fa-exclamation-triangle" style="color:var(--royal-gold);margin-left:6px;"></i><strong style="color:var(--royal-gold);">${lateList.reduce((t,s)=>t+s.missed.length,0)}</strong> عنصر لم يُكتمل</div>
-            <div style="color:rgba(255,255,255,0.5);font-size:0.8rem;">${grade ? (gradeNames[grade]||grade) : 'كل الصفوف'} • من أصل ${students.length} طالب مسجل</div>
+            <div style="color:rgba(255,255,255,0.5);font-size:0.8rem;">${grade?(gradeNames[grade]||grade):'كل الصفوف'} • من أصل ${students.length} طالب مسجل</div>
         </div>`;
 
-        const cardsHtml = lateList.map(({ student: s, missed }) => {
-            const byType = {};
-            missed.forEach(m => { const lbl = T[m.type]||m.type; (byType[lbl] = byType[lbl]||[]).push(m.itemTitle || m.title); });
-
-            const details = Object.entries(byType).map(([lbl, titles]) =>
-                `<div style="margin-top:5px;"><span style="color:rgba(255,255,255,0.5);font-size:0.78rem;">${lbl}:</span> ${titles.slice(0,3).map(t=>`<span style="background:rgba(231,76,60,0.12);border-radius:4px;padding:1px 7px;margin:2px;display:inline-block;font-size:0.78rem;">${t}</span>`).join('')}${titles.length>3?`<span style="font-size:0.73rem;color:rgba(255,255,255,0.35);"> +${titles.length-3} أخرى</span>`:''}</div>`
-            ).join('');
-
-            const waText = `عزيزي ولي أمر الطالب ${s.name}،\nنود إبلاغك بأن ${s.name} متأخر عن إتمام:\n`
-                + Object.entries(byType).map(([t,items])=>`• ${t}: ${items.slice(0,2).join('، ')}${items.length>2?` (+${items.length-2})`:''}` ).join('\n')
-                + `\nبرجاء متابعة الطالب لإتمام المحتوى. شكراً 🙏`;
-            const waPhone = s.phone ? '2' + s.phone.replace(/^0/,'') : '';
-
-            return `<div class="late-card" style="margin-bottom:12px;">
-                <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;">
-                    <div style="flex:1;">
-                        <div class="late-msg"><strong style="color:var(--royal-gold);">${s.name}</strong>
-                            <span style="background:rgba(231,76,60,0.15);color:#e74c3c;font-size:0.73rem;padding:2px 8px;border-radius:12px;margin-right:8px;">${missed.length} عنصر</span>
-                        </div>
-                        ${s.phone ? `<div style="font-size:0.73rem;color:rgba(255,255,255,0.38);margin-top:2px;">${s.phone}</div>` : ''}
-                        ${details}
-                    </div>
-                    <div style="display:flex;gap:6px;flex-shrink:0;padding-top:4px;">
-                        <button class="copy-btn" onclick='copyMsg(${JSON.stringify(waText)}, this)' style="font-size:0.78rem;"><i class="fas fa-copy"></i> نسخ</button>
-                        ${waPhone ? `<a href="https://wa.me/${waPhone}?text=${encodeURIComponent(waText)}" target="_blank" class="copy-btn" style="font-size:0.78rem;text-decoration:none;background:rgba(37,211,102,0.12);color:#25d366;border-color:rgba(37,211,102,0.3);"><i class="fab fa-whatsapp"></i></a>` : ''}
-                    </div>
-                </div>
-            </div>`;
+        container.innerHTML = summaryHtml + lateList.map(({student:s,missed})=>{
+            const byType={};
+            missed.forEach(m=>{ const lbl=T[m.type]||m.type; (byType[lbl]=byType[lbl]||[]).push(m.title); });
+            const details=Object.entries(byType).map(([lbl,titles])=>`<div style="margin-top:5px;"><span style="color:rgba(255,255,255,0.5);font-size:0.78rem;">${lbl}:</span> ${titles.slice(0,3).map(t=>`<span style="background:rgba(231,76,60,0.12);border-radius:4px;padding:1px 7px;margin:2px;display:inline-block;font-size:0.78rem;">${t}</span>`).join('')}${titles.length>3?`<span style="font-size:0.73rem;color:rgba(255,255,255,0.35);"> +${titles.length-3} أخرى</span>`:''}</div>`).join('');
+            const waText=`عزيزي ولي أمر الطالب ${s.name}،\nنود إبلاغك بأن ${s.name} متأخر عن إتمام:\n`+Object.entries(byType).map(([t,it])=>`• ${t}: ${it.slice(0,2).join('، ')}${it.length>2?` (+${it.length-2})`:''}`).join('\n')+`\nبرجاء متابعة الطالب لإتمام المحتوى. شكراً 🙏`;
+            const waP=s.phone?'2'+s.phone.replace(/^0/,''):'';
+            return `<div class="late-card" style="margin-bottom:12px;"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;">
+                <div style="flex:1;"><div class="late-msg"><strong style="color:var(--royal-gold);">${s.name}</strong><span style="background:rgba(231,76,60,0.15);color:#e74c3c;font-size:0.73rem;padding:2px 8px;border-radius:12px;margin-right:8px;">${missed.length} عنصر</span></div>${s.phone?`<div style="font-size:0.73rem;color:rgba(255,255,255,0.38);margin-top:2px;">${s.phone}</div>`:''} ${details}</div>
+                <div style="display:flex;gap:6px;flex-shrink:0;padding-top:4px;"><button class="copy-btn" onclick='copyMsg(${JSON.stringify(waText)},this)' style="font-size:0.78rem;"><i class="fas fa-copy"></i> نسخ</button>${waP?`<a href="https://wa.me/${waP}?text=${encodeURIComponent(waText)}" target="_blank" class="copy-btn" style="font-size:0.78rem;text-decoration:none;background:rgba(37,211,102,0.12);color:#25d366;border-color:rgba(37,211,102,0.3);"><i class="fab fa-whatsapp"></i></a>`:''}</div>
+            </div></div>`;
         }).join('');
-
-        container.innerHTML = summaryHtml + cardsHtml;
-
-    } catch(e) {
-        container.innerHTML = `<p style="color:#e74c3c;">خطأ: ${e.message}</p>`;
-        console.error('loadLateStudents error:', e);
-    }
+    } catch(e) { container.innerHTML=`<p style="color:#e74c3c;">خطأ: ${e.message}</p>`; console.error('loadLateStudents error:',e); }
 }
 
-function copyMsg(msg, btn) {
-    navigator.clipboard.writeText(msg).then(() => {
-        btn.textContent = '✅ تم النسخ';
-        setTimeout(() => { btn.innerHTML = '<i class="fas fa-copy"></i> نسخ'; }, 1500);
-    });
-}
-
-function copyAllLateMessages() {
-    const cards = document.querySelectorAll('.late-card .late-msg');
-    const msgs = Array.from(cards).map(c => c.textContent.trim()).join('\n');
-    if (!msgs) { alert('لا توجد متأخرات لنسخها'); return; }
-    navigator.clipboard.writeText(msgs).then(() => alert('تم نسخ كل الرسائل!'));
-}
+function copyMsg(msg,btn) { navigator.clipboard.writeText(msg).then(()=>{ btn.textContent='✅ تم النسخ'; setTimeout(()=>{ btn.innerHTML='<i class="fas fa-copy"></i> نسخ'; },1500); }); }
+function copyAllLateMessages() { const cards=document.querySelectorAll('.late-card .late-msg'),msgs=Array.from(cards).map(c=>c.textContent.trim()).join('\n'); if(!msgs){alert('لا توجد متأخرات لنسخها');return;} navigator.clipboard.writeText(msgs).then(()=>alert('تم نسخ كل الرسائل!')); }
 
 async function loadLevels() {
     const grade = document.getElementById('levelGradeFilter').value;
-    if (!grade) { document.getElementById('levelsContainer').innerHTML = '<div style="text-align:center; padding:40px; color:rgba(255,255,255,0.5);">اختر صفاً أولاً</div>'; return; }
-    
-    document.getElementById('levelsContainer').innerHTML = '<div style="text-align:center; padding:30px;"><i class="fas fa-spinner fa-spin"></i></div>';
-    
+    document.getElementById('levelsContainer').innerHTML='<div style="text-align:center;padding:30px;"><i class="fas fa-spinner fa-spin"></i></div>';
     if (!window.firebaseDb) return;
     try {
-        let cached = JSON.parse(localStorage.getItem('cached_students') || '[]');
-        if (cached && cached.length > 0) {
-            allStudentsData = cached.map(s => { s._uid = s.id || s._uid; return s; });
-            if (grade) allStudentsData = allStudentsData.filter(s => s.grade === grade);
-            filterLevel(currentLevelFilter);
-            return;
+        let cached=getCachedStudents();
+        if (cached && cached.length) {
+            allStudentsData=cached.map(s=>{ s._uid=s.id||s._uid; return s; });
+        } else {
+            let q=window.firebaseDb.collection('students');
+            if (grade) q=q.where('grade','==',grade);
+            const snap=await q.limit(300).get();
+            allStudentsData=[];
+            snap.forEach(doc=>{ const d=doc.data(); d._uid=doc.id; allStudentsData.push(d); });
+            setCachedStudents(allStudentsData);
         }
-
-        const snap = await window.firebaseDb.collection('students').where('grade', '==', grade).limit(300).get();
-        allStudentsData = [];
-        snap.forEach(doc => { const d = doc.data(); d._uid = doc.id; allStudentsData.push(d); });
+        const display = grade ? allStudentsData.filter(s=>s.grade===grade) : allStudentsData;
+        allStudentsData = display;
         filterLevel(currentLevelFilter);
-    } catch(e) {
-        document.getElementById('levelsContainer').innerHTML = `<p style="color:#e74c3c;">خطأ: ${e.message}</p>`;
-    }
+    } catch(e) { document.getElementById('levelsContainer').innerHTML=`<p style="color:#e74c3c;">خطأ: ${e.message}</p>`; }
 }
 
 function filterLevel(level, btn) {
-    currentLevelFilter = level;
-    document.querySelectorAll('#tab-levels .tab-btn').forEach(b => b.classList.remove('active'));
-    if (btn) btn.classList.add('active');
-    else { const el = document.getElementById('lvl-'+level); if(el) el.classList.add('active'); }
-    
-    const container = document.getElementById('levelsContainer');
-    const filtered = allStudentsData.filter(s => {
-        const stats = calcStudentStats(s);
-        const avg = stats.avgExam !== null ? stats.avgExam : 0;
-        const lvl = getLevelInfo(avg);
         return lvl.key === level;
     });
     
