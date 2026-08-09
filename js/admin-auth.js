@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Owner Admin Authentication System
  * Mock Database and Role-based Authentication for Platform
  */
@@ -188,7 +188,7 @@ document.addEventListener('DOMContentLoaded', () => {
             window.location.href = 'admin-dashboard.html';
         }
 
-        adminLoginForm.addEventListener('submit', (e) => {
+        adminLoginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('adminEmail').value;
             const password = document.getElementById('adminPassword').value;
@@ -197,6 +197,23 @@ document.addEventListener('DOMContentLoaded', () => {
             const result = adminLogin(email, password);
             
             if (result.success) {
+                // Silently login to Firebase Auth for Security Rules (Admin identity)
+                if (window.firebase && window.firebase.auth) {
+                    try {
+                        await firebase.auth().signInWithEmailAndPassword(email, password);
+                    } catch (err) {
+                        if (err.code === 'auth/user-not-found') {
+                            try {
+                                await firebase.auth().createUserWithEmailAndPassword(email, password);
+                            } catch (createErr) {
+                                console.warn("Could not create admin auth account:", createErr);
+                            }
+                        } else {
+                            console.warn("Firebase admin auth failed:", err);
+                        }
+                    }
+                }
+
                 if(window.showToast) {
                     window.showToast('تم تسجيل الدخول بنجاح. جاري التوجيه...', 'success');
                 }

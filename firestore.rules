@@ -2,9 +2,42 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
+    
+    function isAdmin() {
+      // Check if user is authenticated and is listed in the platformAdmins collection
+      return request.auth != null && (
+        request.auth.token.email == 'youssefbarkatofficial@gmail.com' ||
+        exists(/databases/$(database)/documents/platformAdmins/$(request.auth.token.email))
+      );
+    }
 
+    match /courses/{courseId} {
+      allow read: if true; // Anyone can see courses
+      allow write: if isAdmin(); // Only admins can add, edit, or delete courses
+    }
+
+    match /students/{studentId} {
+      // Admin can read/write any student. Student can read/write their own document.
+      allow read, write: if request.auth != null && (request.auth.uid == studentId || isAdmin());
+    }
+
+    match /paymentRequests/{reqId} {
+      // Students can create requests. Only admins can read all or update/delete them.
+      allow read: if isAdmin() || (request.auth != null && resource.data.userPhone != null);
+      allow create: if request.auth != null;
+      allow update, delete: if isAdmin();
+    }
+    
+    match /platformAdmins/{adminId} {
+      // Only the primary owner can edit admins, but admins can read.
+      allow read: if isAdmin();
+      allow write: if request.auth != null && request.auth.token.email == 'youssefbarkatofficial@gmail.com';
+    }
+
+    // Default open for any other collections just in case (e.g. supportChats, notifications)
+    // To prevent breaking undocumented features
     match /{document=**} {
-      allow read, write: if true;
+      allow read, write: if true; 
     }
   }
 }

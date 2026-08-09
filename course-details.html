@@ -1120,11 +1120,18 @@
                             
                             let isScheduled = false;
                             if (availStr) {
-                                const availTime = new Date(availStr).getTime();
-                                if (Date.now() < availTime) {
+                                // Robust date parsing
+                                let availTime = new Date(availStr).getTime();
+                                if (isNaN(availTime)) {
+                                    // Fallback for Safari if needed
+                                    availTime = Date.parse(availStr.replace(/-/g, '/').replace('T', ' '));
+                                }
+                                
+                                if (!isNaN(availTime) && Date.now() < availTime) {
                                     isLocked = true;
                                     isScheduled = true;
-                                    const dateStr = new Date(availStr).toLocaleDateString('ar-EG', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+                                    const dt = new Date(availTime);
+                                    const dateStr = dt.toLocaleDateString('ar-EG', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
                                     lockReason = `سيكون متاحاً: ${dateStr}`;
                                 }
                             }
@@ -1390,8 +1397,12 @@
                     const examTypeName = isTraining ? 'التدريب' : isHomework ? 'الواجب' : 'الامتحان';
 
                     if (!isMasterPreview && !isTraining) {
-                        if(exam.availableFrom && new Date(exam.availableFrom).getTime() > nowMs) {
-                            const fromStr = new Date(exam.availableFrom).toLocaleString('ar-EG');
+                        let availExamTime = exam.availableFrom ? new Date(exam.availableFrom).getTime() : NaN;
+                        if (isNaN(availExamTime) && exam.availableFrom) {
+                            availExamTime = Date.parse(exam.availableFrom.replace(/-/g, '/').replace('T', ' '));
+                        }
+                        if(!isNaN(availExamTime) && availExamTime > nowMs) {
+                            const fromStr = new Date(availExamTime).toLocaleString('ar-EG');
                             if(window.showToast) window.showToast(`${examTypeName} لم يفتح بعد. يفتح في: ` + fromStr, 'error');
                             else alert(`${examTypeName} لم يفتح بعد. يفتح في: ` + fromStr);
                             return;
@@ -1680,19 +1691,20 @@
                         }
 
                         let percent = Math.round((earnedPoints / (totalPoints || 1)) * 100);
-                        if (isStrictViolation) {
-                            // Strict violations no longer set score to 0. They are handled by monitoring status.
-                        }
 
                         let penaltyApplied = false;
+                        
                         if(exam.availableUntil && new Date(exam.availableUntil).getTime() < Date.now()) { penaltyApplied = true; }
-                        const effectivePercent = penaltyApplied ? Math.max(0, percent - 20) : percent;
-                        const dispPct = penaltyApplied ? effectivePercent : percent;
+                        
+                        let effectivePercent = percent;
+                        if (penaltyApplied) effectivePercent = Math.max(0, effectivePercent - 20);
+                        
+                        const dispPct = effectivePercent;
 
                         let encouragement = '', encColor = '', encIcon = '';
                         if (isStrictViolation) {
-                            encouragement = '❌ نتيجة مُلغاة بسبب مخالفة الوضع الصارم ❌<br><span style="font-size:1rem;color:#fff;">(محاولة غش أو خروج من الامتحان)</span>';
-                            encColor = '#e74c3c';
+                            encouragement = '⚠️ تم سحب الامتحان إجبارياً بسبب محاولة الخروج أو الغش ⚠️<br><span style="font-size:1rem;color:#fff;">(تم احتساب درجاتك التي أجبت عليها فقط)</span>';
+                            encColor = '#e67e22';
                             encIcon = '⛔';
                         } else {
                             if(dispPct >= 90) { encouragement = 'طالب البوصلة! أداء استثنائي ومثالي! 👑'; encColor = '#f1c40f'; encIcon = '🧭'; }
@@ -1706,9 +1718,16 @@
                         let rHtml = '<div style="background:rgba(255,255,255,0.04);padding:20px;border-radius:14px;border:1px solid rgba(255,255,255,0.1);">';
                         rHtml += '<div style="font-size:2.5rem;margin-bottom:6px;">' + encIcon + '</div>';
                         rHtml += '<div style="font-size:1.3rem;font-weight:bold;color:' + encColor + ';margin-bottom:10px;">' + encouragement + '</div>';
-                        rHtml += '<div style="font-size:1.1rem;"><strong>درجتك: ' + percent + '%</strong>' + (penaltyApplied ? ' <span style="color:#e74c3c;">(بعد خصم التأخير: ' + effectivePercent + '%)</span>' : '') + '</div>';
+                        
+                        let scoreDisp = '<div style="font-size:1.1rem;"><strong>الدرجة الأساسية: ' + percent + '%</strong>';
+                        if (penaltyApplied) {
+                            scoreDisp += ' <br/><span style="color:#e74c3c; font-size: 1.2rem; font-weight: bold;">(الدرجة النهائية بعد الخصم: ' + effectivePercent + '%)</span>';
+                        }
+                        scoreDisp += '</div>';
+                        rHtml += scoreDisp;
+                        
                         rHtml += '<div style="font-size:1rem;color:#f39c12;margin-top:5px;"><strong>مجموع النقاط: ' + earnedPoints + ' من ' + totalPoints + '</strong></div>';
-                        if(isStrictViolation) rHtml += '<div style="margin-top:8px;color:#e74c3c;font-size:0.9rem;font-weight:bold;">🚨 تم سحب الامتحان منك تلقائياً لخرق قواعد الوضع الصارم.</div>';
+                        if(isStrictViolation) rHtml += '<div style="margin-top:10px;padding:10px;background:rgba(230,126,34,0.15);border-radius:8px;color:#e67e22;font-size:0.9rem;">⚠️ <strong>تم تسليم الامتحان وتسجيل درجاتك الحالية بسبب محاولة الخروج أو مخالفة القواعد.</strong></div>';
                         else if(autoSubmit) rHtml += '<div style="margin-top:8px;color:#e74c3c;font-size:0.9rem;">⏰ تم التسليم التلقائي بعد انتهاء الوقت.</div>';
                         if(penaltyApplied) rHtml += '<div style="margin-top:10px;padding:10px;background:rgba(231,76,60,0.15);border-radius:8px;color:#e74c3c;font-size:0.9rem;">⚠️ <strong>تم خصم 20% من درجتك بسبب التأخر في التسليم بعد الموعد النهائي.</strong></div>';
                         rHtml += '<hr style="border-color:rgba(255,255,255,0.08);margin:14px 0;"><div id="_examResDetails"></div></div>';
@@ -1871,7 +1890,7 @@
 
                         _examStrictBeforeUnload = function(e) {
                             e.preventDefault();
-                            e.returnValue = 'إذا غادرت الآن سيتم تسجيل نتيجة صفر!';
+                            e.returnValue = 'إذا غادرت الآن سيتم تسليم الامتحان إجبارياً مع خصم 10%!';
                             return e.returnValue;
                         };
                         
@@ -1885,7 +1904,7 @@
 
                         const failExamDirectly = (reason) => {
                             if(submitBtn.disabled && submitBtn.innerHTML.includes('جاري')) return;
-                            const confirmExit = confirm(`تحذير نهائي: ${reason}\n\nهل أنت مصر على الخروج وتسليم الدرجة (صفر) أم استكمال الحل؟\n\n- اضغط OK/حسناً للخروج بـ (صفر)\n- اضغط Cancel/إلغاء لاستكمال الحل`);
+                            const confirmExit = confirm(`تحذير نهائي: ${reason}\n\nهل أنت مصر على الخروج؟\n\n- اضغط OK/حسناً للخروج وتسليم الامتحان بما تم إنجازه مع خصم 10%\n- اضغط Cancel/إلغاء لاستكمال الحل`);
                             if (!confirmExit) {
                                 if(window.showToast) window.showToast('✅ تم التراجع عن الخروج، استكمل الامتحان.', 'success');
                                 _strictViolationsCount = Math.max(0, _strictViolationsCount - 1);
@@ -1898,7 +1917,7 @@
                                 return;
                             }
                             doSubmit(true, true);
-                            alert(`تم تسليم الامتحان تلقائياً بدرجة صفر بناءً على تأكيدك أو خروجك المتعمد.`);
+                            alert(`تم تسليم الامتحان تلقائياً بسبب خروجك المتعمد، وتم خصم 10% كعقوبة انضباطية.`);
                         };
 
                         const warnOrFailExam = (reason) => {

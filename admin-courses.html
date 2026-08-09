@@ -103,8 +103,7 @@
             <ul class="sidebar-nav">
                 <li><a href="admin-dashboard.html"><i class="fas fa-chart-line"></i> الإحصائيات العامة</a></li>
                 <li><a href="admin-students.html"><i class="fas fa-users"></i> إدارة الطلاب</a></li>
-                <li><a href="admin-students-details.html"><i class="fas fa-user-graduate"></i> إحصائيات الطلاب (تفصيلي)</a></li>
-                <li><a href="admin-courses.html" class="active"><i class="fas fa-book-open"></i> إدارة الكورسات</a></li>
+                                <li><a href="admin-courses.html" class="active"><i class="fas fa-book-open"></i> إدارة الكورسات</a></li>
                 <li><a href="admin-upload.html"><i class="fas fa-bolt"></i> الرفع السريع</a></li>
                 <li><a href="admin-payments.html"><i class="fas fa-money-check-alt"></i> مراجعة المدفوعات</a></li>
                 <li><a href="admin-compass.html"><i class="fas fa-compass"></i> بوت البوصلة</a></li>
@@ -224,6 +223,31 @@
             <div style="margin-top: 40px; text-align: left;">
                 <button class="btn btn-gold btn-large" id="btnSaveFullCourse"><i class="fas fa-save mr-2"></i> حفظ التعديلات</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Move Item Modal -->
+    <div class="modal-overlay" id="moveContentModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2500; justify-content: center; align-items: center;">
+        <div class="glass-panel modal-content" style="width: 95%; max-width: 500px; padding: 25px; position: relative;">
+            <button class="close-modal" style="position: absolute; top: 15px; right: 15px; background: transparent; border: none; color: #fff; font-size: 1.5rem; cursor: pointer;" onclick="closeMoveModal()"><i class="fas fa-times"></i></button>
+            <h2 class="text-gold mb-3"><i class="fas fa-exchange-alt mr-2"></i> نقل المحتوى</h2>
+            
+            <div class="form-group mb-3">
+                <label>اختر الكورس الوجهة</label>
+                <select id="moveTargetCourse" class="form-control" style="background: rgba(0,0,0,0.5); color: #fff;"></select>
+            </div>
+            
+            <div class="form-group mb-4">
+                <label>اختر القسم الوجهة</label>
+                <select id="moveTargetSection" class="form-control" style="background: rgba(0,0,0,0.5); color: #fff;">
+                    <option value="lectures">المحاضرات</option>
+                    <option value="homeworks">الواجبات</option>
+                    <option value="exams">الامتحانات</option>
+                    <option value="trainings">التدريبات</option>
+                </select>
+            </div>
+            
+            <button class="btn btn-gold w-100" onclick="confirmMoveItem()"><i class="fas fa-check"></i> تأكيد النقل</button>
         </div>
     </div>
 
@@ -1410,6 +1434,92 @@ window.exportSubscribersCSV = async function() {
     
     XLSX.writeFile(wb, `subscribers_course_${currentCourseSubscribersId}_${new Date().toISOString().split('T')[0]}.xlsx`);
 };
+
+let moveItemData = null;
+
+window.moveFlatItem = function(listKey, idx) {
+    moveItemData = { listKey, idx, isChild: false };
+    openMoveModal();
+};
+
+window.moveFlatChildItem = function(listKey, parentIdx, childIdx) {
+    moveItemData = { listKey, parentIdx, childIdx, isChild: true };
+    openMoveModal();
+};
+
+window.openMoveModal = function() {
+    const courses = JSON.parse(localStorage.getItem('adminCourses') || '[]');
+    const select = document.getElementById('moveTargetCourse');
+    select.innerHTML = '';
+    courses.forEach(c => {
+        select.innerHTML += `<option value="${c.id}">${c.title} (${c.grade})</option>`;
+    });
+    // Set current course as default selected
+    select.value = window.currentFlatCourseId;
+    
+    document.getElementById('moveContentModal').style.display = 'flex';
+};
+
+window.closeMoveModal = function() {
+    document.getElementById('moveContentModal').style.display = 'none';
+    moveItemData = null;
+};
+
+window.confirmMoveItem = async function() {
+    if (!moveItemData) return;
+    
+    const targetCourseId = document.getElementById('moveTargetCourse').value;
+    const targetSection = document.getElementById('moveTargetSection').value;
+    
+    if (!targetCourseId || !targetSection) {
+        showToast('يرجى تحديد الكورس والقسم الوجهة', 'error');
+        return;
+    }
+    
+    const courses = JSON.parse(localStorage.getItem('adminCourses') || '[]');
+    const srcCourseIdx = courses.findIndex(c => c.id === window.currentFlatCourseId);
+    const dstCourseIdx = courses.findIndex(c => c.id === targetCourseId);
+    
+    if (srcCourseIdx === -1 || dstCourseIdx === -1) return;
+    
+    const srcCourse = courses[srcCourseIdx];
+    const dstCourse = courses[dstCourseIdx];
+    
+    if (!dstCourse.contents) dstCourse.contents = { lectures: [], homeworks: [], exams: [], trainings: [] };
+    if (!dstCourse.contents[targetSection]) dstCourse.contents[targetSection] = [];
+    
+    let itemToMove;
+    
+    if (moveItemData.isChild) {
+        itemToMove = srcCourse.contents[moveItemData.listKey][moveItemData.parentIdx].children[moveItemData.childIdx];
+        srcCourse.contents[moveItemData.listKey][moveItemData.parentIdx].children.splice(moveItemData.childIdx, 1);
+    } else {
+        itemToMove = srcCourse.contents[moveItemData.listKey][moveItemData.idx];
+        srcCourse.contents[moveItemData.listKey].splice(moveItemData.idx, 1);
+    }
+    
+    // Unlink from lecture if moving to a top-level section
+    if (itemToMove.attachedToLectureId) {
+        delete itemToMove.attachedToLectureId;
+    }
+    
+    dstCourse.contents[targetSection].push(itemToMove);
+    
+    try {
+        if (window.FirebaseService) {
+            await window.FirebaseService.saveCourse(srcCourse);
+            if (srcCourseIdx !== dstCourseIdx) {
+                await window.FirebaseService.saveCourse(dstCourse);
+            }
+        }
+        localStorage.setItem('adminCourses', JSON.stringify(courses));
+        showToast('تم نقل المحتوى بنجاح', 'success');
+        closeMoveModal();
+        renderFlatContents(); // refresh view
+    } catch(err) {
+        showToast('حدث خطأ أثناء نقل المحتوى', 'error');
+    }
+};
 </script>
     <!-- Mobile Sidebar Toggle Script -->
     <script>
@@ -1497,6 +1607,7 @@ window.renderFlatContents = function() {
                         <div style="font-size:0.75rem; color:#aaa; margin-top:3px;">ID: ${item.id || 'N/A'}</div>
                     </div>
                     <div>
+                        <button class="btn btn-outline" style="padding:4px 8px; border-color:var(--royal-gold); color:var(--royal-gold); font-size:0.8rem; margin-left:5px;" onclick="openMoveItemModal('${list.key}', ${idx})"><i class="fas fa-exchange-alt"></i> نقل</button>
                         <button class="btn btn-outline" style="padding:4px 8px; border-color:#e74c3c; color:#e74c3c; font-size:0.8rem;" onclick="deleteFlatItem('${list.key}', ${idx})"><i class="fas fa-trash"></i> مسح</button>
                     </div>
                 </div>
@@ -1516,6 +1627,7 @@ window.renderFlatContents = function() {
                                 <strong style="color:#eee; font-size:0.9rem;">- ${child.title || 'بدون عنوان'}</strong> ${cDetails}
                             </div>
                             <div>
+                                <button class="btn btn-outline" style="padding:2px 6px; border-color:var(--royal-gold); color:var(--royal-gold); font-size:0.75rem; margin-left:5px;" onclick="openMoveItemModal('${list.key}', ${idx}, ${cIdx})"><i class="fas fa-exchange-alt"></i> نقل</button>
                                 <button class="btn btn-outline" style="padding:2px 6px; border-color:#e74c3c; color:#e74c3c; font-size:0.75rem;" onclick="deleteFlatChildItem('${list.key}', ${idx}, ${cIdx})"><i class="fas fa-trash"></i> مسح</button>
                             </div>
                         </div>
@@ -1575,7 +1687,93 @@ window.deleteFlatChildItem = async function(listKey, parentIdx, childIdx) {
     window.renderFlatContents();
     alert('تم المسح بنجاح');
 };
+
+// --- Move Item Logic ---
+let _moveState = { listKey: null, parentIdx: null, childIdx: null };
+window.openMoveItemModal = function(listKey, parentIdx, childIdx = null) {
+    _moveState = { listKey, parentIdx, childIdx };
+    const courses = JSON.parse(localStorage.getItem('adminCourses') || '[]');
+    
+    let courseSelectHtml = '<option value="">اختر الكورس...</option>';
+    courses.forEach(c => {
+        courseSelectHtml += `<option value="${c.id}">${c.title}</option>`;
+    });
+    
+    document.getElementById('moveCourseSelect').innerHTML = courseSelectHtml;
+    // Auto-select current course if moving within same course
+    document.getElementById('moveCourseSelect').value = window.currentFlatCourseId;
+    
+    document.getElementById('moveItemModal').style.display = 'flex';
+};
+
+window.confirmMoveItem = async function() {
+    const targetCourseId = document.getElementById('moveCourseSelect').value;
+    const targetSection = document.getElementById('moveSectionSelect').value;
+    
+    if(!targetCourseId || !targetSection) return alert('يرجى اختيار الكورس والقسم!');
+    
+    const courses = JSON.parse(localStorage.getItem('adminCourses') || '[]');
+    const sourceCourseIdx = courses.findIndex(c => c.id === window.currentFlatCourseId);
+    const targetCourseIdx = courses.findIndex(c => c.id === targetCourseId);
+    
+    if(sourceCourseIdx === -1 || targetCourseIdx === -1) return alert('خطأ في تحديد الكورس!');
+    
+    let itemToMove;
+    if(_moveState.childIdx !== null) {
+        itemToMove = courses[sourceCourseIdx].contents[_moveState.listKey][_moveState.parentIdx].children[_moveState.childIdx];
+        courses[sourceCourseIdx].contents[_moveState.listKey][_moveState.parentIdx].children.splice(_moveState.childIdx, 1);
+    } else {
+        itemToMove = courses[sourceCourseIdx].contents[_moveState.listKey][_moveState.parentIdx];
+        courses[sourceCourseIdx].contents[_moveState.listKey].splice(_moveState.parentIdx, 1);
+    }
+    
+    // Add to target
+    if(!courses[targetCourseIdx].contents) courses[targetCourseIdx].contents = { lectures:[], homeworks:[], exams:[], trainings:[] };
+    if(!courses[targetCourseIdx].contents[targetSection]) courses[targetCourseIdx].contents[targetSection] = [];
+    
+    courses[targetCourseIdx].contents[targetSection].push(itemToMove);
+    
+    localStorage.setItem('adminCourses', JSON.stringify(courses));
+    if (window.FirebaseService && typeof window.FirebaseService.saveCourse === 'function') {
+        // Save both if different, else save once
+        if (sourceCourseIdx !== targetCourseIdx) {
+            await window.FirebaseService.saveCourse(courses[sourceCourseIdx]);
+        }
+        await window.FirebaseService.saveCourse(courses[targetCourseIdx]);
+    }
+    
+    document.getElementById('moveItemModal').style.display = 'none';
+    window.renderFlatContents();
+    if(window.showToast) window.showToast('تم نقل المحتوى بنجاح!', 'success');
+    else alert('تم نقل المحتوى بنجاح!');
+};
     </script>
+    
+    <!-- Move Item Modal HTML -->
+    <div class="modal-overlay" id="moveItemModal" style="display:none; z-index: 100000;">
+        <div class="glass-panel modal-content" style="max-width:400px; padding:25px;">
+            <button class="close-modal" onclick="document.getElementById('moveItemModal').style.display='none'"><i class="fas fa-times"></i></button>
+            <h3 style="color:var(--royal-gold); text-align:center; margin-bottom:20px;">نقل المحتوى</h3>
+            
+            <div class="form-group">
+                <label>إلى كورس:</label>
+                <select id="moveCourseSelect" class="form-control" style="background:#1a2332; color:#fff;"></select>
+            </div>
+            
+            <div class="form-group">
+                <label>إلى قسم:</label>
+                <select id="moveSectionSelect" class="form-control" style="background:#1a2332; color:#fff;">
+                    <option value="lectures">المحاضرات</option>
+                    <option value="homeworks">الواجبات</option>
+                    <option value="exams">الامتحانات</option>
+                    <option value="trainings">التدريبات</option>
+                </select>
+            </div>
+            
+            <button class="btn btn-gold btn-block" onclick="confirmMoveItem()">تأكيد النقل</button>
+        </div>
+    </div>
+    
     <script src="js/mobile.js?v=3"></script>
 </body>
 </html>

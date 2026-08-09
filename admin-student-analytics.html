@@ -727,6 +727,20 @@ async function loadLevels() {
 }
 
 function filterLevel(level, btn) {
+    currentLevelFilter = level;
+    if (btn) {
+        document.querySelectorAll('#tab-levels .tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+    }
+    const container = document.getElementById('levelsContainer');
+    if (!allStudentsData || !allStudentsData.length) {
+        container.innerHTML = '<div style="text-align:center; padding:40px; color:rgba(255,255,255,0.5);">لا توجد بيانات</div>';
+        return;
+    }
+    const filtered = allStudentsData.filter(s => {
+        const stats = calcStudentStats(s);
+        const overall = calcOverallLevel(stats);
+        const lvl = getLevelInfo(overall);
         return lvl.key === level;
     });
     

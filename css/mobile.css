@@ -178,11 +178,11 @@
   }
 
   .nav-brand-text {
-    font-size: 0.95rem !important;
+    font-size: 0.85rem !important;
     white-space: nowrap !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
-    max-width: 130px !important;
+    max-width: 180px !important;
     flex-shrink: 1 !important;
   }
 
@@ -912,8 +912,8 @@
   /* Nav brand text can be even shorter */
   /* Nav brand text can be even shorter */
   .nav-brand-text {
-    max-width: 100px !important;
-    font-size: 0.85rem !important;
+    max-width: 150px !important;
+    font-size: 0.75rem !important;
   }
 
   /* Features circle smaller */
