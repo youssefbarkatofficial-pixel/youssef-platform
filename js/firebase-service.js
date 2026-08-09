@@ -721,9 +721,10 @@ window.FirebaseService = (function () {
         console.log('🚀 بدء مزامنة البيانات المحلية لـ Firestore...');
 
         // Sync Courses
-        const courses = JSON.parse(localStorage.getItem('adminCourses') || '[]');
+        const courses = getCoursesFromStorage();
         for (const course of courses) {
             try {
+                // If image is a huge base64, it might fail to sync to Firestore, but at least it won't corrupt the DB with '__local__'
                 await getDb().collection('courses').doc(course.id).set(course, { merge: true });
                 console.log('✅ كورس:', course.title);
             } catch (e) { console.warn('❌ فشل كورس:', course.id, e); }

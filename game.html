@@ -1,10 +1,11 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+    <link rel="manifest" href="./manifest.json">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>صراع البوصلة ⚔️ | منصة يوسف بركات</title>
-  <meta name="description" content="صراع البوصلة - لعبة التعليم التنافسية داخل المنصة التعليمية">
+  <title>طµط±ط§ط¹ ط§ظ„ط¨ظˆطµظ„ط© âڑ”ï¸ڈ | ظ…ظ†طµط© ظٹظˆط³ظپ ط¨ط±ظƒط§طھ</title>
+  <meta name="description" content="طµط±ط§ط¹ ط§ظ„ط¨ظˆطµظ„ط© - ظ„ط¹ط¨ط© ط§ظ„طھط¹ظ„ظٹظ… ط§ظ„طھظ†ط§ظپط³ظٹط© ط¯ط§ط®ظ„ ط§ظ„ظ…ظ†طµط© ط§ظ„طھط¹ظ„ظٹظ…ظٹط©">
 
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -30,9 +31,9 @@
 ======================================================== -->
 <div id="screen-loading" class="screen active">
   <div class="loading-logo">
-    <span class="loading-compass">🧭</span>
-    <h1 class="loading-title">صِراع البوصلة</h1>
-    <p class="loading-subtitle">لعبة التحدي التعليمي</p>
+    <span class="loading-compass">ًں§­</span>
+    <h1 class="loading-title">طµظگط±ط§ط¹ ط§ظ„ط¨ظˆطµظ„ط©</h1>
+    <p class="loading-subtitle">ظ„ط¹ط¨ط© ط§ظ„طھط­ط¯ظٹ ط§ظ„طھط¹ظ„ظٹظ…ظٹ</p>
     <div class="loading-bar-wrap"><div class="loading-bar"></div></div>
   </div>
 </div>
@@ -43,52 +44,52 @@
 <div id="screen-login" class="screen">
   <div class="login-card">
     <div class="login-logo">
-      <span class="compass-icon">🧭</span>
-      <h1>صِراع البوصلة</h1>
-      <p>سجّل دخولك لتبدأ المبارزة</p>
+      <span class="compass-icon">ًں§­</span>
+      <h1>طµظگط±ط§ط¹ ط§ظ„ط¨ظˆطµظ„ط©</h1>
+      <p>ط³ط¬ظ‘ظ„ ط¯ط®ظˆظ„ظƒ ظ„طھط¨ط¯ط£ ط§ظ„ظ…ط¨ط§ط±ط²ط©</p>
     </div>
     <div class="login-tabs">
-      <button class="login-tab active" id="tab-login" onclick="switchLoginTab('login')">دخول</button>
-      <button class="login-tab" id="tab-register" onclick="switchLoginTab('register')">حساب جديد</button>
+      <button class="login-tab active" id="tab-login" onclick="switchLoginTab('login')">ط¯ط®ظˆظ„</button>
+      <button class="login-tab" id="tab-register" onclick="switchLoginTab('register')">ط­ط³ط§ط¨ ط¬ط¯ظٹط¯</button>
     </div>
 
     <!-- Login Form -->
     <div id="form-login">
       <div class="form-group">
-        <label>البريد الإلكتروني</label>
+        <label>ط§ظ„ط¨ط±ظٹط¯ ط§ظ„ط¥ظ„ظƒطھط±ظˆظ†ظٹ</label>
         <input type="email" id="login-email" placeholder="example@email.com" autocomplete="email">
       </div>
       <div class="form-group">
-        <label>كلمة المرور</label>
-        <input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password">
+        <label>ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط±</label>
+        <input type="password" id="login-pass" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" autocomplete="current-password">
       </div>
-      <button class="btn-primary" onclick="doLogin()">دخول ⚔️</button>
+      <button class="btn-primary" onclick="doLogin()">ط¯ط®ظˆظ„ âڑ”ï¸ڈ</button>
     </div>
 
     <!-- Register Form -->
     <div id="form-register" class="hidden">
       <div class="form-group">
-        <label>الاسم الكامل</label>
-        <input type="text" id="reg-name" placeholder="اسمك بالكامل">
+        <label>ط§ظ„ط§ط³ظ… ط§ظ„ظƒط§ظ…ظ„</label>
+        <input type="text" id="reg-name" placeholder="ط§ط³ظ…ظƒ ط¨ط§ظ„ظƒط§ظ…ظ„">
       </div>
       <div class="form-group">
-        <label>الصف الدراسي</label>
+        <label>ط§ظ„طµظپ ط§ظ„ط¯ط±ط§ط³ظٹ</label>
         <select id="reg-grade">
-          <option value="7">أول إعدادي</option>
-          <option value="8">ثاني إعدادي</option>
-          <option value="9">ثالث إعدادي</option>
-          <option value="10">أول ثانوي</option>
+          <option value="7">ط£ظˆظ„ ط¥ط¹ط¯ط§ط¯ظٹ</option>
+          <option value="8">ط«ط§ظ†ظٹ ط¥ط¹ط¯ط§ط¯ظٹ</option>
+          <option value="9">ط«ط§ظ„ط« ط¥ط¹ط¯ط§ط¯ظٹ</option>
+          <option value="10">ط£ظˆظ„ ط«ط§ظ†ظˆظٹ</option>
         </select>
       </div>
       <div class="form-group">
-        <label>البريد الإلكتروني</label>
+        <label>ط§ظ„ط¨ط±ظٹط¯ ط§ظ„ط¥ظ„ظƒطھط±ظˆظ†ظٹ</label>
         <input type="email" id="reg-email" placeholder="example@email.com" autocomplete="email">
       </div>
       <div class="form-group">
-        <label>كلمة المرور</label>
-        <input type="password" id="reg-pass" placeholder="6 أحرف على الأقل" autocomplete="new-password">
+        <label>ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط±</label>
+        <input type="password" id="reg-pass" placeholder="6 ط£ط­ط±ظپ ط¹ظ„ظ‰ ط§ظ„ط£ظ‚ظ„" autocomplete="new-password">
       </div>
-      <button class="btn-primary" onclick="doRegister()">إنشاء حساب 🚀</button>
+      <button class="btn-primary" onclick="doRegister()">ط¥ظ†ط´ط§ط، ط­ط³ط§ط¨ ًںڑ€</button>
     </div>
 
     <div class="login-error" id="login-error"></div>
@@ -101,33 +102,33 @@
 <div id="screen-lobby" class="screen">
   <!-- Header -->
   <div class="lobby-header">
-    <div class="player-avatar" id="lobby-avatar">؟</div>
+    <div class="player-avatar" id="lobby-avatar">طں</div>
     <div class="player-info">
-      <div class="name" id="lobby-name">جاري التحميل...</div>
-      <div class="rank" id="lobby-rank">🧭 ---</div>
+      <div class="name" id="lobby-name">ط¬ط§ط±ظٹ ط§ظ„طھط­ظ…ظٹظ„...</div>
+      <div class="rank" id="lobby-rank">ًں§­ ---</div>
       <div class="xp-bar-wrap">
         <div class="xp-bar"><div class="xp-bar-fill" id="lobby-xp-bar" style="width:0%"></div></div>
         <span class="xp-label" id="lobby-xp-label">0 XP</span>
       </div>
     </div>
-    <button onclick="exitGame()" style="background:transparent;border:none;color:var(--text-muted);font-size:1.3rem;cursor:pointer;padding:8px;transition:0.3s;" onmouseover="this.style.color='#e74c3c'" onmouseout="this.style.color='var(--text-muted)'" title="إغلاق اللعبة">
+    <button onclick="exitGame()" style="background:transparent;border:none;color:var(--text-muted);font-size:1.3rem;cursor:pointer;padding:8px;transition:0.3s;" onmouseover="this.style.color='#e74c3c'" onmouseout="this.style.color='var(--text-muted)'" title="ط¥ط؛ظ„ط§ظ‚ ط§ظ„ظ„ط¹ط¨ط©">
       <i class="fas fa-sign-out-alt"></i>
     </button>
   </div>
 
   <!-- Stats -->
   <div class="lobby-stats">
-    <div class="stat-box"><div class="val" id="stat-wins">0</div><div class="lbl">انتصارات</div></div>
-    <div class="stat-box"><div class="val" id="stat-losses">0</div><div class="lbl">هزائم</div></div>
-    <div class="stat-box"><div class="val" id="stat-rate">0%</div><div class="lbl">نسبة الفوز</div></div>
+    <div class="stat-box"><div class="val" id="stat-wins">0</div><div class="lbl">ط§ظ†طھطµط§ط±ط§طھ</div></div>
+    <div class="stat-box"><div class="val" id="stat-losses">0</div><div class="lbl">ظ‡ط²ط§ط¦ظ…</div></div>
+    <div class="stat-box"><div class="val" id="stat-rate">0%</div><div class="lbl">ظ†ط³ط¨ط© ط§ظ„ظپظˆط²</div></div>
   </div>
 
   <!-- Nav Tabs -->
   <div class="lobby-nav">
-    <button class="nav-tab active" onclick="showLobbyTab('play')">⚔️ العب</button>
-    <button class="nav-tab" onclick="showLobbyTab('training')">📚 تدريب</button>
-    <button class="nav-tab" onclick="showLobbyTab('friends')">👥 أصدقاء</button>
-    <button class="nav-tab" onclick="showLobbyTab('leaderboard')">🏆 المتصدرون</button>
+    <button class="nav-tab active" onclick="showLobbyTab('play')">âڑ”ï¸ڈ ط§ظ„ط¹ط¨</button>
+    <button class="nav-tab" onclick="showLobbyTab('training')">ًں“ڑ طھط¯ط±ظٹط¨</button>
+    <button class="nav-tab" onclick="showLobbyTab('friends')">ًں‘¥ ط£طµط¯ظ‚ط§ط،</button>
+    <button class="nav-tab" onclick="showLobbyTab('leaderboard')">ًںڈ† ط§ظ„ظ…طھطµط¯ط±ظˆظ†</button>
   </div>
 
   <!-- Lobby Content -->
@@ -135,49 +136,49 @@
 
     <!-- ====== PLAY TAB ====== -->
     <div id="tab-play" class="lobby-tab-content">
-      <p class="section-title">وضع اللعب</p>
+      <p class="section-title">ظˆط¶ط¹ ط§ظ„ظ„ط¹ط¨</p>
       <div class="mode-grid">
         <button class="mode-btn selected" data-mode="ranked" onclick="selectMode(this,'ranked')">
-          <span class="icon">🏆</span>
-          <span class="title">مصنفة</span>
-          <span class="desc">تنافس على الترتيب</span>
+          <span class="icon">ًںڈ†</span>
+          <span class="title">ظ…طµظ†ظپط©</span>
+          <span class="desc">طھظ†ط§ظپط³ ط¹ظ„ظ‰ ط§ظ„طھط±طھظٹط¨</span>
         </button>
         <button class="mode-btn" data-mode="bot_only" onclick="selectMode(this,'bot_only')">
-          <span class="icon">🤖</span>
-          <span class="title">ضد الأيجنت</span>
-          <span class="desc">بدون تأثير على الرتبة</span>
+          <span class="icon">ًں¤–</span>
+          <span class="title">ط¶ط¯ ط§ظ„ط£ظٹط¬ظ†طھ</span>
+          <span class="desc">ط¨ط¯ظˆظ† طھط£ط«ظٹط± ط¹ظ„ظ‰ ط§ظ„ط±طھط¨ط©</span>
         </button>
       </div>
 
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
         <div>
-          <p class="section-title">المادة الدراسية</p>
+          <p class="section-title">ط§ظ„ظ…ط§ط¯ط© ط§ظ„ط¯ط±ط§ط³ظٹط©</p>
           <div class="select-wrapper">
             <select class="custom-select" onchange="ui.subject = this.value">
-              <option value="history">تاريخ 📜</option>
-              <option value="geography">جغرافيا 🌍</option>
-              <option value="mixed">مدمج ⚖️</option>
+              <option value="history">طھط§ط±ظٹط® ًں“œ</option>
+              <option value="geography">ط¬ط؛ط±ط§ظپظٹط§ ًںŒچ</option>
+              <option value="mixed">ظ…ط¯ظ…ط¬ âڑ–ï¸ڈ</option>
             </select>
           </div>
         </div>
         <div>
-          <p class="section-title">الصف الدراسي</p>
+          <p class="section-title">ط§ظ„طµظپ ط§ظ„ط¯ط±ط§ط³ظٹ</p>
           <div class="select-wrapper">
             <select class="custom-select" onchange="ui.grade = this.value">
-              <option value="general">عام</option>
-              <option value="7">١ إعدادي</option>
-              <option value="8">٢ إعدادي</option>
-              <option value="9">٣ إعدادي</option>
-              <option value="10">١ ثانوي</option>
-              <option value="11" disabled>٢ ثانوي (قريباً)</option>
-              <option value="12" disabled>٣ ثانوي (قريباً)</option>
+              <option value="general">ط¹ط§ظ…</option>
+              <option value="7">ظ، ط¥ط¹ط¯ط§ط¯ظٹ</option>
+              <option value="8">ظ¢ ط¥ط¹ط¯ط§ط¯ظٹ</option>
+              <option value="9">ظ£ ط¥ط¹ط¯ط§ط¯ظٹ</option>
+              <option value="10">ظ، ط«ط§ظ†ظˆظٹ</option>
+              <option value="11" disabled>ظ¢ ط«ط§ظ†ظˆظٹ (ظ‚ط±ظٹط¨ط§ظ‹)</option>
+              <option value="12" disabled>ظ£ ط«ط§ظ†ظˆظٹ (ظ‚ط±ظٹط¨ط§ظ‹)</option>
             </select>
           </div>
         </div>
       </div>
 
       <button class="btn-start" id="btn-start" onclick="proceedToBotSetup()">
-        <i class="fas fa-bolt"></i> ابدأ المبارزة
+        <i class="fas fa-bolt"></i> ط§ط¨ط¯ط£ ط§ظ„ظ…ط¨ط§ط±ط²ط©
       </button>
     </div>
 
@@ -185,79 +186,79 @@
     <div id="tab-training" class="lobby-tab-content hidden">
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
         <div>
-          <p class="section-title">المادة الدراسية</p>
+          <p class="section-title">ط§ظ„ظ…ط§ط¯ط© ط§ظ„ط¯ط±ط§ط³ظٹط©</p>
           <div class="select-wrapper">
             <select class="custom-select" onchange="ui.trainSubject = this.value; updateTrainLessonPicker();">
-              <option value="history">تاريخ 📜</option>
-              <option value="geography">جغرافيا 🌍</option>
-              <option value="mixed">مدمج ⚖️</option>
+              <option value="history">طھط§ط±ظٹط® ًں“œ</option>
+              <option value="geography">ط¬ط؛ط±ط§ظپظٹط§ ًںŒچ</option>
+              <option value="mixed">ظ…ط¯ظ…ط¬ âڑ–ï¸ڈ</option>
             </select>
           </div>
         </div>
         <div>
-          <p class="section-title">الصف الدراسي</p>
+          <p class="section-title">ط§ظ„طµظپ ط§ظ„ط¯ط±ط§ط³ظٹ</p>
           <div class="select-wrapper">
             <select class="custom-select" onchange="ui.trainGrade = this.value; ui.trainUnit = null; ui.trainLesson = null; updateTrainLessonPicker();">
-              <option value="general">عام</option>
-              <option value="7">١ إعدادي</option>
-              <option value="8">٢ إعدادي</option>
-              <option value="9">٣ إعدادي</option>
-              <option value="10">١ ثانوي</option>
-              <option value="11" disabled>٢ ثانوي (قريباً)</option>
-              <option value="12" disabled>٣ ثانوي (قريباً)</option>
+              <option value="general">ط¹ط§ظ…</option>
+              <option value="7">ظ، ط¥ط¹ط¯ط§ط¯ظٹ</option>
+              <option value="8">ظ¢ ط¥ط¹ط¯ط§ط¯ظٹ</option>
+              <option value="9">ظ£ ط¥ط¹ط¯ط§ط¯ظٹ</option>
+              <option value="10">ظ، ط«ط§ظ†ظˆظٹ</option>
+              <option value="11" disabled>ظ¢ ط«ط§ظ†ظˆظٹ (ظ‚ط±ظٹط¨ط§ظ‹)</option>
+              <option value="12" disabled>ظ£ ط«ط§ظ†ظˆظٹ (ظ‚ط±ظٹط¨ط§ظ‹)</option>
             </select>
           </div>
         </div>
       </div>
 
       <div id="train-lesson-picker" class="hidden">
-        <p class="section-title">تحديد الوحدة والدرس</p>
+        <p class="section-title">طھط­ط¯ظٹط¯ ط§ظ„ظˆط­ط¯ط© ظˆط§ظ„ط¯ط±ط³</p>
         <div id="train-units" class="grade-grid"></div>
         <div id="train-lessons" class="grade-grid" style="margin-top:8px;"></div>
       </div>
 
       <button class="btn-start" style="margin-top:16px;" onclick="startTraining()">
-        <i class="fas fa-graduation-cap"></i> ابدأ التدريب
+        <i class="fas fa-graduation-cap"></i> ط§ط¨ط¯ط£ ط§ظ„طھط¯ط±ظٹط¨
       </button>
     </div>
 
     <!-- ====== FRIENDS TAB ====== -->
     <div id="tab-friends" class="lobby-tab-content hidden">
       <div style="text-align:center;padding:20px 0;">
-        <div style="font-size:4rem;margin-bottom:12px;">👥</div>
-        <p style="color:var(--text-soft);font-size:1rem;margin-bottom:20px;">العب مع أصدقائك بكود الغرفة</p>
+        <div style="font-size:4rem;margin-bottom:12px;">ًں‘¥</div>
+        <p style="color:var(--text-soft);font-size:1rem;margin-bottom:20px;">ط§ظ„ط¹ط¨ ظ…ط¹ ط£طµط¯ظ‚ط§ط¦ظƒ ط¨ظƒظˆط¯ ط§ظ„ط؛ط±ظپط©</p>
       </div>
 
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;">
         <button class="mode-btn" onclick="createRoom()">
-          <span class="icon">➕</span>
-          <span class="title">إنشاء غرفة</span>
-          <span class="desc">شارك الكود مع صديقك</span>
+          <span class="icon">â‍•</span>
+          <span class="title">ط¥ظ†ط´ط§ط، ط؛ط±ظپط©</span>
+          <span class="desc">ط´ط§ط±ظƒ ط§ظ„ظƒظˆط¯ ظ…ط¹ طµط¯ظٹظ‚ظƒ</span>
         </button>
         <button class="mode-btn" onclick="showJoinRoom()">
-          <span class="icon">🔑</span>
-          <span class="title">انضمام</span>
-          <span class="desc">أدخل كود صديقك</span>
+          <span class="icon">ًں”‘</span>
+          <span class="title">ط§ظ†ط¶ظ…ط§ظ…</span>
+          <span class="desc">ط£ط¯ط®ظ„ ظƒظˆط¯ طµط¯ظٹظ‚ظƒ</span>
         </button>
       </div>
 
       <div id="room-created" class="hidden">
         <div class="room-code-display" onclick="copyRoomCode()">
           <div class="code" id="room-code-text">------</div>
-          <div class="hint">اضغط لنسخ الكود</div>
+          <div class="hint">ط§ط¶ط؛ط· ظ„ظ†ط³ط® ط§ظ„ظƒظˆط¯</div>
         </div>
-        <p style="text-align:center;color:var(--text-muted);font-size:0.8rem;">شارك هذا الكود مع أصدقائك ليدخلوا الغرفة</p>
+        <p style="text-align:center;color:var(--text-muted);font-size:0.8rem;">ط´ط§ط±ظƒ ظ‡ط°ط§ ط§ظ„ظƒظˆط¯ ظ…ط¹ ط£طµط¯ظ‚ط§ط¦ظƒ ظ„ظٹط¯ط®ظ„ظˆط§ ط§ظ„ط؛ط±ظپط©</p>
         <button class="btn-start" style="margin-top:12px;" onclick="startFriendGame()">
-          <i class="fas fa-play"></i> ابدأ اللعبة
+          <i class="fas fa-play"></i> ط§ط¨ط¯ط£ ط§ظ„ظ„ط¹ط¨ط©
         </button>
       </div>
 
       <div id="room-join" class="hidden">
         <div class="form-group">
-          <label>كود الغرفة</label>
+          <label>ظƒظˆط¯ ط§ظ„ط؛ط±ظپط©</label>
           <input type="text" id="join-code-input" placeholder="XXXXXX" maxlength="6" style="text-align:center;letter-spacing:6px;font-size:1.4rem;text-transform:uppercase;">
         </div>
-        <button class="btn-primary" onclick="joinRoom()">دخول الغرفة</button>
+        <button class="btn-primary" onclick="joinRoom()">ط¯ط®ظˆظ„ ط§ظ„ط؛ط±ظپط©</button>
       </div>
     </div>
 
@@ -265,7 +266,7 @@
     <div id="tab-leaderboard" class="lobby-tab-content hidden">
       <div class="leaderboard-grade-filter" id="lb-filter"></div>
       <div id="lb-content">
-        <p style="text-align:center;color:var(--text-muted);padding:40px 0;">جاري التحميل...</p>
+        <p style="text-align:center;color:var(--text-muted);padding:40px 0;">ط¬ط§ط±ظٹ ط§ظ„طھط­ظ…ظٹظ„...</p>
       </div>
     </div>
 
@@ -278,37 +279,37 @@
 <div id="screen-bot-setup" class="screen">
   <div class="bot-setup-card">
     <button onclick="showScreen('lobby')" style="background:transparent;border:none;color:var(--text-muted);cursor:pointer;margin-bottom:12px;font-size:0.9rem;">
-      ← رجوع
+      â†گ ط±ط¬ظˆط¹
     </button>
-    <h2>⚔️ إعداد المبارزة</h2>
-    <p>اختر عدد المنافسين ومستوى صعوبتهم</p>
+    <h2>âڑ”ï¸ڈ ط¥ط¹ط¯ط§ط¯ ط§ظ„ظ…ط¨ط§ط±ط²ط©</h2>
+    <p>ط§ط®طھط± ط¹ط¯ط¯ ط§ظ„ظ…ظ†ط§ظپط³ظٹظ† ظˆظ…ط³طھظˆظ‰ طµط¹ظˆط¨طھظ‡ظ…</p>
 
-    <p class="section-title">عدد الخصوم</p>
+    <p class="section-title">ط¹ط¯ط¯ ط§ظ„ط®طµظˆظ…</p>
     <div class="bot-count-grid">
-      <button class="bot-count-btn selected" data-count="1" onclick="selectBotCount(this,1)"><span class="num">1</span>خصم</button>
-      <button class="bot-count-btn" data-count="2" onclick="selectBotCount(this,2)"><span class="num">2</span>خصوم</button>
-      <button class="bot-count-btn" data-count="3" onclick="selectBotCount(this,3)"><span class="num">3</span>خصوم</button>
-      <button class="bot-count-btn" data-count="6" onclick="selectBotCount(this,6)"><span class="num">6</span>خصوم</button>
+      <button class="bot-count-btn selected" data-count="1" onclick="selectBotCount(this,1)"><span class="num">1</span>ط®طµظ…</button>
+      <button class="bot-count-btn" data-count="2" onclick="selectBotCount(this,2)"><span class="num">2</span>ط®طµظˆظ…</button>
+      <button class="bot-count-btn" data-count="3" onclick="selectBotCount(this,3)"><span class="num">3</span>ط®طµظˆظ…</button>
+      <button class="bot-count-btn" data-count="6" onclick="selectBotCount(this,6)"><span class="num">6</span>ط®طµظˆظ…</button>
     </div>
 
-    <p class="section-title">مستوى الصعوبة</p>
+    <p class="section-title">ظ…ط³طھظˆظ‰ ط§ظ„طµط¹ظˆط¨ط©</p>
     <div class="difficulty-grid">
       <button class="diff-btn selected" data-diff="beginner" onclick="selectDifficulty(this,'beginner')">
-        <span class="icon">🌱</span>مبتدئ
+        <span class="icon">ًںŒ±</span>ظ…ط¨طھط¯ط¦
       </button>
       <button class="diff-btn" data-diff="medium" onclick="selectDifficulty(this,'medium')">
-        <span class="icon">⚡</span>متوسط
+        <span class="icon">âڑ،</span>ظ…طھظˆط³ط·
       </button>
       <button class="diff-btn" data-diff="pro" onclick="selectDifficulty(this,'pro')">
-        <span class="icon">🔥</span>محترف
+        <span class="icon">ًں”¥</span>ظ…ط­طھط±ظپ
       </button>
       <button class="diff-btn" data-diff="commander" onclick="selectDifficulty(this,'commander')">
-        <span class="icon">👑</span>قائد
+        <span class="icon">ًں‘‘</span>ظ‚ط§ط¦ط¯
       </button>
     </div>
 
     <button class="btn-start" onclick="launchBattle()">
-      <i class="fas fa-sword"></i> انطلق للمعركة!
+      <i class="fas fa-sword"></i> ط§ظ†ط·ظ„ظ‚ ظ„ظ„ظ…ط¹ط±ظƒط©!
     </button>
   </div>
 </div>
@@ -320,14 +321,14 @@
 
   <!-- Header -->
   <div class="battle-header">
-    <div class="battle-title">⚔️ صِراع البوصلة</div>
-    <div class="battle-round" id="battle-round-label">جولة 1 / 7</div>
+    <div class="battle-title">âڑ”ï¸ڈ طµظگط±ط§ط¹ ط§ظ„ط¨ظˆطµظ„ط©</div>
+    <div class="battle-round" id="battle-round-label">ط¬ظˆظ„ط© 1 / 7</div>
     <div style="display:flex; gap:10px;">
       <button onclick="confirmQuit()" style="background:transparent;border:1px solid var(--dark-border);border-radius:8px;color:var(--text-muted);font-size:0.75rem;padding:4px 10px;cursor:pointer;">
-        إنهاء
+        ط¥ظ†ظ‡ط§ط،
       </button>
       <button onclick="exitGame()" style="background:transparent;border:1px solid #e74c3c;border-radius:8px;color:#e74c3c;font-size:0.75rem;padding:4px 10px;cursor:pointer;">
-        خروج
+        ط®ط±ظˆط¬
       </button>
     </div>
   </div>
@@ -358,7 +359,7 @@
   </div>
 
   <div class="phase-indicator" id="phase-indicator" style="text-align:center; padding: 10px; background: rgba(0,0,0,0.5); color: #fff; font-size: 1.1rem; border-bottom: 1px solid #333;">
-    <span id="phase-title">جاري التجهيز للملحمة...</span>
+    <span id="phase-title">ط¬ط§ط±ظٹ ط§ظ„طھط¬ظ‡ظٹط² ظ„ظ„ظ…ظ„ط­ظ…ط©...</span>
   </div>
 
   <!-- Bot Status -->
@@ -375,12 +376,12 @@
     </div>
     <div class="question-text-wrap">
       <div class="question-category" id="q-category">---</div>
-      <div class="question-text" id="q-text">جاري تحميل السؤال...</div>
+      <div class="question-text" id="q-text">ط¬ط§ط±ظٹ طھط­ظ…ظٹظ„ ط§ظ„ط³ط¤ط§ظ„...</div>
     </div>
   </div>
 
   <!-- Change Hint -->
-  <div class="change-hint" id="change-hint">يمكنك تغيير إجابتك حتى انتهاء الوقت</div>
+  <div class="change-hint" id="change-hint">ظٹظ…ظƒظ†ظƒ طھط؛ظٹظٹط± ط¥ط¬ط§ط¨طھظƒ ط­طھظ‰ ط§ظ†طھظ‡ط§ط، ط§ظ„ظˆظ‚طھ</div>
 
   <!-- Options -->
   <div class="options-grid" id="options-grid">
@@ -397,46 +398,46 @@
 ======================================================== -->
 <div id="screen-result" class="screen">
   <div class="result-card">
-    <span class="result-trophy" id="result-trophy">🏆</span>
-    <div class="result-title" id="result-title">انتصار!</div>
-    <div class="result-sub" id="result-sub">أحسنت! لقد فزت بالمبارزة</div>
+    <span class="result-trophy" id="result-trophy">ًںڈ†</span>
+    <div class="result-title" id="result-title">ط§ظ†طھطµط§ط±!</div>
+    <div class="result-sub" id="result-sub">ط£ط­ط³ظ†طھ! ظ„ظ‚ط¯ ظپط²طھ ط¨ط§ظ„ظ…ط¨ط§ط±ط²ط©</div>
 
     <div class="result-stats">
       <div class="result-stat">
         <div class="val" id="res-correct">0</div>
-        <div class="lbl">إجابات صح</div>
+        <div class="lbl">ط¥ط¬ط§ط¨ط§طھ طµط­</div>
       </div>
       <div class="result-stat">
         <div class="val" id="res-rounds">7</div>
       </div>
       <div class="result-stat">
         <div class="val" id="res-chunks">0</div>
-        <div class="lbl">مناطق السيطرة</div>
-        <div class="lbl">جولات</div>
+        <div class="lbl">ظ…ظ†ط§ط·ظ‚ ط§ظ„ط³ظٹط·ط±ط©</div>
+        <div class="lbl">ط¬ظˆظ„ط§طھ</div>
       </div>
       <div class="result-stat">
         <div class="val" id="res-accuracy">0%</div>
-        <div class="lbl">دقة</div>
+        <div class="lbl">ط¯ظ‚ط©</div>
       </div>
     </div>
 
     <div class="xp-gained">
       <div class="big" id="res-xp">+0 XP</div>
-      <div class="lbl">نقاط أثر مكتسبة</div>
+      <div class="lbl">ظ†ظ‚ط§ط· ط£ط«ط± ظ…ظƒطھط³ط¨ط©</div>
     </div>
 
-    <!-- خريطة ملخص -->
+    <!-- ط®ط±ظٹط·ط© ظ…ظ„ط®طµ -->
     <div class="result-leaderboard" id="result-leaderboard" style="margin: 32px 0; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 16px; padding: 24px; box-shadow: inset 0 0 20px rgba(0,0,0,0.5);">
-      <h3 style="color: #D4AF37; margin-top:0; margin-bottom: 20px; font-size: 1.3rem; font-weight: 900; text-align:center; text-shadow: 0 0 10px rgba(212,175,55,0.3); letter-spacing: 0.5px;">الترتيب النهائي للسيطرة</h3>
+      <h3 style="color: #D4AF37; margin-top:0; margin-bottom: 20px; font-size: 1.3rem; font-weight: 900; text-align:center; text-shadow: 0 0 10px rgba(212,175,55,0.3); letter-spacing: 0.5px;">ط§ظ„طھط±طھظٹط¨ ط§ظ„ظ†ظ‡ط§ط¦ظٹ ظ„ظ„ط³ظٹط·ط±ط©</h3>
       <div id="leaderboard-list" style="display: flex; flex-direction: column; gap: 10px;">
       </div>
     </div>
     <div class="result-map-preview" id="result-map-preview"></div>
 
     <div class="result-actions">
-      <button class="btn-primary" onclick="playAgain()">⚔️ مبارزة جديدة</button>
-      <button class="btn-secondary" onclick="showScreen('lobby')">🏠 العودة للوبي</button>
-      <button class="btn-secondary" onclick="exitGame()" style="color:#e74c3c; border-color:#e74c3c; grid-column: 1 / -1;">🚪 خروج من اللعبة</button>
+      <button class="btn-primary" onclick="playAgain()">âڑ”ï¸ڈ ظ…ط¨ط§ط±ط²ط© ط¬ط¯ظٹط¯ط©</button>
+      <button class="btn-secondary" onclick="showScreen('lobby')">ًںڈ  ط§ظ„ط¹ظˆط¯ط© ظ„ظ„ظˆط¨ظٹ</button>
+      <button class="btn-secondary" onclick="exitGame()" style="color:#e74c3c; border-color:#e74c3c; grid-column: 1 / -1;">ًںڑھ ط®ط±ظˆط¬ ظ…ظ† ط§ظ„ظ„ط¹ط¨ط©</button>
     </div>
   </div>
 </div>
@@ -457,7 +458,7 @@
 // GAME UI CONTROLLER
 // ============================================================
 
-// -- State local للـ UI --
+// -- State local ظ„ظ„ظ€ UI --
 let ui = {
   subject: 'history',
   grade: 'general',
@@ -472,7 +473,7 @@ let ui = {
 };
 
 // ============================================================
-// INIT: تهيئة Firebase Auth
+// INIT: طھظ‡ظٹط¦ط© Firebase Auth
 // ============================================================
 document.addEventListener('DOMContentLoaded', () => {
   setTimeout(() => {
@@ -489,7 +490,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const fakeUser = {
         uid: pUser.email || pUser.phone,
         email: pUser.email || '',
-        displayName: pUser.name || 'أدمن المنصة'
+        displayName: pUser.name || 'ط£ط¯ظ…ظ† ط§ظ„ظ…ظ†طµط©'
       };
       initLobby(fakeUser);
       return;
@@ -507,7 +508,7 @@ document.addEventListener('DOMContentLoaded', () => {
         showScreen('login');
       }
     });
-  }, 2000); // وقت شاشة التحميل
+  }, 2000); // ظˆظ‚طھ ط´ط§ط´ط© ط§ظ„طھط­ظ…ظٹظ„
 });
 
 // ============================================================
@@ -532,7 +533,7 @@ function switchLoginTab(tab) {
 async function doLogin() {
   const email = document.getElementById('login-email').value.trim();
   const pass  = document.getElementById('login-pass').value;
-  if (!email || !pass) return showError('أدخل البريد وكلمة المرور');
+  if (!email || !pass) return showError('ط£ط¯ط®ظ„ ط§ظ„ط¨ط±ظٹط¯ ظˆظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط±');
   try {
     await window.firebaseAuth.signInWithEmailAndPassword(email, pass);
   } catch(e) {
@@ -545,8 +546,8 @@ async function doRegister() {
   const grade = document.getElementById('reg-grade').value;
   const email = document.getElementById('reg-email').value.trim();
   const pass  = document.getElementById('reg-pass').value;
-  if (!name || !email || !pass) return showError('الرجاء ملء جميع الحقول');
-  if (pass.length < 6) return showError('كلمة المرور 6 أحرف على الأقل');
+  if (!name || !email || !pass) return showError('ط§ظ„ط±ط¬ط§ط، ظ…ظ„ط، ط¬ظ…ظٹط¹ ط§ظ„ط­ظ‚ظˆظ„');
+  if (pass.length < 6) return showError('ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط± 6 ط£ط­ط±ظپ ط¹ظ„ظ‰ ط§ظ„ط£ظ‚ظ„');
   try {
     const cred = await window.firebaseAuth.createUserWithEmailAndPassword(email, pass);
     await window.firebaseDb.collection('users').doc(cred.user.uid).set({
@@ -573,13 +574,13 @@ function showError(msg) {
 
 function translateError(code) {
   const map = {
-    'auth/user-not-found': 'البريد الإلكتروني غير موجود',
-    'auth/wrong-password': 'كلمة المرور غير صحيحة',
-    'auth/email-already-in-use': 'البريد مستخدم بالفعل',
-    'auth/invalid-email': 'البريد الإلكتروني غير صالح',
-    'auth/weak-password': 'كلمة المرور ضعيفة',
+    'auth/user-not-found': 'ط§ظ„ط¨ط±ظٹط¯ ط§ظ„ط¥ظ„ظƒطھط±ظˆظ†ظٹ ط؛ظٹط± ظ…ظˆط¬ظˆط¯',
+    'auth/wrong-password': 'ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط± ط؛ظٹط± طµط­ظٹط­ط©',
+    'auth/email-already-in-use': 'ط§ظ„ط¨ط±ظٹط¯ ظ…ط³طھط®ط¯ظ… ط¨ط§ظ„ظپط¹ظ„',
+    'auth/invalid-email': 'ط§ظ„ط¨ط±ظٹط¯ ط§ظ„ط¥ظ„ظƒطھط±ظˆظ†ظٹ ط؛ظٹط± طµط§ظ„ط­',
+    'auth/weak-password': 'ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط± ط¶ط¹ظٹظپط©',
   };
-  return map[code] || 'حدث خطأ، حاول مجدداً';
+  return map[code] || 'ط­ط¯ط« ط®ط·ط£طŒ ط­ط§ظˆظ„ ظ…ط¬ط¯ط¯ط§ظ‹';
 }
 
 // ============================================================
@@ -593,7 +594,7 @@ async function initLobby(user) {
   GameEngine.getState().playerXp = data.xp;
   GameEngine.getState().isLoggedIn = true;
 
-  // تحديث Header
+  // طھط­ط¯ظٹط« Header
   const initials = data.name.trim().split(' ').map(w => w[0]).slice(0,2).join('');
   document.getElementById('lobby-avatar').textContent = initials;
   if (data.photoURL) {
@@ -601,7 +602,7 @@ async function initLobby(user) {
   }
   document.getElementById('lobby-name').textContent = data.name;
   const rank = GameEngine.getRank(data.xp);
-  document.getElementById('lobby-rank').textContent = `🧭 ${rank.name}`;
+  document.getElementById('lobby-rank').textContent = `ًں§­ ${rank.name}`;
 
   const progress = GameEngine.getProgress(data.xp) * 100;
   document.getElementById('lobby-xp-bar').style.width = progress + '%';
@@ -614,7 +615,7 @@ async function initLobby(user) {
   const rate = total > 0 ? Math.round(data.wins/total*100) : 0;
   document.getElementById('stat-rate').textContent = rate + '%';
 
-  // تهيئة فلتر المتصدرين
+  // طھظ‡ظٹط¦ط© ظپظ„طھط± ط§ظ„ظ…طھطµط¯ط±ظٹظ†
   initLeaderboardFilter(data.grade);
 }
 
@@ -681,7 +682,7 @@ function updateTrainLessonPicker() {
 
   const unitsEl = document.getElementById('train-units');
   unitsEl.innerHTML = units.map(u => `
-    <button class="grade-btn${ui.trainUnit===u?' selected':''}" onclick="selectTrainUnit('${u}')">وحدة ${u}</button>
+    <button class="grade-btn${ui.trainUnit===u?' selected':''}" onclick="selectTrainUnit('${u}')">ظˆط­ط¯ط© ${u}</button>
   `).join('');
 }
 
@@ -699,7 +700,7 @@ function updateTrainLessons(unit) {
   const ls = lessons[unit] || [];
   const el = document.getElementById('train-lessons');
   el.innerHTML = ls.map(l => `
-    <button class="grade-btn" onclick="selectTrainLesson('${l}')">درس ${l}</button>
+    <button class="grade-btn" onclick="selectTrainLesson('${l}')">ط¯ط±ط³ ${l}</button>
   `).join('');
 }
 
@@ -768,11 +769,11 @@ function launchBattleWithConfig({ mode, subject, grade, questions, botCount, bot
 
   const s = GameEngine.getState();
 
-  // بناء لوحة النتائج العلوية ديناميكياً
+  // ط¨ظ†ط§ط، ظ„ظˆط­ط© ط§ظ„ظ†طھط§ط¦ط¬ ط§ظ„ط¹ظ„ظˆظٹط© ط¯ظٹظ†ط§ظ…ظٹظƒظٹط§ظ‹
   const scoresContainer = document.getElementById('battle-scores-container');
   let scoresHTML = `
     <div class="score-player me" style="border-bottom: 3px solid #D4AF37;">
-      <div class="score-name" id="battle-player-name" style="color:#D4AF37;">${ui.playerData?.name || 'اللاعب'}</div>
+      <div class="score-name" id="battle-player-name" style="color:#D4AF37;">${ui.playerData?.name || 'ط§ظ„ظ„ط§ط¹ط¨'}</div>
       <div class="score-num" id="battle-player-score" style="color:#D4AF37;">0</div>
     </div>
   `;
@@ -780,7 +781,7 @@ function launchBattleWithConfig({ mode, subject, grade, questions, botCount, bot
   const botColors = ['#EF4444', '#A855F7', '#F97316', '#3B82F6', '#10B981'];
   s.bots.forEach((bot, idx) => {
     const c = botColors[idx % botColors.length];
-    if (s.bots.length === 1) scoresHTML += `<div class="score-divider">ضد</div>`;
+    if (s.bots.length === 1) scoresHTML += `<div class="score-divider">ط¶ط¯</div>`;
     scoresHTML += `
       <div class="score-player enemy" style="background: ${c}10; border-bottom: 3px solid ${c}; flex: 1;">
         <div class="score-name" id="battle-bot-name-${idx}" style="color: #fff; font-size: 0.9rem;">${bot.name}</div>
@@ -800,23 +801,23 @@ function startBattleRound() {
   const q = GameEngine.getCurrentQuestion();
   if (!q) { showGameResult(); return; }
 
-  // تحديث UI
-  document.getElementById('battle-round-label').textContent = `جولة ${s.currentRound + 1} / ${GameEngine.ROUNDS}`;
+  // طھط­ط¯ظٹط« UI
+  document.getElementById('battle-round-label').textContent = `ط¬ظˆظ„ط© ${s.currentRound + 1} / ${GameEngine.ROUNDS}`;
   document.getElementById('battle-player-score').textContent = s.scores.player;
   s.bots.forEach((bot, idx) => {
     const el = document.getElementById(`battle-bot-score-${idx}`);
     if (el) el.textContent = s.scores.bots[idx] || 0;
   });
 
-  // تحديث مؤشر المرحلة
+  // طھط­ط¯ظٹط« ظ…ط¤ط´ط± ط§ظ„ظ…ط±ط­ظ„ط©
   updatePhaseIndicator();
 
-  // السؤال
-  const catMap = { history: '📜 تاريخ', geography: '🌍 جغرافيا' };
+  // ط§ظ„ط³ط¤ط§ظ„
+  const catMap = { history: 'ًں“œ طھط§ط±ظٹط®', geography: 'ًںŒچ ط¬ط؛ط±ط§ظپظٹط§' };
   document.getElementById('q-category').textContent = catMap[q.category] || q.category;
   document.getElementById('q-text').textContent = q.text;
 
-  // الخيارات - reset
+  // ط§ظ„ط®ظٹط§ط±ط§طھ - reset
   document.getElementById('change-hint').classList.remove('visible');
   for (let i = 0; i < 4; i++) {
     const btn = document.getElementById('opt-' + i);
@@ -825,7 +826,7 @@ function startBattleRound() {
     btn.disabled = false;
   }
 
-  // بدء الجولة
+  // ط¨ط¯ط، ط§ظ„ط¬ظˆظ„ط©
   GameEngine.startRound(
     // onTick
     (secondsLeft) => updateTimer(secondsLeft),
@@ -845,7 +846,7 @@ function playerSelectAnswer(idx) {
   const success = GameEngine.selectAnswer(idx);
   if (!success) return;
 
-  // تحديث visual
+  // طھط­ط¯ظٹط« visual
   for (let i = 0; i < 4; i++) {
     document.getElementById('opt-' + i).classList.remove('selected');
   }
@@ -866,7 +867,7 @@ function updateTimer(secondsLeft) {
 }
 
 function showRoundResult(result) {
-  // تلوين الأزرار
+  // طھظ„ظˆظٹظ† ط§ظ„ط£ط²ط±ط§ط±
   for (let i = 0; i < 4; i++) {
     const btn = document.getElementById('opt-' + i);
     btn.disabled = true;
@@ -877,24 +878,24 @@ function showRoundResult(result) {
     }
   }
 
-  // تحديث الخريطة الجديدة
+  // طھط­ط¯ظٹط« ط§ظ„ط®ط±ظٹط·ط© ط§ظ„ط¬ط¯ظٹط¯ط©
   updateAllTerritories();
 
   // toast
   if (result.playerCorrect) {
-    showToast('✅ إجابة صحيحة! +10 XP', 'success');
+    showToast('âœ… ط¥ط¬ط§ط¨ط© طµط­ظٹط­ط©! +10 XP', 'success');
   } else {
-    showToast('❌ إجابة خاطئة', 'error');
+    showToast('â‌Œ ط¥ط¬ط§ط¨ط© ط®ط§ط·ط¦ط©', 'error');
   }
 
-  // تحديث النتائج
+  // طھط­ط¯ظٹط« ط§ظ„ظ†طھط§ط¦ط¬
   document.getElementById('battle-player-score').textContent = result.scores.player;
   result.bots.forEach((bot, idx) => {
     const el = document.getElementById(`battle-bot-score-${idx}`);
     if (el) el.textContent = result.scores.bots[idx] || 0;
   });
 
-  // انتقال للجولة التالية بعد 3 ثواني
+  // ط§ظ†طھظ‚ط§ظ„ ظ„ظ„ط¬ظˆظ„ط© ط§ظ„طھط§ظ„ظٹط© ط¨ط¹ط¯ 3 ط«ظˆط§ظ†ظٹ
   setTimeout(() => {
     GameEngine.nextRound();
     const s = GameEngine.getState();
@@ -910,8 +911,8 @@ function showRoundResult(result) {
 // MAP FUNCTIONS
 // ============================================================
 function getColorForEntity(id) {
-  if (id === 'player') return '#D4AF37'; // ذهبي
-  if (!id) return '#1A2540'; // حيادي (رمادي/أزرق داكن)
+  if (id === 'player') return '#D4AF37'; // ط°ظ‡ط¨ظٹ
+  if (!id) return '#1A2540'; // ط­ظٹط§ط¯ظٹ (ط±ظ…ط§ط¯ظٹ/ط£ط²ط±ظ‚ ط¯ط§ظƒظ†)
   if (id.startsWith('bot_')) {
      const idx = parseInt(id.split('_')[1]);
      const botColors = ['#EF4444', '#A855F7', '#F97316', '#3B82F6', '#10B981'];
@@ -948,11 +949,11 @@ function updatePhaseIndicator() {
   const s = GameEngine.getState();
   const titleEl = document.getElementById('phase-title');
   if (!titleEl) return;
-  const phase = s.currentRound < 5 ? 'المرحلة 1: تعزيز النفوذ (قارتك)' : 'المرحلة 2: الغزو والهيمنة';
+  const phase = s.currentRound < 5 ? 'ط§ظ„ظ…ط±ط­ظ„ط© 1: طھط¹ط²ظٹط² ط§ظ„ظ†ظپظˆط° (ظ‚ط§ط±طھظƒ)' : 'ط§ظ„ظ…ط±ط­ظ„ط© 2: ط§ظ„ط؛ط²ظˆ ظˆط§ظ„ظ‡ظٹظ…ظ†ط©';
   const targetId = s.targets['player'];
   const targetTerritory = s.territories.find(t => t.id === targetId);
-  const targetName = targetTerritory ? targetTerritory.name : 'مجهول';
-  titleEl.innerHTML = `<strong>${phase}</strong> | الجولة ${s.currentRound + 1}/${GameEngine.ROUNDS} | ⚔️ هدفك: ${targetName}`;
+  const targetName = targetTerritory ? targetTerritory.name : 'ظ…ط¬ظ‡ظˆظ„';
+  titleEl.innerHTML = `<strong>${phase}</strong> | ط§ظ„ط¬ظˆظ„ط© ${s.currentRound + 1}/${GameEngine.ROUNDS} | âڑ”ï¸ڈ ظ‡ط¯ظپظƒ: ${targetName}`;
 }
 
   function renderBotStatus() {
@@ -984,7 +985,7 @@ function showGameResult() {
   const result = GameEngine.endGame();
   const s = GameEngine.getState();
 
-  // حفظ في Firebase
+  // ط­ظپط¸ ظپظٹ Firebase
   if (s.isLoggedIn && s.currentUser && s.gameMode !== 'training') {
     GameEngine.saveGameResult({
       uid: s.currentUser.uid,
@@ -992,12 +993,12 @@ function showGameResult() {
       won: result.playerWon,
       draw: result.isDraw,
     }).then(() => {
-      // تحديث الواجهة فوراً
+      // طھط­ط¯ظٹط« ط§ظ„ظˆط§ط¬ظ‡ط© ظپظˆط±ط§ظ‹
       GameEngine.loadPlayerData(s.currentUser.uid).then(data => {
         ui.playerData = data;
         GameEngine.getState().playerXp = data.xp;
         const rank = GameEngine.getRank(data.xp);
-        document.getElementById('lobby-rank').textContent = `🧭 ${rank.name}`;
+        document.getElementById('lobby-rank').textContent = `ًں§­ ${rank.name}`;
         const progress = GameEngine.getProgress(data.xp) * 100;
         document.getElementById('lobby-xp-bar').style.width = progress + '%';
         document.getElementById('lobby-xp-label').textContent = `${data.xp} XP`;
@@ -1005,25 +1006,25 @@ function showGameResult() {
     });
   }
 
-  // شاشة النتيجة
+  // ط´ط§ط´ط© ط§ظ„ظ†طھظٹط¬ط©
   showScreen('result');
 
   if (result.playerWon) {
-    document.getElementById('result-trophy').textContent = '🏆';
-    document.getElementById('result-title').textContent = 'انتصار!';
+    document.getElementById('result-trophy').textContent = 'ًںڈ†';
+    document.getElementById('result-title').textContent = 'ط§ظ†طھطµط§ط±!';
     document.getElementById('result-title').className = 'result-title win';
-    document.getElementById('result-sub').textContent = 'أحسنت! سيطرت على خريطة العالم';
+    document.getElementById('result-sub').textContent = 'ط£ط­ط³ظ†طھ! ط³ظٹط·ط±طھ ط¹ظ„ظ‰ ط®ط±ظٹط·ط© ط§ظ„ط¹ط§ظ„ظ…';
     launchConfetti();
   } else if (result.isDraw) {
-    document.getElementById('result-trophy').textContent = '🤝';
-    document.getElementById('result-title').textContent = 'تعادل!';
+    document.getElementById('result-trophy').textContent = 'ًں¤‌';
+    document.getElementById('result-title').textContent = 'طھط¹ط§ط¯ظ„!';
     document.getElementById('result-title').className = 'result-title draw';
-    document.getElementById('result-sub').textContent = 'معركة متكافئة!';
+    document.getElementById('result-sub').textContent = 'ظ…ط¹ط±ظƒط© ظ…طھظƒط§ظپط¦ط©!';
   } else {
-    document.getElementById('result-trophy').textContent = '📚';
-    document.getElementById('result-title').textContent = 'هزيمة!';
+    document.getElementById('result-trophy').textContent = 'ًں“ڑ';
+    document.getElementById('result-title').textContent = 'ظ‡ط²ظٹظ…ط©!';
     document.getElementById('result-title').className = 'result-title lose';
-    document.getElementById('result-sub').textContent = 'لا تستسلم، تدرب أكثر وعد!';
+    document.getElementById('result-sub').textContent = 'ظ„ط§ طھط³طھط³ظ„ظ…طŒ طھط¯ط±ط¨ ط£ظƒط«ط± ظˆط¹ط¯!';
   }
 
   document.getElementById('res-correct').textContent = result.scores?.player || 0;
@@ -1035,7 +1036,7 @@ function showGameResult() {
   const xpText = result.xpGained >= 0 ? `+${result.xpGained} XP` : `${result.xpGained} XP`;
   document.getElementById('res-xp').textContent = xpText;
 
-  // خريطة ملخص مصغّرة
+  // ط®ط±ظٹط·ط© ظ…ظ„ط®طµ ظ…طµط؛ظ‘ط±ط©
   // Build Leaderboard HTML
   let allScores = {};
   allScores['player'] = { name: ui.playerData?.name || 'Player', color: 'var(--player-color)', score: result.playerScore || 0, isPlayer: true };
@@ -1105,7 +1106,7 @@ function playAgain() {
 }
 
 function confirmQuit() {
-  if (confirm('هل أنت متأكد أنك تريد المغادرة؟')) {
+  if (confirm('ظ‡ظ„ ط£ظ†طھ ظ…طھط£ظƒط¯ ط£ظ†ظƒ طھط±ظٹط¯ ط§ظ„ظ…ط؛ط§ط¯ط±ط©طں')) {
     clearBotTimers();
     clearInterval(GameEngine.getState().timerInterval);
     showScreen('lobby');
@@ -1121,7 +1122,7 @@ function exitGame() {
     var c = window.parent.document.getElementById('pfChatBubble');
     if(c) c.style.display = 'block';
   } else {
-    alert("لا يمكن الخروج من هذه النافذة");
+    alert("ظ„ط§ ظٹظ…ظƒظ† ط§ظ„ط®ط±ظˆط¬ ظ…ظ† ظ‡ط°ظ‡ ط§ظ„ظ†ط§ظپط°ط©");
   }
 }
 
@@ -1130,7 +1131,7 @@ function exitGame() {
 // ============================================================
 function initLeaderboardFilter(userGrade) {
   const grades = ['general','7','8','9','10'];
-  const names = { general:'عام', '7':'١ إعدادي', '8':'٢ إعدادي', '9':'٣ إعدادي', '10':'١ ثانوي' };
+  const names = { general:'ط¹ط§ظ…', '7':'ظ، ط¥ط¹ط¯ط§ط¯ظٹ', '8':'ظ¢ ط¥ط¹ط¯ط§ط¯ظٹ', '9':'ظ£ ط¥ط¹ط¯ط§ط¯ظٹ', '10':'ظ، ط«ط§ظ†ظˆظٹ' };
   document.getElementById('lb-filter').innerHTML = grades.map(g => `
     <button class="filter-btn ${g===userGrade?'active':''}" onclick="loadLeaderboard('${g}', this)">${names[g]}</button>
   `).join('');
@@ -1143,36 +1144,36 @@ async function loadLeaderboard(grade = 'general', btn = null) {
   }
 
   const lbContent = document.getElementById('lb-content');
-  lbContent.innerHTML = '<p style="text-align:center;color:var(--text-muted);padding:24px;">جاري التحميل...</p>';
+  lbContent.innerHTML = '<p style="text-align:center;color:var(--text-muted);padding:24px;">ط¬ط§ط±ظٹ ط§ظ„طھط­ظ…ظٹظ„...</p>';
 
   const players = await GameEngine.loadLeaderboard(grade);
 
   let html = `
     <div class="owner-entry">
-      <span class="owner-badge">👑</span>
+      <span class="owner-badge">ًں‘‘</span>
       <div>
-        <div class="owner-name">يوسف بركات</div>
-        <div class="owner-rank">⭐ حارس البوصلة الأعظم</div>
+        <div class="owner-name">ظٹظˆط³ظپ ط¨ط±ظƒط§طھ</div>
+        <div class="owner-rank">â­گ ط­ط§ط±ط³ ط§ظ„ط¨ظˆطµظ„ط© ط§ظ„ط£ط¹ط¸ظ…</div>
       </div>
-      <div class="owner-xp">∞ XP</div>
+      <div class="owner-xp">âˆ‍ XP</div>
     </div>
   `;
 
   if (players.length === 0) {
-    html += '<p style="text-align:center;color:var(--text-muted);padding:20px;">لا يوجد لاعبون بعد</p>';
+    html += '<p style="text-align:center;color:var(--text-muted);padding:20px;">ظ„ط§ ظٹظˆط¬ط¯ ظ„ط§ط¹ط¨ظˆظ† ط¨ط¹ط¯</p>';
   } else {
     players.forEach((p, i) => {
       const rankClass = i === 0 ? 'top1' : i === 1 ? 'top2' : i === 2 ? 'top3' : '';
-      const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i+1);
+      const medal = i === 0 ? 'ًں¥‡' : i === 1 ? 'ًں¥ˆ' : i === 2 ? 'ًں¥‰' : (i+1);
       const rank = GameEngine.getRank(p.gameXp || 0);
-      const initials = (p.name || '؟').split(' ').map(w=>w[0]).slice(0,2).join('');
+      const initials = (p.name || 'طں').split(' ').map(w=>w[0]).slice(0,2).join('');
       html += `
         <div class="lb-entry">
           <div class="lb-rank ${rankClass}">${medal}</div>
           <div class="lb-avatar">${initials}</div>
           <div class="lb-info">
-            <div class="lb-name">${p.name || 'مجهول'}</div>
-            <div class="lb-detail">${rank.name} · ${p.gameWins||0} انتصار</div>
+            <div class="lb-name">${p.name || 'ظ…ط¬ظ‡ظˆظ„'}</div>
+            <div class="lb-detail">${rank.name} آ· ${p.gameWins||0} ط§ظ†طھطµط§ط±</div>
           </div>
           <div class="lb-xp">${(p.gameXp||0).toLocaleString()} XP</div>
         </div>`;
@@ -1195,7 +1196,7 @@ function createRoom() {
 
 function copyRoomCode() {
   const code = document.getElementById('room-code-text').textContent;
-  navigator.clipboard.writeText(code).then(() => showToast('تم نسخ الكود! 📋', 'info'));
+  navigator.clipboard.writeText(code).then(() => showToast('طھظ… ظ†ط³ط® ط§ظ„ظƒظˆط¯! ًں“‹', 'info'));
 }
 
 function showJoinRoom() {
@@ -1205,13 +1206,13 @@ function showJoinRoom() {
 
 function joinRoom() {
   const code = document.getElementById('join-code-input').value.trim().toUpperCase();
-  if (code.length !== 6) return showToast('الكود 6 أحرف', 'error');
-  showToast('جاري البحث عن الغرفة...', 'info');
+  if (code.length !== 6) return showToast('ط§ظ„ظƒظˆط¯ 6 ط£ط­ط±ظپ', 'error');
+  showToast('ط¬ط§ط±ظٹ ط§ظ„ط¨ط­ط« ط¹ظ† ط§ظ„ط؛ط±ظپط©...', 'info');
   // TODO: Firebase room lookup
 }
 
 function startFriendGame() {
-  launchBattle(); // مؤقتاً تبدأ مباراة عادية
+  launchBattle(); // ظ…ط¤ظ‚طھط§ظ‹ طھط¨ط¯ط£ ظ…ط¨ط§ط±ط§ط© ط¹ط§ط¯ظٹط©
 }
 
 // ============================================================
@@ -1255,6 +1256,14 @@ function launchConfetti() {
 }
 </script>
 
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW registration failed:', err));
+            });
+        }
+    </script>
 </body>
 </html>
 

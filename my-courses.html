@@ -1,9 +1,10 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+    <link rel="manifest" href="./manifest.json">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>كورساتي - يوسف بركات</title>
+    <title>ظƒظˆط±ط³ط§طھظٹ - ظٹظˆط³ظپ ط¨ط±ظƒط§طھ</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/dashboard.css">
@@ -14,12 +15,12 @@
 
     <header class="navbar glass-panel" style="background: var(--primary-navy);">
         <a href="index.html" class="nav-brand">
-            <div class="logo-circle" style="width: 40px; height: 40px; font-size: 1.2rem;">ي</div>
-            <span class="nav-brand-text">منصة يوسف بركات</span>
+            <div class="logo-circle" style="width: 40px; height: 40px; font-size: 1.2rem;">ظٹ</div>
+            <span class="nav-brand-text">ظ…ظ†طµط© ظٹظˆط³ظپ ط¨ط±ظƒط§طھ</span>
         </a>
         <div class="nav-actions">
             <a href="#" class="btn btn-outline" style="padding: 8px 15px; border-radius: 20px;"><i class="fas fa-bell"></i></a>
-            <a href="#" id="logoutBtn" class="btn btn-outline" style="border-color: #e74c3c; color: #e74c3c; padding: 8px 15px; border-radius: 20px;">خروج <i class="fas fa-sign-out-alt"></i></a>
+            <a href="#" id="logoutBtn" class="btn btn-outline" style="border-color: #e74c3c; color: #e74c3c; padding: 8px 15px; border-radius: 20px;">ط®ط±ظˆط¬ <i class="fas fa-sign-out-alt"></i></a>
             <div class="mobile-menu-btn"><i class="fas fa-bars"></i></div>
         </div>
     </header>
@@ -30,24 +31,24 @@
                 <div class="avatar" style="overflow: hidden;">
                     <img id="userAvatarImg" src="https://via.placeholder.com/80/071326/D4A64F?text=%D8%B7%D8%A7%D9%84%D8%A8" style="width: 100%; height: 100%; object-fit: cover;">
                 </div>
-                <h4 id="userNameDisplay">طالب</h4>
-                <p id="userGradeDisplay">الصف الدراسي</p>
+                <h4 id="userNameDisplay">ط·ط§ظ„ط¨</h4>
+                <p id="userGradeDisplay">ط§ظ„طµظپ ط§ظ„ط¯ط±ط§ط³ظٹ</p>
             </div>
             <ul class="sidebar-nav">
-                <li><a href="dashboard.html"><i class="fas fa-home"></i> لوحة التحكم</a></li>
-                <li><a href="profile.html"><i class="fas fa-user"></i> حسابي</a></li>
-                <li><a href="courses.html"><i class="fas fa-plus-circle"></i> اشتراك في كورسات</a></li>
-                <li><a href="my-courses.html" class="active"><i class="fas fa-video"></i> كورساتي</a></li>
-                <li><a href="homeworks.html"><i class="fas fa-tasks"></i> الواجبات</a></li>
-                <li><a href="exams.html"><i class="fas fa-clipboard-list"></i> الامتحانات</a></li>
-                <li><a href="stats.html"><i class="fas fa-chart-line"></i> الإحصائيات</a></li>
-                <li><a href="settings.html"><i class="fas fa-cog"></i> الإعدادات</a></li>
+                <li><a href="dashboard.html"><i class="fas fa-home"></i> ظ„ظˆط­ط© ط§ظ„طھط­ظƒظ…</a></li>
+                <li><a href="profile.html"><i class="fas fa-user"></i> ط­ط³ط§ط¨ظٹ</a></li>
+                <li><a href="courses.html"><i class="fas fa-plus-circle"></i> ط§ط´طھط±ط§ظƒ ظپظٹ ظƒظˆط±ط³ط§طھ</a></li>
+                <li><a href="my-courses.html" class="active"><i class="fas fa-video"></i> ظƒظˆط±ط³ط§طھظٹ</a></li>
+                <li><a href="homeworks.html"><i class="fas fa-tasks"></i> ط§ظ„ظˆط§ط¬ط¨ط§طھ</a></li>
+                <li><a href="exams.html"><i class="fas fa-clipboard-list"></i> ط§ظ„ط§ظ…طھط­ط§ظ†ط§طھ</a></li>
+                <li><a href="stats.html"><i class="fas fa-chart-line"></i> ط§ظ„ط¥ط­طµط§ط¦ظٹط§طھ</a></li>
+                <li><a href="settings.html"><i class="fas fa-cog"></i> ط§ظ„ط¥ط¹ط¯ط§ط¯ط§طھ</a></li>
             </ul>
         </aside>
 
         <main class="main-content">
             <div class="page-header">
-                <h1 class="page-title"><i class="fas fa-video mr-2 text-gold"></i> الكورسات المشترك بها</h1>
+                <h1 class="page-title"><i class="fas fa-video mr-2 text-gold"></i> ط§ظ„ظƒظˆط±ط³ط§طھ ط§ظ„ظ…ط´طھط±ظƒ ط¨ظ‡ط§</h1>
             </div>
 
             <div class="glass-panel dash-panel" style="min-height: 400px;">
@@ -57,9 +58,9 @@
 
                 <div id="noCoursesState" style="display: none; text-align: center; padding: 50px 20px;">
                     <i class="fas fa-book-reader text-gold" style="font-size: 4rem; margin-bottom: 20px; opacity: 0.5;"></i>
-                    <h2 style="color: var(--soft-white); margin-bottom: 10px;">لا يوجد كورسات مشترك فيها بعد</h2>
-                    <p style="color: rgba(255,255,255,0.7); margin-bottom: 20px;">ابدأ رحلتك التعليمية واشترك في أقوى الكورسات الآن</p>
-                    <a href="courses.html" class="btn btn-gold btn-large">استكشف الكورسات</a>
+                    <h2 style="color: var(--soft-white); margin-bottom: 10px;">ظ„ط§ ظٹظˆط¬ط¯ ظƒظˆط±ط³ط§طھ ظ…ط´طھط±ظƒ ظپظٹظ‡ط§ ط¨ط¹ط¯</h2>
+                    <p style="color: rgba(255,255,255,0.7); margin-bottom: 20px;">ط§ط¨ط¯ط£ ط±ط­ظ„طھظƒ ط§ظ„طھط¹ظ„ظٹظ…ظٹط© ظˆط§ط´طھط±ظƒ ظپظٹ ط£ظ‚ظˆظ‰ ط§ظ„ظƒظˆط±ط³ط§طھ ط§ظ„ط¢ظ†</p>
+                    <a href="courses.html" class="btn btn-gold btn-large">ط§ط³طھظƒط´ظپ ط§ظ„ظƒظˆط±ط³ط§طھ</a>
                 </div>
             </div>
         </main>
@@ -87,14 +88,14 @@
             let user = JSON.parse(userStr);
             document.getElementById('userNameDisplay').textContent = user.name;
             const grades = {
-                'prep1': 'الأول الإعدادي',
-                'prep2': 'الثاني الإعدادي',
-                'prep3': 'الثالث الإعدادي',
-                'sec1': 'الأول الثانوي',
-                'sec2': 'الثاني الثانوي',
-                'sec3': 'الثالث الثانوي'
+                'prep1': 'ط§ظ„ط£ظˆظ„ ط§ظ„ط¥ط¹ط¯ط§ط¯ظٹ',
+                'prep2': 'ط§ظ„ط«ط§ظ†ظٹ ط§ظ„ط¥ط¹ط¯ط§ط¯ظٹ',
+                'prep3': 'ط§ظ„ط«ط§ظ„ط« ط§ظ„ط¥ط¹ط¯ط§ط¯ظٹ',
+                'sec1': 'ط§ظ„ط£ظˆظ„ ط§ظ„ط«ط§ظ†ظˆظٹ',
+                'sec2': 'ط§ظ„ط«ط§ظ†ظٹ ط§ظ„ط«ط§ظ†ظˆظٹ',
+                'sec3': 'ط§ظ„ط«ط§ظ„ط« ط§ظ„ط«ط§ظ†ظˆظٹ'
             };
-            document.getElementById('userGradeDisplay').textContent = grades[user.grade] || 'طالب';
+            document.getElementById('userGradeDisplay').textContent = grades[user.grade] || 'ط·ط§ظ„ط¨';
 
             const container = document.getElementById('myCoursesList');
             const emptyState = document.getElementById('noCoursesState');
@@ -163,9 +164,9 @@
                                 <img src="${c.image || 'https://via.placeholder.com/400x250/071326/D4A64F?text=%D9%83%D9%88%D8%B1%D8%B3'}" style="width: 100%; height: 100%; object-fit: cover; object-position: center; display: block;" onerror="this.src='https://via.placeholder.com/400x250/071326/D4A64F?text=%D9%83%D9%88%D8%B1%D8%B3'">
                             </div>
                             <div style="padding: 20px; flex: 1; display: flex; flex-direction: column;">
-                                <h3 style="color: var(--text-primary); margin-bottom: 10px;">${c.title || 'بدون عنوان'}</h3>
+                                <h3 style="color: var(--text-primary); margin-bottom: 10px;">${c.title || 'ط¨ط¯ظˆظ† ط¹ظ†ظˆط§ظ†'}</h3>
                                 <p style="color: rgba(255,255,255,0.6); font-size: 0.9rem; margin-bottom: 15px; flex: 1;">${(c.desc || '').substring(0, 80)}...</p>
-                                <a href="course-details.html?id=${c.id}" class="btn btn-green" style="width: 100%; justify-content: center;"><i class="fas fa-play-circle mr-2"></i> دخول الكورس</a>
+                                <a href="course-details.html?id=${c.id}" class="btn btn-green" style="width: 100%; justify-content: center;"><i class="fas fa-play-circle mr-2"></i> ط¯ط®ظˆظ„ ط§ظ„ظƒظˆط±ط³</a>
                             </div>
                         `;
                         container.appendChild(card);
@@ -189,6 +190,14 @@
         });
     </script>
     <script src="js/mobile.js?v=3"></script>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW registration failed:', err));
+            });
+        }
+    </script>
 </body>
 </html>
 

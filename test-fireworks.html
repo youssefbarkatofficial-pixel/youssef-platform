@@ -1,6 +1,7 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="ar">
 <head>
+    <link rel="manifest" href="./manifest.json">
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Test Fireworks</title>
@@ -12,9 +13,9 @@
 </head>
 <body>
   <div class="card">
-    <h1>������ ������� ������� (Fireworks)</h1>
-    <p>���� ��� �������� ������ ������� ������� ������ �������.</p>
-    <button id="run">����� ������� �������</button>
+    <h1>ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ (Fireworks)</h1>
+    <p>ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½.</p>
+    <button id="run">ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½</button>
     <p id="status" style="margin-top:12px; color:#ffd166"></p>
   </div>
   <script src="js/main.js?v=9"></script>
@@ -23,12 +24,12 @@
       try {
         if (window.triggerFireworks) {
           window.triggerFireworks(3500);
-          document.getElementById('status').textContent = '�� ����� ������� ������� � ���� �� ������ ������.';
+          document.getElementById('status').textContent = 'ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½.';
         } else {
-          document.getElementById('status').textContent = '���� triggerFireworks ��� ������.';
+          document.getElementById('status').textContent = 'ï؟½ï؟½ï؟½ï؟½ triggerFireworks ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½.';
         }
       } catch (e) {
-        document.getElementById('status').textContent = '��� ��� �������: ' + e.message;
+        document.getElementById('status').textContent = 'ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½: ' + e.message;
       }
     });
 
@@ -45,6 +46,14 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
     <script src="js/firebase-config.js?v=9"></script>
     <script src="js/firebase-service.js?v=9"></script>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW registration failed:', err));
+            });
+        }
+    </script>
 </body>
 </html>
 

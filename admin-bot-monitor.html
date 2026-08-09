@@ -1,6 +1,7 @@
 ﻿<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+    <link rel="manifest" href="./manifest.json">
     <script>
         if (!sessionStorage.getItem('currentAdmin')) { window.location.replace('admin-login.html'); }
     </script>
@@ -709,6 +710,14 @@
         });
     </script>
     <script src="js/mobile.js?v=3"></script>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW registration failed:', err));
+            });
+        }
+    </script>
 </body>
 </html>
 

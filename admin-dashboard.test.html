@@ -1,6 +1,7 @@
 ﻿<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+    <link rel="manifest" href="./manifest.json">
     <meta charset="UTF-8">
     <script>
         if (!sessionStorage.getItem('currentAdmin')) { window.location.replace('admin-login.html'); }
@@ -1677,6 +1678,14 @@
                 navActions.insertBefore(toggleBtn, navActions.firstChild);
             }
         });
+    </script>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW registration failed:', err));
+            });
+        }
     </script>
 </body>
 </html>

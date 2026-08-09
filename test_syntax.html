@@ -1,6 +1,7 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 <head>
+    <link rel="manifest" href="./manifest.json">
 <script>
 window.onerror = function(message, source, lineno, colno, error) {
     var errObj = {msg: message, src: source, line: lineno, col: colno};
@@ -16,7 +17,15 @@ window.onload = function() {
 };
 </script>
 </head>
-<body></body>
+<body>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW registration failed:', err));
+            });
+        }
+    </script>
+</body>
 </html>
 
 

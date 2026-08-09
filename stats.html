@@ -1,9 +1,10 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+    <link rel="manifest" href="./manifest.json">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>الإحصائيات - منصة يوسف بركات</title>
+    <title>ط§ظ„ط¥ط­طµط§ط¦ظٹط§طھ - ظ…ظ†طµط© ظٹظˆط³ظپ ط¨ط±ظƒط§طھ</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/style.css?v=1785347365071">
     <link rel="stylesheet" href="css/dashboard.css">
@@ -161,12 +162,12 @@
 <div class="bg-effects"></div>
 <header class="navbar glass-panel">
     <a href="index.html" class="nav-brand">
-        <div class="logo-circle" style="width:40px;height:40px;font-size:1.2rem;">ي</div>
-        <span class="nav-brand-text">منصة يوسف بركات</span>
+        <div class="logo-circle" style="width:40px;height:40px;font-size:1.2rem;">ظٹ</div>
+        <span class="nav-brand-text">ظ…ظ†طµط© ظٹظˆط³ظپ ط¨ط±ظƒط§طھ</span>
     </a>
     <div class="nav-actions">
         <a href="#" class="btn btn-outline" style="padding:8px 15px;border-radius:20px;"><i class="fas fa-bell"></i></a>
-        <a href="#" id="logoutBtn" class="btn btn-outline" style="border-color:#e74c3c;color:#e74c3c;padding:8px 15px;border-radius:20px;">خروج <i class="fas fa-sign-out-alt"></i></a>
+        <a href="#" id="logoutBtn" class="btn btn-outline" style="border-color:#e74c3c;color:#e74c3c;padding:8px 15px;border-radius:20px;">ط®ط±ظˆط¬ <i class="fas fa-sign-out-alt"></i></a>
     </div>
 </header>
 
@@ -176,59 +177,59 @@
             <div class="avatar" style="overflow:hidden;">
                 <img id="userAvatarImg" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Ccircle cx='40' cy='40' r='40' fill='%23071326'/%3E%3Ccircle cx='40' cy='30' r='16' fill='%23D4A64F'/%3E%3Cellipse cx='40' cy='70' rx='24' ry='18' fill='%23D4A64F'/%3E%3C/svg%3E" style="width:100%;height:100%;object-fit:cover;">
             </div>
-            <h4 id="userNameDisplay">طالب</h4>
-            <p id="userGradeDisplay">الصف الدراسي</p>
+            <h4 id="userNameDisplay">ط·ط§ظ„ط¨</h4>
+            <p id="userGradeDisplay">ط§ظ„طµظپ ط§ظ„ط¯ط±ط§ط³ظٹ</p>
             <div id="userCodeDisplay" style="margin-top:8px;font-family:monospace;letter-spacing:2px;color:var(--accent-cyan);font-weight:bold;background:rgba(0,0,0,0.3);padding:4px 8px;border-radius:4px;font-size:0.8rem;"></div>
         </div>
         <ul class="sidebar-nav">
-            <li><a href="dashboard.html"><i class="fas fa-home"></i> لوحة التحكم</a></li>
-            <li><a href="profile.html"><i class="fas fa-user"></i> حسابي</a></li>
-            <li><a href="courses.html"><i class="fas fa-plus-circle"></i> اشتراك في كورسات</a></li>
-            <li><a href="my-courses.html"><i class="fas fa-video"></i> كورساتي</a></li>
-            <li><a href="homeworks.html"><i class="fas fa-tasks"></i> الواجبات</a></li>
-            <li><a href="exams.html"><i class="fas fa-clipboard-list"></i> الامتحانات</a></li>
-            <li><a href="stats.html" class="active"><i class="fas fa-chart-line"></i> الإحصائيات</a></li>
-            <li><a href="settings.html"><i class="fas fa-cog"></i> الإعدادات</a></li>
+            <li><a href="dashboard.html"><i class="fas fa-home"></i> ظ„ظˆط­ط© ط§ظ„طھط­ظƒظ…</a></li>
+            <li><a href="profile.html"><i class="fas fa-user"></i> ط­ط³ط§ط¨ظٹ</a></li>
+            <li><a href="courses.html"><i class="fas fa-plus-circle"></i> ط§ط´طھط±ط§ظƒ ظپظٹ ظƒظˆط±ط³ط§طھ</a></li>
+            <li><a href="my-courses.html"><i class="fas fa-video"></i> ظƒظˆط±ط³ط§طھظٹ</a></li>
+            <li><a href="homeworks.html"><i class="fas fa-tasks"></i> ط§ظ„ظˆط§ط¬ط¨ط§طھ</a></li>
+            <li><a href="exams.html"><i class="fas fa-clipboard-list"></i> ط§ظ„ط§ظ…طھط­ط§ظ†ط§طھ</a></li>
+            <li><a href="stats.html" class="active"><i class="fas fa-chart-line"></i> ط§ظ„ط¥ط­طµط§ط¦ظٹط§طھ</a></li>
+            <li><a href="settings.html"><i class="fas fa-cog"></i> ط§ظ„ط¥ط¹ط¯ط§ط¯ط§طھ</a></li>
         </ul>
     </aside>
 
     <main class="main-content">
         <div class="page-header">
-            <h1 class="page-title"><i class="fas fa-chart-pie mr-2 text-gold"></i> إحصائياتي</h1>
-            <p style="color:rgba(255,255,255,0.5);margin-top:5px;font-size:0.9rem;">تابع تقدمك الحقيقي وحللّ أداءك بدقة</p>
+            <h1 class="page-title"><i class="fas fa-chart-pie mr-2 text-gold"></i> ط¥ط­طµط§ط¦ظٹط§طھظٹ</h1>
+            <p style="color:rgba(255,255,255,0.5);margin-top:5px;font-size:0.9rem;">طھط§ط¨ط¹ طھظ‚ط¯ظ…ظƒ ط§ظ„ط­ظ‚ظٹظ‚ظٹ ظˆط­ظ„ظ„ظ‘ ط£ط¯ط§ط،ظƒ ط¨ط¯ظ‚ط©</p>
         </div>
 
         <!-- KPI CARDS -->
         <div class="kpi-grid" id="kpiGrid" style="display:none;">
-            <div class="kpi-card gold" style="cursor:pointer;" onclick="if(window.showToast) window.showToast('قريباً: تقارير تفصيلية لتحليل مستواك!', 'majestic')">
+            <div class="kpi-card gold" style="cursor:pointer;" onclick="if(window.showToast) window.showToast('ظ‚ط±ظٹط¨ط§ظ‹: طھظ‚ط§ط±ظٹط± طھظپطµظٹظ„ظٹط© ظ„طھط­ظ„ظٹظ„ ظ…ط³طھظˆط§ظƒ!', 'majestic')">
                 <div class="kpi-icon gold"><i class="fas fa-star"></i></div>
                 <div class="kpi-data">
                     <div class="kpi-val" id="kAvg" style="color:var(--gold);">-</div>
-                    <div class="kpi-lbl">متوسط الدرجات</div>
+                    <div class="kpi-lbl">ظ…طھظˆط³ط· ط§ظ„ط¯ط±ط¬ط§طھ</div>
                     <div class="kpi-sub" id="kAvgSub"></div>
                 </div>
             </div>
-            <div class="kpi-card cyan" style="cursor:pointer;" onclick="if(window.showToast) window.showToast('قريباً: مكافآت للملتزمين بمشاهدة المحاضرات!', 'majestic')">
+            <div class="kpi-card cyan" style="cursor:pointer;" onclick="if(window.showToast) window.showToast('ظ‚ط±ظٹط¨ط§ظ‹: ظ…ظƒط§ظپط¢طھ ظ„ظ„ظ…ظ„طھط²ظ…ظٹظ† ط¨ظ…ط´ط§ظ‡ط¯ط© ط§ظ„ظ…ط­ط§ط¶ط±ط§طھ!', 'majestic')">
                 <div class="kpi-icon cyan"><i class="fas fa-video"></i></div>
                 <div class="kpi-data">
                     <div class="kpi-val" id="kVideos" style="color:var(--cyan);">-</div>
-                    <div class="kpi-lbl">محاضرات مكتملة</div>
+                    <div class="kpi-lbl">ظ…ط­ط§ط¶ط±ط§طھ ظ…ظƒطھظ…ظ„ط©</div>
                     <div class="kpi-sub" id="kVideosSub"></div>
                 </div>
             </div>
-            <div class="kpi-card green" style="cursor:pointer;" onclick="if(window.showToast) window.showToast('استمر في التقدم! كل اختبار يزيد من خبرتك', 'majestic')">
+            <div class="kpi-card green" style="cursor:pointer;" onclick="if(window.showToast) window.showToast('ط§ط³طھظ…ط± ظپظٹ ط§ظ„طھظ‚ط¯ظ…! ظƒظ„ ط§ط®طھط¨ط§ط± ظٹط²ظٹط¯ ظ…ظ† ط®ط¨ط±طھظƒ', 'majestic')">
                 <div class="kpi-icon green"><i class="fas fa-clipboard-check"></i></div>
                 <div class="kpi-data">
                     <div class="kpi-val" id="kExams" style="color:var(--green);">-</div>
-                    <div class="kpi-lbl">امتحانات / تدريبات</div>
+                    <div class="kpi-lbl">ط§ظ…طھط­ط§ظ†ط§طھ / طھط¯ط±ظٹط¨ط§طھ</div>
                     <div class="kpi-sub" id="kExamsSub"></div>
                 </div>
             </div>
-            <div class="kpi-card blue" style="cursor:pointer;" onclick="if(window.showToast) window.showToast('قريباً: استبيان سريع لتقييم الكورسات', 'majestic')">
+            <div class="kpi-card blue" style="cursor:pointer;" onclick="if(window.showToast) window.showToast('ظ‚ط±ظٹط¨ط§ظ‹: ط§ط³طھط¨ظٹط§ظ† ط³ط±ظٹط¹ ظ„طھظ‚ظٹظٹظ… ط§ظ„ظƒظˆط±ط³ط§طھ', 'majestic')">
                 <div class="kpi-icon blue"><i class="fas fa-book-open"></i></div>
                 <div class="kpi-data">
                     <div class="kpi-val" id="kCourses" style="color:var(--blue);">-</div>
-                    <div class="kpi-lbl">كورسات مسجل بها</div>
+                    <div class="kpi-lbl">ظƒظˆط±ط³ط§طھ ظ…ط³ط¬ظ„ ط¨ظ‡ط§</div>
                     <div class="kpi-sub" id="kCoursesSub"></div>
                 </div>
             </div>
@@ -236,9 +237,9 @@
 
         <!-- INSIGHT CARD -->
         <div class="insight-card" id="insightCard" style="display:none;">
-            <div class="insight-icon" id="insightIcon">💡</div>
+            <div class="insight-icon" id="insightIcon">ًں’،</div>
             <div class="insight-text">
-                <div class="insight-title" id="insightTitle">تحليل أدائك</div>
+                <div class="insight-title" id="insightTitle">طھط­ظ„ظٹظ„ ط£ط¯ط§ط¦ظƒ</div>
                 <div id="insightText"></div>
             </div>
         </div>
@@ -247,7 +248,7 @@
         <div class="charts-2col" id="chartsRow" style="display:none;">
             <div class="chart-box">
                 <div class="section-title" style="margin-bottom:16px;">
-                    <i class="fas fa-chart-line"></i> منحنى الدرجات
+                    <i class="fas fa-chart-line"></i> ظ…ظ†ط­ظ†ظ‰ ط§ظ„ط¯ط±ط¬ط§طھ
                 </div>
                 <div style="height:220px;"><canvas id="scoresChart"></canvas></div>
             </div>
@@ -256,7 +257,7 @@
         <!-- COURSE PROGRESS -->
         <div class="glass-panel dash-panel" id="courseProgressSection" style="display:none;margin-bottom:24px;">
             <div class="section-title">
-                <i class="fas fa-tasks"></i> التقدم في كل كورس
+                <i class="fas fa-tasks"></i> ط§ظ„طھظ‚ط¯ظ… ظپظٹ ظƒظ„ ظƒظˆط±ط³
             </div>
             <div id="courseProgressList"></div>
         </div>
@@ -264,16 +265,16 @@
         <!-- EXAM HISTORY TABLE -->
         <div class="glass-panel dash-panel" id="examTableSection" style="display:none;margin-bottom:24px;">
             <div class="section-title">
-                <i class="fas fa-table"></i> سجل الامتحانات والتدريبات
+                <i class="fas fa-table"></i> ط³ط¬ظ„ ط§ظ„ط§ظ…طھط­ط§ظ†ط§طھ ظˆط§ظ„طھط¯ط±ظٹط¨ط§طھ
             </div>
             <div style="overflow-x:auto;">
                 <table class="exam-table" id="examTable">
                     <thead>
                         <tr>
-                            <th>اسم الاختبار والكورس</th>
-                            <th>النوع</th>
-                            <th>الدرجة</th>
-                            <th>التاريخ</th>
+                            <th>ط§ط³ظ… ط§ظ„ط§ط®طھط¨ط§ط± ظˆط§ظ„ظƒظˆط±ط³</th>
+                            <th>ط§ظ„ظ†ظˆط¹</th>
+                            <th>ط§ظ„ط¯ط±ط¬ط©</th>
+                            <th>ط§ظ„طھط§ط±ظٹط®</th>
                         </tr>
                     </thead>
                     <tbody id="examTableBody"></tbody>
@@ -284,7 +285,7 @@
         <!-- ACTIVITY FEED -->
         <div class="glass-panel dash-panel" id="activitySection" style="display:none;margin-bottom:24px;">
             <div class="section-title">
-                <i class="fas fa-history"></i> آخر النشاطات
+                <i class="fas fa-history"></i> ط¢ط®ط± ط§ظ„ظ†ط´ط§ط·ط§طھ
             </div>
             <div id="activityFeed"></div>
         </div>
@@ -293,9 +294,9 @@
         <div id="noStatsState" style="display:none;" class="glass-panel dash-panel">
             <div class="empty-stats">
                 <i class="fas fa-chart-bar"></i>
-                <h2 style="color:var(--soft-white);margin-bottom:10px;">لا توجد إحصائيات بعد</h2>
-                <p style="margin-bottom:24px;">اشترك في الكورسات وأكمل بعض التدريبات لتبدأ رحلتك!</p>
-                <a href="courses.html" class="btn btn-gold btn-large">تصفح الكورسات المتاحة</a>
+                <h2 style="color:var(--soft-white);margin-bottom:10px;">ظ„ط§ طھظˆط¬ط¯ ط¥ط­طµط§ط¦ظٹط§طھ ط¨ط¹ط¯</h2>
+                <p style="margin-bottom:24px;">ط§ط´طھط±ظƒ ظپظٹ ط§ظ„ظƒظˆط±ط³ط§طھ ظˆط£ظƒظ…ظ„ ط¨ط¹ط¶ ط§ظ„طھط¯ط±ظٹط¨ط§طھ ظ„طھط¨ط¯ط£ ط±ط­ظ„طھظƒ!</p>
+                <a href="courses.html" class="btn btn-gold btn-large">طھطµظپط­ ط§ظ„ظƒظˆط±ط³ط§طھ ط§ظ„ظ…طھط§ط­ط©</a>
             </div>
         </div>
     </main>
@@ -329,8 +330,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (gradeEl) {
         const g = (window.getEffectiveStudentGrade && window.getGradeLabel)
             ? window.getGradeLabel(window.getEffectiveStudentGrade(user))
-            : (user.grade || 'طالب');
-        gradeEl.textContent = g || 'طالب';
+            : (user.grade || 'ط·ط§ظ„ط¨');
+        gradeEl.textContent = g || 'ط·ط§ظ„ط¨';
     }
     const pic = localStorage.getItem(`profilePic_${user.phone}`);
     if (pic && avatarEl) avatarEl.src = pic;
@@ -429,7 +430,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     const avgScore = scoreCount > 0 ? Math.round(sumScores / scoreCount) : 0;
-    // For chart: remove duplicate re-grading entries — keep only official per exam per ts
+    // For chart: remove duplicate re-grading entries â€” keep only official per exam per ts
     // We show ALL entries chronologically so student can see their journey
     scoreHistory.sort((a, b) => a.ts - b.ts);
 
@@ -452,13 +453,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     const sc = avgScore >= 85 ? 'var(--green)' : avgScore >= 60 ? 'var(--blue)' : avgScore >= 40 ? '#f39c12' : 'var(--red)';
     document.getElementById('kAvg').style.color = sc;
     animCount('kAvg', avgScore, '%');
-    document.getElementById('kAvgSub').textContent = scoreCount > 0 ? `من ${scoreCount} اختبار` : 'لا يوجد اختبارات بعد';
+    document.getElementById('kAvgSub').textContent = scoreCount > 0 ? `ظ…ظ† ${scoreCount} ط§ط®طھط¨ط§ط±` : 'ظ„ط§ ظٹظˆط¬ط¯ ط§ط®طھط¨ط§ط±ط§طھ ط¨ط¹ط¯';
     animCount('kVideos', totalVideos);
-    document.getElementById('kVideosSub').textContent = totalVideosPossible > 0 ? `من أصل ${totalVideosPossible} محاضرة` : '';
+    document.getElementById('kVideosSub').textContent = totalVideosPossible > 0 ? `ظ…ظ† ط£طµظ„ ${totalVideosPossible} ظ…ط­ط§ط¶ط±ط©` : '';
     animCount('kExams', examResults.length);
-    document.getElementById('kExamsSub').textContent = `${Object.keys(uniqueExamMap).length} اختبار فريد`;
+    document.getElementById('kExamsSub').textContent = `${Object.keys(uniqueExamMap).length} ط§ط®طھط¨ط§ط± ظپط±ظٹط¯`;
     animCount('kCourses', courses.length);
-    document.getElementById('kCoursesSub').textContent = courseProgressData.map(c => `${c.pct}%`).join('  •  ');
+    document.getElementById('kCoursesSub').textContent = courseProgressData.map(c => `${c.pct}%`).join('  â€¢  ');
 
     // ===== INSIGHT =====
     buildInsight(avgScore, totalVideos, totalVideosPossible, examResults.length, scoreHistory);
@@ -475,8 +476,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 </div>
                 <div class="cpb-track"><div class="cpb-fill" style="width:0%;background:linear-gradient(90deg,${fillColor},${fillColor}aa);" data-width="${cp.pct}"></div></div>
                 <div class="cpb-meta">
-                    <span><i class="fas fa-video mr-1"></i>${cp.videoDone}/${cp.videoTotal} محاضرة</span>
-                    <span><i class="fas fa-check-circle mr-1"></i>${cp.done}/${cp.total} عنصر</span>
+                    <span><i class="fas fa-video mr-1"></i>${cp.videoDone}/${cp.videoTotal} ظ…ط­ط§ط¶ط±ط©</span>
+                    <span><i class="fas fa-check-circle mr-1"></i>${cp.done}/${cp.total} ط¹ظ†طµط±</span>
                 </div>
             </div>`;
     });
@@ -507,20 +508,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     sortedHistory.forEach((r, idx) => {
         const pct = r.pct;
         const pillClass = pct >= 85 ? 'ex' : pct >= 60 ? 'good' : pct >= 40 ? 'avg' : 'low';
-        const scoreEmoji = pct >= 85 ? '🌟' : pct >= 60 ? '👍' : pct >= 40 ? '📖' : '❌';
-        const typeIcon = r.type === 'training' ? '🏋️ تدريب' : r.type === 'homework' ? '📝 واجب' : '📋 امتحان';
+        const scoreEmoji = pct >= 85 ? 'ًںŒں' : pct >= 60 ? 'ًں‘چ' : pct >= 40 ? 'ًں“–' : 'â‌Œ';
+        const typeIcon = r.type === 'training' ? 'ًںڈ‹ï¸ڈ طھط¯ط±ظٹط¨' : r.type === 'homework' ? 'ًں“‌ ظˆط§ط¬ط¨' : 'ًں“‹ ط§ظ…طھط­ط§ظ†';
         const courseTitle = (adminCourses.find(c => c.id === r.courseId) || {}).title || '-';
         const dateStr = r.ts ? new Date(r.ts).toLocaleDateString('ar-EG', { month: 'short', day: 'numeric' }) : '-';
-        const overrideBadge = r.isOverride ? ' <span style="font-size:0.65rem;background:rgba(46,204,113,0.15);color:#2ecc71;border-radius:4px;padding:1px 5px;">✓ معدّل</span>' : '';
+        const overrideBadge = r.isOverride ? ' <span style="font-size:0.65rem;background:rgba(46,204,113,0.15);color:#2ecc71;border-radius:4px;padding:1px 5px;">âœ“ ظ…ط¹ط¯ظ‘ظ„</span>' : '';
 
         // Trend vs same exam's PREVIOUS chronological entry
         const prevSame = sortedHistory.slice(idx + 1).find(x => x.title === r.title);
         let trendHtml = '';
         if (prevSame) {
             const diff = pct - prevSame.pct;
-            if (diff > 0)       trendHtml = `<div style="color:#2ecc71;font-size:0.78rem;margin-top:3px;">⬆ تحسّنت بـ ${diff}% عن المرة اللي فاتت (${prevSame.pct}% → ${pct}%)</div>`;
-            else if (diff < 0)  trendHtml = `<div style="color:#e74c3c;font-size:0.78rem;margin-top:3px;">⬇ انخفضت ${Math.abs(diff)}% عن المرة اللي فاتت (${prevSame.pct}% → ${pct}%)</div>`;
-            else                trendHtml = `<div style="color:#aaa;font-size:0.78rem;margin-top:3px;">↔ نفس الدرجة زي المرة اللي فاتت</div>`;
+            if (diff > 0)       trendHtml = `<div style="color:#2ecc71;font-size:0.78rem;margin-top:3px;">â¬† طھط­ط³ظ‘ظ†طھ ط¨ظ€ ${diff}% ط¹ظ† ط§ظ„ظ…ط±ط© ط§ظ„ظ„ظٹ ظپط§طھطھ (${prevSame.pct}% â†’ ${pct}%)</div>`;
+            else if (diff < 0)  trendHtml = `<div style="color:#e74c3c;font-size:0.78rem;margin-top:3px;">â¬‡ ط§ظ†ط®ظپط¶طھ ${Math.abs(diff)}% ط¹ظ† ط§ظ„ظ…ط±ط© ط§ظ„ظ„ظٹ ظپط§طھطھ (${prevSame.pct}% â†’ ${pct}%)</div>`;
+            else                trendHtml = `<div style="color:#aaa;font-size:0.78rem;margin-top:3px;">â†” ظ†ظپط³ ط§ظ„ط¯ط±ط¬ط© ط²ظٹ ط§ظ„ظ…ط±ط© ط§ظ„ظ„ظٹ ظپط§طھطھ</div>`;
         }
 
         tbody.innerHTML += `<tr>
@@ -543,7 +544,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         actItems.push({
             icon: r.isTraining ? 'fa-dumbbell' : 'fa-file-alt',
             iconClass: r.isTraining ? 'exam' : 'exam',
-            title: r.examTitle || 'اختبار',
+            title: r.examTitle || 'ط§ط®طھط¨ط§ط±',
             sub: (adminCourses.find(c => c.id === r.courseId) || {}).title || '',
             badge: `${r.effectivePercent ?? r.percent ?? 0}%`,
             badgeColor: (r.effectivePercent ?? r.percent ?? 0) >= 60 ? '#2ecc71' : '#e74c3c',
@@ -561,9 +562,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (doneIds.includes(item.id) && item.type === 'video') {
                     actItems.push({
                         icon: 'fa-video', iconClass: 'video',
-                        title: item.title || 'محاضرة',
+                        title: item.title || 'ظ…ط­ط§ط¶ط±ط©',
                         sub: c.title,
-                        badge: 'مكتمل ✓',
+                        badge: 'ظ…ظƒطھظ…ظ„ âœ“',
                         badgeColor: '#3498db',
                         ts: progress[cId].lastWatchTime || 0
                     });
@@ -579,7 +580,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <div class="activity-icon ${it.iconClass}"><i class="fas ${it.icon}"></i></div>
                 <div class="activity-text">
                     <div class="activity-title">${it.title}</div>
-                    <div class="activity-sub">${it.sub}${dateStr ? ' • ' + dateStr : ''}</div>
+                    <div class="activity-sub">${it.sub}${dateStr ? ' â€¢ ' + dateStr : ''}</div>
                 </div>
                 <div class="activity-badge" style="color:${it.badgeColor};">${it.badge}</div>
             </div>`;
@@ -594,8 +595,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             // X-axis: just numbers 1,2,3... Tooltip shows the full name + score + type
             const labels = scoreHistory.map((r, i) => `${i+1}`);
             const data   = scoreHistory.map(r => r.pct);
-            const fullLabels = scoreHistory.map(r => r.title || 'اختبار');
-            const typeLabels = scoreHistory.map(r => r.type === 'training' ? 'تدريب' : r.type === 'homework' ? 'واجب' : 'امتحان');
+            const fullLabels = scoreHistory.map(r => r.title || 'ط§ط®طھط¨ط§ط±');
+            const typeLabels = scoreHistory.map(r => r.type === 'training' ? 'طھط¯ط±ظٹط¨' : r.type === 'homework' ? 'ظˆط§ط¬ط¨' : 'ط§ظ…طھط­ط§ظ†');
             const pointColors = data.map(v => v >= 85 ? '#2ecc71' : v >= 60 ? '#3498db' : v >= 40 ? '#f39c12' : '#e74c3c');
             const grad = ctx1.getContext('2d').createLinearGradient(0, 0, 0, 220);
             grad.addColorStop(0, 'rgba(212,166,79,0.4)');
@@ -605,7 +606,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 data: {
                     labels,
                     datasets: [{
-                        data, label: 'الدرجة',
+                        data, label: 'ط§ظ„ط¯ط±ط¬ط©',
                         borderColor: '#D4A64F', backgroundColor: grad, borderWidth: 2.5,
                         pointBackgroundColor: pointColors, pointBorderColor: '#fff',
                         pointRadius: 6, pointHoverRadius: 9, fill: true, tension: 0.4
@@ -624,8 +625,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 },
                                 label: ctx => {
                                     const v = ctx.parsed.y;
-                                    const emoji = v >= 85 ? '🌟 ممتاز' : v >= 60 ? '👍 جيد' : v >= 40 ? '📖 متوسط' : '❌ ضعيف';
-                                    return `الدرجة: ${v}% — ${emoji}`;
+                                    const emoji = v >= 85 ? 'ًںŒں ظ…ظ…طھط§ط²' : v >= 60 ? 'ًں‘چ ط¬ظٹط¯' : v >= 40 ? 'ًں“– ظ…طھظˆط³ط·' : 'â‌Œ ط¶ط¹ظٹظپ';
+                                    return `ط§ظ„ط¯ط±ط¬ط©: ${v}% â€” ${emoji}`;
                                 }
                             },
                             backgroundColor: 'rgba(10,20,35,0.95)',
@@ -646,7 +647,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 color: 'rgba(255,255,255,0.5)', font: { size: 11 },
                                 callback: (val, i) => `#${i+1}`
                             },
-                            title: { display: true, text: 'مرر على النقطة لتعرف اسم الاختبار ↑', color: 'rgba(255,255,255,0.25)', font: { size: 9 } }
+                            title: { display: true, text: 'ظ…ط±ط± ط¹ظ„ظ‰ ط§ظ„ظ†ظ‚ط·ط© ظ„طھط¹ط±ظپ ط§ط³ظ… ط§ظ„ط§ط®طھط¨ط§ط± â†‘', color: 'rgba(255,255,255,0.25)', font: { size: 9 } }
                         }
                     }
                 }
@@ -675,48 +676,56 @@ function buildInsight(avg, videos, totalVids, examsCount, history) {
 
     let insights = [];
 
-    // Avg score insight — plain language
-    if (avg >= 85)      insights.push(`متوسط درجاتك ${avg}% — ممتاز جداً! 🎉 استمر في الحفاظ على هذا المستوى.`);
-    else if (avg >= 60) insights.push(`متوسط درجاتك ${avg}% — أنت ناجح! 👍 لكن حاول مراجعة أخطائك للوصول للامتياز.`);
-    else if (avg > 0)   insights.push(`متوسط درجاتك ${avg}% — لم تصل لنسبة النجاح (60%). ❌ ركز أكثر وراجع دروسك.`);
-    else                insights.push(`لم تنجز أي اختبارات بعد. تذكر أن نسبة النجاح المطلوبة هي 60%.`);
+    // Avg score insight â€” plain language
+    if (avg >= 85)      insights.push(`ظ…طھظˆط³ط· ط¯ط±ط¬ط§طھظƒ ${avg}% â€” ظ…ظ…طھط§ط² ط¬ط¯ط§ظ‹! ًںژ‰ ط§ط³طھظ…ط± ظپظٹ ط§ظ„ط­ظپط§ط¸ ط¹ظ„ظ‰ ظ‡ط°ط§ ط§ظ„ظ…ط³طھظˆظ‰.`);
+    else if (avg >= 60) insights.push(`ظ…طھظˆط³ط· ط¯ط±ط¬ط§طھظƒ ${avg}% â€” ط£ظ†طھ ظ†ط§ط¬ط­! ًں‘چ ظ„ظƒظ† ط­ط§ظˆظ„ ظ…ط±ط§ط¬ط¹ط© ط£ط®ط·ط§ط¦ظƒ ظ„ظ„ظˆطµظˆظ„ ظ„ظ„ط§ظ…طھظٹط§ط².`);
+    else if (avg > 0)   insights.push(`ظ…طھظˆط³ط· ط¯ط±ط¬ط§طھظƒ ${avg}% â€” ظ„ظ… طھطµظ„ ظ„ظ†ط³ط¨ط© ط§ظ„ظ†ط¬ط§ط­ (60%). â‌Œ ط±ظƒط² ط£ظƒط«ط± ظˆط±ط§ط¬ط¹ ط¯ط±ظˆط³ظƒ.`);
+    else                insights.push(`ظ„ظ… طھظ†ط¬ط² ط£ظٹ ط§ط®طھط¨ط§ط±ط§طھ ط¨ط¹ط¯. طھط°ظƒط± ط£ظ† ظ†ط³ط¨ط© ط§ظ„ظ†ط¬ط§ط­ ط§ظ„ظ…ط·ظ„ظˆط¨ط© ظ‡ظٹ 60%.`);
 
     // Video progress insight
     if (totalVids > 0) {
         const vidPct = Math.round(videos / totalVids * 100);
         const remaining = totalVids - videos;
-        if (vidPct === 100)        insights.push(`شاهدت كل المحاضرات (${videos} محاضرة) — أحسنت! 👏`);
-        else if (vidPct >= 70)     insights.push(`شاهدت ${videos} من ${totalVids} محاضرة (${vidPct}%) — قرّبت تخلص!`);
-        else if (vidPct >= 30)     insights.push(`شاهدت ${videos} من ${totalVids} محاضرة — لسه فيه ${remaining} محاضرة، أكمل!`);
-        else                       insights.push(`لسه شاهدت ${videos} محاضرة بس من أصل ${totalVids} — اشتغل أكتر على المحاضرات!`);
+        if (vidPct === 100)        insights.push(`ط´ط§ظ‡ط¯طھ ظƒظ„ ط§ظ„ظ…ط­ط§ط¶ط±ط§طھ (${videos} ظ…ط­ط§ط¶ط±ط©) â€” ط£ط­ط³ظ†طھ! ًں‘ڈ`);
+        else if (vidPct >= 70)     insights.push(`ط´ط§ظ‡ط¯طھ ${videos} ظ…ظ† ${totalVids} ظ…ط­ط§ط¶ط±ط© (${vidPct}%) â€” ظ‚ط±ظ‘ط¨طھ طھط®ظ„طµ!`);
+        else if (vidPct >= 30)     insights.push(`ط´ط§ظ‡ط¯طھ ${videos} ظ…ظ† ${totalVids} ظ…ط­ط§ط¶ط±ط© â€” ظ„ط³ظ‡ ظپظٹظ‡ ${remaining} ظ…ط­ط§ط¶ط±ط©طŒ ط£ظƒظ…ظ„!`);
+        else                       insights.push(`ظ„ط³ظ‡ ط´ط§ظ‡ط¯طھ ${videos} ظ…ط­ط§ط¶ط±ط© ط¨ط³ ظ…ظ† ط£طµظ„ ${totalVids} â€” ط§ط´طھط؛ظ„ ط£ظƒطھط± ط¹ظ„ظ‰ ط§ظ„ظ…ط­ط§ط¶ط±ط§طھ!`);
     }
 
-    // Trend insight — crystal clear comparison
+    // Trend insight â€” crystal clear comparison
     if (history.length >= 2) {
         const last     = history[history.length - 1];
         const prev     = history[history.length - 2];
         const diff     = last.pct - prev.pct;
-        const lastName = last.title || 'الاختبار الأخير';
-        const prevName = prev.title || 'الاختبار اللي قبله';
+        const lastName = last.title || 'ط§ظ„ط§ط®طھط¨ط§ط± ط§ظ„ط£ط®ظٹط±';
+        const prevName = prev.title || 'ط§ظ„ط§ط®طھط¨ط§ط± ط§ظ„ظ„ظٹ ظ‚ط¨ظ„ظ‡';
         if (diff > 0) {
-            insights.push(`في "${lastName}" جبت ${last.pct}%، وكانت درجتك في "${prevName}" ${prev.pct}% — يعني اتحسّنت بـ ${diff}% 🚀 جميل!`);
+            insights.push(`ظپظٹ "${lastName}" ط¬ط¨طھ ${last.pct}%طŒ ظˆظƒط§ظ†طھ ط¯ط±ط¬طھظƒ ظپظٹ "${prevName}" ${prev.pct}% â€” ظٹط¹ظ†ظٹ ط§طھط­ط³ظ‘ظ†طھ ط¨ظ€ ${diff}% ًںڑ€ ط¬ظ…ظٹظ„!`);
         } else if (diff < 0) {
-            insights.push(`في "${lastName}" جبت ${last.pct}%، وكانت درجتك في "${prevName}" ${prev.pct}% — انخفضت ${Math.abs(diff)}%، راجع أخطاءك.`);
+            insights.push(`ظپظٹ "${lastName}" ط¬ط¨طھ ${last.pct}%طŒ ظˆظƒط§ظ†طھ ط¯ط±ط¬طھظƒ ظپظٹ "${prevName}" ${prev.pct}% â€” ط§ظ†ط®ظپط¶طھ ${Math.abs(diff)}%طŒ ط±ط§ط¬ط¹ ط£ط®ط·ط§ط،ظƒ.`);
         } else {
-            insights.push(`درجتك في "${lastName}" (${last.pct}%) نفس اللي قبلها تماماً — حاول تتحسن المرة الجاية.`);
+            insights.push(`ط¯ط±ط¬طھظƒ ظپظٹ "${lastName}" (${last.pct}%) ظ†ظپط³ ط§ظ„ظ„ظٹ ظ‚ط¨ظ„ظ‡ط§ طھظ…ط§ظ…ط§ظ‹ â€” ط­ط§ظˆظ„ طھطھط­ط³ظ† ط§ظ„ظ…ط±ط© ط§ظ„ط¬ط§ظٹط©.`);
         }
     }
 
-    if (insights.length === 0) insights.push('واصل الدراسة وأكمل امتحانات أكتر عشان تشوف تحليلاتك هنا.');
+    if (insights.length === 0) insights.push('ظˆط§طµظ„ ط§ظ„ط¯ط±ط§ط³ط© ظˆط£ظƒظ…ظ„ ط§ظ…طھط­ط§ظ†ط§طھ ط£ظƒطھط± ط¹ط´ط§ظ† طھط´ظˆظپ طھط­ظ„ظٹظ„ط§طھظƒ ظ‡ظ†ط§.');
 
-    const emojis = avg >= 85 ? '🏆' : avg >= 60 ? '📈' : avg > 0 ? '📚' : '💡';
+    const emojis = avg >= 85 ? 'ًںڈ†' : avg >= 60 ? 'ًں“ˆ' : avg > 0 ? 'ًں“ڑ' : 'ًں’،';
     icon.textContent = emojis;
-    title.textContent = 'تحليل أدائك الشخصي';
-    text.innerHTML = insights.map(t => `• ${t}`).join('<br><br>');
+    title.textContent = 'طھط­ظ„ظٹظ„ ط£ط¯ط§ط¦ظƒ ط§ظ„ط´ط®طµظٹ';
+    text.innerHTML = insights.map(t => `â€¢ ${t}`).join('<br><br>');
     card.style.display = 'flex';
 }
 </script>
     <script src="js/mobile.js?v=3"></script>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW registration failed:', err));
+            });
+        }
+    </script>
 </body>
 </html>
 

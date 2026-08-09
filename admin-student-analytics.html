@@ -1,12 +1,13 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+    <link rel="manifest" href="./manifest.json">
     <script>
         if (!sessionStorage.getItem('currentAdmin')) { window.location.replace('admin-login.html'); }
     </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تحليلات الطلاب التفصيلية - لوحة الإدارة</title>
+    <title>طھط­ظ„ظٹظ„ط§طھ ط§ظ„ط·ظ„ط§ط¨ ط§ظ„طھظپطµظٹظ„ظٹط© - ظ„ظˆط­ط© ط§ظ„ط¥ط¯ط§ط±ط©</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/style.css?v=10">
     <link rel="stylesheet" href="css/dashboard.css">
@@ -69,12 +70,12 @@
 
 <header class="navbar glass-panel" style="border-bottom-color: var(--royal-gold);">
     <a href="index.html" class="nav-brand">
-        <div class="logo-circle" style="color:#fff; background:var(--royal-gold);">ي</div>
-        <span class="nav-brand-text text-gold">تحليلات الطلاب</span>
+        <div class="logo-circle" style="color:#fff; background:var(--royal-gold);">ظٹ</div>
+        <span class="nav-brand-text text-gold">طھط­ظ„ظٹظ„ط§طھ ط§ظ„ط·ظ„ط§ط¨</span>
     </a>
     <div class="nav-actions">
-        <a href="admin-dashboard.html" class="btn btn-outline" style="padding:8px 15px; border-radius:20px;"><i class="fas fa-arrow-right"></i> الداش بورد</a>
-        <a href="#" id="logoutBtn" class="btn btn-outline" style="border-color:#e74c3c; color:#e74c3c; padding:8px 15px; border-radius:20px;">خروج <i class="fas fa-sign-out-alt"></i></a>
+        <a href="admin-dashboard.html" class="btn btn-outline" style="padding:8px 15px; border-radius:20px;"><i class="fas fa-arrow-right"></i> ط§ظ„ط¯ط§ط´ ط¨ظˆط±ط¯</a>
+        <a href="#" id="logoutBtn" class="btn btn-outline" style="border-color:#e74c3c; color:#e74c3c; padding:8px 15px; border-radius:20px;">ط®ط±ظˆط¬ <i class="fas fa-sign-out-alt"></i></a>
     </div>
 </header>
 
@@ -82,64 +83,64 @@
     <aside class="sidebar" id="sidebar">
         <div class="user-profile-mini" style="text-align:center; margin-bottom:20px; padding:15px;">
             <div style="width:60px; height:60px; border-radius:50%; background:linear-gradient(135deg,var(--royal-gold),#b8860b); display:flex; align-items:center; justify-content:center; margin:0 auto 10px;"><i class="fas fa-user-tie" style="font-size:1.8rem; color:#fff;"></i></div>
-            <h4 style="margin:0; color:var(--royal-gold);">يوسف بركات</h4>
-            <p style="margin:4px 0 0; color:rgba(255,255,255,0.6); font-size:0.8rem;">المدير العام</p>
+            <h4 style="margin:0; color:var(--royal-gold);">ظٹظˆط³ظپ ط¨ط±ظƒط§طھ</h4>
+            <p style="margin:4px 0 0; color:rgba(255,255,255,0.6); font-size:0.8rem;">ط§ظ„ظ…ط¯ظٹط± ط§ظ„ط¹ط§ظ…</p>
         </div>
         <ul class="sidebar-nav">
-            <li><a href="admin-dashboard.html"><i class="fas fa-chart-line"></i> الإحصائيات العامة</a></li>
-            <li><a href="admin-students.html"><i class="fas fa-users"></i> إدارة الطلاب</a></li>
-            <li><a href="admin-student-analytics.html" class="active"><i class="fas fa-chart-bar"></i> تحليلات تفصيلية</a></li>
-            <li><a href="admin-courses.html"><i class="fas fa-book-open"></i> إدارة الكورسات</a></li>
-            <li><a href="admin-upload.html"><i class="fas fa-bolt"></i> الرفع السريع</a></li>
-            <li><a href="admin-payments.html"><i class="fas fa-money-check-alt"></i> مراجعة المدفوعات</a></li>
-            <li><a href="admin-notifications.html"><i class="fas fa-bell"></i> إرسال الإشعارات</a></li>
-            <li><a href="admin-settings.html"><i class="fas fa-cog"></i> إعدادات المنصة</a></li>
+            <li><a href="admin-dashboard.html"><i class="fas fa-chart-line"></i> ط§ظ„ط¥ط­طµط§ط¦ظٹط§طھ ط§ظ„ط¹ط§ظ…ط©</a></li>
+            <li><a href="admin-students.html"><i class="fas fa-users"></i> ط¥ط¯ط§ط±ط© ط§ظ„ط·ظ„ط§ط¨</a></li>
+            <li><a href="admin-student-analytics.html" class="active"><i class="fas fa-chart-bar"></i> طھط­ظ„ظٹظ„ط§طھ طھظپطµظٹظ„ظٹط©</a></li>
+            <li><a href="admin-courses.html"><i class="fas fa-book-open"></i> ط¥ط¯ط§ط±ط© ط§ظ„ظƒظˆط±ط³ط§طھ</a></li>
+            <li><a href="admin-upload.html"><i class="fas fa-bolt"></i> ط§ظ„ط±ظپط¹ ط§ظ„ط³ط±ظٹط¹</a></li>
+            <li><a href="admin-payments.html"><i class="fas fa-money-check-alt"></i> ظ…ط±ط§ط¬ط¹ط© ط§ظ„ظ…ط¯ظپظˆط¹ط§طھ</a></li>
+            <li><a href="admin-notifications.html"><i class="fas fa-bell"></i> ط¥ط±ط³ط§ظ„ ط§ظ„ط¥ط´ط¹ط§ط±ط§طھ</a></li>
+            <li><a href="admin-settings.html"><i class="fas fa-cog"></i> ط¥ط¹ط¯ط§ط¯ط§طھ ط§ظ„ظ…ظ†طµط©</a></li>
         </ul>
     </aside>
 
     <main class="main-content">
         <div class="page-header">
-            <h1 class="page-title"><i class="fas fa-chart-bar" style="color:var(--royal-gold);"></i> تحليلات الطلاب التفصيلية</h1>
+            <h1 class="page-title"><i class="fas fa-chart-bar" style="color:var(--royal-gold);"></i> طھط­ظ„ظٹظ„ط§طھ ط§ظ„ط·ظ„ط§ط¨ ط§ظ„طھظپطµظٹظ„ظٹط©</h1>
         </div>
 
         <div class="tabs">
-            <button class="tab-btn active" onclick="switchTab('students', this)">قائمة الطلاب</button>
-            <button class="tab-btn" onclick="switchTab('late', this)">المتأخرات</button>
-            <button class="tab-btn" onclick="switchTab('levels', this)">المستويات</button>
+            <button class="tab-btn active" onclick="switchTab('students', this)">ظ‚ط§ط¦ظ…ط© ط§ظ„ط·ظ„ط§ط¨</button>
+            <button class="tab-btn" onclick="switchTab('late', this)">ط§ظ„ظ…طھط£ط®ط±ط§طھ</button>
+            <button class="tab-btn" onclick="switchTab('levels', this)">ط§ظ„ظ…ط³طھظˆظٹط§طھ</button>
         </div>
 
         <!-- TAB: Students -->
         <div id="tab-students">
             <div class="filter-bar">
                 <select id="gradeFilter" onchange="loadStudents()">
-                    <option value="">كل الصفوف</option>
-                    <option value="prep1">الصف الأول الإعدادي</option>
-                    <option value="prep2">الصف الثاني الإعدادي</option>
-                    <option value="prep3">الصف الثالث الإعدادي</option>
-                    <option value="sec1">الصف الأول الثانوي</option>
-                    <option value="sec2">الصف الثاني الثانوي</option>
-                    <option value="sec3">الصف الثالث الثانوي</option>
+                    <option value="">ظƒظ„ ط§ظ„طµظپظˆظپ</option>
+                    <option value="prep1">ط§ظ„طµظپ ط§ظ„ط£ظˆظ„ ط§ظ„ط¥ط¹ط¯ط§ط¯ظٹ</option>
+                    <option value="prep2">ط§ظ„طµظپ ط§ظ„ط«ط§ظ†ظٹ ط§ظ„ط¥ط¹ط¯ط§ط¯ظٹ</option>
+                    <option value="prep3">ط§ظ„طµظپ ط§ظ„ط«ط§ظ„ط« ط§ظ„ط¥ط¹ط¯ط§ط¯ظٹ</option>
+                    <option value="sec1">ط§ظ„طµظپ ط§ظ„ط£ظˆظ„ ط§ظ„ط«ط§ظ†ظˆظٹ</option>
+                    <option value="sec2">ط§ظ„طµظپ ط§ظ„ط«ط§ظ†ظٹ ط§ظ„ط«ط§ظ†ظˆظٹ</option>
+                    <option value="sec3">ط§ظ„طµظپ ط§ظ„ط«ط§ظ„ط« ط§ظ„ط«ط§ظ†ظˆظٹ</option>
                 </select>
-                <input type="text" id="studentSearch" placeholder="ابحث باسم الطالب..." oninput="filterStudentsTable()" style="flex: 1; min-width: 200px;">
-                <button class="btn-gold" onclick="loadStudents()"><i class="fas fa-sync"></i> تحديث</button>
+                <input type="text" id="studentSearch" placeholder="ط§ط¨ط­ط« ط¨ط§ط³ظ… ط§ظ„ط·ط§ظ„ط¨..." oninput="filterStudentsTable()" style="flex: 1; min-width: 200px;">
+                <button class="btn-gold" onclick="loadStudents()"><i class="fas fa-sync"></i> طھط­ط¯ظٹط«</button>
             </div>
             <div class="glass-panel dash-panel">
                 <div style="overflow-x:auto;">
                     <table class="admin-table" id="studentsTable">
                         <thead>
                             <tr>
-                                <th data-sort="name" onclick="sortBy('name')"><span class="sort-icon">⇅</span>الطالب والتواصل</th>
-                                <th>الصف</th>
-                                <th data-sort="avgExam" onclick="sortBy('avgExam')"><span class="sort-icon">⇅</span>📄 متوسط الامتحانات</th>
-                                <th data-sort="avgHw" onclick="sortBy('avgHw')"><span class="sort-icon">⇅</span>📚 متوسط الواجبات</th>
-                                <th data-sort="avgTrain" onclick="sortBy('avgTrain')"><span class="sort-icon">⇅</span>📝 متوسط التدريبات</th>
-                                <th data-sort="watch" onclick="sortBy('watch')"><span class="sort-icon">⇅</span>🎥 نسبة المشاهدة</th>
-                                <th data-sort="level" onclick="sortBy('level')"><span class="sort-icon">⇅</span>المستوى</th>
-                                <th>تفاصيل وتصحيح</th>
+                                <th data-sort="name" onclick="sortBy('name')"><span class="sort-icon">â‡…</span>ط§ظ„ط·ط§ظ„ط¨ ظˆط§ظ„طھظˆط§طµظ„</th>
+                                <th>ط§ظ„طµظپ</th>
+                                <th data-sort="avgExam" onclick="sortBy('avgExam')"><span class="sort-icon">â‡…</span>ًں“„ ظ…طھظˆط³ط· ط§ظ„ط§ظ…طھط­ط§ظ†ط§طھ</th>
+                                <th data-sort="avgHw" onclick="sortBy('avgHw')"><span class="sort-icon">â‡…</span>ًں“ڑ ظ…طھظˆط³ط· ط§ظ„ظˆط§ط¬ط¨ط§طھ</th>
+                                <th data-sort="avgTrain" onclick="sortBy('avgTrain')"><span class="sort-icon">â‡…</span>ًں“‌ ظ…طھظˆط³ط· ط§ظ„طھط¯ط±ظٹط¨ط§طھ</th>
+                                <th data-sort="watch" onclick="sortBy('watch')"><span class="sort-icon">â‡…</span>ًںژ¥ ظ†ط³ط¨ط© ط§ظ„ظ…ط´ط§ظ‡ط¯ط©</th>
+                                <th data-sort="level" onclick="sortBy('level')"><span class="sort-icon">â‡…</span>ط§ظ„ظ…ط³طھظˆظ‰</th>
+                                <th>طھظپط§طµظٹظ„ ظˆطھطµط­ظٹط­</th>
                             </tr>
                         </thead>
                         <tbody id="studentsTableBody">
-                            <tr><td colspan="8" style="text-align:center; padding:30px;"><i class="fas fa-spinner fa-spin"></i> جاري التحميل...</td></tr>
+                            <tr><td colspan="8" style="text-align:center; padding:30px;"><i class="fas fa-spinner fa-spin"></i> ط¬ط§ط±ظٹ ط§ظ„طھط­ظ…ظٹظ„...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -150,19 +151,19 @@
         <div id="tab-late" style="display:none;">
             <div class="filter-bar">
                 <select id="lateGradeFilter" onchange="loadLateStudents()">
-                    <option value="">كل الصفوف</option>
-                    <option value="prep1">الصف الأول الإعدادي</option>
-                    <option value="prep2">الصف الثاني الإعدادي</option>
-                    <option value="prep3">الصف الثالث الإعدادي</option>
-                    <option value="sec1">الصف الأول الثانوي</option>
-                    <option value="sec2">الصف الثاني الثانوي</option>
-                    <option value="sec3">الصف الثالث الثانوي</option>
+                    <option value="">ظƒظ„ ط§ظ„طµظپظˆظپ</option>
+                    <option value="prep1">ط§ظ„طµظپ ط§ظ„ط£ظˆظ„ ط§ظ„ط¥ط¹ط¯ط§ط¯ظٹ</option>
+                    <option value="prep2">ط§ظ„طµظپ ط§ظ„ط«ط§ظ†ظٹ ط§ظ„ط¥ط¹ط¯ط§ط¯ظٹ</option>
+                    <option value="prep3">ط§ظ„طµظپ ط§ظ„ط«ط§ظ„ط« ط§ظ„ط¥ط¹ط¯ط§ط¯ظٹ</option>
+                    <option value="sec1">ط§ظ„طµظپ ط§ظ„ط£ظˆظ„ ط§ظ„ط«ط§ظ†ظˆظٹ</option>
+                    <option value="sec2">ط§ظ„طµظپ ط§ظ„ط«ط§ظ†ظٹ ط§ظ„ط«ط§ظ†ظˆظٹ</option>
+                    <option value="sec3">ط§ظ„طµظپ ط§ظ„ط«ط§ظ„ط« ط§ظ„ط«ط§ظ†ظˆظٹ</option>
                 </select>
-                <button class="btn-gold" onclick="loadLateStudents()"><i class="fas fa-sync"></i> تحديث</button>
-                <button class="btn-info" onclick="copyAllLateMessages()"><i class="fas fa-copy"></i> نسخ كل الرسائل</button>
+                <button class="btn-gold" onclick="loadLateStudents()"><i class="fas fa-sync"></i> طھط­ط¯ظٹط«</button>
+                <button class="btn-info" onclick="copyAllLateMessages()"><i class="fas fa-copy"></i> ظ†ط³ط® ظƒظ„ ط§ظ„ط±ط³ط§ط¦ظ„</button>
             </div>
             <div id="lateContainer">
-                <div style="text-align:center; padding:40px; color:rgba(255,255,255,0.5);">اختر صفاً لعرض المتأخرات</div>
+                <div style="text-align:center; padding:40px; color:rgba(255,255,255,0.5);">ط§ط®طھط± طµظپط§ظ‹ ظ„ط¹ط±ط¶ ط§ظ„ظ…طھط£ط®ط±ط§طھ</div>
             </div>
         </div>
 
@@ -170,22 +171,22 @@
         <div id="tab-levels" style="display:none;">
             <div class="filter-bar">
                 <select id="levelGradeFilter" onchange="loadLevels()">
-                    <option value="">كل الصفوف</option>
-                    <option value="prep1">الصف الأول الإعدادي</option>
-                    <option value="prep2">الصف الثاني الإعدادي</option>
-                    <option value="prep3">الصف الثالث الإعدادي</option>
-                    <option value="sec1">الصف الأول الثانوي</option>
-                    <option value="sec2">الصف الثاني الثانوي</option>
-                    <option value="sec3">الصف الثالث الثانوي</option>
+                    <option value="">ظƒظ„ ط§ظ„طµظپظˆظپ</option>
+                    <option value="prep1">ط§ظ„طµظپ ط§ظ„ط£ظˆظ„ ط§ظ„ط¥ط¹ط¯ط§ط¯ظٹ</option>
+                    <option value="prep2">ط§ظ„طµظپ ط§ظ„ط«ط§ظ†ظٹ ط§ظ„ط¥ط¹ط¯ط§ط¯ظٹ</option>
+                    <option value="prep3">ط§ظ„طµظپ ط§ظ„ط«ط§ظ„ط« ط§ظ„ط¥ط¹ط¯ط§ط¯ظٹ</option>
+                    <option value="sec1">ط§ظ„طµظپ ط§ظ„ط£ظˆظ„ ط§ظ„ط«ط§ظ†ظˆظٹ</option>
+                    <option value="sec2">ط§ظ„طµظپ ط§ظ„ط«ط§ظ†ظٹ ط§ظ„ط«ط§ظ†ظˆظٹ</option>
+                    <option value="sec3">ط§ظ„طµظپ ط§ظ„ط«ط§ظ„ط« ط§ظ„ط«ط§ظ†ظˆظٹ</option>
                 </select>
                 <div style="display:flex; gap:6px;">
-                    <button class="tab-btn active" id="lvl-top" onclick="filterLevel('top', this)" style="border-radius:8px;">⭐ متفوقون</button>
-                    <button class="tab-btn" id="lvl-mid" onclick="filterLevel('mid', this)" style="border-radius:8px;">📊 متوسطون</button>
-                    <button class="tab-btn" id="lvl-low" onclick="filterLevel('low', this)" style="border-radius:8px;">📉 ضعاف</button>
+                    <button class="tab-btn active" id="lvl-top" onclick="filterLevel('top', this)" style="border-radius:8px;">â­گ ظ…طھظپظˆظ‚ظˆظ†</button>
+                    <button class="tab-btn" id="lvl-mid" onclick="filterLevel('mid', this)" style="border-radius:8px;">ًں“ٹ ظ…طھظˆط³ط·ظˆظ†</button>
+                    <button class="tab-btn" id="lvl-low" onclick="filterLevel('low', this)" style="border-radius:8px;">ًں“‰ ط¶ط¹ط§ظپ</button>
                 </div>
             </div>
             <div id="levelsContainer">
-                <div style="text-align:center; padding:40px; color:rgba(255,255,255,0.5);">اختر صفاً ومستوى لعرض الطلاب</div>
+                <div style="text-align:center; padding:40px; color:rgba(255,255,255,0.5);">ط§ط®طھط± طµظپط§ظ‹ ظˆظ…ط³طھظˆظ‰ ظ„ط¹ط±ط¶ ط§ظ„ط·ظ„ط§ط¨</div>
             </div>
         </div>
     </main>
@@ -209,7 +210,7 @@
 <script>
 let allStudentsData = [];
 let currentLevelFilter = 'top';
-const gradeNames = { prep1:'الصف الأول الإعدادي', prep2:'الصف الثاني الإعدادي', prep3:'الصف الثالث الإعدادي', sec1:'الصف الأول الثانوي', sec2:'الصف الثاني الثانوي', sec3:'الصف الثالث الثانوي' };
+const gradeNames = { prep1:'ط§ظ„طµظپ ط§ظ„ط£ظˆظ„ ط§ظ„ط¥ط¹ط¯ط§ط¯ظٹ', prep2:'ط§ظ„طµظپ ط§ظ„ط«ط§ظ†ظٹ ط§ظ„ط¥ط¹ط¯ط§ط¯ظٹ', prep3:'ط§ظ„طµظپ ط§ظ„ط«ط§ظ„ط« ط§ظ„ط¥ط¹ط¯ط§ط¯ظٹ', sec1:'ط§ظ„طµظپ ط§ظ„ط£ظˆظ„ ط§ظ„ط«ط§ظ†ظˆظٹ', sec2:'ط§ظ„طµظپ ط§ظ„ط«ط§ظ†ظٹ ط§ظ„ط«ط§ظ†ظˆظٹ', sec3:'ط§ظ„طµظپ ط§ظ„ط«ط§ظ„ط« ط§ظ„ط«ط§ظ†ظˆظٹ' };
 
 function switchTab(tab, btn) {
     ['students','late','levels'].forEach(t => document.getElementById('tab-'+t).style.display = 'none');
@@ -221,15 +222,15 @@ function switchTab(tab, btn) {
 }
 
 function getLevelInfo(avg) {
-    if (avg >= 80) return { label:'متفوق', cls:'level-top', key:'top' };
-    if (avg >= 50) return { label:'متوسط', cls:'level-mid', key:'mid' };
-    return { label:'ضعيف', cls:'level-low', key:'low' };
+    if (avg >= 80) return { label:'ظ…طھظپظˆظ‚', cls:'level-top', key:'top' };
+    if (avg >= 50) return { label:'ظ…طھظˆط³ط·', cls:'level-mid', key:'mid' };
+    return { label:'ط¶ط¹ظٹظپ', cls:'level-low', key:'low' };
 }
 
 function calcStudentStats(s) {
     const examResults = s.examResults || [];
-    const isT = (r) => r.isTraining || (r.examTitle && r.examTitle.includes('تدريب'));
-    const isH = (r) => r.isHomework  || (r.examTitle && r.examTitle.includes('واجب'));
+    const isT = (r) => r.isTraining || (r.examTitle && r.examTitle.includes('طھط¯ط±ظٹط¨'));
+    const isH = (r) => r.isHomework  || (r.examTitle && r.examTitle.includes('ظˆط§ط¬ط¨'));
     const exams     = examResults.filter(r => !isT(r) && !isH(r));
     const trainings = examResults.filter(r =>  isT(r));
     const homeworks = examResults.filter(r =>  isH(r));
@@ -291,9 +292,9 @@ let _sortCol = null, _sortDir = -1;
 function sortBy(col) {
     _sortDir = (_sortCol === col) ? -_sortDir : -1;
     _sortCol = col;
-    document.querySelectorAll('.admin-table th[data-sort] .sort-icon').forEach(ic => ic.textContent = '⇅');
+    document.querySelectorAll('.admin-table th[data-sort] .sort-icon').forEach(ic => ic.textContent = 'â‡…');
     const th = document.querySelector(`.admin-table th[data-sort="${col}"] .sort-icon`);
-    if (th) th.textContent = _sortDir === 1 ? '↑' : '↓';
+    if (th) th.textContent = _sortDir === 1 ? 'â†‘' : 'â†“';
     renderStudentsTable(filterBySearch(allStudentsData));
 }
 
@@ -346,14 +347,14 @@ function subscribeStudents(grade) {
         renderStudentsTable(filterBySearch(allStudentsData));
     }, err => {
         const tbody = document.getElementById('studentsTableBody');
-        if (tbody) tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:#e74c3c;">خطأ: ${err.message}</td></tr>`;
+        if (tbody) tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:#e74c3c;">ط®ط·ط£: ${err.message}</td></tr>`;
     });
 }
 
 async function loadStudents() {
     const grade = document.getElementById('gradeFilter').value;
     if (!window.firebaseDb) {
-        document.getElementById('studentsTableBody').innerHTML = '<tr><td colspan="8" style="text-align:center;color:#e74c3c;">Firebase غير متاح</td></tr>';
+        document.getElementById('studentsTableBody').innerHTML = '<tr><td colspan="8" style="text-align:center;color:#e74c3c;">Firebase ط؛ظٹط± ظ…طھط§ط­</td></tr>';
         return;
     }
     const cached = getCachedStudents();
@@ -371,7 +372,7 @@ function renderStudentsTable(students) {
     const tbody = document.getElementById('studentsTableBody');
     if (!tbody) return;
     if (!students || !students.length) {
-        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:30px;">لا يوجد طلاب</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:30px;">ظ„ط§ ظٹظˆط¬ط¯ ط·ظ„ط§ط¨</td></tr>';
         return;
     }
 
@@ -405,24 +406,24 @@ function renderStudentsTable(students) {
         const waBtnHtml = waPhone ? `<a href="https://wa.me/${waPhone}" target="_blank" class="wa-btn" onclick="event.stopPropagation()"><i class="fab fa-whatsapp"></i></a>` : '';
 
         const col = v => v !== null ? (v>=70?'#2ecc71':v>=50?'#f1c40f':'#e74c3c') : 'rgba(255,255,255,0.35)';
-        const fmt = v => v !== null ? `${v}%` : '<span style="color:rgba(255,255,255,0.3);">—</span>';
+        const fmt = v => v !== null ? `${v}%` : '<span style="color:rgba(255,255,255,0.3);">â€”</span>';
 
         return `<tr onclick="openStudentDetail('${s._uid}')">
-            <td><div style="display:flex;align-items:center;gap:8px;">${waBtnHtml}<div><strong>${s.name||'بدون اسم'}</strong><br><span style="font-size:0.75rem;color:rgba(255,255,255,0.45);">${s.phone||''}</span></div></div></td>
+            <td><div style="display:flex;align-items:center;gap:8px;">${waBtnHtml}<div><strong>${s.name||'ط¨ط¯ظˆظ† ط§ط³ظ…'}</strong><br><span style="font-size:0.75rem;color:rgba(255,255,255,0.45);">${s.phone||''}</span></div></div></td>
             <td>${gradeNames[s.grade]||s.grade||'-'}</td>
             <td><span style="color:${col(stats.avgExam)};font-weight:700;font-size:1rem;">${fmt(stats.avgExam)}</span></td>
             <td><span style="color:${col(stats.avgHomework)};font-weight:700;font-size:1rem;">${fmt(stats.avgHomework)}</span></td>
             <td><span style="color:${col(stats.avgTraining)};font-weight:700;font-size:1rem;">${fmt(stats.avgTraining)}</span></td>
             <td>${watchBar}</td>
             <td><span class="level-badge ${lvl.cls}">${lvl.label}</span><br><span style="font-size:0.72rem;color:rgba(255,255,255,0.35);">${overall}%</span></td>
-            <td><button onclick="event.stopPropagation();openStudentDetail('${s._uid}')" class="btn btn-gold" style="padding:6px 14px;font-size:0.82rem;border-radius:8px;"><i class="fas fa-edit"></i> تفاصيل وتصحيح</button></td>
+            <td><button onclick="event.stopPropagation();openStudentDetail('${s._uid}')" class="btn btn-gold" style="padding:6px 14px;font-size:0.82rem;border-radius:8px;"><i class="fas fa-edit"></i> طھظپط§طµظٹظ„ ظˆطھطµط­ظٹط­</button></td>
         </tr>`;
     }).join('');
 }
 
 async function openStudentDetail(uid) {
     document.getElementById('studentDetailModal').classList.add('active');
-    document.getElementById('modalStudentName').textContent = 'جاري التحميل...';
+    document.getElementById('modalStudentName').textContent = 'ط¬ط§ط±ظٹ ط§ظ„طھط­ظ…ظٹظ„...';
     document.getElementById('modalStudentMeta').textContent = '';
     document.getElementById('modalContent').innerHTML = '<div style="text-align:center;padding:40px;"><i class="fas fa-spinner fa-spin" style="font-size:2rem;color:var(--royal-gold);"></i></div>';
 
@@ -431,18 +432,18 @@ async function openStudentDetail(uid) {
         const doc = await window.firebaseDb.collection('students').doc(uid).get();
         if (doc.exists) { s = doc.data(); s._uid = uid; }
     }
-    if (!s) { document.getElementById('modalContent').innerHTML = '<p style="color:#e74c3c;">لم يتم العثور على الطالب</p>'; return; }
+    if (!s) { document.getElementById('modalContent').innerHTML = '<p style="color:#e74c3c;">ظ„ظ… ظٹطھظ… ط§ظ„ط¹ط«ظˆط± ط¹ظ„ظ‰ ط§ظ„ط·ط§ظ„ط¨</p>'; return; }
 
     const rawPhone = (s.phone||'').replace(/\D/g,'');
     const waPhone  = rawPhone ? '2'+rawPhone.replace(/^0/,'') : '';
     const waHref   = waPhone  ? `https://wa.me/${waPhone}` : '';
 
-    document.getElementById('modalStudentName').innerHTML = `${s.name||'بدون اسم'} ${waPhone?`<a href="${waHref}" target="_blank" style="margin-right:10px;color:#25d366;font-size:1rem;"><i class="fab fa-whatsapp"></i> واتساب</a>`:''}`;
-    document.getElementById('modalStudentMeta').textContent = `${s.phone||''} | ${gradeNames[s.grade]||s.grade||''} | آخر دخول: ${s.lastSeen?new Date(s.lastSeen).toLocaleString('ar-EG'):'غير معروف'}`;
+    document.getElementById('modalStudentName').innerHTML = `${s.name||'ط¨ط¯ظˆظ† ط§ط³ظ…'} ${waPhone?`<a href="${waHref}" target="_blank" style="margin-right:10px;color:#25d366;font-size:1rem;"><i class="fab fa-whatsapp"></i> ظˆط§طھط³ط§ط¨</a>`:''}`;
+    document.getElementById('modalStudentMeta').textContent = `${s.phone||''} | ${gradeNames[s.grade]||s.grade||''} | ط¢ط®ط± ط¯ط®ظˆظ„: ${s.lastSeen?new Date(s.lastSeen).toLocaleString('ar-EG'):'ط؛ظٹط± ظ…ط¹ط±ظˆظپ'}`;
 
     const examResults = s.examResults || [];
-    const isT = r => r.isTraining || (r.examTitle&&r.examTitle.includes('تدريب'));
-    const isH = r => r.isHomework  || (r.examTitle&&r.examTitle.includes('واجب'));
+    const isT = r => r.isTraining || (r.examTitle&&r.examTitle.includes('طھط¯ط±ظٹط¨'));
+    const isH = r => r.isHomework  || (r.examTitle&&r.examTitle.includes('ظˆط§ط¬ط¨'));
     const exams     = examResults.filter(r => !isT(r)&&!isH(r));
     const trainings = examResults.filter(r =>  isT(r));
     const homeworks = examResults.filter(r =>  isH(r));
@@ -454,36 +455,36 @@ async function openStudentDetail(uid) {
     const lvlRGB = lvl.cls==='level-top'?'46,204,113':lvl.cls==='level-mid'?'241,196,15':'231,76,60';
 
     const statBar = `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:18px;">
-        <div style="background:rgba(52,152,219,0.1);border:1px solid rgba(52,152,219,0.25);border-radius:10px;padding:12px;text-align:center;"><div style="font-size:1.6rem;font-weight:800;color:#3498db;">${stats.avgExam!==null?stats.avgExam+'%':'—'}</div><div style="font-size:0.75rem;color:rgba(255,255,255,0.5);">متوسط الامتحانات</div></div>
-        <div style="background:rgba(155,89,182,0.1);border:1px solid rgba(155,89,182,0.25);border-radius:10px;padding:12px;text-align:center;"><div style="font-size:1.6rem;font-weight:800;color:#9b59b6;">${stats.avgHomework!==null?stats.avgHomework+'%':'—'}</div><div style="font-size:0.75rem;color:rgba(255,255,255,0.5);">متوسط الواجبات</div></div>
-        <div style="background:rgba(46,204,113,0.1);border:1px solid rgba(46,204,113,0.25);border-radius:10px;padding:12px;text-align:center;"><div style="font-size:1.6rem;font-weight:800;color:#2ecc71;">${stats.avgTraining!==null?stats.avgTraining+'%':'—'}</div><div style="font-size:0.75rem;color:rgba(255,255,255,0.5);">متوسط التدريبات</div></div>
-        <div style="background:rgba(212,175,55,0.1);border:1px solid rgba(212,175,55,0.25);border-radius:10px;padding:12px;text-align:center;"><div style="font-size:1.6rem;font-weight:800;color:var(--royal-gold);">${stats.watchPct!==null?stats.watchPct+'%':'—'}</div><div style="font-size:0.75rem;color:rgba(255,255,255,0.5);">نسبة المشاهدة</div></div>
-        <div style="background:rgba(${lvlRGB},0.1);border:1px solid rgba(${lvlRGB},0.25);border-radius:10px;padding:12px;text-align:center;"><div style="font-size:1.6rem;font-weight:800;" class="${lvl.cls}">${overall}%</div><div style="font-size:0.75rem;color:rgba(255,255,255,0.5);">المستوى: ${lvl.label}</div></div>
+        <div style="background:rgba(52,152,219,0.1);border:1px solid rgba(52,152,219,0.25);border-radius:10px;padding:12px;text-align:center;"><div style="font-size:1.6rem;font-weight:800;color:#3498db;">${stats.avgExam!==null?stats.avgExam+'%':'â€”'}</div><div style="font-size:0.75rem;color:rgba(255,255,255,0.5);">ظ…طھظˆط³ط· ط§ظ„ط§ظ…طھط­ط§ظ†ط§طھ</div></div>
+        <div style="background:rgba(155,89,182,0.1);border:1px solid rgba(155,89,182,0.25);border-radius:10px;padding:12px;text-align:center;"><div style="font-size:1.6rem;font-weight:800;color:#9b59b6;">${stats.avgHomework!==null?stats.avgHomework+'%':'â€”'}</div><div style="font-size:0.75rem;color:rgba(255,255,255,0.5);">ظ…طھظˆط³ط· ط§ظ„ظˆط§ط¬ط¨ط§طھ</div></div>
+        <div style="background:rgba(46,204,113,0.1);border:1px solid rgba(46,204,113,0.25);border-radius:10px;padding:12px;text-align:center;"><div style="font-size:1.6rem;font-weight:800;color:#2ecc71;">${stats.avgTraining!==null?stats.avgTraining+'%':'â€”'}</div><div style="font-size:0.75rem;color:rgba(255,255,255,0.5);">ظ…طھظˆط³ط· ط§ظ„طھط¯ط±ظٹط¨ط§طھ</div></div>
+        <div style="background:rgba(212,175,55,0.1);border:1px solid rgba(212,175,55,0.25);border-radius:10px;padding:12px;text-align:center;"><div style="font-size:1.6rem;font-weight:800;color:var(--royal-gold);">${stats.watchPct!==null?stats.watchPct+'%':'â€”'}</div><div style="font-size:0.75rem;color:rgba(255,255,255,0.5);">ظ†ط³ط¨ط© ط§ظ„ظ…ط´ط§ظ‡ط¯ط©</div></div>
+        <div style="background:rgba(${lvlRGB},0.1);border:1px solid rgba(${lvlRGB},0.25);border-radius:10px;padding:12px;text-align:center;"><div style="font-size:1.6rem;font-weight:800;" class="${lvl.cls}">${overall}%</div><div style="font-size:0.75rem;color:rgba(255,255,255,0.5);">ط§ظ„ظ…ط³طھظˆظ‰: ${lvl.label}</div></div>
     </div>`;
 
     const catTabs = `<div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
-        <button class="cat-tab-btn active" id="catBtn-exams"     onclick="switchModalCat('exams',this)">📄 الامتحانات (${[...new Set(exams.map(r=>r.examTitle))].length})</button>
-        <button class="cat-tab-btn"        id="catBtn-homeworks"  onclick="switchModalCat('homeworks',this)">📚 الواجبات (${[...new Set(homeworks.map(r=>r.examTitle))].length})</button>
-        <button class="cat-tab-btn"        id="catBtn-trainings"  onclick="switchModalCat('trainings',this)">📝 التدريبات (${[...new Set(trainings.map(r=>r.examTitle))].length})</button>
+        <button class="cat-tab-btn active" id="catBtn-exams"     onclick="switchModalCat('exams',this)">ًں“„ ط§ظ„ط§ظ…طھط­ط§ظ†ط§طھ (${[...new Set(exams.map(r=>r.examTitle))].length})</button>
+        <button class="cat-tab-btn"        id="catBtn-homeworks"  onclick="switchModalCat('homeworks',this)">ًں“ڑ ط§ظ„ظˆط§ط¬ط¨ط§طھ (${[...new Set(homeworks.map(r=>r.examTitle))].length})</button>
+        <button class="cat-tab-btn"        id="catBtn-trainings"  onclick="switchModalCat('trainings',this)">ًں“‌ ط§ظ„طھط¯ط±ظٹط¨ط§طھ (${[...new Set(trainings.map(r=>r.examTitle))].length})</button>
     </div>`;
 
     const renderCategory = (id, items, typeStr, isVisible) => {
         const byTitle = {};
-        items.forEach(r => { const k = r.examTitle||'غير معنون'; (byTitle[k]=byTitle[k]||[]).push(r); });
+        items.forEach(r => { const k = r.examTitle||'ط؛ظٹط± ظ…ط¹ظ†ظˆظ†'; (byTitle[k]=byTitle[k]||[]).push(r); });
         const sortedTitles = Object.entries(byTitle).sort((a,b)=>(a[1][0].ts||0)-(b[1][0].ts||0));
         let cHtml = `<div id="${id}" class="modal-cat" style="display:${isVisible?'block':'none'};">`;
         if (!sortedTitles.length) {
-            cHtml += `<div style="text-align:center;padding:30px;color:rgba(255,255,255,0.35);"><i class="fas fa-inbox" style="font-size:2rem;display:block;margin-bottom:10px;"></i>لا توجد ${typeStr}</div>`;
+            cHtml += `<div style="text-align:center;padding:30px;color:rgba(255,255,255,0.35);"><i class="fas fa-inbox" style="font-size:2rem;display:block;margin-bottom:10px;"></i>ظ„ط§ طھظˆط¬ط¯ ${typeStr}</div>`;
         } else {
-            const letters = ['أ','ب','ج','د','ه','ا'];
+            const letters = ['ط£','ط¨','ط¬','ط¯','ظ‡','ط§'];
             const getFullAns = (ans, opts) => {
-                if (ans===undefined||ans===null||ans==='') return '(بدون إجابة)';
+                if (ans===undefined||ans===null||ans==='') return '(ط¨ط¯ظˆظ† ط¥ط¬ط§ط¨ط©)';
                 const ansStr = String(ans).trim();
                 if (opts && Array.isArray(opts)) {
                     let idx = letters.indexOf(ansStr); if (idx===5) idx=0;
-                    if (idx>=0&&opts[idx]) return `${ansStr} — ${opts[idx]}`;
+                    if (idx>=0&&opts[idx]) return `${ansStr} â€” ${opts[idx]}`;
                     const numIdx = parseInt(ansStr);
-                    if (!isNaN(numIdx)&&numIdx>=0&&numIdx<opts.length) return `${letters[numIdx]} — ${opts[numIdx]}`;
+                    if (!isNaN(numIdx)&&numIdx>=0&&numIdx<opts.length) return `${letters[numIdx]} â€” ${opts[numIdx]}`;
                 }
                 return ansStr;
             };
@@ -497,42 +498,42 @@ async function openStudentDetail(uid) {
 
                 cHtml += `<div style="border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:14px 16px;margin-bottom:12px;background:rgba(0,0,0,0.2);">
                     <div class="modal-section-header">
-                        <div><strong style="font-size:1rem;">${title}</strong>${fa._adminOverride?` <span style="background:rgba(212,175,55,0.15);color:var(--royal-gold);font-size:0.72rem;padding:2px 7px;border-radius:10px;margin-right:6px;">✏️ معدّلة</span>`:''}<br><span style="font-size:0.78rem;color:rgba(255,255,255,0.4);">${fa.ts?new Date(fa.ts).toLocaleString('ar-EG'):''}</span></div>
-                        <div style="display:flex;align-items:center;gap:10px;"><span style="font-size:1.5rem;font-weight:800;color:${pCol};">${cPct}%</span><span style="font-size:0.75rem;color:rgba(255,255,255,0.4);">الدرجة الرسمية</span></div>
+                        <div><strong style="font-size:1rem;">${title}</strong>${fa._adminOverride?` <span style="background:rgba(212,175,55,0.15);color:var(--royal-gold);font-size:0.72rem;padding:2px 7px;border-radius:10px;margin-right:6px;">âœڈï¸ڈ ظ…ط¹ط¯ظ‘ظ„ط©</span>`:''}<br><span style="font-size:0.78rem;color:rgba(255,255,255,0.4);">${fa.ts?new Date(fa.ts).toLocaleString('ar-EG'):''}</span></div>
+                        <div style="display:flex;align-items:center;gap:10px;"><span style="font-size:1.5rem;font-weight:800;color:${pCol};">${cPct}%</span><span style="font-size:0.75rem;color:rgba(255,255,255,0.4);">ط§ظ„ط¯ط±ط¬ط© ط§ظ„ط±ط³ظ…ظٹط©</span></div>
                     </div>`;
 
                 if (attempts.length>1) {
-                    cHtml += `<div style="margin-bottom:10px;padding:8px 12px;background:rgba(255,255,255,0.03);border-radius:8px;display:flex;flex-wrap:wrap;gap:8px;"><span style="font-size:0.78rem;color:rgba(255,255,255,0.45);">كل المحاولات:</span>`;
-                    attempts.forEach((a,i)=>{ const p=a.effectivePercent??a.percent??0; cHtml+=`<span style="font-size:0.78rem;padding:2px 8px;border-radius:8px;background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.7);">م${a.attemptNumber||i+1}: ${p}%</span>`; });
+                    cHtml += `<div style="margin-bottom:10px;padding:8px 12px;background:rgba(255,255,255,0.03);border-radius:8px;display:flex;flex-wrap:wrap;gap:8px;"><span style="font-size:0.78rem;color:rgba(255,255,255,0.45);">ظƒظ„ ط§ظ„ظ…ط­ط§ظˆظ„ط§طھ:</span>`;
+                    attempts.forEach((a,i)=>{ const p=a.effectivePercent??a.percent??0; cHtml+=`<span style="font-size:0.78rem;padding:2px 8px;border-radius:8px;background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.7);">ظ…${a.attemptNumber||i+1}: ${p}%</span>`; });
                     cHtml += `</div>`;
                 }
 
                 cHtml += `<div style="background:rgba(212,175,55,0.07);border:1px solid rgba(212,175,55,0.2);border-radius:8px;padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-                    <span style="font-size:0.85rem;color:var(--royal-gold);font-weight:600;"><i class="fas fa-edit"></i> تعديل الدرجة الرسمية:</span>
+                    <span style="font-size:0.85rem;color:var(--royal-gold);font-weight:600;"><i class="fas fa-edit"></i> طھط¹ط¯ظٹظ„ ط§ظ„ط¯ط±ط¬ط© ط§ظ„ط±ط³ظ…ظٹط©:</span>
                     <input type="number" class="score-input" id="score_${tId}" value="${cPct}" min="0" max="100" style="width:80px;font-size:1rem;">
                     <span style="color:rgba(255,255,255,0.4);font-size:0.8rem;">/100</span>
-                    <button id="saveBtn_${tId}" class="save-grade-btn" onclick="saveGradeOverride('${uid}','${safe}',this)">💾 حفظ الدرجة</button>
-                    <span id="officialPercent_${tId}" style="font-size:0.78rem;color:rgba(255,255,255,0.4);">الحالية: ${cPct}%</span>
+                    <button id="saveBtn_${tId}" class="save-grade-btn" onclick="saveGradeOverride('${uid}','${safe}',this)">ًں’¾ ط­ظپط¸ ط§ظ„ط¯ط±ط¬ط©</button>
+                    <span id="officialPercent_${tId}" style="font-size:0.78rem;color:rgba(255,255,255,0.4);">ط§ظ„ط­ط§ظ„ظٹط©: ${cPct}%</span>
                 </div>`;
 
                 if (fa.details && fa.details.length) {
-                    cHtml += `<div style="margin-top:4px;"><div style="font-size:0.85rem;color:rgba(255,255,255,0.5);margin-bottom:8px;">إجابات الطالب (${fa.details.length} سؤال) — اضغط لتغيير الحكم:</div>`;
+                    cHtml += `<div style="margin-top:4px;"><div style="font-size:0.85rem;color:rgba(255,255,255,0.5);margin-bottom:8px;">ط¥ط¬ط§ط¨ط§طھ ط§ظ„ط·ط§ظ„ط¨ (${fa.details.length} ط³ط¤ط§ظ„) â€” ط§ط¶ط؛ط· ظ„طھط؛ظٹظٹط± ط§ظ„ط­ظƒظ…:</div>`;
                     fa.details.forEach((d,i)=>{
                         const ok = d.score>=0.5;
                         const dS = getFullAns(d.rawAnswer,d.options);
                         const cR = d.correctAnswer??d.correct??d.answer??'';
                         const dC = cR!==''?getFullAns(cR,d.options):'';
                         cHtml+=`<div class="q-card ${ok?'correct':'wrong'}"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">
-                            <div style="flex:1;"><div style="font-size:0.88rem;margin-bottom:5px;"><strong>س${i+1}:</strong> ${d.question||''}</div>
-                            <div style="font-size:0.83rem;"><span style="color:rgba(255,255,255,0.55);">إجابة الطالب: </span><span style="color:${ok?'#2ecc71':'#e74c3c'};font-weight:600;">${dS}</span></div>
-                            ${!ok&&dC?`<div style="font-size:0.82rem;margin-top:3px;"><span style="color:rgba(255,255,255,0.45);">الإجابة الصحيحة: </span><span style="color:#2ecc71;">${dC}</span></div>`:''}
-                            <div style="font-size:0.73rem;color:rgba(255,255,255,0.3);margin-top:3px;">${Math.round((d.score||0)*100)}% — (${d.pointsEarned||0}/${d.totalPoints||1} نقطة)</div></div>
-                            <button class="toggle-score-btn" onclick="window.toggleQuestionScore('${uid}','${safe}',${i},this)">${ok?'❌ اجعله خطأ':'✅ اجعله صحيح'}</button>
+                            <div style="flex:1;"><div style="font-size:0.88rem;margin-bottom:5px;"><strong>ط³${i+1}:</strong> ${d.question||''}</div>
+                            <div style="font-size:0.83rem;"><span style="color:rgba(255,255,255,0.55);">ط¥ط¬ط§ط¨ط© ط§ظ„ط·ط§ظ„ط¨: </span><span style="color:${ok?'#2ecc71':'#e74c3c'};font-weight:600;">${dS}</span></div>
+                            ${!ok&&dC?`<div style="font-size:0.82rem;margin-top:3px;"><span style="color:rgba(255,255,255,0.45);">ط§ظ„ط¥ط¬ط§ط¨ط© ط§ظ„طµط­ظٹط­ط©: </span><span style="color:#2ecc71;">${dC}</span></div>`:''}
+                            <div style="font-size:0.73rem;color:rgba(255,255,255,0.3);margin-top:3px;">${Math.round((d.score||0)*100)}% â€” (${d.pointsEarned||0}/${d.totalPoints||1} ظ†ظ‚ط·ط©)</div></div>
+                            <button class="toggle-score-btn" onclick="window.toggleQuestionScore('${uid}','${safe}',${i},this)">${ok?'â‌Œ ط§ط¬ط¹ظ„ظ‡ ط®ط·ط£':'âœ… ط§ط¬ط¹ظ„ظ‡ طµط­ظٹط­'}</button>
                         </div></div>`;
                     });
                     cHtml += `</div>`;
                 } else {
-                    cHtml += `<div style="color:rgba(255,255,255,0.3);font-size:0.82rem;padding:6px 0;">لا توجد تفاصيل إجابات محفوظة لهذه المحاولة</div>`;
+                    cHtml += `<div style="color:rgba(255,255,255,0.3);font-size:0.82rem;padding:6px 0;">ظ„ط§ طھظˆط¬ط¯ طھظپط§طµظٹظ„ ط¥ط¬ط§ط¨ط§طھ ظ…ط­ظپظˆط¸ط© ظ„ظ‡ط°ظ‡ ط§ظ„ظ…ط­ط§ظˆظ„ط©</div>`;
                 }
                 cHtml += `</div>`;
             }
@@ -541,9 +542,9 @@ async function openStudentDetail(uid) {
     };
 
     document.getElementById('modalContent').innerHTML = statBar + catTabs
-        + renderCategory('cat-exams',    exams,    'امتحانات', true)
-        + renderCategory('cat-homeworks', homeworks,'واجبات',   false)
-        + renderCategory('cat-trainings', trainings,'تدريبات',  false);
+        + renderCategory('cat-exams',    exams,    'ط§ظ…طھط­ط§ظ†ط§طھ', true)
+        + renderCategory('cat-homeworks', homeworks,'ظˆط§ط¬ط¨ط§طھ',   false)
+        + renderCategory('cat-trainings', trainings,'طھط¯ط±ظٹط¨ط§طھ',  false);
 }
 
 window.switchModalCat = function(cat, btn) {
@@ -556,11 +557,11 @@ window.switchModalCat = function(cat, btn) {
 async function saveGradeOverride(uid, examTitle, btn) {
     const tId = (uid+'_'+examTitle).replace(/\s/g,'_').replace(/[^a-zA-Z0-9_\u0600-\u06FF]/g,'');
     const newScore = parseInt(document.getElementById(`score_${tId}`)?.value);
-    if (isNaN(newScore)||newScore<0||newScore>100) { alert('الدرجة يجب أن تكون بين 0 و 100'); return; }
+    if (isNaN(newScore)||newScore<0||newScore>100) { alert('ط§ظ„ط¯ط±ط¬ط© ظٹط¬ط¨ ط£ظ† طھظƒظˆظ† ط¨ظٹظ† 0 ظˆ 100'); return; }
     btn.textContent = '...';
     try {
         const local = allStudentsData.find(x => x._uid===uid);
-        if (!local) throw new Error('الطالب غير موجود في الذاكرة');
+        if (!local) throw new Error('ط§ظ„ط·ط§ظ„ط¨ ط؛ظٹط± ظ…ظˆط¬ظˆط¯ ظپظٹ ط§ظ„ط°ط§ظƒط±ط©');
         let updated=false, isTrain=false, isHomework=false;
         local.examResults.forEach(r => {
             if (r.examTitle===examTitle && (r.attemptNumber===1||!r.attemptNumber)) {
@@ -571,17 +572,17 @@ async function saveGradeOverride(uid, examTitle, btn) {
                 if (r.isHomework) isHomework=true;
             }
         });
-        if (!updated) { alert('لم يتم العثور على هذا الامتحان في سجلات الطالب'); btn.textContent='حفظ'; return; }
-        const typeStr = isTrain?'تدريب':(isHomework?'واجب':'امتحان');
+        if (!updated) { alert('ظ„ظ… ظٹطھظ… ط§ظ„ط¹ط«ظˆط± ط¹ظ„ظ‰ ظ‡ط°ط§ ط§ظ„ط§ظ…طھط­ط§ظ† ظپظٹ ط³ط¬ظ„ط§طھ ط§ظ„ط·ط§ظ„ط¨'); btn.textContent='ط­ظپط¸'; return; }
+        const typeStr = isTrain?'طھط¯ط±ظٹط¨':(isHomework?'ظˆط§ط¬ط¨':'ط§ظ…طھط­ط§ظ†');
         local.notifications = local.notifications||[];
-        local.notifications.push({ title:`تم إعادة تصحيح ${typeStr}`, message:`تم إعادة تصحيح ${typeStr} "${examTitle}". درجتك الجديدة هي ${newScore}%.`, timestamp:Date.now(), read:false, link:'exams.html' });
+        local.notifications.push({ title:`طھظ… ط¥ط¹ط§ط¯ط© طھطµط­ظٹط­ ${typeStr}`, message:`طھظ… ط¥ط¹ط§ط¯ط© طھطµط­ظٹط­ ${typeStr} "${examTitle}". ط¯ط±ط¬طھظƒ ط§ظ„ط¬ط¯ظٹط¯ط© ظ‡ظٹ ${newScore}%.`, timestamp:Date.now(), read:false, link:'exams.html' });
         await window.firebaseDb.collection('students').doc(uid).update({ examResults:local.examResults, notifications:local.notifications });
         invalidateCache();
-        const off = document.getElementById(`officialPercent_${tId}`); if (off) off.innerHTML=`الحالية: ${newScore}%`;
+        const off = document.getElementById(`officialPercent_${tId}`); if (off) off.innerHTML=`ط§ظ„ط­ط§ظ„ظٹط©: ${newScore}%`;
         filterStudentsTable();
         const sb = document.getElementById(`saveBtn_${tId}`);
-        if (sb) { sb.classList.remove('urgent'); sb.textContent='✅ تم الحفظ'; setTimeout(()=>{ sb.textContent='💾 حفظ الدرجة'; },2000); }
-    } catch(e) { alert('خطأ في الحفظ: '+e.message); btn.textContent='حفظ'; }
+        if (sb) { sb.classList.remove('urgent'); sb.textContent='âœ… طھظ… ط§ظ„ط­ظپط¸'; setTimeout(()=>{ sb.textContent='ًں’¾ ط­ظپط¸ ط§ظ„ط¯ط±ط¬ط©'; },2000); }
+    } catch(e) { alert('ط®ط·ط£ ظپظٹ ط§ظ„ط­ظپط¸: '+e.message); btn.textContent='ط­ظپط¸'; }
 }
 
 window.toggleQuestionScore = function(uid, examTitle, qIndex, btn) {
@@ -591,7 +592,7 @@ window.toggleQuestionScore = function(uid, examTitle, qIndex, btn) {
         if (r.examTitle===examTitle && (r.attemptNumber===1||!r.attemptNumber) && r.details?.[qIndex]) {
             const q=r.details[qIndex], wasOk=(q.score>=0.5), newS=wasOk?0:1;
             q.score=newS; q.pointsEarned=newS*(q.totalPoints||1);
-            q.feedback=newS===1?'تم تصحيح الدرجة يدوياً ✅':'تم خصم الدرجة يدوياً ❌';
+            q.feedback=newS===1?'طھظ… طھطµط­ظٹط­ ط§ظ„ط¯ط±ط¬ط© ظٹط¯ظˆظٹط§ظ‹ âœ…':'طھظ… ط®طµظ… ط§ظ„ط¯ط±ط¬ط© ظٹط¯ظˆظٹط§ظ‹ â‌Œ';
             let tot=r.totalPoints||r.details.reduce((s,d)=>s+(d.totalPoints||1),0);
             let earned=r.details.reduce((s,d)=>s+(d.pointsEarned||(d.score*(d.totalPoints||1))),0);
             r.earnedPoints=earned; r.totalPoints=tot;
@@ -601,21 +602,21 @@ window.toggleQuestionScore = function(uid, examTitle, qIndex, btn) {
             const par=btn.parentElement.parentElement;
             par.style.background=isOk?'rgba(46,204,113,0.08)':'rgba(231,76,60,0.08)';
             par.style.borderColor=isOk?'rgba(46,204,113,0.25)':'rgba(231,76,60,0.25)';
-            btn.innerHTML=isOk?'❌ اجعله خطأ':'✅ اجعله صحيح';
-            const letters=['أ','ب','ج','د','ه','ا'];
+            btn.innerHTML=isOk?'â‌Œ ط§ط¬ط¹ظ„ظ‡ ط®ط·ط£':'âœ… ط§ط¬ط¹ظ„ظ‡ طµط­ظٹط­';
+            const letters=['ط£','ط¨','ط¬','ط¯','ظ‡','ط§'];
             const gA=ans=>{
-                if(ans===undefined||ans===null||ans==='') return '(بدون إجابة)';
+                if(ans===undefined||ans===null||ans==='') return '(ط¨ط¯ظˆظ† ط¥ط¬ط§ط¨ط©)';
                 const a=String(ans).trim();
                 if(q.options&&Array.isArray(q.options)){let i=letters.indexOf(a);if(i===5)i=0;if(i>=0&&q.options[i])return`${a} - (${q.options[i]})`;const n=parseInt(a);if(!isNaN(n)&&n>=0&&n<q.options.length)return`${letters[n]} - (${q.options[n]})`;}
                 return a;
             };
             const dS=gA(q.rawAnswer), cR=q.correctAnswer!==undefined?q.correctAnswer:q.correct!==undefined?q.correct:q.answer!==undefined?q.answer:'', dC=cR!==''?gA(cR):'';
             const td=par.querySelector('div>div');
-            if(td) td.innerHTML=`<strong>س${qIndex+1}:</strong> ${q.question||''}<br><span style="color:rgba(255,255,255,0.6);">إجابة الطالب: </span><span style="color:${isOk?'#2ecc71':'#e74c3c'};">${dS}</span>${(!isOk&&dC)?`<br><span style="color:rgba(255,255,255,0.45);">الإجابة الصحيحة: </span><span style="color:#2ecc71;">${dC}</span>`:''}<br><span style="color:rgba(255,255,255,0.4);font-size:0.78rem;"> | ${Math.round((q.score||0)*100)}% (${q.pointsEarned||0}/${q.totalPoints||1} نقطة)</span>`;
+            if(td) td.innerHTML=`<strong>ط³${qIndex+1}:</strong> ${q.question||''}<br><span style="color:rgba(255,255,255,0.6);">ط¥ط¬ط§ط¨ط© ط§ظ„ط·ط§ظ„ط¨: </span><span style="color:${isOk?'#2ecc71':'#e74c3c'};">${dS}</span>${(!isOk&&dC)?`<br><span style="color:rgba(255,255,255,0.45);">ط§ظ„ط¥ط¬ط§ط¨ط© ط§ظ„طµط­ظٹط­ط©: </span><span style="color:#2ecc71;">${dC}</span>`:''}<br><span style="color:rgba(255,255,255,0.4);font-size:0.78rem;"> | ${Math.round((q.score||0)*100)}% (${q.pointsEarned||0}/${q.totalPoints||1} ظ†ظ‚ط·ط©)</span>`;
             const tId=(uid+'_'+examTitle).replace(/\s/g,'_').replace(/[^a-zA-Z0-9_\u0600-\u06FF]/g,'');
             const inp=document.getElementById(`score_${tId}`); if(inp){inp.value=r.percent;inp.style.boxShadow='0 0 10px rgba(212,175,55,0.5)';setTimeout(()=>inp.style.boxShadow='none',1000);}
-            const sb=document.getElementById(`saveBtn_${tId}`); if(sb){sb.classList.add('urgent');sb.textContent='⚠️ احفظ الآن!';}
-            const off=document.getElementById(`officialPercent_${tId}`); if(off) off.innerHTML=`الحالية: ${r.percent}%`;
+            const sb=document.getElementById(`saveBtn_${tId}`); if(sb){sb.classList.add('urgent');sb.textContent='âڑ ï¸ڈ ط§ط­ظپط¸ ط§ظ„ط¢ظ†!';}
+            const off=document.getElementById(`officialPercent_${tId}`); if(off) off.innerHTML=`ط§ظ„ط­ط§ظ„ظٹط©: ${r.percent}%`;
         }
     });
 };
@@ -625,13 +626,13 @@ function closeDetailModal() { document.getElementById('studentDetailModal').clas
 async function loadLateStudents() {
     const grade = document.getElementById('lateGradeFilter').value;
     const container = document.getElementById('lateContainer');
-    container.innerHTML = '<div style="text-align:center;padding:30px;"><i class="fas fa-spinner fa-spin"></i> جاري التحليل الحقيقي من Firebase...</div>';
-    if (!window.firebaseDb) { container.innerHTML='<p style="color:#e74c3c;">Firebase غير متاح</p>'; return; }
+    container.innerHTML = '<div style="text-align:center;padding:30px;"><i class="fas fa-spinner fa-spin"></i> ط¬ط§ط±ظٹ ط§ظ„طھط­ظ„ظٹظ„ ط§ظ„ط­ظ‚ظٹظ‚ظٹ ظ…ظ† Firebase...</div>';
+    if (!window.firebaseDb) { container.innerHTML='<p style="color:#e74c3c;">Firebase ط؛ظٹط± ظ…طھط§ط­</p>'; return; }
 
     const NO_CONTENT_GRADES = ['prep1','prep2','sec1','sec2','sec3'];
     if (grade && NO_CONTENT_GRADES.includes(grade)) {
-        const GL={prep1:'الأول الإعدادي',prep2:'الثاني الإعدادي',sec1:'الأول الثانوي',sec2:'الثاني الثانوي',sec3:'الثالث الثانوي'};
-        container.innerHTML=`<div style="text-align:center;padding:40px;"><i class="fas fa-calendar-times" style="font-size:2.5rem;color:var(--royal-gold);opacity:0.6;display:block;margin-bottom:14px;"></i><h3 style="color:rgba(255,255,255,0.8);margin:0 0 8px;">لم يُنشر محتوى بعد</h3><p style="color:rgba(255,255,255,0.45);max-width:340px;margin:auto;line-height:1.7;">صف <strong>${GL[grade]}</strong> — لم يتم نشر أي محاضرات أو تدريبات حتى الآن، لذلك لا توجد متأخرات. عند نشر المحتوى ستظهر النتائج هنا تلقائياً.</p></div>`;
+        const GL={prep1:'ط§ظ„ط£ظˆظ„ ط§ظ„ط¥ط¹ط¯ط§ط¯ظٹ',prep2:'ط§ظ„ط«ط§ظ†ظٹ ط§ظ„ط¥ط¹ط¯ط§ط¯ظٹ',sec1:'ط§ظ„ط£ظˆظ„ ط§ظ„ط«ط§ظ†ظˆظٹ',sec2:'ط§ظ„ط«ط§ظ†ظٹ ط§ظ„ط«ط§ظ†ظˆظٹ',sec3:'ط§ظ„ط«ط§ظ„ط« ط§ظ„ط«ط§ظ†ظˆظٹ'};
+        container.innerHTML=`<div style="text-align:center;padding:40px;"><i class="fas fa-calendar-times" style="font-size:2.5rem;color:var(--royal-gold);opacity:0.6;display:block;margin-bottom:14px;"></i><h3 style="color:rgba(255,255,255,0.8);margin:0 0 8px;">ظ„ظ… ظٹظڈظ†ط´ط± ظ…ط­طھظˆظ‰ ط¨ط¹ط¯</h3><p style="color:rgba(255,255,255,0.45);max-width:340px;margin:auto;line-height:1.7;">طµظپ <strong>${GL[grade]}</strong> â€” ظ„ظ… ظٹطھظ… ظ†ط´ط± ط£ظٹ ظ…ط­ط§ط¶ط±ط§طھ ط£ظˆ طھط¯ط±ظٹط¨ط§طھ ط­طھظ‰ ط§ظ„ط¢ظ†طŒ ظ„ط°ظ„ظƒ ظ„ط§ طھظˆط¬ط¯ ظ…طھط£ط®ط±ط§طھ. ط¹ظ†ط¯ ظ†ط´ط± ط§ظ„ظ…ط­طھظˆظ‰ ط³طھط¸ظ‡ط± ط§ظ„ظ†طھط§ط¦ط¬ ظ‡ظ†ط§ طھظ„ظ‚ط§ط¦ظٹط§ظ‹.</p></div>`;
         return;
     }
 
@@ -642,22 +643,22 @@ async function loadLateStudents() {
         if (grade) allCourses=allCourses.filter(c=>c.grade===grade||c.targetGrade===grade);
 
         function extractItems(course) {
-            const out=[], con=course.contents||{}, cId=course.id, cT=course.title||'كورس';
+            const out=[], con=course.contents||{}, cId=course.id, cT=course.title||'ظƒظˆط±ط³';
             if (Array.isArray(con.sections)) {
-                con.sections.forEach(sec=>(sec.items||[]).forEach(item=>{ if(item.id&&item.type!=='header') out.push({id:item.id,title:item.title||'عنصر',type:item.type||'video',courseId:cId,courseTitle:cT}); }));
+                con.sections.forEach(sec=>(sec.items||[]).forEach(item=>{ if(item.id&&item.type!=='header') out.push({id:item.id,title:item.title||'ط¹ظ†طµط±',type:item.type||'video',courseId:cId,courseTitle:cT}); }));
                 if (out.length) return out;
             }
-            (con.lectures||[]).forEach(lec=>{ if(lec.id) out.push({id:lec.id,title:lec.title||'محاضرة',type:'video',courseId:cId,courseTitle:cT}); (lec.children||[]).forEach(ch=>{ if(ch.id) out.push({id:ch.id,title:ch.title||'عنصر',type:ch.type||'training',courseId:cId,courseTitle:cT}); }); });
-            (con.trainings||[]).forEach(tr=>{ if(tr.id) out.push({id:tr.id,title:tr.title||'تدريب',type:'training',courseId:cId,courseTitle:cT}); });
-            (con.homeworks||[]).forEach(hw=>{ if(hw.id) out.push({id:hw.id,title:hw.title||'واجب',type:'homework',courseId:cId,courseTitle:cT}); });
-            (con.exams||[]).forEach(ex=>{ if(ex.id) out.push({id:ex.id,title:ex.title||'امتحان',type:'exam',courseId:cId,courseTitle:cT}); });
+            (con.lectures||[]).forEach(lec=>{ if(lec.id) out.push({id:lec.id,title:lec.title||'ظ…ط­ط§ط¶ط±ط©',type:'video',courseId:cId,courseTitle:cT}); (lec.children||[]).forEach(ch=>{ if(ch.id) out.push({id:ch.id,title:ch.title||'ط¹ظ†طµط±',type:ch.type||'training',courseId:cId,courseTitle:cT}); }); });
+            (con.trainings||[]).forEach(tr=>{ if(tr.id) out.push({id:tr.id,title:tr.title||'طھط¯ط±ظٹط¨',type:'training',courseId:cId,courseTitle:cT}); });
+            (con.homeworks||[]).forEach(hw=>{ if(hw.id) out.push({id:hw.id,title:hw.title||'ظˆط§ط¬ط¨',type:'homework',courseId:cId,courseTitle:cT}); });
+            (con.exams||[]).forEach(ex=>{ if(ex.id) out.push({id:ex.id,title:ex.title||'ط§ظ…طھط­ط§ظ†',type:'exam',courseId:cId,courseTitle:cT}); });
             return out;
         }
 
         const courseMap={};let totalCourseItems=0;
         allCourses.forEach(c=>{ const items=extractItems(c); if(items.length){courseMap[c.id]={course:c,items};totalCourseItems+=items.length;} });
 
-        if (!totalCourseItems) { container.innerHTML=`<div style="text-align:center;padding:40px;"><i class="fas fa-box-open" style="font-size:2.5rem;color:rgba(255,255,255,0.2);display:block;margin-bottom:14px;"></i><p style="color:rgba(255,255,255,0.45);">لا يوجد محتوى منشور في الكورسات المحددة حتى الآن.</p></div>`; return; }
+        if (!totalCourseItems) { container.innerHTML=`<div style="text-align:center;padding:40px;"><i class="fas fa-box-open" style="font-size:2.5rem;color:rgba(255,255,255,0.2);display:block;margin-bottom:14px;"></i><p style="color:rgba(255,255,255,0.45);">ظ„ط§ ظٹظˆط¬ط¯ ظ…ط­طھظˆظ‰ ظ…ظ†ط´ظˆط± ظپظٹ ط§ظ„ظƒظˆط±ط³ط§طھ ط§ظ„ظ…ط­ط¯ط¯ط© ط­طھظ‰ ط§ظ„ط¢ظ†.</p></div>`; return; }
 
         let students=[];
         let q=window.firebaseDb.collection('students');
@@ -672,37 +673,37 @@ async function loadLateStudents() {
             const examTitles=new Set((Array.isArray(s.examResults)?s.examResults:[]).map(r=>r.examTitle||r.title||'').filter(Boolean));
             const enrolled=Array.isArray(s.enrolledCourses)?s.enrolledCourses:(Array.isArray(s.courses)?s.courses:[]);
             const missed=[];
-            enrolled.forEach(cId=>{ const entry=courseMap[cId]; if(!entry) return; entry.items.forEach(item=>{ const isVid=item.type==='video',isTest=['training','quiz','task','homework','exam','تدريب','واجب','امتحان'].includes(item.type); if(isVid&&!done.has(item.id)) missed.push(item); else if(isTest&&!done.has(item.id)&&!examTitles.has(item.title)) missed.push(item); }); });
+            enrolled.forEach(cId=>{ const entry=courseMap[cId]; if(!entry) return; entry.items.forEach(item=>{ const isVid=item.type==='video',isTest=['training','quiz','task','homework','exam','طھط¯ط±ظٹط¨','ظˆط§ط¬ط¨','ط§ظ…طھط­ط§ظ†'].includes(item.type); if(isVid&&!done.has(item.id)) missed.push(item); else if(isTest&&!done.has(item.id)&&!examTitles.has(item.title)) missed.push(item); }); });
             if (missed.length) lateMap[s._uid||s.phone]={student:s,missed};
         });
 
         const lateList=Object.values(lateMap).sort((a,b)=>b.missed.length-a.missed.length);
-        if (!lateList.length) { container.innerHTML=`<div style="text-align:center;padding:40px;color:#2ecc71;"><i class="fas fa-check-circle" style="font-size:2.5rem;display:block;margin-bottom:10px;"></i><h3 style="margin:0 0 8px;">رائع! لا توجد متأخرات 🎉</h3><p style="color:rgba(255,255,255,0.45);">جميع الطلاب أكملوا المحتوى المنشور</p></div>`; return; }
+        if (!lateList.length) { container.innerHTML=`<div style="text-align:center;padding:40px;color:#2ecc71;"><i class="fas fa-check-circle" style="font-size:2.5rem;display:block;margin-bottom:10px;"></i><h3 style="margin:0 0 8px;">ط±ط§ط¦ط¹! ظ„ط§ طھظˆط¬ط¯ ظ…طھط£ط®ط±ط§طھ ًںژ‰</h3><p style="color:rgba(255,255,255,0.45);">ط¬ظ…ظٹط¹ ط§ظ„ط·ظ„ط§ط¨ ط£ظƒظ…ظ„ظˆط§ ط§ظ„ظ…ط­طھظˆظ‰ ط§ظ„ظ…ظ†ط´ظˆط±</p></div>`; return; }
 
-        const T={video:'🎥 مشاهدة المحاضرة',training:'📝 حل التدريب',تدريب:'📝 حل التدريب',quiz:'📋 حل الاختبار',homework:'📚 تسليم الواجب',واجب:'📚 تسليم الواجب',exam:'📄 حل الامتحان',امتحان:'📄 حل الامتحان',task:'✏️ إنجاز المهمة'};
+        const T={video:'ًںژ¥ ظ…ط´ط§ظ‡ط¯ط© ط§ظ„ظ…ط­ط§ط¶ط±ط©',training:'ًں“‌ ط­ظ„ ط§ظ„طھط¯ط±ظٹط¨',طھط¯ط±ظٹط¨:'ًں“‌ ط­ظ„ ط§ظ„طھط¯ط±ظٹط¨',quiz:'ًں“‹ ط­ظ„ ط§ظ„ط§ط®طھط¨ط§ط±',homework:'ًں“ڑ طھط³ظ„ظٹظ… ط§ظ„ظˆط§ط¬ط¨',ظˆط§ط¬ط¨:'ًں“ڑ طھط³ظ„ظٹظ… ط§ظ„ظˆط§ط¬ط¨',exam:'ًں“„ ط­ظ„ ط§ظ„ط§ظ…طھط­ط§ظ†',ط§ظ…طھط­ط§ظ†:'ًں“„ ط­ظ„ ط§ظ„ط§ظ…طھط­ط§ظ†',task:'âœڈï¸ڈ ط¥ظ†ط¬ط§ط² ط§ظ„ظ…ظ‡ظ…ط©'};
 
         const summaryHtml=`<div style="background:rgba(231,76,60,0.1);border:1px solid rgba(231,76,60,0.3);border-radius:10px;padding:14px 20px;margin-bottom:16px;display:flex;gap:20px;flex-wrap:wrap;align-items:center;">
-            <div><i class="fas fa-users" style="color:#e74c3c;margin-left:6px;"></i><strong style="color:#e74c3c;">${lateList.length}</strong> طالب متأخر</div>
-            <div><i class="fas fa-exclamation-triangle" style="color:var(--royal-gold);margin-left:6px;"></i><strong style="color:var(--royal-gold);">${lateList.reduce((t,s)=>t+s.missed.length,0)}</strong> عنصر لم يُكتمل</div>
-            <div style="color:rgba(255,255,255,0.5);font-size:0.8rem;">${grade?(gradeNames[grade]||grade):'كل الصفوف'} • من أصل ${students.length} طالب مسجل</div>
+            <div><i class="fas fa-users" style="color:#e74c3c;margin-left:6px;"></i><strong style="color:#e74c3c;">${lateList.length}</strong> ط·ط§ظ„ط¨ ظ…طھط£ط®ط±</div>
+            <div><i class="fas fa-exclamation-triangle" style="color:var(--royal-gold);margin-left:6px;"></i><strong style="color:var(--royal-gold);">${lateList.reduce((t,s)=>t+s.missed.length,0)}</strong> ط¹ظ†طµط± ظ„ظ… ظٹظڈظƒطھظ…ظ„</div>
+            <div style="color:rgba(255,255,255,0.5);font-size:0.8rem;">${grade?(gradeNames[grade]||grade):'ظƒظ„ ط§ظ„طµظپظˆظپ'} â€¢ ظ…ظ† ط£طµظ„ ${students.length} ط·ط§ظ„ط¨ ظ…ط³ط¬ظ„</div>
         </div>`;
 
         container.innerHTML = summaryHtml + lateList.map(({student:s,missed})=>{
             const byType={};
             missed.forEach(m=>{ const lbl=T[m.type]||m.type; (byType[lbl]=byType[lbl]||[]).push(m.title); });
-            const details=Object.entries(byType).map(([lbl,titles])=>`<div style="margin-top:5px;"><span style="color:rgba(255,255,255,0.5);font-size:0.78rem;">${lbl}:</span> ${titles.slice(0,3).map(t=>`<span style="background:rgba(231,76,60,0.12);border-radius:4px;padding:1px 7px;margin:2px;display:inline-block;font-size:0.78rem;">${t}</span>`).join('')}${titles.length>3?`<span style="font-size:0.73rem;color:rgba(255,255,255,0.35);"> +${titles.length-3} أخرى</span>`:''}</div>`).join('');
-            const waText=`عزيزي ولي أمر الطالب ${s.name}،\nنود إبلاغك بأن ${s.name} متأخر عن إتمام:\n`+Object.entries(byType).map(([t,it])=>`• ${t}: ${it.slice(0,2).join('، ')}${it.length>2?` (+${it.length-2})`:''}`).join('\n')+`\nبرجاء متابعة الطالب لإتمام المحتوى. شكراً 🙏`;
+            const details=Object.entries(byType).map(([lbl,titles])=>`<div style="margin-top:5px;"><span style="color:rgba(255,255,255,0.5);font-size:0.78rem;">${lbl}:</span> ${titles.slice(0,3).map(t=>`<span style="background:rgba(231,76,60,0.12);border-radius:4px;padding:1px 7px;margin:2px;display:inline-block;font-size:0.78rem;">${t}</span>`).join('')}${titles.length>3?`<span style="font-size:0.73rem;color:rgba(255,255,255,0.35);"> +${titles.length-3} ط£ط®ط±ظ‰</span>`:''}</div>`).join('');
+            const waText=`ط¹ط²ظٹط²ظٹ ظˆظ„ظٹ ط£ظ…ط± ط§ظ„ط·ط§ظ„ط¨ ${s.name}طŒ\nظ†ظˆط¯ ط¥ط¨ظ„ط§ط؛ظƒ ط¨ط£ظ† ${s.name} ظ…طھط£ط®ط± ط¹ظ† ط¥طھظ…ط§ظ…:\n`+Object.entries(byType).map(([t,it])=>`â€¢ ${t}: ${it.slice(0,2).join('طŒ ')}${it.length>2?` (+${it.length-2})`:''}`).join('\n')+`\nط¨ط±ط¬ط§ط، ظ…طھط§ط¨ط¹ط© ط§ظ„ط·ط§ظ„ط¨ ظ„ط¥طھظ…ط§ظ… ط§ظ„ظ…ط­طھظˆظ‰. ط´ظƒط±ط§ظ‹ ًں™ڈ`;
             const waP=s.phone?'2'+s.phone.replace(/^0/,''):'';
             return `<div class="late-card" style="margin-bottom:12px;"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;">
-                <div style="flex:1;"><div class="late-msg"><strong style="color:var(--royal-gold);">${s.name}</strong><span style="background:rgba(231,76,60,0.15);color:#e74c3c;font-size:0.73rem;padding:2px 8px;border-radius:12px;margin-right:8px;">${missed.length} عنصر</span></div>${s.phone?`<div style="font-size:0.73rem;color:rgba(255,255,255,0.38);margin-top:2px;">${s.phone}</div>`:''} ${details}</div>
-                <div style="display:flex;gap:6px;flex-shrink:0;padding-top:4px;"><button class="copy-btn" onclick='copyMsg(${JSON.stringify(waText)},this)' style="font-size:0.78rem;"><i class="fas fa-copy"></i> نسخ</button>${waP?`<a href="https://wa.me/${waP}?text=${encodeURIComponent(waText)}" target="_blank" class="copy-btn" style="font-size:0.78rem;text-decoration:none;background:rgba(37,211,102,0.12);color:#25d366;border-color:rgba(37,211,102,0.3);"><i class="fab fa-whatsapp"></i></a>`:''}</div>
+                <div style="flex:1;"><div class="late-msg"><strong style="color:var(--royal-gold);">${s.name}</strong><span style="background:rgba(231,76,60,0.15);color:#e74c3c;font-size:0.73rem;padding:2px 8px;border-radius:12px;margin-right:8px;">${missed.length} ط¹ظ†طµط±</span></div>${s.phone?`<div style="font-size:0.73rem;color:rgba(255,255,255,0.38);margin-top:2px;">${s.phone}</div>`:''} ${details}</div>
+                <div style="display:flex;gap:6px;flex-shrink:0;padding-top:4px;"><button class="copy-btn" onclick='copyMsg(${JSON.stringify(waText)},this)' style="font-size:0.78rem;"><i class="fas fa-copy"></i> ظ†ط³ط®</button>${waP?`<a href="https://wa.me/${waP}?text=${encodeURIComponent(waText)}" target="_blank" class="copy-btn" style="font-size:0.78rem;text-decoration:none;background:rgba(37,211,102,0.12);color:#25d366;border-color:rgba(37,211,102,0.3);"><i class="fab fa-whatsapp"></i></a>`:''}</div>
             </div></div>`;
         }).join('');
-    } catch(e) { container.innerHTML=`<p style="color:#e74c3c;">خطأ: ${e.message}</p>`; console.error('loadLateStudents error:',e); }
+    } catch(e) { container.innerHTML=`<p style="color:#e74c3c;">ط®ط·ط£: ${e.message}</p>`; console.error('loadLateStudents error:',e); }
 }
 
-function copyMsg(msg,btn) { navigator.clipboard.writeText(msg).then(()=>{ btn.textContent='✅ تم النسخ'; setTimeout(()=>{ btn.innerHTML='<i class="fas fa-copy"></i> نسخ'; },1500); }); }
-function copyAllLateMessages() { const cards=document.querySelectorAll('.late-card .late-msg'),msgs=Array.from(cards).map(c=>c.textContent.trim()).join('\n'); if(!msgs){alert('لا توجد متأخرات لنسخها');return;} navigator.clipboard.writeText(msgs).then(()=>alert('تم نسخ كل الرسائل!')); }
+function copyMsg(msg,btn) { navigator.clipboard.writeText(msg).then(()=>{ btn.textContent='âœ… طھظ… ط§ظ„ظ†ط³ط®'; setTimeout(()=>{ btn.innerHTML='<i class="fas fa-copy"></i> ظ†ط³ط®'; },1500); }); }
+function copyAllLateMessages() { const cards=document.querySelectorAll('.late-card .late-msg'),msgs=Array.from(cards).map(c=>c.textContent.trim()).join('\n'); if(!msgs){alert('ظ„ط§ طھظˆط¬ط¯ ظ…طھط£ط®ط±ط§طھ ظ„ظ†ط³ط®ظ‡ط§');return;} navigator.clipboard.writeText(msgs).then(()=>alert('طھظ… ظ†ط³ط® ظƒظ„ ط§ظ„ط±ط³ط§ط¦ظ„!')); }
 
 async function loadLevels() {
     const grade = document.getElementById('levelGradeFilter').value;
@@ -723,7 +724,7 @@ async function loadLevels() {
         const display = grade ? allStudentsData.filter(s=>s.grade===grade) : allStudentsData;
         allStudentsData = display;
         filterLevel(currentLevelFilter);
-    } catch(e) { document.getElementById('levelsContainer').innerHTML=`<p style="color:#e74c3c;">خطأ: ${e.message}</p>`; }
+    } catch(e) { document.getElementById('levelsContainer').innerHTML=`<p style="color:#e74c3c;">ط®ط·ط£: ${e.message}</p>`; }
 }
 
 function filterLevel(level, btn) {
@@ -734,7 +735,7 @@ function filterLevel(level, btn) {
     }
     const container = document.getElementById('levelsContainer');
     if (!allStudentsData || !allStudentsData.length) {
-        container.innerHTML = '<div style="text-align:center; padding:40px; color:rgba(255,255,255,0.5);">لا توجد بيانات</div>';
+        container.innerHTML = '<div style="text-align:center; padding:40px; color:rgba(255,255,255,0.5);">ظ„ط§ طھظˆط¬ط¯ ط¨ظٹط§ظ†ط§طھ</div>';
         return;
     }
     const filtered = allStudentsData.filter(s => {
@@ -745,18 +746,18 @@ function filterLevel(level, btn) {
     });
     
     if (!filtered.length) {
-        container.innerHTML = `<div style="text-align:center; padding:40px; color:rgba(255,255,255,0.5);">لا يوجد طلاب في هذا المستوى</div>`;
+        container.innerHTML = `<div style="text-align:center; padding:40px; color:rgba(255,255,255,0.5);">ظ„ط§ ظٹظˆط¬ط¯ ط·ظ„ط§ط¨ ظپظٹ ظ‡ط°ط§ ط§ظ„ظ…ط³طھظˆظ‰</div>`;
         return;
     }
     
-    const lvlInfo = { top: { label:'متفوقون', cls:'level-top', icon:'⭐' }, mid: { label:'متوسطون', cls:'level-mid', icon:'📊' }, low: { label:'ضعاف', cls:'level-low', icon:'📉' } }[level];
+    const lvlInfo = { top: { label:'ظ…طھظپظˆظ‚ظˆظ†', cls:'level-top', icon:'â­گ' }, mid: { label:'ظ…طھظˆط³ط·ظˆظ†', cls:'level-mid', icon:'ًں“ٹ' }, low: { label:'ط¶ط¹ط§ظپ', cls:'level-low', icon:'ًں“‰' } }[level];
     
-    container.innerHTML = `<div style="margin-bottom:14px;"><span class="level-badge ${lvlInfo.cls}" style="font-size:1rem; padding:6px 16px;">${lvlInfo.icon} ${lvlInfo.label} — ${filtered.length} طالب</span></div>` +
+    container.innerHTML = `<div style="margin-bottom:14px;"><span class="level-badge ${lvlInfo.cls}" style="font-size:1rem; padding:6px 16px;">${lvlInfo.icon} ${lvlInfo.label} â€” ${filtered.length} ط·ط§ظ„ط¨</span></div>` +
         filtered.sort((a,b) => (calcStudentStats(b).avgExam||0) - (calcStudentStats(a).avgExam||0)).map(s => {
             const stats = calcStudentStats(s);
             return `<div class="section-block" style="display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="openStudentDetail('${s._uid}')">
-                <div><strong>${s.name || 'بدون اسم'}</strong><br><span style="font-size:0.8rem; color:rgba(255,255,255,0.5);">${s.phone || ''}</span></div>
-                <div style="text-align:center;"><div style="font-size:1.4rem; font-weight:700; color:var(--royal-gold);">${stats.avgExam !== null ? stats.avgExam + '%' : '-'}</div><div style="font-size:0.75rem; color:rgba(255,255,255,0.4);">متوسط الدرجات</div></div>
+                <div><strong>${s.name || 'ط¨ط¯ظˆظ† ط§ط³ظ…'}</strong><br><span style="font-size:0.8rem; color:rgba(255,255,255,0.5);">${s.phone || ''}</span></div>
+                <div style="text-align:center;"><div style="font-size:1.4rem; font-weight:700; color:var(--royal-gold);">${stats.avgExam !== null ? stats.avgExam + '%' : '-'}</div><div style="font-size:0.75rem; color:rgba(255,255,255,0.4);">ظ…طھظˆط³ط· ط§ظ„ط¯ط±ط¬ط§طھ</div></div>
             </div>`;
         }).join('');
 }
@@ -783,6 +784,14 @@ document.getElementById('studentDetailModal').addEventListener('click', function
 });
 </script>
     <script src="js/mobile.js?v=3"></script>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW registration failed:', err));
+            });
+        }
+    </script>
 </body>
 </html>
 

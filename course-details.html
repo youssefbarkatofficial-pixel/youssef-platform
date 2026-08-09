@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+    <link rel="manifest" href="./manifest.json">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تفاصيل الكورس | منصة يوسف بركات للدراسات الاجتماعية</title>
+    <title>طھظپط§طµظٹظ„ ط§ظ„ظƒظˆط±ط³ | ظ…ظ†طµط© ظٹظˆط³ظپ ط¨ط±ظƒط§طھ ظ„ظ„ط¯ط±ط§ط³ط§طھ ط§ظ„ط§ط¬طھظ…ط§ط¹ظٹط©</title>
     
     <!-- Professional SEO Metadata -->
-    <meta name="description" content="تعرف على تفاصيل كورس الدراسات الاجتماعية مع مستر يوسف بركات. شاهد المحاضرات والملازم الخاصة بالكورس وابدأ رحلة التفوق.">
-    <meta name="keywords" content="تفاصيل كورس دراسات, يوسف بركات, منصة يوسف بركات, شرح تاريخ, شرح جغرافيا, مراجعة دراسات اجتماعية, منصة تعليمية">
+    <meta name="description" content="طھط¹ط±ظپ ط¹ظ„ظ‰ طھظپط§طµظٹظ„ ظƒظˆط±ط³ ط§ظ„ط¯ط±ط§ط³ط§طھ ط§ظ„ط§ط¬طھظ…ط§ط¹ظٹط© ظ…ط¹ ظ…ط³طھط± ظٹظˆط³ظپ ط¨ط±ظƒط§طھ. ط´ط§ظ‡ط¯ ط§ظ„ظ…ط­ط§ط¶ط±ط§طھ ظˆط§ظ„ظ…ظ„ط§ط²ظ… ط§ظ„ط®ط§طµط© ط¨ط§ظ„ظƒظˆط±ط³ ظˆط§ط¨ط¯ط£ ط±ط­ظ„ط© ط§ظ„طھظپظˆظ‚.">
+    <meta name="keywords" content="طھظپط§طµظٹظ„ ظƒظˆط±ط³ ط¯ط±ط§ط³ط§طھ, ظٹظˆط³ظپ ط¨ط±ظƒط§طھ, ظ…ظ†طµط© ظٹظˆط³ظپ ط¨ط±ظƒط§طھ, ط´ط±ط­ طھط§ط±ظٹط®, ط´ط±ط­ ط¬ط؛ط±ط§ظپظٹط§, ظ…ط±ط§ط¬ط¹ط© ط¯ط±ط§ط³ط§طھ ط§ط¬طھظ…ط§ط¹ظٹط©, ظ…ظ†طµط© طھط¹ظ„ظٹظ…ظٹط©">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://youssefbarakat.pages.dev/course-details.html" />
     
@@ -44,11 +45,24 @@
                     if (ogDesc && c.desc) ogDesc.setAttribute('content', c.desc);
                     var metaDesc = document.querySelector('meta[name="description"]');
                     if (metaDesc && c.desc) metaDesc.setAttribute('content', c.desc);
+                    
+                    if (c.image && !c.image.startsWith('__local__')) {
+                        var ogImage = document.querySelector('meta[property="og:image"]');
+                        if (ogImage) {
+                            ogImage.setAttribute('content', c.image);
+                        } else {
+                            var metaImg = document.createElement('meta');
+                            metaImg.setAttribute('property', 'og:image');
+                            metaImg.setAttribute('content', c.image);
+                            document.head.appendChild(metaImg);
+                        }
+                    }
                 }
             }
         } catch(e) {}
     })();
     </script>
+
     <style>
     @keyframes gentlePulse {
         0% { opacity: 1; transform: scale(1); box-shadow: 0 0 0px rgba(52, 152, 219, 0); }
@@ -87,13 +101,13 @@
     <!-- Header -->
     <header class="navbar glass-panel">
         <a href="index.html" class="nav-brand">
-            <div class="logo-circle">ي</div>
-            <span class="nav-brand-text">منصة يوسف بركات</span>
+            <div class="logo-circle">ظٹ</div>
+            <span class="nav-brand-text">ظ…ظ†طµط© ظٹظˆط³ظپ ط¨ط±ظƒط§طھ</span>
         </a>
         <ul class="nav-links">
-            <li><a href="index.html">الرئيسية</a></li>
-            <li><a href="courses.html">الكورسات</a></li>
-            <li><a href="dashboard.html">لوحة التحكم</a></li>
+            <li><a href="index.html">ط§ظ„ط±ط¦ظٹط³ظٹط©</a></li>
+            <li><a href="courses.html">ط§ظ„ظƒظˆط±ط³ط§طھ</a></li>
+            <li><a href="dashboard.html">ظ„ظˆط­ط© ط§ظ„طھط­ظƒظ…</a></li>
         </ul>
         <div class="nav-actions">
             
@@ -104,7 +118,7 @@
         <div class="glass-panel" style="padding: 40px; border-radius: 20px; max-width: 800px; margin: 0 auto;">
             
             <a href="courses.html" style="color: var(--accent-cyan); text-decoration: none; font-size: 0.9rem; margin-bottom: 20px; display: inline-block;">
-                <i class="fas fa-arrow-right mr-2"></i> العودة للكورسات
+                <i class="fas fa-arrow-right mr-2"></i> ط§ظ„ط¹ظˆط¯ط© ظ„ظ„ظƒظˆط±ط³ط§طھ
             </a>
 
             <div style="display: flex; flex-wrap: wrap; gap: 30px; margin-bottom: 40px; align-items: flex-start;">
@@ -132,48 +146,48 @@
     <div class="modal-overlay" id="paymentModal">
         <div class="glass-panel modal-content" style="padding: 30px; max-width: 500px;">
             <button class="close-modal" onclick="document.getElementById('paymentModal').classList.remove('active')"><i class="fas fa-times"></i></button>
-            <h2 class="text-gold mb-2 text-center">تأكيد الاشتراك والدفع</h2>
+            <h2 class="text-gold mb-2 text-center">طھط£ظƒظٹط¯ ط§ظ„ط§ط´طھط±ط§ظƒ ظˆط§ظ„ط¯ظپط¹</h2>
             
-            <p style="margin-bottom: 20px; text-align: center;">اختر طريقة الدفع المناسبة لك:</p>
+            <p style="margin-bottom: 20px; text-align: center;">ط§ط®طھط± ط·ط±ظٹظ‚ط© ط§ظ„ط¯ظپط¹ ط§ظ„ظ…ظ†ط§ط³ط¨ط© ظ„ظƒ:</p>
             
             <div class="payment-methods">
                 <div class="pay-method active" data-type="vodafone">
                     <i class="fas fa-mobile-alt" style="font-size: 2rem; color: #e60000; margin-bottom: 10px;"></i>
-                    <h4>فودافون كاش</h4>
+                    <h4>ظپظˆط¯ط§ظپظˆظ† ظƒط§ط´</h4>
                 </div>
                 <div class="pay-method" data-type="fawry" style="opacity: 0.5; pointer-events: none; filter: grayscale(100%); position: relative;">
-                    <span style="position: absolute; top: 5px; left: 5px; background: rgba(0,0,0,0.5); font-size: 0.7rem; padding: 2px 5px; border-radius: 3px;">قريباً</span>
+                    <span style="position: absolute; top: 5px; left: 5px; background: rgba(0,0,0,0.5); font-size: 0.7rem; padding: 2px 5px; border-radius: 3px;">ظ‚ط±ظٹط¨ط§ظ‹</span>
                     <i class="fas fa-store" style="font-size: 2rem; color: #f1c40f; margin-bottom: 10px;"></i>
-                    <h4>فوري</h4>
+                    <h4>ظپظˆط±ظٹ</h4>
                 </div>
             </div>
 
             <div class="payment-details" id="vodafoneDetails">
-                <p>قم بتحويل المبلغ على الرقم التالي عبر فودافون كاش:</p>
+                <p>ظ‚ظ… ط¨طھط­ظˆظٹظ„ ط§ظ„ظ…ط¨ظ„ط؛ ط¹ظ„ظ‰ ط§ظ„ط±ظ‚ظ… ط§ظ„طھط§ظ„ظٹ ط¹ط¨ط± ظپظˆط¯ط§ظپظˆظ† ظƒط§ط´:</p>
                 <div class="copy-box">
                     <span id="vCashNum" style="font-size: 1.2rem; font-weight: bold; letter-spacing: 2px;">01023675235</span>
                     <button class="copy-btn" data-target="vCashNum"><i class="fas fa-copy"></i></button>
                 </div>
-                <p style="font-size: 0.85rem; margin-top: 10px; color: var(--accent-cyan);">* برجاء الاحتفاظ بصورة التحويل (الاسكرين شوت) لرفعها بعد الدفع.</p>
+                <p style="font-size: 0.85rem; margin-top: 10px; color: var(--accent-cyan);">* ط¨ط±ط¬ط§ط، ط§ظ„ط§ط­طھظپط§ط¸ ط¨طµظˆط±ط© ط§ظ„طھط­ظˆظٹظ„ (ط§ظ„ط§ط³ظƒط±ظٹظ† ط´ظˆطھ) ظ„ط±ظپط¹ظ‡ط§ ط¨ط¹ط¯ ط§ظ„ط¯ظپط¹.</p>
             </div>
 
             <div class="payment-details" id="fawryDetails" style="display: none;">
-                <p>توجه لأقرب ماكينة فوري واستخدم كود الدفع التالي:</p>
+                <p>طھظˆط¬ظ‡ ظ„ط£ظ‚ط±ط¨ ظ…ط§ظƒظٹظ†ط© ظپظˆط±ظٹ ظˆط§ط³طھط®ط¯ظ… ظƒظˆط¯ ط§ظ„ط¯ظپط¹ ط§ظ„طھط§ظ„ظٹ:</p>
                 <div class="copy-box">
                     <span id="fawryCode" style="font-size: 1.2rem; font-weight: bold; letter-spacing: 2px;">784512</span>
                     <button class="copy-btn" data-target="fawryCode"><i class="fas fa-copy"></i></button>
                 </div>
-                <p style="font-size: 0.85rem; margin-top: 10px; color: var(--accent-cyan);">* الكود صالح لمدة 24 ساعة فقط.</p>
+                <p style="font-size: 0.85rem; margin-top: 10px; color: var(--accent-cyan);">* ط§ظ„ظƒظˆط¯ طµط§ظ„ط­ ظ„ظ…ط¯ط© 24 ط³ط§ط¹ط© ظپظ‚ط·.</p>
             </div>
 
             <div class="form-group" style="margin-top: 20px;">
-                <label>ارفع صورة التحويل</label>
+                <label>ط§ط±ظپط¹ طµظˆط±ط© ط§ظ„طھط­ظˆظٹظ„</label>
                 <input type="file" id="paymentProofImage" class="form-control" style="padding: 10px;" accept="image/*">
             </div>
 
             <div style="display: flex; gap: 10px; margin-top: 20px;">
-                <button class="btn btn-outline" style="flex: 1;" onclick="document.getElementById('paymentModal').classList.remove('active')">تراجع</button>
-                <button type="button" class="btn btn-green" style="flex: 1;" id="confirmPayment" onclick="submitPaymentRequest()">استمرار</button>
+                <button class="btn btn-outline" style="flex: 1;" onclick="document.getElementById('paymentModal').classList.remove('active')">طھط±ط§ط¬ط¹</button>
+                <button type="button" class="btn btn-green" style="flex: 1;" id="confirmPayment" onclick="submitPaymentRequest()">ط§ط³طھظ…ط±ط§ط±</button>
             </div>
         </div>
     </div>
@@ -194,69 +208,69 @@
             <button class="close-modal" onclick="document.getElementById('loginModal').classList.remove('active')"><i class="fas fa-times"></i></button>
             <div class="auth-header">
                 <div class="auth-logo"><i class="fas fa-user-graduate"></i></div>
-                <h2>تسجيل الدخول</h2>
-                <p>مرحباً بك مجدداً في منصتك</p>
+                <h2>طھط³ط¬ظٹظ„ ط§ظ„ط¯ط®ظˆظ„</h2>
+                <p>ظ…ط±ط­ط¨ط§ظ‹ ط¨ظƒ ظ…ط¬ط¯ط¯ط§ظ‹ ظپظٹ ظ…ظ†طµطھظƒ</p>
             </div>
             <form id="loginForm">
                 <div class="form-group">
-                    <label>رقم الموبايل</label>
-                    <input type="text" id="loginPhone" class="form-control" placeholder="أدخل رقم الموبايل" required>
+                    <label>ط±ظ‚ظ… ط§ظ„ظ…ظˆط¨ط§ظٹظ„</label>
+                    <input type="text" id="loginPhone" class="form-control" placeholder="ط£ط¯ط®ظ„ ط±ظ‚ظ… ط§ظ„ظ…ظˆط¨ط§ظٹظ„" required>
                 </div>
                 <div class="form-group">
-                    <label>كلمة المرور</label>
-                    <input type="password" id="loginPassword" class="form-control" placeholder="أدخل كلمة المرور" required>
+                    <label>ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط±</label>
+                    <input type="password" id="loginPassword" class="form-control" placeholder="ط£ط¯ط®ظ„ ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط±" required>
                   <div id="loginError" class="error-message" style="display:none; color: #e74c3c; background: rgba(231,76,60,0.1); padding: 10px; border-radius: 8px; margin-top: 15px; font-size: 0.9rem; text-align: center; border: 1px solid rgba(231,76,60,0.3);"></div>
                 </div>
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <a href="#" id="forgotPasswordLink" style="color: var(--accent-cyan); font-weight: 700;">نسيت كلمة المرور؟</a>
-                    <span style="color: rgba(0,0,0,0.6); font-size: 0.92rem;">تسجيل الدخول الآمن</span>
+                    <a href="#" id="forgotPasswordLink" style="color: var(--accent-cyan); font-weight: 700;">ظ†ط³ظٹطھ ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط±طں</a>
+                    <span style="color: rgba(0,0,0,0.6); font-size: 0.92rem;">طھط³ط¬ظٹظ„ ط§ظ„ط¯ط®ظˆظ„ ط§ظ„ط¢ظ…ظ†</span>
                 </div>
-                <button type="submit" class="btn btn-green btn-block">تسجيل الدخول</button>
+                <button type="submit" class="btn btn-green btn-block">طھط³ط¬ظٹظ„ ط§ظ„ط¯ط®ظˆظ„</button>
             </form>
             <div id="forgotPasswordModal" class="modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 10000; justify-content: center; align-items: center; padding: 20px;">
                 <div class="glass-panel" style="max-width: 520px; width: 100%; padding: 30px; position: relative; border-radius: 20px;">
                     <button onclick="document.getElementById('forgotPasswordModal').style.display='none'" style="position: absolute; top: 18px; right: 18px; background: transparent; border: none; color: var(--text-primary); font-size: 1.4rem; cursor: pointer;"><i class="fas fa-times"></i></button>
-                    <h2 style="margin-bottom: 20px; color: var(--royal-gold);">استعادة كلمة المرور</h2>
-                    <p style="margin-bottom: 20px; color: var(--text-secondary);">اكتب رقم ولي الأمر المرتبط بحسابك وهيتم إرسال كود تأكيد لتغيير كلمة السر.</p>
+                    <h2 style="margin-bottom: 20px; color: var(--royal-gold);">ط§ط³طھط¹ط§ط¯ط© ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط±</h2>
+                    <p style="margin-bottom: 20px; color: var(--text-secondary);">ط§ظƒطھط¨ ط±ظ‚ظ… ظˆظ„ظٹ ط§ظ„ط£ظ…ط± ط§ظ„ظ…ط±طھط¨ط· ط¨ط­ط³ط§ط¨ظƒ ظˆظ‡ظٹطھظ… ط¥ط±ط³ط§ظ„ ظƒظˆط¯ طھط£ظƒظٹط¯ ظ„طھط؛ظٹظٹط± ظƒظ„ظ…ط© ط§ظ„ط³ط±.</p>
                     <div id="fpStatusText" style="display:none; margin-bottom: 20px; padding: 12px 14px; border-radius: 16px; font-size: 0.95rem; line-height:1.5;"></div>
                     <form id="forgotPasswordForm">
                         <div class="form-group">
-                            <label>رقم الطالب</label>
-                            <input type="tel" id="fpStudentPhone" class="form-control" placeholder="رقم الطالب" required>
+                            <label>ط±ظ‚ظ… ط§ظ„ط·ط§ظ„ط¨</label>
+                            <input type="tel" id="fpStudentPhone" class="form-control" placeholder="ط±ظ‚ظ… ط§ظ„ط·ط§ظ„ط¨" required>
                         </div>
                         <div class="form-group">
-                            <label>رقم ولي الأمر</label>
-                            <input type="tel" id="fpParentPhone" class="form-control" placeholder="رقم ولي الأمر" required>
-                            <span id="fpParentError" class="error-message" style="display:none;">الرقم غير مطابق لولي الأمر المسجل.</span>
+                            <label>ط±ظ‚ظ… ظˆظ„ظٹ ط§ظ„ط£ظ…ط±</label>
+                            <input type="tel" id="fpParentPhone" class="form-control" placeholder="ط±ظ‚ظ… ظˆظ„ظٹ ط§ظ„ط£ظ…ط±" required>
+                            <span id="fpParentError" class="error-message" style="display:none;">ط§ظ„ط±ظ‚ظ… ط؛ظٹط± ظ…ط·ط§ط¨ظ‚ ظ„ظˆظ„ظٹ ط§ظ„ط£ظ…ط± ط§ظ„ظ…ط³ط¬ظ„.</span>
                         <div id="fpStep2" style="display:none;">
                             <div class="form-group">
-                                <label>أدخل كود التحقق</label>
+                                <label>ط£ط¯ط®ظ„ ظƒظˆط¯ ط§ظ„طھط­ظ‚ظ‚</label>
                                 <input type="text" id="fpOtpCode" class="form-control" placeholder="xxxxx" maxlength="5">
                             </div>
                             <div class="form-group" style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
-                                <button type="button" id="fpResendBtn" class="btn btn-outline" style="display:none; padding: 10px 14px; min-width:150px;">إعادة إرسال الكود</button>
-                                <span id="fpOtpHelp" style="flex:1 1 100%; color: rgba(0,0,0,0.72); font-size: 0.92rem;">الكود صالح لمدة 10 دقائق ولا يتم مشاركته مع أي شخص.</span>
+                                <button type="button" id="fpResendBtn" class="btn btn-outline" style="display:none; padding: 10px 14px; min-width:150px;">ط¥ط¹ط§ط¯ط© ط¥ط±ط³ط§ظ„ ط§ظ„ظƒظˆط¯</button>
+                                <span id="fpOtpHelp" style="flex:1 1 100%; color: rgba(0,0,0,0.72); font-size: 0.92rem;">ط§ظ„ظƒظˆط¯ طµط§ظ„ط­ ظ„ظ…ط¯ط© 10 ط¯ظ‚ط§ط¦ظ‚ ظˆظ„ط§ ظٹطھظ… ظ…ط´ط§ط±ظƒطھظ‡ ظ…ط¹ ط£ظٹ ط´ط®طµ.</span>
                             </div>
                             <div class="form-group">
-                                <label>كلمة المرور الجديدة</label>
-                                <input type="password" id="fpNewPassword" class="form-control" placeholder="كلمة المرور الجديدة">
+                                <label>ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط± ط§ظ„ط¬ط¯ظٹط¯ط©</label>
+                                <input type="password" id="fpNewPassword" class="form-control" placeholder="ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط± ط§ظ„ط¬ط¯ظٹط¯ط©">
                             </div>
                             <div class="form-group">
-                                <label>تأكيد كلمة المرور الجديدة</label>
-                                <input type="password" id="fpConfirmPassword" class="form-control" placeholder="تأكيد كلمة المرور الجديدة">
-                                <span id="fpPasswordError" class="error-message" style="display:none;">يجب أن تتطابق كلمات المرور وأن تكون قوية.</span>
+                                <label>طھط£ظƒظٹط¯ ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط± ط§ظ„ط¬ط¯ظٹط¯ط©</label>
+                                <input type="password" id="fpConfirmPassword" class="form-control" placeholder="طھط£ظƒظٹط¯ ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط± ط§ظ„ط¬ط¯ظٹط¯ط©">
+                                <span id="fpPasswordError" class="error-message" style="display:none;">ظٹط¬ط¨ ط£ظ† طھطھط·ط§ط¨ظ‚ ظƒظ„ظ…ط§طھ ط§ظ„ظ…ط±ظˆط± ظˆط£ظ† طھظƒظˆظ† ظ‚ظˆظٹط©.</span>
                             </div>
                         </div>
                         </div>
                         <div style="display:flex; justify-content: space-between; gap: 10px; margin-top: 20px;">
-                            <button type="button" class="btn btn-outline" onclick="document.getElementById('forgotPasswordModal').style.display='none'">إلغاء</button>
-                            <button type="submit" id="fpSubmitBtn" class="btn btn-green">إرسال الكود عبر واتساب</button>
+                            <button type="button" class="btn btn-outline" onclick="document.getElementById('forgotPasswordModal').style.display='none'">ط¥ظ„ط؛ط§ط،</button>
+                            <button type="submit" id="fpSubmitBtn" class="btn btn-green">ط¥ط±ط³ط§ظ„ ط§ظ„ظƒظˆط¯ ط¹ط¨ط± ظˆط§طھط³ط§ط¨</button>
                         </div>
                     </form>
                 </div>
             </div>
             <div class="auth-footer">
-                <p>ليس لديك حساب؟ <a href="register.html">إنشاء حساب جديد</a></p>
+                <p>ظ„ظٹط³ ظ„ط¯ظٹظƒ ط­ط³ط§ط¨طں <a href="register.html">ط¥ظ†ط´ط§ط، ط­ط³ط§ط¨ ط¬ط¯ظٹط¯</a></p>
             </div>
         </div>
     <!-- Login Modal -->
@@ -265,69 +279,69 @@
             <button class="close-modal" onclick="document.getElementById('loginModal').classList.remove('active')"><i class="fas fa-times"></i></button>
             <div class="auth-header">
                 <div class="auth-logo"><i class="fas fa-user-graduate"></i></div>
-                <h2>تسجيل الدخول</h2>
-                <p>مرحباً بك مجدداً في منصتك</p>
+                <h2>طھط³ط¬ظٹظ„ ط§ظ„ط¯ط®ظˆظ„</h2>
+                <p>ظ…ط±ط­ط¨ط§ظ‹ ط¨ظƒ ظ…ط¬ط¯ط¯ط§ظ‹ ظپظٹ ظ…ظ†طµطھظƒ</p>
             </div>
             <form id="loginForm">
                 <div class="form-group">
-                    <label>رقم الموبايل</label>
-                    <input type="text" id="loginPhone" class="form-control" placeholder="أدخل رقم الموبايل" required>
+                    <label>ط±ظ‚ظ… ط§ظ„ظ…ظˆط¨ط§ظٹظ„</label>
+                    <input type="text" id="loginPhone" class="form-control" placeholder="ط£ط¯ط®ظ„ ط±ظ‚ظ… ط§ظ„ظ…ظˆط¨ط§ظٹظ„" required>
                 </div>
                 <div class="form-group">
-                    <label>كلمة المرور</label>
-                    <input type="password" id="loginPassword" class="form-control" placeholder="أدخل كلمة المرور" required>
+                    <label>ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط±</label>
+                    <input type="password" id="loginPassword" class="form-control" placeholder="ط£ط¯ط®ظ„ ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط±" required>
                   <div id="loginError" class="error-message" style="display:none; color: #e74c3c; background: rgba(231,76,60,0.1); padding: 10px; border-radius: 8px; margin-top: 15px; font-size: 0.9rem; text-align: center; border: 1px solid rgba(231,76,60,0.3);"></div>
                 </div>
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <a href="#" id="forgotPasswordLink" style="color: var(--accent-cyan); font-weight: 700;">نسيت كلمة المرور؟</a>
-                    <span style="color: rgba(0,0,0,0.6); font-size: 0.92rem;">تسجيل الدخول الآمن</span>
+                    <a href="#" id="forgotPasswordLink" style="color: var(--accent-cyan); font-weight: 700;">ظ†ط³ظٹطھ ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط±طں</a>
+                    <span style="color: rgba(0,0,0,0.6); font-size: 0.92rem;">طھط³ط¬ظٹظ„ ط§ظ„ط¯ط®ظˆظ„ ط§ظ„ط¢ظ…ظ†</span>
                 </div>
-                <button type="submit" class="btn btn-green btn-block">تسجيل الدخول</button>
+                <button type="submit" class="btn btn-green btn-block">طھط³ط¬ظٹظ„ ط§ظ„ط¯ط®ظˆظ„</button>
             </form>
             <div id="forgotPasswordModal" class="modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 10000; justify-content: center; align-items: center; padding: 20px;">
                 <div class="glass-panel" style="max-width: 520px; width: 100%; padding: 30px; position: relative; border-radius: 20px;">
                     <button onclick="document.getElementById('forgotPasswordModal').style.display='none'" style="position: absolute; top: 18px; right: 18px; background: transparent; border: none; color: var(--text-primary); font-size: 1.4rem; cursor: pointer;"><i class="fas fa-times"></i></button>
-                    <h2 style="margin-bottom: 20px; color: var(--royal-gold);">استعادة كلمة المرور</h2>
-                    <p style="margin-bottom: 20px; color: var(--text-secondary);">اكتب رقم ولي الأمر المرتبط بحسابك وهيتم إرسال كود تأكيد لتغيير كلمة السر.</p>
+                    <h2 style="margin-bottom: 20px; color: var(--royal-gold);">ط§ط³طھط¹ط§ط¯ط© ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط±</h2>
+                    <p style="margin-bottom: 20px; color: var(--text-secondary);">ط§ظƒطھط¨ ط±ظ‚ظ… ظˆظ„ظٹ ط§ظ„ط£ظ…ط± ط§ظ„ظ…ط±طھط¨ط· ط¨ط­ط³ط§ط¨ظƒ ظˆظ‡ظٹطھظ… ط¥ط±ط³ط§ظ„ ظƒظˆط¯ طھط£ظƒظٹط¯ ظ„طھط؛ظٹظٹط± ظƒظ„ظ…ط© ط§ظ„ط³ط±.</p>
                     <div id="fpStatusText" style="display:none; margin-bottom: 20px; padding: 12px 14px; border-radius: 16px; font-size: 0.95rem; line-height:1.5;"></div>
                     <form id="forgotPasswordForm">
                         <div class="form-group">
-                            <label>رقم الطالب</label>
-                            <input type="tel" id="fpStudentPhone" class="form-control" placeholder="رقم الطالب" required>
+                            <label>ط±ظ‚ظ… ط§ظ„ط·ط§ظ„ط¨</label>
+                            <input type="tel" id="fpStudentPhone" class="form-control" placeholder="ط±ظ‚ظ… ط§ظ„ط·ط§ظ„ط¨" required>
                         </div>
                         <div class="form-group">
-                            <label>رقم ولي الأمر</label>
-                            <input type="tel" id="fpParentPhone" class="form-control" placeholder="رقم ولي الأمر" required>
-                            <span id="fpParentError" class="error-message" style="display:none;">الرقم غير مطابق لولي الأمر المسجل.</span>
+                            <label>ط±ظ‚ظ… ظˆظ„ظٹ ط§ظ„ط£ظ…ط±</label>
+                            <input type="tel" id="fpParentPhone" class="form-control" placeholder="ط±ظ‚ظ… ظˆظ„ظٹ ط§ظ„ط£ظ…ط±" required>
+                            <span id="fpParentError" class="error-message" style="display:none;">ط§ظ„ط±ظ‚ظ… ط؛ظٹط± ظ…ط·ط§ط¨ظ‚ ظ„ظˆظ„ظٹ ط§ظ„ط£ظ…ط± ط§ظ„ظ…ط³ط¬ظ„.</span>
                         <div id="fpStep2" style="display:none;">
                             <div class="form-group">
-                                <label>أدخل كود التحقق</label>
+                                <label>ط£ط¯ط®ظ„ ظƒظˆط¯ ط§ظ„طھط­ظ‚ظ‚</label>
                                 <input type="text" id="fpOtpCode" class="form-control" placeholder="xxxxx" maxlength="5">
                             </div>
                             <div class="form-group" style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
-                                <button type="button" id="fpResendBtn" class="btn btn-outline" style="display:none; padding: 10px 14px; min-width:150px;">إعادة إرسال الكود</button>
-                                <span id="fpOtpHelp" style="flex:1 1 100%; color: rgba(0,0,0,0.72); font-size: 0.92rem;">الكود صالح لمدة 10 دقائق ولا يتم مشاركته مع أي شخص.</span>
+                                <button type="button" id="fpResendBtn" class="btn btn-outline" style="display:none; padding: 10px 14px; min-width:150px;">ط¥ط¹ط§ط¯ط© ط¥ط±ط³ط§ظ„ ط§ظ„ظƒظˆط¯</button>
+                                <span id="fpOtpHelp" style="flex:1 1 100%; color: rgba(0,0,0,0.72); font-size: 0.92rem;">ط§ظ„ظƒظˆط¯ طµط§ظ„ط­ ظ„ظ…ط¯ط© 10 ط¯ظ‚ط§ط¦ظ‚ ظˆظ„ط§ ظٹطھظ… ظ…ط´ط§ط±ظƒطھظ‡ ظ…ط¹ ط£ظٹ ط´ط®طµ.</span>
                             </div>
                             <div class="form-group">
-                                <label>كلمة المرور الجديدة</label>
-                                <input type="password" id="fpNewPassword" class="form-control" placeholder="كلمة المرور الجديدة">
+                                <label>ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط± ط§ظ„ط¬ط¯ظٹط¯ط©</label>
+                                <input type="password" id="fpNewPassword" class="form-control" placeholder="ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط± ط§ظ„ط¬ط¯ظٹط¯ط©">
                             </div>
                             <div class="form-group">
-                                <label>تأكيد كلمة المرور الجديدة</label>
-                                <input type="password" id="fpConfirmPassword" class="form-control" placeholder="تأكيد كلمة المرور الجديدة">
-                                <span id="fpPasswordError" class="error-message" style="display:none;">يجب أن تتطابق كلمات المرور وأن تكون قوية.</span>
+                                <label>طھط£ظƒظٹط¯ ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط± ط§ظ„ط¬ط¯ظٹط¯ط©</label>
+                                <input type="password" id="fpConfirmPassword" class="form-control" placeholder="طھط£ظƒظٹط¯ ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط± ط§ظ„ط¬ط¯ظٹط¯ط©">
+                                <span id="fpPasswordError" class="error-message" style="display:none;">ظٹط¬ط¨ ط£ظ† طھطھط·ط§ط¨ظ‚ ظƒظ„ظ…ط§طھ ط§ظ„ظ…ط±ظˆط± ظˆط£ظ† طھظƒظˆظ† ظ‚ظˆظٹط©.</span>
                             </div>
                         </div>
                         </div>
                         <div style="display:flex; justify-content: space-between; gap: 10px; margin-top: 20px;">
-                            <button type="button" class="btn btn-outline" onclick="document.getElementById('forgotPasswordModal').style.display='none'">إلغاء</button>
-                            <button type="submit" id="fpSubmitBtn" class="btn btn-green">إرسال الكود عبر واتساب</button>
+                            <button type="button" class="btn btn-outline" onclick="document.getElementById('forgotPasswordModal').style.display='none'">ط¥ظ„ط؛ط§ط،</button>
+                            <button type="submit" id="fpSubmitBtn" class="btn btn-green">ط¥ط±ط³ط§ظ„ ط§ظ„ظƒظˆط¯ ط¹ط¨ط± ظˆط§طھط³ط§ط¨</button>
                         </div>
                     </form>
                 </div>
             </div>
             <div class="auth-footer">
-                <p>ليس لديك حساب؟ <a href="register.html">إنشاء حساب جديد</a></p>
+                <p>ظ„ظٹط³ ظ„ط¯ظٹظƒ ط­ط³ط§ط¨طں <a href="register.html">ط¥ظ†ط´ط§ط، ط­ط³ط§ط¨ ط¬ط¯ظٹط¯</a></p>
             </div>
         </div>
     </div>
@@ -373,7 +387,7 @@
                 document.addEventListener('keyup', (e) => {
                     if(e.key === 'PrintScreen' || e.keyCode === 44) {
                         navigator.clipboard.writeText('Screenshots are disabled for copyright protection.');
-                        if(window.showToast) window.showToast('غير مسموح بأخذ لقطة شاشة لمحتوى المنصة لحفظ الحقوق.', 'error');
+                        if(window.showToast) window.showToast('ط؛ظٹط± ظ…ط³ظ…ظˆط­ ط¨ط£ط®ط° ظ„ظ‚ط·ط© ط´ط§ط´ط© ظ„ظ…ط­طھظˆظ‰ ط§ظ„ظ…ظ†طµط© ظ„ط­ظپط¸ ط§ظ„ط­ظ‚ظˆظ‚.', 'error');
                     }
                 });
                 
@@ -395,7 +409,7 @@
             }
             
             if(!course) {
-                alert('هذا الكورس غير موجود');
+                alert('ظ‡ط°ط§ ط§ظ„ظƒظˆط±ط³ ط؛ظٹط± ظ…ظˆط¬ظˆط¯');
                 window.location.href = 'courses.html';
                 return;
             }
@@ -424,7 +438,7 @@
                     } catch(e) {
                         console.error('Server verification failed', e);
                         isOwned = false;
-                        alert('تعذر التحقق من ملكيتك للكورس بسبب مشكلة في الاتصال بالإنترنت. يرجى المحاولة لاحقاً.');
+                        alert('طھط¹ط°ط± ط§ظ„طھط­ظ‚ظ‚ ظ…ظ† ظ…ظ„ظƒظٹطھظƒ ظ„ظ„ظƒظˆط±ط³ ط¨ط³ط¨ط¨ ظ…ط´ظƒظ„ط© ظپظٹ ط§ظ„ط§طھطµط§ظ„ ط¨ط§ظ„ط¥ظ†طھط±ظ†طھ. ظٹط±ط¬ظ‰ ط§ظ„ظ…ط­ط§ظˆظ„ط© ظ„ط§ط­ظ‚ط§ظ‹.');
                         window.location.href = 'courses.html';
                         return;
                     }
@@ -458,10 +472,10 @@
             }
 
             const grades = {
-                'prep1': 'أولى إعدادي',
-                'prep2': 'تانية إعدادي',
-                'prep3': 'تالتة إعدادي',
-                'sec1': 'أولى ثانوي'
+                'prep1': 'ط£ظˆظ„ظ‰ ط¥ط¹ط¯ط§ط¯ظٹ',
+                'prep2': 'طھط§ظ†ظٹط© ط¥ط¹ط¯ط§ط¯ظٹ',
+                'prep3': 'طھط§ظ„طھط© ط¥ط¹ط¯ط§ط¯ظٹ',
+                'sec1': 'ط£ظˆظ„ظ‰ ط«ط§ظ†ظˆظٹ'
             };
 
             document.getElementById('cdImage').src = course.image;
@@ -472,8 +486,8 @@
             if (course.hasDiscount && course.discountPrice && (!course.discountExpiry || course.discountExpiry > Date.now())) {
                 priceContainer.innerHTML = `
                     <div style="display:flex; flex-direction:column; align-items:center; line-height: 1;">
-                        <span style="text-decoration: line-through; font-size: 1.1rem; color: var(--text-muted); opacity: 0.8; margin-bottom: 5px;">${course.price} ج.م</span>
-                        <span style="color: #2ecc71; font-size: 2.2rem;">${course.discountPrice} ج.م</span>
+                        <span style="text-decoration: line-through; font-size: 1.1rem; color: var(--text-muted); opacity: 0.8; margin-bottom: 5px;">${course.price} ط¬.ظ…</span>
+                        <span style="color: #2ecc71; font-size: 2.2rem;">${course.discountPrice} ط¬.ظ…</span>
                     </div>
                 `;
                 if (course.discountExpiry && !isOwned && !isPending && !isAdmin) {
@@ -481,7 +495,7 @@
                     timerDiv.className = 'discount-countdown';
                     timerDiv.setAttribute('data-expiry', course.discountExpiry);
                     timerDiv.style.cssText = 'background: rgba(231, 76, 60, 0.1); border: 1px solid rgba(231, 76, 60, 0.3); border-radius: 8px; padding: 10px 15px; margin-top: 15px; margin-left: auto; margin-right: auto; text-align: center; color: #e74c3c; font-weight: bold; font-size: 0.95rem; animation: pulse 2s infinite; width: fit-content; max-width: 100%; display: flex; justify-content: center; align-items: center; gap: 8px; flex-wrap: nowrap; white-space: nowrap; line-height: 1;';
-                    timerDiv.innerHTML = '<i class="fas fa-clock" style="font-size: 1.1rem;"></i> <span>ينتهي الخصم خلال:</span> <span class="cd-timer" style="direction: ltr; unicode-bidi: embed;">...</span>';
+                    timerDiv.innerHTML = '<i class="fas fa-clock" style="font-size: 1.1rem;"></i> <span>ظٹظ†طھظ‡ظٹ ط§ظ„ط®طµظ… ط®ظ„ط§ظ„:</span> <span class="cd-timer" style="direction: ltr; unicode-bidi: embed;">...</span>';
                     // We'll append this after setting the grade, just below the title area.
                     setTimeout(() => {
                         const actContainer = document.getElementById('cdActionBtnContainer');
@@ -491,7 +505,7 @@
                     }, 0);
                 }
             } else {
-                priceContainer.innerHTML = `<span style="font-size: 2.2rem; color: var(--royal-gold); line-height: 1;">${course.price} ج.م</span>`;
+                priceContainer.innerHTML = `<span style="font-size: 2.2rem; color: var(--royal-gold); line-height: 1;">${course.price} ط¬.ظ…</span>`;
             }
             
             document.getElementById('cdGrade').textContent = grades[course.grade] || course.grade;
@@ -500,11 +514,11 @@
             if (course.grade && course.grade.startsWith('prep')) {
                 scheduleEl.style.display = 'flex';
                 scheduleEl.className = 'schedule-pulse';
-                scheduleEl.innerHTML = '<div style="display:flex; justify-content:center; align-items:center; gap:12px; flex-wrap:wrap; width:100%;"><span style="color:var(--royal-gold);"><i class="fas fa-calendar-alt"></i> الشرح والتدريب: الخميس</span> <span style="color:rgba(255,255,255,0.3);">|</span> <span style="color:#3498db;"><i class="fas fa-edit"></i> الواجب: الثلاثاء</span> <span style="color:rgba(255,255,255,0.3);">|</span> <span style="color:#e74c3c;"><i class="fas fa-trophy"></i> الامتحان: الأربعاء</span></div><span class="schedule-time-badge"><i class="far fa-clock"></i> جميع المواعيد المذكورة الساعة 9 مساءً</span>';
+                scheduleEl.innerHTML = '<div style="display:flex; justify-content:center; align-items:center; gap:12px; flex-wrap:wrap; width:100%;"><span style="color:var(--royal-gold);"><i class="fas fa-calendar-alt"></i> ط§ظ„ط´ط±ط­ ظˆط§ظ„طھط¯ط±ظٹط¨: ط§ظ„ط®ظ…ظٹط³</span> <span style="color:rgba(255,255,255,0.3);">|</span> <span style="color:#3498db;"><i class="fas fa-edit"></i> ط§ظ„ظˆط§ط¬ط¨: ط§ظ„ط«ظ„ط§ط«ط§ط،</span> <span style="color:rgba(255,255,255,0.3);">|</span> <span style="color:#e74c3c;"><i class="fas fa-trophy"></i> ط§ظ„ط§ظ…طھط­ط§ظ†: ط§ظ„ط£ط±ط¨ط¹ط§ط،</span></div><span class="schedule-time-badge"><i class="far fa-clock"></i> ط¬ظ…ظٹط¹ ط§ظ„ظ…ظˆط§ط¹ظٹط¯ ط§ظ„ظ…ط°ظƒظˆط±ط© ط§ظ„ط³ط§ط¹ط© 9 ظ…ط³ط§ط،ظ‹</span>';
             } else if (course.grade && course.grade.startsWith('sec')) {
                 scheduleEl.style.display = 'flex';
                 scheduleEl.className = 'schedule-pulse';
-                scheduleEl.innerHTML = '<div style="display:flex; justify-content:center; align-items:center; gap:12px; flex-wrap:wrap; width:100%;"><span style="color:var(--royal-gold);"><i class="fas fa-calendar-alt"></i> الشرح والتدريب: الجمعة</span> <span style="color:rgba(255,255,255,0.3);">|</span> <span style="color:#3498db;"><i class="fas fa-edit"></i> الواجب: الثلاثاء</span> <span style="color:rgba(255,255,255,0.3);">|</span> <span style="color:#e74c3c;"><i class="fas fa-trophy"></i> الامتحان: الأربعاء</span></div><span class="schedule-time-badge"><i class="far fa-clock"></i> جميع المواعيد المذكورة الساعة 9 مساءً</span>';
+                scheduleEl.innerHTML = '<div style="display:flex; justify-content:center; align-items:center; gap:12px; flex-wrap:wrap; width:100%;"><span style="color:var(--royal-gold);"><i class="fas fa-calendar-alt"></i> ط§ظ„ط´ط±ط­ ظˆط§ظ„طھط¯ط±ظٹط¨: ط§ظ„ط¬ظ…ط¹ط©</span> <span style="color:rgba(255,255,255,0.3);">|</span> <span style="color:#3498db;"><i class="fas fa-edit"></i> ط§ظ„ظˆط§ط¬ط¨: ط§ظ„ط«ظ„ط§ط«ط§ط،</span> <span style="color:rgba(255,255,255,0.3);">|</span> <span style="color:#e74c3c;"><i class="fas fa-trophy"></i> ط§ظ„ط§ظ…طھط­ط§ظ†: ط§ظ„ط£ط±ط¨ط¹ط§ط،</span></div><span class="schedule-time-badge"><i class="far fa-clock"></i> ط¬ظ…ظٹط¹ ط§ظ„ظ…ظˆط§ط¹ظٹط¯ ط§ظ„ظ…ط°ظƒظˆط±ط© ط§ظ„ط³ط§ط¹ط© 9 ظ…ط³ط§ط،ظ‹</span>';
             } else {
                 scheduleEl.style.display = 'none';
             }
@@ -526,10 +540,10 @@
             if (isAdmin) {
                 actionContainer.innerHTML = `
                     <button class="btn btn-outline" style="border-color: var(--accent-cyan); color: var(--accent-cyan); margin-left: 10px;" onclick="openAdminCourseEdit()">
-                        <i class="fas fa-edit mr-2"></i> تعديل بيانات الكورس
+                        <i class="fas fa-edit mr-2"></i> طھط¹ط¯ظٹظ„ ط¨ظٹط§ظ†ط§طھ ط§ظ„ظƒظˆط±ط³
                     </button>
                     <button class="btn btn-outline" style="border-color: var(--royal-gold); color: var(--royal-gold);" onclick="window.location.href='admin-courses.html?id=${course.id}'">
-                        <i class="fas fa-layer-group mr-2"></i> تعديل المحتوى
+                        <i class="fas fa-layer-group mr-2"></i> طھط¹ط¯ظٹظ„ ط§ظ„ظ…ط­طھظˆظ‰
                     </button>
                 `;
                 
@@ -538,38 +552,38 @@
                 <div class="modal-overlay" id="adminEditCourseModal">
                     <div class="glass-panel modal-content" style="padding: 30px; max-width: 500px;">
                         <button class="close-modal" onclick="document.getElementById('adminEditCourseModal').classList.remove('active')"><i class="fas fa-times"></i></button>
-                        <h2 class="text-gold mb-2 text-center">تعديل بيانات الكورس</h2>
+                        <h2 class="text-gold mb-2 text-center">طھط¹ط¯ظٹظ„ ط¨ظٹط§ظ†ط§طھ ط§ظ„ظƒظˆط±ط³</h2>
                         <div class="form-group mt-2">
-                            <label>اسم الكورس</label>
+                            <label>ط§ط³ظ… ط§ظ„ظƒظˆط±ط³</label>
                             <input type="text" id="adminEditCourseTitle" class="form-control" value="${course.title}">
                         </div>
                         <div class="form-group">
-                            <label>حالة الكورس (مثال: يبدأ فوراً أو 15 أكتوبر)</label>
+                            <label>ط­ط§ظ„ط© ط§ظ„ظƒظˆط±ط³ (ظ…ط«ط§ظ„: ظٹط¨ط¯ط£ ظپظˆط±ط§ظ‹ ط£ظˆ 15 ط£ظƒطھظˆط¨ط±)</label>
                             <input type="text" id="adminEditCourseStatus" class="form-control" value="${course.courseStatus || ''}">
                         </div>
                         <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 15px;">
                             <div class="form-group">
-                                <label style="font-size: 0.85rem;">المحاضرات</label>
-                                <input type="text" id="adminEditLecSchedule" class="form-control" value="${course.lecSchedule || ''}" placeholder="السبت 8 م">
+                                <label style="font-size: 0.85rem;">ط§ظ„ظ…ط­ط§ط¶ط±ط§طھ</label>
+                                <input type="text" id="adminEditLecSchedule" class="form-control" value="${course.lecSchedule || ''}" placeholder="ط§ظ„ط³ط¨طھ 8 ظ…">
                             </div>
                             <div class="form-group">
-                                <label style="font-size: 0.85rem;">الواجبات</label>
-                                <input type="text" id="adminEditHwSchedule" class="form-control" value="${course.hwSchedule || ''}" placeholder="الأحد 10 ص">
+                                <label style="font-size: 0.85rem;">ط§ظ„ظˆط§ط¬ط¨ط§طھ</label>
+                                <input type="text" id="adminEditHwSchedule" class="form-control" value="${course.hwSchedule || ''}" placeholder="ط§ظ„ط£ط­ط¯ 10 طµ">
                             </div>
                             <div class="form-group">
-                                <label style="font-size: 0.85rem;">الامتحانات</label>
-                                <input type="text" id="adminEditExamSchedule" class="form-control" value="${course.examSchedule || ''}" placeholder="الإثنين 12 ظ">
+                                <label style="font-size: 0.85rem;">ط§ظ„ط§ظ…طھط­ط§ظ†ط§طھ</label>
+                                <input type="text" id="adminEditExamSchedule" class="form-control" value="${course.examSchedule || ''}" placeholder="ط§ظ„ط¥ط«ظ†ظٹظ† 12 ط¸">
                             </div>
                         </div>
                         <div class="form-group">
-                            <label>رابط الصورة</label>
+                            <label>ط±ط§ط¨ط· ط§ظ„طµظˆط±ط©</label>
                             <input type="text" id="adminEditCourseImage" class="form-control" value="${course.image}">
                         </div>
                         <div class="form-group">
-                            <label>الوصف</label>
+                            <label>ط§ظ„ظˆطµظپ</label>
                             <textarea id="adminEditCourseDesc" class="form-control" rows="3">${course.desc}</textarea>
                         </div>
-                        <button class="btn btn-green btn-block mt-2" onclick="saveAdminCourseEdit()">حفظ التعديلات</button>
+                        <button class="btn btn-green btn-block mt-2" onclick="saveAdminCourseEdit()">ط­ظپط¸ ط§ظ„طھط¹ط¯ظٹظ„ط§طھ</button>
                     </div>
                 </div>`;
                 const div = document.createElement('div');
@@ -608,34 +622,34 @@
                     
                     document.getElementById('cdTitle').textContent = newTitle;
                     document.getElementById('cdImage').src = newImage;
-                    document.getElementById('cdDesc').textContent = course.description || 'لا يوجد وصف متاح';
+                    document.getElementById('cdDesc').textContent = course.description || 'ظ„ط§ ظٹظˆط¬ط¯ ظˆطµظپ ظ…طھط§ط­';
                     
                     const scheduleEl = document.getElementById('cdSchedule');
                     if (course.grade && course.grade.startsWith('prep')) {
                         scheduleEl.style.display = 'flex';
                         scheduleEl.className = 'schedule-pulse';
-                        scheduleEl.innerHTML = '<div style="display:flex; justify-content:center; align-items:center; gap:12px; flex-wrap:wrap; width:100%;"><span style="color:var(--royal-gold);"><i class="fas fa-calendar-alt"></i> الشرح والتدريب: الخميس</span> <span style="color:rgba(255,255,255,0.3);">|</span> <span style="color:#3498db;"><i class="fas fa-edit"></i> الواجب: الثلاثاء</span> <span style="color:rgba(255,255,255,0.3);">|</span> <span style="color:#e74c3c;"><i class="fas fa-trophy"></i> الامتحان: الأربعاء</span></div><span class="schedule-time-badge"><i class="far fa-clock"></i> جميع المواعيد المذكورة الساعة 9 مساءً</span>';
+                        scheduleEl.innerHTML = '<div style="display:flex; justify-content:center; align-items:center; gap:12px; flex-wrap:wrap; width:100%;"><span style="color:var(--royal-gold);"><i class="fas fa-calendar-alt"></i> ط§ظ„ط´ط±ط­ ظˆط§ظ„طھط¯ط±ظٹط¨: ط§ظ„ط®ظ…ظٹط³</span> <span style="color:rgba(255,255,255,0.3);">|</span> <span style="color:#3498db;"><i class="fas fa-edit"></i> ط§ظ„ظˆط§ط¬ط¨: ط§ظ„ط«ظ„ط§ط«ط§ط،</span> <span style="color:rgba(255,255,255,0.3);">|</span> <span style="color:#e74c3c;"><i class="fas fa-trophy"></i> ط§ظ„ط§ظ…طھط­ط§ظ†: ط§ظ„ط£ط±ط¨ط¹ط§ط،</span></div><span class="schedule-time-badge"><i class="far fa-clock"></i> ط¬ظ…ظٹط¹ ط§ظ„ظ…ظˆط§ط¹ظٹط¯ ط§ظ„ظ…ط°ظƒظˆط±ط© ط§ظ„ط³ط§ط¹ط© 9 ظ…ط³ط§ط،ظ‹</span>';
                     } else if (course.grade && course.grade.startsWith('sec')) {
                         scheduleEl.style.display = 'flex';
                         scheduleEl.className = 'schedule-pulse';
-                        scheduleEl.innerHTML = '<div style="display:flex; justify-content:center; align-items:center; gap:12px; flex-wrap:wrap; width:100%;"><span style="color:var(--royal-gold);"><i class="fas fa-calendar-alt"></i> الشرح والتدريب: الجمعة</span> <span style="color:rgba(255,255,255,0.3);">|</span> <span style="color:#3498db;"><i class="fas fa-edit"></i> الواجب: الثلاثاء</span> <span style="color:rgba(255,255,255,0.3);">|</span> <span style="color:#e74c3c;"><i class="fas fa-trophy"></i> الامتحان: الأربعاء</span></div><span class="schedule-time-badge"><i class="far fa-clock"></i> جميع المواعيد المذكورة الساعة 9 مساءً</span>';
+                        scheduleEl.innerHTML = '<div style="display:flex; justify-content:center; align-items:center; gap:12px; flex-wrap:wrap; width:100%;"><span style="color:var(--royal-gold);"><i class="fas fa-calendar-alt"></i> ط§ظ„ط´ط±ط­ ظˆط§ظ„طھط¯ط±ظٹط¨: ط§ظ„ط¬ظ…ط¹ط©</span> <span style="color:rgba(255,255,255,0.3);">|</span> <span style="color:#3498db;"><i class="fas fa-edit"></i> ط§ظ„ظˆط§ط¬ط¨: ط§ظ„ط«ظ„ط§ط«ط§ط،</span> <span style="color:rgba(255,255,255,0.3);">|</span> <span style="color:#e74c3c;"><i class="fas fa-trophy"></i> ط§ظ„ط§ظ…طھط­ط§ظ†: ط§ظ„ط£ط±ط¨ط¹ط§ط،</span></div><span class="schedule-time-badge"><i class="far fa-clock"></i> ط¬ظ…ظٹط¹ ط§ظ„ظ…ظˆط§ط¹ظٹط¯ ط§ظ„ظ…ط°ظƒظˆط±ط© ط§ظ„ط³ط§ط¹ط© 9 ظ…ط³ط§ط،ظ‹</span>';
                     } else {
                         scheduleEl.style.display = 'none';
                     }               document.getElementById('adminEditCourseModal').classList.remove('active');
                 };
             }
             else if (isOwned || isMasterPreview) {
-                actionContainer.innerHTML = `<button class="btn btn-green"><i class="fas fa-check-circle mr-2"></i> المحتوى مفتوح لك (وضع المالك)</button>`;
+                actionContainer.innerHTML = `<button class="btn btn-green"><i class="fas fa-check-circle mr-2"></i> ط§ظ„ظ…ط­طھظˆظ‰ ظ…ظپطھظˆط­ ظ„ظƒ (ظˆط¶ط¹ ط§ظ„ظ…ط§ظ„ظƒ)</button>`;
             } else if (isPending) {
-                actionContainer.innerHTML = `<button class="btn btn-outline" style="color:var(--accent-orange); border-color:var(--accent-orange);" onclick="showPendingMessageDetails()"><i class="fas fa-clock mr-2"></i> طلبك قيد المراجعة</button>`;
+                actionContainer.innerHTML = `<button class="btn btn-outline" style="color:var(--accent-orange); border-color:var(--accent-orange);" onclick="showPendingMessageDetails()"><i class="fas fa-clock mr-2"></i> ط·ظ„ط¨ظƒ ظ‚ظٹط¯ ط§ظ„ظ…ط±ط§ط¬ط¹ط©</button>`;
             } else if (course.isFree || course.price == '0' || course.price === 0) {
                 if (userStr) {
-                    actionContainer.innerHTML = `<button class="btn btn-green" onclick="enrollFreeCourse('${course.id}')"><i class="fas fa-door-open mr-2"></i> دخول الكورس مجاناً</button>`;
+                    actionContainer.innerHTML = `<button class="btn btn-green" onclick="enrollFreeCourse('${course.id}')"><i class="fas fa-door-open mr-2"></i> ط¯ط®ظˆظ„ ط§ظ„ظƒظˆط±ط³ ظ…ط¬ط§ظ†ط§ظ‹</button>`;
                 } else {
-                    actionContainer.innerHTML = `<button class="btn btn-outline" style="color:#f1c40f; border-color:#f1c40f;" onclick="window.location.href='index.html#login'"><i class="fas fa-user-lock mr-2"></i> يجب تسجيل الدخول للاستمتاع بالكورس المجاني</button>`;
+                    actionContainer.innerHTML = `<button class="btn btn-outline" style="color:#f1c40f; border-color:#f1c40f;" onclick="window.location.href='index.html#login'"><i class="fas fa-user-lock mr-2"></i> ظٹط¬ط¨ طھط³ط¬ظٹظ„ ط§ظ„ط¯ط®ظˆظ„ ظ„ظ„ط§ط³طھظ…طھط§ط¹ ط¨ط§ظ„ظƒظˆط±ط³ ط§ظ„ظ…ط¬ط§ظ†ظٹ</button>`;
                 }
             } else {
-                actionContainer.innerHTML = `<button class="btn btn-gold" onclick="openPaymentModalDetails('${course.id}')"><i class="fas fa-lock-open mr-2"></i> الاشتراك لفتح المحتوى</button>`;
+                actionContainer.innerHTML = `<button class="btn btn-gold" onclick="openPaymentModalDetails('${course.id}')"><i class="fas fa-lock-open mr-2"></i> ط§ظ„ط§ط´طھط±ط§ظƒ ظ„ظپطھط­ ط§ظ„ظ…ط­طھظˆظ‰</button>`;
             }
 
             const rawContents = course.contents || {};
@@ -649,9 +663,9 @@
                 }
 
                 let defaultSections = [
-                    { id: 'sec_lectures', title: 'المحاضرات', items: [] },
-                    { id: 'sec_homeworks', title: 'الواجبات', items: [] },
-                    { id: 'sec_exams', title: 'الامتحانات', items: [] }
+                    { id: 'sec_lectures', title: 'ط§ظ„ظ…ط­ط§ط¶ط±ط§طھ', items: [] },
+                    { id: 'sec_homeworks', title: 'ط§ظ„ظˆط§ط¬ط¨ط§طھ', items: [] },
+                    { id: 'sec_exams', title: 'ط§ظ„ط§ظ…طھط­ط§ظ†ط§طھ', items: [] }
                 ];
                 
                 // Helper to find items attached to a specific lecture
@@ -710,13 +724,13 @@
                 if (c.trainings && c.trainings.length) {
                     let unattached = c.trainings.filter(t => !t.attachedToLectureId);
                     if (unattached.length) {
-                        sections.push({ id: 'sec_trainings', title: 'التدريبات', items: unattached });
+                        sections.push({ id: 'sec_trainings', title: 'ط§ظ„طھط¯ط±ظٹط¨ط§طھ', items: unattached });
                     }
                 }
 
                 if (c.customSections && c.customSections.length) {
                     c.customSections.forEach((sec, idx) => {
-                        sections.push({ id: 'sec_custom_'+idx, title: sec.name || 'قسم مخصص', items: sec.items || [] });
+                        sections.push({ id: 'sec_custom_'+idx, title: sec.name || 'ظ‚ط³ظ… ظ…ط®طµطµ', items: sec.items || [] });
                     });
                 }
                 
@@ -756,20 +770,20 @@
                             window.location.href = 'index.html?login=true';
                             return;
                         } else {
-                            if(window.showToast) window.showToast('يرجى الضغط على زر "دخول الكورس مجاناً" باللون الأخضر بالأعلى أولاً', 'info');
-                            else alert('يرجى الضغط على زر "دخول الكورس مجاناً" باللون الأخضر بالأعلى أولاً');
+                            if(window.showToast) window.showToast('ظٹط±ط¬ظ‰ ط§ظ„ط¶ط؛ط· ط¹ظ„ظ‰ ط²ط± "ط¯ط®ظˆظ„ ط§ظ„ظƒظˆط±ط³ ظ…ط¬ط§ظ†ط§ظ‹" ط¨ط§ظ„ظ„ظˆظ† ط§ظ„ط£ط®ط¶ط± ط¨ط§ظ„ط£ط¹ظ„ظ‰ ط£ظˆظ„ط§ظ‹', 'info');
+                            else alert('ظٹط±ط¬ظ‰ ط§ظ„ط¶ط؛ط· ط¹ظ„ظ‰ ط²ط± "ط¯ط®ظˆظ„ ط§ظ„ظƒظˆط±ط³ ظ…ط¬ط§ظ†ط§ظ‹" ط¨ط§ظ„ظ„ظˆظ† ط§ظ„ط£ط®ط¶ط± ط¨ط§ظ„ط£ط¹ظ„ظ‰ ط£ظˆظ„ط§ظ‹');
                             return;
                         }
                     } else {
-                        if(window.showToast) window.showToast('هذا المحتوى غير متاح، يجب عليك الاشتراك في الكورس أولاً', 'error');
-                        else alert('هذا المحتوى غير متاح، يجب عليك الاشتراك في الكورس أولاً');
+                        if(window.showToast) window.showToast('ظ‡ط°ط§ ط§ظ„ظ…ط­طھظˆظ‰ ط؛ظٹط± ظ…طھط§ط­طŒ ظٹط¬ط¨ ط¹ظ„ظٹظƒ ط§ظ„ط§ط´طھط±ط§ظƒ ظپظٹ ط§ظ„ظƒظˆط±ط³ ط£ظˆظ„ط§ظ‹', 'error');
+                        else alert('ظ‡ط°ط§ ط§ظ„ظ…ط­طھظˆظ‰ ط؛ظٹط± ظ…طھط§ط­طŒ ظٹط¬ط¨ ط¹ظ„ظٹظƒ ط§ظ„ط§ط´طھط±ط§ظƒ ظپظٹ ط§ظ„ظƒظˆط±ط³ ط£ظˆظ„ط§ظ‹');
                         return;
                     }
                 }
                 
                 if(isLocked && !isMasterPreview) {
-                    if(window.showToast) window.showToast(lockReason || 'هذا المحتوى مغلق حالياً', 'error');
-                    else alert(lockReason || 'هذا المحتوى مقفول حالياً');
+                    if(window.showToast) window.showToast(lockReason || 'ظ‡ط°ط§ ط§ظ„ظ…ط­طھظˆظ‰ ظ…ط؛ظ„ظ‚ ط­ط§ظ„ظٹط§ظ‹', 'error');
+                    else alert(lockReason || 'ظ‡ط°ط§ ط§ظ„ظ…ط­طھظˆظ‰ ظ…ظ‚ظپظˆظ„ ط­ط§ظ„ظٹط§ظ‹');
                     return;
                 }
 
@@ -802,7 +816,7 @@
                                 
                                 const handleVideoEnded = () => {
                                     markItemCompleted(item.id);
-                                    if(window.showToast) window.showToast('تم اكتمال مشاهدة الدرس بنجاح!', 'success');
+                                    if(window.showToast) window.showToast('طھظ… ط§ظƒطھظ…ط§ظ„ ظ…ط´ط§ظ‡ط¯ط© ط§ظ„ط¯ط±ط³ ط¨ظ†ط¬ط§ط­!', 'success');
                                     
                                     // Find next attached training
                                     let parentId = item._parentLecId || item.id;
@@ -880,17 +894,17 @@
                                 // For iframe we can't easily track ended event without Vimeo API, so mark it completed after a delay
                                 setTimeout(() => {
                                     markItemCompleted(item.id);
-                                    if(window.showToast) window.showToast('تم إكمال الدرس!', 'success');
+                                    if(window.showToast) window.showToast('طھظ… ط¥ظƒظ…ط§ظ„ ط§ظ„ط¯ط±ط³!', 'success');
                                 }, 30000);
                             } else {
                                 const posterAttr = item.thumbnail ? `poster="${item.thumbnail}"` : '';
-                                container.innerHTML = `<video width="100%" height="100%" controls controlsList="nodownload" autoplay ${posterAttr}><source src="${item.videoUrl}" type="video/mp4">متصفحك لا يدعم تشغيل الفيديو.</video>`;
+                                container.innerHTML = `<video width="100%" height="100%" controls controlsList="nodownload" autoplay ${posterAttr}><source src="${item.videoUrl}" type="video/mp4">ظ…طھطµظپط­ظƒ ظ„ط§ ظٹط¯ط¹ظ… طھط´ط؛ظٹظ„ ط§ظ„ظپظٹط¯ظٹظˆ.</video>`;
                                 if (window.injectVideoWatermark) window.injectVideoWatermark(container);
                                 const vidEl = container.querySelector('video');
                                 if(vidEl) {
                                     vidEl.onended = () => {
                                         markItemCompleted(item.id);
-                                        if(window.showToast) window.showToast('تم اكتمال مشاهدة الدرس بنجاح!', 'success');
+                                        if(window.showToast) window.showToast('طھظ… ط§ظƒطھظ…ط§ظ„ ظ…ط´ط§ظ‡ط¯ط© ط§ظ„ط¯ط±ط³ ط¨ظ†ط¬ط§ط­!', 'success');
                                         
                                         // Find next attached training
                                         let parentId = item._parentLecId || item.id;
@@ -921,21 +935,21 @@
                     return;
                 }
                 
-                const isQuizType = ['quiz', 'exam', 'امتحان'].includes(item.type);
-                const isHomeworkType = ['task', 'homework', 'واجب'].includes(item.type);
-                const isTrainingType = ['training', 'تدريب'].includes(item.type);
+                const isQuizType = ['quiz', 'exam', 'ط§ظ…طھط­ط§ظ†'].includes(item.type);
+                const isHomeworkType = ['task', 'homework', 'ظˆط§ط¬ط¨'].includes(item.type);
+                const isTrainingType = ['training', 'طھط¯ط±ظٹط¨'].includes(item.type);
 
                 if(isQuizType || isHomeworkType || isTrainingType) {
                     // SPECIAL CASE: HW Apology
-                    if (item.title === 'واجب المحاضرة التعريفية' && isHomeworkType) {
+                    if (item.title === 'ظˆط§ط¬ط¨ ط§ظ„ظ…ط­ط§ط¶ط±ط© ط§ظ„طھط¹ط±ظٹظپظٹط©' && isHomeworkType) {
                         const customOverlay = document.createElement('div');
                         customOverlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:999999;display:flex;align-items:center;justify-content:center;padding:20px;';
                         customOverlay.innerHTML = `
                             <div style="background:#111;border:1px solid #d4a64f;border-radius:15px;padding:30px;max-width:500px;text-align:center;position:relative;box-shadow:0 10px 40px rgba(0,0,0,0.8);">
                                 <button onclick="this.parentElement.parentElement.remove()" style="position:absolute;top:10px;left:15px;background:none;border:none;color:#fff;font-size:1.8rem;cursor:pointer;">&times;</button>
                                 <i class="fas fa-gift" style="font-size:3.5rem;color:#d4a64f;margin-bottom:20px;"></i>
-                                <h3 style="color:#fff;margin-bottom:25px;line-height:1.6;font-size:1.2rem;">نظراً لوجود تحديث بالمنصة أثناء أدائك للواجب الخاص بالمحاضرة التعريفية وحدث عطل،<br><span style="color:#2ecc71;">حصلت أنت على درجة الواجب كاملة 10/10</span><br>وغداً في تمام الـ 9 مساءً يجب أن تحضر الامتحان.</h3>
-                                <button onclick="this.parentElement.parentElement.remove()" class="btn btn-gold" style="padding:10px 30px;border-radius:25px;font-size:1.1rem;">حسناً، فهمت</button>
+                                <h3 style="color:#fff;margin-bottom:25px;line-height:1.6;font-size:1.2rem;">ظ†ط¸ط±ط§ظ‹ ظ„ظˆط¬ظˆط¯ طھط­ط¯ظٹط« ط¨ط§ظ„ظ…ظ†طµط© ط£ط«ظ†ط§ط، ط£ط¯ط§ط¦ظƒ ظ„ظ„ظˆط§ط¬ط¨ ط§ظ„ط®ط§طµ ط¨ط§ظ„ظ…ط­ط§ط¶ط±ط© ط§ظ„طھط¹ط±ظٹظپظٹط© ظˆط­ط¯ط« ط¹ط·ظ„طŒ<br><span style="color:#2ecc71;">ط­طµظ„طھ ط£ظ†طھ ط¹ظ„ظ‰ ط¯ط±ط¬ط© ط§ظ„ظˆط§ط¬ط¨ ظƒط§ظ…ظ„ط© 10/10</span><br>ظˆط؛ط¯ط§ظ‹ ظپظٹ طھظ…ط§ظ… ط§ظ„ظ€ 9 ظ…ط³ط§ط،ظ‹ ظٹط¬ط¨ ط£ظ† طھط­ط¶ط± ط§ظ„ط§ظ…طھط­ط§ظ†.</h3>
+                                <button onclick="this.parentElement.parentElement.remove()" class="btn btn-gold" style="padding:10px 30px;border-radius:25px;font-size:1.1rem;">ط­ط³ظ†ط§ظ‹طŒ ظپظ‡ظ…طھ</button>
                             </div>
                         `;
                         document.body.appendChild(customOverlay);
@@ -946,8 +960,8 @@
                     if (!isMasterPreview) {
                         const parentLecId = item.attachedToLectureId || item._parentLecId;
                         if (parentLecId && !isItemCompleted(parentLecId)) {
-                            if(window.showToast) window.showToast('🔒 يجب مشاهدة المحاضرة كاملاً قبل الدخول للتدريب', 'error');
-                            else alert('يجب مشاهدة المحاضرة كاملاً قبل الدخول للتدريب');
+                            if(window.showToast) window.showToast('ًں”’ ظٹط¬ط¨ ظ…ط´ط§ظ‡ط¯ط© ط§ظ„ظ…ط­ط§ط¶ط±ط© ظƒط§ظ…ظ„ط§ظ‹ ظ‚ط¨ظ„ ط§ظ„ط¯ط®ظˆظ„ ظ„ظ„طھط¯ط±ظٹط¨', 'error');
+                            else alert('ظٹط¬ط¨ ظ…ط´ط§ظ‡ط¯ط© ط§ظ„ظ…ط­ط§ط¶ط±ط© ظƒط§ظ…ظ„ط§ظ‹ ظ‚ط¨ظ„ ط§ظ„ط¯ط®ظˆظ„ ظ„ظ„طھط¯ط±ظٹط¨');
                             return;
                         }
                         const tempStudentStr = sessionStorage.getItem('currentStudent');
@@ -956,19 +970,19 @@
                         
                         // Cannot do homework unless training is submitted
                         if (isHomeworkType && item._requiresTraining) {
-                            const trainingDone = (dbUser.examResults || []).some(r => r.courseId === course.id && (r.isTraining || ['training', 'تدريب'].includes(r.examType)));
+                            const trainingDone = (dbUser.examResults || []).some(r => r.courseId === course.id && (r.isTraining || ['training', 'طھط¯ط±ظٹط¨'].includes(r.examType)));
                             if (!trainingDone) {
-                                if(window.showToast) window.showToast('🔒 يجب تسليم التدريب أولاً قبل الواجب', 'error');
-                                else alert('يجب تسليم التدريب أولاً قبل الواجب');
+                                if(window.showToast) window.showToast('ًں”’ ظٹط¬ط¨ طھط³ظ„ظٹظ… ط§ظ„طھط¯ط±ظٹط¨ ط£ظˆظ„ط§ظ‹ ظ‚ط¨ظ„ ط§ظ„ظˆط§ط¬ط¨', 'error');
+                                else alert('ظٹط¬ط¨ طھط³ظ„ظٹظ… ط§ظ„طھط¯ط±ظٹط¨ ط£ظˆظ„ط§ظ‹ ظ‚ط¨ظ„ ط§ظ„ظˆط§ط¬ط¨');
                                 return;
                             }
                         }
                         // Cannot do exam unless homework submitted
                         if (isQuizType && item._requiresHomework) {
-                            const hwDone = (dbUser.examResults || []).some(r => r.courseId === course.id && (r.isHomework || ['task', 'homework', 'واجب'].includes(r.examType)));
+                            const hwDone = (dbUser.examResults || []).some(r => r.courseId === course.id && (r.isHomework || ['task', 'homework', 'ظˆط§ط¬ط¨'].includes(r.examType)));
                             if (!hwDone) {
-                                if(window.showToast) window.showToast('🔒 يجب تسليم الواجب أولاً قبل الامتحان', 'error');
-                                else alert('يجب تسليم الواجب أولاً قبل الامتحان');
+                                if(window.showToast) window.showToast('ًں”’ ظٹط¬ط¨ طھط³ظ„ظٹظ… ط§ظ„ظˆط§ط¬ط¨ ط£ظˆظ„ط§ظ‹ ظ‚ط¨ظ„ ط§ظ„ط§ظ…طھط­ط§ظ†', 'error');
+                                else alert('ظٹط¬ط¨ طھط³ظ„ظٹظ… ط§ظ„ظˆط§ط¬ط¨ ط£ظˆظ„ط§ظ‹ ظ‚ط¨ظ„ ط§ظ„ط§ظ…طھط­ط§ظ†');
                                 return;
                             }
                         }
@@ -984,8 +998,8 @@
                     if (!isMasterPreview) {
                         const parentLecId = item.attachedToLectureId || item._parentLecId;
                         if (parentLecId && !isItemCompleted(parentLecId)) {
-                            if(window.showToast) window.showToast('🔒 يجب مشاهدة المحاضرة كاملاً قبل تحميل الملف', 'error');
-                            else alert('يجب مشاهدة المحاضرة كاملاً قبل تحميل الملف');
+                            if(window.showToast) window.showToast('ًں”’ ظٹط¬ط¨ ظ…ط´ط§ظ‡ط¯ط© ط§ظ„ظ…ط­ط§ط¶ط±ط© ظƒط§ظ…ظ„ط§ظ‹ ظ‚ط¨ظ„ طھط­ظ…ظٹظ„ ط§ظ„ظ…ظ„ظپ', 'error');
+                            else alert('ظٹط¬ط¨ ظ…ط´ط§ظ‡ط¯ط© ط§ظ„ظ…ط­ط§ط¶ط±ط© ظƒط§ظ…ظ„ط§ظ‹ ظ‚ط¨ظ„ طھط­ظ…ظٹظ„ ط§ظ„ظ…ظ„ظپ');
                             return;
                         }
                     }
@@ -993,8 +1007,8 @@
                     return;
                 }
                 
-                if(window.showToast) window.showToast('افتح المحتوى: ' + item.title, 'success');
-                else alert('افتح المحتوى: ' + item.title);
+                if(window.showToast) window.showToast('ط§ظپطھط­ ط§ظ„ظ…ط­طھظˆظ‰: ' + item.title, 'success');
+                else alert('ط§ظپطھط­ ط§ظ„ظ…ط­طھظˆظ‰: ' + item.title);
             }
 
             function toItemIcon(type) {
@@ -1028,20 +1042,20 @@
                     
                     let scheduleHtml = '';
                     if (scheduleText) {
-                        scheduleHtml = `<div style="color: rgba(255,255,255,0.6); font-size: 0.85rem; margin-top: 5px; font-weight: normal;"><i class="fas fa-clock mr-1"></i> موعد النزول: ${scheduleText}</div>`;
+                        scheduleHtml = `<div style="color: rgba(255,255,255,0.6); font-size: 0.85rem; margin-top: 5px; font-weight: normal;"><i class="fas fa-clock mr-1"></i> ظ…ظˆط¹ط¯ ط§ظ„ظ†ط²ظˆظ„: ${scheduleText}</div>`;
                     }
                     
                     const itemsArr = sec.items || [];
                     let countText = '';
-                    if (sec.id === 'sec_homeworks') countText = `${itemsArr.length} واجبات`;
-                    else if (sec.id === 'sec_exams') countText = `${itemsArr.length} امتحانات`;
-                    else countText = `${itemsArr.filter(i => i.type === 'video').length} محاضرات`;
+                    if (sec.id === 'sec_homeworks') countText = `${itemsArr.length} ظˆط§ط¬ط¨ط§طھ`;
+                    else if (sec.id === 'sec_exams') countText = `${itemsArr.length} ط§ظ…طھط­ط§ظ†ط§طھ`;
+                    else countText = `${itemsArr.filter(i => i.type === 'video').length} ظ…ط­ط§ط¶ط±ط§طھ`;
                     
                     let latestBadge = '';
                     if (itemsArr.length > 0) {
                         const lastItem = itemsArr[itemsArr.length - 1];
-                        const badgeLabel = sec.id === 'sec_homeworks' ? 'واجب جديد' : (sec.id === 'sec_exams' ? 'امتحان جديد' : 'أحدث إضافة');
-                        latestBadge = `<div style="display:inline-block; margin-top:8px; padding: 4px 10px; background: rgba(52, 152, 219, 0.15); border: 1px solid rgba(52, 152, 219, 0.3); border-radius: 6px; color: #3498db; font-size: 0.8rem; font-weight: bold;"><i class="fas fa-star" style="color:var(--royal-gold); margin-left:5px; font-size:0.75rem;"></i>${badgeLabel}: ${lastItem.title || 'بدون عنوان'}</div>`;
+                        const badgeLabel = sec.id === 'sec_homeworks' ? 'ظˆط§ط¬ط¨ ط¬ط¯ظٹط¯' : (sec.id === 'sec_exams' ? 'ط§ظ…طھط­ط§ظ† ط¬ط¯ظٹط¯' : 'ط£ط­ط¯ط« ط¥ط¶ط§ظپط©');
+                        latestBadge = `<div style="display:inline-block; margin-top:8px; padding: 4px 10px; background: rgba(52, 152, 219, 0.15); border: 1px solid rgba(52, 152, 219, 0.3); border-radius: 6px; color: #3498db; font-size: 0.8rem; font-weight: bold;"><i class="fas fa-star" style="color:var(--royal-gold); margin-left:5px; font-size:0.75rem;"></i>${badgeLabel}: ${lastItem.title || 'ط¨ط¯ظˆظ† ط¹ظ†ظˆط§ظ†'}</div>`;
                     }
 
                     header.innerHTML = `
@@ -1069,7 +1083,7 @@
                     detailsInner.style.cssText = 'display:flex; flex-direction:column; gap:8px; padding: 15px;';
 
                     if(!sec.items || sec.items.length === 0) {
-                        detailsInner.innerHTML = '<div style="text-align:center; padding: 30px; background: rgba(0,0,0,0.2); border-radius: 12px; margin-top: 10px;"><i class="fas fa-laptop-code mb-3" style="font-size: 2.5rem; color: var(--accent-cyan); opacity: 0.8;"></i><h3 style="color: var(--royal-gold); margin-bottom: 10px;">المحتوى قيد التجهيز 🚀</h3><p style="color: rgba(255,255,255,0.7); line-height: 1.6; font-size: 0.95rem;">يتم الآن إعداد وتجهيز محتوى هذا القسم بأفضل جودة ليكون متاحاً قريباً، ابقوا متابعين ولا تفوتوا الجديد!</p></div>';
+                        detailsInner.innerHTML = '<div style="text-align:center; padding: 30px; background: rgba(0,0,0,0.2); border-radius: 12px; margin-top: 10px;"><i class="fas fa-laptop-code mb-3" style="font-size: 2.5rem; color: var(--accent-cyan); opacity: 0.8;"></i><h3 style="color: var(--royal-gold); margin-bottom: 10px;">ط§ظ„ظ…ط­طھظˆظ‰ ظ‚ظٹط¯ ط§ظ„طھط¬ظ‡ظٹط² ًںڑ€</h3><p style="color: rgba(255,255,255,0.7); line-height: 1.6; font-size: 0.95rem;">ظٹطھظ… ط§ظ„ط¢ظ† ط¥ط¹ط¯ط§ط¯ ظˆطھط¬ظ‡ظٹط² ظ…ط­طھظˆظ‰ ظ‡ط°ط§ ط§ظ„ظ‚ط³ظ… ط¨ط£ظپط¶ظ„ ط¬ظˆط¯ط© ظ„ظٹظƒظˆظ† ظ…طھط§ط­ط§ظ‹ ظ‚ط±ظٹط¨ط§ظ‹طŒ ط§ط¨ظ‚ظˆط§ ظ…طھط§ط¨ط¹ظٹظ† ظˆظ„ط§ طھظپظˆطھظˆط§ ط§ظ„ط¬ط¯ظٹط¯!</p></div>';
                     } else {
                         let currentLecGroup = null;
 
@@ -1091,7 +1105,7 @@
                             let lockReason = '';
                             
                             // Exam lock logic for videos
-                            const isExamType = item.type === 'exam' || item.type === 'quiz' || item.type === 'امتحان' || (!['video', 'pdf', 'task', 'homework', 'واجب', 'training', 'تدريب', 'header'].includes(item.type));
+                            const isExamType = item.type === 'exam' || item.type === 'quiz' || item.type === 'ط§ظ…طھط­ط§ظ†' || (!['video', 'pdf', 'task', 'homework', 'ظˆط§ط¬ط¨', 'training', 'طھط¯ط±ظٹط¨', 'header'].includes(item.type));
                             if (isExamType) {
                                 globalLastExamCompleted = isItemCompleted(item.id);
                                 lastExamName = item.title;
@@ -1099,21 +1113,21 @@
                             
                             if (item.type === 'video' && !globalLastExamCompleted) {
                                 isLocked = true;
-                                lockReason = `يجب اجتياز (${lastExamName}) أولاً لفتح المحاضرة`;
+                                lockReason = `ظٹط¬ط¨ ط§ط¬طھظٹط§ط² (${lastExamName}) ط£ظˆظ„ط§ظ‹ ظ„ظپطھط­ ط§ظ„ظ…ط­ط§ط¶ط±ط©`;
                             }
 
                             if (item.dependsOn) {
                                 if (!isItemCompleted(item.dependsOn)) {
                                     isLocked = true;
-                                    lockReason = 'يجب إكمال المحتوى السابق أولاً';
+                                    lockReason = 'ظٹط¬ط¨ ط¥ظƒظ…ط§ظ„ ط§ظ„ظ…ط­طھظˆظ‰ ط§ظ„ط³ط§ط¨ظ‚ ط£ظˆظ„ط§ظ‹';
                                 }
                             }
                             
                             let availStr = item.availabilityDate || item.availableFrom;
                             let untilStr = item.availableUntil;
                             
-                            // إلغاء قيود الوقت للتدريبات (تفتح بعد المحاضرة مباشرة)
-                            if (item.type === 'تدريب' || item.type === 'training') {
+                            // ط¥ظ„ط؛ط§ط، ظ‚ظٹظˆط¯ ط§ظ„ظˆظ‚طھ ظ„ظ„طھط¯ط±ظٹط¨ط§طھ (طھظپطھط­ ط¨ط¹ط¯ ط§ظ„ظ…ط­ط§ط¶ط±ط© ظ…ط¨ط§ط´ط±ط©)
+                            if (item.type === 'طھط¯ط±ظٹط¨' || item.type === 'training') {
                                 availStr = null;
                                 untilStr = null;
                             }
@@ -1132,7 +1146,7 @@
                                     isScheduled = true;
                                     const dt = new Date(availTime);
                                     const dateStr = dt.toLocaleDateString('ar-EG', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-                                    lockReason = `سيكون متاحاً: ${dateStr}`;
+                                    lockReason = `ط³ظٹظƒظˆظ† ظ…طھط§ط­ط§ظ‹: ${dateStr}`;
                                 }
                             }
                             
@@ -1140,7 +1154,7 @@
                                 const untilTime = new Date(untilStr).getTime();
                                 if (Date.now() > untilTime) {
                                     isLocked = true;
-                                    lockReason = `انتهى وقت إتاحة المحتوى`;
+                                    lockReason = `ط§ظ†طھظ‡ظ‰ ظˆظ‚طھ ط¥طھط§ط­ط© ط§ظ„ظ…ط­طھظˆظ‰`;
                                 }
                             }
 
@@ -1194,7 +1208,7 @@
                                     }
                                 } catch(e) {}
                             }
-                            const statusBadge = isCompleted ? `<span style="background:#2ecc71; color:#000; font-size:0.7rem; padding:2px 6px; border-radius:4px; margin-right:8px;">مكتمل</span> ${attemptsText}` : '';
+                            const statusBadge = isCompleted ? `<span style="background:#2ecc71; color:#000; font-size:0.7rem; padding:2px 6px; border-radius:4px; margin-right:8px;">ظ…ظƒطھظ…ظ„</span> ${attemptsText}` : '';
 
                             row.innerHTML = `
                                 <div style="display:flex; align-items:center; gap:15px; flex:1;">
@@ -1204,8 +1218,8 @@
                                     <div style="min-width:0;">
                                         <div style="color: var(--text-primary); font-weight: 700; font-size: 1.05rem;">${item.title} ${statusBadge}</div>
                                         <div style="font-size:0.8rem; color: rgba(255,255,255,0.5); margin-top: 4px;">
-                                            ${item.type === 'video' ? 'فيديو مسجل' : item.type === 'pdf' ? 'مذكرة' : ['task', 'homework', 'واجب'].includes(item.type) ? 'واجب' : ['training', 'تدريب'].includes(item.type) ? 'تدريب' : 'امتحان'}
-                                            ${item.deadlineDate ? ` <span style="color: #e74c3c; margin-right: 10px;"><i class="fas fa-clock"></i> الديدلاين: ${new Date(item.deadlineDate).toLocaleDateString('ar-EG')}</span>` : ''}
+                                            ${item.type === 'video' ? 'ظپظٹط¯ظٹظˆ ظ…ط³ط¬ظ„' : item.type === 'pdf' ? 'ظ…ط°ظƒط±ط©' : ['task', 'homework', 'ظˆط§ط¬ط¨'].includes(item.type) ? 'ظˆط§ط¬ط¨' : ['training', 'طھط¯ط±ظٹط¨'].includes(item.type) ? 'طھط¯ط±ظٹط¨' : 'ط§ظ…طھط­ط§ظ†'}
+                                            ${item.deadlineDate ? ` <span style="color: #e74c3c; margin-right: 10px;"><i class="fas fa-clock"></i> ط§ظ„ط¯ظٹط¯ظ„ط§ظٹظ†: ${new Date(item.deadlineDate).toLocaleDateString('ar-EG')}</span>` : ''}
                                             ${lockReason ? ` <br><span style="color: ${isScheduled ? '#f1c40f' : 'var(--accent-orange)'};"><i class="fas fa-info-circle"></i> ${lockReason}</span>` : ''}
                                         </div>
                                     </div>
@@ -1218,7 +1232,7 @@
                             if (item.id) actionBtn.dataset.itemId = item.id;
                             
                             if (isLocked) {
-                                actionBtn.innerHTML = '<i class="fas fa-lock"></i> مقفول';
+                                actionBtn.innerHTML = '<i class="fas fa-lock"></i> ظ…ظ‚ظپظˆظ„';
                                 actionBtn.style.borderColor = isScheduled ? '#f1c40f' : 'rgba(255,255,255,0.2)';
                                 actionBtn.style.color = isScheduled ? '#f1c40f' : 'rgba(255,255,255,0.5)';
                                 actionBtn.href = "#";
@@ -1227,17 +1241,17 @@
                                 let isFreeCourse = (course.isFree || course.price == '0' || course.price === 0);
                                 if (isOwned || isMasterPreview) {
                                     if (item.type === 'video') {
-                                        actionBtn.textContent = isCompleted ? 'مراجعة' : 'بدء';
-                                    } else if (['تدريب', 'training', 'exam', 'quiz', 'امتحان', 'task', 'homework', 'واجب'].includes(item.type)) {
-                                        if (['exam', 'quiz', 'امتحان'].includes(item.type)) {
-                                            actionBtn.textContent = 'دخول الامتحان';
-                                        } else if (['training', 'تدريب'].includes(item.type)) {
-                                            actionBtn.textContent = 'دخول التدريب';
+                                        actionBtn.textContent = isCompleted ? 'ظ…ط±ط§ط¬ط¹ط©' : 'ط¨ط¯ط،';
+                                    } else if (['طھط¯ط±ظٹط¨', 'training', 'exam', 'quiz', 'ط§ظ…طھط­ط§ظ†', 'task', 'homework', 'ظˆط§ط¬ط¨'].includes(item.type)) {
+                                        if (['exam', 'quiz', 'ط§ظ…طھط­ط§ظ†'].includes(item.type)) {
+                                            actionBtn.textContent = 'ط¯ط®ظˆظ„ ط§ظ„ط§ظ…طھط­ط§ظ†';
+                                        } else if (['training', 'طھط¯ط±ظٹط¨'].includes(item.type)) {
+                                            actionBtn.textContent = 'ط¯ط®ظˆظ„ ط§ظ„طھط¯ط±ظٹط¨';
                                         } else {
-                                            actionBtn.textContent = 'دخول الواجب';
+                                            actionBtn.textContent = 'ط¯ط®ظˆظ„ ط§ظ„ظˆط§ط¬ط¨';
                                         }
                                     } else if (item.type === 'pdf') {
-                                        actionBtn.innerHTML = '<i class="fas fa-download"></i> تحميل الملف';
+                                        actionBtn.innerHTML = '<i class="fas fa-download"></i> طھط­ظ…ظٹظ„ ط§ظ„ظ…ظ„ظپ';
                                     }
                                     
                                     if (isCompleted && item.type !== 'pdf') {
@@ -1249,9 +1263,9 @@
                                     }
                                 } else {
                                     if (isFreeCourse) {
-                                        actionBtn.textContent = userStr ? 'انضمام مجاني' : 'سجل الدخول';
+                                        actionBtn.textContent = userStr ? 'ط§ظ†ط¶ظ…ط§ظ… ظ…ط¬ط§ظ†ظٹ' : 'ط³ط¬ظ„ ط§ظ„ط¯ط®ظˆظ„';
                                     } else {
-                                        actionBtn.textContent = 'اشترك لفتح';
+                                        actionBtn.textContent = 'ط§ط´طھط±ظƒ ظ„ظپطھط­';
                                     }
                                     actionBtn.style.borderColor = 'var(--accent-orange)';
                                     actionBtn.style.color = 'var(--accent-orange)';
@@ -1335,18 +1349,18 @@
                 } catch(e) { console.error('Failed to mount Bousala Course Viewer', e); }
             })();
 
-            // Add exam modal UI — Full Featured (Timer, Auto-Submit, Strict Mode, Encouragement, Attempts)
+            // Add exam modal UI â€” Full Featured (Timer, Auto-Submit, Strict Mode, Encouragement, Attempts)
             (function(){
                 const examModalHtml = `
                 <div class="modal-overlay" id="examWarningModal" style="z-index: 10001;">
                   <div class="glass-panel modal-content" style="padding: 30px; max-width: 500px; text-align: center;">
                     <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #f39c12; margin-bottom: 20px;"></i>
-                    <h2 id="ewmTitle" style="margin-bottom: 15px; color: #f39c12;">تنبيه هام قبل بدء الامتحان</h2>
+                    <h2 id="ewmTitle" style="margin-bottom: 15px; color: #f39c12;">طھظ†ط¨ظٹظ‡ ظ‡ط§ظ… ظ‚ط¨ظ„ ط¨ط¯ط، ط§ظ„ط§ظ…طھط­ط§ظ†</h2>
                     <div style="text-align: right; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; margin-bottom: 20px; font-size: 0.95rem; line-height: 1.6;" id="ewmAttempts">
                     </div>
                     <div style="display: flex; gap: 10px; justify-content: center;">
-                        <button class="btn btn-outline" id="ewmCancelBtn">رجوع</button>
-                        <button class="btn btn-gold" id="ewmStartBtn">فاهم وموافق — ابدأ الامتحان</button>
+                        <button class="btn btn-outline" id="ewmCancelBtn">ط±ط¬ظˆط¹</button>
+                        <button class="btn btn-gold" id="ewmStartBtn">ظپط§ظ‡ظ… ظˆظ…ظˆط§ظپظ‚ â€” ط§ط¨ط¯ط£ ط§ظ„ط§ظ…طھط­ط§ظ†</button>
                     </div>
                   </div>
                 </div>
@@ -1354,11 +1368,11 @@
                 <div class="modal-overlay" id="examModal">
                   <div class="glass-panel modal-content" style="padding: 20px; max-width: 800px; position:relative;">
                     <button class="close-modal" id="examModalCloseBtn"><i class="fas fa-times"></i></button>
-                    <h2 id="examModalTitle" style="margin-bottom:10px;">امتحان</h2>
+                    <h2 id="examModalTitle" style="margin-bottom:10px;">ط§ظ…طھط­ط§ظ†</h2>
                     <div id="examQuestionsContainer" style="display:block; max-height:50vh; overflow:auto; gap:10px; margin-bottom:12px;"></div>
                     <div style="display:flex; gap:10px; justify-content:flex-end;">
-                      <button class="btn btn-outline" id="examCancelBtn">إلغاء</button>
-                      <button class="btn btn-green" id="submitExamBtn">تسليم الإجابات</button>
+                      <button class="btn btn-outline" id="examCancelBtn">ط¥ظ„ط؛ط§ط،</button>
+                      <button class="btn btn-green" id="submitExamBtn">طھط³ظ„ظٹظ… ط§ظ„ط¥ط¬ط§ط¨ط§طھ</button>
                     </div>
                     <div id="examResultContainer" style="margin-top:12px; display:none;"></div>
                   </div>
@@ -1388,13 +1402,13 @@
                     } else if(course && course.contents) {
                         if(typeof examObjOrIndex === 'number' && Array.isArray(course.contents.exams)) exam = course.contents.exams[examObjOrIndex];
                     }
-                    if(!exam) { if(window.showToast) window.showToast('لا يوجد امتحان قابل للتشغيل','error'); else alert('لا يوجد امتحان.'); return; }
+                    if(!exam) { if(window.showToast) window.showToast('ظ„ط§ ظٹظˆط¬ط¯ ط§ظ…طھط­ط§ظ† ظ‚ط§ط¨ظ„ ظ„ظ„طھط´ط؛ظٹظ„','error'); else alert('ظ„ط§ ظٹظˆط¬ط¯ ط§ظ…طھط­ط§ظ†.'); return; }
 
                     // Check availability window (Skip for training)
                     const nowMs = Date.now();
-                    const isTraining = (exam.type === 'تدريب' || exam.type === 'training' || (exam.title && exam.title.includes('تدريب')));
-                    const isHomework = (exam.type === 'واجب' || exam.type === 'homework' || exam.type === 'task' || (exam.title && exam.title.includes('واجب')));
-                    const examTypeName = isTraining ? 'التدريب' : isHomework ? 'الواجب' : 'الامتحان';
+                    const isTraining = (exam.type === 'طھط¯ط±ظٹط¨' || exam.type === 'training' || (exam.title && exam.title.includes('طھط¯ط±ظٹط¨')));
+                    const isHomework = (exam.type === 'ظˆط§ط¬ط¨' || exam.type === 'homework' || exam.type === 'task' || (exam.title && exam.title.includes('ظˆط§ط¬ط¨')));
+                    const examTypeName = isTraining ? 'ط§ظ„طھط¯ط±ظٹط¨' : isHomework ? 'ط§ظ„ظˆط§ط¬ط¨' : 'ط§ظ„ط§ظ…طھط­ط§ظ†';
 
                     if (!isMasterPreview && !isTraining) {
                         let availExamTime = exam.availableFrom ? new Date(exam.availableFrom).getTime() : NaN;
@@ -1403,13 +1417,13 @@
                         }
                         if(!isNaN(availExamTime) && availExamTime > nowMs) {
                             const fromStr = new Date(availExamTime).toLocaleString('ar-EG');
-                            if(window.showToast) window.showToast(`${examTypeName} لم يفتح بعد. يفتح في: ` + fromStr, 'error');
-                            else alert(`${examTypeName} لم يفتح بعد. يفتح في: ` + fromStr);
+                            if(window.showToast) window.showToast(`${examTypeName} ظ„ظ… ظٹظپطھط­ ط¨ط¹ط¯. ظٹظپطھط­ ظپظٹ: ` + fromStr, 'error');
+                            else alert(`${examTypeName} ظ„ظ… ظٹظپطھط­ ط¨ط¹ط¯. ظٹظپطھط­ ظپظٹ: ` + fromStr);
                             return;
                         }
                         if(exam.availableUntil && new Date(exam.availableUntil).getTime() < nowMs) {
-                            if(window.showToast) window.showToast(`انتهى وقت هذا ${examTypeName} ولا يمكن الدخول إليه.`, 'error');
-                            else alert(`انتهى وقت هذا ${examTypeName} ولا يمكن الدخول إليه.`);
+                            if(window.showToast) window.showToast(`ط§ظ†طھظ‡ظ‰ ظˆظ‚طھ ظ‡ط°ط§ ${examTypeName} ظˆظ„ط§ ظٹظ…ظƒظ† ط§ظ„ط¯ط®ظˆظ„ ط¥ظ„ظٹظ‡.`, 'error');
+                            else alert(`ط§ظ†طھظ‡ظ‰ ظˆظ‚طھ ظ‡ط°ط§ ${examTypeName} ظˆظ„ط§ ظٹظ…ظƒظ† ط§ظ„ط¯ط®ظˆظ„ ط¥ظ„ظٹظ‡.`);
                             return;
                         }
                     }
@@ -1423,8 +1437,8 @@
                     const dbRec = JSON.parse(localStorage.getItem(dbKey) || '{}') || {};
                     const prevAttempts = (dbRec.examResults || []).filter(r => r.courseId === courseId && r.examTitle === (exam.title || ''));
                     if (prevAttempts.length >= 3 && !isMasterPreview) {
-                        if(window.showToast) window.showToast('لقد استنفذت الحد الأقصى للمحاولات (3 محاولات).', 'error');
-                        else alert('لقد استنفذت الحد الأقصى للمحاولات (3 محاولات).');
+                        if(window.showToast) window.showToast('ظ„ظ‚ط¯ ط§ط³طھظ†ظپط°طھ ط§ظ„ط­ط¯ ط§ظ„ط£ظ‚طµظ‰ ظ„ظ„ظ…ط­ط§ظˆظ„ط§طھ (3 ظ…ط­ط§ظˆظ„ط§طھ).', 'error');
+                        else alert('ظ„ظ‚ط¯ ط§ط³طھظ†ظپط°طھ ط§ظ„ط­ط¯ ط§ظ„ط£ظ‚طµظ‰ ظ„ظ„ظ…ط­ط§ظˆظ„ط§طھ (3 ظ…ط­ط§ظˆظ„ط§طھ).');
                         return;
                     }
 
@@ -1433,12 +1447,12 @@
                     
                     const ewmTitle = document.getElementById('ewmTitle');
                     if(ewmTitle) {
-                        ewmTitle.innerHTML = `تنبيه هام قبل بدء ${examTypeName}`;
+                        ewmTitle.innerHTML = `طھظ†ط¨ظٹظ‡ ظ‡ط§ظ… ظ‚ط¨ظ„ ط¨ط¯ط، ${examTypeName}`;
                     }
 
                     const ewmAttempts = document.getElementById('ewmAttempts');
                     if(ewmAttempts) {
-                        let warningsHtml = `<p style="margin-bottom: 10px;">⚠️ لديك <strong>${3 - prevAttempts.length}</strong> محاولات متبقية. <br><small style="color: #f39c12;">(المحاولة الأولى فقط هي المحسوبة في التقييم، والمحاولات الإضافية هي لتحسين درجتك وتدريبك ولكنها غير محسوبة رسمياً).</small></p>`;
+                        let warningsHtml = `<p style="margin-bottom: 10px;">âڑ ï¸ڈ ظ„ط¯ظٹظƒ <strong>${3 - prevAttempts.length}</strong> ظ…ط­ط§ظˆظ„ط§طھ ظ…طھط¨ظ‚ظٹط©. <br><small style="color: #f39c12;">(ط§ظ„ظ…ط­ط§ظˆظ„ط© ط§ظ„ط£ظˆظ„ظ‰ ظپظ‚ط· ظ‡ظٹ ط§ظ„ظ…ط­ط³ظˆط¨ط© ظپظٹ ط§ظ„طھظ‚ظٹظٹظ…طŒ ظˆط§ظ„ظ…ط­ط§ظˆظ„ط§طھ ط§ظ„ط¥ط¶ط§ظپظٹط© ظ‡ظٹ ظ„طھط­ط³ظٹظ† ط¯ط±ط¬طھظƒ ظˆطھط¯ط±ظٹط¨ظƒ ظˆظ„ظƒظ†ظ‡ط§ ط؛ظٹط± ظ…ط­ط³ظˆط¨ط© ط±ط³ظ…ظٹط§ظ‹).</small></p>`;
                         
                         let durationMins = parseInt(exam.duration) || 0;
                         if (exam.strictMode && durationMins === 0) durationMins = 5;
@@ -1449,15 +1463,15 @@
                         }
 
                         if (exam.strictMode) {
-                            warningsHtml += `<p style="margin-bottom: 10px; color: #e74c3c;">🚫 <strong>الوضع الصارم مفعل! يُمنع الخروج أو التبديل بين التطبيقات!</strong> أي محاولة لفتح تطبيق آخر أو الخروج من النافذة ستؤدي إلى <strong>تسليم الامتحان فوراً بدرجة صفر</strong>.</p>`;
+                            warningsHtml += `<p style="margin-bottom: 10px; color: #e74c3c;">ًںڑ« <strong>ط§ظ„ظˆط¶ط¹ ط§ظ„طµط§ط±ظ… ظ…ظپط¹ظ„! ظٹظڈظ…ظ†ط¹ ط§ظ„ط®ط±ظˆط¬ ط£ظˆ ط§ظ„طھط¨ط¯ظٹظ„ ط¨ظٹظ† ط§ظ„طھط·ط¨ظٹظ‚ط§طھ!</strong> ط£ظٹ ظ…ط­ط§ظˆظ„ط© ظ„ظپطھط­ طھط·ط¨ظٹظ‚ ط¢ط®ط± ط£ظˆ ط§ظ„ط®ط±ظˆط¬ ظ…ظ† ط§ظ„ظ†ط§ظپط°ط© ط³طھط¤ط¯ظٹ ط¥ظ„ظ‰ <strong>طھط³ظ„ظٹظ… ط§ظ„ط§ظ…طھط­ط§ظ† ظپظˆط±ط§ظ‹ ط¨ط¯ط±ط¬ط© طµظپط±</strong>.</p>`;
                         } else {
-                            warningsHtml += `<p style="margin-bottom: 10px; color: #3498db;">ℹ️ الوضع الصارم غير مفعل لهذا التقييم.</p>`;
+                            warningsHtml += `<p style="margin-bottom: 10px; color: #3498db;">â„¹ï¸ڈ ط§ظ„ظˆط¶ط¹ ط§ظ„طµط§ط±ظ… ط؛ظٹط± ظ…ظپط¹ظ„ ظ„ظ‡ط°ط§ ط§ظ„طھظ‚ظٹظٹظ….</p>`;
                         }
 
                         if (durationMins > 0) {
-                            warningsHtml += `<p style="margin-bottom: 0;">⏱️ مدة الامتحان <strong>${durationMins} دقائق</strong>. سيستمر العداد حتى لو انقطع الإنترنت.</p>`;
+                            warningsHtml += `<p style="margin-bottom: 0;">âڈ±ï¸ڈ ظ…ط¯ط© ط§ظ„ط§ظ…طھط­ط§ظ† <strong>${durationMins} ط¯ظ‚ط§ط¦ظ‚</strong>. ط³ظٹط³طھظ…ط± ط§ظ„ط¹ط¯ط§ط¯ ط­طھظ‰ ظ„ظˆ ط§ظ†ظ‚ط·ط¹ ط§ظ„ط¥ظ†طھط±ظ†طھ.</p>`;
                         } else {
-                            warningsHtml += `<p style="margin-bottom: 0;">⏱️ الامتحان بدون وقت محدد.</p>`;
+                            warningsHtml += `<p style="margin-bottom: 0;">âڈ±ï¸ڈ ط§ظ„ط§ظ…طھط­ط§ظ† ط¨ط¯ظˆظ† ظˆظ‚طھ ظ…ط­ط¯ط¯.</p>`;
                         }
                         
                         ewmAttempts.innerHTML = warningsHtml;
@@ -1487,13 +1501,13 @@
                     if (isMasterPreview) {
                         const mNote = document.createElement('p');
                         mNote.style.color = '#3498db';
-                        mNote.innerHTML = 'ℹ️ <strong>ملاحظة (حساب الماستر 0000):</strong> هذه هي شاشة التعليمات التي تظهر للطالب.';
+                        mNote.innerHTML = 'â„¹ï¸ڈ <strong>ظ…ظ„ط§ط­ط¸ط© (ط­ط³ط§ط¨ ط§ظ„ظ…ط§ط³طھط± 0000):</strong> ظ‡ط°ظ‡ ظ‡ظٹ ط´ط§ط´ط© ط§ظ„طھط¹ظ„ظٹظ…ط§طھ ط§ظ„طھظٹ طھط¸ظ‡ط± ظ„ظ„ط·ط§ظ„ط¨.';
                         ewmAttempts.appendChild(mNote);
                     }
                     warningModal.classList.add('active');
 
                     function startActualExam() {
-                        document.getElementById('examModalTitle').textContent = (exam.title || examTypeName) + (isMasterPreview ? '' : ` (محاولة ${prevAttempts.length + 1} من 3)`);
+                        document.getElementById('examModalTitle').textContent = (exam.title || examTypeName) + (isMasterPreview ? '' : ` (ظ…ط­ط§ظˆظ„ط© ${prevAttempts.length + 1} ظ…ظ† 3)`);
 
                         const container = document.getElementById('examQuestionsContainer');
                         container.innerHTML = '';
@@ -1516,11 +1530,11 @@
                         if(q.type === 'choose' || q.asMcq){
                             inputHtml = '<div>' + ['a','b','c','d'].map(k => '<label style="display:block;margin-bottom:8px;cursor:pointer;"><input type=radio name=qa_' + idx + ' value="' + k + '"/> ' + (q.options && q.options[k] ? q.options[k] : k) + '</label>').join('') + '</div>';
                         } else if(q.type === 'tf'){
-                            inputHtml = '<label style="cursor:pointer;"><input type=radio name=qa_' + idx + ' value="صح"/> صح</label><label style="margin-right:15px;cursor:pointer;"><input type=radio name=qa_' + idx + ' value="خطأ"/> خطأ</label>';
+                            inputHtml = '<label style="cursor:pointer;"><input type=radio name=qa_' + idx + ' value="طµط­"/> طµط­</label><label style="margin-right:15px;cursor:pointer;"><input type=radio name=qa_' + idx + ' value="ط®ط·ط£"/> ط®ط·ط£</label>';
                         } else {
-                            inputHtml = '<textarea name=qa_' + idx + ' rows=3 style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);color:#fff;border-radius:6px;padding:8px;" placeholder="اكتب إجابتك هنا"></textarea>';
+                            inputHtml = '<textarea name=qa_' + idx + ' rows=3 style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);color:#fff;border-radius:6px;padding:8px;" placeholder="ط§ظƒطھط¨ ط¥ط¬ط§ط¨طھظƒ ظ‡ظ†ط§"></textarea>';
                         }
-                        qDiv.innerHTML = '<p style="margin:0 0 10px 0;font-weight:600;"><span style="color:var(--royal-gold);">س' + (idx+1) + ':</span> <span style="font-size:0.8rem; color:#f39c12; margin-right:10px;">(' + (q.points || 1) + ' درجة)</span><br>' + q.text + '</p>' + inputHtml;
+                        qDiv.innerHTML = '<p style="margin:0 0 10px 0;font-weight:600;"><span style="color:var(--royal-gold);">ط³' + (idx+1) + ':</span> <span style="font-size:0.8rem; color:#f39c12; margin-right:10px;">(' + (q.points || 1) + ' ط¯ط±ط¬ط©)</span><br>' + q.text + '</p>' + inputHtml;
                         container.appendChild(qDiv);
                     });
                     
@@ -1542,7 +1556,7 @@
                     const cancelBtn = document.getElementById('examCancelBtn');
                     const resultBox = document.getElementById('examResultContainer');
                     resultBox.style.display = 'none'; resultBox.innerHTML = '';
-                    submitBtn.disabled = true; submitBtn.innerHTML = 'تسليم الإجابات'; // Disabled by default until all solved
+                    submitBtn.disabled = true; submitBtn.innerHTML = 'طھط³ظ„ظٹظ… ط§ظ„ط¥ط¬ط§ط¨ط§طھ'; // Disabled by default until all solved
                     
                     function checkAllAnswered() {
                         let allAnswered = true;
@@ -1580,7 +1594,7 @@
                     async function doSubmit(autoSubmit, isStrictViolation = false) {
                         _stopTimer();
                         const studentStr = sessionStorage.getItem('currentStudent');
-                        if(!studentStr){ alert('يجب تسجيل الدخول لتسليم الإجابة'); return; }
+                        if(!studentStr){ alert('ظٹط¬ط¨ طھط³ط¬ظٹظ„ ط§ظ„ط¯ط®ظˆظ„ ظ„طھط³ظ„ظٹظ… ط§ظ„ط¥ط¬ط§ط¨ط©'); return; }
                         const student = JSON.parse(studentStr);
                         const answers = [];
                         let unansweredCount = 0;
@@ -1597,14 +1611,14 @@
                         });
 
                         if (!autoSubmit) {
-                            let summaryHtml = '<div style="text-align:right;"><strong>ملخص إجاباتك قبل التسليم النهائي:</strong><ul style="margin-top:10px;">';
+                            let summaryHtml = '<div style="text-align:right;"><strong>ظ…ظ„ط®طµ ط¥ط¬ط§ط¨ط§طھظƒ ظ‚ط¨ظ„ ط§ظ„طھط³ظ„ظٹظ… ط§ظ„ظ†ظ‡ط§ط¦ظٹ:</strong><ul style="margin-top:10px;">';
                             answers.forEach((ans, i) => {
-                                let ansText = ans.answer.trim() ? ans.answer : '<span style="color:#e74c3c">لم تتم الإجابة</span>';
-                                summaryHtml += `<li>س${i+1}: ${ansText}</li>`;
+                                let ansText = ans.answer.trim() ? ans.answer : '<span style="color:#e74c3c">ظ„ظ… طھطھظ… ط§ظ„ط¥ط¬ط§ط¨ط©</span>';
+                                summaryHtml += `<li>ط³${i+1}: ${ansText}</li>`;
                             });
-                            summaryHtml += '</ul>هل أنت متأكد من تسليم هذا الامتحان نهائياً؟ لا يمكن التراجع!</div>';
+                            summaryHtml += '</ul>ظ‡ظ„ ط£ظ†طھ ظ…طھط£ظƒط¯ ظ…ظ† طھط³ظ„ظٹظ… ظ‡ط°ط§ ط§ظ„ط§ظ…طھط­ط§ظ† ظ†ظ‡ط§ط¦ظٹط§ظ‹طں ظ„ط§ ظٹظ…ظƒظ† ط§ظ„طھط±ط§ط¬ط¹!</div>';
                             
-                            const confirmSubmit = confirm("ملخص الإجابات سيظهر الآن.\n" + summaryHtml.replace(/<[^>]*>?/gm, ' '));
+                            const confirmSubmit = confirm("ظ…ظ„ط®طµ ط§ظ„ط¥ط¬ط§ط¨ط§طھ ط³ظٹط¸ظ‡ط± ط§ظ„ط¢ظ†.\n" + summaryHtml.replace(/<[^>]*>?/gm, ' '));
                             if (!confirmSubmit) {
                                 // Resume strict mode if it was on
                                 if(exam.strictMode) _activateStrict();
@@ -1613,7 +1627,7 @@
                         }
 
                         submitBtn.disabled = true;
-                        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري التصحيح...';
+                        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ط¬ط§ط±ظٹ ط§ظ„طھطµط­ظٹط­...';
 
                         // Import Bousala Grader
                         let BousalaGrader = null;
@@ -1651,7 +1665,7 @@
                                     } else {
                                         const opts = { choices: item.q.options ? Object.values(item.q.options) : null, altAnswers: item.q.altAnswers };
                                         const res = BousalaGrader.gradeObjective(item.answer, item.q.answer, opts);
-                                        r = { score: res.score, feedback: res.why, needsReview: false, method: "آلي" };
+                                        r = { score: res.score, feedback: res.why, needsReview: false, method: "ط¢ظ„ظٹ" };
                                     }
                                 }
                             } catch(e) { console.error('Bousala grading failed for item, using fallback', e); }
@@ -1661,7 +1675,7 @@
                                 try {
                                     if(window.PF_Grader && typeof window.PF_Grader.scoreAnswer === 'function' && !item.q.asMcq) {
                                         const res = window.PF_Grader.scoreAnswer(item.answer, item.q.answer, item.q.type || 'explain');
-                                        r = { score: res.score || 0, feedback: res.feedback || (res.score === 1 ? 'إجابة صحيحة تمامًا ✅' : 'راجع الإجابة'), needsReview: false };
+                                        r = { score: res.score || 0, feedback: res.feedback || (res.score === 1 ? 'ط¥ط¬ط§ط¨ط© طµط­ظٹط­ط© طھظ…ط§ظ…ظ‹ط§ âœ…' : 'ط±ط§ط¬ط¹ ط§ظ„ط¥ط¬ط§ط¨ط©'), needsReview: false };
                                     }
                                 } catch(e) {}
                             }
@@ -1670,7 +1684,7 @@
                                 const correct = (item.q.answer || '').toString().trim().toLowerCase();
                                 const given = String(item.answer || '').trim().toLowerCase();
                                 const ok = given !== '' && given === correct;
-                                r = { score: ok ? 1 : 0, feedback: ok ? 'إجابة صحيحة ✅' : ('إجابة غير صحيحة ❌ — الإجابة الصحيحة: ' + item.q.answer), needsReview: false };
+                                r = { score: ok ? 1 : 0, feedback: ok ? 'ط¥ط¬ط§ط¨ط© طµط­ظٹط­ط© âœ…' : ('ط¥ط¬ط§ط¨ط© ط؛ظٹط± طµط­ظٹط­ط© â‌Œ â€” ط§ظ„ط¥ط¬ط§ط¨ط© ط§ظ„طµط­ظٹط­ط©: ' + item.q.answer), needsReview: false };
                             }
                             
                             const pEarned = r.score * qPts;
@@ -1684,7 +1698,7 @@
                                 totalPoints: qPts, 
                                 feedback: r.feedback, 
                                 needsReview: !!r.needsReview, 
-                                method: r.method || "قديم",
+                                method: r.method || "ظ‚ط¯ظٹظ…",
                                 options: item.q.options || null,
                                 correctAnswer: item.q.answer || null
                             });
@@ -1703,15 +1717,15 @@
 
                         let encouragement = '', encColor = '', encIcon = '';
                         if (isStrictViolation) {
-                            encouragement = '⚠️ تم سحب الامتحان إجبارياً بسبب محاولة الخروج أو الغش ⚠️<br><span style="font-size:1rem;color:#fff;">(تم احتساب درجاتك التي أجبت عليها فقط)</span>';
+                            encouragement = 'âڑ ï¸ڈ طھظ… ط³ط­ط¨ ط§ظ„ط§ظ…طھط­ط§ظ† ط¥ط¬ط¨ط§ط±ظٹط§ظ‹ ط¨ط³ط¨ط¨ ظ…ط­ط§ظˆظ„ط© ط§ظ„ط®ط±ظˆط¬ ط£ظˆ ط§ظ„ط؛ط´ âڑ ï¸ڈ<br><span style="font-size:1rem;color:#fff;">(طھظ… ط§ط­طھط³ط§ط¨ ط¯ط±ط¬ط§طھظƒ ط§ظ„طھظٹ ط£ط¬ط¨طھ ط¹ظ„ظٹظ‡ط§ ظپظ‚ط·)</span>';
                             encColor = '#e67e22';
-                            encIcon = '⛔';
+                            encIcon = 'â›”';
                         } else {
-                            if(dispPct >= 90) { encouragement = 'طالب البوصلة! أداء استثنائي ومثالي! 👑'; encColor = '#f1c40f'; encIcon = '🧭'; }
-                            else if(dispPct >= 80) { encouragement = 'جيد جداً! مستوى مبشر ومتميز! 🌟'; encColor = '#2ecc71'; encIcon = '🏆'; }
-                            else if(dispPct >= 65) { encouragement = 'جيد! أداء كويس بس تقدر تعمل أحسن! 👏'; encColor = '#3498db'; encIcon = '👍'; }
-                            else if(dispPct >= 50) { encouragement = 'مقبول. محتاج تذاكر أكتر وتركز المرة الجاية! 📚'; encColor = '#f39c12'; encIcon = '⚠️'; }
-                            else { encouragement = 'ضعيف جداً! هذا المستوى لا يليق بك، راجع دروسك فوراً! ❌'; encColor = '#e74c3c'; encIcon = '💔'; }
+                            if(dispPct >= 90) { encouragement = 'ط·ط§ظ„ط¨ ط§ظ„ط¨ظˆطµظ„ط©! ط£ط¯ط§ط، ط§ط³طھط«ظ†ط§ط¦ظٹ ظˆظ…ط«ط§ظ„ظٹ! ًں‘‘'; encColor = '#f1c40f'; encIcon = 'ًں§­'; }
+                            else if(dispPct >= 80) { encouragement = 'ط¬ظٹط¯ ط¬ط¯ط§ظ‹! ظ…ط³طھظˆظ‰ ظ…ط¨ط´ط± ظˆظ…طھظ…ظٹط²! ًںŒں'; encColor = '#2ecc71'; encIcon = 'ًںڈ†'; }
+                            else if(dispPct >= 65) { encouragement = 'ط¬ظٹط¯! ط£ط¯ط§ط، ظƒظˆظٹط³ ط¨ط³ طھظ‚ط¯ط± طھط¹ظ…ظ„ ط£ط­ط³ظ†! ًں‘ڈ'; encColor = '#3498db'; encIcon = 'ًں‘چ'; }
+                            else if(dispPct >= 50) { encouragement = 'ظ…ظ‚ط¨ظˆظ„. ظ…ط­طھط§ط¬ طھط°ط§ظƒط± ط£ظƒطھط± ظˆطھط±ظƒط² ط§ظ„ظ…ط±ط© ط§ظ„ط¬ط§ظٹط©! ًں“ڑ'; encColor = '#f39c12'; encIcon = 'âڑ ï¸ڈ'; }
+                            else { encouragement = 'ط¶ط¹ظٹظپ ط¬ط¯ط§ظ‹! ظ‡ط°ط§ ط§ظ„ظ…ط³طھظˆظ‰ ظ„ط§ ظٹظ„ظٹظ‚ ط¨ظƒطŒ ط±ط§ط¬ط¹ ط¯ط±ظˆط³ظƒ ظپظˆط±ط§ظ‹! â‌Œ'; encColor = '#e74c3c'; encIcon = 'ًں’”'; }
                         }
 
                         resultBox.style.display = 'block';
@@ -1719,17 +1733,17 @@
                         rHtml += '<div style="font-size:2.5rem;margin-bottom:6px;">' + encIcon + '</div>';
                         rHtml += '<div style="font-size:1.3rem;font-weight:bold;color:' + encColor + ';margin-bottom:10px;">' + encouragement + '</div>';
                         
-                        let scoreDisp = '<div style="font-size:1.1rem;"><strong>الدرجة الأساسية: ' + percent + '%</strong>';
+                        let scoreDisp = '<div style="font-size:1.1rem;"><strong>ط§ظ„ط¯ط±ط¬ط© ط§ظ„ط£ط³ط§ط³ظٹط©: ' + percent + '%</strong>';
                         if (penaltyApplied) {
-                            scoreDisp += ' <br/><span style="color:#e74c3c; font-size: 1.2rem; font-weight: bold;">(الدرجة النهائية بعد الخصم: ' + effectivePercent + '%)</span>';
+                            scoreDisp += ' <br/><span style="color:#e74c3c; font-size: 1.2rem; font-weight: bold;">(ط§ظ„ط¯ط±ط¬ط© ط§ظ„ظ†ظ‡ط§ط¦ظٹط© ط¨ط¹ط¯ ط§ظ„ط®طµظ…: ' + effectivePercent + '%)</span>';
                         }
                         scoreDisp += '</div>';
                         rHtml += scoreDisp;
                         
-                        rHtml += '<div style="font-size:1rem;color:#f39c12;margin-top:5px;"><strong>مجموع النقاط: ' + earnedPoints + ' من ' + totalPoints + '</strong></div>';
-                        if(isStrictViolation) rHtml += '<div style="margin-top:10px;padding:10px;background:rgba(230,126,34,0.15);border-radius:8px;color:#e67e22;font-size:0.9rem;">⚠️ <strong>تم تسليم الامتحان وتسجيل درجاتك الحالية بسبب محاولة الخروج أو مخالفة القواعد.</strong></div>';
-                        else if(autoSubmit) rHtml += '<div style="margin-top:8px;color:#e74c3c;font-size:0.9rem;">⏰ تم التسليم التلقائي بعد انتهاء الوقت.</div>';
-                        if(penaltyApplied) rHtml += '<div style="margin-top:10px;padding:10px;background:rgba(231,76,60,0.15);border-radius:8px;color:#e74c3c;font-size:0.9rem;">⚠️ <strong>تم خصم 20% من درجتك بسبب التأخر في التسليم بعد الموعد النهائي.</strong></div>';
+                        rHtml += '<div style="font-size:1rem;color:#f39c12;margin-top:5px;"><strong>ظ…ط¬ظ…ظˆط¹ ط§ظ„ظ†ظ‚ط§ط·: ' + earnedPoints + ' ظ…ظ† ' + totalPoints + '</strong></div>';
+                        if(isStrictViolation) rHtml += '<div style="margin-top:10px;padding:10px;background:rgba(230,126,34,0.15);border-radius:8px;color:#e67e22;font-size:0.9rem;">âڑ ï¸ڈ <strong>طھظ… طھط³ظ„ظٹظ… ط§ظ„ط§ظ…طھط­ط§ظ† ظˆطھط³ط¬ظٹظ„ ط¯ط±ط¬ط§طھظƒ ط§ظ„ط­ط§ظ„ظٹط© ط¨ط³ط¨ط¨ ظ…ط­ط§ظˆظ„ط© ط§ظ„ط®ط±ظˆط¬ ط£ظˆ ظ…ط®ط§ظ„ظپط© ط§ظ„ظ‚ظˆط§ط¹ط¯.</strong></div>';
+                        else if(autoSubmit) rHtml += '<div style="margin-top:8px;color:#e74c3c;font-size:0.9rem;">âڈ° طھظ… ط§ظ„طھط³ظ„ظٹظ… ط§ظ„طھظ„ظ‚ط§ط¦ظٹ ط¨ط¹ط¯ ط§ظ†طھظ‡ط§ط، ط§ظ„ظˆظ‚طھ.</div>';
+                        if(penaltyApplied) rHtml += '<div style="margin-top:10px;padding:10px;background:rgba(231,76,60,0.15);border-radius:8px;color:#e74c3c;font-size:0.9rem;">âڑ ï¸ڈ <strong>طھظ… ط®طµظ… 20% ظ…ظ† ط¯ط±ط¬طھظƒ ط¨ط³ط¨ط¨ ط§ظ„طھط£ط®ط± ظپظٹ ط§ظ„طھط³ظ„ظٹظ… ط¨ط¹ط¯ ط§ظ„ظ…ظˆط¹ط¯ ط§ظ„ظ†ظ‡ط§ط¦ظٹ.</strong></div>';
                         rHtml += '<hr style="border-color:rgba(255,255,255,0.08);margin:14px 0;"><div id="_examResDetails"></div></div>';
                         resultBox.innerHTML = rHtml;
 
@@ -1738,9 +1752,9 @@
                             const p = document.createElement('div');
                             p.style.cssText = 'padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.06);font-size:0.9rem;line-height:1.6;';
                             
-                            const letters = ['أ', 'ب', 'ج', 'د', 'ه', 'ا'];
+                            const letters = ['ط£', 'ط¨', 'ط¬', 'ط¯', 'ظ‡', 'ط§'];
                             const getFullAns = (ans, opts) => {
-                                if (ans === undefined || ans === null || ans === '') return '(بدون إجابة)';
+                                if (ans === undefined || ans === null || ans === '') return '(ط¨ط¯ظˆظ† ط¥ط¬ط§ط¨ط©)';
                                 const ansStr = String(ans).trim();
                                 if (opts && Array.isArray(opts)) {
                                     let idx = letters.indexOf(ansStr);
@@ -1761,19 +1775,19 @@
                             let isCorrect = (r.score >= 0.5);
                             let correctAnsHtml = '';
                             if (!isCorrect && displayCorrect) {
-                                correctAnsHtml = `<br/><span style="color:rgba(255,255,255,0.6);">الإجابة الصحيحة: </span><span style="color:#2ecc71;">${displayCorrect}</span>`;
+                                correctAnsHtml = `<br/><span style="color:rgba(255,255,255,0.6);">ط§ظ„ط¥ط¬ط§ط¨ط© ط§ظ„طµط­ظٹط­ط©: </span><span style="color:#2ecc71;">${displayCorrect}</span>`;
                             }
                             
-                            p.innerHTML = '<strong>س' + (i+1) + ':</strong> ' + r.question + ' <span style="color:#f39c12;">(' + (r.pointsEarned||0) + '/' + (r.totalPoints||1) + ' نقطة)</span><br/><em style="color:rgba(255,255,255,0.6);">إجابتك:</em> <span style="color:' + (isCorrect ? '#2ecc71' : '#e74c3c') + ';">' + displayStudent + '</span>' + correctAnsHtml + '<br/><em style="color:rgba(255,255,255,0.6);">التعليق:</em> ' + r.feedback;
+                            p.innerHTML = '<strong>ط³' + (i+1) + ':</strong> ' + r.question + ' <span style="color:#f39c12;">(' + (r.pointsEarned||0) + '/' + (r.totalPoints||1) + ' ظ†ظ‚ط·ط©)</span><br/><em style="color:rgba(255,255,255,0.6);">ط¥ط¬ط§ط¨طھظƒ:</em> <span style="color:' + (isCorrect ? '#2ecc71' : '#e74c3c') + ';">' + displayStudent + '</span>' + correctAnsHtml + '<br/><em style="color:rgba(255,255,255,0.6);">ط§ظ„طھط¹ظ„ظٹظ‚:</em> ' + r.feedback;
                             detEl.appendChild(p);
                         });
 
                         container.querySelectorAll('input, textarea').forEach(el => el.disabled = true);
-                        submitBtn.disabled = true; submitBtn.innerHTML = '<i class="fas fa-check-circle"></i> تم التسليم';
+                        submitBtn.disabled = true; submitBtn.innerHTML = '<i class="fas fa-check-circle"></i> طھظ… ط§ظ„طھط³ظ„ظٹظ…';
                         _deactivateStrict();
                         
                         // Show exit buttons again so user can close the result screen
-                        cancelBtn.innerHTML = 'إغلاق نافذة النتيجة';
+                        cancelBtn.innerHTML = 'ط¥ط؛ظ„ط§ظ‚ ظ†ط§ظپط°ط© ط§ظ„ظ†طھظٹط¬ط©';
                         cancelBtn.onclick = function() {
                             if(examModal) { examModal.classList.remove('active'); document.body.style.overflow = ''; }
                         };
@@ -1792,7 +1806,7 @@
                             dbRec.examResults = dbRec.examResults || [];
                             const prev = dbRec.examResults.filter(r => r.courseId === courseId && r.examTitle === (exam.title || ''));
                             const aNum = prev.length + 1;
-                            const isH = (exam.type === 'واجب' || exam.type === 'homework' || (exam.title && exam.title.includes('واجب')));
+                            const isH = (exam.type === 'ظˆط§ط¬ط¨' || exam.type === 'homework' || (exam.title && exam.title.includes('ظˆط§ط¬ط¨')));
                             dbRec.examResults.push({ courseId, examTitle: exam.title||'', percent, earnedPoints, totalPoints, effectivePercent, penalized: penaltyApplied, attemptNumber: aNum, isOfficial: aNum===1, autoSubmit:!!autoSubmit, ts:Date.now(), details:results, isTraining: isTraining, isHomework: isH });
                             
                             if(window.FirebaseService && typeof window.FirebaseService.updateStudentData === 'function') {
@@ -1805,7 +1819,7 @@
                             if(aNum > 1) {
                                 const ntc = document.createElement('div');
                                 ntc.style.cssText = 'margin-top:12px;padding:12px;background:rgba(212,166,79,0.12);border-radius:8px;color:var(--royal-gold);font-size:0.9rem;';
-                                ntc.innerHTML = '<i class="fas fa-info-circle"></i> <strong>تنبيه:</strong> هذه المحاولة رقم ' + aNum + '. <strong>المحاولة الأولى هي الدرجة المعتمدة رسمياً.</strong> المحاولات اللاحقة محفوظة للمراجعة.';
+                                ntc.innerHTML = '<i class="fas fa-info-circle"></i> <strong>طھظ†ط¨ظٹظ‡:</strong> ظ‡ط°ظ‡ ط§ظ„ظ…ط­ط§ظˆظ„ط© ط±ظ‚ظ… ' + aNum + '. <strong>ط§ظ„ظ…ط­ط§ظˆظ„ط© ط§ظ„ط£ظˆظ„ظ‰ ظ‡ظٹ ط§ظ„ط¯ط±ط¬ط© ط§ظ„ظ…ط¹طھظ…ط¯ط© ط±ط³ظ…ظٹط§ظ‹.</strong> ط§ظ„ظ…ط­ط§ظˆظ„ط§طھ ط§ظ„ظ„ط§ط­ظ‚ط© ظ…ط­ظپظˆط¸ط© ظ„ظ„ظ…ط±ط§ط¬ط¹ط©.';
                                 resultBox.appendChild(ntc);
                             }
                         } catch(e) { console.error('save exam result failed', e); }
@@ -1823,10 +1837,10 @@
                             return;
                         }
                         // WARNING 1
-                        const w1 = confirm('⚠️ تحذير أول: إذا خرجت الآن، سيتم تسليم إجاباتك الحالية تلقائياً حتى لو لم تكمل. هل تريد الاستمرار في الخروج؟');
+                        const w1 = confirm('âڑ ï¸ڈ طھط­ط°ظٹط± ط£ظˆظ„: ط¥ط°ط§ ط®ط±ط¬طھ ط§ظ„ط¢ظ†طŒ ط³ظٹطھظ… طھط³ظ„ظٹظ… ط¥ط¬ط§ط¨ط§طھظƒ ط§ظ„ط­ط§ظ„ظٹط© طھظ„ظ‚ط§ط¦ظٹط§ظ‹ ط­طھظ‰ ظ„ظˆ ظ„ظ… طھظƒظ…ظ„. ظ‡ظ„ طھط±ظٹط¯ ط§ظ„ط§ط³طھظ…ط±ط§ط± ظپظٹ ط§ظ„ط®ط±ظˆط¬طں');
                         if (!w1) return;
                         // WARNING 2
-                        const w2 = confirm('⚠️ تحذير أخير: هذا الإجراء نهائي ولا رجعة فيه. إجاباتك ستُسلّم الآن وسيُحسب عليك كمحاولة. هل أنت متأكد تماماً؟');
+                        const w2 = confirm('âڑ ï¸ڈ طھط­ط°ظٹط± ط£ط®ظٹط±: ظ‡ط°ط§ ط§ظ„ط¥ط¬ط±ط§ط، ظ†ظ‡ط§ط¦ظٹ ظˆظ„ط§ ط±ط¬ط¹ط© ظپظٹظ‡. ط¥ط¬ط§ط¨ط§طھظƒ ط³طھظڈط³ظ„ظ‘ظ… ط§ظ„ط¢ظ† ظˆط³ظٹظڈط­ط³ط¨ ط¹ظ„ظٹظƒ ظƒظ…ط­ط§ظˆظ„ط©. ظ‡ظ„ ط£ظ†طھ ظ…طھط£ظƒط¯ طھظ…ط§ظ…ط§ظ‹طں');
                         if (!w2) return;
                         doSubmit(true);
                         setTimeout(() => { 
@@ -1870,8 +1884,8 @@
                             const urg = secsLeft <= 60;
                             timerEl.style.color = urg ? '#e74c3c' : 'var(--royal-gold)';
                             timerEl.style.borderColor = urg ? 'rgba(231,76,60,0.4)' : 'rgba(212,166,79,0.2)';
-                            timerEl.innerHTML = '⏱️ الوقت المتبقي: <span>' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0') + '</span>';
-                            if(secsLeft <= 0) { _stopTimer(); timerEl.innerHTML = '⏰ <span style="color:#e74c3c;">انتهى الوقت! جاري التسليم التلقائي لما تم إجابته...</span>'; setTimeout(() => doSubmit(true), 500); }
+                            timerEl.innerHTML = 'âڈ±ï¸ڈ ط§ظ„ظˆظ‚طھ ط§ظ„ظ…طھط¨ظ‚ظٹ: <span>' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0') + '</span>';
+                            if(secsLeft <= 0) { _stopTimer(); timerEl.innerHTML = 'âڈ° <span style="color:#e74c3c;">ط§ظ†طھظ‡ظ‰ ط§ظ„ظˆظ‚طھ! ط¬ط§ط±ظٹ ط§ظ„طھط³ظ„ظٹظ… ط§ظ„طھظ„ظ‚ط§ط¦ظٹ ظ„ظ…ط§ طھظ… ط¥ط¬ط§ط¨طھظ‡...</span>'; setTimeout(() => doSubmit(true), 500); }
                         }
                         updTm(); _examTimerInterval = setInterval(updTm, 1000);
                     }
@@ -1882,7 +1896,7 @@
                         // Block Links
                         const _preventNavigation = (e) => {
                             e.preventDefault();
-                            if(window.showToast) window.showToast('⚠️ ممنوع الخروج من الامتحان!', 'error');
+                            if(window.showToast) window.showToast('âڑ ï¸ڈ ظ…ظ…ظ†ظˆط¹ ط§ظ„ط®ط±ظˆط¬ ظ…ظ† ط§ظ„ط§ظ…طھط­ط§ظ†!', 'error');
                         };
                         document.querySelectorAll('a').forEach(link => {
                             link.addEventListener('click', _preventNavigation);
@@ -1890,7 +1904,7 @@
 
                         _examStrictBeforeUnload = function(e) {
                             e.preventDefault();
-                            e.returnValue = 'إذا غادرت الآن سيتم تسليم الامتحان إجبارياً مع خصم 10%!';
+                            e.returnValue = 'ط¥ط°ط§ ط؛ط§ط¯ط±طھ ط§ظ„ط¢ظ† ط³ظٹطھظ… طھط³ظ„ظٹظ… ط§ظ„ط§ظ…طھط­ط§ظ† ط¥ط¬ط¨ط§ط±ظٹط§ظ‹ ظ…ط¹ ط®طµظ… 10%!';
                             return e.returnValue;
                         };
                         
@@ -1903,10 +1917,10 @@
                         };
 
                         const failExamDirectly = (reason) => {
-                            if(submitBtn.disabled && submitBtn.innerHTML.includes('جاري')) return;
-                            const confirmExit = confirm(`تحذير نهائي: ${reason}\n\nهل أنت مصر على الخروج؟\n\n- اضغط OK/حسناً للخروج وتسليم الامتحان بما تم إنجازه مع خصم 10%\n- اضغط Cancel/إلغاء لاستكمال الحل`);
+                            if(submitBtn.disabled && submitBtn.innerHTML.includes('ط¬ط§ط±ظٹ')) return;
+                            const confirmExit = confirm(`طھط­ط°ظٹط± ظ†ظ‡ط§ط¦ظٹ: ${reason}\n\nظ‡ظ„ ط£ظ†طھ ظ…طµط± ط¹ظ„ظ‰ ط§ظ„ط®ط±ظˆط¬طں\n\n- ط§ط¶ط؛ط· OK/ط­ط³ظ†ط§ظ‹ ظ„ظ„ط®ط±ظˆط¬ ظˆطھط³ظ„ظٹظ… ط§ظ„ط§ظ…طھط­ط§ظ† ط¨ظ…ط§ طھظ… ط¥ظ†ط¬ط§ط²ظ‡ ظ…ط¹ ط®طµظ… 10%\n- ط§ط¶ط؛ط· Cancel/ط¥ظ„ط؛ط§ط، ظ„ط§ط³طھظƒظ…ط§ظ„ ط§ظ„ط­ظ„`);
                             if (!confirmExit) {
-                                if(window.showToast) window.showToast('✅ تم التراجع عن الخروج، استكمل الامتحان.', 'success');
+                                if(window.showToast) window.showToast('âœ… طھظ… ط§ظ„طھط±ط§ط¬ط¹ ط¹ظ† ط§ظ„ط®ط±ظˆط¬طŒ ط§ط³طھظƒظ…ظ„ ط§ظ„ط§ظ…طھط­ط§ظ†.', 'success');
                                 _strictViolationsCount = Math.max(0, _strictViolationsCount - 1);
                                 try {
                                     const elem = document.documentElement;
@@ -1917,18 +1931,18 @@
                                 return;
                             }
                             doSubmit(true, true);
-                            alert(`تم تسليم الامتحان تلقائياً بسبب خروجك المتعمد، وتم خصم 10% كعقوبة انضباطية.`);
+                            alert(`طھظ… طھط³ظ„ظٹظ… ط§ظ„ط§ظ…طھط­ط§ظ† طھظ„ظ‚ط§ط¦ظٹط§ظ‹ ط¨ط³ط¨ط¨ ط®ط±ظˆط¬ظƒ ط§ظ„ظ…طھط¹ظ…ط¯طŒ ظˆطھظ… ط®طµظ… 10% ظƒط¹ظ‚ظˆط¨ط© ط§ظ†ط¶ط¨ط§ط·ظٹط©.`);
                         };
 
                         const warnOrFailExam = (reason) => {
-                            if(submitBtn.disabled && submitBtn.innerHTML.includes('جاري')) return;
+                            if(submitBtn.disabled && submitBtn.innerHTML.includes('ط¬ط§ط±ظٹ')) return;
                             _strictViolationsCount++;
                             
                             if (_strictViolationsCount >= 3) {
-                                failExamDirectly(`تجاوزت الحد الأقصى للمخالفات (3 مرات) - السبب الأخير: ${reason}`);
+                                failExamDirectly(`طھط¬ط§ظˆط²طھ ط§ظ„ط­ط¯ ط§ظ„ط£ظ‚طµظ‰ ظ„ظ„ظ…ط®ط§ظ„ظپط§طھ (3 ظ…ط±ط§طھ) - ط§ظ„ط³ط¨ط¨ ط§ظ„ط£ط®ظٹط±: ${reason}`);
                             } else {
                                 const remaining = 3 - _strictViolationsCount;
-                                const msg = `⚠️ تحذير مخالفة (${_strictViolationsCount}/3): ${reason}\n\nيُرجى عدم تكرار ذلك وإلا سيتم سحب الامتحان منك! يتبقى لك ${remaining} تحذيرات.`;
+                                const msg = `âڑ ï¸ڈ طھط­ط°ظٹط± ظ…ط®ط§ظ„ظپط© (${_strictViolationsCount}/3): ${reason}\n\nظٹظڈط±ط¬ظ‰ ط¹ط¯ظ… طھظƒط±ط§ط± ط°ظ„ظƒ ظˆط¥ظ„ط§ ط³ظٹطھظ… ط³ط­ط¨ ط§ظ„ط§ظ…طھط­ط§ظ† ظ…ظ†ظƒ! ظٹطھط¨ظ‚ظ‰ ظ„ظƒ ${remaining} طھط­ط°ظٹط±ط§طھ.`;
                                 if(window.showToast) window.showToast(msg, 'warning', 7000);
                                 else alert(msg);
                                 
@@ -1948,19 +1962,19 @@
                                     _offlineStartTime = Date.now();
                                 } else {
                                     _awayTimeout = setTimeout(() => {
-                                        failExamDirectly('الخروج من نافذة الامتحان لمدة تزيد عن 15 ثانية متواصلة');
+                                        failExamDirectly('ط§ظ„ط®ط±ظˆط¬ ظ…ظ† ظ†ط§ظپط°ط© ط§ظ„ط§ظ…طھط­ط§ظ† ظ„ظ…ط¯ط© طھط²ظٹط¯ ط¹ظ† 15 ط«ط§ظ†ظٹط© ظ…طھظˆط§طµظ„ط©');
                                     }, 15000);
                                 }
                             } else {
                                 if (_awayTimeout) {
                                     _clearAwayTimer();
-                                    warnOrFailExam('الخروج من نافذة الامتحان (تبديل التبويبات أو إخفاء المتصفح)');
+                                    warnOrFailExam('ط§ظ„ط®ط±ظˆط¬ ظ…ظ† ظ†ط§ظپط°ط© ط§ظ„ط§ظ…طھط­ط§ظ† (طھط¨ط¯ظٹظ„ ط§ظ„طھط¨ظˆظٹط¨ط§طھ ط£ظˆ ط¥ط®ظپط§ط، ط§ظ„ظ…طھطµظپط­)');
                                 }
                                 if (_offlineStartTime) {
                                     const offlineDur = Date.now() - _offlineStartTime;
                                     _offlineStartTime = null;
                                     if (offlineDur > 5 * 60 * 1000) {
-                                        failExamDirectly('انقطاع الإنترنت لأكثر من 5 دقائق');
+                                        failExamDirectly('ط§ظ†ظ‚ط·ط§ط¹ ط§ظ„ط¥ظ†طھط±ظ†طھ ظ„ط£ظƒط«ط± ظ…ظ† 5 ط¯ظ‚ط§ط¦ظ‚');
                                     }
                                 }
                             }
@@ -1970,7 +1984,7 @@
                             if (!navigator.onLine) return; // Allow blur if offline
                             if (!_awayTimeout) {
                                 _awayTimeout = setTimeout(() => {
-                                    failExamDirectly('فقدان التركيز على النافذة لمدة تزيد عن 15 ثانية متواصلة');
+                                    failExamDirectly('ظپظ‚ط¯ط§ظ† ط§ظ„طھط±ظƒظٹط² ط¹ظ„ظ‰ ط§ظ„ظ†ط§ظپط°ط© ظ„ظ…ط¯ط© طھط²ظٹط¯ ط¹ظ† 15 ط«ط§ظ†ظٹط© ظ…طھظˆط§طµظ„ط©');
                                 }, 15000);
                             }
                         };
@@ -1978,13 +1992,13 @@
                         const _examStrictFocus = function() {
                             if (_awayTimeout) {
                                 _clearAwayTimer();
-                                warnOrFailExam('فقدان التركيز على النافذة (فتح تطبيق آخر أو النقر خارج المتصفح)');
+                                warnOrFailExam('ظپظ‚ط¯ط§ظ† ط§ظ„طھط±ظƒظٹط² ط¹ظ„ظ‰ ط§ظ„ظ†ط§ظپط°ط© (ظپطھط­ طھط·ط¨ظٹظ‚ ط¢ط®ط± ط£ظˆ ط§ظ„ظ†ظ‚ط± ط®ط§ط±ط¬ ط§ظ„ظ…طھطµظپط­)');
                             }
                         };
 
                         const _examStrictFullscreenChange = function() {
                             if (!document.fullscreenElement && !document.webkitIsFullScreen && !document.mozFullScreen) {
-                                warnOrFailExam('الخروج من وضع ملء الشاشة');
+                                warnOrFailExam('ط§ظ„ط®ط±ظˆط¬ ظ…ظ† ظˆط¶ط¹ ظ…ظ„ط، ط§ظ„ط´ط§ط´ط©');
                             }
                         };
 
@@ -2000,7 +2014,7 @@
                             // Prevent F12, Ctrl+Shift+I, Ctrl+C, Ctrl+V, PrintScreen
                             if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && e.key === 'I') || (e.ctrlKey && e.key === 'c') || (e.ctrlKey && e.key === 'v') || e.key === 'PrintScreen') {
                                 e.preventDefault();
-                                if (window.showToast) window.showToast('⚠️ محاولة استخدام اختصار ممنوع!', 'error');
+                                if (window.showToast) window.showToast('âڑ ï¸ڈ ظ…ط­ط§ظˆظ„ط© ط§ط³طھط®ط¯ط§ظ… ط§ط®طھطµط§ط± ظ…ظ…ظ†ظˆط¹!', 'error');
                             }
                         };
 
@@ -2020,8 +2034,8 @@
                         history.pushState({ strictExam: true }, null, window.location.href);
                         _examStrictPopstate = function(e) {
                             history.pushState({ strictExam: true }, null, window.location.href);
-                            if(window.showToast) window.showToast('⚠️ لا يمكنك الرجوع للخلف أثناء الامتحان!', 'error');
-                            warnOrFailExam('محاولة الرجوع للخلف (Swipe Back)');
+                            if(window.showToast) window.showToast('âڑ ï¸ڈ ظ„ط§ ظٹظ…ظƒظ†ظƒ ط§ظ„ط±ط¬ظˆط¹ ظ„ظ„ط®ظ„ظپ ط£ط«ظ†ط§ط، ط§ظ„ط§ظ…طھط­ط§ظ†!', 'error');
+                            warnOrFailExam('ظ…ط­ط§ظˆظ„ط© ط§ظ„ط±ط¬ظˆط¹ ظ„ظ„ط®ظ„ظپ (Swipe Back)');
                         };
                         window.addEventListener('popstate', _examStrictPopstate);
 
@@ -2074,7 +2088,7 @@
                         const sb = document.createElement('div');
                         sb.id = 'examStrictBadge';
                         sb.style.cssText = 'background:rgba(231,76,60,0.15);border:1px solid rgba(231,76,60,0.3);color:#e74c3c;padding:10px 14px;border-radius:8px;font-size:0.9rem;margin-bottom:12px; font-weight: bold;';
-                        sb.innerHTML = '<i class="fas fa-shield-alt"></i> <strong>الوضع الصارم مفعل (مستوى الصعوبة القصوى)</strong> — يُمنع الخروج، النقر خارج النافذة، الإغلاق، وضع ملء الشاشة إجباري، ولا يمكن استخدام النسخ واللصق.';
+                        sb.innerHTML = '<i class="fas fa-shield-alt"></i> <strong>ط§ظ„ظˆط¶ط¹ ط§ظ„طµط§ط±ظ… ظ…ظپط¹ظ„ (ظ…ط³طھظˆظ‰ ط§ظ„طµط¹ظˆط¨ط© ط§ظ„ظ‚طµظˆظ‰)</strong> â€” ظٹظڈظ…ظ†ط¹ ط§ظ„ط®ط±ظˆط¬طŒ ط§ظ„ظ†ظ‚ط± ط®ط§ط±ط¬ ط§ظ„ظ†ط§ظپط°ط©طŒ ط§ظ„ط¥ط؛ظ„ط§ظ‚طŒ ظˆط¶ط¹ ظ…ظ„ط، ط§ظ„ط´ط§ط´ط© ط¥ط¬ط¨ط§ط±ظٹطŒ ظˆظ„ط§ ظٹظ…ظƒظ† ط§ط³طھط®ط¯ط§ظ… ط§ظ„ظ†ط³ط® ظˆط§ظ„ظ„طµظ‚.';
                         container.parentElement.insertBefore(sb, container);
                     }
 
@@ -2100,7 +2114,7 @@
                         const vodafoneDetails = document.getElementById('vodafoneDetails');
                         if(vodafoneDetails) {
                             const p = vodafoneDetails.querySelector('p');
-                            if(p) p.textContent = paymentSettings.paymentInstructions || 'قم بتحويل المبلغ على الرقم التالي عبر فودافون كاش:';
+                            if(p) p.textContent = paymentSettings.paymentInstructions || 'ظ‚ظ… ط¨طھط­ظˆظٹظ„ ط§ظ„ظ…ط¨ظ„ط؛ ط¹ظ„ظ‰ ط§ظ„ط±ظ‚ظ… ط§ظ„طھط§ظ„ظٹ ط¹ط¨ط± ظپظˆط¯ط§ظپظˆظ† ظƒط§ط´:';
                         }
                         const fawryMethodBtn = document.querySelector('.pay-method[data-type="fawry"]');
                         if(fawryMethodBtn) {
@@ -2134,15 +2148,15 @@
                 let msgHTML = `
                     <div style="text-align: center;">
                         <i class="fas fa-clock" style="font-size: 3rem; color: var(--accent-orange); margin-bottom: 15px;"></i>
-                        <h3 style="color: var(--text-primary); margin-bottom: 10px;">طلب الدفع تحت المراجعة</h3>
-                        <p style="color: rgba(255,255,255,0.8); margin-bottom: 20px;">سيتم تفعيل الكورس فور التأكد من التحويل</p>
+                        <h3 style="color: var(--text-primary); margin-bottom: 10px;">ط·ظ„ط¨ ط§ظ„ط¯ظپط¹ طھط­طھ ط§ظ„ظ…ط±ط§ط¬ط¹ط©</h3>
+                        <p style="color: rgba(255,255,255,0.8); margin-bottom: 20px;">ط³ظٹطھظ… طھظپط¹ظٹظ„ ط§ظ„ظƒظˆط±ط³ ظپظˆط± ط§ظ„طھط£ظƒط¯ ظ…ظ† ط§ظ„طھط­ظˆظٹظ„</p>
                         <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; margin-bottom: 20px;">
-                            <p style="font-size: 0.9rem; margin-bottom: 10px;">إذا قمت بالتحويل بالفعل ولم يتم التفعيل بعد، تواصل عبر الرقم:<br><strong style="font-size: 1.2rem; color: var(--accent-cyan);">01023675235</strong></p>
+                            <p style="font-size: 0.9rem; margin-bottom: 10px;">ط¥ط°ط§ ظ‚ظ…طھ ط¨ط§ظ„طھط­ظˆظٹظ„ ط¨ط§ظ„ظپط¹ظ„ ظˆظ„ظ… ظٹطھظ… ط§ظ„طھظپط¹ظٹظ„ ط¨ط¹ط¯طŒ طھظˆط§طµظ„ ط¹ط¨ط± ط§ظ„ط±ظ‚ظ…:<br><strong style="font-size: 1.2rem; color: var(--accent-cyan);">01023675235</strong></p>
                         </div>
                         <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
-                            <a href="https://wa.me/201023675235" target="_blank" class="btn btn-green" style="background-color: #25D366; border-color: #25D366; flex: 1;"><i class="fab fa-whatsapp"></i> واتساب</a>
-                            <a href="tel:01023675235" class="btn btn-outline" style="flex: 1;"><i class="fas fa-phone"></i> اتصال</a>
-                            <button class="btn btn-gold" onclick="document.getElementById('pendingMsgModal').classList.remove('active'); window.openPaymentModalDetails('${courseId}')" style="flex: 1 1 100%;"><i class="fas fa-redo"></i> إعادة محاولة الدفع</button>
+                            <a href="https://wa.me/201023675235" target="_blank" class="btn btn-green" style="background-color: #25D366; border-color: #25D366; flex: 1;"><i class="fab fa-whatsapp"></i> ظˆط§طھط³ط§ط¨</a>
+                            <a href="tel:01023675235" class="btn btn-outline" style="flex: 1;"><i class="fas fa-phone"></i> ط§طھطµط§ظ„</a>
+                            <button class="btn btn-gold" onclick="document.getElementById('pendingMsgModal').classList.remove('active'); window.openPaymentModalDetails('${courseId}')" style="flex: 1 1 100%;"><i class="fas fa-redo"></i> ط¥ط¹ط§ط¯ط© ظ…ط­ط§ظˆظ„ط© ط§ظ„ط¯ظپط¹</button>
                         </div>
                     </div>
                 `;
@@ -2183,7 +2197,7 @@
                     const status = document.getElementById('fpStatusText');
                     if (status) {
                         status.style.display = 'block';
-                        status.textContent = `سيتم إرسال كود مكون من ${OTP_LEN} أرقام لرقم ولي الأمر عبر واتساب. لا تشاركه مع أي شخص.`;
+                        status.textContent = `ط³ظٹطھظ… ط¥ط±ط³ط§ظ„ ظƒظˆط¯ ظ…ظƒظˆظ† ظ…ظ† ${OTP_LEN} ط£ط±ظ‚ط§ظ… ظ„ط±ظ‚ظ… ظˆظ„ظٹ ط§ظ„ط£ظ…ط± ط¹ط¨ط± ظˆط§طھط³ط§ط¨. ظ„ط§ طھط´ط§ط±ظƒظ‡ ظ…ط¹ ط£ظٹ ط´ط®طµ.`;
                         status.style.color = '#f8f1d4';
                         status.style.background = 'rgba(212, 166, 79, 0.12)';
                         status.style.border = '1px solid rgba(212, 166, 79, 0.24)';
@@ -2262,7 +2276,7 @@ window.enrollFreeCourse = async function(courseId) {
         }
     }
     
-    if(window.showToast) window.showToast('مرحباً بك في الكورس المجاني!', 'success');
+    if(window.showToast) window.showToast('ظ…ط±ط­ط¨ط§ظ‹ ط¨ظƒ ظپظٹ ط§ظ„ظƒظˆط±ط³ ط§ظ„ظ…ط¬ط§ظ†ظٹ!', 'success');
     setTimeout(() => {
     setTimeout(() => {
         window.location.reload();
@@ -2279,7 +2293,7 @@ setInterval(() => {
         const remaining = expiry - Date.now();
         
         if (remaining <= 0) {
-            el.innerHTML = 'انتهى الخصم';
+            el.innerHTML = 'ط§ظ†طھظ‡ظ‰ ط§ظ„ط®طµظ…';
             el.style.animation = 'none';
             el.style.opacity = '0.5';
             setTimeout(() => {
@@ -2293,14 +2307,14 @@ setInterval(() => {
             let s = Math.floor(seconds % 60);
             
             let parts = [];
-            if (d > 0) parts.push(`${d} يوم`);
-            if (h > 0) parts.push(`${h} ساعة`);
-            if (m > 0) parts.push(`${m} دقيقة`);
-            parts.push(`${s} ثانية`);
+            if (d > 0) parts.push(`${d} ظٹظˆظ…`);
+            if (h > 0) parts.push(`${h} ط³ط§ط¹ط©`);
+            if (m > 0) parts.push(`${m} ط¯ظ‚ظٹظ‚ط©`);
+            parts.push(`${s} ط«ط§ظ†ظٹط©`);
             
             const timerSpan = el.querySelector('.cd-timer');
             if (timerSpan) {
-                timerSpan.textContent = parts.join(' و ');
+                timerSpan.textContent = parts.join(' ظˆ ');
             }
         }
     });
@@ -2323,6 +2337,14 @@ setInterval(() => {
     </script>
     <script src="js/flow-system.js?v=1"></script>
     <script src="js/mobile.js?v=3"></script>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW registration failed:', err));
+            });
+        }
+    </script>
 </body>
 </html>
 

@@ -1,0 +1,21 @@
+{
+  "name": "منصة يوسف بركات",
+  "short_name": "يوسف بركات",
+  "description": "منصة يوسف بركات التعليمية - الكورسات والامتحانات",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#071326",
+  "theme_color": "#D4A64F",
+  "icons": [
+    {
+      "src": "./favicon.ico",
+      "sizes": "192x192",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "./favicon.ico",
+      "sizes": "512x512",
+      "type": "image/x-icon"
+    }
+  ]
+}
