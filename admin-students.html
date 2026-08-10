@@ -154,7 +154,7 @@
                     </ul>
                 </div>
                 <div class="glass-panel" style="padding: 15px; border-radius: 10px;">
-                    <h4 style="color: var(--accent-cyan); margin-bottom: 10px;"><i class="fas fa-plus"></i> إضافة كورس للطالب (مجانظ‹ا)</h4>
+                    <h4 style="color: var(--accent-cyan); margin-bottom: 10px;"><i class="fas fa-plus"></i> إضافة كورس للطالب (مجاناًا)</h4>
                     <div style="display: flex; gap: 10px;">
                         <select id="availableCoursesSelect" class="form-control" style="flex: 1;"></select>
                         <button class="btn btn-outline" id="btnAddCourseToStudent">إضافة</button>
@@ -162,13 +162,13 @@
                 </div>
             </div>
 
-            <h3 style="color: var(--text-primary); border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; margin-bottom: 15px;">الكورسات المشترك بها حالياظ‹</h3>
+            <h3 style="color: var(--text-primary); border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; margin-bottom: 15px;">الكورسات المشترك بها حاليااً</h3>
             <div id="studentCoursesList"></div>
 
             <div style="margin-top: 40px; text-align: left;">
                 <div class="glass-panel" style="padding: 12px; border-radius: 10px; margin-bottom: 15px; background: rgba(0, 188, 212, 0.1); border-color: rgba(0, 188, 212, 0.3);">
                     <p style="color: #fff; margin: 0; font-size: 0.95rem;">
-                        <i class="fas fa-info-circle text-cyan mr-2"></i> <strong>ملاحظة:</strong> إذا نسي الطالب كلمة المرور، يمكنك إعط·ائه الكلمة المكتوبة بالأعلى، أو يمكنك مسح حسابه من <a href="https://console.firebase.google.com/" target="_blank" style="color: var(--royal-gold);">Firebase Console</a> ليقوم بالتسجيل من جديد.
+                        <i class="fas fa-info-circle text-cyan mr-2"></i> <strong>ملاحظة:</strong> إذا نسي الطالب كلمة المرور، يمكنك إعطائه الكلمة المكتوبة بالأعلى، أو يمكنك مسح حسابه من <a href="https://console.firebase.google.com/" target="_blank" style="color: var(--royal-gold);">Firebase Console</a> ليقوم بالتسجيل من جديد.
                     </p>
                 </div>
                 <button class="btn btn-gold btn-large" id="btnSaveStudent"><i class="fas fa-save mr-2"></i> حفظ التعديلات</button>
@@ -330,7 +330,7 @@
                 displayUsers.forEach(u => {
                     if (filter && !u.phone.includes(filter) && !(u.name || '').toLowerCase().includes(filter.toLowerCase())) return;
 
-                    // قراءة عدد الكورسات من بيانات Firestore (u.courses) أولاظ‹ ثم من الكاش المحلي
+                    // قراءة عدد الكورسات من بيانات Firestore (u.courses) أولااً ثم من الكاش المحلي
                     const coursesCount = Array.isArray(u.courses) ? u.courses.length :
                         (JSON.parse(localStorage.getItem(`db_${u.phone}`) || '{}').courses || []).length;
                     
@@ -342,7 +342,7 @@
                         if ((new Date() - last) < 15 * 60 * 1000) isOnline = true;
                     }
                     const statusBadge = isOnline ? 
-                        '<span class="badge" style="background: rgba(46, 204, 113, 0.2); color: #2ecc71;">متصل قريباظ‹</span>' : 
+                        '<span class="badge" style="background: rgba(46, 204, 113, 0.2); color: #2ecc71;">متصل قريبااً</span>' : 
                         '<span class="badge" style="background: rgba(149, 165, 166, 0.2); color: #95a5a6;">غير متصل</span>';
                         
                     const grades = {'prep1':'أولى إعدادي', 'prep2':'تانية إعدادي', 'prep3':'تالتة إعدادي', 'sec1':'أولى ثانوي'};
@@ -408,7 +408,7 @@
                 currentStudentPhone = phone;
                 hasUnsavedChanges = false;
                 
-                // قراءة الكورسات من بيانات Firestore (student.courses) أولاظ‹
+                // قراءة الكورسات من بيانات Firestore (student.courses) أولااً
                 const firestoreCourses = Array.isArray(student.courses) ? student.courses : [];
                 let dbUser = JSON.parse(localStorage.getItem(`db_${phone}`)) || { courses: [] };
                 // دمج الكورسات من المصدرين
@@ -427,7 +427,7 @@
                     const last = new Date(lastActiveVal);
                     if ((new Date() - last) < 15 * 60 * 1000) isOnline = true;
                 }
-                document.getElementById('sLastSeen').textContent = isOnline ? 'متصل قريباظ‹' : 'غير متصل';
+                document.getElementById('sLastSeen').textContent = isOnline ? 'متصل قريبااً' : 'غير متصل';
                 let hwRate = stats.homeworkTotal > 0 ? Math.round((stats.homeworkCompleted / stats.homeworkTotal) * 100) : 0;
                 
                 if (stats.homeworkTotal === 0 && stats.homeworkCompleted === 0) {
@@ -497,7 +497,7 @@
 
             document.getElementById('btnAddCourseToStudent').addEventListener('click', () => {
                 const cId = document.getElementById('availableCoursesSelect').value;
-                if(!cId) { alert('اختر كورس أولاظ‹'); return; }
+                if(!cId) { alert('اختر كورس أولااً'); return; }
                 if(tempStudentCourses.includes(cId)) { alert('الطالب مشترك في هذا الكورس بالفعل'); return; }
                 
                 tempStudentCourses.push(cId);
@@ -587,7 +587,7 @@
                                 notifications.push({
                                     id: 'notif_' + Date.now() + Math.random(),
                                     title: 'تم تفعيل كورس جديد',
-                                    message: `تم تفعيل كورس ${courseInfo ? courseInfo.title : ''} لك مجاناظ‹ من قبل الإدارة. نتمنى لك التوفيق!`,
+                                    message: `تم تفعيل كورس ${courseInfo ? courseInfo.title : ''} لك مجانااً من قبل الإدارة. نتمنى لك التوفيق!`,
                                     date: new Date().toISOString(),
                                     read: false,
                                     courseId: cId
@@ -666,7 +666,7 @@
             resultDiv.style.display = 'block';
             
             if (!code.startsWith('YB-')) {
-                resultDiv.innerHTML = '<span style="color:#e74c3c;">الكود غير صحيح. يجب أن يبدأ بظ€ YB-</span>';
+                resultDiv.innerHTML = '<span style="color:#e74c3c;">الكود غير صحيح. يجب أن يبدأ بـ YB-</span>';
                 return;
             }
             const parts = code.split('-');
@@ -695,7 +695,7 @@
                     html += `<div><strong>الصف الدراسي:</strong> ${student.grade}</div>`;
                     html += `</div>`;
                 } else {
-                    html += `<div style="margin-top: 10px; color:#f39c12; font-size:0.85rem;"><i class="fas fa-exclamation-triangle"></i> الطالب غير مسجل حالياظ‹ في قاعدة البيانات بهذه الأرقام، ربما قام بحذف حسابه.</div>`;
+                    html += `<div style="margin-top: 10px; color:#f39c12; font-size:0.85rem;"><i class="fas fa-exclamation-triangle"></i> الطالب غير مسجل حاليااً في قاعدة البيانات بهذه الأرقام، ربما قام بحذف حسابه.</div>`;
                 }
                 
                 resultDiv.innerHTML = html;
@@ -726,7 +726,7 @@
                         alert('حدث خطأ أثناء حفظ الباسورد: ' + e.message);
                     }
                 } else {
-                    alert('وظيفة الحفظ غير متوفرة حالياظ‹.');
+                    alert('وظيفة الحفظ غير متوفرة حاليااً.');
                 }
             }
         };

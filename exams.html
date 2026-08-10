@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <link rel="manifest" href="./manifest.json">
@@ -283,7 +283,7 @@
                 <div id="noExamState" style="display: none; text-align: center; padding: 50px 20px;">
                     <i class="fas fa-book-reader text-gold" style="font-size: 4rem; margin-bottom: 20px; opacity: 0.5;"></i>
                     <h2 style="color: var(--soft-white); margin-bottom: 10px;">لا توجد امتحانات بعد</h2>
-                    <p style="color: rgba(255,255,255,0.7); margin-bottom: 20px;">اشترك في الكورسات أولاظ‹ للوصول إلى الامتحانات الخاصة بها</p>
+                    <p style="color: rgba(255,255,255,0.7); margin-bottom: 20px;">اشترك في الكورسات أولااً للوصول إلى الامتحانات الخاصة بها</p>
                     <a href="courses.html" class="btn btn-gold btn-large">تصفح الكورسات</a>
                 </div>
             </div>
@@ -307,7 +307,7 @@
                 <div class="modal-no-detail" id="modalNoDetail" style="display:none;">
                     <i class="fas fa-info-circle"></i>
                     <p>لا تتوفر تفاصيل الأسئلة لهذا الامتحان.</p>
-                    <p style="font-size:0.82rem; margin-top:8px; color:rgba(255,255,255,0.4);">يتم حفظ تفاصيل الأسئلة للامتحانات الجديدة فقط·.</p>
+                    <p style="font-size:0.82rem; margin-top:8px; color:rgba(255,255,255,0.4);">يتم حفظ تفاصيل الأسئلة للامتحانات الجديدة فقط.</p>
                 </div>
                 <div id="questionsContainer"></div>
             </div>
@@ -339,7 +339,7 @@
         let adminCourses = JSON.parse(localStorage.getItem('adminCourses')) || [];
 
         // ADMIN BYPASS
-        const isAdmin = (user.phone === '0000' || user.phone === '01099616091');
+        const isAdmin = (user.phone === '0000' || user.phone === '01099616091' || user.phone === '01023675235');
         if (isAdmin) {
             dbUser.courses = adminCourses.map(c => c.id);
         }
@@ -365,6 +365,7 @@
                     if (courseObj.homeworks) tasks.push(...courseObj.homeworks);
                     if (courseObj.trainings) tasks.push(...courseObj.trainings);
                     if (courseObj.customSections) courseObj.customSections.forEach(s => { if(s.items) tasks.push(...s.items); });
+                    if (courseObj.sections) courseObj.sections.forEach(s => { if(s.items) tasks.push(...s.items); });
                     return tasks.filter(t => t.type === 'exam' || t.type === 'تدريب' || t.type === 'training' || t.type === 'واجب' || t.type === 'homework' || t.type === 'task' || t.type === 'quiz' || t.questions);
                 }
 
@@ -590,7 +591,7 @@
                         choicesHTML = `<div class="q-answer-row">
                             <div class="answer-chip ${isSkipped ? 'skip' : isCorrect ? 'correct' : 'wrong'}">
                                 <i class="fas ${statusIcon}"></i>
-                                إجابتك: ${isSkipped ? 'لم تظڈجب' : (qStudentAnswer || '-')}
+                                إجابتك: ${isSkipped ? 'لم تُجب' : (qStudentAnswer || '-')}
                             </div>
                             ${!isCorrect && qCorrectAnswer ? `<div class="answer-chip correct"><i class="fas fa-check"></i> الإجابة الصحيحة: ${qCorrectAnswer}</div>` : ''}
                         </div>`;

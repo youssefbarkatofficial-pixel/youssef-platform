@@ -148,7 +148,7 @@
             <button class="close-modal" onclick="document.getElementById('paymentModal').classList.remove('active')"><i class="fas fa-times"></i></button>
             <h2 class="text-gold mb-2 text-center">تأكيد الاشتراك والدفع</h2>
             
-            <p style="margin-bottom: 20px; text-align: center;">اختر ط·ريقة الدفع المناسبة لك:</p>
+            <p style="margin-bottom: 20px; text-align: center;">اختر طريقة الدفع المناسبة لك:</p>
             
             <div class="payment-methods">
                 <div class="pay-method active" data-type="vodafone">
@@ -156,7 +156,7 @@
                     <h4>فودافون كاش</h4>
                 </div>
                 <div class="pay-method" data-type="fawry" style="opacity: 0.5; pointer-events: none; filter: grayscale(100%); position: relative;">
-                    <span style="position: absolute; top: 5px; left: 5px; background: rgba(0,0,0,0.5); font-size: 0.7rem; padding: 2px 5px; border-radius: 3px;">قريباظ‹</span>
+                    <span style="position: absolute; top: 5px; left: 5px; background: rgba(0,0,0,0.5); font-size: 0.7rem; padding: 2px 5px; border-radius: 3px;">قريبااً</span>
                     <i class="fas fa-store" style="font-size: 2rem; color: #f1c40f; margin-bottom: 10px;"></i>
                     <h4>فوري</h4>
                 </div>
@@ -177,7 +177,7 @@
                     <span id="fawryCode" style="font-size: 1.2rem; font-weight: bold; letter-spacing: 2px;">784512</span>
                     <button class="copy-btn" data-target="fawryCode"><i class="fas fa-copy"></i></button>
                 </div>
-                <p style="font-size: 0.85rem; margin-top: 10px; color: var(--accent-cyan);">* الكود صالح لمدة 24 ساعة فقط·.</p>
+                <p style="font-size: 0.85rem; margin-top: 10px; color: var(--accent-cyan);">* الكود صالح لمدة 24 ساعة فقط.</p>
             </div>
 
             <div class="form-group" style="margin-top: 20px;">
@@ -209,7 +209,7 @@
             <div class="auth-header">
                 <div class="auth-logo"><i class="fas fa-user-graduate"></i></div>
                 <h2>تسجيل الدخول</h2>
-                <p>مرحباً بك مجدداظ‹ في منصتك</p>
+                <p>مرحباً بك مجددااً في منصتك</p>
             </div>
             <form id="loginForm">
                 <div class="form-group">
@@ -280,7 +280,7 @@
             <div class="auth-header">
                 <div class="auth-logo"><i class="fas fa-user-graduate"></i></div>
                 <h2>تسجيل الدخول</h2>
-                <p>مرحباً بك مجدداظ‹ في منصتك</p>
+                <p>مرحباً بك مجددااً في منصتك</p>
             </div>
             <form id="loginForm">
                 <div class="form-group">
@@ -387,7 +387,7 @@
                 document.addEventListener('keyup', (e) => {
                     if(e.key === 'PrintScreen' || e.keyCode === 44) {
                         navigator.clipboard.writeText('Screenshots are disabled for copyright protection.');
-                        if(window.showToast) window.showToast('غير مسموح بأخذ لقط·ة شاشة لمحتوى المنصة لحفظ الحقوق.', 'error');
+                        if(window.showToast) window.showToast('غير مسموح بأخذ لقطة شاشة لمحتوى المنصة لحفظ الحقوق.', 'error');
                     }
                 });
                 
@@ -438,7 +438,7 @@
                     } catch(e) {
                         console.error('Server verification failed', e);
                         isOwned = false;
-                        alert('تعذر التحقق من ملكيتك للكورس بسبب مشكلة في الاتصال بالإنترنت. يرجى المحاولة لاحقاظ‹.');
+                        alert('تعذر التحقق من ملكيتك للكورس بسبب مشكلة في الاتصال بالإنترنت. يرجى المحاولة لاحقااً.');
                         window.location.href = 'courses.html';
                         return;
                     }
@@ -514,11 +514,11 @@
             if (course.grade && course.grade.startsWith('prep')) {
                 scheduleEl.style.display = 'flex';
                 scheduleEl.className = 'schedule-pulse';
-                scheduleEl.innerHTML = '<div style="display:flex; justify-content:center; align-items:center; gap:12px; flex-wrap:wrap; width:100%;"><span style="color:var(--royal-gold);"><i class="fas fa-calendar-alt"></i> الشرح والتدريب: الخميس</span> <span style="color:rgba(255,255,255,0.3);">|</span> <span style="color:#3498db;"><i class="fas fa-edit"></i> الواجب: الثلاثاء</span> <span style="color:rgba(255,255,255,0.3);">|</span> <span style="color:#e74c3c;"><i class="fas fa-trophy"></i> الامتحان: الأربعاء</span></div><span class="schedule-time-badge"><i class="far fa-clock"></i> جميع المواعيد المذكورة الساعة 9 مساءظ‹</span>';
+                scheduleEl.innerHTML = '<div style="display:flex; justify-content:center; align-items:center; gap:12px; flex-wrap:wrap; width:100%;"><span style="color:var(--royal-gold);"><i class="fas fa-calendar-alt"></i> الشرح والتدريب: الخميس</span> <span style="color:rgba(255,255,255,0.3);">|</span> <span style="color:#3498db;"><i class="fas fa-edit"></i> الواجب: الثلاثاء</span> <span style="color:rgba(255,255,255,0.3);">|</span> <span style="color:#e74c3c;"><i class="fas fa-trophy"></i> الامتحان: الأربعاء</span></div><span class="schedule-time-badge"><i class="far fa-clock"></i> جميع المواعيد المذكورة الساعة 9 مساءاً</span>';
             } else if (course.grade && course.grade.startsWith('sec')) {
                 scheduleEl.style.display = 'flex';
                 scheduleEl.className = 'schedule-pulse';
-                scheduleEl.innerHTML = '<div style="display:flex; justify-content:center; align-items:center; gap:12px; flex-wrap:wrap; width:100%;"><span style="color:var(--royal-gold);"><i class="fas fa-calendar-alt"></i> الشرح والتدريب: الجمعة</span> <span style="color:rgba(255,255,255,0.3);">|</span> <span style="color:#3498db;"><i class="fas fa-edit"></i> الواجب: الثلاثاء</span> <span style="color:rgba(255,255,255,0.3);">|</span> <span style="color:#e74c3c;"><i class="fas fa-trophy"></i> الامتحان: الأربعاء</span></div><span class="schedule-time-badge"><i class="far fa-clock"></i> جميع المواعيد المذكورة الساعة 9 مساءظ‹</span>';
+                scheduleEl.innerHTML = '<div style="display:flex; justify-content:center; align-items:center; gap:12px; flex-wrap:wrap; width:100%;"><span style="color:var(--royal-gold);"><i class="fas fa-calendar-alt"></i> الشرح والتدريب: الجمعة</span> <span style="color:rgba(255,255,255,0.3);">|</span> <span style="color:#3498db;"><i class="fas fa-edit"></i> الواجب: الثلاثاء</span> <span style="color:rgba(255,255,255,0.3);">|</span> <span style="color:#e74c3c;"><i class="fas fa-trophy"></i> الامتحان: الأربعاء</span></div><span class="schedule-time-badge"><i class="far fa-clock"></i> جميع المواعيد المذكورة الساعة 9 مساءاً</span>';
             } else {
                 scheduleEl.style.display = 'none';
             }
@@ -558,7 +558,7 @@
                             <input type="text" id="adminEditCourseTitle" class="form-control" value="${course.title}">
                         </div>
                         <div class="form-group">
-                            <label>حالة الكورس (مثال: يبدأ فوراظ‹ أو 15 أكتوبر)</label>
+                            <label>حالة الكورس (مثال: يبدأ فورااً أو 15 أكتوبر)</label>
                             <input type="text" id="adminEditCourseStatus" class="form-control" value="${course.courseStatus || ''}">
                         </div>
                         <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 15px;">
@@ -628,11 +628,11 @@
                     if (course.grade && course.grade.startsWith('prep')) {
                         scheduleEl.style.display = 'flex';
                         scheduleEl.className = 'schedule-pulse';
-                        scheduleEl.innerHTML = '<div style="display:flex; justify-content:center; align-items:center; gap:12px; flex-wrap:wrap; width:100%;"><span style="color:var(--royal-gold);"><i class="fas fa-calendar-alt"></i> الشرح والتدريب: الخميس</span> <span style="color:rgba(255,255,255,0.3);">|</span> <span style="color:#3498db;"><i class="fas fa-edit"></i> الواجب: الثلاثاء</span> <span style="color:rgba(255,255,255,0.3);">|</span> <span style="color:#e74c3c;"><i class="fas fa-trophy"></i> الامتحان: الأربعاء</span></div><span class="schedule-time-badge"><i class="far fa-clock"></i> جميع المواعيد المذكورة الساعة 9 مساءظ‹</span>';
+                        scheduleEl.innerHTML = '<div style="display:flex; justify-content:center; align-items:center; gap:12px; flex-wrap:wrap; width:100%;"><span style="color:var(--royal-gold);"><i class="fas fa-calendar-alt"></i> الشرح والتدريب: الخميس</span> <span style="color:rgba(255,255,255,0.3);">|</span> <span style="color:#3498db;"><i class="fas fa-edit"></i> الواجب: الثلاثاء</span> <span style="color:rgba(255,255,255,0.3);">|</span> <span style="color:#e74c3c;"><i class="fas fa-trophy"></i> الامتحان: الأربعاء</span></div><span class="schedule-time-badge"><i class="far fa-clock"></i> جميع المواعيد المذكورة الساعة 9 مساءاً</span>';
                     } else if (course.grade && course.grade.startsWith('sec')) {
                         scheduleEl.style.display = 'flex';
                         scheduleEl.className = 'schedule-pulse';
-                        scheduleEl.innerHTML = '<div style="display:flex; justify-content:center; align-items:center; gap:12px; flex-wrap:wrap; width:100%;"><span style="color:var(--royal-gold);"><i class="fas fa-calendar-alt"></i> الشرح والتدريب: الجمعة</span> <span style="color:rgba(255,255,255,0.3);">|</span> <span style="color:#3498db;"><i class="fas fa-edit"></i> الواجب: الثلاثاء</span> <span style="color:rgba(255,255,255,0.3);">|</span> <span style="color:#e74c3c;"><i class="fas fa-trophy"></i> الامتحان: الأربعاء</span></div><span class="schedule-time-badge"><i class="far fa-clock"></i> جميع المواعيد المذكورة الساعة 9 مساءظ‹</span>';
+                        scheduleEl.innerHTML = '<div style="display:flex; justify-content:center; align-items:center; gap:12px; flex-wrap:wrap; width:100%;"><span style="color:var(--royal-gold);"><i class="fas fa-calendar-alt"></i> الشرح والتدريب: الجمعة</span> <span style="color:rgba(255,255,255,0.3);">|</span> <span style="color:#3498db;"><i class="fas fa-edit"></i> الواجب: الثلاثاء</span> <span style="color:rgba(255,255,255,0.3);">|</span> <span style="color:#e74c3c;"><i class="fas fa-trophy"></i> الامتحان: الأربعاء</span></div><span class="schedule-time-badge"><i class="far fa-clock"></i> جميع المواعيد المذكورة الساعة 9 مساءاً</span>';
                     } else {
                         scheduleEl.style.display = 'none';
                     }               document.getElementById('adminEditCourseModal').classList.remove('active');
@@ -641,10 +641,10 @@
             else if (isOwned || isMasterPreview) {
                 actionContainer.innerHTML = `<button class="btn btn-green"><i class="fas fa-check-circle mr-2"></i> المحتوى مفتوح لك (وضع المالك)</button>`;
             } else if (isPending) {
-                actionContainer.innerHTML = `<button class="btn btn-outline" style="color:var(--accent-orange); border-color:var(--accent-orange);" onclick="showPendingMessageDetails()"><i class="fas fa-clock mr-2"></i> ط·لبك قيد المراجعة</button>`;
+                actionContainer.innerHTML = `<button class="btn btn-outline" style="color:var(--accent-orange); border-color:var(--accent-orange);" onclick="showPendingMessageDetails()"><i class="fas fa-clock mr-2"></i> طلبك قيد المراجعة</button>`;
             } else if (course.isFree || course.price == '0' || course.price === 0) {
                 if (userStr) {
-                    actionContainer.innerHTML = `<button class="btn btn-green" onclick="enrollFreeCourse('${course.id}')"><i class="fas fa-door-open mr-2"></i> دخول الكورس مجاناظ‹</button>`;
+                    actionContainer.innerHTML = `<button class="btn btn-green" onclick="enrollFreeCourse('${course.id}')"><i class="fas fa-door-open mr-2"></i> دخول الكورس مجانااً</button>`;
                 } else {
                     actionContainer.innerHTML = `<button class="btn btn-outline" style="color:#f1c40f; border-color:#f1c40f;" onclick="window.location.href='index.html#login'"><i class="fas fa-user-lock mr-2"></i> يجب تسجيل الدخول للاستمتاع بالكورس المجاني</button>`;
                 }
@@ -770,20 +770,20 @@
                             window.location.href = 'index.html?login=true';
                             return;
                         } else {
-                            if(window.showToast) window.showToast('يرجى الضغط على زر "دخول الكورس مجاناظ‹" باللون الأخضر بالأعلى أولاظ‹', 'info');
-                            else alert('يرجى الضغط على زر "دخول الكورس مجاناظ‹" باللون الأخضر بالأعلى أولاظ‹');
+                            if(window.showToast) window.showToast('يرجى الضغط على زر "دخول الكورس مجانااً" باللون الأخضر بالأعلى أولااً', 'info');
+                            else alert('يرجى الضغط على زر "دخول الكورس مجانااً" باللون الأخضر بالأعلى أولااً');
                             return;
                         }
                     } else {
-                        if(window.showToast) window.showToast('هذا المحتوى غير متاح، يجب عليك الاشتراك في الكورس أولاظ‹', 'error');
-                        else alert('هذا المحتوى غير متاح، يجب عليك الاشتراك في الكورس أولاظ‹');
+                        if(window.showToast) window.showToast('هذا المحتوى غير متاح، يجب عليك الاشتراك في الكورس أولااً', 'error');
+                        else alert('هذا المحتوى غير متاح، يجب عليك الاشتراك في الكورس أولااً');
                         return;
                     }
                 }
                 
                 if(isLocked && !isMasterPreview) {
-                    if(window.showToast) window.showToast(lockReason || 'هذا المحتوى مغلق حالياظ‹', 'error');
-                    else alert(lockReason || 'هذا المحتوى مقفول حالياظ‹');
+                    if(window.showToast) window.showToast(lockReason || 'هذا المحتوى مغلق حاليااً', 'error');
+                    else alert(lockReason || 'هذا المحتوى مقفول حاليااً');
                     return;
                 }
 
@@ -948,8 +948,8 @@
                             <div style="background:#111;border:1px solid #d4a64f;border-radius:15px;padding:30px;max-width:500px;text-align:center;position:relative;box-shadow:0 10px 40px rgba(0,0,0,0.8);">
                                 <button onclick="this.parentElement.parentElement.remove()" style="position:absolute;top:10px;left:15px;background:none;border:none;color:#fff;font-size:1.8rem;cursor:pointer;">&times;</button>
                                 <i class="fas fa-gift" style="font-size:3.5rem;color:#d4a64f;margin-bottom:20px;"></i>
-                                <h3 style="color:#fff;margin-bottom:25px;line-height:1.6;font-size:1.2rem;">نظراظ‹ لوجود تحديث بالمنصة أثناء أدائك للواجب الخاص بالمحاضرة التعريفية وحدث عط·ل،<br><span style="color:#2ecc71;">حصلت أنت على درجة الواجب كاملة 10/10</span><br>وغداظ‹ في تمام الظ€ 9 مساءظ‹ يجب أن تحضر الامتحان.</h3>
-                                <button onclick="this.parentElement.parentElement.remove()" class="btn btn-gold" style="padding:10px 30px;border-radius:25px;font-size:1.1rem;">حسناظ‹، فهمت</button>
+                                <h3 style="color:#fff;margin-bottom:25px;line-height:1.6;font-size:1.2rem;">نظرااً لوجود تحديث بالمنصة أثناء أدائك للواجب الخاص بالمحاضرة التعريفية وحدث عطل،<br><span style="color:#2ecc71;">حصلت أنت على درجة الواجب كاملة 10/10</span><br>وغدااً في تمام الـ 9 مساءاً يجب أن تحضر الامتحان.</h3>
+                                <button onclick="this.parentElement.parentElement.remove()" class="btn btn-gold" style="padding:10px 30px;border-radius:25px;font-size:1.1rem;">حسنااً، فهمت</button>
                             </div>
                         `;
                         document.body.appendChild(customOverlay);
@@ -960,8 +960,8 @@
                     if (!isMasterPreview) {
                         const parentLecId = item.attachedToLectureId || item._parentLecId;
                         if (parentLecId && !isItemCompleted(parentLecId)) {
-                            if(window.showToast) window.showToast('ًں”’ يجب مشاهدة المحاضرة كاملاظ‹ قبل الدخول للتدريب', 'error');
-                            else alert('يجب مشاهدة المحاضرة كاملاظ‹ قبل الدخول للتدريب');
+                            if(window.showToast) window.showToast('ًں”’ يجب مشاهدة المحاضرة كاملااً قبل الدخول للتدريب', 'error');
+                            else alert('يجب مشاهدة المحاضرة كاملااً قبل الدخول للتدريب');
                             return;
                         }
                         const tempStudentStr = sessionStorage.getItem('currentStudent');
@@ -972,8 +972,8 @@
                         if (isHomeworkType && item._requiresTraining) {
                             const trainingDone = (dbUser.examResults || []).some(r => r.courseId === course.id && (r.isTraining || ['training', 'تدريب'].includes(r.examType)));
                             if (!trainingDone) {
-                                if(window.showToast) window.showToast('ًں”’ يجب تسليم التدريب أولاظ‹ قبل الواجب', 'error');
-                                else alert('يجب تسليم التدريب أولاظ‹ قبل الواجب');
+                                if(window.showToast) window.showToast('ًں”’ يجب تسليم التدريب أولااً قبل الواجب', 'error');
+                                else alert('يجب تسليم التدريب أولااً قبل الواجب');
                                 return;
                             }
                         }
@@ -981,8 +981,8 @@
                         if (isQuizType && item._requiresHomework) {
                             const hwDone = (dbUser.examResults || []).some(r => r.courseId === course.id && (r.isHomework || ['task', 'homework', 'واجب'].includes(r.examType)));
                             if (!hwDone) {
-                                if(window.showToast) window.showToast('ًں”’ يجب تسليم الواجب أولاظ‹ قبل الامتحان', 'error');
-                                else alert('يجب تسليم الواجب أولاظ‹ قبل الامتحان');
+                                if(window.showToast) window.showToast('ًں”’ يجب تسليم الواجب أولااً قبل الامتحان', 'error');
+                                else alert('يجب تسليم الواجب أولااً قبل الامتحان');
                                 return;
                             }
                         }
@@ -998,8 +998,8 @@
                     if (!isMasterPreview) {
                         const parentLecId = item.attachedToLectureId || item._parentLecId;
                         if (parentLecId && !isItemCompleted(parentLecId)) {
-                            if(window.showToast) window.showToast('ًں”’ يجب مشاهدة المحاضرة كاملاظ‹ قبل تحميل الملف', 'error');
-                            else alert('يجب مشاهدة المحاضرة كاملاظ‹ قبل تحميل الملف');
+                            if(window.showToast) window.showToast('ًں”’ يجب مشاهدة المحاضرة كاملااً قبل تحميل الملف', 'error');
+                            else alert('يجب مشاهدة المحاضرة كاملااً قبل تحميل الملف');
                             return;
                         }
                     }
@@ -1083,7 +1083,7 @@
                     detailsInner.style.cssText = 'display:flex; flex-direction:column; gap:8px; padding: 15px;';
 
                     if(!sec.items || sec.items.length === 0) {
-                        detailsInner.innerHTML = '<div style="text-align:center; padding: 30px; background: rgba(0,0,0,0.2); border-radius: 12px; margin-top: 10px;"><i class="fas fa-laptop-code mb-3" style="font-size: 2.5rem; color: var(--accent-cyan); opacity: 0.8;"></i><h3 style="color: var(--royal-gold); margin-bottom: 10px;">المحتوى قيد التجهيز ًںڑ€</h3><p style="color: rgba(255,255,255,0.7); line-height: 1.6; font-size: 0.95rem;">يتم الآن إعداد وتجهيز محتوى هذا القسم بأفضل جودة ليكون متاحاظ‹ قريباظ‹، ابقوا متابعين ولا تفوتوا الجديد!</p></div>';
+                        detailsInner.innerHTML = '<div style="text-align:center; padding: 30px; background: rgba(0,0,0,0.2); border-radius: 12px; margin-top: 10px;"><i class="fas fa-laptop-code mb-3" style="font-size: 2.5rem; color: var(--accent-cyan); opacity: 0.8;"></i><h3 style="color: var(--royal-gold); margin-bottom: 10px;">المحتوى قيد التجهيز ًںڑ€</h3><p style="color: rgba(255,255,255,0.7); line-height: 1.6; font-size: 0.95rem;">يتم الآن إعداد وتجهيز محتوى هذا القسم بأفضل جودة ليكون متاحااً قريبااً، ابقوا متابعين ولا تفوتوا الجديد!</p></div>';
                     } else {
                         let currentLecGroup = null;
 
@@ -1113,13 +1113,13 @@
                             
                             if (item.type === 'video' && !globalLastExamCompleted) {
                                 isLocked = true;
-                                lockReason = `يجب اجتياز (${lastExamName}) أولاظ‹ لفتح المحاضرة`;
+                                lockReason = `يجب اجتياز (${lastExamName}) أولااً لفتح المحاضرة`;
                             }
 
                             if (item.dependsOn) {
                                 if (!isItemCompleted(item.dependsOn)) {
                                     isLocked = true;
-                                    lockReason = 'يجب إكمال المحتوى السابق أولاظ‹';
+                                    lockReason = 'يجب إكمال المحتوى السابق أولااً';
                                 }
                             }
                             
@@ -1146,7 +1146,7 @@
                                     isScheduled = true;
                                     const dt = new Date(availTime);
                                     const dateStr = dt.toLocaleDateString('ar-EG', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-                                    lockReason = `سيكون متاحاظ‹: ${dateStr}`;
+                                    lockReason = `سيكون متاحااً: ${dateStr}`;
                                 }
                             }
                             
@@ -1452,7 +1452,7 @@
 
                     const ewmAttempts = document.getElementById('ewmAttempts');
                     if(ewmAttempts) {
-                        let warningsHtml = `<p style="margin-bottom: 10px;">âڑ ï¸ڈ لديك <strong>${3 - prevAttempts.length}</strong> محاولات متبقية. <br><small style="color: #f39c12;">(المحاولة الأولى فقط هي المحسوبة في التقييم، والمحاولات الإضافية هي لتحسين درجتك وتدريبك ولكنها غير محسوبة رسمياظ‹).</small></p>`;
+                        let warningsHtml = `<p style="margin-bottom: 10px;">âڑ ï¸ڈ لديك <strong>${3 - prevAttempts.length}</strong> محاولات متبقية. <br><small style="color: #f39c12;">(المحاولة الأولى فقط هي المحسوبة في التقييم، والمحاولات الإضافية هي لتحسين درجتك وتدريبك ولكنها غير محسوبة رسميااً).</small></p>`;
                         
                         let durationMins = parseInt(exam.duration) || 0;
                         if (exam.strictMode && durationMins === 0) durationMins = 5;
@@ -1463,13 +1463,13 @@
                         }
 
                         if (exam.strictMode) {
-                            warningsHtml += `<p style="margin-bottom: 10px; color: #e74c3c;">ًںڑ« <strong>الوضع الصارم مفعل! يظڈمنع الخروج أو التبديل بين التط·بيقات!</strong> أي محاولة لفتح تط·بيق آخر أو الخروج من النافذة ستؤدي إلى <strong>تسليم الامتحان فوراظ‹ بدرجة صفر</strong>.</p>`;
+                            warningsHtml += `<p style="margin-bottom: 10px; color: #e74c3c;">ًںڑ« <strong>الوضع الصارم مفعل! يُمنع الخروج أو التبديل بين التطبيقات!</strong> أي محاولة لفتح تطبيق آخر أو الخروج من النافذة ستؤدي إلى <strong>تسليم الامتحان فورااً بدرجة صفر</strong>.</p>`;
                         } else {
                             warningsHtml += `<p style="margin-bottom: 10px; color: #3498db;">â„¹ï¸ڈ الوضع الصارم غير مفعل لهذا التقييم.</p>`;
                         }
 
                         if (durationMins > 0) {
-                            warningsHtml += `<p style="margin-bottom: 0;">âڈ±ï¸ڈ مدة الامتحان <strong>${durationMins} دقائق</strong>. سيستمر العداد حتى لو انقط·ع الإنترنت.</p>`;
+                            warningsHtml += `<p style="margin-bottom: 0;">âڈ±ï¸ڈ مدة الامتحان <strong>${durationMins} دقائق</strong>. سيستمر العداد حتى لو انقطع الإنترنت.</p>`;
                         } else {
                             warningsHtml += `<p style="margin-bottom: 0;">âڈ±ï¸ڈ الامتحان بدون وقت محدد.</p>`;
                         }
@@ -1616,7 +1616,7 @@
                                 let ansText = ans.answer.trim() ? ans.answer : '<span style="color:#e74c3c">لم تتم الإجابة</span>';
                                 summaryHtml += `<li>س${i+1}: ${ansText}</li>`;
                             });
-                            summaryHtml += '</ul>هل أنت متأكد من تسليم هذا الامتحان نهائياظ‹؟ لا يمكن التراجع!</div>';
+                            summaryHtml += '</ul>هل أنت متأكد من تسليم هذا الامتحان نهائيااً؟ لا يمكن التراجع!</div>';
                             
                             const confirmSubmit = confirm("ملخص الإجابات سيظهر الآن.\n" + summaryHtml.replace(/<[^>]*>?/gm, ' '));
                             if (!confirmSubmit) {
@@ -1675,7 +1675,7 @@
                                 try {
                                     if(window.PF_Grader && typeof window.PF_Grader.scoreAnswer === 'function' && !item.q.asMcq) {
                                         const res = window.PF_Grader.scoreAnswer(item.answer, item.q.answer, item.q.type || 'explain');
-                                        r = { score: res.score || 0, feedback: res.feedback || (res.score === 1 ? 'إجابة صحيحة تمامظ‹ا âœ…' : 'راجع الإجابة'), needsReview: false };
+                                        r = { score: res.score || 0, feedback: res.feedback || (res.score === 1 ? 'إجابة صحيحة تماماًا âœ…' : 'راجع الإجابة'), needsReview: false };
                                     }
                                 } catch(e) {}
                             }
@@ -1717,7 +1717,7 @@
 
                         let encouragement = '', encColor = '', encIcon = '';
                         if (isStrictViolation) {
-                            encouragement = 'âڑ ï¸ڈ تم سحب الامتحان إجبارياظ‹ بسبب محاولة الخروج أو الغش âڑ ï¸ڈ<br><span style="font-size:1rem;color:#fff;">(تم احتساب درجاتك التي أجبت عليها فقط·)</span>';
+                            encouragement = 'âڑ ï¸ڈ تم سحب الامتحان إجباريااً بسبب محاولة الخروج أو الغش âڑ ï¸ڈ<br><span style="font-size:1rem;color:#fff;">(تم احتساب درجاتك التي أجبت عليها فقط)</span>';
                             encColor = '#e67e22';
                             encIcon = 'â›”';
                         } else {
@@ -1725,7 +1725,7 @@
                             else if(dispPct >= 80) { encouragement = 'جيد جداً! مستوى مبشر ومتميز! ًںŒں'; encColor = '#2ecc71'; encIcon = 'ًںڈ†'; }
                             else if(dispPct >= 65) { encouragement = 'جيد! أداء كويس بس تقدر تعمل أحسن! ًں‘ڈ'; encColor = '#3498db'; encIcon = 'ًں‘چ'; }
                             else if(dispPct >= 50) { encouragement = 'مقبول. محتاج تذاكر أكتر وتركز المرة الجاية! ًں“ڑ'; encColor = '#f39c12'; encIcon = 'âڑ ï¸ڈ'; }
-                            else { encouragement = 'ضعيف جداً! هذا المستوى لا يليق بك، راجع دروسك فوراظ‹! â‌Œ'; encColor = '#e74c3c'; encIcon = 'ًں’”'; }
+                            else { encouragement = 'ضعيف جداً! هذا المستوى لا يليق بك، راجع دروسك فورااً! â‌Œ'; encColor = '#e74c3c'; encIcon = 'ًں’”'; }
                         }
 
                         resultBox.style.display = 'block';
@@ -1740,7 +1740,7 @@
                         scoreDisp += '</div>';
                         rHtml += scoreDisp;
                         
-                        rHtml += '<div style="font-size:1rem;color:#f39c12;margin-top:5px;"><strong>مجموع النقاط·: ' + earnedPoints + ' من ' + totalPoints + '</strong></div>';
+                        rHtml += '<div style="font-size:1rem;color:#f39c12;margin-top:5px;"><strong>مجموع النقاط: ' + earnedPoints + ' من ' + totalPoints + '</strong></div>';
                         if(isStrictViolation) rHtml += '<div style="margin-top:10px;padding:10px;background:rgba(230,126,34,0.15);border-radius:8px;color:#e67e22;font-size:0.9rem;">âڑ ï¸ڈ <strong>تم تسليم الامتحان وتسجيل درجاتك الحالية بسبب محاولة الخروج أو مخالفة القواعد.</strong></div>';
                         else if(autoSubmit) rHtml += '<div style="margin-top:8px;color:#e74c3c;font-size:0.9rem;">âڈ° تم التسليم التلقائي بعد انتهاء الوقت.</div>';
                         if(penaltyApplied) rHtml += '<div style="margin-top:10px;padding:10px;background:rgba(231,76,60,0.15);border-radius:8px;color:#e74c3c;font-size:0.9rem;">âڑ ï¸ڈ <strong>تم خصم 20% من درجتك بسبب التأخر في التسليم بعد الموعد النهائي.</strong></div>';
@@ -1819,7 +1819,7 @@
                             if(aNum > 1) {
                                 const ntc = document.createElement('div');
                                 ntc.style.cssText = 'margin-top:12px;padding:12px;background:rgba(212,166,79,0.12);border-radius:8px;color:var(--royal-gold);font-size:0.9rem;';
-                                ntc.innerHTML = '<i class="fas fa-info-circle"></i> <strong>تنبيه:</strong> هذه المحاولة رقم ' + aNum + '. <strong>المحاولة الأولى هي الدرجة المعتمدة رسمياظ‹.</strong> المحاولات اللاحقة محفوظة للمراجعة.';
+                                ntc.innerHTML = '<i class="fas fa-info-circle"></i> <strong>تنبيه:</strong> هذه المحاولة رقم ' + aNum + '. <strong>المحاولة الأولى هي الدرجة المعتمدة رسميااً.</strong> المحاولات اللاحقة محفوظة للمراجعة.';
                                 resultBox.appendChild(ntc);
                             }
                         } catch(e) { console.error('save exam result failed', e); }
@@ -1837,10 +1837,10 @@
                             return;
                         }
                         // WARNING 1
-                        const w1 = confirm('âڑ ï¸ڈ تحذير أول: إذا خرجت الآن، سيتم تسليم إجاباتك الحالية تلقائياظ‹ حتى لو لم تكمل. هل تريد الاستمرار في الخروج؟');
+                        const w1 = confirm('âڑ ï¸ڈ تحذير أول: إذا خرجت الآن، سيتم تسليم إجاباتك الحالية تلقائيااً حتى لو لم تكمل. هل تريد الاستمرار في الخروج؟');
                         if (!w1) return;
                         // WARNING 2
-                        const w2 = confirm('âڑ ï¸ڈ تحذير أخير: هذا الإجراء نهائي ولا رجعة فيه. إجاباتك ستظڈسلظ‘م الآن وسيظڈحسب عليك كمحاولة. هل أنت متأكد تماماظ‹؟');
+                        const w2 = confirm('âڑ ï¸ڈ تحذير أخير: هذا الإجراء نهائي ولا رجعة فيه. إجاباتك ستُسلّم الآن وسيُحسب عليك كمحاولة. هل أنت متأكد تمامااً؟');
                         if (!w2) return;
                         doSubmit(true);
                         setTimeout(() => { 
@@ -1904,7 +1904,7 @@
 
                         _examStrictBeforeUnload = function(e) {
                             e.preventDefault();
-                            e.returnValue = 'إذا غادرت الآن سيتم تسليم الامتحان إجبارياظ‹ مع خصم 10%!';
+                            e.returnValue = 'إذا غادرت الآن سيتم تسليم الامتحان إجباريااً مع خصم 10%!';
                             return e.returnValue;
                         };
                         
@@ -1918,7 +1918,7 @@
 
                         const failExamDirectly = (reason) => {
                             if(submitBtn.disabled && submitBtn.innerHTML.includes('جاري')) return;
-                            const confirmExit = confirm(`تحذير نهائي: ${reason}\n\nهل أنت مصر على الخروج؟\n\n- اضغط OK/حسناظ‹ للخروج وتسليم الامتحان بما تم إنجازه مع خصم 10%\n- اضغط Cancel/إلغاء لاستكمال الحل`);
+                            const confirmExit = confirm(`تحذير نهائي: ${reason}\n\nهل أنت مصر على الخروج؟\n\n- اضغط OK/حسنااً للخروج وتسليم الامتحان بما تم إنجازه مع خصم 10%\n- اضغط Cancel/إلغاء لاستكمال الحل`);
                             if (!confirmExit) {
                                 if(window.showToast) window.showToast('âœ… تم التراجع عن الخروج، استكمل الامتحان.', 'success');
                                 _strictViolationsCount = Math.max(0, _strictViolationsCount - 1);
@@ -1931,7 +1931,7 @@
                                 return;
                             }
                             doSubmit(true, true);
-                            alert(`تم تسليم الامتحان تلقائياظ‹ بسبب خروجك المتعمد، وتم خصم 10% كعقوبة انضباط·ية.`);
+                            alert(`تم تسليم الامتحان تلقائيااً بسبب خروجك المتعمد، وتم خصم 10% كعقوبة انضباطية.`);
                         };
 
                         const warnOrFailExam = (reason) => {
@@ -1942,7 +1942,7 @@
                                 failExamDirectly(`تجاوزت الحد الأقصى للمخالفات (3 مرات) - السبب الأخير: ${reason}`);
                             } else {
                                 const remaining = 3 - _strictViolationsCount;
-                                const msg = `âڑ ï¸ڈ تحذير مخالفة (${_strictViolationsCount}/3): ${reason}\n\nيظڈرجى عدم تكرار ذلك وإلا سيتم سحب الامتحان منك! يتبقى لك ${remaining} تحذيرات.`;
+                                const msg = `âڑ ï¸ڈ تحذير مخالفة (${_strictViolationsCount}/3): ${reason}\n\nيُرجى عدم تكرار ذلك وإلا سيتم سحب الامتحان منك! يتبقى لك ${remaining} تحذيرات.`;
                                 if(window.showToast) window.showToast(msg, 'warning', 7000);
                                 else alert(msg);
                                 
@@ -1974,7 +1974,7 @@
                                     const offlineDur = Date.now() - _offlineStartTime;
                                     _offlineStartTime = null;
                                     if (offlineDur > 5 * 60 * 1000) {
-                                        failExamDirectly('انقط·اع الإنترنت لأكثر من 5 دقائق');
+                                        failExamDirectly('انقطاع الإنترنت لأكثر من 5 دقائق');
                                     }
                                 }
                             }
@@ -1992,7 +1992,7 @@
                         const _examStrictFocus = function() {
                             if (_awayTimeout) {
                                 _clearAwayTimer();
-                                warnOrFailExam('فقدان التركيز على النافذة (فتح تط·بيق آخر أو النقر خارج المتصفح)');
+                                warnOrFailExam('فقدان التركيز على النافذة (فتح تطبيق آخر أو النقر خارج المتصفح)');
                             }
                         };
 
@@ -2088,7 +2088,7 @@
                         const sb = document.createElement('div');
                         sb.id = 'examStrictBadge';
                         sb.style.cssText = 'background:rgba(231,76,60,0.15);border:1px solid rgba(231,76,60,0.3);color:#e74c3c;padding:10px 14px;border-radius:8px;font-size:0.9rem;margin-bottom:12px; font-weight: bold;';
-                        sb.innerHTML = '<i class="fas fa-shield-alt"></i> <strong>الوضع الصارم مفعل (مستوى الصعوبة القصوى)</strong> — يظڈمنع الخروج، النقر خارج النافذة، الإغلاق، وضع ملء الشاشة إجباري، ولا يمكن استخدام النسخ واللصق.';
+                        sb.innerHTML = '<i class="fas fa-shield-alt"></i> <strong>الوضع الصارم مفعل (مستوى الصعوبة القصوى)</strong> — يُمنع الخروج، النقر خارج النافذة، الإغلاق، وضع ملء الشاشة إجباري، ولا يمكن استخدام النسخ واللصق.';
                         container.parentElement.insertBefore(sb, container);
                     }
 
@@ -2148,7 +2148,7 @@
                 let msgHTML = `
                     <div style="text-align: center;">
                         <i class="fas fa-clock" style="font-size: 3rem; color: var(--accent-orange); margin-bottom: 15px;"></i>
-                        <h3 style="color: var(--text-primary); margin-bottom: 10px;">ط·لب الدفع تحت المراجعة</h3>
+                        <h3 style="color: var(--text-primary); margin-bottom: 10px;">طلب الدفع تحت المراجعة</h3>
                         <p style="color: rgba(255,255,255,0.8); margin-bottom: 20px;">سيتم تفعيل الكورس فور التأكد من التحويل</p>
                         <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; margin-bottom: 20px;">
                             <p style="font-size: 0.9rem; margin-bottom: 10px;">إذا قمت بالتحويل بالفعل ولم يتم التفعيل بعد، تواصل عبر الرقم:<br><strong style="font-size: 1.2rem; color: var(--accent-cyan);">01023675235</strong></p>

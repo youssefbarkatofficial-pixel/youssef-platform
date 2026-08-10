@@ -99,7 +99,7 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <label>ط·ريقة إضافة الفيديو</label>
+                            <label>طريقة إضافة الفيديو</label>
                             <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                                 <label style="display:flex; align-items:center; gap: 6px;"><input type="radio" name="videoSource" value="upload" checked> رفع ملف</label>
                                 <label style="display:flex; align-items:center; gap: 6px;"><input type="radio" name="videoSource" value="youtube"> رابط فيديو</label>
@@ -154,14 +154,14 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <label>ط·ريقة إضافة المذكرة</label>
+                            <label>طريقة إضافة المذكرة</label>
                             <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                                 <label style="display:flex; align-items:center; gap: 6px;"><input type="radio" name="pdfSource" value="upload" checked> رفع ملف</label>
                                 <label style="display:flex; align-items:center; gap: 6px;"><input type="radio" name="pdfSource" value="link"> رابط مذكرة</label>
                             </div>
                         </div>
                         <div class="form-group" id="pdfFileGroup">
-                            <label>ملف الظ€ PDF</label>
+                            <label>ملف الـ PDF</label>
                             <input type="file" id="pFileInput" accept=".pdf" class="form-control" style="padding: 10px;">
                         </div>
                         <div class="form-group" id="pdfUrlGroup" style="display:none;">
@@ -262,7 +262,7 @@
                             </select>
                         </div>
                         <div class="form-group" id="pointsGroup">
-                            <label>الدرجة (النقاط·)</label>
+                            <label>الدرجة (النقاط)</label>
                             <input type="number" id="questionPoints" class="form-control" placeholder="مثال: 1" min="0.5" step="0.5" value="1">
                         </div>
                         <button type="button" id="btnGenerateRubric" class="btn btn-outline" style="margin-bottom: 15px; border-color: #9b59b6; color: #9b59b6; display: none;"><i class="fas fa-magic mr-2"></i> توليد تقييم ذكي بالذكاء الاصطناعي</button>
@@ -471,7 +471,7 @@
                     const qText = document.getElementById('questionText').value;
                     const qAnswer = document.getElementById('correctAnswer').value;
                     if(!qText || !qAnswer) {
-                        alert('يجب كتابة السؤال والإجابة النموذجية أولاظ‹ قبل توليد التقييم.');
+                        alert('يجب كتابة السؤال والإجابة النموذجية أولااً قبل توليد التقييم.');
                         return;
                     }
 

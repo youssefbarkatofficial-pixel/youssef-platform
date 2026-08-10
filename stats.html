@@ -196,12 +196,12 @@
     <main class="main-content">
         <div class="page-header">
             <h1 class="page-title"><i class="fas fa-chart-pie mr-2 text-gold"></i> إحصائياتي</h1>
-            <p style="color:rgba(255,255,255,0.5);margin-top:5px;font-size:0.9rem;">تابع تقدمك الحقيقي وحللظ‘ أداءك بدقة</p>
+            <p style="color:rgba(255,255,255,0.5);margin-top:5px;font-size:0.9rem;">تابع تقدمك الحقيقي وحللّ أداءك بدقة</p>
         </div>
 
         <!-- KPI CARDS -->
         <div class="kpi-grid" id="kpiGrid" style="display:none;">
-            <div class="kpi-card gold" style="cursor:pointer;" onclick="if(window.showToast) window.showToast('قريباظ‹: تقارير تفصيلية لتحليل مستواك!', 'majestic')">
+            <div class="kpi-card gold" style="cursor:pointer;" onclick="if(window.showToast) window.showToast('قريبااً: تقارير تفصيلية لتحليل مستواك!', 'majestic')">
                 <div class="kpi-icon gold"><i class="fas fa-star"></i></div>
                 <div class="kpi-data">
                     <div class="kpi-val" id="kAvg" style="color:var(--gold);">-</div>
@@ -209,7 +209,7 @@
                     <div class="kpi-sub" id="kAvgSub"></div>
                 </div>
             </div>
-            <div class="kpi-card cyan" style="cursor:pointer;" onclick="if(window.showToast) window.showToast('قريباظ‹: مكافآت للملتزمين بمشاهدة المحاضرات!', 'majestic')">
+            <div class="kpi-card cyan" style="cursor:pointer;" onclick="if(window.showToast) window.showToast('قريبااً: مكافآت للملتزمين بمشاهدة المحاضرات!', 'majestic')">
                 <div class="kpi-icon cyan"><i class="fas fa-video"></i></div>
                 <div class="kpi-data">
                     <div class="kpi-val" id="kVideos" style="color:var(--cyan);">-</div>
@@ -225,7 +225,7 @@
                     <div class="kpi-sub" id="kExamsSub"></div>
                 </div>
             </div>
-            <div class="kpi-card blue" style="cursor:pointer;" onclick="if(window.showToast) window.showToast('قريباظ‹: استبيان سريع لتقييم الكورسات', 'majestic')">
+            <div class="kpi-card blue" style="cursor:pointer;" onclick="if(window.showToast) window.showToast('قريبااً: استبيان سريع لتقييم الكورسات', 'majestic')">
                 <div class="kpi-icon blue"><i class="fas fa-book-open"></i></div>
                 <div class="kpi-data">
                     <div class="kpi-val" id="kCourses" style="color:var(--blue);">-</div>
@@ -512,14 +512,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         const typeIcon = r.type === 'training' ? 'ًںڈ‹ï¸ڈ تدريب' : r.type === 'homework' ? 'ًں“‌ واجب' : 'ًں“‹ امتحان';
         const courseTitle = (adminCourses.find(c => c.id === r.courseId) || {}).title || '-';
         const dateStr = r.ts ? new Date(r.ts).toLocaleDateString('ar-EG', { month: 'short', day: 'numeric' }) : '-';
-        const overrideBadge = r.isOverride ? ' <span style="font-size:0.65rem;background:rgba(46,204,113,0.15);color:#2ecc71;border-radius:4px;padding:1px 5px;">âœ“ معدظ‘ل</span>' : '';
+        const overrideBadge = r.isOverride ? ' <span style="font-size:0.65rem;background:rgba(46,204,113,0.15);color:#2ecc71;border-radius:4px;padding:1px 5px;">âœ“ معدّل</span>' : '';
 
         // Trend vs same exam's PREVIOUS chronological entry
         const prevSame = sortedHistory.slice(idx + 1).find(x => x.title === r.title);
         let trendHtml = '';
         if (prevSame) {
             const diff = pct - prevSame.pct;
-            if (diff > 0)       trendHtml = `<div style="color:#2ecc71;font-size:0.78rem;margin-top:3px;">â¬† تحسظ‘نت بظ€ ${diff}% عن المرة اللي فاتت (${prevSame.pct}% ↑ ${pct}%)</div>`;
+            if (diff > 0)       trendHtml = `<div style="color:#2ecc71;font-size:0.78rem;margin-top:3px;">â¬† تحسّنت بـ ${diff}% عن المرة اللي فاتت (${prevSame.pct}% ↑ ${pct}%)</div>`;
             else if (diff < 0)  trendHtml = `<div style="color:#e74c3c;font-size:0.78rem;margin-top:3px;">â¬‡ انخفضت ${Math.abs(diff)}% عن المرة اللي فاتت (${prevSame.pct}% ↑ ${pct}%)</div>`;
             else                trendHtml = `<div style="color:#aaa;font-size:0.78rem;margin-top:3px;">↓ نفس الدرجة زي المرة اللي فاتت</div>`;
         }
@@ -678,7 +678,7 @@ function buildInsight(avg, videos, totalVids, examsCount, history) {
 
     // Avg score insight — plain language
     if (avg >= 85)      insights.push(`متوسط درجاتك ${avg}% — ممتاز جداً! ًںژ‰ استمر في الحفاظ على هذا المستوى.`);
-    else if (avg >= 60) insights.push(`متوسط درجاتك ${avg}% — أنت ناجح! ًں‘چ لكن حاول مراجعة أخط·ائك للوصول للامتياز.`);
+    else if (avg >= 60) insights.push(`متوسط درجاتك ${avg}% — أنت ناجح! ًں‘چ لكن حاول مراجعة أخطائك للوصول للامتياز.`);
     else if (avg > 0)   insights.push(`متوسط درجاتك ${avg}% — لم تصل لنسبة النجاح (60%). â‌Œ ركز أكثر وراجع دروسك.`);
     else                insights.push(`لم تنجز أي اختبارات بعد. تذكر أن نسبة النجاح المطلوبة هي 60%.`);
 
@@ -687,7 +687,7 @@ function buildInsight(avg, videos, totalVids, examsCount, history) {
         const vidPct = Math.round(videos / totalVids * 100);
         const remaining = totalVids - videos;
         if (vidPct === 100)        insights.push(`شاهدت كل المحاضرات (${videos} محاضرة) — أحسنت! ًں‘ڈ`);
-        else if (vidPct >= 70)     insights.push(`شاهدت ${videos} من ${totalVids} محاضرة (${vidPct}%) — قرظ‘بت تخلص!`);
+        else if (vidPct >= 70)     insights.push(`شاهدت ${videos} من ${totalVids} محاضرة (${vidPct}%) — قرّبت تخلص!`);
         else if (vidPct >= 30)     insights.push(`شاهدت ${videos} من ${totalVids} محاضرة — لسه فيه ${remaining} محاضرة، أكمل!`);
         else                       insights.push(`لسه شاهدت ${videos} محاضرة بس من أصل ${totalVids} — اشتغل أكتر على المحاضرات!`);
     }
@@ -700,11 +700,11 @@ function buildInsight(avg, videos, totalVids, examsCount, history) {
         const lastName = last.title || 'الاختبار الأخير';
         const prevName = prev.title || 'الاختبار اللي قبله';
         if (diff > 0) {
-            insights.push(`في "${lastName}" جبت ${last.pct}%، وكانت درجتك في "${prevName}" ${prev.pct}% — يعني اتحسظ‘نت بظ€ ${diff}% ًںڑ€ جميل!`);
+            insights.push(`في "${lastName}" جبت ${last.pct}%، وكانت درجتك في "${prevName}" ${prev.pct}% — يعني اتحسّنت بـ ${diff}% ًںڑ€ جميل!`);
         } else if (diff < 0) {
-            insights.push(`في "${lastName}" جبت ${last.pct}%، وكانت درجتك في "${prevName}" ${prev.pct}% — انخفضت ${Math.abs(diff)}%، راجع أخط·اءك.`);
+            insights.push(`في "${lastName}" جبت ${last.pct}%، وكانت درجتك في "${prevName}" ${prev.pct}% — انخفضت ${Math.abs(diff)}%، راجع أخطاءك.`);
         } else {
-            insights.push(`درجتك في "${lastName}" (${last.pct}%) نفس اللي قبلها تماماظ‹ — حاول تتحسن المرة الجاية.`);
+            insights.push(`درجتك في "${lastName}" (${last.pct}%) نفس اللي قبلها تمامااً — حاول تتحسن المرة الجاية.`);
         }
     }
 

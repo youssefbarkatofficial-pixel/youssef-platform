@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 
 <head>
@@ -35,7 +35,7 @@
       },
       "url": "https://youssefbarakat.pages.dev/",
       "inLanguage": "ar",
-      "description": "منصة يوسف بركات للدراسات الاجتماعية تقدم شرحظ‹ا احترافيظ‹ا لمناهج التاريخ والجغرافيا للمرحلتين الإعدادية والثانوية."
+      "description": "منصة يوسف بركات للدراسات الاجتماعية تقدم شرحاًا احترافياًا لمناهج التاريخ والجغرافيا للمرحلتين الإعدادية والثانوية."
     }
     </script>
 
@@ -239,6 +239,7 @@
                     <a href="register.html" id="heroSubscribeBtn" class="btn btn-gold btn-large">اشترك الآن <i
                             class="fas fa-arrow-left mr-2" style="margin-right: 10px;"></i></a>
                     <a href="#latest-courses" id="heroExploreBtn" class="btn btn-outline btn-large">استكشف الكورسات</a>
+                    <button onclick="pwaInstallNow()" id="heroPwaBtn" class="btn btn-outline btn-large" style="border-color: #3498db; color: #3498db;"><i class="fas fa-download" style="margin-left: 8px;"></i>تحميل التطبيق</button>
                 </div>
             </div>
 
@@ -467,7 +468,7 @@
 
             <div class="footer-bottom font-serif">
                 <p>جميع الحقوق محفوظة آ© 2026 | منصة يوسف بركات</p>
-                <p style="margin-top: 10px; font-size: 0.9rem;">تمت برمجة المنصة والذكاء الاصطناعي المساعد للط·لبة
+                <p style="margin-top: 10px; font-size: 0.9rem;">تمت برمجة المنصة والذكاء الاصطناعي المساعد للطلبة
                     (البوصلة) بواسطة الأستاذ يوسف بركات.</p>
             </div>
         </div>
@@ -480,7 +481,7 @@
             <div class="auth-header">
                 <div class="auth-logo"><i class="fas fa-user-graduate"></i></div>
                 <h2>تسجيل الدخول</h2>
-                <p>مرحباً بك مجدداظ‹ في منصتك</p>
+                <p>مرحباً بك مجددااً في منصتك</p>
             </div>
 
             <form id="loginForm">
@@ -692,10 +693,14 @@
             _pwaPrompt.prompt();
             _pwaPrompt.userChoice.then(choice => {
                 if (choice.outcome === 'accepted') {
-                    document.getElementById('pwaInstallBanner').style.display = 'none';
+                    const banner = document.getElementById('pwaInstallBanner');
+                    if(banner) banner.style.display = 'none';
                 }
                 _pwaPrompt = null;
             });
+        } else {
+            if(window.showToast) window.showToast('التطبيق مثبت بالفعل أو أن متصفحك لا يدعم التثبيت المباشر.', 'info');
+            else alert('التطبيق مثبت بالفعل أو أن متصفحك لا يدعم التثبيت المباشر. يمكنك إضافة الموقع للشاشة الرئيسية من إعدادات المتصفح.');
         }
     }
     function pwaDismiss() {
@@ -705,6 +710,33 @@
     }
     </script>
 
+    <!-- Floating Install App Button (Left Side) -->
+    <button id="floatingInstallBtn" style="display: none; position: fixed; bottom: 30px; left: 30px; background: linear-gradient(135deg, #2ecc71, #27ae60); color: #fff; border: none; width: 60px; height: 60px; border-radius: 50%; box-shadow: 0 0 15px rgba(46,204,113,0.5); cursor: pointer; z-index: 9999; justify-content: center; align-items: center; font-size: 1.8rem; transition: transform 0.3s; animation: safePulse 2s infinite;" title="تثبيت تطبيق المنصة" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+        <i class="fas fa-download"></i>
+    </button>
+    <script>
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            const installBtn = document.getElementById('floatingInstallBtn');
+            if (installBtn) {
+                installBtn.style.display = 'flex';
+                installBtn.addEventListener('click', () => {
+                    installBtn.style.display = 'none';
+                    deferredPrompt.prompt();
+                    deferredPrompt.userChoice.then((choiceResult) => {
+                        if (choiceResult.outcome === 'accepted') {
+                            console.log('User accepted the install prompt');
+                        } else {
+                            console.log('User dismissed the install prompt');
+                        }
+                        deferredPrompt = null;
+                    });
+                });
+            }
+        });
+    </script>
 </body>
 
 </html>

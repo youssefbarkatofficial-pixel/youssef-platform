@@ -489,7 +489,7 @@
                         <button class="btn btn-outline" style="padding: 5px 10px; font-size: 0.8rem; border-color: var(--royal-gold); color: var(--royal-gold);" onclick="openCourseSubscribers('${c.id}')"><i class="fas fa-users"></i> المشتركين</button>
                         ${visibilityBtn}
                         ${finishBtn}
-                        <button class="btn btn-outline" style="padding: 5px 10px; font-size: 0.8rem; border-color: #e74c3c; color: #e74c3c;" onclick="deleteCourseSecure('${c.id}')" title="حذف الكورس نهائياظ‹"><i class="fas fa-trash"></i></button>
+                        <button class="btn btn-outline" style="padding: 5px 10px; font-size: 0.8rem; border-color: #e74c3c; color: #e74c3c;" onclick="deleteCourseSecure('${c.id}')" title="حذف الكورس نهائيااً"><i class="fas fa-trash"></i></button>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -514,7 +514,7 @@
                 }
                 adminCourses = adminCourses.filter(c => c.id !== id);
                 renderCoursesTable();
-                window.showToast('تم حذف الكورس نهائياظ‹', 'success');
+                window.showToast('تم حذف الكورس نهائيااً', 'success');
             }
         };
 
@@ -674,9 +674,9 @@ function renderContentLists() {
                                 <input type="number" min="0" max="100" class="form-control" value="${item.penalty || 0}" onchange="updateItemField(${sIdx}, ${iIdx}, 'penalty', this.value)" style="padding: 4px; font-size: 0.8rem;" placeholder="مثال: 10">
                             </div>
                             <div style="flex: 1; min-width: 150px;">
-                                <label style="font-size: 0.8rem; color: #3498db; margin-bottom: 2px; display: block;">يعتمد على (مقفل حتى يظڈنجز)</label>
+                                <label style="font-size: 0.8rem; color: #3498db; margin-bottom: 2px; display: block;">يعتمد على (مقفل حتى يُنجز)</label>
                                 <select class="form-control" onchange="updateItemField(${sIdx}, ${iIdx}, 'dependsOn', this.value)" style="padding: 4px; font-size: 0.8rem;">
-                                    <option value="">-- لا يوجد (متاح فوراظ‹) --</option>
+                                    <option value="">-- لا يوجد (متاح فورااً) --</option>
                                     ${generateDependsOnOptions(sIdx, iIdx, item.dependsOn)}
                                 </select>
                             </div>
@@ -1189,7 +1189,7 @@ window.updateItemUrl = function(sIdx, iIdx, type, val) {
                     <span>تحديد الكل</span>
                 </label>
                 <div>
-                    <button class="btn btn-outline" style="border-color:#e74c3c; color:#e74c3c; padding:6px 12px; font-size:0.9rem;" onclick="bulkRemoveSubscribers()"><i class="fas fa-trash-alt mr-1"></i> إزالة المحددين صمتاظ‹</button>
+                    <button class="btn btn-outline" style="border-color:#e74c3c; color:#e74c3c; padding:6px 12px; font-size:0.9rem;" onclick="bulkRemoveSubscribers()"><i class="fas fa-trash-alt mr-1"></i> إزالة المحددين صمتااً</button>
                     <button class="btn btn-gold" style="padding:6px 12px; font-size:0.9rem;" onclick="exportSubscribersCSV()"><i class="fas fa-download mr-1"></i> مسودة المشتركين (CSV)</button>
                 </div>
             </div>
@@ -1303,7 +1303,7 @@ window.bulkRemoveSubscribers = async function() {
         alert('الرجاء تحديد طالب واحد على الأقل');
         return;
     }
-    if(!confirm('هل أنت متأكد من إزالة جميع الطلاب المحددين من هذا الكورس؟ (' + checkboxes.length + ' ط·لاب)')) return;
+    if(!confirm('هل أنت متأكد من إزالة جميع الطلاب المحددين من هذا الكورس؟ (' + checkboxes.length + ' طلاب)')) return;
     
     const phones = Array.from(checkboxes).map(cb => cb.value);
     await processUnsubscribe(phones);
@@ -1652,7 +1652,7 @@ window.deleteFlatItem = async function(listKey, idx) {
     if(pwd === null) return;
     if(pwd.trim() !== 'My@36_172001') return alert('كلمة المرور خاطئة');
     
-    if(!confirm('هل أنت متأكد من مسح هذا العنصر نهائياظ‹؟')) return;
+    if(!confirm('هل أنت متأكد من مسح هذا العنصر نهائيااً؟')) return;
     
     const courses = JSON.parse(localStorage.getItem('adminCourses') || '[]');
     const courseIndex = courses.findIndex(c => c.id === window.currentFlatCourseId);
@@ -1673,7 +1673,7 @@ window.deleteFlatChildItem = async function(listKey, parentIdx, childIdx) {
     if(pwd === null) return;
     if(pwd.trim() !== 'My@36_172001') return alert('كلمة المرور خاطئة');
     
-    if(!confirm('هل أنت متأكد من مسح هذا العنصر الفرعي نهائياظ‹؟')) return;
+    if(!confirm('هل أنت متأكد من مسح هذا العنصر الفرعي نهائيااً؟')) return;
     
     const courses = JSON.parse(localStorage.getItem('adminCourses') || '[]');
     const courseIndex = courses.findIndex(c => c.id === window.currentFlatCourseId);

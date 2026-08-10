@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <link rel="manifest" href="./manifest.json">
@@ -163,7 +163,7 @@
                 <button class="btn-info" onclick="copyAllLateMessages()"><i class="fas fa-copy"></i> نسخ كل الرسائل</button>
             </div>
             <div id="lateContainer">
-                <div style="text-align:center; padding:40px; color:rgba(255,255,255,0.5);">اختر صفاظ‹ لعرض المتأخرات</div>
+                <div style="text-align:center; padding:40px; color:rgba(255,255,255,0.5);">اختر صفااً لعرض المتأخرات</div>
             </div>
         </div>
 
@@ -186,7 +186,7 @@
                 </div>
             </div>
             <div id="levelsContainer">
-                <div style="text-align:center; padding:40px; color:rgba(255,255,255,0.5);">اختر صفاظ‹ ومستوى لعرض الطلاب</div>
+                <div style="text-align:center; padding:40px; color:rgba(255,255,255,0.5);">اختر صفااً ومستوى لعرض الطلاب</div>
             </div>
         </div>
     </main>
@@ -309,7 +309,6 @@ function _countCourseItems(course) {
     let count = 0;
     if (Array.isArray(con.sections)) {
         con.sections.forEach(sec => (sec.items||[]).forEach(item => { if (item.id && item.type !== 'header') count++; }));
-        if (count > 0) return count;
     }
     (con.lectures ||[]).forEach(lec => { if (lec.id) count++; (lec.children||[]).forEach(ch => { if (ch.id) count++; }); });
     (con.trainings||[]).forEach(tr => { if (tr.id) count++; });
@@ -340,12 +339,12 @@ function subscribeStudents(grade) {
     showSkeletonRows();
     let q = window.firebaseDb.collection('students');
     if (grade) q = q.where('grade', '==', grade);
-    _studentsUnsubscribe = q.limit(300).onSnapshot(snap => {
+    q.limit(300).get().then(snap => {
         allStudentsData = [];
         snap.forEach(doc => { const d = doc.data(); d._uid = doc.id; allStudentsData.push(d); });
         setCachedStudents(allStudentsData);
         renderStudentsTable(filterBySearch(allStudentsData));
-    }, err => {
+    }).catch(err => {
         const tbody = document.getElementById('studentsTableBody');
         if (tbody) tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:#e74c3c;">خطأ: ${err.message}</td></tr>`;
     });
@@ -498,7 +497,7 @@ async function openStudentDetail(uid) {
 
                 cHtml += `<div style="border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:14px 16px;margin-bottom:12px;background:rgba(0,0,0,0.2);">
                     <div class="modal-section-header">
-                        <div><strong style="font-size:1rem;">${title}</strong>${fa._adminOverride?` <span style="background:rgba(212,175,55,0.15);color:var(--royal-gold);font-size:0.72rem;padding:2px 7px;border-radius:10px;margin-right:6px;">âœڈï¸ڈ معدظ‘لة</span>`:''}<br><span style="font-size:0.78rem;color:rgba(255,255,255,0.4);">${fa.ts?new Date(fa.ts).toLocaleString('ar-EG'):''}</span></div>
+                        <div><strong style="font-size:1rem;">${title}</strong>${fa._adminOverride?` <span style="background:rgba(212,175,55,0.15);color:var(--royal-gold);font-size:0.72rem;padding:2px 7px;border-radius:10px;margin-right:6px;">âœڈï¸ڈ معدّلة</span>`:''}<br><span style="font-size:0.78rem;color:rgba(255,255,255,0.4);">${fa.ts?new Date(fa.ts).toLocaleString('ar-EG'):''}</span></div>
                         <div style="display:flex;align-items:center;gap:10px;"><span style="font-size:1.5rem;font-weight:800;color:${pCol};">${cPct}%</span><span style="font-size:0.75rem;color:rgba(255,255,255,0.4);">الدرجة الرسمية</span></div>
                     </div>`;
 
@@ -592,7 +591,7 @@ window.toggleQuestionScore = function(uid, examTitle, qIndex, btn) {
         if (r.examTitle===examTitle && (r.attemptNumber===1||!r.attemptNumber) && r.details?.[qIndex]) {
             const q=r.details[qIndex], wasOk=(q.score>=0.5), newS=wasOk?0:1;
             q.score=newS; q.pointsEarned=newS*(q.totalPoints||1);
-            q.feedback=newS===1?'تم تصحيح الدرجة يدوياظ‹ âœ…':'تم خصم الدرجة يدوياظ‹ â‌Œ';
+            q.feedback=newS===1?'تم تصحيح الدرجة يدويااً âœ…':'تم خصم الدرجة يدويااً â‌Œ';
             let tot=r.totalPoints||r.details.reduce((s,d)=>s+(d.totalPoints||1),0);
             let earned=r.details.reduce((s,d)=>s+(d.pointsEarned||(d.score*(d.totalPoints||1))),0);
             r.earnedPoints=earned; r.totalPoints=tot;
@@ -632,7 +631,7 @@ async function loadLateStudents() {
     const NO_CONTENT_GRADES = ['prep1','prep2','sec1','sec2','sec3'];
     if (grade && NO_CONTENT_GRADES.includes(grade)) {
         const GL={prep1:'الأول الإعدادي',prep2:'الثاني الإعدادي',sec1:'الأول الثانوي',sec2:'الثاني الثانوي',sec3:'الثالث الثانوي'};
-        container.innerHTML=`<div style="text-align:center;padding:40px;"><i class="fas fa-calendar-times" style="font-size:2.5rem;color:var(--royal-gold);opacity:0.6;display:block;margin-bottom:14px;"></i><h3 style="color:rgba(255,255,255,0.8);margin:0 0 8px;">لم يظڈنشر محتوى بعد</h3><p style="color:rgba(255,255,255,0.45);max-width:340px;margin:auto;line-height:1.7;">صف <strong>${GL[grade]}</strong> — لم يتم نشر أي محاضرات أو تدريبات حتى الآن، لذلك لا توجد متأخرات. عند نشر المحتوى ستظهر النتائج هنا تلقائياظ‹.</p></div>`;
+        container.innerHTML=`<div style="text-align:center;padding:40px;"><i class="fas fa-calendar-times" style="font-size:2.5rem;color:var(--royal-gold);opacity:0.6;display:block;margin-bottom:14px;"></i><h3 style="color:rgba(255,255,255,0.8);margin:0 0 8px;">لم يُنشر محتوى بعد</h3><p style="color:rgba(255,255,255,0.45);max-width:340px;margin:auto;line-height:1.7;">صف <strong>${GL[grade]}</strong> — لم يتم نشر أي محاضرات أو تدريبات حتى الآن، لذلك لا توجد متأخرات. عند نشر المحتوى ستظهر النتائج هنا تلقائيااً.</p></div>`;
         return;
     }
 
@@ -684,7 +683,7 @@ async function loadLateStudents() {
 
         const summaryHtml=`<div style="background:rgba(231,76,60,0.1);border:1px solid rgba(231,76,60,0.3);border-radius:10px;padding:14px 20px;margin-bottom:16px;display:flex;gap:20px;flex-wrap:wrap;align-items:center;">
             <div><i class="fas fa-users" style="color:#e74c3c;margin-left:6px;"></i><strong style="color:#e74c3c;">${lateList.length}</strong> طالب متأخر</div>
-            <div><i class="fas fa-exclamation-triangle" style="color:var(--royal-gold);margin-left:6px;"></i><strong style="color:var(--royal-gold);">${lateList.reduce((t,s)=>t+s.missed.length,0)}</strong> عنصر لم يظڈكتمل</div>
+            <div><i class="fas fa-exclamation-triangle" style="color:var(--royal-gold);margin-left:6px;"></i><strong style="color:var(--royal-gold);">${lateList.reduce((t,s)=>t+s.missed.length,0)}</strong> عنصر لم يُكتمل</div>
             <div style="color:rgba(255,255,255,0.5);font-size:0.8rem;">${grade?(gradeNames[grade]||grade):'كل الصفوف'} • من أصل ${students.length} طالب مسجل</div>
         </div>`;
 
@@ -692,7 +691,7 @@ async function loadLateStudents() {
             const byType={};
             missed.forEach(m=>{ const lbl=T[m.type]||m.type; (byType[lbl]=byType[lbl]||[]).push(m.title); });
             const details=Object.entries(byType).map(([lbl,titles])=>`<div style="margin-top:5px;"><span style="color:rgba(255,255,255,0.5);font-size:0.78rem;">${lbl}:</span> ${titles.slice(0,3).map(t=>`<span style="background:rgba(231,76,60,0.12);border-radius:4px;padding:1px 7px;margin:2px;display:inline-block;font-size:0.78rem;">${t}</span>`).join('')}${titles.length>3?`<span style="font-size:0.73rem;color:rgba(255,255,255,0.35);"> +${titles.length-3} أخرى</span>`:''}</div>`).join('');
-            const waText=`عزيزي ولي أمر الطالب ${s.name}،\nنود إبلاغك بأن ${s.name} متأخر عن إتمام:\n`+Object.entries(byType).map(([t,it])=>`• ${t}: ${it.slice(0,2).join('، ')}${it.length>2?` (+${it.length-2})`:''}`).join('\n')+`\nبرجاء متابعة الطالب لإتمام المحتوى. شكراظ‹ ًں™ڈ`;
+            const waText=`عزيزي ولي أمر الطالب ${s.name}،\nنود إبلاغك بأن ${s.name} متأخر عن إتمام:\n`+Object.entries(byType).map(([t,it])=>`• ${t}: ${it.slice(0,2).join('، ')}${it.length>2?` (+${it.length-2})`:''}`).join('\n')+`\nبرجاء متابعة الطالب لإتمام المحتوى. شكرااً ًں™ڈ`;
             const waP=s.phone?'2'+s.phone.replace(/^0/,''):'';
             return `<div class="late-card" style="margin-bottom:12px;"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;">
                 <div style="flex:1;"><div class="late-msg"><strong style="color:var(--royal-gold);">${s.name}</strong><span style="background:rgba(231,76,60,0.15);color:#e74c3c;font-size:0.73rem;padding:2px 8px;border-radius:12px;margin-right:8px;">${missed.length} عنصر</span></div>${s.phone?`<div style="font-size:0.73rem;color:rgba(255,255,255,0.38);margin-top:2px;">${s.phone}</div>`:''} ${details}</div>

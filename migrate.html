@@ -49,7 +49,7 @@
                 // Check if already migrated
                 const existingExam = examsSec.items.find(i => i.title === 'امتحان المحاضرة التعريفية');
                 if (existingExam) {
-                    document.getElementById('status').innerText = 'تم إنشاء الامتحان مسبقاظ‹.';
+                    document.getElementById('status').innerText = 'تم إنشاء الامتحان مسبقااً.';
                     return;
                 }
 
@@ -81,7 +81,7 @@
                 examsSec.items.push(newExam);
                 
                 await window.fbService.saveCourse(prep3);
-                document.getElementById('status').innerHTML = '<b>تم بنجاح! تم إنشاء امتحان المحاضرة التعريفية ليفتح الأربعاء 9 مساءظ‹. يمكنك حذف هذا الملف الآن.</b>';
+                document.getElementById('status').innerHTML = '<b>تم بنجاح! تم إنشاء امتحان المحاضرة التعريفية ليفتح الأربعاء 9 مساءاً. يمكنك حذف هذا الملف الآن.</b>';
             } catch (err) {
                 console.error(err);
                 document.getElementById('status').innerText = 'حدث خطأ: ' + err.message;

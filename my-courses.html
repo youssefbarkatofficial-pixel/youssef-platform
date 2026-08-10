@@ -131,7 +131,7 @@
             }
             
             // ADMIN BYPASS
-            const isAdmin = (user.phone === '0000' || user.phone === '01099616091');
+            const isAdmin = (user.phone === '0000' || user.phone === '01099616091' || user.phone === '01023675235');
             if (isAdmin) {
                 dbUser.courses = adminCourses.map(c => c.id);
             }

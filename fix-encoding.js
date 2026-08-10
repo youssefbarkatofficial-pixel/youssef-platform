@@ -3,13 +3,13 @@ const fs = require('fs');
 // Fix encoding issue in all HTML files - replace garbled Arabic with correct text
 const fixes = [
     // Common garbled patterns -> correct Arabic
-    { bad: 'ظ…ظ†طµط© ظٹظˆط³ظپ ط¨ط±ظƒط§طھ', good: 'منصة يوسف بركات' },
-    { bad: 'ط§ظ„ط±ط¦ظٹط³ظٹط©', good: 'الرئيسية' },
-    { bad: 'ط§ظ„ظƒظˆط±ط³ط§طھ', good: 'الكورسات' },
-    { bad: 'ط¹ظ† ط§ظ„ظ…ظڈط¹ظ„ظ…', good: 'عن المعلم' },
-    { bad: 'ط§ظ„ظ…ظ…ظٹط²ط§طھ', good: 'المميزات' },
+    { bad: 'ظ…ظ†طµط© يوط³ظپ ط¨ط±ظƒط§طھ', good: 'منصة يوسف بركات' },
+    { bad: 'ط§ظ„ط±ط¦يط³يط©', good: 'الرئيسية' },
+    { bad: 'ط§ظ„ظƒوط±ط³ط§طھ', good: 'الكورسات' },
+    { bad: 'ط¹ظ† ط§ظ„ظ…ُط¹ظ„ظ…', good: 'عن المعلم' },
+    { bad: 'ط§ظ„ظ…ظ…يط²ط§طھ', good: 'المميزات' },
     { bad: 'ط§ظ„ظ…ط³ط§ط¹ط¯ط©', good: 'المساعدة' },
-    { bad: 'ظٹ', good: 'ي' },
+    { bad: 'ي', good: 'ي' },
 ];
 
 const htmlFiles = fs.readdirSync('.').filter(f => f.endsWith('.html') && !f.includes('tmp'));

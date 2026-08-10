@@ -9,7 +9,7 @@ const EXACT_FIXES = [
     // stats.html - subtitle garbled
     { file: 'stats.html', bad: "تابع تقدمك الحقيقي وحللظ' أداط،ك بدقة", good: 'تابع تقدمك الحقيقي وحلل أداءك بدقة' },
     // stats.html - userNameDisplay
-    { file: 'stats.html', bad: 'ط·الب', good: 'طالب' },
+    { file: 'stats.html', bad: 'طالب', good: 'طالب' },
     // login.html - subtitle
     { file: 'login.html', bad: 'مروّراتك مُحفظة في منصة', good: 'مرحباً بك في منصة يوسف بركات' },
     // index.html nav-brand link fix (links to index.html not /)
@@ -48,7 +48,7 @@ htmlFiles.forEach(f => {
     const lines = content.split('\n');
     lines.forEach((line, i) => {
         if (line.includes('أداط') || line.includes('حللظ') || line.includes('بدخة') || 
-            line.includes('أدانطب') || line.includes('ط·') || line.includes('ط§ط')) {
+            line.includes('أدانطب') || line.includes('ط') || line.includes('ط§ط')) {
             console.log(`  ${f}:${i+1}: ${line.trim().substring(0, 100)}`);
         }
     });

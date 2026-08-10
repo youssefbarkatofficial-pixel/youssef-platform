@@ -46,7 +46,7 @@
     <div class="login-logo">
       <span class="compass-icon">ًں§­</span>
       <h1>صراع البوصلة</h1>
-      <p>سجظ‘ل دخولك لتبدأ المبارزة</p>
+      <p>سجّل دخولك لتبدأ المبارزة</p>
     </div>
     <div class="login-tabs">
       <button class="login-tab active" id="tab-login" onclick="switchLoginTab('login')">دخول</button>
@@ -170,8 +170,8 @@
               <option value="8">ظ¢ إعدادي</option>
               <option value="9">ظ£ إعدادي</option>
               <option value="10">ظ، ثانوي</option>
-              <option value="11" disabled>ظ¢ ثانوي (قريباظ‹)</option>
-              <option value="12" disabled>ظ£ ثانوي (قريباظ‹)</option>
+              <option value="11" disabled>ظ¢ ثانوي (قريبااً)</option>
+              <option value="12" disabled>ظ£ ثانوي (قريبااً)</option>
             </select>
           </div>
         </div>
@@ -204,8 +204,8 @@
               <option value="8">ظ¢ إعدادي</option>
               <option value="9">ظ£ إعدادي</option>
               <option value="10">ظ، ثانوي</option>
-              <option value="11" disabled>ظ¢ ثانوي (قريباظ‹)</option>
-              <option value="12" disabled>ظ£ ثانوي (قريباظ‹)</option>
+              <option value="11" disabled>ظ¢ ثانوي (قريبااً)</option>
+              <option value="12" disabled>ظ£ ثانوي (قريبااً)</option>
             </select>
           </div>
         </div>
@@ -428,7 +428,7 @@
 
     <!-- خريطة ملخص -->
     <div class="result-leaderboard" id="result-leaderboard" style="margin: 32px 0; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 16px; padding: 24px; box-shadow: inset 0 0 20px rgba(0,0,0,0.5);">
-      <h3 style="color: #D4AF37; margin-top:0; margin-bottom: 20px; font-size: 1.3rem; font-weight: 900; text-align:center; text-shadow: 0 0 10px rgba(212,175,55,0.3); letter-spacing: 0.5px;">الترتيب النهائي للسيط·رة</h3>
+      <h3 style="color: #D4AF37; margin-top:0; margin-bottom: 20px; font-size: 1.3rem; font-weight: 900; text-align:center; text-shadow: 0 0 10px rgba(212,175,55,0.3); letter-spacing: 0.5px;">الترتيب النهائي للسيطرة</h3>
       <div id="leaderboard-list" style="display: flex; flex-direction: column; gap: 10px;">
       </div>
     </div>
@@ -458,7 +458,7 @@
 // GAME UI CONTROLLER
 // ============================================================
 
-// -- State local للظ€ UI --
+// -- State local للـ UI --
 let ui = {
   subject: 'history',
   grade: 'general',
@@ -580,7 +580,7 @@ function translateError(code) {
     'auth/invalid-email': 'البريد الإلكتروني غير صالح',
     'auth/weak-password': 'كلمة المرور ضعيفة',
   };
-  return map[code] || 'حدث خطأ، حاول مجدداظ‹';
+  return map[code] || 'حدث خطأ، حاول مجددااً';
 }
 
 // ============================================================
@@ -769,7 +769,7 @@ function launchBattleWithConfig({ mode, subject, grade, questions, botCount, bot
 
   const s = GameEngine.getState();
 
-  // بناء لوحة النتائج العلوية ديناميكياظ‹
+  // بناء لوحة النتائج العلوية ديناميكيااً
   const scoresContainer = document.getElementById('battle-scores-container');
   let scoresHTML = `
     <div class="score-player me" style="border-bottom: 3px solid #D4AF37;">
@@ -993,7 +993,7 @@ function showGameResult() {
       won: result.playerWon,
       draw: result.isDraw,
     }).then(() => {
-      // تحديث الواجهة فوراظ‹
+      // تحديث الواجهة فورااً
       GameEngine.loadPlayerData(s.currentUser.uid).then(data => {
         ui.playerData = data;
         GameEngine.getState().playerXp = data.xp;
@@ -1036,7 +1036,7 @@ function showGameResult() {
   const xpText = result.xpGained >= 0 ? `+${result.xpGained} XP` : `${result.xpGained} XP`;
   document.getElementById('res-xp').textContent = xpText;
 
-  // خريطة ملخص مصغظ‘رة
+  // خريطة ملخص مصغّرة
   // Build Leaderboard HTML
   let allScores = {};
   allScores['player'] = { name: ui.playerData?.name || 'Player', color: 'var(--player-color)', score: result.playerScore || 0, isPlayer: true };
@@ -1212,7 +1212,7 @@ function joinRoom() {
 }
 
 function startFriendGame() {
-  launchBattle(); // مؤقتاظ‹ تبدأ مباراة عادية
+  launchBattle(); // مؤقتااً تبدأ مباراة عادية
 }
 
 // ============================================================

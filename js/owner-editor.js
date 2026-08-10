@@ -1,4 +1,4 @@
-﻿// js/owner-editor.js
+// js/owner-editor.js
 
 document.addEventListener('DOMContentLoaded', () => {
     
@@ -91,7 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 // Add Admin Dashboard Link
                 const dashboardBtn = document.createElement('a');
-                dashboardBtn.href = 'admin-dashboard.html';
+                dashboardBtn.href = '/admin-dashboard.html';
                 dashboardBtn.className = 'btn btn-outline';
                 dashboardBtn.style.padding = '8px 15px';
                 dashboardBtn.style.borderRadius = '20px';

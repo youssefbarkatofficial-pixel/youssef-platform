@@ -97,7 +97,7 @@
             <!-- Pending Payments Table -->
             <div class="glass-panel dash-panel">
                 <div class="panel-header">
-                    <h2 class="panel-title"><i class="fas fa-list mr-2"></i> سجل المدفوعات والط·لبات</h2>
+                    <h2 class="panel-title"><i class="fas fa-list mr-2"></i> سجل المدفوعات والطلبات</h2>
                     <div style="display: flex; gap: 10px;">
                         <select id="pStatusFilter" class="form-control" style="background: rgba(0,0,0,0.5); padding: 5px 15px; width: auto; border-color: var(--royal-gold);">
                             <option value="all">الكل</option>
@@ -106,7 +106,7 @@
                             <option value="rejected">مرفوض</option>
                         </select>
                         <button class="btn btn-outline" id="btnRefreshPayments" style="padding: 5px 15px; font-size: 0.9rem;"><i class="fas fa-sync-alt"></i> تحديث</button>
-                        <button class="btn btn-gold" id="btnExportPaymentsCSV" onclick="exportPaymentsCSV()" style="padding: 5px 15px; font-size: 0.9rem;"><i class="fas fa-download mr-1"></i> تحميل مسودة المدفوعات والط·لبة</button>
+                        <button class="btn btn-gold" id="btnExportPaymentsCSV" onclick="exportPaymentsCSV()" style="padding: 5px 15px; font-size: 0.9rem;"><i class="fas fa-download mr-1"></i> تحميل مسودة المدفوعات والطلبة</button>
                     </div>
                 </div>
                 
@@ -268,7 +268,7 @@
                 }
 
                 if(filteredReqs.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: var(--text-muted); padding: 30px;">لا توجد ط·لبات دفع بهذه الحالة حالياظ‹</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: var(--text-muted); padding: 30px;">لا توجد طلبات دفع بهذه الحالة حاليااً</td></tr>';
                     return;
                 }
 
@@ -383,7 +383,7 @@
             document.getElementById('pStatusFilter').addEventListener('change', () => renderPayments());
 
             window.approvePayment = async function(id) {
-                if(!confirm('هل أنت متأكد من قبول هذا الط·لب؟ سيتم تفعيل الكورس للطالب وفتح محتوياته فوراظ‹.')) return;
+                if(!confirm('هل أنت متأكد من قبول هذا الطلب؟ سيتم تفعيل الكورس للطالب وفتح محتوياته فورااً.')) return;
                 
                 if (!window.firebaseDb) {
                     if(window.showToast) window.showToast('فشل الاتصال السحابي، تأكد من اتصال الإنترنت.', 'error');
@@ -395,7 +395,7 @@
                     const payDocRef = window.firebaseDb.collection('paymentRequests').doc(id);
                     const payDoc = await payDocRef.get();
                     if (!payDoc.exists) {
-                        alert('ط·لب الدفع غير موجود.');
+                        alert('طلب الدفع غير موجود.');
                         return;
                     }
                     
@@ -462,16 +462,16 @@
                         window.audioManager.play('celebration');
                     }
                     if(window.triggerConfetti) window.triggerConfetti();
-                    if(window.showToast) window.showToast('تم قبول الط·لب وتفعيل الكورس', 'majestic', { duration: 4500 });
+                    if(window.showToast) window.showToast('تم قبول الطلب وتفعيل الكورس', 'majestic', { duration: 4500 });
 
                 } catch (e) {
                     console.error("Error approving payment:", e);
-                    if(window.showToast) window.showToast('حدث خطأ أثناء معالجة الط·لب', 'error');
+                    if(window.showToast) window.showToast('حدث خطأ أثناء معالجة الطلب', 'error');
                 }
             };
 
             window.rejectPayment = async function(id) {
-                if(!confirm('هل أنت متأكد من رفض هذا الط·لب؟ لن يتم تفعيل الكورس.')) return;
+                if(!confirm('هل أنت متأكد من رفض هذا الطلب؟ لن يتم تفعيل الكورس.')) return;
                 
                 if (!window.firebaseDb) {
                     if(window.showToast) window.showToast('فشل الاتصال السحابي، تأكد من اتصال الإنترنت.', 'error');
@@ -483,7 +483,7 @@
                     const payDocRef = window.firebaseDb.collection('paymentRequests').doc(id);
                     const payDoc = await payDocRef.get();
                     if (!payDoc.exists) {
-                        alert('ط·لب الدفع غير موجود.');
+                        alert('طلب الدفع غير موجود.');
                         return;
                     }
                     
@@ -532,10 +532,10 @@
 
                     await renderPayments();
                     await calculatePaymentStats();
-                    if(window.showToast) window.showToast('تم رفض الط·لب', 'error');
+                    if(window.showToast) window.showToast('تم رفض الطلب', 'error');
                 } catch (e) {
                     console.error("Error rejecting payment:", e);
-                    if(window.showToast) window.showToast('حدث خطأ أثناء معالجة الط·لب', 'error');
+                    if(window.showToast) window.showToast('حدث خطأ أثناء معالجة الطلب', 'error');
                 }
             };
 
@@ -616,15 +616,15 @@
                     let aoa = [];
                     
                     // --- Active Courses Section ---
-                    aoa.push(['الط·لبة المشتركين حاليا']);
-                    aoa.push(["اسم الطالب", "رقم الموبايل", "رقم ولي الامر", "الصف", "الكورس", "حالة الدفع", "تاريخ الدفع", "ط·ريقة الاشتراك (مجاني/مدفوع)"]);
+                    aoa.push(['الطلبة المشتركين حاليا']);
+                    aoa.push(["اسم الطالب", "رقم الموبايل", "رقم ولي الامر", "الصف", "الكورس", "حالة الدفع", "تاريخ الدفع", "طريقة الاشتراك (مجاني/مدفوع)"]);
                     
                     let activeCount = 0;
                     students.forEach(student => {
                         if (student.courses && student.courses.length > 0) {
                             student.courses.forEach(courseId => {
                                 const req = paymentRequests.find(r => (r.userId === student.phone || r.userId === student.uid) && r.courseId === courseId && (r.status === 'approved' || r.status === 'active'));
-                                const pStatus = req ? (req.status === 'approved' ? 'مقبول' : req.status) : 'لا يوجد ط·لب (مباشر)';
+                                const pStatus = req ? (req.status === 'approved' ? 'مقبول' : req.status) : 'لا يوجد طلب (مباشر)';
                                 const pDate = req ? new Date(req.date).toLocaleDateString('ar-EG') : 'غير محدد';
                                 const isFree = req ? 'مدفوع' : 'مجاني (اضافة يدوية)';
                                 
@@ -635,14 +635,14 @@
                     });
 
                     if (activeCount === 0) {
-                        aoa.push(["لا يوجد ط·لبة مشتركين بالفعل حتى الان"]);
+                        aoa.push(["لا يوجد طلبة مشتركين بالفعل حتى الان"]);
                     }
 
                     aoa.push([]); // empty row
 
                     // --- Revoked Courses Section ---
-                    aoa.push(['الط·لبة المسحوب منهم صلاحيات الكورسات']);
-                    aoa.push(["اسم الطالب", "رقم الموبايل", "رقم ولي الامر", "الصف", "الكورس", "حالة الدفع", "تاريخ الدفع", "ط·ريقة الاشتراك"]);
+                    aoa.push(['الطلبة المسحوب منهم صلاحيات الكورسات']);
+                    aoa.push(["اسم الطالب", "رقم الموبايل", "رقم ولي الامر", "الصف", "الكورس", "حالة الدفع", "تاريخ الدفع", "طريقة الاشتراك"]);
                     
                     let revokedCount = 0;
                     const approvedReqs = paymentRequests.filter(r => r.status === 'approved' || r.status === 'active');
@@ -658,7 +658,7 @@
                     });
 
                     if (revokedCount === 0) {
-                        aoa.push(["لا يوجد ط·لبة مسحوب منهم الكورس بالفعل حتى الان"]);
+                        aoa.push(["لا يوجد طلبة مسحوب منهم الكورس بالفعل حتى الان"]);
                     }
                     
                     const ws = XLSX.utils.aoa_to_sheet(aoa);
@@ -694,11 +694,11 @@
                     for (let i in ws) {
                         if (i[0] === '!') continue;
                         const cell = ws[i];
-                        if (cell.v === 'الط·لبة المشتركين حاليا' || cell.v === 'الط·لبة المسحوب منهم صلاحيات الكورسات') {
+                        if (cell.v === 'الطلبة المشتركين حاليا' || cell.v === 'الطلبة المسحوب منهم صلاحيات الكورسات') {
                             cell.s = titleStyle;
-                        } else if (['اسم الطالب', 'رقم الموبايل', 'رقم ولي الامر', 'الصف', 'الكورس', 'حالة الدفع', 'تاريخ الدفع', 'ط·ريقة الاشتراك (مجاني/مدفوع)', 'ط·ريقة الاشتراك'].includes(cell.v)) {
+                        } else if (['اسم الطالب', 'رقم الموبايل', 'رقم ولي الامر', 'الصف', 'الكورس', 'حالة الدفع', 'تاريخ الدفع', 'طريقة الاشتراك (مجاني/مدفوع)', 'طريقة الاشتراك'].includes(cell.v)) {
                             cell.s = headerStyle;
-                        } else if (cell.v && cell.v.toString().includes('لا يوجد ط·لبة')) {
+                        } else if (cell.v && cell.v.toString().includes('لا يوجد طلبة')) {
                             cell.s = { font: { bold: true, color: { rgb: "E74C3C" }, sz: 14 }, alignment: { horizontal: "center" } };
                         } else {
                             cell.s = dataStyle;
@@ -717,7 +717,7 @@
                     console.error("Export Error:", e);
                     alert("حدث خطأ أثناء تصدير البيانات");
                     let btn = document.getElementById('btnExportPaymentsCSV');
-                    if(btn) { btn.innerHTML = '<i class="fas fa-download mr-1"></i> تحميل مسودة المدفوعات والط·لبة'; btn.disabled = false; }
+                    if(btn) { btn.innerHTML = '<i class="fas fa-download mr-1"></i> تحميل مسودة المدفوعات والطلبة'; btn.disabled = false; }
                 }
             };
 

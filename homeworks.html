@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <link rel="manifest" href="./manifest.json">
@@ -111,7 +111,7 @@
                 <div id="noHwState" style="display: none; text-align: center; padding: 50px 20px;">
                     <i class="fas fa-book-reader text-gold" style="font-size: 4rem; margin-bottom: 20px; opacity: 0.5;"></i>
                     <h2 style="color: var(--soft-white); margin-bottom: 10px;">لا يوجد كورسات مشترك فيها بعد</h2>
-                    <p style="color: rgba(255,255,255,0.7); margin-bottom: 20px;">اشترك في الكورسات أولاظ‹ لتظهر لك الواجبات الخاصة بها</p>
+                    <p style="color: rgba(255,255,255,0.7); margin-bottom: 20px;">اشترك في الكورسات أولااً لتظهر لك الواجبات الخاصة بها</p>
                     <a href="courses.html" class="btn btn-gold btn-large">استكشف الكورسات</a>
                 </div>
             </div>
@@ -165,7 +165,7 @@
             }
             
             // ADMIN BYPASS
-            const isAdmin = (user.phone === '0000' || user.phone === '01099616091');
+            const isAdmin = (user.phone === '0000' || user.phone === '01099616091' || user.phone === '01023675235');
             if (isAdmin) {
                 dbUser.courses = adminCourses.map(c => c.id);
             }
@@ -179,6 +179,18 @@
                     const c = adminCourses.find(course => course.id === cId);
                     if (!c) return;
                     let homeworks = (c.contents && c.contents.homeworks) ? c.contents.homeworks : [];
+                // EXTRACT FROM SECTIONS
+                if (c.contents && Array.isArray(c.contents.sections)) {
+                    c.contents.sections.forEach(sec => {
+                        if (sec.items && Array.isArray(sec.items)) {
+                            sec.items.forEach(item => {
+                                if (item.type === 'homework' || item.type === 'واجب' || item.type === 'task') {
+                                    homeworks.push(item);
+                                }
+                            });
+                        }
+                    });
+                }
                     if (c.contents && c.contents.sections) {
                         c.contents.sections.forEach(sec => {
                             if (sec.items) {
@@ -198,7 +210,7 @@
                             const targetUrl = isExternal ? hw.link : ('course-details.html?id=' + c.id + (hw.id ? '&open=' + hw.id : ''));
                             return `<div class="hw-item"><span style="font-weight:bold">${hw.title || 'واجب'}</span><a href="${targetUrl}" ${isExternal ? 'target="_blank"' : ''} class="btn btn-outline" style="padding:4px 12px;font-size:0.85rem;"><i class="fas fa-external-link-alt"></i> فتح</a></div>`;
                         }).join('')
-                        : `<div class="empty-message">لا توجد واجبات في هذا الكورس حالياظ‹</div>`;
+                        : `<div class="empty-message">لا توجد واجبات في هذا الكورس حالياً</div>`;
                     row.innerHTML = `
                         <div class="course-hw-header">
                             <div style="display:flex;align-items:center;gap:15px;">
