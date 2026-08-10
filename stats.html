@@ -4,7 +4,7 @@
     <link rel="manifest" href="./manifest.json">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ط§ظ„ط¥ط­طµط§ط¦ظٹط§طھ - ظ…ظ†طµط© ظٹظˆط³ظپ ط¨ط±ظƒط§طھ</title>
+    <title>ط§ظ„ط¥ط­طµط§ط¦ظٹط§طھ - منصة يوسف بركات</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/style.css?v=1785347365071">
     <link rel="stylesheet" href="css/dashboard.css">
@@ -163,7 +163,7 @@
 <header class="navbar glass-panel">
     <a href="index.html" class="nav-brand">
         <div class="logo-circle" style="width:40px;height:40px;font-size:1.2rem;">ظٹ</div>
-        <span class="nav-brand-text">ظ…ظ†طµط© ظٹظˆط³ظپ ط¨ط±ظƒط§طھ</span>
+        <span class="nav-brand-text">منصة يوسف بركات</span>
     </a>
     <div class="nav-actions">
         <a href="#" class="btn btn-outline" style="padding:8px 15px;border-radius:20px;"><i class="fas fa-bell"></i></a>
@@ -186,8 +186,8 @@
             <li><a href="profile.html"><i class="fas fa-user"></i> ط­ط³ط§ط¨ظٹ</a></li>
             <li><a href="courses.html"><i class="fas fa-plus-circle"></i> ط§ط´طھط±ط§ظƒ ظپظٹ ظƒظˆط±ط³ط§طھ</a></li>
             <li><a href="my-courses.html"><i class="fas fa-video"></i> ظƒظˆط±ط³ط§طھظٹ</a></li>
-            <li><a href="homeworks.html"><i class="fas fa-tasks"></i> ط§ظ„ظˆط§ط¬ط¨ط§طھ</a></li>
-            <li><a href="exams.html"><i class="fas fa-clipboard-list"></i> ط§ظ„ط§ظ…طھط­ط§ظ†ط§طھ</a></li>
+            <li><a href="homeworks.html"><i class="fas fa-tasks"></i> الواجبات</a></li>
+            <li><a href="exams.html"><i class="fas fa-clipboard-list"></i> الامتحانات</a></li>
             <li><a href="stats.html" class="active"><i class="fas fa-chart-line"></i> ط§ظ„ط¥ط­طµط§ط¦ظٹط§طھ</a></li>
             <li><a href="settings.html"><i class="fas fa-cog"></i> ط§ظ„ط¥ط¹ط¯ط§ط¯ط§طھ</a></li>
         </ul>
@@ -209,7 +209,7 @@
                     <div class="kpi-sub" id="kAvgSub"></div>
                 </div>
             </div>
-            <div class="kpi-card cyan" style="cursor:pointer;" onclick="if(window.showToast) window.showToast('ظ‚ط±ظٹط¨ط§ظ‹: ظ…ظƒط§ظپط¢طھ ظ„ظ„ظ…ظ„طھط²ظ…ظٹظ† ط¨ظ…ط´ط§ظ‡ط¯ط© ط§ظ„ظ…ط­ط§ط¶ط±ط§طھ!', 'majestic')">
+            <div class="kpi-card cyan" style="cursor:pointer;" onclick="if(window.showToast) window.showToast('ظ‚ط±ظٹط¨ط§ظ‹: ظ…ظƒط§ظپط¢طھ ظ„ظ„ظ…ظ„طھط²ظ…ظٹظ† ط¨ظ…ط´ط§ظ‡ط¯ط© المحاضرات!', 'majestic')">
                 <div class="kpi-icon cyan"><i class="fas fa-video"></i></div>
                 <div class="kpi-data">
                     <div class="kpi-val" id="kVideos" style="color:var(--cyan);">-</div>
@@ -225,7 +225,7 @@
                     <div class="kpi-sub" id="kExamsSub"></div>
                 </div>
             </div>
-            <div class="kpi-card blue" style="cursor:pointer;" onclick="if(window.showToast) window.showToast('ظ‚ط±ظٹط¨ط§ظ‹: ط§ط³طھط¨ظٹط§ظ† ط³ط±ظٹط¹ ظ„طھظ‚ظٹظٹظ… ط§ظ„ظƒظˆط±ط³ط§طھ', 'majestic')">
+            <div class="kpi-card blue" style="cursor:pointer;" onclick="if(window.showToast) window.showToast('ظ‚ط±ظٹط¨ط§ظ‹: ط§ط³طھط¨ظٹط§ظ† ط³ط±ظٹط¹ ظ„طھظ‚ظٹظٹظ… الكورسات', 'majestic')">
                 <div class="kpi-icon blue"><i class="fas fa-book-open"></i></div>
                 <div class="kpi-data">
                     <div class="kpi-val" id="kCourses" style="color:var(--blue);">-</div>
@@ -265,7 +265,7 @@
         <!-- EXAM HISTORY TABLE -->
         <div class="glass-panel dash-panel" id="examTableSection" style="display:none;margin-bottom:24px;">
             <div class="section-title">
-                <i class="fas fa-table"></i> ط³ط¬ظ„ ط§ظ„ط§ظ…طھط­ط§ظ†ط§طھ ظˆط§ظ„طھط¯ط±ظٹط¨ط§طھ
+                <i class="fas fa-table"></i> ط³ط¬ظ„ الامتحانات ظˆالتدريبات
             </div>
             <div style="overflow-x:auto;">
                 <table class="exam-table" id="examTable">
@@ -295,8 +295,8 @@
             <div class="empty-stats">
                 <i class="fas fa-chart-bar"></i>
                 <h2 style="color:var(--soft-white);margin-bottom:10px;">ظ„ط§ طھظˆط¬ط¯ ط¥ط­طµط§ط¦ظٹط§طھ ط¨ط¹ط¯</h2>
-                <p style="margin-bottom:24px;">ط§ط´طھط±ظƒ ظپظٹ ط§ظ„ظƒظˆط±ط³ط§طھ ظˆط£ظƒظ…ظ„ ط¨ط¹ط¶ ط§ظ„طھط¯ط±ظٹط¨ط§طھ ظ„طھط¨ط¯ط£ ط±ط­ظ„طھظƒ!</p>
-                <a href="courses.html" class="btn btn-gold btn-large">طھطµظپط­ ط§ظ„ظƒظˆط±ط³ط§طھ ط§ظ„ظ…طھط§ط­ط©</a>
+                <p style="margin-bottom:24px;">ط§ط´طھط±ظƒ ظپظٹ الكورسات ظˆط£ظƒظ…ظ„ ط¨ط¹ط¶ التدريبات ظ„طھط¨ط¯ط£ ط±ط­ظ„طھظƒ!</p>
+                <a href="courses.html" class="btn btn-gold btn-large">طھطµظپط­ الكورسات ط§ظ„ظ…طھط§ط­ط©</a>
             </div>
         </div>
     </main>
@@ -686,10 +686,10 @@ function buildInsight(avg, videos, totalVids, examsCount, history) {
     if (totalVids > 0) {
         const vidPct = Math.round(videos / totalVids * 100);
         const remaining = totalVids - videos;
-        if (vidPct === 100)        insights.push(`ط´ط§ظ‡ط¯طھ ظƒظ„ ط§ظ„ظ…ط­ط§ط¶ط±ط§طھ (${videos} ظ…ط­ط§ط¶ط±ط©) â€” ط£ط­ط³ظ†طھ! ًں‘ڈ`);
+        if (vidPct === 100)        insights.push(`ط´ط§ظ‡ط¯طھ ظƒظ„ المحاضرات (${videos} ظ…ط­ط§ط¶ط±ط©) â€” ط£ط­ط³ظ†طھ! ًں‘ڈ`);
         else if (vidPct >= 70)     insights.push(`ط´ط§ظ‡ط¯طھ ${videos} ظ…ظ† ${totalVids} ظ…ط­ط§ط¶ط±ط© (${vidPct}%) â€” ظ‚ط±ظ‘ط¨طھ طھط®ظ„طµ!`);
         else if (vidPct >= 30)     insights.push(`ط´ط§ظ‡ط¯طھ ${videos} ظ…ظ† ${totalVids} ظ…ط­ط§ط¶ط±ط© â€” ظ„ط³ظ‡ ظپظٹظ‡ ${remaining} ظ…ط­ط§ط¶ط±ط©طŒ ط£ظƒظ…ظ„!`);
-        else                       insights.push(`ظ„ط³ظ‡ ط´ط§ظ‡ط¯طھ ${videos} ظ…ط­ط§ط¶ط±ط© ط¨ط³ ظ…ظ† ط£طµظ„ ${totalVids} â€” ط§ط´طھط؛ظ„ ط£ظƒطھط± ط¹ظ„ظ‰ ط§ظ„ظ…ط­ط§ط¶ط±ط§طھ!`);
+        else                       insights.push(`ظ„ط³ظ‡ ط´ط§ظ‡ط¯طھ ${videos} ظ…ط­ط§ط¶ط±ط© ط¨ط³ ظ…ظ† ط£طµظ„ ${totalVids} â€” ط§ط´طھط؛ظ„ ط£ظƒطھط± ط¹ظ„ظ‰ المحاضرات!`);
     }
 
     // Trend insight â€” crystal clear comparison

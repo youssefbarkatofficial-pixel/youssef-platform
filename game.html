@@ -4,7 +4,7 @@
     <link rel="manifest" href="./manifest.json">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>طµط±ط§ط¹ ط§ظ„ط¨ظˆطµظ„ط© âڑ”ï¸ڈ | ظ…ظ†طµط© ظٹظˆط³ظپ ط¨ط±ظƒط§طھ</title>
+  <title>طµط±ط§ط¹ ط§ظ„ط¨ظˆطµظ„ط© âڑ”ï¸ڈ | منصة يوسف بركات</title>
   <meta name="description" content="طµط±ط§ط¹ ط§ظ„ط¨ظˆطµظ„ط© - ظ„ط¹ط¨ط© ط§ظ„طھط¹ظ„ظٹظ… ط§ظ„طھظ†ط§ظپط³ظٹط© ط¯ط§ط®ظ„ ط§ظ„ظ…ظ†طµط© ط§ظ„طھط¹ظ„ظٹظ…ظٹط©">
 
   <!-- Firebase -->
@@ -104,7 +104,7 @@
   <div class="lobby-header">
     <div class="player-avatar" id="lobby-avatar">طں</div>
     <div class="player-info">
-      <div class="name" id="lobby-name">ط¬ط§ط±ظٹ ط§ظ„طھط­ظ…ظٹظ„...</div>
+      <div class="name" id="lobby-name">جاري التحميل...</div>
       <div class="rank" id="lobby-rank">ًں§­ ---</div>
       <div class="xp-bar-wrap">
         <div class="xp-bar"><div class="xp-bar-fill" id="lobby-xp-bar" style="width:0%"></div></div>
@@ -266,7 +266,7 @@
     <div id="tab-leaderboard" class="lobby-tab-content hidden">
       <div class="leaderboard-grade-filter" id="lb-filter"></div>
       <div id="lb-content">
-        <p style="text-align:center;color:var(--text-muted);padding:40px 0;">ط¬ط§ط±ظٹ ط§ظ„طھط­ظ…ظٹظ„...</p>
+        <p style="text-align:center;color:var(--text-muted);padding:40px 0;">جاري التحميل...</p>
       </div>
     </div>
 
@@ -1144,7 +1144,7 @@ async function loadLeaderboard(grade = 'general', btn = null) {
   }
 
   const lbContent = document.getElementById('lb-content');
-  lbContent.innerHTML = '<p style="text-align:center;color:var(--text-muted);padding:24px;">ط¬ط§ط±ظٹ ط§ظ„طھط­ظ…ظٹظ„...</p>';
+  lbContent.innerHTML = '<p style="text-align:center;color:var(--text-muted);padding:24px;">جاري التحميل...</p>';
 
   const players = await GameEngine.loadLeaderboard(grade);
 
@@ -1152,7 +1152,7 @@ async function loadLeaderboard(grade = 'general', btn = null) {
     <div class="owner-entry">
       <span class="owner-badge">ًں‘‘</span>
       <div>
-        <div class="owner-name">ظٹظˆط³ظپ ط¨ط±ظƒط§طھ</div>
+        <div class="owner-name">يوسف بركات</div>
         <div class="owner-rank">â­گ ط­ط§ط±ط³ ط§ظ„ط¨ظˆطµظ„ط© ط§ظ„ط£ط¹ط¸ظ…</div>
       </div>
       <div class="owner-xp">âˆ‍ XP</div>

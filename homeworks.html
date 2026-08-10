@@ -4,7 +4,7 @@
     <link rel="manifest" href="./manifest.json">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ط§ظ„ظˆط§ط¬ط¨ط§طھ - ظٹظˆط³ظپ ط¨ط±ظƒط§طھ</title>
+    <title>الواجبات - يوسف بركات</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/dashboard.css">
@@ -68,7 +68,7 @@
     <header class="navbar glass-panel" style="background: var(--primary-navy);">
         <a href="index.html" class="nav-brand">
             <div class="logo-circle" style="width: 40px; height: 40px; font-size: 1.2rem;">ظٹ</div>
-            <span class="nav-brand-text">ظ…ظ†طµط© ظٹظˆط³ظپ ط¨ط±ظƒط§طھ</span>
+            <span class="nav-brand-text">منصة يوسف بركات</span>
         </a>
         <div class="nav-actions">
             <a href="#" class="btn btn-outline" style="padding: 8px 15px; border-radius: 20px;"><i class="fas fa-bell"></i></a>
@@ -91,8 +91,8 @@
                 <li><a href="profile.html"><i class="fas fa-user"></i> ط­ط³ط§ط¨ظٹ</a></li>
                 <li><a href="courses.html"><i class="fas fa-plus-circle"></i> ط§ط´طھط±ط§ظƒ ظپظٹ ظƒظˆط±ط³ط§طھ</a></li>
                 <li><a href="my-courses.html"><i class="fas fa-video"></i> ظƒظˆط±ط³ط§طھظٹ</a></li>
-                <li><a href="homeworks.html" class="active"><i class="fas fa-tasks"></i> ط§ظ„ظˆط§ط¬ط¨ط§طھ</a></li>
-                <li><a href="exams.html"><i class="fas fa-clipboard-list"></i> ط§ظ„ط§ظ…طھط­ط§ظ†ط§طھ</a></li>
+                <li><a href="homeworks.html" class="active"><i class="fas fa-tasks"></i> الواجبات</a></li>
+                <li><a href="exams.html"><i class="fas fa-clipboard-list"></i> الامتحانات</a></li>
                 <li><a href="stats.html"><i class="fas fa-chart-line"></i> ط§ظ„ط¥ط­طµط§ط¦ظٹط§طھ</a></li>
                 <li><a href="settings.html"><i class="fas fa-cog"></i> ط§ظ„ط¥ط¹ط¯ط§ط¯ط§طھ</a></li>
             </ul>
@@ -111,8 +111,8 @@
                 <div id="noHwState" style="display: none; text-align: center; padding: 50px 20px;">
                     <i class="fas fa-book-reader text-gold" style="font-size: 4rem; margin-bottom: 20px; opacity: 0.5;"></i>
                     <h2 style="color: var(--soft-white); margin-bottom: 10px;">ظ„ط§ ظٹظˆط¬ط¯ ظƒظˆط±ط³ط§طھ ظ…ط´طھط±ظƒ ظپظٹظ‡ط§ ط¨ط¹ط¯</h2>
-                    <p style="color: rgba(255,255,255,0.7); margin-bottom: 20px;">ط§ط´طھط±ظƒ ظپظٹ ط§ظ„ظƒظˆط±ط³ط§طھ ط£ظˆظ„ط§ظ‹ ظ„طھط¸ظ‡ط± ظ„ظƒ ط§ظ„ظˆط§ط¬ط¨ط§طھ ط§ظ„ط®ط§طµط© ط¨ظ‡ط§</p>
-                    <a href="courses.html" class="btn btn-gold btn-large">ط§ط³طھظƒط´ظپ ط§ظ„ظƒظˆط±ط³ط§طھ</a>
+                    <p style="color: rgba(255,255,255,0.7); margin-bottom: 20px;">ط§ط´طھط±ظƒ ظپظٹ الكورسات ط£ظˆظ„ط§ظ‹ ظ„طھط¸ظ‡ط± ظ„ظƒ الواجبات ط§ظ„ط®ط§طµط© ط¨ظ‡ط§</p>
+                    <a href="courses.html" class="btn btn-gold btn-large">ط§ط³طھظƒط´ظپ الكورسات</a>
                 </div>
             </div>
         </main>
@@ -205,11 +205,11 @@
                                 <i class="fas fa-book text-gold" style="font-size:1.5rem;"></i>
                                 <h3 style="margin:0;color:var(--text-primary);">${c.title}</h3>
                             </div>
-                            <button class="btn btn-outline toggle-btn">ط¹ط±ط¶ ط§ظ„ظˆط§ط¬ط¨ط§طھ <i class="fas fa-chevron-down" style="margin-right:8px;"></i></button>
+                            <button class="btn btn-outline toggle-btn">ط¹ط±ط¶ الواجبات <i class="fas fa-chevron-down" style="margin-right:8px;"></i></button>
                         </div>
                         <div class="course-hw-body">
                             <div class="hw-category">
-                                <h4 style="color:var(--accent-cyan);"><i class="fas fa-tasks"></i> ظ‚ط§ط¦ظ…ط© ط§ظ„ظˆط§ط¬ط¨ط§طھ</h4>
+                                <h4 style="color:var(--accent-cyan);"><i class="fas fa-tasks"></i> ظ‚ط§ط¦ظ…ط© الواجبات</h4>
                                 ${hwItems}
                             </div>
                         </div>`;
@@ -217,8 +217,8 @@
                     toggleBtn.addEventListener('click', () => {
                         row.classList.toggle('active');
                         toggleBtn.innerHTML = row.classList.contains('active')
-                            ? 'ط¥ط®ظپط§ط، ط§ظ„ظˆط§ط¬ط¨ط§طھ <i class="fas fa-chevron-up" style="margin-right:8px;"></i>'
-                            : 'ط¹ط±ط¶ ط§ظ„ظˆط§ط¬ط¨ط§طھ <i class="fas fa-chevron-down" style="margin-right:8px;"></i>';
+                            ? 'ط¥ط®ظپط§ط، الواجبات <i class="fas fa-chevron-up" style="margin-right:8px;"></i>'
+                            : 'ط¹ط±ط¶ الواجبات <i class="fas fa-chevron-down" style="margin-right:8px;"></i>';
                     });
                     container.appendChild(row);
                 });

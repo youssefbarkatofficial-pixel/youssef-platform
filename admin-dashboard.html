@@ -7,7 +7,7 @@
         if (!sessionStorage.getItem('currentAdmin')) { window.location.replace('admin-login.html'); }
     </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ظ„ظˆط­ط© ط§ظ„ط¥ط¯ط§ط±ط© | ظٹظˆط³ظپ ط¨ط±ظƒط§طھ</title>
+    <title>ظ„ظˆط­ط© ط§ظ„ط¥ط¯ط§ط±ط© | يوسف بركات</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/style.css?v=1785347365011">
     <link rel="stylesheet" href="css/dashboard.css">
@@ -28,7 +28,7 @@
     <header class="navbar glass-panel" style="border-bottom-color: var(--royal-gold);">
         <a href="index.html" class="nav-brand">
             <div class="logo-circle" style="color: #fff; background: var(--royal-gold);">ظٹ</div>
-            <span class="nav-brand-text text-gold"><span class="desktop-text">ظ„ظˆط­ط© ط§ظ„ط¥ط¯ط§ط±ط© - ظٹظˆط³ظپ ط¨ط±ظƒط§طھ</span><span class="mobile-only-text" style="display: none;">ظ„ظˆط­ط© ط§ظ„ط¥ط¯ط§ط±ط©</span></span>
+            <span class="nav-brand-text text-gold"><span class="desktop-text">ظ„ظˆط­ط© ط§ظ„ط¥ط¯ط§ط±ط© - يوسف بركات</span><span class="mobile-only-text" style="display: none;">ظ„ظˆط­ط© ط§ظ„ط¥ط¯ط§ط±ط©</span></span>
         </a>
         <div class="nav-actions">
             <a href="admin-compass.html" id="ownerCompassBtn" class="btn btn-outline" style="position: relative; border-radius: 20px; padding: 8px 15px; display: inline-flex; align-items: center; gap: 8px;">
@@ -49,14 +49,14 @@
                         <i class="fas fa-user-tie" style="font-size: 2rem; color: #fff;"></i>
                     </div>
                 </div>
-                <h4 style="margin:0; font-size: 1.2rem; color: var(--royal-gold);">ظٹظˆط³ظپ ط¨ط±ظƒط§طھ</h4>
+                <h4 style="margin:0; font-size: 1.2rem; color: var(--royal-gold);">يوسف بركات</h4>
                 <p style="margin:5px 0 0; color: rgba(255,255,255,0.6); font-size: 0.85rem;">ط§ظ„ظ…ط¯ظٹط± ط§ظ„ط¹ط§ظ… (Owner)</p>
             </div>
             <ul class="sidebar-nav">
                 <li><a href="admin-dashboard.html" class="active"><i class="fas fa-chart-line"></i> ط§ظ„ط¥ط­طµط§ط¦ظٹط§طھ ط§ظ„ط¹ط§ظ…ط©</a></li>
-                <li><a href="admin-students.html"><i class="fas fa-users"></i> ط¥ط¯ط§ط±ط© ط§ظ„ط·ظ„ط§ط¨</a></li>
+                <li><a href="admin-students.html"><i class="fas fa-users"></i> ط¥ط¯ط§ط±ط© الطلاب</a></li>
                                 <li><a href="admin-student-analytics.html"><i class="fas fa-chart-bar"></i> ط§ظ„طھط­ظ„ظٹظ„ط§طھ ط§ظ„طھظپطµظٹظ„ظٹط© (ط§ظ„طھظ‚ظٹظٹظ…ط§طھ)</a></li>
-                <li><a href="admin-courses.html"><i class="fas fa-book-open"></i> ط¥ط¯ط§ط±ط© ط§ظ„ظƒظˆط±ط³ط§طھ</a></li>
+                <li><a href="admin-courses.html"><i class="fas fa-book-open"></i> ط¥ط¯ط§ط±ط© الكورسات</a></li>
                 <li><a href="admin-upload.html"><i class="fas fa-bolt"></i> ط§ظ„ط±ظپط¹ ط§ظ„ط³ط±ظٹط¹</a></li>
                 <li><a href="admin-payments.html"><i class="fas fa-money-check-alt"></i> ظ…ط±ط§ط¬ط¹ط© ط§ظ„ظ…ط¯ظپظˆط¹ط§طھ</a></li>
                 <li><a href="admin-compass.html"><i class="fas fa-compass"></i> ط¨ظˆطھ ط§ظ„ط¨ظˆطµظ„ط©</a></li>
@@ -103,7 +103,7 @@
             <div class="dash-cards">
                 <div class="glass-panel dash-card" style="border-color: var(--accent-cyan);">
                     <div class="dash-card-info">
-                        <h3>ط¥ط¬ظ…ط§ظ„ظٹ ط§ظ„ط·ظ„ط§ط¨</h3>
+                        <h3>ط¥ط¬ظ…ط§ظ„ظٹ الطلاب</h3>
                         <span class="value" id="adminTotalStudents">0</span>
                     </div>
                     <div class="dash-card-icon" style="color: var(--accent-cyan); background: rgba(88, 196, 221, 0.1);"><i class="fas fa-users"></i></div>
@@ -142,7 +142,7 @@
             <!-- Pending Complaints Table -->
             <div class="glass-panel dash-panel" id="complaintsRequestsPanel" style="margin-bottom: 30px;">
                 <div class="panel-header">
-                    <h2 class="panel-title" style="color: #e74c3c;"><i class="fas fa-envelope-open-text mr-2"></i> ط´ظƒط§ظˆظ‰ ط§ظ„ط·ظ„ط§ط¨ ظˆط§ظ„ط¯ط¹ظ… ط§ظ„ظپظ†ظٹ</h2>
+                    <h2 class="panel-title" style="color: #e74c3c;"><i class="fas fa-envelope-open-text mr-2"></i> ط´ظƒط§ظˆظ‰ الطلاب ظˆط§ظ„ط¯ط¹ظ… ط§ظ„ظپظ†ظٹ</h2>
                     <div style="display: flex; gap: 10px;">
                         <a href="admin-compass.html" class="btn btn-outline" style="padding: 5px 15px; font-size: 0.9rem; border-color: #e74c3c; color: #e74c3c;"><i class="fas fa-external-link-alt"></i> ظپطھط­ ظ„ظˆط­ط© ط§ظ„ط´ط§طھ ظ„ظ„ط±ط¯</a>
                     </div>
@@ -266,7 +266,7 @@
                 <div class="panel-header">
                     <h2 class="panel-title"><i class="fas fa-brain mr-2" style="color:#a855f7"></i> طھط¹ظ„ظٹظ… ط§ظ„ط¨ظˆطµظ„ط© ًں§­</h2>
                     <div style="display:flex;gap:8px;align-items:center;">
-                        <span id="teachLessonsCount" style="color:var(--text-secondary);font-size:0.85rem;">ط¬ط§ط±ظٹ ط§ظ„طھط­ظ…ظٹظ„...</span>
+                        <span id="teachLessonsCount" style="color:var(--text-secondary);font-size:0.85rem;">جاري التحميل...</span>
                         <button id="btnClearLessons" class="btn btn-outline" style="padding:4px 14px;font-size:0.85rem;border-color:#e74c3c;color:#e74c3c;"><i class="fas fa-trash"></i> ظ…ط³ط­ ط§ظ„ظƒظ„</button>
                     </div>
                 </div>
@@ -361,7 +361,7 @@
             <!-- Course Management Section -->
             <div class="glass-panel dash-panel" style="margin-top: 30px;">
                 <div class="panel-header">
-                    <h2 class="panel-title"><i class="fas fa-book-open mr-2"></i> ط§ظ„ظƒظˆط±ط³ط§طھ ط§ظ„ظ…طھط§ط­ط© ط¹ظ„ظ‰ ط§ظ„ظ…ظ†طµط©</h2>
+                    <h2 class="panel-title"><i class="fas fa-book-open mr-2"></i> الكورسات ط§ظ„ظ…طھط§ط­ط© ط¹ظ„ظ‰ ط§ظ„ظ…ظ†طµط©</h2>
                     <div style="display: flex; gap: 10px; align-items: center;">
                         <select id="adminGradeFilter" class="form-control" style="background: rgba(7, 19, 38, 0.9); color: var(--royal-gold); padding: 6px 20px; width: auto; border: 1px solid var(--royal-gold); border-radius: 20px; font-weight: bold; cursor: pointer; outline: none; box-shadow: 0 2px 8px rgba(212, 166, 79, 0.2); appearance: auto;">
                             <option value="all" style="background: #071326; color: #fff;">ظƒظ„ ط§ظ„طµظپظˆظپ</option>
@@ -399,7 +399,7 @@
             <h3 style="color: #e74c3c; font-size: 1.1rem; margin-bottom: 15px;"><i class="fas fa-exclamation-triangle"></i> ط®ظٹط§ط±ط§طھ ظ…طھظ‚ط¯ظ…ط© (ط­ط°ظپ ظ†ظ‡ط§ط¦ظٹ)</h3>
             
             <button id="btnFactoryReset" class="btn btn-block" style="background: rgba(231, 76, 60, 0.1); border: 1px solid #e74c3c; color: #e74c3c; text-align: right; padding-right: 20px;" onclick="executeFactoryReset()">
-                <i class="fas fa-radiation-alt mr-2"></i> ظ…ط³ط­ ط¬ظ…ظٹط¹ ط­ط³ط§ط¨ط§طھ ط§ظ„ط·ظ„ط§ط¨ ظˆط¨ظٹط§ظ†ط§طھظ‡ظ… (طھظ‡ظٹط¦ط© ط§ظ„ظ…ظ†طµط©)
+                <i class="fas fa-radiation-alt mr-2"></i> ظ…ط³ط­ ط¬ظ…ظٹط¹ ط­ط³ط§ط¨ط§طھ الطلاب ظˆط¨ظٹط§ظ†ط§طھظ‡ظ… (طھظ‡ظٹط¦ط© ط§ظ„ظ…ظ†طµط©)
             </button>
         </div>
     </div>
@@ -480,15 +480,15 @@
             
             <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 15px;">
                 <div class="form-group">
-                    <label style="color: var(--text-primary); margin-bottom: 5px; display: block; font-size: 0.9rem;">ظ…ظˆط¹ط¯ ط§ظ„ظ…ط­ط§ط¶ط±ط§طھ</label>
+                    <label style="color: var(--text-primary); margin-bottom: 5px; display: block; font-size: 0.9rem;">ظ…ظˆط¹ط¯ المحاضرات</label>
                     <input type="text" id="editLecSchedule" class="form-control" placeholder="ط§ظ„ط³ط¨طھ 8:00 ظ…">
                 </div>
                 <div class="form-group">
-                    <label style="color: var(--text-primary); margin-bottom: 5px; display: block; font-size: 0.9rem;">ظ…ظˆط¹ط¯ ط§ظ„ظˆط§ط¬ط¨ط§طھ</label>
+                    <label style="color: var(--text-primary); margin-bottom: 5px; display: block; font-size: 0.9rem;">ظ…ظˆط¹ط¯ الواجبات</label>
                     <input type="text" id="editHwSchedule" class="form-control" placeholder="ط§ظ„ط£ط­ط¯ 10:00 طµ">
                 </div>
                 <div class="form-group">
-                    <label style="color: var(--text-primary); margin-bottom: 5px; display: block; font-size: 0.9rem;">ظ…ظˆط¹ط¯ ط§ظ„ط§ظ…طھط­ط§ظ†ط§طھ</label>
+                    <label style="color: var(--text-primary); margin-bottom: 5px; display: block; font-size: 0.9rem;">ظ…ظˆط¹ط¯ الامتحانات</label>
                     <input type="text" id="editExamSchedule" class="form-control" placeholder="ط§ظ„ط¥ط«ظ†ظٹظ† 12:00 ط¸">
                 </div>
             </div>
@@ -567,7 +567,7 @@
                 return;
             }
             
-            if(!confirm("طھط­ط°ظٹط± ط®ط·ظٹط± ط¬ط¯ط§ظ‹: ظ‡ط°ط§ ط§ظ„ط¥ط¬ط±ط§ط، ط³ظٹظ‚ظˆظ… ط¨ظ…ط³ط­ ط¬ظ…ظٹط¹ ط§ظ„ط·ظ„ط§ط¨ ط§ظ„ظ…ط´طھط±ظƒظٹظ† ظˆط¬ظ…ظٹط¹ ط¨ظٹط§ظ†ط§طھظ‡ظ… ظˆطھطµظ†ظٹظپط§طھظ‡ظ… ظˆظ…ط­ط§ط¯ط«ط§طھظ‡ظ… ظ…ظ† ظ‚ط§ط¹ط¯ط© ط§ظ„ط¨ظٹط§ظ†ط§طھ ظˆظ„ظ† ظٹطھط¨ظ‚ظ‰ ط³ظˆظ‰ ط­ط³ط§ط¨ظƒ ظƒظ…ط§ظ„ظƒ ظ„ظ„ظ…ظ†طµط© ظˆط§ظ„ظƒظˆط±ط³ط§طھ ظپظ‚ط·. (ط³ظٹط¤ط¯ظٹ ط°ظ„ظƒ ظ„طھط³ط¬ظٹظ„ ط®ط±ظˆط¬ ط£ظٹ ط·ط§ظ„ط¨ ظˆظ‡ظ…ظٹ ط­ط§ظ„ظٹ). ظ‡ظ„ ط£ظ†طھ ظ…طھط£ظƒط¯ ط¨ظ†ط³ط¨ط© 100%طں")) return;
+            if(!confirm("طھط­ط°ظٹط± ط®ط·ظٹط± ط¬ط¯ط§ظ‹: ظ‡ط°ط§ ط§ظ„ط¥ط¬ط±ط§ط، ط³ظٹظ‚ظˆظ… ط¨ظ…ط³ط­ ط¬ظ…ظٹط¹ الطلاب ط§ظ„ظ…ط´طھط±ظƒظٹظ† ظˆط¬ظ…ظٹط¹ ط¨ظٹط§ظ†ط§طھظ‡ظ… ظˆطھطµظ†ظٹظپط§طھظ‡ظ… ظˆظ…ط­ط§ط¯ط«ط§طھظ‡ظ… ظ…ظ† ظ‚ط§ط¹ط¯ط© ط§ظ„ط¨ظٹط§ظ†ط§طھ ظˆظ„ظ† ظٹطھط¨ظ‚ظ‰ ط³ظˆظ‰ ط­ط³ط§ط¨ظƒ ظƒظ…ط§ظ„ظƒ ظ„ظ„ظ…ظ†طµط© ظˆالكورسات ظپظ‚ط·. (ط³ظٹط¤ط¯ظٹ ط°ظ„ظƒ ظ„طھط³ط¬ظٹظ„ ط®ط±ظˆط¬ ط£ظٹ ط·ط§ظ„ط¨ ظˆظ‡ظ…ظٹ ط­ط§ظ„ظٹ). ظ‡ظ„ ط£ظ†طھ ظ…طھط£ظƒط¯ ط¨ظ†ط³ط¨ط© 100%طں")) return;
             
             let btn = document.getElementById('btnFactoryReset');
             let originalText = btn.innerHTML;
@@ -606,7 +606,7 @@
                 // Force empty strictUsers
                 localStorage.setItem('strictUsers', '[]');
                 
-                alert("طھظ… ظ…ط³ط­ ط¬ظ…ظٹط¹ ط­ط³ط§ط¨ط§طھ ط§ظ„ط·ظ„ط§ط¨ ط§ظ„ظˆظ‡ظ…ظٹط© ظˆطھظ‡ظٹط¦ط© ظ‚ط§ط¹ط¯ط© ط§ظ„ط¨ظٹط§ظ†ط§طھ ط¨ظ†ط¬ط§ط­! ط§ظ„ظ…ظ†طµط© ط§ظ„ط¢ظ† ط¬ط¯ظٹط¯ط© طھظ…ط§ظ…ط§ظ‹ ظˆطھط³طھظ‚ط¨ظ„ ظپظ‚ط· ط§ظ„ط·ظ„ط§ط¨ ط§ظ„ط­ظ‚ظٹظ‚ظٹظٹظ†.");
+                alert("طھظ… ظ…ط³ط­ ط¬ظ…ظٹط¹ ط­ط³ط§ط¨ط§طھ الطلاب ط§ظ„ظˆظ‡ظ…ظٹط© ظˆطھظ‡ظٹط¦ط© ظ‚ط§ط¹ط¯ط© ط§ظ„ط¨ظٹط§ظ†ط§طھ ط¨ظ†ط¬ط§ط­! ط§ظ„ظ…ظ†طµط© ط§ظ„ط¢ظ† ط¬ط¯ظٹط¯ط© طھظ…ط§ظ…ط§ظ‹ ظˆطھط³طھظ‚ط¨ظ„ ظپظ‚ط· الطلاب ط§ظ„ط­ظ‚ظٹظ‚ظٹظٹظ†.");
                 window.location.reload();
             } catch(e) {
                 console.error(e);
@@ -689,7 +689,7 @@
                 adminCourses = [
                     { id: 'c1', title: 'ظ…ظ†ظ‡ط¬ ط§ظ„ط¬ط؛ط±ط§ظپظٹط§ ظƒط§ظ…ظ„ط§ظ‹ - ط§ظ„طھط±ظ… ط§ظ„ط£ظˆظ„', desc: 'ط´ط±ط­ طھظپطµظٹظ„ظٹ ظ„ظ…ظ†ظ‡ط¬ ط§ظ„ط¬ط؛ط±ط§ظپظٹط§ ظ…ط¹ ط®ط±ط§ط¦ط· ط°ظ‡ظ†ظٹط© ظˆط§ظ…طھط­ط§ظ†ط§طھ ط£ط³ط¨ظˆط¹ظٹط© ظˆطھط¯ط±ظٹط¨ ط¹ظ„ظ‰ ط§ظ„ظ†ط¸ط§ظ… ط§ظ„ط¬ط¯ظٹط¯.', price: '150', grade: 'prep3', image: 'https://via.placeholder.com/400x250/071326/D4A64F?text=Geography' },
                     { id: 'c2', title: 'طھط§ط±ظٹط® ظ…طµط± ط§ظ„ظ‚ط¯ظٹظ…ط© ظˆط§ظ„ط­ط¶ط§ط±ط§طھ', desc: 'ظپظ‡ظ… ط¹ظ…ظٹظ‚ ظ„ظ„طھط§ط±ظٹط® ط¨ط£ط³ظ„ظˆط¨ ظ‚طµطµظٹ ظ…ظ…طھط¹ ظٹط¬ط¹ظ„ظƒ طھط¹ظٹط´ ط§ظ„ط£ط­ط¯ط§ط« ظˆطھط³طھظ†طھط¬ ط§ظ„ط£ط³ط¦ظ„ط©.', price: '200', grade: 'sec1', image: 'https://via.placeholder.com/400x250/071326/58C4DD?text=History' },
-                    { id: 'c3', title: 'ط§ظ„ط¯ط±ط§ط³ط§طھ ط§ظ„ط§ط¬طھظ…ط§ط¹ظٹط© - طھط£ط³ظٹط³', desc: 'ظƒظˆط±ط³ ط§ظ„طھط£ط³ظٹط³ ط§ظ„ط´ط§ظ…ظ„ ظ„ط·ظ„ط§ط¨ ط§ظ„طµظپ ط§ظ„ط£ظˆظ„ ط§ظ„ط¥ط¹ط¯ط§ط¯ظٹطŒ ظ…ط¯ط®ظ„ظƒ ظ„ظپظ‡ظ… ط§ظ„ظ…ط§ط¯ط© ط¨ط¨ط³ط§ط·ط©.', price: '100', grade: 'prep1', image: 'https://via.placeholder.com/400x250/0A1E3A/D4A64F?text=Social+Studies' }
+                    { id: 'c3', title: 'الدراسات الاجتماعية - طھط£ط³ظٹط³', desc: 'ظƒظˆط±ط³ ط§ظ„طھط£ط³ظٹط³ ط§ظ„ط´ط§ظ…ظ„ ظ„ط·ظ„ط§ط¨ ط§ظ„طµظپ ط§ظ„ط£ظˆظ„ ط§ظ„ط¥ط¹ط¯ط§ط¯ظٹطŒ ظ…ط¯ط®ظ„ظƒ ظ„ظپظ‡ظ… ط§ظ„ظ…ط§ط¯ط© ط¨ط¨ط³ط§ط·ط©.', price: '100', grade: 'prep1', image: 'https://via.placeholder.com/400x250/0A1E3A/D4A64F?text=Social+Studies' }
                 ];
                 // Use safe global function if available
                 if (typeof window.safeStorageSaveCourses === 'function') {

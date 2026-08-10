@@ -178,12 +178,13 @@
   }
 
   .nav-brand-text {
-    font-size: 0.85rem !important;
+    font-size: 0.82rem !important;
     white-space: nowrap !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
-    max-width: 180px !important;
+    max-width: 140px !important;
     flex-shrink: 1 !important;
+    line-height: 1.2 !important;
   }
 
   /* Show desktop nav-links on mobile as scrollable */
@@ -909,11 +910,11 @@
     grid-template-columns: 1fr !important;
   }
 
-  /* Nav brand text can be even shorter */
-  /* Nav brand text can be even shorter */
+  /* Nav brand text — very small screens (iPhone SE, Galaxy A etc) */
   .nav-brand-text {
-    max-width: 150px !important;
-    font-size: 0.75rem !important;
+    max-width: 110px !important;
+    font-size: 0.7rem !important;
+    letter-spacing: -0.01em !important;
   }
 
   /* Features circle smaller */

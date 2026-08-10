@@ -7,7 +7,7 @@
     </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>طھط­ظ„ظٹظ„ط§طھ ط§ظ„ط·ظ„ط§ط¨ ط§ظ„طھظپطµظٹظ„ظٹط© - ظ„ظˆط­ط© ط§ظ„ط¥ط¯ط§ط±ط©</title>
+    <title>طھط­ظ„ظٹظ„ط§طھ الطلاب ط§ظ„طھظپطµظٹظ„ظٹط© - ظ„ظˆط­ط© ط§ظ„ط¥ط¯ط§ط±ط©</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/style.css?v=10">
     <link rel="stylesheet" href="css/dashboard.css">
@@ -71,7 +71,7 @@
 <header class="navbar glass-panel" style="border-bottom-color: var(--royal-gold);">
     <a href="index.html" class="nav-brand">
         <div class="logo-circle" style="color:#fff; background:var(--royal-gold);">ظٹ</div>
-        <span class="nav-brand-text text-gold">طھط­ظ„ظٹظ„ط§طھ ط§ظ„ط·ظ„ط§ط¨</span>
+        <span class="nav-brand-text text-gold">طھط­ظ„ظٹظ„ط§طھ الطلاب</span>
     </a>
     <div class="nav-actions">
         <a href="admin-dashboard.html" class="btn btn-outline" style="padding:8px 15px; border-radius:20px;"><i class="fas fa-arrow-right"></i> ط§ظ„ط¯ط§ط´ ط¨ظˆط±ط¯</a>
@@ -83,14 +83,14 @@
     <aside class="sidebar" id="sidebar">
         <div class="user-profile-mini" style="text-align:center; margin-bottom:20px; padding:15px;">
             <div style="width:60px; height:60px; border-radius:50%; background:linear-gradient(135deg,var(--royal-gold),#b8860b); display:flex; align-items:center; justify-content:center; margin:0 auto 10px;"><i class="fas fa-user-tie" style="font-size:1.8rem; color:#fff;"></i></div>
-            <h4 style="margin:0; color:var(--royal-gold);">ظٹظˆط³ظپ ط¨ط±ظƒط§طھ</h4>
+            <h4 style="margin:0; color:var(--royal-gold);">يوسف بركات</h4>
             <p style="margin:4px 0 0; color:rgba(255,255,255,0.6); font-size:0.8rem;">ط§ظ„ظ…ط¯ظٹط± ط§ظ„ط¹ط§ظ…</p>
         </div>
         <ul class="sidebar-nav">
             <li><a href="admin-dashboard.html"><i class="fas fa-chart-line"></i> ط§ظ„ط¥ط­طµط§ط¦ظٹط§طھ ط§ظ„ط¹ط§ظ…ط©</a></li>
-            <li><a href="admin-students.html"><i class="fas fa-users"></i> ط¥ط¯ط§ط±ط© ط§ظ„ط·ظ„ط§ط¨</a></li>
+            <li><a href="admin-students.html"><i class="fas fa-users"></i> ط¥ط¯ط§ط±ط© الطلاب</a></li>
             <li><a href="admin-student-analytics.html" class="active"><i class="fas fa-chart-bar"></i> طھط­ظ„ظٹظ„ط§طھ طھظپطµظٹظ„ظٹط©</a></li>
-            <li><a href="admin-courses.html"><i class="fas fa-book-open"></i> ط¥ط¯ط§ط±ط© ط§ظ„ظƒظˆط±ط³ط§طھ</a></li>
+            <li><a href="admin-courses.html"><i class="fas fa-book-open"></i> ط¥ط¯ط§ط±ط© الكورسات</a></li>
             <li><a href="admin-upload.html"><i class="fas fa-bolt"></i> ط§ظ„ط±ظپط¹ ط§ظ„ط³ط±ظٹط¹</a></li>
             <li><a href="admin-payments.html"><i class="fas fa-money-check-alt"></i> ظ…ط±ط§ط¬ط¹ط© ط§ظ„ظ…ط¯ظپظˆط¹ط§طھ</a></li>
             <li><a href="admin-notifications.html"><i class="fas fa-bell"></i> ط¥ط±ط³ط§ظ„ ط§ظ„ط¥ط´ط¹ط§ط±ط§طھ</a></li>
@@ -100,11 +100,11 @@
 
     <main class="main-content">
         <div class="page-header">
-            <h1 class="page-title"><i class="fas fa-chart-bar" style="color:var(--royal-gold);"></i> طھط­ظ„ظٹظ„ط§طھ ط§ظ„ط·ظ„ط§ط¨ ط§ظ„طھظپطµظٹظ„ظٹط©</h1>
+            <h1 class="page-title"><i class="fas fa-chart-bar" style="color:var(--royal-gold);"></i> طھط­ظ„ظٹظ„ط§طھ الطلاب ط§ظ„طھظپطµظٹظ„ظٹط©</h1>
         </div>
 
         <div class="tabs">
-            <button class="tab-btn active" onclick="switchTab('students', this)">ظ‚ط§ط¦ظ…ط© ط§ظ„ط·ظ„ط§ط¨</button>
+            <button class="tab-btn active" onclick="switchTab('students', this)">ظ‚ط§ط¦ظ…ط© الطلاب</button>
             <button class="tab-btn" onclick="switchTab('late', this)">ط§ظ„ظ…طھط£ط®ط±ط§طھ</button>
             <button class="tab-btn" onclick="switchTab('levels', this)">ط§ظ„ظ…ط³طھظˆظٹط§طھ</button>
         </div>
@@ -131,16 +131,16 @@
                             <tr>
                                 <th data-sort="name" onclick="sortBy('name')"><span class="sort-icon">â‡…</span>ط§ظ„ط·ط§ظ„ط¨ ظˆط§ظ„طھظˆط§طµظ„</th>
                                 <th>ط§ظ„طµظپ</th>
-                                <th data-sort="avgExam" onclick="sortBy('avgExam')"><span class="sort-icon">â‡…</span>ًں“„ ظ…طھظˆط³ط· ط§ظ„ط§ظ…طھط­ط§ظ†ط§طھ</th>
-                                <th data-sort="avgHw" onclick="sortBy('avgHw')"><span class="sort-icon">â‡…</span>ًں“ڑ ظ…طھظˆط³ط· ط§ظ„ظˆط§ط¬ط¨ط§طھ</th>
-                                <th data-sort="avgTrain" onclick="sortBy('avgTrain')"><span class="sort-icon">â‡…</span>ًں“‌ ظ…طھظˆط³ط· ط§ظ„طھط¯ط±ظٹط¨ط§طھ</th>
+                                <th data-sort="avgExam" onclick="sortBy('avgExam')"><span class="sort-icon">â‡…</span>ًں“„ ظ…طھظˆط³ط· الامتحانات</th>
+                                <th data-sort="avgHw" onclick="sortBy('avgHw')"><span class="sort-icon">â‡…</span>ًں“ڑ ظ…طھظˆط³ط· الواجبات</th>
+                                <th data-sort="avgTrain" onclick="sortBy('avgTrain')"><span class="sort-icon">â‡…</span>ًں“‌ ظ…طھظˆط³ط· التدريبات</th>
                                 <th data-sort="watch" onclick="sortBy('watch')"><span class="sort-icon">â‡…</span>ًںژ¥ ظ†ط³ط¨ط© ط§ظ„ظ…ط´ط§ظ‡ط¯ط©</th>
                                 <th data-sort="level" onclick="sortBy('level')"><span class="sort-icon">â‡…</span>ط§ظ„ظ…ط³طھظˆظ‰</th>
                                 <th>طھظپط§طµظٹظ„ ظˆطھطµط­ظٹط­</th>
                             </tr>
                         </thead>
                         <tbody id="studentsTableBody">
-                            <tr><td colspan="8" style="text-align:center; padding:30px;"><i class="fas fa-spinner fa-spin"></i> ط¬ط§ط±ظٹ ط§ظ„طھط­ظ…ظٹظ„...</td></tr>
+                            <tr><td colspan="8" style="text-align:center; padding:30px;"><i class="fas fa-spinner fa-spin"></i> جاري التحميل...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -186,7 +186,7 @@
                 </div>
             </div>
             <div id="levelsContainer">
-                <div style="text-align:center; padding:40px; color:rgba(255,255,255,0.5);">ط§ط®طھط± طµظپط§ظ‹ ظˆظ…ط³طھظˆظ‰ ظ„ط¹ط±ط¶ ط§ظ„ط·ظ„ط§ط¨</div>
+                <div style="text-align:center; padding:40px; color:rgba(255,255,255,0.5);">ط§ط®طھط± طµظپط§ظ‹ ظˆظ…ط³طھظˆظ‰ ظ„ط¹ط±ط¶ الطلاب</div>
             </div>
         </div>
     </main>
@@ -423,7 +423,7 @@ function renderStudentsTable(students) {
 
 async function openStudentDetail(uid) {
     document.getElementById('studentDetailModal').classList.add('active');
-    document.getElementById('modalStudentName').textContent = 'ط¬ط§ط±ظٹ ط§ظ„طھط­ظ…ظٹظ„...';
+    document.getElementById('modalStudentName').textContent = 'جاري التحميل...';
     document.getElementById('modalStudentMeta').textContent = '';
     document.getElementById('modalContent').innerHTML = '<div style="text-align:center;padding:40px;"><i class="fas fa-spinner fa-spin" style="font-size:2rem;color:var(--royal-gold);"></i></div>';
 
@@ -432,7 +432,7 @@ async function openStudentDetail(uid) {
         const doc = await window.firebaseDb.collection('students').doc(uid).get();
         if (doc.exists) { s = doc.data(); s._uid = uid; }
     }
-    if (!s) { document.getElementById('modalContent').innerHTML = '<p style="color:#e74c3c;">ظ„ظ… ظٹطھظ… ط§ظ„ط¹ط«ظˆط± ط¹ظ„ظ‰ ط§ظ„ط·ط§ظ„ط¨</p>'; return; }
+    if (!s) { document.getElementById('modalContent').innerHTML = '<p style="color:#e74c3c;">لم يتم العثور على ط§ظ„ط·ط§ظ„ط¨</p>'; return; }
 
     const rawPhone = (s.phone||'').replace(/\D/g,'');
     const waPhone  = rawPhone ? '2'+rawPhone.replace(/^0/,'') : '';
@@ -455,17 +455,17 @@ async function openStudentDetail(uid) {
     const lvlRGB = lvl.cls==='level-top'?'46,204,113':lvl.cls==='level-mid'?'241,196,15':'231,76,60';
 
     const statBar = `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:18px;">
-        <div style="background:rgba(52,152,219,0.1);border:1px solid rgba(52,152,219,0.25);border-radius:10px;padding:12px;text-align:center;"><div style="font-size:1.6rem;font-weight:800;color:#3498db;">${stats.avgExam!==null?stats.avgExam+'%':'â€”'}</div><div style="font-size:0.75rem;color:rgba(255,255,255,0.5);">ظ…طھظˆط³ط· ط§ظ„ط§ظ…طھط­ط§ظ†ط§طھ</div></div>
-        <div style="background:rgba(155,89,182,0.1);border:1px solid rgba(155,89,182,0.25);border-radius:10px;padding:12px;text-align:center;"><div style="font-size:1.6rem;font-weight:800;color:#9b59b6;">${stats.avgHomework!==null?stats.avgHomework+'%':'â€”'}</div><div style="font-size:0.75rem;color:rgba(255,255,255,0.5);">ظ…طھظˆط³ط· ط§ظ„ظˆط§ط¬ط¨ط§طھ</div></div>
-        <div style="background:rgba(46,204,113,0.1);border:1px solid rgba(46,204,113,0.25);border-radius:10px;padding:12px;text-align:center;"><div style="font-size:1.6rem;font-weight:800;color:#2ecc71;">${stats.avgTraining!==null?stats.avgTraining+'%':'â€”'}</div><div style="font-size:0.75rem;color:rgba(255,255,255,0.5);">ظ…طھظˆط³ط· ط§ظ„طھط¯ط±ظٹط¨ط§طھ</div></div>
+        <div style="background:rgba(52,152,219,0.1);border:1px solid rgba(52,152,219,0.25);border-radius:10px;padding:12px;text-align:center;"><div style="font-size:1.6rem;font-weight:800;color:#3498db;">${stats.avgExam!==null?stats.avgExam+'%':'â€”'}</div><div style="font-size:0.75rem;color:rgba(255,255,255,0.5);">ظ…طھظˆط³ط· الامتحانات</div></div>
+        <div style="background:rgba(155,89,182,0.1);border:1px solid rgba(155,89,182,0.25);border-radius:10px;padding:12px;text-align:center;"><div style="font-size:1.6rem;font-weight:800;color:#9b59b6;">${stats.avgHomework!==null?stats.avgHomework+'%':'â€”'}</div><div style="font-size:0.75rem;color:rgba(255,255,255,0.5);">ظ…طھظˆط³ط· الواجبات</div></div>
+        <div style="background:rgba(46,204,113,0.1);border:1px solid rgba(46,204,113,0.25);border-radius:10px;padding:12px;text-align:center;"><div style="font-size:1.6rem;font-weight:800;color:#2ecc71;">${stats.avgTraining!==null?stats.avgTraining+'%':'â€”'}</div><div style="font-size:0.75rem;color:rgba(255,255,255,0.5);">ظ…طھظˆط³ط· التدريبات</div></div>
         <div style="background:rgba(212,175,55,0.1);border:1px solid rgba(212,175,55,0.25);border-radius:10px;padding:12px;text-align:center;"><div style="font-size:1.6rem;font-weight:800;color:var(--royal-gold);">${stats.watchPct!==null?stats.watchPct+'%':'â€”'}</div><div style="font-size:0.75rem;color:rgba(255,255,255,0.5);">ظ†ط³ط¨ط© ط§ظ„ظ…ط´ط§ظ‡ط¯ط©</div></div>
         <div style="background:rgba(${lvlRGB},0.1);border:1px solid rgba(${lvlRGB},0.25);border-radius:10px;padding:12px;text-align:center;"><div style="font-size:1.6rem;font-weight:800;" class="${lvl.cls}">${overall}%</div><div style="font-size:0.75rem;color:rgba(255,255,255,0.5);">ط§ظ„ظ…ط³طھظˆظ‰: ${lvl.label}</div></div>
     </div>`;
 
     const catTabs = `<div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
-        <button class="cat-tab-btn active" id="catBtn-exams"     onclick="switchModalCat('exams',this)">ًں“„ ط§ظ„ط§ظ…طھط­ط§ظ†ط§طھ (${[...new Set(exams.map(r=>r.examTitle))].length})</button>
-        <button class="cat-tab-btn"        id="catBtn-homeworks"  onclick="switchModalCat('homeworks',this)">ًں“ڑ ط§ظ„ظˆط§ط¬ط¨ط§طھ (${[...new Set(homeworks.map(r=>r.examTitle))].length})</button>
-        <button class="cat-tab-btn"        id="catBtn-trainings"  onclick="switchModalCat('trainings',this)">ًں“‌ ط§ظ„طھط¯ط±ظٹط¨ط§طھ (${[...new Set(trainings.map(r=>r.examTitle))].length})</button>
+        <button class="cat-tab-btn active" id="catBtn-exams"     onclick="switchModalCat('exams',this)">ًں“„ الامتحانات (${[...new Set(exams.map(r=>r.examTitle))].length})</button>
+        <button class="cat-tab-btn"        id="catBtn-homeworks"  onclick="switchModalCat('homeworks',this)">ًں“ڑ الواجبات (${[...new Set(homeworks.map(r=>r.examTitle))].length})</button>
+        <button class="cat-tab-btn"        id="catBtn-trainings"  onclick="switchModalCat('trainings',this)">ًں“‌ التدريبات (${[...new Set(trainings.map(r=>r.examTitle))].length})</button>
     </div>`;
 
     const renderCategory = (id, items, typeStr, isVisible) => {
@@ -572,7 +572,7 @@ async function saveGradeOverride(uid, examTitle, btn) {
                 if (r.isHomework) isHomework=true;
             }
         });
-        if (!updated) { alert('ظ„ظ… ظٹطھظ… ط§ظ„ط¹ط«ظˆط± ط¹ظ„ظ‰ ظ‡ط°ط§ ط§ظ„ط§ظ…طھط­ط§ظ† ظپظٹ ط³ط¬ظ„ط§طھ ط§ظ„ط·ط§ظ„ط¨'); btn.textContent='ط­ظپط¸'; return; }
+        if (!updated) { alert('لم يتم العثور على ظ‡ط°ط§ ط§ظ„ط§ظ…طھط­ط§ظ† ظپظٹ ط³ط¬ظ„ط§طھ ط§ظ„ط·ط§ظ„ط¨'); btn.textContent='ط­ظپط¸'; return; }
         const typeStr = isTrain?'طھط¯ط±ظٹط¨':(isHomework?'ظˆط§ط¬ط¨':'ط§ظ…طھط­ط§ظ†');
         local.notifications = local.notifications||[];
         local.notifications.push({ title:`طھظ… ط¥ط¹ط§ط¯ط© طھطµط­ظٹط­ ${typeStr}`, message:`طھظ… ط¥ط¹ط§ط¯ط© طھطµط­ظٹط­ ${typeStr} "${examTitle}". ط¯ط±ط¬طھظƒ ط§ظ„ط¬ط¯ظٹط¯ط© ظ‡ظٹ ${newScore}%.`, timestamp:Date.now(), read:false, link:'exams.html' });
@@ -582,7 +582,7 @@ async function saveGradeOverride(uid, examTitle, btn) {
         filterStudentsTable();
         const sb = document.getElementById(`saveBtn_${tId}`);
         if (sb) { sb.classList.remove('urgent'); sb.textContent='âœ… طھظ… ط§ظ„ط­ظپط¸'; setTimeout(()=>{ sb.textContent='ًں’¾ ط­ظپط¸ ط§ظ„ط¯ط±ط¬ط©'; },2000); }
-    } catch(e) { alert('ط®ط·ط£ ظپظٹ ط§ظ„ط­ظپط¸: '+e.message); btn.textContent='ط­ظپط¸'; }
+    } catch(e) { alert('خطأ في الحفظ: '+e.message); btn.textContent='ط­ظپط¸'; }
 }
 
 window.toggleQuestionScore = function(uid, examTitle, qIndex, btn) {
@@ -658,7 +658,7 @@ async function loadLateStudents() {
         const courseMap={};let totalCourseItems=0;
         allCourses.forEach(c=>{ const items=extractItems(c); if(items.length){courseMap[c.id]={course:c,items};totalCourseItems+=items.length;} });
 
-        if (!totalCourseItems) { container.innerHTML=`<div style="text-align:center;padding:40px;"><i class="fas fa-box-open" style="font-size:2.5rem;color:rgba(255,255,255,0.2);display:block;margin-bottom:14px;"></i><p style="color:rgba(255,255,255,0.45);">ظ„ط§ ظٹظˆط¬ط¯ ظ…ط­طھظˆظ‰ ظ…ظ†ط´ظˆط± ظپظٹ ط§ظ„ظƒظˆط±ط³ط§طھ ط§ظ„ظ…ط­ط¯ط¯ط© ط­طھظ‰ ط§ظ„ط¢ظ†.</p></div>`; return; }
+        if (!totalCourseItems) { container.innerHTML=`<div style="text-align:center;padding:40px;"><i class="fas fa-box-open" style="font-size:2.5rem;color:rgba(255,255,255,0.2);display:block;margin-bottom:14px;"></i><p style="color:rgba(255,255,255,0.45);">ظ„ط§ ظٹظˆط¬ط¯ ظ…ط­طھظˆظ‰ ظ…ظ†ط´ظˆط± ظپظٹ الكورسات ط§ظ„ظ…ط­ط¯ط¯ط© ط­طھظ‰ ط§ظ„ط¢ظ†.</p></div>`; return; }
 
         let students=[];
         let q=window.firebaseDb.collection('students');
@@ -678,7 +678,7 @@ async function loadLateStudents() {
         });
 
         const lateList=Object.values(lateMap).sort((a,b)=>b.missed.length-a.missed.length);
-        if (!lateList.length) { container.innerHTML=`<div style="text-align:center;padding:40px;color:#2ecc71;"><i class="fas fa-check-circle" style="font-size:2.5rem;display:block;margin-bottom:10px;"></i><h3 style="margin:0 0 8px;">ط±ط§ط¦ط¹! ظ„ط§ طھظˆط¬ط¯ ظ…طھط£ط®ط±ط§طھ ًںژ‰</h3><p style="color:rgba(255,255,255,0.45);">ط¬ظ…ظٹط¹ ط§ظ„ط·ظ„ط§ط¨ ط£ظƒظ…ظ„ظˆط§ ط§ظ„ظ…ط­طھظˆظ‰ ط§ظ„ظ…ظ†ط´ظˆط±</p></div>`; return; }
+        if (!lateList.length) { container.innerHTML=`<div style="text-align:center;padding:40px;color:#2ecc71;"><i class="fas fa-check-circle" style="font-size:2.5rem;display:block;margin-bottom:10px;"></i><h3 style="margin:0 0 8px;">ط±ط§ط¦ط¹! ظ„ط§ طھظˆط¬ط¯ ظ…طھط£ط®ط±ط§طھ ًںژ‰</h3><p style="color:rgba(255,255,255,0.45);">ط¬ظ…ظٹط¹ الطلاب ط£ظƒظ…ظ„ظˆط§ ط§ظ„ظ…ط­طھظˆظ‰ ط§ظ„ظ…ظ†ط´ظˆط±</p></div>`; return; }
 
         const T={video:'ًںژ¥ ظ…ط´ط§ظ‡ط¯ط© ط§ظ„ظ…ط­ط§ط¶ط±ط©',training:'ًں“‌ ط­ظ„ ط§ظ„طھط¯ط±ظٹط¨',طھط¯ط±ظٹط¨:'ًں“‌ ط­ظ„ ط§ظ„طھط¯ط±ظٹط¨',quiz:'ًں“‹ ط­ظ„ ط§ظ„ط§ط®طھط¨ط§ط±',homework:'ًں“ڑ طھط³ظ„ظٹظ… ط§ظ„ظˆط§ط¬ط¨',ظˆط§ط¬ط¨:'ًں“ڑ طھط³ظ„ظٹظ… ط§ظ„ظˆط§ط¬ط¨',exam:'ًں“„ ط­ظ„ ط§ظ„ط§ظ…طھط­ط§ظ†',ط§ظ…طھط­ط§ظ†:'ًں“„ ط­ظ„ ط§ظ„ط§ظ…طھط­ط§ظ†',task:'âœڈï¸ڈ ط¥ظ†ط¬ط§ط² ط§ظ„ظ…ظ‡ظ…ط©'};
 

@@ -4,7 +4,7 @@
     <link rel="manifest" href="./manifest.json">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ط§ظ„ط§ظ…طھط­ط§ظ†ط§طھ - ظ…ظ†طµط© ظٹظˆط³ظپ ط¨ط±ظƒط§طھ</title>
+    <title>الامتحانات - منصة يوسف بركات</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/style.css?v=1785347365048">
     <link rel="stylesheet" href="css/dashboard.css">
@@ -243,7 +243,7 @@
     <header class="navbar glass-panel">
         <a href="index.html" class="nav-brand">
             <div class="logo-circle" style="width: 40px; height: 40px; font-size: 1.2rem;">ظٹ</div>
-            <span class="nav-brand-text">ظ…ظ†طµط© ظٹظˆط³ظپ ط¨ط±ظƒط§طھ</span>
+            <span class="nav-brand-text">منصة يوسف بركات</span>
         </a>
         <div class="nav-actions">
             <a href="#" class="btn btn-outline" style="padding: 8px 15px; border-radius: 20px;"><i class="fas fa-bell"></i></a>
@@ -265,8 +265,8 @@
                 <li><a href="profile.html"><i class="fas fa-user"></i> ط­ط³ط§ط¨ظٹ</a></li>
                 <li><a href="courses.html"><i class="fas fa-plus-circle"></i> ط§ط´طھط±ط§ظƒ ظپظٹ ظƒظˆط±ط³ط§طھ</a></li>
                 <li><a href="my-courses.html"><i class="fas fa-video"></i> ظƒظˆط±ط³ط§طھظٹ</a></li>
-                <li><a href="homeworks.html"><i class="fas fa-tasks"></i> ط§ظ„ظˆط§ط¬ط¨ط§طھ</a></li>
-                <li><a href="exams.html" class="active"><i class="fas fa-clipboard-list"></i> ط§ظ„ط§ظ…طھط­ط§ظ†ط§طھ</a></li>
+                <li><a href="homeworks.html"><i class="fas fa-tasks"></i> الواجبات</a></li>
+                <li><a href="exams.html" class="active"><i class="fas fa-clipboard-list"></i> الامتحانات</a></li>
                 <li><a href="stats.html"><i class="fas fa-chart-line"></i> ط§ظ„ط¥ط­طµط§ط¦ظٹط§طھ</a></li>
                 <li><a href="settings.html"><i class="fas fa-cog"></i> ط§ظ„ط¥ط¹ط¯ط§ط¯ط§طھ</a></li>
             </ul>
@@ -274,7 +274,7 @@
 
         <main class="main-content">
             <div class="page-header">
-                <h1 class="page-title"><i class="fas fa-clipboard-list mr-2 text-gold"></i> ط§ظ„ط§ظ…طھط­ط§ظ†ط§طھ</h1>
+                <h1 class="page-title"><i class="fas fa-clipboard-list mr-2 text-gold"></i> الامتحانات</h1>
                 <p style="color:rgba(255,255,255,0.5); margin-top:5px; font-size:0.9rem;">ط§ط¶ط؛ط· ط¹ظ„ظ‰ ط£ظٹ ط¯ط±ط¬ط© ظ„ط¹ط±ط¶ طھظپط§طµظٹظ„ ط§ظ„ط¥ط¬ط§ط¨ط§طھ ظˆط§ظ„طھطµط­ظٹط­ ط§ظ„ظƒط§ظ…ظ„</p>
             </div>
 
@@ -283,8 +283,8 @@
                 <div id="noExamState" style="display: none; text-align: center; padding: 50px 20px;">
                     <i class="fas fa-book-reader text-gold" style="font-size: 4rem; margin-bottom: 20px; opacity: 0.5;"></i>
                     <h2 style="color: var(--soft-white); margin-bottom: 10px;">ظ„ط§ طھظˆط¬ط¯ ط§ظ…طھط­ط§ظ†ط§طھ ط¨ط¹ط¯</h2>
-                    <p style="color: rgba(255,255,255,0.7); margin-bottom: 20px;">ط§ط´طھط±ظƒ ظپظٹ ط§ظ„ظƒظˆط±ط³ط§طھ ط£ظˆظ„ط§ظ‹ ظ„ظ„ظˆطµظˆظ„ ط¥ظ„ظ‰ ط§ظ„ط§ظ…طھط­ط§ظ†ط§طھ ط§ظ„ط®ط§طµط© ط¨ظ‡ط§</p>
-                    <a href="courses.html" class="btn btn-gold btn-large">طھطµظپط­ ط§ظ„ظƒظˆط±ط³ط§طھ</a>
+                    <p style="color: rgba(255,255,255,0.7); margin-bottom: 20px;">ط§ط´طھط±ظƒ ظپظٹ الكورسات ط£ظˆظ„ط§ظ‹ ظ„ظ„ظˆطµظˆظ„ ط¥ظ„ظ‰ الامتحانات ط§ظ„ط®ط§طµط© ط¨ظ‡ط§</p>
+                    <a href="courses.html" class="btn btn-gold btn-large">طھطµظپط­ الكورسات</a>
                 </div>
             </div>
         </main>
@@ -430,9 +430,9 @@
                     return html;
                 };
 
-                const examsHtml    = renderGroup(groups.exam,     'fas fa-file-alt',  'ط§ظ„ط§ظ…طھط­ط§ظ†ط§طھ', '#3498db');
-                const trainingsHtml= renderGroup(groups.training,  'fas fa-dumbbell',  'ط§ظ„طھط¯ط±ظٹط¨ط§طھ',  '#e67e22');
-                const homeworksHtml= renderGroup(groups.homework,  'fas fa-home',      'ط§ظ„ظˆط§ط¬ط¨ط§طھ',   '#9b59b6');
+                const examsHtml    = renderGroup(groups.exam,     'fas fa-file-alt',  'الامتحانات', '#3498db');
+                const trainingsHtml= renderGroup(groups.training,  'fas fa-dumbbell',  'التدريبات',  '#e67e22');
+                const homeworksHtml= renderGroup(groups.homework,  'fas fa-home',      'الواجبات',   '#9b59b6');
 
                 row.innerHTML = `
                     <div class="course-exam-header">
@@ -449,9 +449,9 @@
                     </div>
                     <div class="course-exam-body">
                         <div style="display:flex; gap:10px; margin-bottom:18px; flex-wrap:wrap;">
-                            <button class="btn btn-gold filter-btn" data-target="exam" style="flex:1; min-width:100px;">ط§ظ„ط§ظ…طھط­ط§ظ†ط§طھ</button>
-                            <button class="btn btn-outline filter-btn" data-target="training" style="flex:1; min-width:100px;">ط§ظ„طھط¯ط±ظٹط¨ط§طھ</button>
-                            <button class="btn btn-outline filter-btn" data-target="homework" style="flex:1; min-width:100px;">ط§ظ„ظˆط§ط¬ط¨ط§طھ</button>
+                            <button class="btn btn-gold filter-btn" data-target="exam" style="flex:1; min-width:100px;">الامتحانات</button>
+                            <button class="btn btn-outline filter-btn" data-target="training" style="flex:1; min-width:100px;">التدريبات</button>
+                            <button class="btn btn-outline filter-btn" data-target="homework" style="flex:1; min-width:100px;">الواجبات</button>
                         </div>
                         <div class="filter-section" id="section-exam">
                             ${examsHtml || '<div class="empty-message">ظ„ط§ طھظˆط¬ط¯ ط§ظ…طھط­ط§ظ†ط§طھ ظ…ظƒطھظ…ظ„ط© ط¨ط¹ط¯</div>'}
