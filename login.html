@@ -33,7 +33,7 @@
                     <input type="checkbox" id="rememberMe" style="width:16px; height:16px; accent: var(--royal-gold);" />
                     تذكرني على هذا الجهاز
                 </label>
-                <a href="#" id="forgotPasswordLink" onclick="document.getElementById('forgotPasswordModal').style.display='flex'; return false;" style="color: var(--accent-cyan); font-weight: 700;">نسيت كلمة المرورطں</a>
+                <a href="#" id="forgotPasswordLink" onclick="document.getElementById('forgotPasswordModal').style.display='flex'; return false;" style="color: var(--accent-cyan); font-weight: 700;">نسيت كلمة المرور؟</a>
             </div>
             <div id="loginError" class="error-message"></div>
             <button type="submit" class="btn btn-green btn-block">تسجيل الدخول</button>
@@ -47,13 +47,13 @@
                 <div id="fpStatusText" style="display:none; margin-bottom: 20px; padding: 12px 14px; border-radius: 16px; font-size: 0.95rem; line-height:1.5;"></div>
                 <form id="forgotPasswordForm">
                     <div class="form-group">
-                        <label>رقم الط·الب</label>
-                        <input type="tel" id="fpStudentPhone" class="form-control" placeholder="رقم الط·الب" required>
+                        <label>رقم الطالب</label>
+                        <input type="tel" id="fpStudentPhone" class="form-control" placeholder="رقم الطالب" required>
                     </div>
                     <div class="form-group">
                         <label>رقم ولي الأمر</label>
                         <input type="tel" id="fpParentPhone" class="form-control" placeholder="رقم ولي الأمر" required>
-                        <span id="fpParentError" class="error-message" style="display:none;">رقم ولي الأمر ط؛ير صحيح.</span>
+                        <span id="fpParentError" class="error-message" style="display:none;">رقم ولي الأمر غير صحيح.</span>
                     </div>
                     <div id="fpStep2" style="display:none;">
                         <div class="form-group">
@@ -71,19 +71,19 @@
                         <div class="form-group">
                             <label>تأكيد كلمة المرور الجديدة</label>
                             <input type="password" id="fpConfirmPassword" class="form-control" placeholder="تأكيد كلمة المرور الجديدة">
-                            <span id="fpPasswordError" class="error-message" style="display:none;">كلمتا المرور ط؛ير متط·ابقتين.</span>
+                            <span id="fpPasswordError" class="error-message" style="display:none;">كلمتا المرور غير متطابقتين.</span>
                         </div>
                     </div>
                     <div style="display:flex; justify-content: space-between; gap: 10px; margin-top: 20px;">
-                        <button type="button" class="btn btn-outline" onclick="document.getElementById('forgotPasswordModal').style.display='none'">إط؛لاق</button>
-                        <button type="submit" id="fpSubmitBtn" class="btn btn-green">تأكيد تط؛يير كلمة المرور</button>
+                        <button type="button" class="btn btn-outline" onclick="document.getElementById('forgotPasswordModal').style.display='none'">إغلاق</button>
+                        <button type="submit" id="fpSubmitBtn" class="btn btn-green">تأكيد تغيير كلمة المرور</button>
                     </div>
                 </form>
             </div>
         </div>
         
         <div class="auth-footer mt-2">
-            <p>ليس لديك حسابطں <a href="register.html">إنشاط، حساب جديد</a></p>
+            <p>ليس لديك حساب؟ <a href="register.html">إنشاء حساب جديد</a></p>
         </div>
     </div>
 

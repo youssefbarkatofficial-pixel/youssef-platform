@@ -257,7 +257,7 @@
                 <div class="avatar" style="overflow: hidden;">
                     <img loading="lazy" id="userAvatarImg" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Ccircle cx='40' cy='40' r='40' fill='%23071326'/%3E%3Ccircle cx='40' cy='30' r='16' fill='%23D4A64F'/%3E%3Cellipse cx='40' cy='70' rx='24' ry='18' fill='%23D4A64F'/%3E%3C/svg%3E" style="width: 100%; height: 100%; object-fit: cover;">
                 </div>
-                <h4 id="userNameDisplay">ط·الب</h4>
+                <h4 id="userNameDisplay">طالب</h4>
                 <p id="userGradeDisplay">الصف الدراسي</p>
             </div>
             <ul class="sidebar-nav">
@@ -275,7 +275,7 @@
         <main class="main-content">
             <div class="page-header">
                 <h1 class="page-title"><i class="fas fa-clipboard-list mr-2 text-gold"></i> الامتحانات</h1>
-                <p style="color:rgba(255,255,255,0.5); margin-top:5px; font-size:0.9rem;">اضط؛ط· على أي درجة لعرض تفاصيل الإجابات والتصحيح الكامل</p>
+                <p style="color:rgba(255,255,255,0.5); margin-top:5px; font-size:0.9rem;">اضغط على أي درجة لعرض تفاصيل الإجابات والتصحيح الكامل</p>
             </div>
 
             <div class="glass-panel dash-panel" style="min-height: 400px;">
@@ -329,8 +329,8 @@
         if (gradeEl) {
             const effectiveGrade = (window.getEffectiveStudentGrade && window.getGradeLabel)
                 ? window.getGradeLabel(window.getEffectiveStudentGrade(user))
-                : (user.grade || 'ط·الب');
-            gradeEl.textContent = effectiveGrade || 'ط·الب';
+                : (user.grade || 'طالب');
+            gradeEl.textContent = effectiveGrade || 'طالب';
         }
 
         let dbUser = JSON.parse(localStorage.getItem(`db_${user.phone}`)) || { courses: [] };
@@ -398,12 +398,12 @@
                     let html = `<div class="exam-category"><h4 style="color:${color};"><i class="${icon} mr-2"></i>${title}</h4>`;
                     groupArr.forEach(item => {
                         html += `<div class="exam-item-card">`;
-                        html += `<div class="exam-item-title"><i class="fas fa-file-alt mr-2" style="opacity:0.5;"></i>${item.task.title || 'امتحان ط؛ير مسمى'}</div>`;
+                        html += `<div class="exam-item-title"><i class="fas fa-file-alt mr-2" style="opacity:0.5;"></i>${item.task.title || 'امتحان غير مسمى'}</div>`;
                         html += `<div class="attempts-row">`;
                         
                         if (item.attempts.length === 0) {
                             html += `<div style="padding: 10px; width: 100%; text-align: center; color: #fff; background: rgba(231, 76, 60, 0.1); border: 1px dashed #e74c3c; border-radius: 8px;">
-                                        <div style="margin-bottom:8px; font-weight:bold; color: #e74c3c;"><i class="fas fa-exclamation-circle"></i> ط؛ير مكتمل</div>
+                                        <div style="margin-bottom:8px; font-weight:bold; color: #e74c3c;"><i class="fas fa-exclamation-circle"></i> غير مكتمل</div>
                                         <button onclick="window.location.href='course-details.html?id=${cId}'" class="btn btn-outline" style="padding:5px 15px; font-size:0.9rem; border-color:#e74c3c; color:#e74c3c;">الذهاب للمهمة</button>
                                      </div>`;
                         } else {
@@ -468,7 +468,7 @@
                 toggleBtn.addEventListener('click', () => {
                     row.classList.toggle('active');
                     toggleBtn.innerHTML = row.classList.contains('active')
-                        ? 'إخفاط، النتائج <i class="fas fa-chevron-up ml-2" style="margin-right:8px;"></i>'
+                        ? 'إخفاء النتائج <i class="fas fa-chevron-up ml-2" style="margin-right:8px;"></i>'
                         : 'عرض النتائج <i class="fas fa-chevron-down ml-2" style="margin-right:8px;"></i>';
                 });
 
@@ -544,11 +544,11 @@
             bannerEl.innerHTML = `
                 <div class="score-circle-wrap">
                     <div class="score-circle ${scoreClass}">${pct}%</div>
-                    <div style="font-size:0.78rem; color:rgba(255,255,255,0.5);">${pct >= 85 ? 'ممتاز ًںژ‰' : pct >= 60 ? 'جيد ًں‘چ' : pct >= 40 ? 'متوسط·' : 'يحتاج مراجعة'}</div>
+                    <div style="font-size:0.78rem; color:rgba(255,255,255,0.5);">${pct >= 85 ? 'ممتاز ًںژ‰' : pct >= 60 ? 'جيد ًں‘چ' : pct >= 40 ? 'متوسط' : 'يحتاج مراجعة'}</div>
                 </div>
                 ${total ? `<div class="score-stat"><div class="score-stat-val" style="color:#fff;">${total}</div><div class="score-stat-lbl">إجمالي الأسئلة</div></div>` : ''}
                 ${correct != null ? `<div class="score-stat"><div class="score-stat-val" style="color:#2ecc71;">${correct}</div><div class="score-stat-lbl">إجابات صحيحة</div></div>` : ''}
-                ${wrong != null ? `<div class="score-stat"><div class="score-stat-val" style="color:#e74c3c;">${wrong}</div><div class="score-stat-lbl">إجابات خاط·ئة</div></div>` : ''}
+                ${wrong != null ? `<div class="score-stat"><div class="score-stat-val" style="color:#e74c3c;">${wrong}</div><div class="score-stat-lbl">إجابات خاطئة</div></div>` : ''}
                 ${skip != null && skip > 0 ? `<div class="score-stat"><div class="score-stat-val" style="color:#f39c12;">${skip}</div><div class="score-stat-lbl">لم يتم الإجابة</div></div>` : ''}
             `;
 
@@ -602,7 +602,7 @@
                         <div class="q-card ${statusClass}">
                             <div class="q-header">
                                 <div class="q-num ${numClass}"><i class="fas ${statusIcon}"></i></div>
-                                <div class="q-text"><strong>س${idx+1}:</strong> ${q.text || q.question || q.questionText || 'نص السؤال ط؛ير متاح'}</div>
+                                <div class="q-text"><strong>س${idx+1}:</strong> ${q.text || q.question || q.questionText || 'نص السؤال غير متاح'}</div>
                             </div>
                             ${imgHTML}
                             ${choicesHTML}

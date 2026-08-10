@@ -31,7 +31,7 @@
                 <div class="avatar" style="overflow: hidden;">
                     <img loading="lazy" id="userAvatarImg" src="https://via.placeholder.com/80/071326/D4A64F?text=%D8%B7%D8%A7%D9%84%D8%A8" style="width: 100%; height: 100%; object-fit: cover;">
                 </div>
-                <h4 id="userNameDisplay">ط·الب</h4>
+                <h4 id="userNameDisplay">طالب</h4>
                 <p id="userGradeDisplay">الصف الدراسي</p>
             </div>
             <ul class="sidebar-nav">
@@ -59,7 +59,7 @@
                 <div id="noCoursesState" style="display: none; text-align: center; padding: 50px 20px;">
                     <i class="fas fa-book-reader text-gold" style="font-size: 4rem; margin-bottom: 20px; opacity: 0.5;"></i>
                     <h2 style="color: var(--soft-white); margin-bottom: 10px;">لا يوجد كورسات مشترك فيها بعد</h2>
-                    <p style="color: rgba(255,255,255,0.7); margin-bottom: 20px;">ابدأ رحلتك التعليمية واشترك في أقوى الكورسات الط¢ن</p>
+                    <p style="color: rgba(255,255,255,0.7); margin-bottom: 20px;">ابدأ رحلتك التعليمية واشترك في أقوى الكورسات الآن</p>
                     <a href="courses.html" class="btn btn-gold btn-large">استكشف الكورسات</a>
                 </div>
             </div>
@@ -95,7 +95,7 @@
                 'sec2': 'الثاني الثانوي',
                 'sec3': 'الثالث الثانوي'
             };
-            document.getElementById('userGradeDisplay').textContent = grades[user.grade] || 'ط·الب';
+            document.getElementById('userGradeDisplay').textContent = grades[user.grade] || 'طالب';
 
             const container = document.getElementById('myCoursesList');
             const emptyState = document.getElementById('noCoursesState');

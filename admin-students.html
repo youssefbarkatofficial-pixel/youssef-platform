@@ -114,12 +114,12 @@
                     <table class="admin-table" id="studentsTable">
                         <thead>
                             <tr>
-                                <th>اسم الط·الب</th>
+                                <th>اسم الطالب</th>
                                 <th>رقم الموبايل</th>
                                 <th>الصف</th>
                                 <th>حالة الاتصال</th>
                                 <th>كورسات</th>
-                                <th>إجراط،ات</th>
+                                <th>إجراءات</th>
                             </tr>
                         </thead>
                         <tbody id="studentsTableBody"></tbody>
@@ -133,16 +133,16 @@
     <div id="studentEditorModal" class="student-modal">
         <div class="student-modal-content">
             <button id="closeStudentEditor" style="position: absolute; top: 20px; right: 20px; background: transparent; border: none; color: #fff; font-size: 1.8rem; cursor: pointer;"><i class="fas fa-times"></i></button>
-            <h2 class="text-gold mb-2" id="studentNameTitle">إدارة الط·الب</h2>
+            <h2 class="text-gold mb-2" id="studentNameTitle">إدارة الطالب</h2>
             <p style="color: rgba(255,255,255,0.7); margin-bottom: 20px;" id="studentPhoneSubtitle"></p>
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;">
                 <div class="glass-panel" style="padding: 15px; border-radius: 10px;">
-                    <h4 style="color: var(--accent-cyan); margin-bottom: 10px;"><i class="fas fa-info-circle"></i> تفاصيل النشاط·</h4>
+                    <h4 style="color: var(--accent-cyan); margin-bottom: 10px;"><i class="fas fa-info-circle"></i> تفاصيل النشاط</h4>
                     <ul style="list-style: none; color: rgba(255,255,255,0.8); line-height: 1.8;">
                         <li><strong>حالة الاتصال:</strong> <span id="sLastSeen">...</span></li>
                         <li><strong>نسبة حل الواجبات:</strong> <span id="sHwRate">0%</span></li>
-                        <li><strong>متوسط· الامتحانات:</strong> <span id="sExamAvg">0/0</span></li>
+                        <li><strong>متوسط الامتحانات:</strong> <span id="sExamAvg">0/0</span></li>
                         <li style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed rgba(255,255,255,0.2);">
                             <strong><i class="fas fa-phone text-gold"></i> رقم ولي الأمر:</strong> 
                             <span id="sParentPhone" dir="ltr">...</span>
@@ -154,7 +154,7 @@
                     </ul>
                 </div>
                 <div class="glass-panel" style="padding: 15px; border-radius: 10px;">
-                    <h4 style="color: var(--accent-cyan); margin-bottom: 10px;"><i class="fas fa-plus"></i> إضافة كورس للط·الب (مجانظ‹ا)</h4>
+                    <h4 style="color: var(--accent-cyan); margin-bottom: 10px;"><i class="fas fa-plus"></i> إضافة كورس للطالب (مجانظ‹ا)</h4>
                     <div style="display: flex; gap: 10px;">
                         <select id="availableCoursesSelect" class="form-control" style="flex: 1;"></select>
                         <button class="btn btn-outline" id="btnAddCourseToStudent">إضافة</button>
@@ -168,7 +168,7 @@
             <div style="margin-top: 40px; text-align: left;">
                 <div class="glass-panel" style="padding: 12px; border-radius: 10px; margin-bottom: 15px; background: rgba(0, 188, 212, 0.1); border-color: rgba(0, 188, 212, 0.3);">
                     <p style="color: #fff; margin: 0; font-size: 0.95rem;">
-                        <i class="fas fa-info-circle text-cyan mr-2"></i> <strong>ملاحظة:</strong> إذا نسي الط·الب كلمة المرورطŒ يمكنك إعط·ائه الكلمة المكتوبة بالأعلىطŒ أو يمكنك مسح حسابه من <a href="https://console.firebase.google.com/" target="_blank" style="color: var(--royal-gold);">Firebase Console</a> ليقوم بالتسجيل من جديد.
+                        <i class="fas fa-info-circle text-cyan mr-2"></i> <strong>ملاحظة:</strong> إذا نسي الطالب كلمة المرور، يمكنك إعط·ائه الكلمة المكتوبة بالأعلى، أو يمكنك مسح حسابه من <a href="https://console.firebase.google.com/" target="_blank" style="color: var(--royal-gold);">Firebase Console</a> ليقوم بالتسجيل من جديد.
                     </p>
                 </div>
                 <button class="btn btn-gold btn-large" id="btnSaveStudent"><i class="fas fa-save mr-2"></i> حفظ التعديلات</button>
@@ -180,10 +180,10 @@
     <div id="confirmSaveModal" class="confirm-modal">
         <div class="confirm-modal-content">
             <i class="fas fa-question-circle text-gold" style="font-size: 4rem; margin-bottom: 20px;"></i>
-            <h3>هل أنت متأكد من حفظ هذه التعديلات للط·البطں</h3>
+            <h3>هل أنت متأكد من حفظ هذه التعديلات للطالب؟</h3>
             <div class="confirm-modal-actions">
-                <button class="btn btn-green" id="btnConfirmSaveYes" style="flex: 1;">نعمطŒ احفظ</button>
-                <button class="btn btn-outline" id="btnConfirmSaveNo" style="flex: 1;">لاطŒ تراجع</button>
+                <button class="btn btn-green" id="btnConfirmSaveYes" style="flex: 1;">نعم، احفظ</button>
+                <button class="btn btn-outline" id="btnConfirmSaveNo" style="flex: 1;">لا، تراجع</button>
             </div>
         </div>
     </div>
@@ -193,7 +193,7 @@
         <div class="confirm-modal-content">
             <i class="fas fa-exclamation-triangle text-orange" style="font-size: 4rem; margin-bottom: 20px; color: #e67e22;"></i>
             <h3 style="margin-bottom: 10px;">تعديلات لم يتم حفظها!</h3>
-            <p style="color: rgba(255,255,255,0.7); margin-bottom: 20px;">هل تريد استكمال التعديل أم إلط؛اط، التعديلات والخروجطں</p>
+            <p style="color: rgba(255,255,255,0.7); margin-bottom: 20px;">هل تريد استكمال التعديل أم إلغاء التعديلات والخروج؟</p>
             <div class="confirm-modal-actions">
                 <button class="btn btn-outline" id="btnExitDiscard" style="flex: 1; border-color: #e74c3c; color: #e74c3c;">رفض التعديل والخروج</button>
                 <button class="btn btn-green" id="btnExitResume" style="flex: 1;">استكمال التعديل</button>
@@ -262,7 +262,7 @@
                         const data = doc.data();
                         // Provide fallback values instead of strict filtering to prevent ghost accounts disappearing
                         if (!data.phone || data.phone === 'undefined' || String(data.phone).trim() === '') data.phone = data.email || 'بدون هاتف';
-                        if (!data.name || data.name === 'undefined' || String(data.name).trim() === '') data.name = 'ط·الب مسجل بالإيميل';
+                        if (!data.name || data.name === 'undefined' || String(data.name).trim() === '') data.name = 'طالب مسجل بالإيميل';
                         if (data.role === 'admin') return;
                         
                         // Ghost Accounts Auto-Heal (Fix stripped dots in emails)
@@ -330,7 +330,7 @@
                 displayUsers.forEach(u => {
                     if (filter && !u.phone.includes(filter) && !(u.name || '').toLowerCase().includes(filter.toLowerCase())) return;
 
-                    // قراط،ة عدد الكورسات من بيانات Firestore (u.courses) أولاظ‹ ثم من الكاش المحلي
+                    // قراءة عدد الكورسات من بيانات Firestore (u.courses) أولاظ‹ ثم من الكاش المحلي
                     const coursesCount = Array.isArray(u.courses) ? u.courses.length :
                         (JSON.parse(localStorage.getItem(`db_${u.phone}`) || '{}').courses || []).length;
                     
@@ -343,7 +343,7 @@
                     }
                     const statusBadge = isOnline ? 
                         '<span class="badge" style="background: rgba(46, 204, 113, 0.2); color: #2ecc71;">متصل قريباظ‹</span>' : 
-                        '<span class="badge" style="background: rgba(149, 165, 166, 0.2); color: #95a5a6;">ط؛ير متصل</span>';
+                        '<span class="badge" style="background: rgba(149, 165, 166, 0.2); color: #95a5a6;">غير متصل</span>';
                         
                     const grades = {'prep1':'أولى إعدادي', 'prep2':'تانية إعدادي', 'prep3':'تالتة إعدادي', 'sec1':'أولى ثانوي'};
 
@@ -408,7 +408,7 @@
                 currentStudentPhone = phone;
                 hasUnsavedChanges = false;
                 
-                // قراط،ة الكورسات من بيانات Firestore (student.courses) أولاظ‹
+                // قراءة الكورسات من بيانات Firestore (student.courses) أولاظ‹
                 const firestoreCourses = Array.isArray(student.courses) ? student.courses : [];
                 let dbUser = JSON.parse(localStorage.getItem(`db_${phone}`)) || { courses: [] };
                 // دمج الكورسات من المصدرين
@@ -416,7 +416,7 @@
                 window.originalStudentCourses = [...mergedCourses];
                 tempStudentCourses = [...mergedCourses];
 
-                document.getElementById('studentNameTitle').textContent = `إدارة الط·الب: ${student.name}`;
+                document.getElementById('studentNameTitle').textContent = `إدارة الطالب: ${student.name}`;
                 document.getElementById('studentPhoneSubtitle').textContent = `رقم الهاتف: ${student.phone} | الصف: ${student.grade}`;
 
                 // Set strictly real stats
@@ -427,7 +427,7 @@
                     const last = new Date(lastActiveVal);
                     if ((new Date() - last) < 15 * 60 * 1000) isOnline = true;
                 }
-                document.getElementById('sLastSeen').textContent = isOnline ? 'متصل قريباظ‹' : 'ط؛ير متصل';
+                document.getElementById('sLastSeen').textContent = isOnline ? 'متصل قريباظ‹' : 'غير متصل';
                 let hwRate = stats.homeworkTotal > 0 ? Math.round((stats.homeworkCompleted / stats.homeworkTotal) * 100) : 0;
                 
                 if (stats.homeworkTotal === 0 && stats.homeworkCompleted === 0) {
@@ -450,7 +450,7 @@
                     }
                 } catch(e) {}
 
-                document.getElementById('sParentPhone').textContent = student.parentPhone || dbUser.parentPhone || fallbackParentPhone || 'ط؛ير مسجل';
+                document.getElementById('sParentPhone').textContent = student.parentPhone || dbUser.parentPhone || fallbackParentPhone || 'غير مسجل';
 
                 let finalPwd = student.plainPassword || student.password || dbUser.plainPassword || dbUser.password || 'مخفية';
                 document.getElementById('sPassword').innerHTML = `
@@ -475,7 +475,7 @@
                 list.innerHTML = '';
                 
                 if (tempStudentCourses.length === 0) {
-                    list.innerHTML = '<p style="color: rgba(255,255,255,0.5);">لا يوجد كورسات مشترك بها هذا الط·الب.</p>';
+                    list.innerHTML = '<p style="color: rgba(255,255,255,0.5);">لا يوجد كورسات مشترك بها هذا الطالب.</p>';
                     return;
                 }
 
@@ -489,7 +489,7 @@
                         <div>
                             <i class="fas fa-book-reader text-gold mr-2"></i> <strong>${courseName}</strong>
                         </div>
-                        <button class="btn btn-outline" style="padding: 5px 10px; font-size: 0.8rem; border-color: #e74c3c; color: #e74c3c;" onclick="removeCourseFromStudent('${cId}')"><i class="fas fa-trash"></i> الط؛اط، الكورس</button>
+                        <button class="btn btn-outline" style="padding: 5px 10px; font-size: 0.8rem; border-color: #e74c3c; color: #e74c3c;" onclick="removeCourseFromStudent('${cId}')"><i class="fas fa-trash"></i> الغاء الكورس</button>
                     `;
                     list.appendChild(div);
                 });
@@ -498,7 +498,7 @@
             document.getElementById('btnAddCourseToStudent').addEventListener('click', () => {
                 const cId = document.getElementById('availableCoursesSelect').value;
                 if(!cId) { alert('اختر كورس أولاظ‹'); return; }
-                if(tempStudentCourses.includes(cId)) { alert('الط·الب مشترك في هذا الكورس بالفعل'); return; }
+                if(tempStudentCourses.includes(cId)) { alert('الطالب مشترك في هذا الكورس بالفعل'); return; }
                 
                 tempStudentCourses.push(cId);
                 markUnsaved();
@@ -572,7 +572,7 @@
                                     id: reqId,
                                     userId: currentStudentPhone,
                                     userPhone: currentStudentPhone,
-                                    userName: student ? student.name : 'ط·الب',
+                                    userName: student ? student.name : 'طالب',
                                     courseId: cId,
                                     status: 'approved',
                                     price: 0,
@@ -617,7 +617,7 @@
                         else alert('تم حفظ التعديلات بنجاح');
                     } catch(err) {
                         console.error('Error during save student', err);
-                        alert('حدث خطأ أثناط، حفظ التعديلات. يرجى المحاولة مرة أخرى.');
+                        alert('حدث خطأ أثناء حفظ التعديلات. يرجى المحاولة مرة أخرى.');
                     } finally {
                         btn.innerHTML = originalText;
                         btn.disabled = false;
@@ -640,13 +640,13 @@
             <i class="fas fa-search-plus text-gold" style="font-size: 3rem; margin-bottom: 15px;"></i>
             <h3 style="margin-bottom: 20px; color: var(--royal-gold);">فك شفرة التسريب (REF Code)</h3>
             <p style="color: rgba(255,255,255,0.7); margin-bottom: 20px; font-size: 0.9rem;">
-                أدخل الكود الموجود في زاوية الشاشة أو على الفيديو (مثال: YB-XXXX-YYYY) لمعرفة هوية الط·الب.
+                أدخل الكود الموجود في زاوية الشاشة أو على الفيديو (مثال: YB-XXXX-YYYY) لمعرفة هوية الطالب.
             </p>
             <input type="text" id="decoderInput" class="form-control" placeholder="YB-..." style="text-align: center; font-size: 1.2rem; letter-spacing: 2px; text-transform: uppercase;">
             <div id="decoderResult" style="margin-top: 20px; text-align: right; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; display: none;"></div>
             <div class="confirm-modal-actions" style="margin-top: 25px;">
                 <button class="btn btn-gold" onclick="decodeRefCode()" style="flex: 1;">فك الشفرة</button>
-                <button class="btn btn-outline" onclick="closeDecoderModal()" style="flex: 1;">إط؛لاق</button>
+                <button class="btn btn-outline" onclick="closeDecoderModal()" style="flex: 1;">إغلاق</button>
             </div>
         </div>
     </div>
@@ -666,12 +666,12 @@
             resultDiv.style.display = 'block';
             
             if (!code.startsWith('YB-')) {
-                resultDiv.innerHTML = '<span style="color:#e74c3c;">الكود ط؛ير صحيح. يجب أن يبدأ بظ€ YB-</span>';
+                resultDiv.innerHTML = '<span style="color:#e74c3c;">الكود غير صحيح. يجب أن يبدأ بظ€ YB-</span>';
                 return;
             }
             const parts = code.split('-');
             if (parts.length < 3) {
-                resultDiv.innerHTML = '<span style="color:#e74c3c;">تنسيق الكود ط؛ير مكتمل.</span>';
+                resultDiv.innerHTML = '<span style="color:#e74c3c;">تنسيق الكود غير مكتمل.</span>';
                 return;
             }
             
@@ -686,36 +686,36 @@
                 let student = users.find(u => u.phone === phone);
                 
                 let html = `<div style="color:var(--accent-cyan); font-weight:bold; margin-bottom:10px;">تم فك الشفرة بنجاح:</div>`;
-                html += `<div><strong>رقم هاتف الط·الب:</strong> <span dir="ltr">${phone}</span></div>`;
+                html += `<div><strong>رقم هاتف الطالب:</strong> <span dir="ltr">${phone}</span></div>`;
                 html += `<div><strong>رقم ولي الأمر:</strong> <span dir="ltr">${parentPhone}</span></div>`;
                 
                 if (student) {
                     html += `<div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.1);">`;
-                    html += `<div><strong>اسم الط·الب:</strong> ${student.name}</div>`;
+                    html += `<div><strong>اسم الطالب:</strong> ${student.name}</div>`;
                     html += `<div><strong>الصف الدراسي:</strong> ${student.grade}</div>`;
                     html += `</div>`;
                 } else {
-                    html += `<div style="margin-top: 10px; color:#f39c12; font-size:0.85rem;"><i class="fas fa-exclamation-triangle"></i> الط·الب ط؛ير مسجل حالياظ‹ في قاعدة البيانات بهذه الأرقامطŒ ربما قام بحذف حسابه.</div>`;
+                    html += `<div style="margin-top: 10px; color:#f39c12; font-size:0.85rem;"><i class="fas fa-exclamation-triangle"></i> الطالب غير مسجل حالياظ‹ في قاعدة البيانات بهذه الأرقام، ربما قام بحذف حسابه.</div>`;
                 }
                 
                 resultDiv.innerHTML = html;
             } catch(e) {
-                resultDiv.innerHTML = '<span style="color:#e74c3c;">خط·أ أثناط، فك الشفرة. تأكد من الحروف والأرقام.</span>';
+                resultDiv.innerHTML = '<span style="color:#e74c3c;">خطأ أثناء فك الشفرة. تأكد من الحروف والأرقام.</span>';
             }
         } 
 
         window.promptChangePassword = async function(phone) {
             const adminData = JSON.parse(sessionStorage.getItem('currentAdmin') || '{}');
-            const adminPass = window.prompt("للحماية: برجاط، إدخال كلمة مرور مدير المنصة (الأدمن) الخاصة بك لتأكيد التعديل:");
+            const adminPass = window.prompt("للحماية: برجاء إدخال كلمة مرور مدير المنصة (الأدمن) الخاصة بك لتأكيد التعديل:");
             
             if (!adminPass) return;
             
             if (adminPass !== adminData.password && adminPass !== 'YoussefMBarakat175235') {
-                alert("كلمة مرور المدير ط؛ير صحيحة. تم إلط؛اط، العملية.");
+                alert("كلمة مرور المدير غير صحيحة. تم إلغاء العملية.");
                 return;
             }
 
-            const newPwd = window.prompt("أدخل كلمة المرور الجديدة التي تريد تسجيلها لهذا الط·الب:");
+            const newPwd = window.prompt("أدخل كلمة المرور الجديدة التي تريد تسجيلها لهذا الطالب:");
             if (newPwd) {
                 if (typeof window.adminOverwriteStudentPassword === 'function') {
                     try {
@@ -723,10 +723,10 @@
                         document.getElementById('pwdDisplaySpan').textContent = newPwd;
                         if (window.showToast) window.showToast('تم حفظ الباسورد الجديد بنجاح', 'success');
                     } catch(e) {
-                        alert('حدث خطأ أثناط، حفظ الباسورد: ' + e.message);
+                        alert('حدث خطأ أثناء حفظ الباسورد: ' + e.message);
                     }
                 } else {
-                    alert('وظيفة الحفظ ط؛ير متوفرة حالياظ‹.');
+                    alert('وظيفة الحفظ غير متوفرة حالياظ‹.');
                 }
             }
         };
@@ -779,9 +779,9 @@
         <div class="lb-close" onclick="document.getElementById('imgLightbox').style.display='none'; document.body.style.overflow='';">
             <i class="fas fa-times"></i>
         </div>
-        <img loading="lazy" id="lbImg" src="" alt="صورة الط·الب" onclick="event.stopPropagation()">
+        <img loading="lazy" id="lbImg" src="" alt="صورة الطالب" onclick="event.stopPropagation()">
         <p id="lbCaption" style="color: rgba(255,255,255,0.8); font-size: 1rem; text-align: center; margin: 0;"></p>
-        <p style="color: rgba(255,255,255,0.4); font-size: 0.8rem;">اضط؛ط· خارج الصورة للإط؛لاق</p>
+        <p style="color: rgba(255,255,255,0.4); font-size: 0.8rem;">اضغط خارج الصورة للإغلاق</p>
     </div>
 
     <script>

@@ -83,7 +83,7 @@
                 <div class="avatar" style="overflow: hidden;">
                     <img loading="lazy" id="userAvatarImg" src="https://via.placeholder.com/80/071326/D4A64F?text=%D8%B7%D8%A7%D9%84%D8%A8" style="width: 100%; height: 100%; object-fit: cover;">
                 </div>
-                <h4 id="userNameDisplay">ط·الب</h4>
+                <h4 id="userNameDisplay">طالب</h4>
                 <p id="userGradeDisplay">الصف الدراسي</p>
             </div>
             <ul class="sidebar-nav">
@@ -139,8 +139,8 @@
             if(gradeEl) {
                 const effectiveGrade = (window.getEffectiveStudentGrade && window.getGradeLabel)
                     ? window.getGradeLabel(window.getEffectiveStudentGrade(user))
-                    : (user.grade || 'ط·الب');
-                gradeEl.textContent = effectiveGrade || 'ط·الب';
+                    : (user.grade || 'طالب');
+                gradeEl.textContent = effectiveGrade || 'طالب';
             }
             let dbUser = JSON.parse(localStorage.getItem(`db_${user.phone}`)) || { courses: [] };
             try {
@@ -217,7 +217,7 @@
                     toggleBtn.addEventListener('click', () => {
                         row.classList.toggle('active');
                         toggleBtn.innerHTML = row.classList.contains('active')
-                            ? 'إخفاط، الواجبات <i class="fas fa-chevron-up" style="margin-right:8px;"></i>'
+                            ? 'إخفاء الواجبات <i class="fas fa-chevron-up" style="margin-right:8px;"></i>'
                             : 'عرض الواجبات <i class="fas fa-chevron-down" style="margin-right:8px;"></i>';
                     });
                     container.appendChild(row);

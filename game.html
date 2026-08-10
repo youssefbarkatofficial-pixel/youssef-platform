@@ -102,7 +102,7 @@
 <div id="screen-lobby" class="screen">
   <!-- Header -->
   <div class="lobby-header">
-    <div class="player-avatar" id="lobby-avatar">طں</div>
+    <div class="player-avatar" id="lobby-avatar">؟</div>
     <div class="player-info">
       <div class="name" id="lobby-name">جاري التحميل...</div>
       <div class="rank" id="lobby-rank">ًں§­ ---</div>
@@ -111,7 +111,7 @@
         <span class="xp-label" id="lobby-xp-label">0 XP</span>
       </div>
     </div>
-    <button onclick="exitGame()" style="background:transparent;border:none;color:var(--text-muted);font-size:1.3rem;cursor:pointer;padding:8px;transition:0.3s;" onmouseover="this.style.color='#e74c3c'" onmouseout="this.style.color='var(--text-muted)'" title="إط؛لاق اللعبة">
+    <button onclick="exitGame()" style="background:transparent;border:none;color:var(--text-muted);font-size:1.3rem;cursor:pointer;padding:8px;transition:0.3s;" onmouseover="this.style.color='#e74c3c'" onmouseout="this.style.color='var(--text-muted)'" title="إغلاق اللعبة">
       <i class="fas fa-sign-out-alt"></i>
     </button>
   </div>
@@ -127,7 +127,7 @@
   <div class="lobby-nav">
     <button class="nav-tab active" onclick="showLobbyTab('play')">âڑ”ï¸ڈ العب</button>
     <button class="nav-tab" onclick="showLobbyTab('training')">ًں“ڑ تدريب</button>
-    <button class="nav-tab" onclick="showLobbyTab('friends')">ًں‘¥ أصدقاط،</button>
+    <button class="nav-tab" onclick="showLobbyTab('friends')">ًں‘¥ أصدقاء</button>
     <button class="nav-tab" onclick="showLobbyTab('leaderboard')">ًںڈ† المتصدرون</button>
   </div>
 
@@ -156,7 +156,7 @@
           <div class="select-wrapper">
             <select class="custom-select" onchange="ui.subject = this.value">
               <option value="history">تاريخ ًں“œ</option>
-              <option value="geography">جط؛رافيا ًںŒچ</option>
+              <option value="geography">جغرافيا ًںŒچ</option>
               <option value="mixed">مدمج âڑ–ï¸ڈ</option>
             </select>
           </div>
@@ -190,7 +190,7 @@
           <div class="select-wrapper">
             <select class="custom-select" onchange="ui.trainSubject = this.value; updateTrainLessonPicker();">
               <option value="history">تاريخ ًں“œ</option>
-              <option value="geography">جط؛رافيا ًںŒچ</option>
+              <option value="geography">جغرافيا ًںŒچ</option>
               <option value="mixed">مدمج âڑ–ï¸ڈ</option>
             </select>
           </div>
@@ -226,13 +226,13 @@
     <div id="tab-friends" class="lobby-tab-content hidden">
       <div style="text-align:center;padding:20px 0;">
         <div style="font-size:4rem;margin-bottom:12px;">ًں‘¥</div>
-        <p style="color:var(--text-soft);font-size:1rem;margin-bottom:20px;">العب مع أصدقائك بكود الط؛رفة</p>
+        <p style="color:var(--text-soft);font-size:1rem;margin-bottom:20px;">العب مع أصدقائك بكود الغرفة</p>
       </div>
 
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;">
         <button class="mode-btn" onclick="createRoom()">
           <span class="icon">â‍•</span>
-          <span class="title">إنشاط، ط؛رفة</span>
+          <span class="title">إنشاء غرفة</span>
           <span class="desc">شارك الكود مع صديقك</span>
         </button>
         <button class="mode-btn" onclick="showJoinRoom()">
@@ -245,9 +245,9 @@
       <div id="room-created" class="hidden">
         <div class="room-code-display" onclick="copyRoomCode()">
           <div class="code" id="room-code-text">------</div>
-          <div class="hint">اضط؛ط· لنسخ الكود</div>
+          <div class="hint">اضغط لنسخ الكود</div>
         </div>
-        <p style="text-align:center;color:var(--text-muted);font-size:0.8rem;">شارك هذا الكود مع أصدقائك ليدخلوا الط؛رفة</p>
+        <p style="text-align:center;color:var(--text-muted);font-size:0.8rem;">شارك هذا الكود مع أصدقائك ليدخلوا الغرفة</p>
         <button class="btn-start" style="margin-top:12px;" onclick="startFriendGame()">
           <i class="fas fa-play"></i> ابدأ اللعبة
         </button>
@@ -255,10 +255,10 @@
 
       <div id="room-join" class="hidden">
         <div class="form-group">
-          <label>كود الط؛رفة</label>
+          <label>كود الغرفة</label>
           <input type="text" id="join-code-input" placeholder="XXXXXX" maxlength="6" style="text-align:center;letter-spacing:6px;font-size:1.4rem;text-transform:uppercase;">
         </div>
-        <button class="btn-primary" onclick="joinRoom()">دخول الط؛رفة</button>
+        <button class="btn-primary" onclick="joinRoom()">دخول الغرفة</button>
       </div>
     </div>
 
@@ -298,7 +298,7 @@
         <span class="icon">ًںŒ±</span>مبتدئ
       </button>
       <button class="diff-btn" data-diff="medium" onclick="selectDifficulty(this,'medium')">
-        <span class="icon">âڑ،</span>متوسط·
+        <span class="icon">âڑ،</span>متوسط
       </button>
       <button class="diff-btn" data-diff="pro" onclick="selectDifficulty(this,'pro')">
         <span class="icon">ًں”¥</span>محترف
@@ -309,7 +309,7 @@
     </div>
 
     <button class="btn-start" onclick="launchBattle()">
-      <i class="fas fa-sword"></i> انط·لق للمعركة!
+      <i class="fas fa-sword"></i> انطلق للمعركة!
     </button>
   </div>
 </div>
@@ -325,7 +325,7 @@
     <div class="battle-round" id="battle-round-label">جولة 1 / 7</div>
     <div style="display:flex; gap:10px;">
       <button onclick="confirmQuit()" style="background:transparent;border:1px solid var(--dark-border);border-radius:8px;color:var(--text-muted);font-size:0.75rem;padding:4px 10px;cursor:pointer;">
-        إنهاط،
+        إنهاء
       </button>
       <button onclick="exitGame()" style="background:transparent;border:1px solid #e74c3c;border-radius:8px;color:#e74c3c;font-size:0.75rem;padding:4px 10px;cursor:pointer;">
         خروج
@@ -381,7 +381,7 @@
   </div>
 
   <!-- Change Hint -->
-  <div class="change-hint" id="change-hint">يمكنك تط؛يير إجابتك حتى انتهاط، الوقت</div>
+  <div class="change-hint" id="change-hint">يمكنك تغيير إجابتك حتى انتهاء الوقت</div>
 
   <!-- Options -->
   <div class="options-grid" id="options-grid">
@@ -412,7 +412,7 @@
       </div>
       <div class="result-stat">
         <div class="val" id="res-chunks">0</div>
-        <div class="lbl">مناط·ق السيط·رة</div>
+        <div class="lbl">مناطق السيطرة</div>
         <div class="lbl">جولات</div>
       </div>
       <div class="result-stat">
@@ -423,10 +423,10 @@
 
     <div class="xp-gained">
       <div class="big" id="res-xp">+0 XP</div>
-      <div class="lbl">نقاط· أثر مكتسبة</div>
+      <div class="lbl">نقاط أثر مكتسبة</div>
     </div>
 
-    <!-- خريط·ة ملخص -->
+    <!-- خريطة ملخص -->
     <div class="result-leaderboard" id="result-leaderboard" style="margin: 32px 0; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 16px; padding: 24px; box-shadow: inset 0 0 20px rgba(0,0,0,0.5);">
       <h3 style="color: #D4AF37; margin-top:0; margin-bottom: 20px; font-size: 1.3rem; font-weight: 900; text-align:center; text-shadow: 0 0 10px rgba(212,175,55,0.3); letter-spacing: 0.5px;">الترتيب النهائي للسيط·رة</h3>
       <div id="leaderboard-list" style="display: flex; flex-direction: column; gap: 10px;">
@@ -546,7 +546,7 @@ async function doRegister() {
   const grade = document.getElementById('reg-grade').value;
   const email = document.getElementById('reg-email').value.trim();
   const pass  = document.getElementById('reg-pass').value;
-  if (!name || !email || !pass) return showError('الرجاط، ملط، جميع الحقول');
+  if (!name || !email || !pass) return showError('الرجاء ملء جميع الحقول');
   if (pass.length < 6) return showError('كلمة المرور 6 أحرف على الأقل');
   try {
     const cred = await window.firebaseAuth.createUserWithEmailAndPassword(email, pass);
@@ -574,13 +574,13 @@ function showError(msg) {
 
 function translateError(code) {
   const map = {
-    'auth/user-not-found': 'البريد الإلكتروني ط؛ير موجود',
-    'auth/wrong-password': 'كلمة المرور ط؛ير صحيحة',
+    'auth/user-not-found': 'البريد الإلكتروني غير موجود',
+    'auth/wrong-password': 'كلمة المرور غير صحيحة',
     'auth/email-already-in-use': 'البريد مستخدم بالفعل',
-    'auth/invalid-email': 'البريد الإلكتروني ط؛ير صالح',
+    'auth/invalid-email': 'البريد الإلكتروني غير صالح',
     'auth/weak-password': 'كلمة المرور ضعيفة',
   };
-  return map[code] || 'حدث خطأطŒ حاول مجدداظ‹';
+  return map[code] || 'حدث خطأ، حاول مجدداظ‹';
 }
 
 // ============================================================
@@ -769,7 +769,7 @@ function launchBattleWithConfig({ mode, subject, grade, questions, botCount, bot
 
   const s = GameEngine.getState();
 
-  // بناط، لوحة النتائج العلوية ديناميكياظ‹
+  // بناء لوحة النتائج العلوية ديناميكياظ‹
   const scoresContainer = document.getElementById('battle-scores-container');
   let scoresHTML = `
     <div class="score-player me" style="border-bottom: 3px solid #D4AF37;">
@@ -813,7 +813,7 @@ function startBattleRound() {
   updatePhaseIndicator();
 
   // السؤال
-  const catMap = { history: 'ًں“œ تاريخ', geography: 'ًںŒچ جط؛رافيا' };
+  const catMap = { history: 'ًں“œ تاريخ', geography: 'ًںŒچ جغرافيا' };
   document.getElementById('q-category').textContent = catMap[q.category] || q.category;
   document.getElementById('q-text').textContent = q.text;
 
@@ -826,7 +826,7 @@ function startBattleRound() {
     btn.disabled = false;
   }
 
-  // بدط، الجولة
+  // بدء الجولة
   GameEngine.startRound(
     // onTick
     (secondsLeft) => updateTimer(secondsLeft),
@@ -878,14 +878,14 @@ function showRoundResult(result) {
     }
   }
 
-  // تحديث الخريط·ة الجديدة
+  // تحديث الخريطة الجديدة
   updateAllTerritories();
 
   // toast
   if (result.playerCorrect) {
     showToast('âœ… إجابة صحيحة! +10 XP', 'success');
   } else {
-    showToast('â‌Œ إجابة خاط·ئة', 'error');
+    showToast('â‌Œ إجابة خاطئة', 'error');
   }
 
   // تحديث النتائج
@@ -949,7 +949,7 @@ function updatePhaseIndicator() {
   const s = GameEngine.getState();
   const titleEl = document.getElementById('phase-title');
   if (!titleEl) return;
-  const phase = s.currentRound < 5 ? 'المرحلة 1: تعزيز النفوذ (قارتك)' : 'المرحلة 2: الط؛زو والهيمنة';
+  const phase = s.currentRound < 5 ? 'المرحلة 1: تعزيز النفوذ (قارتك)' : 'المرحلة 2: الغزو والهيمنة';
   const targetId = s.targets['player'];
   const targetTerritory = s.territories.find(t => t.id === targetId);
   const targetName = targetTerritory ? targetTerritory.name : 'مجهول';
@@ -1013,7 +1013,7 @@ function showGameResult() {
     document.getElementById('result-trophy').textContent = 'ًںڈ†';
     document.getElementById('result-title').textContent = 'انتصار!';
     document.getElementById('result-title').className = 'result-title win';
-    document.getElementById('result-sub').textContent = 'أحسنت! سيط·رت على خريط·ة العالم';
+    document.getElementById('result-sub').textContent = 'أحسنت! سيطرت على خريطة العالم';
     launchConfetti();
   } else if (result.isDraw) {
     document.getElementById('result-trophy').textContent = 'ًں¤‌';
@@ -1024,7 +1024,7 @@ function showGameResult() {
     document.getElementById('result-trophy').textContent = 'ًں“ڑ';
     document.getElementById('result-title').textContent = 'هزيمة!';
     document.getElementById('result-title').className = 'result-title lose';
-    document.getElementById('result-sub').textContent = 'لا تستسلمطŒ تدرب أكثر وعد!';
+    document.getElementById('result-sub').textContent = 'لا تستسلم، تدرب أكثر وعد!';
   }
 
   document.getElementById('res-correct').textContent = result.scores?.player || 0;
@@ -1036,7 +1036,7 @@ function showGameResult() {
   const xpText = result.xpGained >= 0 ? `+${result.xpGained} XP` : `${result.xpGained} XP`;
   document.getElementById('res-xp').textContent = xpText;
 
-  // خريط·ة ملخص مصط؛ظ‘رة
+  // خريطة ملخص مصغظ‘رة
   // Build Leaderboard HTML
   let allScores = {};
   allScores['player'] = { name: ui.playerData?.name || 'Player', color: 'var(--player-color)', score: result.playerScore || 0, isPlayer: true };
@@ -1106,7 +1106,7 @@ function playAgain() {
 }
 
 function confirmQuit() {
-  if (confirm('هل أنت متأكد أنك تريد المط؛ادرةطں')) {
+  if (confirm('هل أنت متأكد أنك تريد المغادرة؟')) {
     clearBotTimers();
     clearInterval(GameEngine.getState().timerInterval);
     showScreen('lobby');
@@ -1166,7 +1166,7 @@ async function loadLeaderboard(grade = 'general', btn = null) {
       const rankClass = i === 0 ? 'top1' : i === 1 ? 'top2' : i === 2 ? 'top3' : '';
       const medal = i === 0 ? 'ًں¥‡' : i === 1 ? 'ًں¥ˆ' : i === 2 ? 'ًں¥‰' : (i+1);
       const rank = GameEngine.getRank(p.gameXp || 0);
-      const initials = (p.name || 'طں').split(' ').map(w=>w[0]).slice(0,2).join('');
+      const initials = (p.name || '؟').split(' ').map(w=>w[0]).slice(0,2).join('');
       html += `
         <div class="lb-entry">
           <div class="lb-rank ${rankClass}">${medal}</div>
@@ -1207,7 +1207,7 @@ function showJoinRoom() {
 function joinRoom() {
   const code = document.getElementById('join-code-input').value.trim().toUpperCase();
   if (code.length !== 6) return showToast('الكود 6 أحرف', 'error');
-  showToast('جاري البحث عن الط؛رفة...', 'info');
+  showToast('جاري البحث عن الغرفة...', 'info');
   // TODO: Firebase room lookup
 }
 

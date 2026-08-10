@@ -93,7 +93,7 @@
                             </select>
                         </div>
                         <div class="form-group" id="vLectureAttachGroup" style="display:none;">
-                            <label>اربط· الفيديو بمحاضرة موجودة</label>
+                            <label>اربط الفيديو بمحاضرة موجودة</label>
                             <select id="vAttachLectureSelect" class="form-control">
                                 <option value="">-- اختر محاضرة --</option>
                             </select>
@@ -102,7 +102,7 @@
                             <label>ط·ريقة إضافة الفيديو</label>
                             <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                                 <label style="display:flex; align-items:center; gap: 6px;"><input type="radio" name="videoSource" value="upload" checked> رفع ملف</label>
-                                <label style="display:flex; align-items:center; gap: 6px;"><input type="radio" name="videoSource" value="youtube"> رابط· فيديو</label>
+                                <label style="display:flex; align-items:center; gap: 6px;"><input type="radio" name="videoSource" value="youtube"> رابط فيديو</label>
                             </div>
                         </div>
                         <div class="form-group" id="videoFileGroup">
@@ -110,7 +110,7 @@
                             <input type="file" id="vFileInput" accept="video/*" class="form-control" style="padding: 10px;">
                         </div>
                         <div class="form-group" id="videoUrlGroup" style="display:none;">
-                            <label>رابط· الفيديو (يوتيوب أو رابط· مباشر من السحابة)</label>
+                            <label>رابط الفيديو (يوتيوب أو رابط مباشر من السحابة)</label>
                             <input type="url" id="vYoutubeUrl" class="form-control" placeholder="مثال: https://.../video.mp4">
                         </div>
                         <div class="form-group" style="display:flex; gap:10px;">
@@ -148,7 +148,7 @@
                             </select>
                         </div>
                         <div class="form-group" id="pLectureAttachGroup" style="display:none;">
-                            <label>اربط· المذكرة بمحاضرة موجودة</label>
+                            <label>اربط المذكرة بمحاضرة موجودة</label>
                             <select id="pAttachLectureSelect" class="form-control">
                                 <option value="">-- اختر محاضرة --</option>
                             </select>
@@ -157,7 +157,7 @@
                             <label>ط·ريقة إضافة المذكرة</label>
                             <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                                 <label style="display:flex; align-items:center; gap: 6px;"><input type="radio" name="pdfSource" value="upload" checked> رفع ملف</label>
-                                <label style="display:flex; align-items:center; gap: 6px;"><input type="radio" name="pdfSource" value="link"> رابط· مذكرة</label>
+                                <label style="display:flex; align-items:center; gap: 6px;"><input type="radio" name="pdfSource" value="link"> رابط مذكرة</label>
                             </div>
                         </div>
                         <div class="form-group" id="pdfFileGroup">
@@ -165,7 +165,7 @@
                             <input type="file" id="pFileInput" accept=".pdf" class="form-control" style="padding: 10px;">
                         </div>
                         <div class="form-group" id="pdfUrlGroup" style="display:none;">
-                            <label>رابط· المذكرة</label>
+                            <label>رابط المذكرة</label>
                             <input type="url" id="pLinkUrl" class="form-control" placeholder="https://drive.google.com/...">
                         </div>
                         <div class="form-group" style="display:flex; gap:10px;">
@@ -205,15 +205,15 @@
                             </select>
                         </div>
                         <div class="form-group" id="trainingAttachGroup" style="display:none;">
-                            <label>اربط· التدريب بمحضرة (اختياري)</label>
+                            <label>اربط التدريب بمحضرة (اختياري)</label>
                             <select id="attachLectureSelect" class="form-control">
                                 <option value="">-- اختر محاضرة --</option>
                             </select>
                         </div>
                         <div class="form-group" id="homeworkLinkGroup" style="display:none;">
-                            <label>اربط· الواجب بتدريب (اختياري)</label>
+                            <label>اربط الواجب بتدريب (اختياري)</label>
                             <select id="linkTrainingSelect" class="form-control">
-                                <option value="">-- بدون ربط· --</option>
+                                <option value="">-- بدون ربط --</option>
                             </select>
                         </div>
                         <div class="form-group">
@@ -221,7 +221,7 @@
                             <select id="questionType" class="form-control">
                                 <option value="choose">اختر</option>
                                 <option value="fill">أكمل</option>
-                                <option value="tf">صح وط؛لط·</option>
+                                <option value="tf">صح وغلط</option>
                                 <option value="explain">بم تفسر</option>
                                 <option value="result">ما النتائج</option>
                                 <option value="prove">دلل</option>
@@ -233,7 +233,7 @@
                         <div class="form-group" id="essayAsMcqGroup" style="display: none; margin-top: -10px; margin-bottom: 15px;">
                             <label style="display:flex; align-items:center; gap:10px; cursor:pointer;">
                                 <input type="checkbox" id="essayAsMcqCheckbox" style="width:18px; height:18px;">
-                                <span style="color:#f39c12; font-weight:bold;">تحويل كسؤال اختياري (يتم عرض الاختيارات للط·الب ولكن يظل كسؤال مقالي في النظام)</span>
+                                <span style="color:#f39c12; font-weight:bold;">تحويل كسؤال اختياري (يتم عرض الاختيارات للطالب ولكن يظل كسؤال مقالي في النظام)</span>
                             </label>
                         </div>
                         <div class="form-group">
@@ -252,7 +252,7 @@
                             <input type="text" id="correctAnswer" class="form-control" placeholder="اكتب الإجابة النموذجية هنا">
                             <select id="correctAnswerTf" class="form-control" style="display:none;">
                                 <option value="صح">صح</option>
-                                <option value="خط·أ">خط·أ</option>
+                                <option value="خطأ">خطأ</option>
                             </select>
                             <select id="correctAnswerChoose" class="form-control" style="display:none;">
                                 <option value="a">أ</option>
@@ -265,7 +265,7 @@
                             <label>الدرجة (النقاط·)</label>
                             <input type="number" id="questionPoints" class="form-control" placeholder="مثال: 1" min="0.5" step="0.5" value="1">
                         </div>
-                        <button type="button" id="btnGenerateRubric" class="btn btn-outline" style="margin-bottom: 15px; border-color: #9b59b6; color: #9b59b6; display: none;"><i class="fas fa-magic mr-2"></i> توليد تقييم ذكي بالذكاط، الاصط·ناعي</button>
+                        <button type="button" id="btnGenerateRubric" class="btn btn-outline" style="margin-bottom: 15px; border-color: #9b59b6; color: #9b59b6; display: none;"><i class="fas fa-magic mr-2"></i> توليد تقييم ذكي بالذكاء الاصطناعي</button>
                         <div id="rubricPreviewContainer" style="display: none; margin-bottom: 15px; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px; font-size: 0.9rem; color: #d4af37; white-space: pre-wrap;"></div>
                         <button type="button" id="btnAddExamQuestion" class="btn btn-outline" style="margin-bottom: 15px;"><i class="fas fa-plus mr-2"></i> إضافة سؤال للامتحان</button>
                         <div id="examQuestionsList" style="display: grid; gap: 10px; margin-bottom: 20px;"></div>
@@ -273,17 +273,17 @@
                         <h3 style="color: #f39c12; margin-bottom: 15px;"><i class="fas fa-clock mr-2"></i> إعدادات الوقت والنشر</h3>
                         <div class="form-group" style="display:flex; gap:10px;">
                             <div style="flex:1;">
-                                <label>ًں“… تاريخ بدط، الامتحان (اختياري)</label>
+                                <label>ًں“… تاريخ بدء الامتحان (اختياري)</label>
                                 <input type="datetime-local" id="eAvailableFrom" class="form-control">
                             </div>
                             <div style="flex:1;">
-                                <label>ًں“… تاريخ انتهاط، الامتحان (اختياري)</label>
+                                <label>ًں“… تاريخ انتهاء الامتحان (اختياري)</label>
                                 <input type="datetime-local" id="eAvailableUntil" class="form-control">
                             </div>
                         </div>
                         <div class="form-group" style="display:flex; gap:10px; align-items:flex-end;">
                             <div style="flex:1;">
-                                <label>âڈ±ï¸ڈ مدة الامتحان (بالدقائقطŒ 0 = بدون حد)</label>
+                                <label>âڈ±ï¸ڈ مدة الامتحان (بالدقائق، 0 = بدون حد)</label>
                                 <input type="number" id="eDuration" class="form-control" placeholder="مثال: 30" min="0" value="0">
                             </div>
                             <div style="flex:1; padding-bottom: 3px;">
@@ -476,7 +476,7 @@
                     }
 
                     if(!window.BousalaRubricGenerator) {
-                        alert('وحدة الذكاط، الاصط·ناعي لتوليد التقييم ط؛ير متوفرة.');
+                        alert('وحدة الذكاء الاصطناعي لتوليد التقييم غير متوفرة.');
                         return;
                     }
 
@@ -492,9 +492,9 @@
                         rubricPreviewContainer.style.display = 'block';
                     } catch(err) {
                         console.error('Rubric Generation Error:', err);
-                        alert('حدث خطأ أثناط، توليد التقييم: ' + err.message);
+                        alert('حدث خطأ أثناء توليد التقييم: ' + err.message);
                     } finally {
-                        btnGenerateRubric.innerHTML = '<i class="fas fa-magic mr-2"></i> توليد تقييم ذكي بالذكاط، الاصط·ناعي';
+                        btnGenerateRubric.innerHTML = '<i class="fas fa-magic mr-2"></i> توليد تقييم ذكي بالذكاء الاصطناعي';
                         btnGenerateRubric.disabled = false;
                     }
                 });
@@ -510,7 +510,7 @@
             function populateLectureAndTrainingSelectors(courseId){
                 // clear
                 attachLectureSelect.innerHTML = '<option value="">-- اختر محاضرة --</option>';
-                linkTrainingSelect.innerHTML = '<option value="">-- بدون ربط· --</option>';
+                linkTrainingSelect.innerHTML = '<option value="">-- بدون ربط --</option>';
                 document.getElementById('vAttachLectureSelect').innerHTML = '<option value="">-- اختر محاضرة --</option>';
                 document.getElementById('pAttachLectureSelect').innerHTML = '<option value="">-- اختر محاضرة --</option>';
                 if(!courseId) return;
@@ -765,7 +765,7 @@
                 let itemObj = { title: title, type: 'video', source: source, attachLectureId: document.getElementById('vAttachLectureSelect').value };
                 if(source === 'youtube') {
                     let urlVal = document.getElementById('vYoutubeUrl').value;
-                    if(!urlVal) { alert('يرجى وضع رابط· الفيديو'); return; }
+                    if(!urlVal) { alert('يرجى وضع رابط الفيديو'); return; }
                     if(urlVal.includes('youtube') || urlVal.includes('youtu.be')) {
                         itemObj.youtubeUrl = urlVal;
                     } else {
@@ -789,7 +789,7 @@
                         itemObj.fileName = file.name; itemObj.availableFrom = document.getElementById('vAvailableFrom').value; itemObj.availableUntil = document.getElementById('vAvailableUntil').value;
                     } catch(err) {
                         console.error('Upload failed', err);
-                        alert('حدث خطأ أثناط، رفع الفيديو: ' + err.message);
+                        alert('حدث خطأ أثناء رفع الفيديو: ' + err.message);
                         submitBtn.innerHTML = originalBtnText;
                         submitBtn.disabled = false;
                         return;
@@ -814,7 +814,7 @@
                 let itemObj = { title: title, type: 'pdf', source: source, attachLectureId: document.getElementById('pAttachLectureSelect').value };
                 if(source === 'link') {
                     itemObj.pdfUrl = document.getElementById('pLinkUrl').value;
-                    if(!itemObj.pdfUrl) { alert('يرجى وضع رابط· خارجي للملف'); return; } itemObj.availableFrom = document.getElementById('pAvailableFrom').value; itemObj.availableUntil = document.getElementById('pAvailableUntil').value;
+                    if(!itemObj.pdfUrl) { alert('يرجى وضع رابط خارجي للملف'); return; } itemObj.availableFrom = document.getElementById('pAvailableFrom').value; itemObj.availableUntil = document.getElementById('pAvailableUntil').value;
                 } else if(source === 'upload') {
                     const fileInput = document.getElementById('pFileInput');
                     if (!fileInput.files.length) { alert('يرجى اختيار ملف PDF'); return; }
@@ -831,7 +831,7 @@
                         itemObj.fileName = file.name; itemObj.availableFrom = document.getElementById('pAvailableFrom').value; itemObj.availableUntil = document.getElementById('pAvailableUntil').value;
                     } catch(err) {
                         console.error('Upload failed', err);
-                        alert('حدث خطأ أثناط، رفع الملف: ' + err.message);
+                        alert('حدث خطأ أثناء رفع الملف: ' + err.message);
                         submitBtn.innerHTML = originalBtnText;
                         submitBtn.disabled = false;
                         return;

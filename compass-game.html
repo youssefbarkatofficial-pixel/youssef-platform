@@ -18,7 +18,7 @@
             padding: 0;
             width: 100%;
             height: 100vh;
-            overflow: hidden; /* لمنع التمرير الخارجيطŒ اللعبة تغطي الشاشة */
+            overflow: hidden; /* لمنع التمرير الخارجي، اللعبة تغطي الشاشة */
             background-color: #000;
         }
         #game-frame {
@@ -61,11 +61,11 @@
         // التحقق من تسجيل الدخول (نفس Auth المنصة)
         firebase.auth().onAuthStateChanged((user) => {
             if (!user) {
-                // إذا كان الطالب كزائرطŒ نوجهه لتسجيل الدخول أولاظ‹ كما ينص القانون
+                // إذا كان الطالب كزائر، نوجهه لتسجيل الدخول أولاظ‹ كما ينص القانون
                 window.location.href = 'login.html?redirect=compass-game.html';
             } else {
-                console.log("الط·الب مسجل دخولطŒ يمكنه اللعب:", user.email);
-                // مستقبلاظ‹ يمكننا إرسال رسالة عبر postMessage للظ€ iframe لإبلاط؛ Flutter بمن هو المستخدم!
+                console.log("الطالب مسجل دخول، يمكنه اللعب:", user.email);
+                // مستقبلاظ‹ يمكننا إرسال رسالة عبر postMessage للظ€ iframe لإبلاغ Flutter بمن هو المستخدم!
             }
         });
     </script>

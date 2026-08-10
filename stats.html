@@ -177,7 +177,7 @@
             <div class="avatar" style="overflow:hidden;">
                 <img loading="lazy" id="userAvatarImg" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Ccircle cx='40' cy='40' r='40' fill='%23071326'/%3E%3Ccircle cx='40' cy='30' r='16' fill='%23D4A64F'/%3E%3Cellipse cx='40' cy='70' rx='24' ry='18' fill='%23D4A64F'/%3E%3C/svg%3E" style="width:100%;height:100%;object-fit:cover;">
             </div>
-            <h4 id="userNameDisplay">ط·الب</h4>
+            <h4 id="userNameDisplay">طالب</h4>
             <p id="userGradeDisplay">الصف الدراسي</p>
             <div id="userCodeDisplay" style="margin-top:8px;font-family:monospace;letter-spacing:2px;color:var(--accent-cyan);font-weight:bold;background:rgba(0,0,0,0.3);padding:4px 8px;border-radius:4px;font-size:0.8rem;"></div>
         </div>
@@ -196,7 +196,7 @@
     <main class="main-content">
         <div class="page-header">
             <h1 class="page-title"><i class="fas fa-chart-pie mr-2 text-gold"></i> إحصائياتي</h1>
-            <p style="color:rgba(255,255,255,0.5);margin-top:5px;font-size:0.9rem;">تابع تقدمك الحقيقي وحللظ‘ أداط،ك بدقة</p>
+            <p style="color:rgba(255,255,255,0.5);margin-top:5px;font-size:0.9rem;">تابع تقدمك الحقيقي وحللظ‘ أداءك بدقة</p>
         </div>
 
         <!-- KPI CARDS -->
@@ -205,11 +205,11 @@
                 <div class="kpi-icon gold"><i class="fas fa-star"></i></div>
                 <div class="kpi-data">
                     <div class="kpi-val" id="kAvg" style="color:var(--gold);">-</div>
-                    <div class="kpi-lbl">متوسط· الدرجات</div>
+                    <div class="kpi-lbl">متوسط الدرجات</div>
                     <div class="kpi-sub" id="kAvgSub"></div>
                 </div>
             </div>
-            <div class="kpi-card cyan" style="cursor:pointer;" onclick="if(window.showToast) window.showToast('قريباظ‹: مكافط¢ت للملتزمين بمشاهدة المحاضرات!', 'majestic')">
+            <div class="kpi-card cyan" style="cursor:pointer;" onclick="if(window.showToast) window.showToast('قريباظ‹: مكافآت للملتزمين بمشاهدة المحاضرات!', 'majestic')">
                 <div class="kpi-icon cyan"><i class="fas fa-video"></i></div>
                 <div class="kpi-data">
                     <div class="kpi-val" id="kVideos" style="color:var(--cyan);">-</div>
@@ -285,7 +285,7 @@
         <!-- ACTIVITY FEED -->
         <div class="glass-panel dash-panel" id="activitySection" style="display:none;margin-bottom:24px;">
             <div class="section-title">
-                <i class="fas fa-history"></i> ط¢خر النشاط·ات
+                <i class="fas fa-history"></i> آخر النشاطات
             </div>
             <div id="activityFeed"></div>
         </div>
@@ -330,8 +330,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (gradeEl) {
         const g = (window.getEffectiveStudentGrade && window.getGradeLabel)
             ? window.getGradeLabel(window.getEffectiveStudentGrade(user))
-            : (user.grade || 'ط·الب');
-        gradeEl.textContent = g || 'ط·الب';
+            : (user.grade || 'طالب');
+        gradeEl.textContent = g || 'طالب';
     }
     const pic = localStorage.getItem(`profilePic_${user.phone}`);
     if (pic && avatarEl) avatarEl.src = pic;
@@ -625,7 +625,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 },
                                 label: ctx => {
                                     const v = ctx.parsed.y;
-                                    const emoji = v >= 85 ? 'ًںŒں ممتاز' : v >= 60 ? 'ًں‘چ جيد' : v >= 40 ? 'ًں“– متوسط·' : 'â‌Œ ضعيف';
+                                    const emoji = v >= 85 ? 'ًںŒں ممتاز' : v >= 60 ? 'ًں‘چ جيد' : v >= 40 ? 'ًں“– متوسط' : 'â‌Œ ضعيف';
                                     return `الدرجة: ${v}% â€” ${emoji}`;
                                 }
                             },
@@ -677,10 +677,10 @@ function buildInsight(avg, videos, totalVids, examsCount, history) {
     let insights = [];
 
     // Avg score insight â€” plain language
-    if (avg >= 85)      insights.push(`متوسط· درجاتك ${avg}% â€” ممتاز جداظ‹! ًںژ‰ استمر في الحفاظ على هذا المستوى.`);
-    else if (avg >= 60) insights.push(`متوسط· درجاتك ${avg}% â€” أنت ناجح! ًں‘چ لكن حاول مراجعة أخط·ائك للوصول للامتياز.`);
-    else if (avg > 0)   insights.push(`متوسط· درجاتك ${avg}% â€” لم تصل لنسبة النجاح (60%). â‌Œ ركز أكثر وراجع دروسك.`);
-    else                insights.push(`لم تنجز أي اختبارات بعد. تذكر أن نسبة النجاح المط·لوبة هي 60%.`);
+    if (avg >= 85)      insights.push(`متوسط درجاتك ${avg}% â€” ممتاز جداً! ًںژ‰ استمر في الحفاظ على هذا المستوى.`);
+    else if (avg >= 60) insights.push(`متوسط درجاتك ${avg}% â€” أنت ناجح! ًں‘چ لكن حاول مراجعة أخط·ائك للوصول للامتياز.`);
+    else if (avg > 0)   insights.push(`متوسط درجاتك ${avg}% â€” لم تصل لنسبة النجاح (60%). â‌Œ ركز أكثر وراجع دروسك.`);
+    else                insights.push(`لم تنجز أي اختبارات بعد. تذكر أن نسبة النجاح المطلوبة هي 60%.`);
 
     // Video progress insight
     if (totalVids > 0) {
@@ -688,8 +688,8 @@ function buildInsight(avg, videos, totalVids, examsCount, history) {
         const remaining = totalVids - videos;
         if (vidPct === 100)        insights.push(`شاهدت كل المحاضرات (${videos} محاضرة) â€” أحسنت! ًں‘ڈ`);
         else if (vidPct >= 70)     insights.push(`شاهدت ${videos} من ${totalVids} محاضرة (${vidPct}%) â€” قرظ‘بت تخلص!`);
-        else if (vidPct >= 30)     insights.push(`شاهدت ${videos} من ${totalVids} محاضرة â€” لسه فيه ${remaining} محاضرةطŒ أكمل!`);
-        else                       insights.push(`لسه شاهدت ${videos} محاضرة بس من أصل ${totalVids} â€” اشتط؛ل أكتر على المحاضرات!`);
+        else if (vidPct >= 30)     insights.push(`شاهدت ${videos} من ${totalVids} محاضرة â€” لسه فيه ${remaining} محاضرة، أكمل!`);
+        else                       insights.push(`لسه شاهدت ${videos} محاضرة بس من أصل ${totalVids} â€” اشتغل أكتر على المحاضرات!`);
     }
 
     // Trend insight â€” crystal clear comparison
@@ -700,9 +700,9 @@ function buildInsight(avg, videos, totalVids, examsCount, history) {
         const lastName = last.title || 'الاختبار الأخير';
         const prevName = prev.title || 'الاختبار اللي قبله';
         if (diff > 0) {
-            insights.push(`في "${lastName}" جبت ${last.pct}%طŒ وكانت درجتك في "${prevName}" ${prev.pct}% â€” يعني اتحسظ‘نت بظ€ ${diff}% ًںڑ€ جميل!`);
+            insights.push(`في "${lastName}" جبت ${last.pct}%، وكانت درجتك في "${prevName}" ${prev.pct}% â€” يعني اتحسظ‘نت بظ€ ${diff}% ًںڑ€ جميل!`);
         } else if (diff < 0) {
-            insights.push(`في "${lastName}" جبت ${last.pct}%طŒ وكانت درجتك في "${prevName}" ${prev.pct}% â€” انخفضت ${Math.abs(diff)}%طŒ راجع أخط·اط،ك.`);
+            insights.push(`في "${lastName}" جبت ${last.pct}%، وكانت درجتك في "${prevName}" ${prev.pct}% â€” انخفضت ${Math.abs(diff)}%، راجع أخط·اءك.`);
         } else {
             insights.push(`درجتك في "${lastName}" (${last.pct}%) نفس اللي قبلها تماماظ‹ â€” حاول تتحسن المرة الجاية.`);
         }

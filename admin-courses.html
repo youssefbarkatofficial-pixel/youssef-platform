@@ -130,7 +130,7 @@
                                 <th>الصف</th>
                                 <th>السعر</th>
                                 <th>الحالة</th>
-                                <th>إجراط،ات</th>
+                                <th>إجراءات</th>
                             </tr>
                         </thead>
                         <tbody id="coursesTableBody"></tbody>
@@ -178,7 +178,7 @@
                         <div class="form-group" style="margin-bottom: 15px; margin-top: 15px;">
                             <label style="color:var(--text-primary); display:flex; align-items:center; gap:8px; cursor:pointer;">
                                 <input type="checkbox" id="fcTimerToggle" onchange="markUnsaved(); document.getElementById('fcDiscountTimerOptions').style.display = this.checked ? 'block' : 'none';"> 
-                                <span style="font-weight: bold; color: var(--royal-gold);">تحديد موعد انتهاط، الخصم</span>
+                                <span style="font-weight: bold; color: var(--royal-gold);">تحديد موعد انتهاء الخصم</span>
                             </label>
                         </div>
                         
@@ -200,7 +200,7 @@
                     </select>
                 </div>
                 <div class="form-group" style="grid-column: 1/-1;">
-                    <label>صورة الط؛لاف (الكورس)</label>
+                    <label>صورة الغلاف (الكورس)</label>
                     <input type="file" id="fcImageFile" accept="image/*" class="form-control" style="background: rgba(255,255,255,0.05); cursor: pointer;">
                     <input type="hidden" id="fcImage">
                     <div style="width: 100%; aspect-ratio: 16/9; overflow: hidden; border-radius: 10px; margin-top: 10px; border: 1px solid var(--border-color); background: var(--secondary-navy, #0a1e3a);">
@@ -269,10 +269,10 @@
     <div id="confirmSaveModal" class="confirm-modal">
         <div class="confirm-modal-content">
             <i class="fas fa-question-circle text-gold" style="font-size: 4rem; margin-bottom: 20px;"></i>
-            <h3>هل أنت متأكد من حفظ هذه التعديلاتطں</h3>
+            <h3>هل أنت متأكد من حفظ هذه التعديلات؟</h3>
             <div class="confirm-modal-actions">
-                <button class="btn btn-green" id="btnConfirmSaveYes" style="flex: 1;">نعمطŒ احفظ</button>
-                <button class="btn btn-outline" id="btnConfirmSaveNo" style="flex: 1;">لاطŒ تراجع</button>
+                <button class="btn btn-green" id="btnConfirmSaveYes" style="flex: 1;">نعم، احفظ</button>
+                <button class="btn btn-outline" id="btnConfirmSaveNo" style="flex: 1;">لا، تراجع</button>
             </div>
         </div>
     </div>
@@ -282,7 +282,7 @@
         <div class="confirm-modal-content">
             <i class="fas fa-exclamation-triangle text-orange" style="font-size: 4rem; margin-bottom: 20px; color: #e67e22;"></i>
             <h3 style="margin-bottom: 10px;">لديك تعديلات لم يتم حفظها!</h3>
-            <p style="color: rgba(255,255,255,0.7); margin-bottom: 20px;">هل تريد استكمال التعديل أم إلط؛اط، التعديلات والخروجطں</p>
+            <p style="color: rgba(255,255,255,0.7); margin-bottom: 20px;">هل تريد استكمال التعديل أم إلغاء التعديلات والخروج؟</p>
             <div class="confirm-modal-actions">
                 <button class="btn btn-outline" id="btnExitDiscard" style="flex: 1; border-color: #e74c3c; color: #e74c3c;">رفض التعديل والخروج</button>
                 <button class="btn btn-green" id="btnExitResume" style="flex: 1;">استكمال التعديل</button>
@@ -393,7 +393,7 @@
         };
 
         window.removeCustomSection = function(index) {
-            if(confirm('هل أنت متأكد من حذف هذا القسم وكل محتوياتهطں')) {
+            if(confirm('هل أنت متأكد من حذف هذا القسم وكل محتوياته؟')) {
                 tempContents.customSections.splice(index, 1);
                 markUnsaved();
                 renderContentLists();
@@ -407,7 +407,7 @@
         };
 
         window.removeCustomItem = function(sectionIndex, itemIndex) {
-            if(confirm('حذف هذا العنصرطں')) {
+            if(confirm('حذف هذا العنصر؟')) {
                 tempContents.customSections[sectionIndex].items.splice(itemIndex, 1);
                 markUnsaved();
                 renderContentLists();
@@ -471,10 +471,10 @@
                 
                 let visibilityBtn = c.hidden ? 
                     `<button class="btn btn-outline" style="padding: 5px; font-size: 0.8rem;" onclick="toggleCourseVisibility('${c.id}')" title="إظهار"><i class="fas fa-eye-slash text-orange"></i></button>` :
-                    `<button class="btn btn-outline" style="padding: 5px; font-size: 0.8rem;" onclick="toggleCourseVisibility('${c.id}')" title="إخفاط،"><i class="fas fa-eye text-cyan"></i></button>`;
+                    `<button class="btn btn-outline" style="padding: 5px; font-size: 0.8rem;" onclick="toggleCourseVisibility('${c.id}')" title="إخفاء"><i class="fas fa-eye text-cyan"></i></button>`;
                 
                 let finishBtn = c.finished ?
-                    `<button class="btn btn-outline" style="padding: 5px; font-size: 0.8rem; border-color: #e74c3c; color: #e74c3c;" onclick="toggleCourseFinish('${c.id}')" title="إلط؛اط، الانتهاط،"><i class="fas fa-calendar-times"></i></button>` :
+                    `<button class="btn btn-outline" style="padding: 5px; font-size: 0.8rem; border-color: #e74c3c; color: #e74c3c;" onclick="toggleCourseFinish('${c.id}')" title="إلغاء الانتهاء"><i class="fas fa-calendar-times"></i></button>` :
                     `<button class="btn btn-outline" style="padding: 5px; font-size: 0.8rem;" onclick="toggleCourseFinish('${c.id}')" title="تحديد كمنتهي"><i class="fas fa-calendar-check text-green"></i></button>`;
 
                 tr.innerHTML = `
@@ -500,10 +500,10 @@
             const pwd = await window.requireAdminPassword();
             if (pwd === null) return;
             if (pwd.trim() !== "My@36_172001") {
-                alert("كلمة المرور ط؛ير صحيحة!");
+                alert("كلمة المرور غير صحيحة!");
                 return;
             }
-            if(confirm('تحذير نهائي: هل أنت متأكد من حذف هذا الكورس بالكامل من قاعدة البياناتطں لا يمكن التراجع عن هذا الإجراط،.')) {
+            if(confirm('تحذير نهائي: هل أنت متأكد من حذف هذا الكورس بالكامل من قاعدة البيانات؟ لا يمكن التراجع عن هذا الإجراء.')) {
                 window.showToast('جاري حذف الكورس...', 'warning');
                 if(window.FirebaseService) {
                     await window.FirebaseService.deleteCourse(id);
@@ -605,7 +605,7 @@ function renderContentLists() {
                 <div style="display: flex; align-items: center; gap: 10px; flex: 1; min-width: 250px;">
                     <i class="fas fa-folder-open text-gold" style="font-size: 1.5rem;"></i>
                     <div style="position: relative; display: flex; align-items: center; width: 100%; max-width: 300px;">
-                        <input type="text" value="${sec.title}" class="form-control" style="font-size: 1.2rem; font-weight: bold; background: rgba(0,0,0,0.2); border: 1px dashed rgba(255,255,255,0.2); color: var(--accent-cyan); width: 100%; padding: 5px 35px 5px 10px; border-radius: 8px; transition: border 0.3s;" onfocus="this.style.border='1px solid var(--accent-cyan)'" onblur="this.style.border='1px dashed rgba(255,255,255,0.2)'" onchange="updateSectionTitle(${sIdx}, this.value)" placeholder="اسم القسم" title="اضط؛ط· لتعديل اسم القسم">
+                        <input type="text" value="${sec.title}" class="form-control" style="font-size: 1.2rem; font-weight: bold; background: rgba(0,0,0,0.2); border: 1px dashed rgba(255,255,255,0.2); color: var(--accent-cyan); width: 100%; padding: 5px 35px 5px 10px; border-radius: 8px; transition: border 0.3s;" onfocus="this.style.border='1px solid var(--accent-cyan)'" onblur="this.style.border='1px dashed rgba(255,255,255,0.2)'" onchange="updateSectionTitle(${sIdx}, this.value)" placeholder="اسم القسم" title="اضغط لتعديل اسم القسم">
                         <i class="fas fa-pen" style="position: absolute; right: 10px; color: rgba(255,255,255,0.4); font-size: 0.9rem; pointer-events: none;"></i>
                     </div>
                 </div>
@@ -621,7 +621,7 @@ function renderContentLists() {
         
         const itemsContainer = document.getElementById('sectionItems_' + sIdx);
         if(!sec.items || sec.items.length === 0) {
-            itemsContainer.innerHTML = '<div style="text-align: center; color: rgba(255,255,255,0.4); padding: 15px; background: rgba(0,0,0,0.2); border-radius: 8px;">لا يوجد محتوى في هذا القسم. اضط؛ط· على إضافة محتوى.</div>';
+            itemsContainer.innerHTML = '<div style="text-align: center; color: rgba(255,255,255,0.4); padding: 15px; background: rgba(0,0,0,0.2); border-radius: 8px;">لا يوجد محتوى في هذا القسم. اضغط على إضافة محتوى.</div>';
         } else {
             sec.items.forEach((item, iIdx) => {
                 const itemDiv = document.createElement('div');
@@ -651,10 +651,10 @@ function renderContentLists() {
 
                 // URL fields based on type
                 if (item.type === 'video') {
-                    html += `<input type="text" class="form-control" value="${item.videoUrl || item.youtubeUrl || ''}" onchange="updateItemUrl(${sIdx}, ${iIdx}, 'video', this.value)" placeholder="رابط· الفيديو (سيرفر أو يوتيوب)" style="padding: 6px; font-size: 0.9rem;">`;
-                    html += `<input type="text" class="form-control" value="${item.thumbnail || ''}" onchange="updateItemField(${sIdx}, ${iIdx}, 'thumbnail', this.value)" placeholder="رابط· الصورة المصط؛رة (اختياري)" style="padding: 6px; font-size: 0.9rem;">`;
+                    html += `<input type="text" class="form-control" value="${item.videoUrl || item.youtubeUrl || ''}" onchange="updateItemUrl(${sIdx}, ${iIdx}, 'video', this.value)" placeholder="رابط الفيديو (سيرفر أو يوتيوب)" style="padding: 6px; font-size: 0.9rem;">`;
+                    html += `<input type="text" class="form-control" value="${item.thumbnail || ''}" onchange="updateItemField(${sIdx}, ${iIdx}, 'thumbnail', this.value)" placeholder="رابط الصورة المصغرة (اختياري)" style="padding: 6px; font-size: 0.9rem;">`;
                 } else if (item.type === 'pdf') {
-                    html += `<input type="text" class="form-control" value="${item.pdfUrl || ''}" onchange="updateItemUrl(${sIdx}, ${iIdx}, 'pdf', this.value)" placeholder="رابط· المذكرة (PDF)" style="padding: 6px; font-size: 0.9rem;">`;
+                    html += `<input type="text" class="form-control" value="${item.pdfUrl || ''}" onchange="updateItemUrl(${sIdx}, ${iIdx}, 'pdf', this.value)" placeholder="رابط المذكرة (PDF)" style="padding: 6px; font-size: 0.9rem;">`;
                 }
 
                 // Advanced LMS fields (Availability, Deadline, Depends On)
@@ -694,7 +694,7 @@ function renderContentLists() {
                             </div>
                             <div style="flex: 1; display: flex; align-items: center; gap: 8px;">
                                 <label style="font-size: 0.9rem; color: #fff;">مدة الامتحان (بالدقائق):</label>
-                                <input type="number" min="0" class="form-control" value="${item.duration || 0}" onchange="updateItemField(${sIdx}, ${iIdx}, 'duration', this.value)" style="padding: 4px; font-size: 0.9rem; width: 80px;" placeholder="0 = ط؛ير محدد">
+                                <input type="number" min="0" class="form-control" value="${item.duration || 0}" onchange="updateItemField(${sIdx}, ${iIdx}, 'duration', this.value)" style="padding: 4px; font-size: 0.9rem; width: 80px;" placeholder="0 = غير محدد">
                             </div>
                         </div>
                     `;
@@ -731,7 +731,7 @@ function generateDependsOnOptions(currentSIdx, currentIIdx, selectedVal) {
 }
 
 window.addNewSection = function() {
-    const name = prompt('أدخل اسم القسم الجديد (مثال: محاضرة تعريفيةطŒ واجب متفوقين):', 'قسم جديد');
+    const name = prompt('أدخل اسم القسم الجديد (مثال: محاضرة تعريفية، واجب متفوقين):', 'قسم جديد');
     if (!name) return; // Cancelled
     
     if(!tempContents.sections) tempContents.sections = [];
@@ -742,7 +742,7 @@ window.addNewSection = function() {
 
 window.removeSection = async function(sIdx) {
     if(!tempContents.sections[sIdx].items || tempContents.sections[sIdx].items.length === 0) {
-        if(confirm('هل أنت متأكد من حذف هذا القسم الفارط؛طں')) {
+        if(confirm('هل أنت متأكد من حذف هذا القسم الفارغ؟')) {
             tempContents.sections.splice(sIdx, 1);
             markUnsaved();
             renderContentLists();
@@ -753,11 +753,11 @@ window.removeSection = async function(sIdx) {
     const pwd = await window.requireAdminPassword();
     if (pwd === null) return;
     if (pwd.trim() !== "My@36_172001") {
-        alert("كلمة المرور ط؛ير صحيحة!");
+        alert("كلمة المرور غير صحيحة!");
         return;
     }
 
-    if(confirm('هل أنت متأكد من حذف هذا القسم بالكامل بما يحتويه من دروسطں')) {
+    if(confirm('هل أنت متأكد من حذف هذا القسم بالكامل بما يحتويه من دروس؟')) {
         tempContents.sections.splice(sIdx, 1);
         markUnsaved();
         renderContentLists();
@@ -861,11 +861,11 @@ window.removeItem = async function(sIdx, iIdx) {
     const pwd = await window.requireAdminPassword();
     if (pwd === null) return;
     if (pwd.trim() !== "My@36_172001") {
-        alert("كلمة المرور ط؛ير صحيحة!");
+        alert("كلمة المرور غير صحيحة!");
         return;
     }
 
-    if(confirm('هل أنت متأكد من حذف هذا العنصرطں')) {
+    if(confirm('هل أنت متأكد من حذف هذا العنصر؟')) {
         tempContents.sections[sIdx].items.splice(iIdx, 1);
         markUnsaved();
         renderContentLists();
@@ -1015,7 +1015,7 @@ window.updateItemUrl = function(sIdx, iIdx, type, val) {
                 
                 if (!title || (!isFree && !price)) {
                     document.getElementById('confirmSaveModal').style.display = 'none';
-                    window.showToast('الرجاط، إدخال العنوان والسعر', 'error');
+                    window.showToast('الرجاء إدخال العنوان والسعر', 'error');
                     return;
                 }
 
@@ -1114,7 +1114,7 @@ window.updateItemUrl = function(sIdx, iIdx, type, val) {
                         window.showToast('âœ… تم حفظ الكورس بنجاح!', 'success');
                     } catch(err) {
                         console.error('Save error:', err);
-                        window.showToast('حدث خطأ أثناط، الحفظ: ' + err.message, 'error');
+                        window.showToast('حدث خطأ أثناء الحفظ: ' + err.message, 'error');
                     } finally {
                         submitBtn.innerHTML = originalBtnText;
                         submitBtn.disabled = false;
@@ -1199,10 +1199,10 @@ window.updateItemUrl = function(sIdx, iIdx, type, val) {
                     <thead>
                         <tr>
                             <th style="width:40px;"></th>
-                            <th>اسم الط·الب</th>
+                            <th>اسم الطالب</th>
                             <th>الهاتف</th>
                             <th>الصف</th>
-                            <th>إجراط،ات</th>
+                            <th>إجراءات</th>
                         </tr>
                     </thead>
                     <tbody id="courseSubscribersTbody">
@@ -1257,7 +1257,7 @@ window.openCourseSubscribers = async function(courseId) {
         renderSubscribersTable();
     } catch(e) {
         console.error(e);
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#e74c3c;">خط·أ في جلب البيانات</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#e74c3c;">خطأ في جلب البيانات</td></tr>';
     }
 };
 
@@ -1293,17 +1293,17 @@ document.getElementById('selectAllSubscribers').addEventListener('change', funct
 });
 
 window.removeSingleSubscriber = async function(phone) {
-    if(!confirm('هل أنت متأكد من إزالة هذا الط·الب من الكورسطں (لن يصله إشعار بذلك)')) return;
+    if(!confirm('هل أنت متأكد من إزالة هذا الطالب من الكورس؟ (لن يصله إشعار بذلك)')) return;
     await processUnsubscribe([phone]);
 };
 
 window.bulkRemoveSubscribers = async function() {
     const checkboxes = document.querySelectorAll('.subscriber-checkbox:checked');
     if(checkboxes.length === 0) {
-        alert('الرجاط، تحديد ط·الب واحد على الأقل');
+        alert('الرجاء تحديد طالب واحد على الأقل');
         return;
     }
-    if(!confirm('هل أنت متأكد من إزالة جميع الطلاب المحددين من هذا الكورسطں (' + checkboxes.length + ' ط·لاب)')) return;
+    if(!confirm('هل أنت متأكد من إزالة جميع الطلاب المحددين من هذا الكورس؟ (' + checkboxes.length + ' ط·لاب)')) return;
     
     const phones = Array.from(checkboxes).map(cb => cb.value);
     await processUnsubscribe(phones);
@@ -1331,8 +1331,8 @@ async function processUnsubscribe(phones) {
         } catch(e) { console.error('Error removing ' + phone, e); }
     }
     
-    if(window.showToast) window.showToast('تم إزالة ' + processed + ' ط·الب بنجاح.', 'success');
-    else alert('تم إزالة ' + processed + ' ط·الب بنجاح.');
+    if(window.showToast) window.showToast('تم إزالة ' + processed + ' طالب بنجاح.', 'success');
+    else alert('تم إزالة ' + processed + ' طالب بنجاح.');
     
     window.openCourseSubscribers(currentCourseSubscribersId);
 }
@@ -1350,7 +1350,7 @@ window.requireAdminPassword = function() {
             <p style="color:#fff;margin-bottom:20px;font-size:0.95rem;">يرجى إدخال كلمة مرور المالك للمتابعة:</p>
             <input type="password" id="tempAdminPwd" autocomplete="new-password" class="form-control" style="width:100%;margin-bottom:20px;text-align:center;letter-spacing:5px;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.1);color:#fff;" placeholder="أدخل كلمة المرور هنا">
             <div style="display:flex;gap:10px;justify-content:center;">
-                <button id="btnPwdCancel" class="btn btn-outline" style="flex:1;border-color:#e74c3c;color:#e74c3c;">إلط؛اط،</button>
+                <button id="btnPwdCancel" class="btn btn-outline" style="flex:1;border-color:#e74c3c;color:#e74c3c;">إلغاء</button>
                 <button id="btnPwdConfirm" class="btn btn-gold" style="flex:1;">تأكيد</button>
             </div>
         `;
@@ -1376,7 +1376,7 @@ window.exportSubscribersCSV = async function() {
     const pwd = await window.requireAdminPassword();
     if (pwd === null) return;
     if (pwd.trim() !== "My@36_172001") {
-        alert("كلمة المرور ط؛ير صحيحة!");
+        alert("كلمة المرور غير صحيحة!");
         return;
     }
 
@@ -1389,7 +1389,7 @@ window.exportSubscribersCSV = async function() {
     aoa.push(["الاسم", "رقم الموبايل", "رقم ولي الأمر", "الصف"]);
     
     currentCourseSubscribersData.forEach(s => {
-        aoa.push([s.name, s.phone, s.parentPhone || 'ط؛ير مسجل', s.grade]);
+        aoa.push([s.name, s.phone, s.parentPhone || 'غير مسجل', s.grade]);
     });
     
     const ws = XLSX.utils.aoa_to_sheet(aoa);
@@ -1518,7 +1518,7 @@ window.confirmMoveItem = async function() {
         closeMoveModal();
         renderFlatContents(); // refresh view
     } catch(err) {
-        showToast('حدث خطأ أثناط، نقل المحتوى', 'error');
+        showToast('حدث خطأ أثناء نقل المحتوى', 'error');
     }
 };
 </script>
@@ -1650,9 +1650,9 @@ window.renderFlatContents = function() {
 window.deleteFlatItem = async function(listKey, idx) {
     const pwd = await window.requireAdminPassword();
     if(pwd === null) return;
-    if(pwd.trim() !== 'My@36_172001') return alert('كلمة المرور خاط·ئة');
+    if(pwd.trim() !== 'My@36_172001') return alert('كلمة المرور خاطئة');
     
-    if(!confirm('هل أنت متأكد من مسح هذا العنصر نهائياظ‹طں')) return;
+    if(!confirm('هل أنت متأكد من مسح هذا العنصر نهائياظ‹؟')) return;
     
     const courses = JSON.parse(localStorage.getItem('adminCourses') || '[]');
     const courseIndex = courses.findIndex(c => c.id === window.currentFlatCourseId);
@@ -1671,9 +1671,9 @@ window.deleteFlatItem = async function(listKey, idx) {
 window.deleteFlatChildItem = async function(listKey, parentIdx, childIdx) {
     const pwd = await window.requireAdminPassword();
     if(pwd === null) return;
-    if(pwd.trim() !== 'My@36_172001') return alert('كلمة المرور خاط·ئة');
+    if(pwd.trim() !== 'My@36_172001') return alert('كلمة المرور خاطئة');
     
-    if(!confirm('هل أنت متأكد من مسح هذا العنصر الفرعي نهائياظ‹طں')) return;
+    if(!confirm('هل أنت متأكد من مسح هذا العنصر الفرعي نهائياظ‹؟')) return;
     
     const courses = JSON.parse(localStorage.getItem('adminCourses') || '[]');
     const courseIndex = courses.findIndex(c => c.id === window.currentFlatCourseId);
@@ -1717,7 +1717,7 @@ window.confirmMoveItem = async function() {
     const sourceCourseIdx = courses.findIndex(c => c.id === window.currentFlatCourseId);
     const targetCourseIdx = courses.findIndex(c => c.id === targetCourseId);
     
-    if(sourceCourseIdx === -1 || targetCourseIdx === -1) return alert('خط·أ في تحديد الكورس!');
+    if(sourceCourseIdx === -1 || targetCourseIdx === -1) return alert('خطأ في تحديد الكورس!');
     
     let itemToMove;
     if(_moveState.childIdx !== null) {
