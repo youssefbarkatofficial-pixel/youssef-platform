@@ -142,7 +142,7 @@
                 </div>
             </div>
             <div style="width: 100%; height: calc(100% - 60px); display: flex; justify-content: center; align-items: center; overflow: auto; padding: 20px;">
-                <img id="proofImageFull" src="" style="max-width: 100%; max-height: 100%; border: 2px solid var(--royal-gold); border-radius: 18px; cursor: zoom-in; transition: transform 0.25s ease;">
+                <img loading="lazy" id="proofImageFull" src="" style="max-width: 100%; max-height: 100%; border: 2px solid var(--royal-gold); border-radius: 18px; cursor: zoom-in; transition: transform 0.25s ease;">
                 <div id="proofMissingMsg" style="display: none; text-align: center; color: white;">
                     <i class="fas fa-image" style="font-size: 4rem; color: rgba(255,255,255,0.2); margin-bottom: 20px;"></i>
                     <h3>ط§ظ„طµظˆط±ط© ط؛ظٹط± ظ…طھظˆظپط±ط©</h3>
@@ -324,7 +324,7 @@
                             <td id="proof-${req.id}">
                                 ${imgSrc ? `
                                 <div style="position:relative; display:inline-block;">
-                                    <img src="${imgSrc}" onclick="window.openProof('${imgSrc}')" style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px; cursor: zoom-in; border: 1px solid var(--border-color);">
+                                    <img loading="lazy" src="${imgSrc}" onclick="window.openProof('${imgSrc}')" style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px; cursor: zoom-in; border: 1px solid var(--border-color);">
                                     <a href="${imgSrc}" download="receipt_${req.id}.png" style="position:absolute; bottom:-5px; right:-5px; background:var(--accent-cyan); color:#fff; border-radius:50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center; text-decoration:none; font-size:0.7rem; box-shadow: 0 2px 5px rgba(0,0,0,0.5); transition: 0.2s;" title="طھط­ظ…ظٹظ„"><i class="fas fa-download"></i></a>
                                 </div>
                                 ` : '<span style="color: rgba(255,255,255,0.3); font-size: 0.8rem;">-</span>'}

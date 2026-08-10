@@ -398,7 +398,7 @@
 
                     // Avatar HTML
                     const avatarHtml = pic
-                        ? `<div class="ticket-avatar ${statusClass}"><img src="${pic}" onerror="this.parentElement.innerHTML='<i class=\'fas fa-user\'></i>'"></div>`
+                        ? `<div class="ticket-avatar ${statusClass}"><img loading="lazy" src="${pic}" onerror="this.parentElement.innerHTML='<i class=\'fas fa-user\'></i>'"></div>`
                         : `<div class="ticket-avatar ${statusClass}"><i class="fas fa-user"></i></div>`;
 
                     // Last admin reply or complaint message

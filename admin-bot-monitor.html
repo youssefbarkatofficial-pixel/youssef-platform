@@ -300,7 +300,7 @@
                     <div id="chatArea" style="display: none; height: 100%; flex-direction: column;">
                         <div class="chat-header">
                             <div style="display: flex; align-items: center; gap: 15px;">
-                                <img id="chatStudentAvatar" src="" class="student-avatar" style="display: none;" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                                <img loading="lazy" id="chatStudentAvatar" src="" class="student-avatar" style="display: none;" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
                                 <div class="student-avatar" id="chatStudentAvatarFallback"><i class="fas fa-user"></i></div>
                                 <div>
                                     <h3 id="chatStudentName" style="margin: 0; font-size: 1.1rem;">اسم الطالب</h3>
@@ -441,7 +441,7 @@
                     let avatarHtml = `<div class="student-avatar"><i class="fas fa-user"></i></div>`;
                     let pic = studentProfiles[userPhone] || localStorage.getItem('profilePic_' + userPhone);
                     if (pic) {
-                        avatarHtml = `<img src="${pic}" class="student-avatar" style="object-fit:cover;" onerror="this.outerHTML='<div class=\\'student-avatar\\'><i class=\\'fas fa-user\\'></i></div>'" />`;
+                        avatarHtml = `<img loading="lazy" src="${pic}" class="student-avatar" style="object-fit:cover;" onerror="this.outerHTML='<div class=\\'student-avatar\\'><i class=\\'fas fa-user\\'></i></div>'" />`;
                     }
 
                     const msgTime = new Date(chat.updatedAt || Date.now()).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit', hour12: false });

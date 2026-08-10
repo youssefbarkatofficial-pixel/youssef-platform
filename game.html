@@ -598,7 +598,7 @@ async function initLobby(user) {
   const initials = data.name.trim().split(' ').map(w => w[0]).slice(0,2).join('');
   document.getElementById('lobby-avatar').textContent = initials;
   if (data.photoURL) {
-    document.getElementById('lobby-avatar').innerHTML = `<img src="${data.photoURL}" alt="avatar">`;
+    document.getElementById('lobby-avatar').innerHTML = `<img loading="lazy" src="${data.photoURL}" alt="avatar">`;
   }
   document.getElementById('lobby-name').textContent = data.name;
   const rank = GameEngine.getRank(data.xp);

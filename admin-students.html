@@ -367,7 +367,7 @@
                     tr.innerHTML = `
                         <td>
                             <div style="display: flex; align-items: center; gap: 10px;">
-                                <img src="${avatarSrc}" 
+                                <img loading="lazy" src="${avatarSrc}" 
                                     class="student-avatar-clickable"
                                     style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid var(--royal-gold); background: #071326; padding: ${hasRealPic ? '0' : '4px'};"
                                     onclick="${hasRealPic ? `openImgLightbox('${avatarSrc.replace(/'/g, "\\'")}',' ${safeName}')` : 'void(0)'}"
@@ -779,7 +779,7 @@
         <div class="lb-close" onclick="document.getElementById('imgLightbox').style.display='none'; document.body.style.overflow='';">
             <i class="fas fa-times"></i>
         </div>
-        <img id="lbImg" src="" alt="طµظˆط±ط© ط§ظ„ط·ط§ظ„ط¨" onclick="event.stopPropagation()">
+        <img loading="lazy" id="lbImg" src="" alt="طµظˆط±ط© ط§ظ„ط·ط§ظ„ط¨" onclick="event.stopPropagation()">
         <p id="lbCaption" style="color: rgba(255,255,255,0.8); font-size: 1rem; text-align: center; margin: 0;"></p>
         <p style="color: rgba(255,255,255,0.4); font-size: 0.8rem;">ط§ط¶ط؛ط· ط®ط§ط±ط¬ ط§ظ„طµظˆط±ط© ظ„ظ„ط¥ط؛ظ„ط§ظ‚</p>
     </div>
