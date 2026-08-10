@@ -11,15 +11,15 @@
     <script src="js/firebase-service.js"></script>
 </head>
 <body style="font-family: sans-serif; text-align: center; padding: 50px;">
-    <h1>ط¬ط§ط±ظٹ ط§ظ„طھط­ط¯ظٹط«...</h1>
-    <p id="status">ط§ظ„ط±ط¬ط§ط، ط§ظ„ط§ظ†طھط¸ط§ط±</p>
+    <h1>جاري التحديث...</h1>
+    <p id="status">الرجاط، الانتظار</p>
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
             try {
                 const courses = await window.fbService.getCourses();
                 const prep3 = courses.find(c => c.id === 'prep3');
                 if (!prep3) {
-                    document.getElementById('status').innerText = 'لم يتم العثور على ظƒظˆط±ط³ prep3.';
+                    document.getElementById('status').innerText = 'لم يتم العثور على كورس prep3.';
                     return;
                 }
 
@@ -27,13 +27,13 @@
                 let hwItem = null;
                 for (const sec of prep3.sections) {
                     if (sec.items) {
-                        const found = sec.items.find(i => i.title === 'ظˆط§ط¬ط¨ ط§ظ„ظ…ط­ط§ط¶ط±ط© ط§ظ„طھط¹ط±ظٹظپظٹط©');
+                        const found = sec.items.find(i => i.title === 'واجب المحاضرة التعريفية');
                         if (found) { hwItem = found; break; }
                     }
                 }
 
                 if (!hwItem) {
-                    document.getElementById('status').innerText = 'لم يتم العثور على ط§ظ„ظˆط§ط¬ط¨ ظ„ظ†ط³ط®ظ‡.';
+                    document.getElementById('status').innerText = 'لم يتم العثور على الواجب لنسخه.';
                     return;
                 }
 
@@ -47,9 +47,9 @@
                 if (!examsSec.items) examsSec.items = [];
 
                 // Check if already migrated
-                const existingExam = examsSec.items.find(i => i.title === 'ط§ظ…طھط­ط§ظ† ط§ظ„ظ…ط­ط§ط¶ط±ط© ط§ظ„طھط¹ط±ظٹظپظٹط©');
+                const existingExam = examsSec.items.find(i => i.title === 'امتحان المحاضرة التعريفية');
                 if (existingExam) {
-                    document.getElementById('status').innerText = 'طھظ… ط¥ظ†ط´ط§ط، ط§ظ„ط§ظ…طھط­ط§ظ† ظ…ط³ط¨ظ‚ط§ظ‹.';
+                    document.getElementById('status').innerText = 'تم إنشاط، الامتحان مسبقاظ‹.';
                     return;
                 }
 
@@ -61,7 +61,7 @@
                 // Clone the homework into an exam
                 const newExam = JSON.parse(JSON.stringify(hwItem));
                 newExam.id = 'exam-' + Date.now();
-                newExam.title = 'ط§ظ…طھط­ط§ظ† ط§ظ„ظ…ط­ط§ط¶ط±ط© ط§ظ„طھط¹ط±ظٹظپظٹط©';
+                newExam.title = 'امتحان المحاضرة التعريفية';
                 newExam.type = 'exam';
                 newExam.availableFrom = nextWed.toISOString();
                 
@@ -69,10 +69,10 @@
                 if (newExam.questions) {
                     newExam.questions.forEach(q => {
                         if (q.text) {
-                            if (q.text.includes('ط¨ظ… طھظپط³ط±') && !q.text.includes('[ط¨ظ… طھظپط³ط±]')) {
-                                q.text = '[ط¨ظ… طھظپط³ط±] ' + q.text.replace('ط¨ظ… طھظپط³ط±', '').trim();
-                            } else if (q.text.includes('ظ…ط§ ط§ظ„ظ†طھط§ط¦ط¬') && !q.text.includes('[ظ…ط§ ط§ظ„ظ†طھط§ط¦ط¬]')) {
-                                q.text = '[ظ…ط§ ط§ظ„ظ†طھط§ط¦ط¬] ' + q.text.replace('ظ…ط§ ط§ظ„ظ†طھط§ط¦ط¬', '').trim();
+                            if (q.text.includes('بم تفسر') && !q.text.includes('[بم تفسر]')) {
+                                q.text = '[بم تفسر] ' + q.text.replace('بم تفسر', '').trim();
+                            } else if (q.text.includes('ما النتائج') && !q.text.includes('[ما النتائج]')) {
+                                q.text = '[ما النتائج] ' + q.text.replace('ما النتائج', '').trim();
                             }
                         }
                     });
@@ -81,7 +81,7 @@
                 examsSec.items.push(newExam);
                 
                 await window.fbService.saveCourse(prep3);
-                document.getElementById('status').innerHTML = '<b>طھظ… ط¨ظ†ط¬ط§ط­! طھظ… ط¥ظ†ط´ط§ط، ط§ظ…طھط­ط§ظ† ط§ظ„ظ…ط­ط§ط¶ط±ط© ط§ظ„طھط¹ط±ظٹظپظٹط© ظ„ظٹظپطھط­ ط§ظ„ط£ط±ط¨ط¹ط§ط، 9 ظ…ط³ط§ط،ظ‹. ظٹظ…ظƒظ†ظƒ ط­ط°ظپ ظ‡ط°ط§ ط§ظ„ظ…ظ„ظپ ط§ظ„ط¢ظ†.</b>';
+                document.getElementById('status').innerHTML = '<b>تم بنجاح! تم إنشاط، امتحان المحاضرة التعريفية ليفتح الأربعاط، 9 مساط،ظ‹. يمكنك حذف هذا الملف الط¢ن.</b>';
             } catch (err) {
                 console.error(err);
                 document.getElementById('status').innerText = 'حدث خطأ: ' + err.message;

@@ -242,12 +242,12 @@
 
     <header class="navbar glass-panel">
         <a href="index.html" class="nav-brand">
-            <div class="logo-circle" style="width: 40px; height: 40px; font-size: 1.2rem;">ظٹ</div>
+            <div class="logo-circle" style="width: 40px; height: 40px; font-size: 1.2rem;">ي</div>
             <span class="nav-brand-text">منصة يوسف بركات</span>
         </a>
         <div class="nav-actions">
             <a href="#" class="btn btn-outline" style="padding: 8px 15px; border-radius: 20px;"><i class="fas fa-bell"></i></a>
-            <a href="#" id="logoutBtn" class="btn btn-outline" style="border-color: #e74c3c; color: #e74c3c; padding: 8px 15px; border-radius: 20px;">ط®ط±ظˆط¬ <i class="fas fa-sign-out-alt"></i></a>
+            <a href="#" id="logoutBtn" class="btn btn-outline" style="border-color: #e74c3c; color: #e74c3c; padding: 8px 15px; border-radius: 20px;">خروج <i class="fas fa-sign-out-alt"></i></a>
         </div>
     </header>
 
@@ -257,34 +257,34 @@
                 <div class="avatar" style="overflow: hidden;">
                     <img loading="lazy" id="userAvatarImg" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Ccircle cx='40' cy='40' r='40' fill='%23071326'/%3E%3Ccircle cx='40' cy='30' r='16' fill='%23D4A64F'/%3E%3Cellipse cx='40' cy='70' rx='24' ry='18' fill='%23D4A64F'/%3E%3C/svg%3E" style="width: 100%; height: 100%; object-fit: cover;">
                 </div>
-                <h4 id="userNameDisplay">ط·ط§ظ„ط¨</h4>
+                <h4 id="userNameDisplay">ط·الب</h4>
                 <p id="userGradeDisplay">الصف الدراسي</p>
             </div>
             <ul class="sidebar-nav">
-                <li><a href="dashboard.html"><i class="fas fa-home"></i> ظ„ظˆط­ط© ط§ظ„طھط­ظƒظ…</a></li>
-                <li><a href="profile.html"><i class="fas fa-user"></i> ط­ط³ط§ط¨ظٹ</a></li>
-                <li><a href="courses.html"><i class="fas fa-plus-circle"></i> ط§ط´طھط±ط§ظƒ ظپظٹ ظƒظˆط±ط³ط§طھ</a></li>
+                <li><a href="dashboard.html"><i class="fas fa-home"></i> لوحة التحكم</a></li>
+                <li><a href="profile.html"><i class="fas fa-user"></i> حسابي</a></li>
+                <li><a href="courses.html"><i class="fas fa-plus-circle"></i> اشتراك في كورسات</a></li>
                 <li><a href="my-courses.html"><i class="fas fa-video"></i> كورساتي</a></li>
                 <li><a href="homeworks.html"><i class="fas fa-tasks"></i> الواجبات</a></li>
                 <li><a href="exams.html" class="active"><i class="fas fa-clipboard-list"></i> الامتحانات</a></li>
-                <li><a href="stats.html"><i class="fas fa-chart-line"></i> ط§ظ„ط¥ط­طµط§ط¦ظٹط§طھ</a></li>
-                <li><a href="settings.html"><i class="fas fa-cog"></i> ط§ظ„ط¥ط¹ط¯ط§ط¯ط§طھ</a></li>
+                <li><a href="stats.html"><i class="fas fa-chart-line"></i> الإحصائيات</a></li>
+                <li><a href="settings.html"><i class="fas fa-cog"></i> الإعدادات</a></li>
             </ul>
         </aside>
 
         <main class="main-content">
             <div class="page-header">
                 <h1 class="page-title"><i class="fas fa-clipboard-list mr-2 text-gold"></i> الامتحانات</h1>
-                <p style="color:rgba(255,255,255,0.5); margin-top:5px; font-size:0.9rem;">ط§ط¶ط؛ط· ط¹ظ„ظ‰ ط£ظٹ ط¯ط±ط¬ط© ظ„ط¹ط±ط¶ طھظپط§طµظٹظ„ ط§ظ„ط¥ط¬ط§ط¨ط§طھ ظˆط§ظ„طھطµط­ظٹط­ ط§ظ„ظƒط§ظ…ظ„</p>
+                <p style="color:rgba(255,255,255,0.5); margin-top:5px; font-size:0.9rem;">اضط؛ط· على أي درجة لعرض تفاصيل الإجابات والتصحيح الكامل</p>
             </div>
 
             <div class="glass-panel dash-panel" style="min-height: 400px;">
                 <div id="examListContainer"></div>
                 <div id="noExamState" style="display: none; text-align: center; padding: 50px 20px;">
                     <i class="fas fa-book-reader text-gold" style="font-size: 4rem; margin-bottom: 20px; opacity: 0.5;"></i>
-                    <h2 style="color: var(--soft-white); margin-bottom: 10px;">ظ„ط§ طھظˆط¬ط¯ ط§ظ…طھط­ط§ظ†ط§طھ ط¨ط¹ط¯</h2>
-                    <p style="color: rgba(255,255,255,0.7); margin-bottom: 20px;">ط§ط´طھط±ظƒ ظپظٹ الكورسات ط£ظˆظ„ط§ظ‹ ظ„ظ„ظˆطµظˆظ„ ط¥ظ„ظ‰ الامتحانات ط§ظ„ط®ط§طµط© ط¨ظ‡ط§</p>
-                    <a href="courses.html" class="btn btn-gold btn-large">طھطµظپط­ الكورسات</a>
+                    <h2 style="color: var(--soft-white); margin-bottom: 10px;">لا توجد امتحانات بعد</h2>
+                    <p style="color: rgba(255,255,255,0.7); margin-bottom: 20px;">اشترك في الكورسات أولاظ‹ للوصول إلى الامتحانات الخاصة بها</p>
+                    <a href="courses.html" class="btn btn-gold btn-large">تصفح الكورسات</a>
                 </div>
             </div>
         </main>
@@ -306,8 +306,8 @@
             <div class="modal-body" id="modalBody">
                 <div class="modal-no-detail" id="modalNoDetail" style="display:none;">
                     <i class="fas fa-info-circle"></i>
-                    <p>ظ„ط§ طھطھظˆظپط± طھظپط§طµظٹظ„ ط§ظ„ط£ط³ط¦ظ„ط© ظ„ظ‡ط°ط§ ط§ظ„ط§ظ…طھط­ط§ظ†.</p>
-                    <p style="font-size:0.82rem; margin-top:8px; color:rgba(255,255,255,0.4);">ظٹطھظ… ط­ظپط¸ طھظپط§طµظٹظ„ ط§ظ„ط£ط³ط¦ظ„ط© ظ„ظ„ط§ظ…طھط­ط§ظ†ط§طھ ط§ظ„ط¬ط¯ظٹط¯ط© ظپظ‚ط·.</p>
+                    <p>لا تتوفر تفاصيل الأسئلة لهذا الامتحان.</p>
+                    <p style="font-size:0.82rem; margin-top:8px; color:rgba(255,255,255,0.4);">يتم حفظ تفاصيل الأسئلة للامتحانات الجديدة فقط·.</p>
                 </div>
                 <div id="questionsContainer"></div>
             </div>
@@ -329,8 +329,8 @@
         if (gradeEl) {
             const effectiveGrade = (window.getEffectiveStudentGrade && window.getGradeLabel)
                 ? window.getGradeLabel(window.getEffectiveStudentGrade(user))
-                : (user.grade || 'ط·ط§ظ„ط¨');
-            gradeEl.textContent = effectiveGrade || 'ط·ط§ظ„ط¨';
+                : (user.grade || 'ط·الب');
+            gradeEl.textContent = effectiveGrade || 'ط·الب';
         }
 
         let dbUser = JSON.parse(localStorage.getItem(`db_${user.phone}`)) || { courses: [] };
@@ -365,7 +365,7 @@
                     if (courseObj.homeworks) tasks.push(...courseObj.homeworks);
                     if (courseObj.trainings) tasks.push(...courseObj.trainings);
                     if (courseObj.customSections) courseObj.customSections.forEach(s => { if(s.items) tasks.push(...s.items); });
-                    return tasks.filter(t => t.type === 'exam' || t.type === 'طھط¯ط±ظٹط¨' || t.type === 'training' || t.type === 'ظˆط§ط¬ط¨' || t.type === 'homework' || t.type === 'task' || t.type === 'quiz' || t.questions);
+                    return tasks.filter(t => t.type === 'exam' || t.type === 'تدريب' || t.type === 'training' || t.type === 'واجب' || t.type === 'homework' || t.type === 'task' || t.type === 'quiz' || t.questions);
                 }
 
                 let allTasks = getCourseTasks(c);
@@ -373,9 +373,9 @@
 
                 allTasks.forEach(task => {
                     let type = 'exam';
-                    const title = task.title || 'ط¨ط¯ظˆظ† ط§ط³ظ…';
-                    if (task.type === 'طھط¯ط±ظٹط¨' || task.type === 'training' || title.includes('طھط¯ط±ظٹط¨')) type = 'training';
-                    if (task.type === 'ظˆط§ط¬ط¨' || task.type === 'homework' || task.type === 'task' || title.includes('ظˆط§ط¬ط¨')) type = 'homework';
+                    const title = task.title || 'بدون اسم';
+                    if (task.type === 'تدريب' || task.type === 'training' || title.includes('تدريب')) type = 'training';
+                    if (task.type === 'واجب' || task.type === 'homework' || task.type === 'task' || title.includes('واجب')) type = 'homework';
                     
                     let taskAttempts = courseResults.filter(r => (r.examId && r.examId === task.id) || (!r.examId && r.examTitle === title));
                     groups[type].push({ task, attempts: taskAttempts });
@@ -384,8 +384,8 @@
                 courseResults.forEach(r => {
                     if (!allTasks.some(t => t.id === r.examId || (!r.examId && t.title === r.examTitle))) {
                         let type = 'exam';
-                        if (r.isTraining || (r.examTitle && r.examTitle.includes('طھط¯ط±ظٹط¨'))) type = 'training';
-                        if (r.isHomework || (r.examTitle && r.examTitle.includes('ظˆط§ط¬ط¨'))) type = 'homework';
+                        if (r.isTraining || (r.examTitle && r.examTitle.includes('تدريب'))) type = 'training';
+                        if (r.isHomework || (r.examTitle && r.examTitle.includes('واجب'))) type = 'homework';
                         groups[type].push({ task: { id: r.examId, title: r.examTitle, _deleted: true }, attempts: [r] });
                     }
                 });
@@ -398,20 +398,20 @@
                     let html = `<div class="exam-category"><h4 style="color:${color};"><i class="${icon} mr-2"></i>${title}</h4>`;
                     groupArr.forEach(item => {
                         html += `<div class="exam-item-card">`;
-                        html += `<div class="exam-item-title"><i class="fas fa-file-alt mr-2" style="opacity:0.5;"></i>${item.task.title || 'ط§ظ…طھط­ط§ظ† ط؛ظٹط± ظ…ط³ظ…ظ‰'}</div>`;
+                        html += `<div class="exam-item-title"><i class="fas fa-file-alt mr-2" style="opacity:0.5;"></i>${item.task.title || 'امتحان ط؛ير مسمى'}</div>`;
                         html += `<div class="attempts-row">`;
                         
                         if (item.attempts.length === 0) {
                             html += `<div style="padding: 10px; width: 100%; text-align: center; color: #fff; background: rgba(231, 76, 60, 0.1); border: 1px dashed #e74c3c; border-radius: 8px;">
-                                        <div style="margin-bottom:8px; font-weight:bold; color: #e74c3c;"><i class="fas fa-exclamation-circle"></i> ط؛ظٹط± ظ…ظƒطھظ…ظ„</div>
-                                        <button onclick="window.location.href='course-details.html?id=${cId}'" class="btn btn-outline" style="padding:5px 15px; font-size:0.9rem; border-color:#e74c3c; color:#e74c3c;">ط§ظ„ط°ظ‡ط§ط¨ ظ„ظ„ظ…ظ‡ظ…ط©</button>
+                                        <div style="margin-bottom:8px; font-weight:bold; color: #e74c3c;"><i class="fas fa-exclamation-circle"></i> ط؛ير مكتمل</div>
+                                        <button onclick="window.location.href='course-details.html?id=${cId}'" class="btn btn-outline" style="padding:5px 15px; font-size:0.9rem; border-color:#e74c3c; color:#e74c3c;">الذهاب للمهمة</button>
                                      </div>`;
                         } else {
                             item.attempts.forEach((att, idx) => {
                                 const aNum = att.attemptNumber || (idx + 1);
-                                const label = aNum === 1 ? 'ط§ظ„ط£ط³ط§ط³ظٹط©' : \`ط§ظ„ظ…ط­ط§ظˆظ„ط© \${aNum}\`;
+                                const label = aNum === 1 ? 'الأساسية' : \`المحاولة \${aNum}\`;
                                 const pct = att.effectivePercent ?? att.percent ?? 0;
-                                const overrideMark = att._adminOverride ? ' <i class="fas fa-check-double" style="color:#2ecc71;font-size:0.7rem;" title="ظ…ط¹ط¯ظ„ط© ظ…ظ† ط§ظ„ظ…ط¹ظ„ظ…"></i>' : '';
+                                const overrideMark = att._adminOverride ? ' <i class="fas fa-check-double" style="color:#2ecc71;font-size:0.7rem;" title="معدلة من المعلم"></i>' : '';
                                 const dateStr = att.ts ? new Date(att.ts).toLocaleDateString('ar-EG', { month: 'short', day: 'numeric' }) : '';
                                 const scoreColor = pct >= 85 ? '#2ecc71' : pct >= 60 ? '#3498db' : pct >= 40 ? '#f39c12' : '#e74c3c';
 
@@ -440,11 +440,11 @@
                             <i class="fas fa-star text-gold" style="font-size:1.4rem;"></i>
                             <div>
                                 <h3 style="margin:0; color:var(--text-primary); font-size:1rem;">${c.title}</h3>
-                                <span style="font-size:0.8rem; color:rgba(255,255,255,0.4);">${courseResults.length} نتيجة ظ…ط³ط¬ظ„ط©</span>
+                                <span style="font-size:0.8rem; color:rgba(255,255,255,0.4);">${courseResults.length} نتيجة مسجلة</span>
                             </div>
                         </div>
                         <button class="btn btn-outline toggle-btn" style="min-width:130px;">
-                            ط¹ط±ط¶ ط§ظ„ظ†طھط§ط¦ط¬ <i class="fas fa-chevron-down ml-2" style="margin-right:8px;"></i>
+                            عرض النتائج <i class="fas fa-chevron-down ml-2" style="margin-right:8px;"></i>
                         </button>
                     </div>
                     <div class="course-exam-body">
@@ -454,13 +454,13 @@
                             <button class="btn btn-outline filter-btn" data-target="homework" style="flex:1; min-width:100px;">الواجبات</button>
                         </div>
                         <div class="filter-section" id="section-exam">
-                            ${examsHtml || '<div class="empty-message">ظ„ط§ طھظˆط¬ط¯ ط§ظ…طھط­ط§ظ†ط§طھ ظ…ظƒطھظ…ظ„ط© ط¨ط¹ط¯</div>'}
+                            ${examsHtml || '<div class="empty-message">لا توجد امتحانات مكتملة بعد</div>'}
                         </div>
                         <div class="filter-section" id="section-training" style="display:none;">
-                            ${trainingsHtml || '<div class="empty-message">ظ„ط§ طھظˆط¬ط¯ طھط¯ط±ظٹط¨ط§طھ ظ…ظƒطھظ…ظ„ط© ط¨ط¹ط¯</div>'}
+                            ${trainingsHtml || '<div class="empty-message">لا توجد تدريبات مكتملة بعد</div>'}
                         </div>
                         <div class="filter-section" id="section-homework" style="display:none;">
-                            ${homeworksHtml || '<div class="empty-message">ظ„ط§ طھظˆط¬ط¯ ظˆط§ط¬ط¨ط§طھ ظ…ظƒطھظ…ظ„ط© ط¨ط¹ط¯</div>'}
+                            ${homeworksHtml || '<div class="empty-message">لا توجد واجبات مكتملة بعد</div>'}
                         </div>
                     </div>`;
 
@@ -468,8 +468,8 @@
                 toggleBtn.addEventListener('click', () => {
                     row.classList.toggle('active');
                     toggleBtn.innerHTML = row.classList.contains('active')
-                        ? 'ط¥ط®ظپط§ط، ط§ظ„ظ†طھط§ط¦ط¬ <i class="fas fa-chevron-up ml-2" style="margin-right:8px;"></i>'
-                        : 'ط¹ط±ط¶ ط§ظ„ظ†طھط§ط¦ط¬ <i class="fas fa-chevron-down ml-2" style="margin-right:8px;"></i>';
+                        ? 'إخفاط، النتائج <i class="fas fa-chevron-up ml-2" style="margin-right:8px;"></i>'
+                        : 'عرض النتائج <i class="fas fa-chevron-down ml-2" style="margin-right:8px;"></i>';
                 });
 
                 const filterBtns = row.querySelectorAll('.filter-btn');
@@ -518,10 +518,10 @@
             const questionsArr = result.questions || result.answers || result.details || [];
             const pct = result.effectivePercent ?? result.percent ?? 0;
             const aNum = result.attemptNumber || 1;
-            const label = aNum === 1 ? 'ط§ظ„ط¯ط±ط¬ط© ط§ظ„ط£ط³ط§ط³ظٹط©' : `ط§ظ„ظ…ط­ط§ظˆظ„ط© ${aNum}`;
+            const label = aNum === 1 ? 'الدرجة الأساسية' : `المحاولة ${aNum}`;
             const dateStr = result.ts ? new Date(result.ts).toLocaleString('ar-EG') : '';
 
-            titleEl.textContent = result.examTitle || 'طھظپط§طµظٹظ„ ط§ظ„ط§ظ…طھط­ط§ظ†';
+            titleEl.textContent = result.examTitle || 'تفاصيل الامتحان';
             attemptEl.textContent = `${label}  â€¢  ${dateStr}`;
 
             // Score banner
@@ -544,12 +544,12 @@
             bannerEl.innerHTML = `
                 <div class="score-circle-wrap">
                     <div class="score-circle ${scoreClass}">${pct}%</div>
-                    <div style="font-size:0.78rem; color:rgba(255,255,255,0.5);">${pct >= 85 ? 'ظ…ظ…طھط§ط² ًںژ‰' : pct >= 60 ? 'ط¬ظٹط¯ ًں‘چ' : pct >= 40 ? 'ظ…طھظˆط³ط·' : 'ظٹط­طھط§ط¬ ظ…ط±ط§ط¬ط¹ط©'}</div>
+                    <div style="font-size:0.78rem; color:rgba(255,255,255,0.5);">${pct >= 85 ? 'ممتاز ًںژ‰' : pct >= 60 ? 'جيد ًں‘چ' : pct >= 40 ? 'متوسط·' : 'يحتاج مراجعة'}</div>
                 </div>
-                ${total ? `<div class="score-stat"><div class="score-stat-val" style="color:#fff;">${total}</div><div class="score-stat-lbl">ط¥ط¬ظ…ط§ظ„ظٹ ط§ظ„ط£ط³ط¦ظ„ط©</div></div>` : ''}
-                ${correct != null ? `<div class="score-stat"><div class="score-stat-val" style="color:#2ecc71;">${correct}</div><div class="score-stat-lbl">ط¥ط¬ط§ط¨ط§طھ طµط­ظٹط­ط©</div></div>` : ''}
-                ${wrong != null ? `<div class="score-stat"><div class="score-stat-val" style="color:#e74c3c;">${wrong}</div><div class="score-stat-lbl">ط¥ط¬ط§ط¨ط§طھ ط®ط§ط·ط¦ط©</div></div>` : ''}
-                ${skip != null && skip > 0 ? `<div class="score-stat"><div class="score-stat-val" style="color:#f39c12;">${skip}</div><div class="score-stat-lbl">ظ„ظ… ظٹطھظ… ط§ظ„ط¥ط¬ط§ط¨ط©</div></div>` : ''}
+                ${total ? `<div class="score-stat"><div class="score-stat-val" style="color:#fff;">${total}</div><div class="score-stat-lbl">إجمالي الأسئلة</div></div>` : ''}
+                ${correct != null ? `<div class="score-stat"><div class="score-stat-val" style="color:#2ecc71;">${correct}</div><div class="score-stat-lbl">إجابات صحيحة</div></div>` : ''}
+                ${wrong != null ? `<div class="score-stat"><div class="score-stat-val" style="color:#e74c3c;">${wrong}</div><div class="score-stat-lbl">إجابات خاط·ئة</div></div>` : ''}
+                ${skip != null && skip > 0 ? `<div class="score-stat"><div class="score-stat-val" style="color:#f39c12;">${skip}</div><div class="score-stat-lbl">لم يتم الإجابة</div></div>` : ''}
             `;
 
             // Questions
@@ -562,7 +562,7 @@
             } else {
                 noDetailEl.style.display = 'none';
                 questionsArr.forEach((q, idx) => {
-                    const qText = q.text || q.question || 'ط³ط¤ط§ظ„';
+                    const qText = q.text || q.question || 'سؤال';
                     const qStudentAnswer = q.studentAnswer !== undefined ? q.studentAnswer : q.rawAnswer;
                     const qCorrectAnswer = q.correctAnswer !== undefined ? q.correctAnswer : q.answer;
                     const qChoices = q.choices || q.options;
@@ -590,23 +590,23 @@
                         choicesHTML = `<div class="q-answer-row">
                             <div class="answer-chip ${isSkipped ? 'skip' : isCorrect ? 'correct' : 'wrong'}">
                                 <i class="fas ${statusIcon}"></i>
-                                ط¥ط¬ط§ط¨طھظƒ: ${isSkipped ? 'ظ„ظ… طھظڈط¬ط¨' : (qStudentAnswer || '-')}
+                                إجابتك: ${isSkipped ? 'لم تظڈجب' : (qStudentAnswer || '-')}
                             </div>
-                            ${!isCorrect && qCorrectAnswer ? `<div class="answer-chip correct"><i class="fas fa-check"></i> ط§ظ„ط¥ط¬ط§ط¨ط© ط§ظ„طµط­ظٹط­ط©: ${qCorrectAnswer}</div>` : ''}
+                            ${!isCorrect && qCorrectAnswer ? `<div class="answer-chip correct"><i class="fas fa-check"></i> الإجابة الصحيحة: ${qCorrectAnswer}</div>` : ''}
                         </div>`;
                     }
 
-                    const imgHTML = q.image ? `<img src="${q.image}" class="q-img" alt="طµظˆط±ط© ط§ظ„ط³ط¤ط§ظ„" loading="lazy">` : '';
+                    const imgHTML = q.image ? `<img src="${q.image}" class="q-img" alt="صورة السؤال" loading="lazy">` : '';
 
                     questionsEl.innerHTML += `
                         <div class="q-card ${statusClass}">
                             <div class="q-header">
                                 <div class="q-num ${numClass}"><i class="fas ${statusIcon}"></i></div>
-                                <div class="q-text"><strong>ط³${idx+1}:</strong> ${q.text || q.question || q.questionText || 'ظ†طµ ط§ظ„ط³ط¤ط§ظ„ ط؛ظٹط± ظ…طھط§ط­'}</div>
+                                <div class="q-text"><strong>س${idx+1}:</strong> ${q.text || q.question || q.questionText || 'نص السؤال ط؛ير متاح'}</div>
                             </div>
                             ${imgHTML}
                             ${choicesHTML}
-                            ${q.feedback ? `<div style="margin-top: 12px; font-size: 0.85rem; color: rgba(255,255,255,0.7); background: rgba(255,255,255,0.05); padding: 10px; border-radius: 6px; border-right: 2px solid var(--accent-cyan);"><i class="fas fa-comment-dots" style="margin-left: 6px; color: var(--accent-cyan);"></i> <strong>طھط¹ظ„ظٹظ‚:</strong> ${q.feedback}</div>` : ''}
+                            ${q.feedback ? `<div style="margin-top: 12px; font-size: 0.85rem; color: rgba(255,255,255,0.7); background: rgba(255,255,255,0.05); padding: 10px; border-radius: 6px; border-right: 2px solid var(--accent-cyan);"><i class="fas fa-comment-dots" style="margin-left: 6px; color: var(--accent-cyan);"></i> <strong>تعليق:</strong> ${q.feedback}</div>` : ''}
                         </div>`;
                 });
             }

@@ -19,8 +19,8 @@
     </style>
 </head>
 <body>
-    <h1>ط¥طµظ„ط§ط­ ط¥ط´ط¹ط§ط±ط§طھ طھط¹ط¯ظٹظ„ ط§ظ„ط¯ط±ط¬ط© ط§ظ„ظ‚ط¯ظٹظ…ط©</h1>
-    <button id="fixBtn">ط§ط¨ط¯ط£ ط§ظ„ط¥طµظ„ط§ط­ ط§ظ„ط¢ظ†</button>
+    <h1>إصلاح إشعارات تعديل الدرجة القديمة</h1>
+    <button id="fixBtn">ابدأ الإصلاح الط¢ن</button>
     <p id="status"></p>
 
     <script>
@@ -28,7 +28,7 @@
             const btn = document.getElementById('fixBtn');
             const status = document.getElementById('status');
             btn.disabled = true;
-            status.innerHTML = 'ط¬ط§ط±ظٹ ط§ظ„ط¨ط­ط« ظپظٹ ظ‚ط§ط¹ط¯ط© ط§ظ„ط¨ظٹط§ظ†ط§طھ...';
+            status.innerHTML = 'جاري البحث في قاعدة البيانات...';
             
             try {
                 const snapshot = await window.firebaseDb.collection('students').get();
@@ -40,15 +40,15 @@
                     
                     if (data.notifications && Array.isArray(data.notifications)) {
                         const newNotifs = data.notifications.map(n => {
-                            if (n.title && n.title.includes('طھط¹ط¯ظٹظ„ ط¯ط±ط¬ط©')) {
+                            if (n.title && n.title.includes('تعديل درجة')) {
                                 changed = true;
-                                let type = 'ط§ظ…طھط­ط§ظ†';
-                                if (n.title.includes('طھط¯ط±ظٹط¨')) type = 'طھط¯ط±ظٹط¨';
-                                if (n.title.includes('ظˆط§ط¬ط¨')) type = 'ظˆط§ط¬ط¨';
+                                let type = 'امتحان';
+                                if (n.title.includes('تدريب')) type = 'تدريب';
+                                if (n.title.includes('واجب')) type = 'واجب';
                                 
                                 return {
-                                    title: `طھظ… ط¥ط¹ط§ط¯ط© طھطµط­ظٹط­ ${type}`,
-                                    message: n.body || n.message || `طھظ… ط¥ط¹ط§ط¯ط© طھطµط­ظٹط­ ${type} ط§ظ„ط®ط§طµ ط¨ظƒ ظˆطھط¹ط¯ظٹظ„ ط¯ط±ط¬طھظƒ.`,
+                                    title: `تم إعادة تصحيح ${type}`,
+                                    message: n.body || n.message || `تم إعادة تصحيح ${type} الخاص بك وتعديل درجتك.`,
                                     timestamp: n.ts || n.timestamp || Date.now(),
                                     read: false,
                                     link: 'exams.html'
@@ -60,14 +60,14 @@
                         if (changed) {
                             await doc.ref.update({ notifications: newNotifs });
                             updatedCount++;
-                            status.innerHTML += `<br>طھظ… طھط­ط¯ظٹط« ط¨ظٹط§ظ†ط§طھ ط§ظ„ط·ط§ظ„ط¨ ${data.name || doc.id}`;
+                            status.innerHTML += `<br>تم تحديث بيانات الط·الب ${data.name || doc.id}`;
                         }
                     }
                 }
                 
-                status.innerHTML += `<br><br><b>ط§ظ†طھظ‡ظ‰! طھظ… طھط­ط¯ظٹط« ط¥ط´ط¹ط§ط±ط§طھ ${updatedCount} ط·ط§ظ„ط¨ ط¨ظ†ط¬ط§ط­.</b>`;
+                status.innerHTML += `<br><br><b>انتهى! تم تحديث إشعارات ${updatedCount} ط·الب بنجاح.</b>`;
             } catch(e) {
-                status.innerHTML += `<br><span style="color:red">ط®ط·ط£: ${e.message}</span>`;
+                status.innerHTML += `<br><span style="color:red">خط·أ: ${e.message}</span>`;
             }
             
             btn.disabled = false;
