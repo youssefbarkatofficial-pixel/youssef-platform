@@ -1057,7 +1057,7 @@ window.updateItemUrl = function(sIdx, iIdx, type, val) {
                             // Editing existing course
                             let idx = adminCourses.findIndex(x => x.id === currentEditingCourse.id);
                             if (idx === -1) {
-                                // Course not found in array â€” add it
+                                // Course not found in array — add it
                                 const newCourse = {
                                     id: courseIdToSave,
                                     title, price, desc, grade,
@@ -1106,7 +1106,7 @@ window.updateItemUrl = function(sIdx, iIdx, type, val) {
                             }
                         }
 
-                        // Smart localStorage save â€” separate base64 images to avoid quota errors
+                        // Smart localStorage save — separate base64 images to avoid quota errors
                         safeLocalStorageSave(adminCourses);
                         hasUnsavedChanges = false;
                         document.getElementById('fullCourseEditor').style.display = 'none';

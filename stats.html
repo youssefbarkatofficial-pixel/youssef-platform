@@ -430,7 +430,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     const avgScore = scoreCount > 0 ? Math.round(sumScores / scoreCount) : 0;
-    // For chart: remove duplicate re-grading entries â€” keep only official per exam per ts
+    // For chart: remove duplicate re-grading entries — keep only official per exam per ts
     // We show ALL entries chronologically so student can see their journey
     scoreHistory.sort((a, b) => a.ts - b.ts);
 
@@ -459,7 +459,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     animCount('kExams', examResults.length);
     document.getElementById('kExamsSub').textContent = `${Object.keys(uniqueExamMap).length} اختبار فريد`;
     animCount('kCourses', courses.length);
-    document.getElementById('kCoursesSub').textContent = courseProgressData.map(c => `${c.pct}%`).join('  â€¢  ');
+    document.getElementById('kCoursesSub').textContent = courseProgressData.map(c => `${c.pct}%`).join('  •  ');
 
     // ===== INSIGHT =====
     buildInsight(avgScore, totalVideos, totalVideosPossible, examResults.length, scoreHistory);
@@ -519,9 +519,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         let trendHtml = '';
         if (prevSame) {
             const diff = pct - prevSame.pct;
-            if (diff > 0)       trendHtml = `<div style="color:#2ecc71;font-size:0.78rem;margin-top:3px;">â¬† تحسظ‘نت بظ€ ${diff}% عن المرة اللي فاتت (${prevSame.pct}% â†’ ${pct}%)</div>`;
-            else if (diff < 0)  trendHtml = `<div style="color:#e74c3c;font-size:0.78rem;margin-top:3px;">â¬‡ انخفضت ${Math.abs(diff)}% عن المرة اللي فاتت (${prevSame.pct}% â†’ ${pct}%)</div>`;
-            else                trendHtml = `<div style="color:#aaa;font-size:0.78rem;margin-top:3px;">â†” نفس الدرجة زي المرة اللي فاتت</div>`;
+            if (diff > 0)       trendHtml = `<div style="color:#2ecc71;font-size:0.78rem;margin-top:3px;">â¬† تحسظ‘نت بظ€ ${diff}% عن المرة اللي فاتت (${prevSame.pct}% ↑ ${pct}%)</div>`;
+            else if (diff < 0)  trendHtml = `<div style="color:#e74c3c;font-size:0.78rem;margin-top:3px;">â¬‡ انخفضت ${Math.abs(diff)}% عن المرة اللي فاتت (${prevSame.pct}% ↑ ${pct}%)</div>`;
+            else                trendHtml = `<div style="color:#aaa;font-size:0.78rem;margin-top:3px;">↓ نفس الدرجة زي المرة اللي فاتت</div>`;
         }
 
         tbody.innerHTML += `<tr>
@@ -580,7 +580,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <div class="activity-icon ${it.iconClass}"><i class="fas ${it.icon}"></i></div>
                 <div class="activity-text">
                     <div class="activity-title">${it.title}</div>
-                    <div class="activity-sub">${it.sub}${dateStr ? ' â€¢ ' + dateStr : ''}</div>
+                    <div class="activity-sub">${it.sub}${dateStr ? ' • ' + dateStr : ''}</div>
                 </div>
                 <div class="activity-badge" style="color:${it.badgeColor};">${it.badge}</div>
             </div>`;
@@ -626,7 +626,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 label: ctx => {
                                     const v = ctx.parsed.y;
                                     const emoji = v >= 85 ? 'ًںŒں ممتاز' : v >= 60 ? 'ًں‘چ جيد' : v >= 40 ? 'ًں“– متوسط' : 'â‌Œ ضعيف';
-                                    return `الدرجة: ${v}% â€” ${emoji}`;
+                                    return `الدرجة: ${v}% — ${emoji}`;
                                 }
                             },
                             backgroundColor: 'rgba(10,20,35,0.95)',
@@ -676,23 +676,23 @@ function buildInsight(avg, videos, totalVids, examsCount, history) {
 
     let insights = [];
 
-    // Avg score insight â€” plain language
-    if (avg >= 85)      insights.push(`متوسط درجاتك ${avg}% â€” ممتاز جداً! ًںژ‰ استمر في الحفاظ على هذا المستوى.`);
-    else if (avg >= 60) insights.push(`متوسط درجاتك ${avg}% â€” أنت ناجح! ًں‘چ لكن حاول مراجعة أخط·ائك للوصول للامتياز.`);
-    else if (avg > 0)   insights.push(`متوسط درجاتك ${avg}% â€” لم تصل لنسبة النجاح (60%). â‌Œ ركز أكثر وراجع دروسك.`);
+    // Avg score insight — plain language
+    if (avg >= 85)      insights.push(`متوسط درجاتك ${avg}% — ممتاز جداً! ًںژ‰ استمر في الحفاظ على هذا المستوى.`);
+    else if (avg >= 60) insights.push(`متوسط درجاتك ${avg}% — أنت ناجح! ًں‘چ لكن حاول مراجعة أخط·ائك للوصول للامتياز.`);
+    else if (avg > 0)   insights.push(`متوسط درجاتك ${avg}% — لم تصل لنسبة النجاح (60%). â‌Œ ركز أكثر وراجع دروسك.`);
     else                insights.push(`لم تنجز أي اختبارات بعد. تذكر أن نسبة النجاح المطلوبة هي 60%.`);
 
     // Video progress insight
     if (totalVids > 0) {
         const vidPct = Math.round(videos / totalVids * 100);
         const remaining = totalVids - videos;
-        if (vidPct === 100)        insights.push(`شاهدت كل المحاضرات (${videos} محاضرة) â€” أحسنت! ًں‘ڈ`);
-        else if (vidPct >= 70)     insights.push(`شاهدت ${videos} من ${totalVids} محاضرة (${vidPct}%) â€” قرظ‘بت تخلص!`);
-        else if (vidPct >= 30)     insights.push(`شاهدت ${videos} من ${totalVids} محاضرة â€” لسه فيه ${remaining} محاضرة، أكمل!`);
-        else                       insights.push(`لسه شاهدت ${videos} محاضرة بس من أصل ${totalVids} â€” اشتغل أكتر على المحاضرات!`);
+        if (vidPct === 100)        insights.push(`شاهدت كل المحاضرات (${videos} محاضرة) — أحسنت! ًں‘ڈ`);
+        else if (vidPct >= 70)     insights.push(`شاهدت ${videos} من ${totalVids} محاضرة (${vidPct}%) — قرظ‘بت تخلص!`);
+        else if (vidPct >= 30)     insights.push(`شاهدت ${videos} من ${totalVids} محاضرة — لسه فيه ${remaining} محاضرة، أكمل!`);
+        else                       insights.push(`لسه شاهدت ${videos} محاضرة بس من أصل ${totalVids} — اشتغل أكتر على المحاضرات!`);
     }
 
-    // Trend insight â€” crystal clear comparison
+    // Trend insight — crystal clear comparison
     if (history.length >= 2) {
         const last     = history[history.length - 1];
         const prev     = history[history.length - 2];
@@ -700,11 +700,11 @@ function buildInsight(avg, videos, totalVids, examsCount, history) {
         const lastName = last.title || 'الاختبار الأخير';
         const prevName = prev.title || 'الاختبار اللي قبله';
         if (diff > 0) {
-            insights.push(`في "${lastName}" جبت ${last.pct}%، وكانت درجتك في "${prevName}" ${prev.pct}% â€” يعني اتحسظ‘نت بظ€ ${diff}% ًںڑ€ جميل!`);
+            insights.push(`في "${lastName}" جبت ${last.pct}%، وكانت درجتك في "${prevName}" ${prev.pct}% — يعني اتحسظ‘نت بظ€ ${diff}% ًںڑ€ جميل!`);
         } else if (diff < 0) {
-            insights.push(`في "${lastName}" جبت ${last.pct}%، وكانت درجتك في "${prevName}" ${prev.pct}% â€” انخفضت ${Math.abs(diff)}%، راجع أخط·اءك.`);
+            insights.push(`في "${lastName}" جبت ${last.pct}%، وكانت درجتك في "${prevName}" ${prev.pct}% — انخفضت ${Math.abs(diff)}%، راجع أخط·اءك.`);
         } else {
-            insights.push(`درجتك في "${lastName}" (${last.pct}%) نفس اللي قبلها تماماظ‹ â€” حاول تتحسن المرة الجاية.`);
+            insights.push(`درجتك في "${lastName}" (${last.pct}%) نفس اللي قبلها تماماظ‹ — حاول تتحسن المرة الجاية.`);
         }
     }
 
@@ -713,7 +713,7 @@ function buildInsight(avg, videos, totalVids, examsCount, history) {
     const emojis = avg >= 85 ? 'ًںڈ†' : avg >= 60 ? 'ًں“ˆ' : avg > 0 ? 'ًں“ڑ' : 'ًں’،';
     icon.textContent = emojis;
     title.textContent = 'تحليل أدائك الشخصي';
-    text.innerHTML = insights.map(t => `â€¢ ${t}`).join('<br><br>');
+    text.innerHTML = insights.map(t => `• ${t}`).join('<br><br>');
     card.style.display = 'flex';
 }
 </script>

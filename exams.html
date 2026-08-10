@@ -522,7 +522,7 @@
             const dateStr = result.ts ? new Date(result.ts).toLocaleString('ar-EG') : '';
 
             titleEl.textContent = result.examTitle || 'تفاصيل الامتحان';
-            attemptEl.textContent = `${label}  â€¢  ${dateStr}`;
+            attemptEl.textContent = `${label}  •  ${dateStr}`;
 
             // Score banner
             const getIsCorrect = (q) => {
