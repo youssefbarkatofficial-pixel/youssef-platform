@@ -4,8 +4,8 @@
     <link rel="manifest" href="./manifest.json">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>طµط±ط§ط¹ ط§ظ„ط¨ظˆطµظ„ط© âڑ”ï¸ڈ | منصة يوسف بركات</title>
-  <meta name="description" content="طµط±ط§ط¹ ط§ظ„ط¨ظˆطµظ„ط© - ظ„ط¹ط¨ط© ط§ظ„طھط¹ظ„ظٹظ… ط§ظ„طھظ†ط§ظپط³ظٹط© ط¯ط§ط®ظ„ ط§ظ„ظ…ظ†طµط© ط§ظ„طھط¹ظ„ظٹظ…ظٹط©">
+  <title>صراع البوصلة âڑ”ï¸ڈ | منصة يوسف بركات</title>
+  <meta name="description" content="صراع البوصلة - لعبة التعليم التنافسية ط¯ط§ط®ظ„ ط§ظ„ظ…ظ†طµط© ط§ظ„طھط¹ظ„ظٹظ…ظٹط©">
 
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -32,8 +32,8 @@
 <div id="screen-loading" class="screen active">
   <div class="loading-logo">
     <span class="loading-compass">ًں§­</span>
-    <h1 class="loading-title">طµظگط±ط§ط¹ ط§ظ„ط¨ظˆطµظ„ط©</h1>
-    <p class="loading-subtitle">ظ„ط¹ط¨ط© ط§ظ„طھط­ط¯ظٹ ط§ظ„طھط¹ظ„ظٹظ…ظٹ</p>
+    <h1 class="loading-title">صراع البوصلة</h1>
+    <p class="loading-subtitle">لعبة التحدي التعليمي</p>
     <div class="loading-bar-wrap"><div class="loading-bar"></div></div>
   </div>
 </div>
@@ -45,22 +45,22 @@
   <div class="login-card">
     <div class="login-logo">
       <span class="compass-icon">ًں§­</span>
-      <h1>طµظگط±ط§ط¹ ط§ظ„ط¨ظˆطµظ„ط©</h1>
+      <h1>صراع البوصلة</h1>
       <p>ط³ط¬ظ‘ظ„ ط¯ط®ظˆظ„ظƒ ظ„طھط¨ط¯ط£ ط§ظ„ظ…ط¨ط§ط±ط²ط©</p>
     </div>
     <div class="login-tabs">
       <button class="login-tab active" id="tab-login" onclick="switchLoginTab('login')">ط¯ط®ظˆظ„</button>
-      <button class="login-tab" id="tab-register" onclick="switchLoginTab('register')">ط­ط³ط§ط¨ ط¬ط¯ظٹط¯</button>
+      <button class="login-tab" id="tab-register" onclick="switchLoginTab('register')">حساب جديد</button>
     </div>
 
     <!-- Login Form -->
     <div id="form-login">
       <div class="form-group">
-        <label>ط§ظ„ط¨ط±ظٹط¯ ط§ظ„ط¥ظ„ظƒطھط±ظˆظ†ظٹ</label>
+        <label>البريد الإلكتروني</label>
         <input type="email" id="login-email" placeholder="example@email.com" autocomplete="email">
       </div>
       <div class="form-group">
-        <label>ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط±</label>
+        <label>كلمة المرور</label>
         <input type="password" id="login-pass" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" autocomplete="current-password">
       </div>
       <button class="btn-primary" onclick="doLogin()">ط¯ط®ظˆظ„ âڑ”ï¸ڈ</button>
@@ -69,27 +69,27 @@
     <!-- Register Form -->
     <div id="form-register" class="hidden">
       <div class="form-group">
-        <label>ط§ظ„ط§ط³ظ… ط§ظ„ظƒط§ظ…ظ„</label>
+        <label>الاسم الكامل</label>
         <input type="text" id="reg-name" placeholder="ط§ط³ظ…ظƒ ط¨ط§ظ„ظƒط§ظ…ظ„">
       </div>
       <div class="form-group">
-        <label>ط§ظ„طµظپ ط§ظ„ط¯ط±ط§ط³ظٹ</label>
+        <label>الصف الدراسي</label>
         <select id="reg-grade">
-          <option value="7">ط£ظˆظ„ ط¥ط¹ط¯ط§ط¯ظٹ</option>
-          <option value="8">ط«ط§ظ†ظٹ ط¥ط¹ط¯ط§ط¯ظٹ</option>
-          <option value="9">ط«ط§ظ„ط« ط¥ط¹ط¯ط§ط¯ظٹ</option>
-          <option value="10">ط£ظˆظ„ ط«ط§ظ†ظˆظٹ</option>
+          <option value="7">أول إعدادي</option>
+          <option value="8">ثاني إعدادي</option>
+          <option value="9">ثالث إعدادي</option>
+          <option value="10">أول ثانوي</option>
         </select>
       </div>
       <div class="form-group">
-        <label>ط§ظ„ط¨ط±ظٹط¯ ط§ظ„ط¥ظ„ظƒطھط±ظˆظ†ظٹ</label>
+        <label>البريد الإلكتروني</label>
         <input type="email" id="reg-email" placeholder="example@email.com" autocomplete="email">
       </div>
       <div class="form-group">
-        <label>ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط±</label>
-        <input type="password" id="reg-pass" placeholder="6 ط£ط­ط±ظپ ط¹ظ„ظ‰ ط§ظ„ط£ظ‚ظ„" autocomplete="new-password">
+        <label>كلمة المرور</label>
+        <input type="password" id="reg-pass" placeholder="6 أحرف على الأقل" autocomplete="new-password">
       </div>
-      <button class="btn-primary" onclick="doRegister()">ط¥ظ†ط´ط§ط، ط­ط³ط§ط¨ ًںڑ€</button>
+      <button class="btn-primary" onclick="doRegister()">إنشاء حساب ًںڑ€</button>
     </div>
 
     <div class="login-error" id="login-error"></div>
@@ -162,7 +162,7 @@
           </div>
         </div>
         <div>
-          <p class="section-title">ط§ظ„طµظپ ط§ظ„ط¯ط±ط§ط³ظٹ</p>
+          <p class="section-title">الصف الدراسي</p>
           <div class="select-wrapper">
             <select class="custom-select" onchange="ui.grade = this.value">
               <option value="general">ط¹ط§ظ…</option>
@@ -196,7 +196,7 @@
           </div>
         </div>
         <div>
-          <p class="section-title">ط§ظ„طµظپ ط§ظ„ط¯ط±ط§ط³ظٹ</p>
+          <p class="section-title">الصف الدراسي</p>
           <div class="select-wrapper">
             <select class="custom-select" onchange="ui.trainGrade = this.value; ui.trainUnit = null; ui.trainLesson = null; updateTrainLessonPicker();">
               <option value="general">ط¹ط§ظ…</option>
@@ -321,7 +321,7 @@
 
   <!-- Header -->
   <div class="battle-header">
-    <div class="battle-title">âڑ”ï¸ڈ طµظگط±ط§ط¹ ط§ظ„ط¨ظˆطµظ„ط©</div>
+    <div class="battle-title">âڑ”ï¸ڈ صراع البوصلة</div>
     <div class="battle-round" id="battle-round-label">ط¬ظˆظ„ط© 1 / 7</div>
     <div style="display:flex; gap:10px;">
       <button onclick="confirmQuit()" style="background:transparent;border:1px solid var(--dark-border);border-radius:8px;color:var(--text-muted);font-size:0.75rem;padding:4px 10px;cursor:pointer;">
@@ -473,7 +473,7 @@ let ui = {
 };
 
 // ============================================================
-// INIT: طھظ‡ظٹط¦ط© Firebase Auth
+// INIT: تهيئة Firebase Auth
 // ============================================================
 document.addEventListener('DOMContentLoaded', () => {
   setTimeout(() => {
@@ -490,7 +490,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const fakeUser = {
         uid: pUser.email || pUser.phone,
         email: pUser.email || '',
-        displayName: pUser.name || 'ط£ط¯ظ…ظ† ط§ظ„ظ…ظ†طµط©'
+        displayName: pUser.name || 'أدمن المنصة'
       };
       initLobby(fakeUser);
       return;
@@ -508,7 +508,7 @@ document.addEventListener('DOMContentLoaded', () => {
         showScreen('login');
       }
     });
-  }, 2000); // ظˆظ‚طھ ط´ط§ط´ط© ط§ظ„طھط­ظ…ظٹظ„
+  }, 2000); // وقت شاشة التحميل
 });
 
 // ============================================================
@@ -533,7 +533,7 @@ function switchLoginTab(tab) {
 async function doLogin() {
   const email = document.getElementById('login-email').value.trim();
   const pass  = document.getElementById('login-pass').value;
-  if (!email || !pass) return showError('ط£ط¯ط®ظ„ ط§ظ„ط¨ط±ظٹط¯ ظˆظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط±');
+  if (!email || !pass) return showError('ط£ط¯ط®ظ„ ط§ظ„ط¨ط±ظٹط¯ ظˆكلمة المرور');
   try {
     await window.firebaseAuth.signInWithEmailAndPassword(email, pass);
   } catch(e) {
@@ -547,7 +547,7 @@ async function doRegister() {
   const email = document.getElementById('reg-email').value.trim();
   const pass  = document.getElementById('reg-pass').value;
   if (!name || !email || !pass) return showError('ط§ظ„ط±ط¬ط§ط، ظ…ظ„ط، ط¬ظ…ظٹط¹ ط§ظ„ط­ظ‚ظˆظ„');
-  if (pass.length < 6) return showError('ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط± 6 ط£ط­ط±ظپ ط¹ظ„ظ‰ ط§ظ„ط£ظ‚ظ„');
+  if (pass.length < 6) return showError('كلمة المرور 6 أحرف على الأقل');
   try {
     const cred = await window.firebaseAuth.createUserWithEmailAndPassword(email, pass);
     await window.firebaseDb.collection('users').doc(cred.user.uid).set({
@@ -574,13 +574,13 @@ function showError(msg) {
 
 function translateError(code) {
   const map = {
-    'auth/user-not-found': 'ط§ظ„ط¨ط±ظٹط¯ ط§ظ„ط¥ظ„ظƒطھط±ظˆظ†ظٹ ط؛ظٹط± ظ…ظˆط¬ظˆط¯',
-    'auth/wrong-password': 'ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط± ط؛ظٹط± طµط­ظٹط­ط©',
+    'auth/user-not-found': 'البريد الإلكتروني ط؛ظٹط± ظ…ظˆط¬ظˆط¯',
+    'auth/wrong-password': 'كلمة المرور ط؛ظٹط± طµط­ظٹط­ط©',
     'auth/email-already-in-use': 'ط§ظ„ط¨ط±ظٹط¯ ظ…ط³طھط®ط¯ظ… ط¨ط§ظ„ظپط¹ظ„',
-    'auth/invalid-email': 'ط§ظ„ط¨ط±ظٹط¯ ط§ظ„ط¥ظ„ظƒطھط±ظˆظ†ظٹ ط؛ظٹط± طµط§ظ„ط­',
-    'auth/weak-password': 'ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط± ط¶ط¹ظٹظپط©',
+    'auth/invalid-email': 'البريد الإلكتروني ط؛ظٹط± طµط§ظ„ط­',
+    'auth/weak-password': 'كلمة المرور ط¶ط¹ظٹظپط©',
   };
-  return map[code] || 'ط­ط¯ط« ط®ط·ط£طŒ ط­ط§ظˆظ„ ظ…ط¬ط¯ط¯ط§ظ‹';
+  return map[code] || 'حدث خطأطŒ ط­ط§ظˆظ„ ظ…ط¬ط¯ط¯ط§ظ‹';
 }
 
 // ============================================================
@@ -1006,7 +1006,7 @@ function showGameResult() {
     });
   }
 
-  // ط´ط§ط´ط© ط§ظ„ظ†طھظٹط¬ط©
+  // ط´ط§ط´ط© ط§ظ„نتيجة
   showScreen('result');
 
   if (result.playerWon) {

@@ -146,7 +146,7 @@
                 <div id="proofMissingMsg" style="display: none; text-align: center; color: white;">
                     <i class="fas fa-image" style="font-size: 4rem; color: rgba(255,255,255,0.2); margin-bottom: 20px;"></i>
                     <h3>ط§ظ„طµظˆط±ط© ط؛ظٹط± ظ…طھظˆظپط±ط©</h3>
-                    <p style="color: rgba(255,255,255,0.6);">ط­ط¯ط« ط®ط·ط£ ط£ط«ظ†ط§ط، ط±ظپط¹ ط§ظ„طµظˆط±ط© ط£ظˆ طھظ… ط­ط°ظپظ‡ط§.<br>ظٹط±ط¬ظ‰ ط§ظ„طھظˆط§طµظ„ ظ…ط¹ ط§ظ„ط·ط§ظ„ط¨ ظ„ط¥ط±ط³ط§ظ„ ط§ظ„ط¥ظٹطµط§ظ„ ط¹ط¨ط± ظˆط§طھط³ط§ط¨.</p>
+                    <p style="color: rgba(255,255,255,0.6);">حدث خطأ ط£ط«ظ†ط§ط، ط±ظپط¹ ط§ظ„طµظˆط±ط© ط£ظˆ طھظ… ط­ط°ظپظ‡ط§.<br>ظٹط±ط¬ظ‰ ط§ظ„طھظˆط§طµظ„ ظ…ط¹ ط§ظ„ط·ط§ظ„ط¨ ظ„ط¥ط±ط³ط§ظ„ ط§ظ„ط¥ظٹطµط§ظ„ ط¹ط¨ط± ظˆط§طھط³ط§ط¨.</p>
                 </div>
             </div>
             <p style="color: rgba(255,255,255,0.75); font-size: 0.93rem; text-align: center;">ط§ط¶ط؛ط· ط¹ظ„ظ‰ ط§ظ„طµظˆط±ط© ظ„ظ„طھظƒط¨ظٹط± ط£ظˆ ط§ظ„طھطµط؛ظٹط±. ظٹظ…ظƒظ†ظƒ طھط­ظ…ظٹظ„ ظ†ط³ط®ط© ط§ظ„ظˆطµظ„ ظ…ط¨ط§ط´ط±ط© ط¥ط°ط§ ط§ط­طھط¬طھ ظ…ط±ط§ط¬ط¹ط© ط³ط±ظٹط¹ط©.</p>
@@ -434,7 +434,7 @@
                         notifications.push({
                             id: 'n' + Date.now(),
                             title: 'طھظ… ظ‚ط¨ظˆظ„ ط§ط´طھط±ط§ظƒظƒ ط¨ظ†ط¬ط§ط­ ًںژ‰',
-                            message: `طھظ… طھظپط¹ظٹظ„ ${courseName} ظ„ظƒ ط¨ظ†ط¬ط§ط­. ظ†طھظ…ظ†ظ‰ ظ„ظƒ ط§ظ„طھظˆظپظٹظ‚طŒ ظٹظ…ظƒظ†ظƒ ط§ظ„ط¢ظ† ط¨ط¯ط، ط§ظ„ظ…ط°ط§ظƒط±ط© ظ…ظ† ظ‚ط³ظ… ظƒظˆط±ط³ط§طھظٹ.`,
+                            message: `طھظ… طھظپط¹ظٹظ„ ${courseName} ظ„ظƒ ط¨ظ†ط¬ط§ط­. ظ†طھظ…ظ†ظ‰ ظ„ظƒ ط§ظ„طھظˆظپظٹظ‚طŒ ظٹظ…ظƒظ†ظƒ ط§ظ„ط¢ظ† ط¨ط¯ط، ط§ظ„ظ…ط°ط§ظƒط±ط© ظ…ظ† ظ‚ط³ظ… كورساتي.`,
                             timestamp: new Date().toISOString(),
                             read: false,
                             courseId: courseId,
@@ -466,7 +466,7 @@
 
                 } catch (e) {
                     console.error("Error approving payment:", e);
-                    if(window.showToast) window.showToast('ط­ط¯ط« ط®ط·ط£ ط£ط«ظ†ط§ط، ظ…ط¹ط§ظ„ط¬ط© ط§ظ„ط·ظ„ط¨', 'error');
+                    if(window.showToast) window.showToast('حدث خطأ ط£ط«ظ†ط§ط، ظ…ط¹ط§ظ„ط¬ط© ط§ظ„ط·ظ„ط¨', 'error');
                 }
             };
 
@@ -535,7 +535,7 @@
                     if(window.showToast) window.showToast('طھظ… ط±ظپط¶ ط§ظ„ط·ظ„ط¨', 'error');
                 } catch (e) {
                     console.error("Error rejecting payment:", e);
-                    if(window.showToast) window.showToast('ط­ط¯ط« ط®ط·ط£ ط£ط«ظ†ط§ط، ظ…ط¹ط§ظ„ط¬ط© ط§ظ„ط·ظ„ط¨', 'error');
+                    if(window.showToast) window.showToast('حدث خطأ ط£ط«ظ†ط§ط، ظ…ط¹ط§ظ„ط¬ط© ط§ظ„ط·ظ„ط¨', 'error');
                 }
             };
 
@@ -550,7 +550,7 @@
                     modal.innerHTML = `
                         <h3 style="color:var(--royal-gold, #d4af37);margin-bottom:15px;"><i class="fas fa-lock"></i> طھط£ظƒظٹط¯ ط§ظ„ط£ظ…ط§ظ†</h3>
                         <p style="color:#fff;margin-bottom:20px;font-size:0.95rem;">ظٹط±ط¬ظ‰ ط¥ط¯ط®ط§ظ„ ظƒظ„ظ…ط© ظ…ط±ظˆط± ط§ظ„ظ…ط§ظ„ظƒ ظ„ظ„ظ…طھط§ط¨ط¹ط©:</p>
-                        <input type="password" id="tempAdminPwd" autocomplete="new-password" class="form-control" style="width:100%;margin-bottom:20px;text-align:center;letter-spacing:5px;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.1);color:#fff;" placeholder="ط£ط¯ط®ظ„ ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط± ظ‡ظ†ط§">
+                        <input type="password" id="tempAdminPwd" autocomplete="new-password" class="form-control" style="width:100%;margin-bottom:20px;text-align:center;letter-spacing:5px;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.1);color:#fff;" placeholder="ط£ط¯ط®ظ„ كلمة المرور ظ‡ظ†ط§">
                         <div style="display:flex;gap:10px;justify-content:center;">
                             <button id="btnPwdCancel" class="btn btn-outline" style="flex:1;border-color:#e74c3c;color:#e74c3c;">ط¥ظ„ط؛ط§ط،</button>
                             <button id="btnPwdConfirm" class="btn btn-gold" style="flex:1;">طھط£ظƒظٹط¯</button>
@@ -579,7 +579,7 @@
                     const pwd = await window.requireAdminPassword();
                     if (pwd === null) return;
                     if (pwd.trim() !== "My@36_172001") {
-                        alert("ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط± ط؛ظٹط± طµط­ظٹط­ط©!");
+                        alert("كلمة المرور ط؛ظٹط± طµط­ظٹط­ط©!");
                         return;
                     }
 
@@ -715,7 +715,7 @@
                     btn.disabled = false;
                 } catch(e) {
                     console.error("Export Error:", e);
-                    alert("ط­ط¯ط« ط®ط·ط£ ط£ط«ظ†ط§ط، طھطµط¯ظٹط± ط§ظ„ط¨ظٹط§ظ†ط§طھ");
+                    alert("حدث خطأ ط£ط«ظ†ط§ط، طھطµط¯ظٹط± ط§ظ„ط¨ظٹط§ظ†ط§طھ");
                     let btn = document.getElementById('btnExportPaymentsCSV');
                     if(btn) { btn.innerHTML = '<i class="fas fa-download mr-1"></i> طھط­ظ…ظٹظ„ ظ…ط³ظˆط¯ط© ط§ظ„ظ…ط¯ظپظˆط¹ط§طھ ظˆط§ظ„ط·ظ„ط¨ط©'; btn.disabled = false; }
                 }

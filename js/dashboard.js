@@ -749,7 +749,37 @@ async function loadLeaderboard(currentGrade) {
                 score += (s.stats.videosWatched || 0) * 5;
                 score += (s.stats.commitment || 0);
             }
+            if (s.gameXp) {
+                score += s.gameXp;
+            }
             s._leaderboardScore = score;
+            
+            // Assign Rank from Compass Game
+            const RANKS = [
+                { name: 'مستكشف ناشئ', minXp: 0 },
+                { name: 'رحّالة مبتدئ', minXp: 200 },
+                { name: 'قارئ الخرائط', minXp: 500 },
+                { name: 'مستكشف الطرق', minXp: 1000 },
+                { name: 'حامل البوصلة', minXp: 2000 },
+                { name: 'كاشف الآثار', minXp: 3500 },
+                { name: 'مؤرخ الحضارات', minXp: 6000 },
+                { name: 'قائد الرحلات', minXp: 10000 },
+                { name: 'سيد المسارات', minXp: 16000 },
+                { name: 'حارس الأطالس', minXp: 25000 },
+                { name: 'وريث البوصلة', minXp: 38000 },
+                { name: 'أسطورة الحضارات', minXp: 55000 },
+                { name: 'سيد القارات', minXp: 80000 },
+                { name: 'حارس البوصلة الأعظم', minXp: Infinity }
+            ];
+            
+            let rankObj = RANKS[0];
+            for(let i=0; i<RANKS.length; i++){
+                if(score >= RANKS[i].minXp && score < (RANKS[i+1]?.minXp || Infinity)) {
+                    rankObj = RANKS[i];
+                    break;
+                }
+            }
+            s._rankName = rankObj.name;
         });
 
         // Sort descending
@@ -777,6 +807,7 @@ async function loadLeaderboard(currentGrade) {
                     ${rankIcon}
                     <img src="${avatar}" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; margin-bottom: 10px; border: 2px solid var(--royal-gold);">
                     <div style="font-weight: bold; font-size: 0.9rem; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;">${student.name || 'طالب مجهول'}</div>
+                    <div style="font-size: 0.75rem; color: #D4A64F; margin-top: 3px; font-weight: bold;">${student._rankName}</div>
                     <div style="font-size: 0.8rem; color: var(--accent-cyan); margin-top: 5px;">${student._leaderboardScore} نقطة</div>
                 </div>
             `;

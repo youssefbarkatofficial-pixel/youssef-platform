@@ -4,7 +4,7 @@
     <link rel="manifest" href="./manifest.json">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ط¥ظ†ط´ط§ط، ط­ط³ط§ط¨ ط¬ط¯ظٹط¯ | منصة يوسف بركات</title>
+    <title>ط¥ظ†ط´ط§ط، حساب جديد | منصة يوسف بركات</title>
     <meta name="description" content="ط³ط¬ظ„ ظپظٹ منصة يوسف بركات ظˆط§ط¨ط¯ط£ ط±ط­ظ„طھظƒ ظپظٹ طھط¹ظ„ظ… ط§ظ„طھط§ط±ظٹط® ظˆط§ظ„ط¬ط؛ط±ط§ظپظٹط§ ظ„ظ„ظ…ط±ط­ظ„ط© ط§ظ„ط¥ط¹ط¯ط§ط¯ظٹط© ظˆط§ظ„ط«ط§ظ†ظˆظٹط©.">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/style.css?v=1785347365070">
@@ -182,7 +182,7 @@
     <div class="glass-panel auth-container">
         <div class="auth-header">
             <a href="index.html" class="auth-logo" style="text-decoration: none;">ظٹ</a>
-            <h2>ط¥ظ†ط´ط§ط، ط­ط³ط§ط¨ ط¬ط¯ظٹط¯</h2>
+            <h2>ط¥ظ†ط´ط§ط، حساب جديد</h2>
             <p>ط§ظ†ط¶ظ… ط§ظ„ط¢ظ† ظ„ط£ظ‚ظˆظ‰ ظ…ظ†طµط© ط¯ط±ط§ط³ط§طھ ظپظٹ ظ…طµط±</p>
         </div>
 
@@ -238,9 +238,9 @@
                 <div class="step-icon">ًں“ڑ</div>
                 <h3 class="text-gold mb-1 text-center">ط§ظ„ط¨ظٹط§ظ†ط§طھ ط§ظ„ط¯ط±ط§ط³ظٹط©</h3>
                 <div class="form-group">
-                    <label>ط§ظ„طµظپ ط§ظ„ط¯ط±ط§ط³ظٹ</label>
+                    <label>الصف الدراسي</label>
                     <select id="grade" class="form-control" required>
-                        <option value="" disabled selected>ط§ط®طھط± ط§ظ„طµظپ ط§ظ„ط¯ط±ط§ط³ظٹ</option>
+                        <option value="" disabled selected>ط§ط®طھط± الصف الدراسي</option>
                         <option value="prep1">ط£ظˆظ„ظ‰ ط¥ط¹ط¯ط§ط¯ظٹ</option>
                         <option value="prep2">طھط§ظ†ظٹط© ط¥ط¹ط¯ط§ط¯ظٹ</option>
                         <option value="prep3">طھط§ظ„طھط© ط¥ط¹ط¯ط§ط¯ظٹ</option>
@@ -271,7 +271,7 @@
             <!-- ===== Step 3: Password Setup ===== -->
             <div class="form-step" id="step3">
                 <div class="step-icon">ًں”گ</div>
-                <h3 class="text-gold mb-1 text-center">ط¥ط¹ط¯ط§ط¯ ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط±</h3>
+                <h3 class="text-gold mb-1 text-center">ط¥ط¹ط¯ط§ط¯ كلمة المرور</h3>
 
                 <!-- Username Info Box -->
                 <div class="username-info-box" style="padding: 10px 12px; margin-bottom: 15px;">
@@ -283,14 +283,14 @@
 
                 <!-- Password field (auth.js will add eye toggle automatically) -->
                 <div class="form-group">
-                    <label>ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط±</label>
-                    <input type="password" id="password" class="form-control" placeholder="ط£ط¯ط®ظ„ ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط±" required>
+                    <label>كلمة المرور</label>
+                    <input type="password" id="password" class="form-control" placeholder="ط£ط¯ط®ظ„ كلمة المرور" required>
                 </div>
 
                 <!-- Password Strength Bar -->
                 <div id="passwordStrengthContainer" style="margin-bottom:14px; display:none;">
                     <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
-                        <span style="font-size:0.82rem; color:rgba(255,255,255,0.6);">ظ‚ظˆط© ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط±:</span>
+                        <span style="font-size:0.82rem; color:rgba(255,255,255,0.6);">ظ‚ظˆط© كلمة المرور:</span>
                         <span id="passwordStrengthLabel" style="font-size:0.82rem; font-weight:700;">â€”</span>
                     </div>
                     <div style="width:100%; height:5px; background:rgba(255,255,255,0.08); border-radius:6px; overflow:hidden;">
@@ -310,8 +310,8 @@
 
                 <!-- Confirm Password (auth.js will add eye toggle automatically) -->
                 <div class="form-group">
-                    <label>طھط£ظƒظٹط¯ ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط±</label>
-                    <input type="password" id="confirmPassword" class="form-control" placeholder="ط£ط¹ط¯ ظƒطھط§ط¨ط© ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط±" required>
+                    <label>طھط£ظƒظٹط¯ كلمة المرور</label>
+                    <input type="password" id="confirmPassword" class="form-control" placeholder="ط£ط¹ط¯ ظƒطھط§ط¨ط© كلمة المرور" required>
                 </div>
                 
                 <div style="display: flex; gap: 12px; margin-top: 8px;">

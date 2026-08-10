@@ -148,7 +148,7 @@
                             <span id="sParentPhone" dir="ltr">...</span>
                         </li>
                         <li style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed rgba(255,255,255,0.2);">
-                            <strong><i class="fas fa-key text-gold"></i> ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط± ط§ظ„ط­ط§ظ„ظٹط©:</strong> 
+                            <strong><i class="fas fa-key text-gold"></i> كلمة المرور ط§ظ„ط­ط§ظ„ظٹط©:</strong> 
                             <span id="sPassword" style="font-family: monospace; font-size: 1.1rem; color: #00bcd4; background: rgba(0,0,0,0.3); padding: 2px 8px; border-radius: 4px; user-select: all;">...</span>
                         </li>
                     </ul>
@@ -168,7 +168,7 @@
             <div style="margin-top: 40px; text-align: left;">
                 <div class="glass-panel" style="padding: 12px; border-radius: 10px; margin-bottom: 15px; background: rgba(0, 188, 212, 0.1); border-color: rgba(0, 188, 212, 0.3);">
                     <p style="color: #fff; margin: 0; font-size: 0.95rem;">
-                        <i class="fas fa-info-circle text-cyan mr-2"></i> <strong>ظ…ظ„ط§ط­ط¸ط©:</strong> ط¥ط°ط§ ظ†ط³ظٹ ط§ظ„ط·ط§ظ„ط¨ ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط±طŒ ظٹظ…ظƒظ†ظƒ ط¥ط¹ط·ط§ط¦ظ‡ ط§ظ„ظƒظ„ظ…ط© ط§ظ„ظ…ظƒطھظˆط¨ط© ط¨ط§ظ„ط£ط¹ظ„ظ‰طŒ ط£ظˆ ظٹظ…ظƒظ†ظƒ ظ…ط³ط­ ط­ط³ط§ط¨ظ‡ ظ…ظ† <a href="https://console.firebase.google.com/" target="_blank" style="color: var(--royal-gold);">Firebase Console</a> ظ„ظٹظ‚ظˆظ… ط¨التسجيل ظ…ظ† ط¬ط¯ظٹط¯.
+                        <i class="fas fa-info-circle text-cyan mr-2"></i> <strong>ظ…ظ„ط§ط­ط¸ط©:</strong> ط¥ط°ط§ ظ†ط³ظٹ ط§ظ„ط·ط§ظ„ط¨ كلمة المرورطŒ ظٹظ…ظƒظ†ظƒ ط¥ط¹ط·ط§ط¦ظ‡ ط§ظ„ظƒظ„ظ…ط© ط§ظ„ظ…ظƒطھظˆط¨ط© ط¨ط§ظ„ط£ط¹ظ„ظ‰طŒ ط£ظˆ ظٹظ…ظƒظ†ظƒ ظ…ط³ط­ ط­ط³ط§ط¨ظ‡ ظ…ظ† <a href="https://console.firebase.google.com/" target="_blank" style="color: var(--royal-gold);">Firebase Console</a> ظ„ظٹظ‚ظˆظ… ط¨التسجيل ظ…ظ† ط¬ط¯ظٹط¯.
                     </p>
                 </div>
                 <button class="btn btn-gold btn-large" id="btnSaveStudent"><i class="fas fa-save mr-2"></i> ط­ظپط¸ ط§ظ„طھط¹ط¯ظٹظ„ط§طھ</button>
@@ -617,7 +617,7 @@
                         else alert('طھظ… ط­ظپط¸ ط§ظ„طھط¹ط¯ظٹظ„ط§طھ ط¨ظ†ط¬ط§ط­');
                     } catch(err) {
                         console.error('Error during save student', err);
-                        alert('ط­ط¯ط« ط®ط·ط£ ط£ط«ظ†ط§ط، ط­ظپط¸ ط§ظ„طھط¹ط¯ظٹظ„ط§طھ. ظٹط±ط¬ظ‰ ط§ظ„ظ…ط­ط§ظˆظ„ط© ظ…ط±ط© ط£ط®ط±ظ‰.');
+                        alert('حدث خطأ ط£ط«ظ†ط§ط، ط­ظپط¸ ط§ظ„طھط¹ط¯ظٹظ„ط§طھ. ظٹط±ط¬ظ‰ ط§ظ„ظ…ط­ط§ظˆظ„ط© ظ…ط±ط© ط£ط®ط±ظ‰.');
                     } finally {
                         btn.innerHTML = originalText;
                         btn.disabled = false;
@@ -692,7 +692,7 @@
                 if (student) {
                     html += `<div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.1);">`;
                     html += `<div><strong>ط§ط³ظ… ط§ظ„ط·ط§ظ„ط¨:</strong> ${student.name}</div>`;
-                    html += `<div><strong>ط§ظ„طµظپ ط§ظ„ط¯ط±ط§ط³ظٹ:</strong> ${student.grade}</div>`;
+                    html += `<div><strong>الصف الدراسي:</strong> ${student.grade}</div>`;
                     html += `</div>`;
                 } else {
                     html += `<div style="margin-top: 10px; color:#f39c12; font-size:0.85rem;"><i class="fas fa-exclamation-triangle"></i> ط§ظ„ط·ط§ظ„ط¨ ط؛ظٹط± ظ…ط³ط¬ظ„ ط­ط§ظ„ظٹط§ظ‹ ظپظٹ ظ‚ط§ط¹ط¯ط© ط§ظ„ط¨ظٹط§ظ†ط§طھ ط¨ظ‡ط°ظ‡ ط§ظ„ط£ط±ظ‚ط§ظ…طŒ ط±ط¨ظ…ط§ ظ‚ط§ظ… ط¨ط­ط°ظپ ط­ط³ط§ط¨ظ‡.</div>`;
@@ -715,7 +715,7 @@
                 return;
             }
 
-            const newPwd = window.prompt("ط£ط¯ط®ظ„ ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط± ط§ظ„ط¬ط¯ظٹط¯ط© ط§ظ„طھظٹ طھط±ظٹط¯ طھط³ط¬ظٹظ„ظ‡ط§ ظ„ظ‡ط°ط§ ط§ظ„ط·ط§ظ„ط¨:");
+            const newPwd = window.prompt("ط£ط¯ط®ظ„ كلمة المرور ط§ظ„ط¬ط¯ظٹط¯ط© ط§ظ„طھظٹ طھط±ظٹط¯ طھط³ط¬ظٹظ„ظ‡ط§ ظ„ظ‡ط°ط§ ط§ظ„ط·ط§ظ„ط¨:");
             if (newPwd) {
                 if (typeof window.adminOverwriteStudentPassword === 'function') {
                     try {
@@ -723,7 +723,7 @@
                         document.getElementById('pwdDisplaySpan').textContent = newPwd;
                         if (window.showToast) window.showToast('طھظ… ط­ظپط¸ ط§ظ„ط¨ط§ط³ظˆط±ط¯ ط§ظ„ط¬ط¯ظٹط¯ ط¨ظ†ط¬ط§ط­', 'success');
                     } catch(e) {
-                        alert('ط­ط¯ط« ط®ط·ط£ ط£ط«ظ†ط§ط، ط­ظپط¸ ط§ظ„ط¨ط§ط³ظˆط±ط¯: ' + e.message);
+                        alert('حدث خطأ ط£ط«ظ†ط§ط، ط­ظپط¸ ط§ظ„ط¨ط§ط³ظˆط±ط¯: ' + e.message);
                     }
                 } else {
                     alert('ظˆط¸ظٹظپط© ط§ظ„ط­ظپط¸ ط؛ظٹط± ظ…طھظˆظپط±ط© ط­ط§ظ„ظٹط§ظ‹.');

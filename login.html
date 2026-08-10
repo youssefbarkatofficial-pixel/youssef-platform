@@ -21,19 +21,19 @@
         
         <form id="loginForm">
             <div class="form-group">
-                <label>ط±ظ‚ظ… ط§ظ„ظ…ط­ظ…ظˆظ„ ط£ظˆ ط§ظ„ط¨ط±ظٹط¯ ط§ظ„ط¥ظ„ظƒطھط±ظˆظ†ظٹ</label>
-                <input type="text" id="loginPhone" class="form-control" placeholder="ط£ط¯ط®ظ„ ط±ظ‚ظ… ط§ظ„ظ…ط­ظ…ظˆظ„ ط£ظˆ ط§ظ„ط¨ط±ظٹط¯ ط§ظ„ط¥ظ„ظƒطھط±ظˆظ†ظٹ" required>
+                <label>ط±ظ‚ظ… ط§ظ„ظ…ط­ظ…ظˆظ„ ط£ظˆ البريد الإلكتروني</label>
+                <input type="text" id="loginPhone" class="form-control" placeholder="ط£ط¯ط®ظ„ ط±ظ‚ظ… ط§ظ„ظ…ط­ظ…ظˆظ„ ط£ظˆ البريد الإلكتروني" required>
             </div>
             <div class="form-group">
-                <label>ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط±</label>
-                <input type="password" id="loginPassword" class="form-control" placeholder="ط£ط¯ط®ظ„ ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط±" required>
+                <label>كلمة المرور</label>
+                <input type="password" id="loginPassword" class="form-control" placeholder="ط£ط¯ط®ظ„ كلمة المرور" required>
             </div>
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; gap:10px; flex-wrap:wrap;">
                 <label style="display: flex; align-items: center; gap: 8px; color: rgba(255,255,255,0.85); font-weight: 600;">
                     <input type="checkbox" id="rememberMe" style="width:16px; height:16px; accent: var(--royal-gold);" />
                     طھط°ظƒط±ظ†ظٹ ط¹ظ„ظ‰ ظ‡ط°ط§ ط§ظ„ط¬ظ‡ط§ط²
                 </label>
-                <a href="#" id="forgotPasswordLink" onclick="document.getElementById('forgotPasswordModal').style.display='flex'; return false;" style="color: var(--accent-cyan); font-weight: 700;">ظ†ط³ظٹطھ ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط±طں</a>
+                <a href="#" id="forgotPasswordLink" onclick="document.getElementById('forgotPasswordModal').style.display='flex'; return false;" style="color: var(--accent-cyan); font-weight: 700;">ظ†ط³ظٹطھ كلمة المرورطں</a>
             </div>
             <div id="loginError" class="error-message"></div>
             <button type="submit" class="btn btn-green btn-block">تسجيل الدخول</button>
@@ -42,8 +42,8 @@
         <div id="forgotPasswordModal" class="modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 10000; justify-content: center; align-items: center; padding: 20px;">
             <div class="glass-panel" style="max-width: 520px; width: 100%; padding: 30px; position: relative; border-radius: 20px;">
                 <button onclick="document.getElementById('forgotPasswordModal').style.display='none'" style="position: absolute; top: 18px; right: 18px; background: transparent; border: none; color: var(--text-primary); font-size: 1.4rem; cursor: pointer;"><i class="fas fa-times"></i></button>
-                <h2 style="margin-bottom: 20px; color: var(--royal-gold);">ط§ط³طھط¹ط§ط¯ط© ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط±</h2>
-                <p style="margin-bottom: 20px; color: var(--text-secondary);">ط£ط¯ط®ظ„ ط±ظ‚ظ… ظ‡ط§طھظپظƒ ظˆط±ظ‚ظ… ظ‡ط§طھظپ ظˆظ„ظٹ ط§ظ„ط£ظ…ط± ظ„ط§ط³طھط¹ط§ط¯ط© ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط±.</p>
+                <h2 style="margin-bottom: 20px; color: var(--royal-gold);">ط§ط³طھط¹ط§ط¯ط© كلمة المرور</h2>
+                <p style="margin-bottom: 20px; color: var(--text-secondary);">ط£ط¯ط®ظ„ ط±ظ‚ظ… ظ‡ط§طھظپظƒ ظˆط±ظ‚ظ… ظ‡ط§طھظپ ظˆظ„ظٹ ط§ظ„ط£ظ…ط± ظ„ط§ط³طھط¹ط§ط¯ط© كلمة المرور.</p>
                 <div id="fpStatusText" style="display:none; margin-bottom: 20px; padding: 12px 14px; border-radius: 16px; font-size: 0.95rem; line-height:1.5;"></div>
                 <form id="forgotPasswordForm">
                     <div class="form-group">
@@ -65,25 +65,25 @@
                             <span id="fpOtpHelp" style="flex:1 1 100%; color: rgba(255,255,255,0.72); font-size: 0.92rem;">ظٹظ…ظƒظ†ظƒ ط¥ط¹ط§ط¯ط© ط§ظ„ط¥ط±ط³ط§ظ„ ط¨ط¹ط¯ 10 ط«ظˆط§ظ†ظٹ.</span>
                         </div>
                         <div class="form-group">
-                            <label>ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط± ط§ظ„ط¬ط¯ظٹط¯ط©</label>
-                            <input type="password" id="fpNewPassword" class="form-control" placeholder="ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط± ط§ظ„ط¬ط¯ظٹط¯ط©">
+                            <label>كلمة المرور ط§ظ„ط¬ط¯ظٹط¯ط©</label>
+                            <input type="password" id="fpNewPassword" class="form-control" placeholder="كلمة المرور ط§ظ„ط¬ط¯ظٹط¯ط©">
                         </div>
                         <div class="form-group">
-                            <label>طھط£ظƒظٹط¯ ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط± ط§ظ„ط¬ط¯ظٹط¯ط©</label>
-                            <input type="password" id="fpConfirmPassword" class="form-control" placeholder="طھط£ظƒظٹط¯ ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط± ط§ظ„ط¬ط¯ظٹط¯ط©">
+                            <label>طھط£ظƒظٹط¯ كلمة المرور ط§ظ„ط¬ط¯ظٹط¯ط©</label>
+                            <input type="password" id="fpConfirmPassword" class="form-control" placeholder="طھط£ظƒظٹط¯ كلمة المرور ط§ظ„ط¬ط¯ظٹط¯ط©">
                             <span id="fpPasswordError" class="error-message" style="display:none;">ظƒظ„ظ…طھط§ ط§ظ„ظ…ط±ظˆط± ط؛ظٹط± ظ…طھط·ط§ط¨ظ‚طھظٹظ†.</span>
                         </div>
                     </div>
                     <div style="display:flex; justify-content: space-between; gap: 10px; margin-top: 20px;">
                         <button type="button" class="btn btn-outline" onclick="document.getElementById('forgotPasswordModal').style.display='none'">ط¥ط؛ظ„ط§ظ‚</button>
-                        <button type="submit" id="fpSubmitBtn" class="btn btn-green">طھط£ظƒظٹط¯ طھط؛ظٹظٹط± ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط±</button>
+                        <button type="submit" id="fpSubmitBtn" class="btn btn-green">طھط£ظƒظٹط¯ طھط؛ظٹظٹط± كلمة المرور</button>
                     </div>
                 </form>
             </div>
         </div>
         
         <div class="auth-footer mt-2">
-            <p>ظ„ظٹط³ ظ„ط¯ظٹظƒ ط­ط³ط§ط¨طں <a href="register.html">ط¥ظ†ط´ط§ط، ط­ط³ط§ط¨ ط¬ط¯ظٹط¯</a></p>
+            <p>ظ„ظٹط³ ظ„ط¯ظٹظƒ ط­ط³ط§ط¨طں <a href="register.html">ط¥ظ†ط´ط§ط، حساب جديد</a></p>
         </div>
     </div>
 

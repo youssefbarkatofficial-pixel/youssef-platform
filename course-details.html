@@ -209,7 +209,7 @@
             <div class="auth-header">
                 <div class="auth-logo"><i class="fas fa-user-graduate"></i></div>
                 <h2>تسجيل الدخول</h2>
-                <p>ظ…ط±ط­ط¨ط§ظ‹ ط¨ظƒ ظ…ط¬ط¯ط¯ط§ظ‹ ظپظٹ ظ…ظ†طµطھظƒ</p>
+                <p>مرحباً ط¨ظƒ ظ…ط¬ط¯ط¯ط§ظ‹ ظپظٹ ظ…ظ†طµطھظƒ</p>
             </div>
             <form id="loginForm">
                 <div class="form-group">
@@ -217,12 +217,12 @@
                     <input type="text" id="loginPhone" class="form-control" placeholder="ط£ط¯ط®ظ„ ط±ظ‚ظ… ط§ظ„ظ…ظˆط¨ط§ظٹظ„" required>
                 </div>
                 <div class="form-group">
-                    <label>ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط±</label>
-                    <input type="password" id="loginPassword" class="form-control" placeholder="ط£ط¯ط®ظ„ ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط±" required>
+                    <label>كلمة المرور</label>
+                    <input type="password" id="loginPassword" class="form-control" placeholder="ط£ط¯ط®ظ„ كلمة المرور" required>
                   <div id="loginError" class="error-message" style="display:none; color: #e74c3c; background: rgba(231,76,60,0.1); padding: 10px; border-radius: 8px; margin-top: 15px; font-size: 0.9rem; text-align: center; border: 1px solid rgba(231,76,60,0.3);"></div>
                 </div>
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <a href="#" id="forgotPasswordLink" style="color: var(--accent-cyan); font-weight: 700;">ظ†ط³ظٹطھ ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط±طں</a>
+                    <a href="#" id="forgotPasswordLink" style="color: var(--accent-cyan); font-weight: 700;">ظ†ط³ظٹطھ كلمة المرورطں</a>
                     <span style="color: rgba(0,0,0,0.6); font-size: 0.92rem;">تسجيل الدخول ط§ظ„ط¢ظ…ظ†</span>
                 </div>
                 <button type="submit" class="btn btn-green btn-block">تسجيل الدخول</button>
@@ -230,7 +230,7 @@
             <div id="forgotPasswordModal" class="modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 10000; justify-content: center; align-items: center; padding: 20px;">
                 <div class="glass-panel" style="max-width: 520px; width: 100%; padding: 30px; position: relative; border-radius: 20px;">
                     <button onclick="document.getElementById('forgotPasswordModal').style.display='none'" style="position: absolute; top: 18px; right: 18px; background: transparent; border: none; color: var(--text-primary); font-size: 1.4rem; cursor: pointer;"><i class="fas fa-times"></i></button>
-                    <h2 style="margin-bottom: 20px; color: var(--royal-gold);">ط§ط³طھط¹ط§ط¯ط© ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط±</h2>
+                    <h2 style="margin-bottom: 20px; color: var(--royal-gold);">ط§ط³طھط¹ط§ط¯ط© كلمة المرور</h2>
                     <p style="margin-bottom: 20px; color: var(--text-secondary);">ط§ظƒطھط¨ ط±ظ‚ظ… ظˆظ„ظٹ ط§ظ„ط£ظ…ط± ط§ظ„ظ…ط±طھط¨ط· ط¨ط­ط³ط§ط¨ظƒ ظˆظ‡ظٹطھظ… ط¥ط±ط³ط§ظ„ ظƒظˆط¯ طھط£ظƒظٹط¯ ظ„طھط؛ظٹظٹط± ظƒظ„ظ…ط© ط§ظ„ط³ط±.</p>
                     <div id="fpStatusText" style="display:none; margin-bottom: 20px; padding: 12px 14px; border-radius: 16px; font-size: 0.95rem; line-height:1.5;"></div>
                     <form id="forgotPasswordForm">
@@ -252,12 +252,12 @@
                                 <span id="fpOtpHelp" style="flex:1 1 100%; color: rgba(0,0,0,0.72); font-size: 0.92rem;">ط§ظ„ظƒظˆط¯ طµط§ظ„ط­ ظ„ظ…ط¯ط© 10 ط¯ظ‚ط§ط¦ظ‚ ظˆظ„ط§ ظٹطھظ… ظ…ط´ط§ط±ظƒطھظ‡ ظ…ط¹ ط£ظٹ ط´ط®طµ.</span>
                             </div>
                             <div class="form-group">
-                                <label>ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط± ط§ظ„ط¬ط¯ظٹط¯ط©</label>
-                                <input type="password" id="fpNewPassword" class="form-control" placeholder="ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط± ط§ظ„ط¬ط¯ظٹط¯ط©">
+                                <label>كلمة المرور ط§ظ„ط¬ط¯ظٹط¯ط©</label>
+                                <input type="password" id="fpNewPassword" class="form-control" placeholder="كلمة المرور ط§ظ„ط¬ط¯ظٹط¯ط©">
                             </div>
                             <div class="form-group">
-                                <label>طھط£ظƒظٹط¯ ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط± ط§ظ„ط¬ط¯ظٹط¯ط©</label>
-                                <input type="password" id="fpConfirmPassword" class="form-control" placeholder="طھط£ظƒظٹط¯ ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط± ط§ظ„ط¬ط¯ظٹط¯ط©">
+                                <label>طھط£ظƒظٹط¯ كلمة المرور ط§ظ„ط¬ط¯ظٹط¯ط©</label>
+                                <input type="password" id="fpConfirmPassword" class="form-control" placeholder="طھط£ظƒظٹط¯ كلمة المرور ط§ظ„ط¬ط¯ظٹط¯ط©">
                                 <span id="fpPasswordError" class="error-message" style="display:none;">ظٹط¬ط¨ ط£ظ† طھطھط·ط§ط¨ظ‚ ظƒظ„ظ…ط§طھ ط§ظ„ظ…ط±ظˆط± ظˆط£ظ† طھظƒظˆظ† ظ‚ظˆظٹط©.</span>
                             </div>
                         </div>
@@ -270,7 +270,7 @@
                 </div>
             </div>
             <div class="auth-footer">
-                <p>ظ„ظٹط³ ظ„ط¯ظٹظƒ ط­ط³ط§ط¨طں <a href="register.html">ط¥ظ†ط´ط§ط، ط­ط³ط§ط¨ ط¬ط¯ظٹط¯</a></p>
+                <p>ظ„ظٹط³ ظ„ط¯ظٹظƒ ط­ط³ط§ط¨طں <a href="register.html">ط¥ظ†ط´ط§ط، حساب جديد</a></p>
             </div>
         </div>
     <!-- Login Modal -->
@@ -280,7 +280,7 @@
             <div class="auth-header">
                 <div class="auth-logo"><i class="fas fa-user-graduate"></i></div>
                 <h2>تسجيل الدخول</h2>
-                <p>ظ…ط±ط­ط¨ط§ظ‹ ط¨ظƒ ظ…ط¬ط¯ط¯ط§ظ‹ ظپظٹ ظ…ظ†طµطھظƒ</p>
+                <p>مرحباً ط¨ظƒ ظ…ط¬ط¯ط¯ط§ظ‹ ظپظٹ ظ…ظ†طµطھظƒ</p>
             </div>
             <form id="loginForm">
                 <div class="form-group">
@@ -288,12 +288,12 @@
                     <input type="text" id="loginPhone" class="form-control" placeholder="ط£ط¯ط®ظ„ ط±ظ‚ظ… ط§ظ„ظ…ظˆط¨ط§ظٹظ„" required>
                 </div>
                 <div class="form-group">
-                    <label>ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط±</label>
-                    <input type="password" id="loginPassword" class="form-control" placeholder="ط£ط¯ط®ظ„ ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط±" required>
+                    <label>كلمة المرور</label>
+                    <input type="password" id="loginPassword" class="form-control" placeholder="ط£ط¯ط®ظ„ كلمة المرور" required>
                   <div id="loginError" class="error-message" style="display:none; color: #e74c3c; background: rgba(231,76,60,0.1); padding: 10px; border-radius: 8px; margin-top: 15px; font-size: 0.9rem; text-align: center; border: 1px solid rgba(231,76,60,0.3);"></div>
                 </div>
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <a href="#" id="forgotPasswordLink" style="color: var(--accent-cyan); font-weight: 700;">ظ†ط³ظٹطھ ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط±طں</a>
+                    <a href="#" id="forgotPasswordLink" style="color: var(--accent-cyan); font-weight: 700;">ظ†ط³ظٹطھ كلمة المرورطں</a>
                     <span style="color: rgba(0,0,0,0.6); font-size: 0.92rem;">تسجيل الدخول ط§ظ„ط¢ظ…ظ†</span>
                 </div>
                 <button type="submit" class="btn btn-green btn-block">تسجيل الدخول</button>
@@ -301,7 +301,7 @@
             <div id="forgotPasswordModal" class="modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 10000; justify-content: center; align-items: center; padding: 20px;">
                 <div class="glass-panel" style="max-width: 520px; width: 100%; padding: 30px; position: relative; border-radius: 20px;">
                     <button onclick="document.getElementById('forgotPasswordModal').style.display='none'" style="position: absolute; top: 18px; right: 18px; background: transparent; border: none; color: var(--text-primary); font-size: 1.4rem; cursor: pointer;"><i class="fas fa-times"></i></button>
-                    <h2 style="margin-bottom: 20px; color: var(--royal-gold);">ط§ط³طھط¹ط§ط¯ط© ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط±</h2>
+                    <h2 style="margin-bottom: 20px; color: var(--royal-gold);">ط§ط³طھط¹ط§ط¯ط© كلمة المرور</h2>
                     <p style="margin-bottom: 20px; color: var(--text-secondary);">ط§ظƒطھط¨ ط±ظ‚ظ… ظˆظ„ظٹ ط§ظ„ط£ظ…ط± ط§ظ„ظ…ط±طھط¨ط· ط¨ط­ط³ط§ط¨ظƒ ظˆظ‡ظٹطھظ… ط¥ط±ط³ط§ظ„ ظƒظˆط¯ طھط£ظƒظٹط¯ ظ„طھط؛ظٹظٹط± ظƒظ„ظ…ط© ط§ظ„ط³ط±.</p>
                     <div id="fpStatusText" style="display:none; margin-bottom: 20px; padding: 12px 14px; border-radius: 16px; font-size: 0.95rem; line-height:1.5;"></div>
                     <form id="forgotPasswordForm">
@@ -323,12 +323,12 @@
                                 <span id="fpOtpHelp" style="flex:1 1 100%; color: rgba(0,0,0,0.72); font-size: 0.92rem;">ط§ظ„ظƒظˆط¯ طµط§ظ„ط­ ظ„ظ…ط¯ط© 10 ط¯ظ‚ط§ط¦ظ‚ ظˆظ„ط§ ظٹطھظ… ظ…ط´ط§ط±ظƒطھظ‡ ظ…ط¹ ط£ظٹ ط´ط®طµ.</span>
                             </div>
                             <div class="form-group">
-                                <label>ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط± ط§ظ„ط¬ط¯ظٹط¯ط©</label>
-                                <input type="password" id="fpNewPassword" class="form-control" placeholder="ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط± ط§ظ„ط¬ط¯ظٹط¯ط©">
+                                <label>كلمة المرور ط§ظ„ط¬ط¯ظٹط¯ط©</label>
+                                <input type="password" id="fpNewPassword" class="form-control" placeholder="كلمة المرور ط§ظ„ط¬ط¯ظٹط¯ط©">
                             </div>
                             <div class="form-group">
-                                <label>طھط£ظƒظٹط¯ ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط± ط§ظ„ط¬ط¯ظٹط¯ط©</label>
-                                <input type="password" id="fpConfirmPassword" class="form-control" placeholder="طھط£ظƒظٹط¯ ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط± ط§ظ„ط¬ط¯ظٹط¯ط©">
+                                <label>طھط£ظƒظٹط¯ كلمة المرور ط§ظ„ط¬ط¯ظٹط¯ط©</label>
+                                <input type="password" id="fpConfirmPassword" class="form-control" placeholder="طھط£ظƒظٹط¯ كلمة المرور ط§ظ„ط¬ط¯ظٹط¯ط©">
                                 <span id="fpPasswordError" class="error-message" style="display:none;">ظٹط¬ط¨ ط£ظ† طھطھط·ط§ط¨ظ‚ ظƒظ„ظ…ط§طھ ط§ظ„ظ…ط±ظˆط± ظˆط£ظ† طھظƒظˆظ† ظ‚ظˆظٹط©.</span>
                             </div>
                         </div>
@@ -341,7 +341,7 @@
                 </div>
             </div>
             <div class="auth-footer">
-                <p>ظ„ظٹط³ ظ„ط¯ظٹظƒ ط­ط³ط§ط¨طں <a href="register.html">ط¥ظ†ط´ط§ط، ط­ط³ط§ط¨ ط¬ط¯ظٹط¯</a></p>
+                <p>ظ„ظٹط³ ظ„ط¯ظٹظƒ ط­ط³ط§ط¨طں <a href="register.html">ط¥ظ†ط´ط§ط، حساب جديد</a></p>
             </div>
         </div>
     </div>
@@ -1778,7 +1778,7 @@
                                 correctAnsHtml = `<br/><span style="color:rgba(255,255,255,0.6);">ط§ظ„ط¥ط¬ط§ط¨ط© ط§ظ„طµط­ظٹط­ط©: </span><span style="color:#2ecc71;">${displayCorrect}</span>`;
                             }
                             
-                            p.innerHTML = '<strong>ط³' + (i+1) + ':</strong> ' + r.question + ' <span style="color:#f39c12;">(' + (r.pointsEarned||0) + '/' + (r.totalPoints||1) + ' ظ†ظ‚ط·ط©)</span><br/><em style="color:rgba(255,255,255,0.6);">ط¥ط¬ط§ط¨طھظƒ:</em> <span style="color:' + (isCorrect ? '#2ecc71' : '#e74c3c') + ';">' + displayStudent + '</span>' + correctAnsHtml + '<br/><em style="color:rgba(255,255,255,0.6);">ط§ظ„طھط¹ظ„ظٹظ‚:</em> ' + r.feedback;
+                            p.innerHTML = '<strong>ط³' + (i+1) + ':</strong> ' + r.question + ' <span style="color:#f39c12;">(' + (r.pointsEarned||0) + '/' + (r.totalPoints||1) + ' نقطة)</span><br/><em style="color:rgba(255,255,255,0.6);">ط¥ط¬ط§ط¨طھظƒ:</em> <span style="color:' + (isCorrect ? '#2ecc71' : '#e74c3c') + ';">' + displayStudent + '</span>' + correctAnsHtml + '<br/><em style="color:rgba(255,255,255,0.6);">ط§ظ„طھط¹ظ„ظٹظ‚:</em> ' + r.feedback;
                             detEl.appendChild(p);
                         });
 
@@ -1787,7 +1787,7 @@
                         _deactivateStrict();
                         
                         // Show exit buttons again so user can close the result screen
-                        cancelBtn.innerHTML = 'ط¥ط؛ظ„ط§ظ‚ ظ†ط§ظپط°ط© ط§ظ„ظ†طھظٹط¬ط©';
+                        cancelBtn.innerHTML = 'ط¥ط؛ظ„ط§ظ‚ ظ†ط§ظپط°ط© ط§ظ„نتيجة';
                         cancelBtn.onclick = function() {
                             if(examModal) { examModal.classList.remove('active'); document.body.style.overflow = ''; }
                         };
@@ -2276,7 +2276,7 @@ window.enrollFreeCourse = async function(courseId) {
         }
     }
     
-    if(window.showToast) window.showToast('ظ…ط±ط­ط¨ط§ظ‹ ط¨ظƒ ظپظٹ ط§ظ„ظƒظˆط±ط³ ط§ظ„ظ…ط¬ط§ظ†ظٹ!', 'success');
+    if(window.showToast) window.showToast('مرحباً ط¨ظƒ ظپظٹ ط§ظ„ظƒظˆط±ط³ ط§ظ„ظ…ط¬ط§ظ†ظٹ!', 'success');
     setTimeout(() => {
     setTimeout(() => {
         window.location.reload();

@@ -492,7 +492,7 @@
                         rubricPreviewContainer.style.display = 'block';
                     } catch(err) {
                         console.error('Rubric Generation Error:', err);
-                        alert('ط­ط¯ط« ط®ط·ط£ ط£ط«ظ†ط§ط، طھظˆظ„ظٹط¯ ط§ظ„طھظ‚ظٹظٹظ…: ' + err.message);
+                        alert('حدث خطأ ط£ط«ظ†ط§ط، طھظˆظ„ظٹط¯ ط§ظ„طھظ‚ظٹظٹظ…: ' + err.message);
                     } finally {
                         btnGenerateRubric.innerHTML = '<i class="fas fa-magic mr-2"></i> طھظˆظ„ظٹط¯ طھظ‚ظٹظٹظ… ط°ظƒظٹ ط¨ط§ظ„ط°ظƒط§ط، ط§ظ„ط§طµط·ظ†ط§ط¹ظٹ';
                         btnGenerateRubric.disabled = false;
@@ -789,7 +789,7 @@
                         itemObj.fileName = file.name; itemObj.availableFrom = document.getElementById('vAvailableFrom').value; itemObj.availableUntil = document.getElementById('vAvailableUntil').value;
                     } catch(err) {
                         console.error('Upload failed', err);
-                        alert('ط­ط¯ط« ط®ط·ط£ ط£ط«ظ†ط§ط، ط±ظپط¹ ط§ظ„ظپظٹط¯ظٹظˆ: ' + err.message);
+                        alert('حدث خطأ ط£ط«ظ†ط§ط، ط±ظپط¹ ط§ظ„ظپظٹط¯ظٹظˆ: ' + err.message);
                         submitBtn.innerHTML = originalBtnText;
                         submitBtn.disabled = false;
                         return;
@@ -831,7 +831,7 @@
                         itemObj.fileName = file.name; itemObj.availableFrom = document.getElementById('pAvailableFrom').value; itemObj.availableUntil = document.getElementById('pAvailableUntil').value;
                     } catch(err) {
                         console.error('Upload failed', err);
-                        alert('ط­ط¯ط« ط®ط·ط£ ط£ط«ظ†ط§ط، ط±ظپط¹ ط§ظ„ظ…ظ„ظپ: ' + err.message);
+                        alert('حدث خطأ ط£ط«ظ†ط§ط، ط±ظپط¹ ط§ظ„ظ…ظ„ظپ: ' + err.message);
                         submitBtn.innerHTML = originalBtnText;
                         submitBtn.disabled = false;
                         return;

@@ -372,7 +372,7 @@ function renderStudentsTable(students) {
     const tbody = document.getElementById('studentsTableBody');
     if (!tbody) return;
     if (!students || !students.length) {
-        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:30px;">ظ„ط§ ظٹظˆط¬ط¯ ط·ظ„ط§ط¨</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:30px;">لا يوجد طلاب</td></tr>';
         return;
     }
 
@@ -527,7 +527,7 @@ async function openStudentDetail(uid) {
                             <div style="flex:1;"><div style="font-size:0.88rem;margin-bottom:5px;"><strong>ط³${i+1}:</strong> ${d.question||''}</div>
                             <div style="font-size:0.83rem;"><span style="color:rgba(255,255,255,0.55);">ط¥ط¬ط§ط¨ط© ط§ظ„ط·ط§ظ„ط¨: </span><span style="color:${ok?'#2ecc71':'#e74c3c'};font-weight:600;">${dS}</span></div>
                             ${!ok&&dC?`<div style="font-size:0.82rem;margin-top:3px;"><span style="color:rgba(255,255,255,0.45);">ط§ظ„ط¥ط¬ط§ط¨ط© ط§ظ„طµط­ظٹط­ط©: </span><span style="color:#2ecc71;">${dC}</span></div>`:''}
-                            <div style="font-size:0.73rem;color:rgba(255,255,255,0.3);margin-top:3px;">${Math.round((d.score||0)*100)}% â€” (${d.pointsEarned||0}/${d.totalPoints||1} ظ†ظ‚ط·ط©)</div></div>
+                            <div style="font-size:0.73rem;color:rgba(255,255,255,0.3);margin-top:3px;">${Math.round((d.score||0)*100)}% â€” (${d.pointsEarned||0}/${d.totalPoints||1} نقطة)</div></div>
                             <button class="toggle-score-btn" onclick="window.toggleQuestionScore('${uid}','${safe}',${i},this)">${ok?'â‌Œ ط§ط¬ط¹ظ„ظ‡ ط®ط·ط£':'âœ… ط§ط¬ط¹ظ„ظ‡ طµط­ظٹط­'}</button>
                         </div></div>`;
                     });
@@ -612,7 +612,7 @@ window.toggleQuestionScore = function(uid, examTitle, qIndex, btn) {
             };
             const dS=gA(q.rawAnswer), cR=q.correctAnswer!==undefined?q.correctAnswer:q.correct!==undefined?q.correct:q.answer!==undefined?q.answer:'', dC=cR!==''?gA(cR):'';
             const td=par.querySelector('div>div');
-            if(td) td.innerHTML=`<strong>ط³${qIndex+1}:</strong> ${q.question||''}<br><span style="color:rgba(255,255,255,0.6);">ط¥ط¬ط§ط¨ط© ط§ظ„ط·ط§ظ„ط¨: </span><span style="color:${isOk?'#2ecc71':'#e74c3c'};">${dS}</span>${(!isOk&&dC)?`<br><span style="color:rgba(255,255,255,0.45);">ط§ظ„ط¥ط¬ط§ط¨ط© ط§ظ„طµط­ظٹط­ط©: </span><span style="color:#2ecc71;">${dC}</span>`:''}<br><span style="color:rgba(255,255,255,0.4);font-size:0.78rem;"> | ${Math.round((q.score||0)*100)}% (${q.pointsEarned||0}/${q.totalPoints||1} ظ†ظ‚ط·ط©)</span>`;
+            if(td) td.innerHTML=`<strong>ط³${qIndex+1}:</strong> ${q.question||''}<br><span style="color:rgba(255,255,255,0.6);">ط¥ط¬ط§ط¨ط© ط§ظ„ط·ط§ظ„ط¨: </span><span style="color:${isOk?'#2ecc71':'#e74c3c'};">${dS}</span>${(!isOk&&dC)?`<br><span style="color:rgba(255,255,255,0.45);">ط§ظ„ط¥ط¬ط§ط¨ط© ط§ظ„طµط­ظٹط­ط©: </span><span style="color:#2ecc71;">${dC}</span>`:''}<br><span style="color:rgba(255,255,255,0.4);font-size:0.78rem;"> | ${Math.round((q.score||0)*100)}% (${q.pointsEarned||0}/${q.totalPoints||1} نقطة)</span>`;
             const tId=(uid+'_'+examTitle).replace(/\s/g,'_').replace(/[^a-zA-Z0-9_\u0600-\u06FF]/g,'');
             const inp=document.getElementById(`score_${tId}`); if(inp){inp.value=r.percent;inp.style.boxShadow='0 0 10px rgba(212,175,55,0.5)';setTimeout(()=>inp.style.boxShadow='none',1000);}
             const sb=document.getElementById(`saveBtn_${tId}`); if(sb){sb.classList.add('urgent');sb.textContent='âڑ ï¸ڈ ط§ط­ظپط¸ ط§ظ„ط¢ظ†!';}
@@ -746,7 +746,7 @@ function filterLevel(level, btn) {
     });
     
     if (!filtered.length) {
-        container.innerHTML = `<div style="text-align:center; padding:40px; color:rgba(255,255,255,0.5);">ظ„ط§ ظٹظˆط¬ط¯ ط·ظ„ط§ط¨ ظپظٹ ظ‡ط°ط§ ط§ظ„ظ…ط³طھظˆظ‰</div>`;
+        container.innerHTML = `<div style="text-align:center; padding:40px; color:rgba(255,255,255,0.5);">لا يوجد طلاب ظپظٹ ظ‡ط°ط§ ط§ظ„ظ…ط³طھظˆظ‰</div>`;
         return;
     }
     
