@@ -775,7 +775,7 @@
 
   // ==================================================
   // ADVANCED SELF-IMPROVING AI SYSTEM
-  // FOR "ط§ظ„ط¨ظˆطµظ„ط©" ASSISTANT
+  // FOR "البوصلة" ASSISTANT
   // ==================================================
 
   // ADMIN LEARNING SYSTEM
@@ -824,7 +824,7 @@
     
     const searchQueries = {
       ar: query,
-      en: query.split(' ').map(w => w.replace(/[ط،-ظٹ]/g, '')).join(' '),
+      en: query.split(' ').map(w => w.replace(/[ء-ي]/g, '')).join(' '),
     };
 
     try {
@@ -835,7 +835,7 @@
         hasSearch: true,
         searchUrl: searchUrl,
         query: searchQueries.ar,
-        recommendation: 'ظٹظ…ظƒظ†ظƒ ط§ظ„ط¨ط­ط« ط¹ظ† ط§ظ„ظ…ط²ظٹط¯ ظ…ظ† ط§ظ„ظ…ط¹ظ„ظˆظ…ط§طھ'
+        recommendation: 'يمكنك البحث عن المزيد من المعلومات'
       };
     } catch (e) {
       return null;
@@ -978,7 +978,7 @@
         return {
           isCheat: true,
           strict: true,
-          response: 'ط®ظ„ط§ظ„ ظپطھط±ط© ط§ظ„ط§ظ…طھط­ط§ظ† ط£ظˆ طھط³ظ„ظٹظ… ط§ظ„ظˆط§ط¬ط¨طŒ ط£ظ‚ط¯ط± ط£ط´ط±ط­ظ„ظƒ ط§ظ„ظ…ظپظ‡ظˆظ… ط¨ط³ ظ…ط§ ط£ط­ظ„ط´ ط§ظ„ط³ط¤ط§ظ„ ط¨ط§ظ„ظƒط§ظ…ظ„. ط¥ط´ط±ط­ ظ„ظٹ ط§ظ„ط¬ط²ط، ط§ظ„ظ„ظٹ ظ…ط´ ظˆط§ط¶ط­ ظˆط§ط­ظ†ط§ ظ†ظ‚ط¯ظ‘ظ… ظ…ط¹ظ‹ط§ ط®ط·ظˆط© ط¨ط®ط·ظˆط©.',
+          response: 'خلال فترة الامتحان أو تسليم الواجبطŒ أقدر أشرحلك المفهوم بس ما أحلش السؤال بالكامل. إشرح لي الجزء اللي مش واضح واحنا نقدظ‘م معظ‹ا خطوة بخطوة.',
           allowExplanation: true,
           allowGuidance: true,
           allowDirectAnswer: false
@@ -987,7 +987,7 @@
       return {
         isCheat: true,
         strict: false,
-        response: 'ظ…ظ‚ط¯ط±ط´ ط£ط³ط§ط¹ط¯ظƒ ظپظ‰ ط¯ظ‡طŒ ط§ظ„ط£ط³طھط§ط° يوسف بركات ظ„ظˆ ظ„ظ…ط­ظ†ظٹ ظ‡ظٹظ…ط±ط¬ط­ظ†ظٹ ًںک‚',
+        response: 'مقدرش أساعدك فى دهطŒ الأستاذ يوسف بركات لو لمحني هيمرجحني ًںک‚',
         allowExplanation: false,
         allowGuidance: false,
         allowDirectAnswer: false
@@ -1049,7 +1049,7 @@
     
     if (commonWords > 0 && chatContext.lastResponse) {
       return {
-        text: `ط§ط³طھظ…ط±ط§ط±ظ‹ط§ ط¹ظ„ظ‰ ط§ظ„ط³ط¤ط§ظ„ ط§ظ„ط³ط§ط¨ظ‚طŒ ${chatContext.lastResponse}`,
+        text: `استمرارظ‹ا على السؤال السابقطŒ ${chatContext.lastResponse}`,
         tag: 'context-aware'
       };
     }
@@ -1101,8 +1101,8 @@
 
     detailedCourses.forEach(course => {
       if (course.contents) {
-        if (Array.isArray(course.contents.homeworks) && course.contents.homeworks.length > 0) contentHints.push(`ظپظٹ ${course.title} ظپظٹ ظˆط§ط¬ط¨ط§طھ`);
-        if (Array.isArray(course.contents.exams) && course.contents.exams.length > 0) contentHints.push(`ظپظٹ ${course.title} ظپظٹ ط§ظ…طھط­ط§ظ†ط§طھ`);
+        if (Array.isArray(course.contents.homeworks) && course.contents.homeworks.length > 0) contentHints.push(`في ${course.title} في واجبات`);
+        if (Array.isArray(course.contents.exams) && course.contents.exams.length > 0) contentHints.push(`في ${course.title} في امتحانات`);
       }
     });
 
@@ -1191,7 +1191,7 @@
       action: ['يلا بينا نرجع نكسر الدنيا في المذاكرة؟', 'تحب نفتح درس جديد ولا نراجع؟']
     },
     clarification: [
-      'أنا مش متأكد إني فهمت قصدك بالظبط، تقصد إيه تحديداً؟',
+      'أنا مش متأكد إني فهمت قصدك بالظبء تقصد إيه تحديداً؟',
       'كلامك كبير عليا شوية، ممكن تبسطهولي عشان أقدر أساعدك؟',
       'انا بحاول أفهمك بس الموضوع تايه مني، تقصد إيه؟',
       'وضحلي أكتر يا صاحبي عشان أقدر أرد عليك صح.'
@@ -1312,7 +1312,7 @@
       const sentences = modified.split(/(?<=[.?!])\s+/);
       modified = sentences.slice(0, 2).join(' ').trim();
     } else if (goal === 'VERIFICATION') {
-      const verifications = ['بالظبط كده! ', 'كلامك مظبوط، ', 'فعلاً يا بطل، ', 'أأكدلك كلامك: '];
+      const verifications = ['بالظبط كده! ', 'كلامك مظبوء ', 'فعلاً يا بطل، ', 'أأكدلك كلامك: '];
       modified = verifications[Math.floor(Math.random() * verifications.length)] + modified;
     } else if (goal === 'DEEP_UNDERSTANDING' || internalPlan.needsExplanation) {
       if (!modified.includes('بص يا سيدي')) {
@@ -2169,66 +2169,66 @@
     const normalized = normalizeText(text);
     if (!normalized) return true;
     if (normalized.length <= 3) return true;
-    const keywords = /(ظƒظˆط±ط³|ظˆط§ط¬ط¨|ط¯ط¹ظ…|ط¯ط®ظˆظ„|ط¨ط§ط³ظˆط±ط¯|ظپظٹط¯ظٹظˆ|ظ…ط´ظƒظ„|ظ…ط´ظƒظ„ظ‡|ظ…ط°ط§ظƒط±|ط§ظ…طھط­ط§ظ†|طھط³ط¬ظٹظ„|طھط­ظˆظٹظ„|ط¯ظپط¹|ط³ط¤ط§ظ„|ط§ظ‡ظ„ط§|ظ…ط±ط­ط¨ط§|ط¹ط§ظٹط²|ط§ظƒطھط¨)/;
+    const keywords = /(كورس|واجب|دعم|دخول|باسورد|فيديو|مشكل|مشكله|مذاكر|امتحان|تسجيل|تحويل|دفع|سؤال|اهلا|مرحبا|عايز|اكتب)/;
     return normalized.split(' ').length <= 2 && !keywords.test(normalized);
   }
 
   function getRudeResponse(text) {
     const normalized = normalizeText(text);
-    if (/ط§ظ†طھ ط؛ط¨ظٹ|ط§ظ†طھ ط§ط­ظ…ظ‚|ظ…ط´ ط°ظƒظٹ|طھط§ظپظ‡|ط§ط®ط±ط³/.test(normalized)) {
-      return { text: 'ظ…ظ…ظƒظ† ط£ظƒظˆظ† ظپظ‡ظ…طھظƒ ط؛ظ„ط· ًںک… ط¬ط±ظ‘ط¨ طھظˆط¶ظ‘ط­ظ„ظٹ ط£ظƒطھط± ظˆط£ظ†ط§ ظ‡ط­ط§ظˆظ„ ط£ط³ط§ط¹ط¯ظƒ.' };
+    if (/انت غبي|انت احمق|مش ذكي|تافه|اخرس/.test(normalized)) {
+      return { text: 'ممكن أكون فهمتك غلط ًںک… جرظ‘ب توضظ‘حلي أكتر وأنا هحاول أساعدك.' };
     }
     return null;
   }
 
   function isCheatingRequest(text) {
     const normalized = normalizeText(text);
-    return /ط­ظ„ ط§ظ„ط³ط¤ط§ظ„ ط¯ظ‡|ط­ظ„ ط§ظ„ط³ط¤ط§ظ„|ط­ظ„ ط§ظ„ط§ظ…طھط­ط§ظ†|ط¹ط§ظٹط² ط­ظ„|ط§ظƒطھط¨ ط§ظ„ط§ط¬ط§ط¨ط©|ط¬ظٹط¨ظ„ظٹ ط§ظ„ط§ط¬ط§ط¨ط©|طھط³ط±ظٹط¨|ط؛ط´|ط§ط¬ط§ط¨ط© ظ…ط¨ط§ط´ط±ط©|ظ†ظ…ط±ظ‡|ط¯ط±ط¬ط©|ط§ط²ط§ظٹ ط§ط¹ظ…ظ„ ط­ظ„|ط§ظƒطھط¨ظ„ظٹ ط§ظ„ط­ظ„/.test(normalized);
+    return /حل السؤال ده|حل السؤال|حل الامتحان|عايز حل|اكتب الاجابة|جيبلي الاجابة|تسريب|غش|اجابة مباشرة|نمره|درجة|ازاي اعمل حل|اكتبلي الحل/.test(normalized);
   }
 
   function isStudyEmotion(text) {
-    return /ط§ظ†ط§ طھط¹ط¨ط§ظ†|ظ…ط´ ظ‚ط§ط¯ط± ط£ط°ط§ظƒط±|ظ…ط´ ظ‚ط§ط¯ط± ط§ط°ظƒط±|ط®ط§ظٹظپ ظ…ظ† ط§ظ„ط§ظ…طھط­ط§ظ†|ط§ظ†ط§ ط®ط§ظٹظپ|ط§ظ„طھظˆطھط±|ط¶ط؛ط· ط§ظ„ط§ظ…طھط­ط§ظ†|ظ…ط¹ظ„ظ‚طھط´|ظ…ط´ ظ‚ط§ط¯ط±|طھط¹ط¨ط§ظ†/.test(normalizeText(text));
+    return /انا تعبان|مش قادر أذاكر|مش قادر اذكر|خايف من الامتحان|انا خايف|التوتر|ضغط الامتحان|معلقتش|مش قادر|تعبان/.test(normalizeText(text));
   }
 
   function isSameIssueFollowup(text) {
-    return /(ظ„ط³ظ‡ ط§ظ„ظ…ط´ظƒظ„ط©|ظ„ط³ظ‡ ظ…ط´ظƒظ„ظ‡|ظ„ط³ظ‡ ط§ظ„ظ…ط´ظƒظ„ط© ظ…ظˆط¬ظˆط¯ظ‡|ظ„ط³ظ‡ ط§ظ„ظ…ط´ظƒظ„ط© ظ…ظˆط¬ظˆط¯ط©|ظ„ط³ظ‡ ظ†ظپط³ ط§ظ„ظ…ط´ظƒظ„ط©|ظ„ط³ظ‡ ط§ظ„ظ…ط´ظƒظ„ط©)/.test(normalizeText(text));
+    return /(لسه المشكلة|لسه مشكله|لسه المشكلة موجوده|لسه المشكلة موجودة|لسه نفس المشكلة|لسه المشكلة)/.test(normalizeText(text));
   }
 
   function getKnownResponses(text) {
     const normalized = normalizeText(text);
     const fallback = { text: null };
-    if (/ط§ط´طھط±ظƒ|ط§ط²ط§ظٹ ط§ط´طھط±ظƒ|ط§ط´طھط±ط§ظƒ|ط§ط´طھط±ظٹ|ط¹ط§ظٹط² ط§ط´طھط±ظƒ/.test(normalized)) {
-      return { text: 'ط§ط¯ط®ظ„ ط¹ظ„ظ‰ ظ‚ط³ظ… الكورساتطŒ ط§ط®طھط§ط± ط§ظ„ظƒظˆط±ط³ ط§ظ„ظ…ظ†ط§ط³ط¨ ظ„طµظپظƒطŒ ظˆط§ط¶ط؛ط· ط§ط´طھط±ط§ظƒ. ط¨ط¹ط¯ ظƒط¯ظ‡ ظ‡طھط¸ظ‡ط±ظ„ظƒ ط·ط±ظٹظ‚ط© ط§ظ„ط¯ظپط¹ ظˆط§ظ„طھط¹ظ„ظٹظ…ط§طھ ط§ظ„ظƒط§ظ…ظ„ط© ظ„ظ„طھط­ظˆظٹظ„ ظˆط±ظپط¹ طµظˆط±ط© ط§ظ„طھط­ظˆظٹظ„.' };
+    if (/اشترك|ازاي اشترك|اشتراك|اشتري|عايز اشترك/.test(normalized)) {
+      return { text: 'ادخل على قسم الكورساتطŒ اختار الكورس المناسب لصفكطŒ واضغط اشتراك. بعد كده هتظهرلك طريقة الدفع والتعليمات الكاملة للتحويل ورفع صورة التحويل.' };
     }
-    if (/ط§ظ„ظƒظˆط±ط³ ظ…ط´ ط´ط؛ط§ظ„|ط§ظ„ظƒظˆط±ط³ ظ…ط´ ط´ط؛ظ‘ط§ظ„|ط§ظ„ظƒظˆط±ط³ ظ…ط´ ط´ط؛ط§ظ„ظ‡|ط§ظ„ظƒظˆط±ط³ ظ…ط´ ط´ط؛ط§ظ„/.test(normalized)) {
-      return { text: 'طھط£ظƒط¯ ط§ظ„ط£ظˆظ„ ظ…ظ† ط§ظ„ظ†طھ ظˆط³ط¬ظ„ ط®ط±ظˆط¬ ظˆط¯ط®ظˆظ„ ظ…ط±ط© طھط§ظ†ظٹط©. ظ„ظˆ ظ„ط³ظ‡ ط§ظ„ظ…ط´ظƒظ„ط©طŒ ط§ط¨ط¹طھظ„ظٹ ط§ط³ظ… ط§ظ„ظƒظˆط±ط³ ط£ظˆ طµظˆط±ط©طŒ ظˆط£ظ†ط§ ط£ط¸ط¨ط·ظ„ظƒ ط­ظ„ ط³ط±ظٹط¹.' };
+    if (/الكورس مش شغال|الكورس مش شغظ‘ال|الكورس مش شغاله|الكورس مش شغال/.test(normalized)) {
+      return { text: 'تأكد الأول من النت وسجل خروج ودخول مرة تانية. لو لسه المشكلةطŒ ابعتلي اسم الكورس أو صورةطŒ وأنا أظبطلك حل سريع.' };
     }
-    if (/ظ†ط³ظٹطھ.*ط§ظ„ط¨ط§ط³ظˆط±ط¯|ظ†ط³ظٹطھ.*ظƒظ„ظ…ظ‡ ط§ظ„ظ…ط±ظˆط±|ظ†ط³ظٹطھ ط§ظ„ط¨ط§ط³ظˆط±ط¯|ظ†ط³ظٹطھ كلمة المرور/.test(normalized)) {
-      return { text: "ط§ط¶ط؛ط· ط¹ظ„ظ‰ 'ظ†ط³ظٹطھ كلمة المرور' ظ…ظ† طµظپط­ط© تسجيل الدخول ظˆط§طھط¨ط¹ ط§ظ„ط®ط·ظˆط§طھطŒ ظˆظ„ظˆ ظ…ط´ ط¸ط¨ط· ظ…ط¹ط§ظƒ ط§ط¨ط¹طھظ„ظٹ ظˆظ‡ظ‚ظˆظ„ظƒ طھط¹ظ…ظ„ ط¥ظٹظ‡." };
+    if (/نسيت.*الباسورد|نسيت.*كلمه المرور|نسيت الباسورد|نسيت كلمة المرور/.test(normalized)) {
+      return { text: "اضغط على 'نسيت كلمة المرور' من صفحة تسجيل الدخول واتبع الخطواتطŒ ولو مش ظبط معاك ابعتلي وهقولك تعمل إيه." };
     }
-    if (/ظپظٹظ†.*الواجبات|ظپظٹظ†.*ط§ظ„ظˆط§ط¬ط¨|ط§ظ„ظˆط§ط¬ط¨ ظپظٹظ†/.test(normalized)) {
-      return { text: 'الواجبات ط¨طھط¨ظ‚ظ‰ ط¬ظˆظ‡ ط§ظ„ظƒظˆط±ط³ ط§ظ„ظ„ظٹ ط§ظ†طھ ظ…ط´طھط±ظƒ ظپظٹظ‡ ط¨ط¹ط¯ ظƒظ„ ط­طµط©. ظ„ظˆ ظ…ط´ ظ„ط§ظ‚ظٹظ‡ط§طŒ ظ‚ظˆظ„ظ‘ظٹ ط§ط³ظ… ط§ظ„ظƒظˆط±ط³ ظˆط§ظ†ط§ ط£ظ‚ظˆظ„ظƒ طھظ…ط´ظٹ ظپظٹظ†.' };
+    if (/فين.*الواجبات|فين.*الواجب|الواجب فين/.test(normalized)) {
+      return { text: 'الواجبات بتبقى جوه الكورس اللي انت مشترك فيه بعد كل حصة. لو مش لاقيهاطŒ قولظ‘ي اسم الكورس وانا أقولك تمشي فين.' };
     }
-    if (/ط§ظ…طھظ‰.*ط§ظ„ط­طµط©|ط¥ظ…طھظ‰.*ط§ظ„ط­طµط©|ظ…ظٹط¹ط§ط¯.*ط§ظ„ط­طµط©|ظ…ظˆط¹ط¯.*ط§ظ„ط­طµط©/.test(normalized)) {
-      return { text: 'ظ…ظˆط§ط¹ظٹط¯ ط§ظ„ط­طµطµ ط¨طھظƒظˆظ† ظ…ظˆط¬ظˆط¯ط© ط¬ظˆظ‡ ط§ظ„ظƒظˆط±ط³ ظˆظپظٹ ط§ظ„ط¥ط´ط¹ط§ط±ط§طھ. ظ„ظˆ ظ…ط´ ط´ط§ظٹظپظ‡ط§ ط§ظپطھط­ ط§ظ„ظƒظˆط±ط³ ط£ظˆ ط§ط¨ط¹طھظ„ظٹ ط§ط³ظ… ط§ظ„ظƒظˆط±ط³.' };
+    if (/امتى.*الحصة|إمتى.*الحصة|ميعاد.*الحصة|موعد.*الحصة/.test(normalized)) {
+      return { text: 'مواعيد الحصص بتكون موجودة جوه الكورس وفي الإشعارات. لو مش شايفها افتح الكورس أو ابعتلي اسم الكورس.' };
     }
-    if (/ط¯ظپط¹طھ.*ظ„ط³ظ‡|ظ„ط³ظ‡ ط§ظ„ظƒظˆط±ط³ ظ…ظپطھط­ط´|ظ„ط³ظ‡ ظپطھط­ط´|ط§ظ„ظƒظˆط±ط³ ظ…ط´ ظ…ظپطھظˆط­/.test(normalized)) {
-      return { text: 'ط؛ط§ظ„ط¨ظ‹ط§ ط·ظ„ط¨ظƒ طھط­طھ ط§ظ„ظ…ط±ط§ط¬ط¹ط©طŒ ط§طھط£ظƒط¯ ط¥ظ† طµظˆط±ط© ط§ظ„طھط­ظˆظٹظ„ ظˆط§ط¶ط­ط©. ظ„ظˆ ظ„ط³ظ‡طŒ ط§ط¨ط¹طھظ„ظٹ ط§ط³ظ… ط§ظ„ظƒظˆط±ط³ ظˆظ‡ظ†ط§ط®ط¯ ط§ظ„ظ…ظˆط¶ظˆط¹ ظ…ط¹ ط§ظ„ط¯ط¹ظ….' };
+    if (/دفعت.*لسه|لسه الكورس مفتحش|لسه فتحش|الكورس مش مفتوح/.test(normalized)) {
+      return { text: 'غالبظ‹ا طلبك تحت المراجعةطŒ اتأكد إن صورة التحويل واضحة. لو لسهطŒ ابعتلي اسم الكورس وهناخد الموضوع مع الدعم.' };
     }
-    if (/ط¹ط§ظˆط².*ط§ظƒظ„ظ… ط§ظ„ط¯ط¹ظ…|ط¹ط§ظٹط².*ط§ظƒظ„ظ… ط§ظ„ط¯ط¹ظ…|ط¹ط§ظˆط² ط£ظƒظ„ظ… ط§ظ„ط¯ط¹ظ…|ط§ظ„ظƒظ„ط§ظ… ظ…ط¹ ط§ظ„ط¯ط¹ظ…/.test(normalized)) {
-      return { text: 'طھظ‚ط¯ط± طھظپطھط­ طµظپط­ط© المساعدة ط£ظˆ طھط³طھط®ط¯ظ… ظˆط§طھط³ط§ط¨ ط§ظ„ط¯ط¹ظ… ط§ظ„ظ…ظˆط¬ظˆط¯ ظپظٹ ط§ظ„ظ…ظ†طµط©. ط£ظ†ط§ ظ…ظˆط¬ظˆط¯ ط£ط³ط§ط¹ط¯ظƒ ظپظٹ ط£ظٹ ط­ط§ط¬ط© ط¨ط¹ط¯ظٹظ†.' };
+    if (/عاوز.*اكلم الدعم|عايز.*اكلم الدعم|عاوز أكلم الدعم|الكلام مع الدعم/.test(normalized)) {
+      return { text: 'تقدر تفتح صفحة المساعدة أو تستخدم واتساب الدعم الموجود في المنصة. أنا موجود أساعدك في أي حاجة بعدين.' };
     }
     if (/أفضل طريقة.*أذاكر|افضل طريقة.*اذاكر|ازاي أذاكر|ازاي اذاكر/.test(normalized)) {
-      return { text: 'ط§ط¨ط¯ط£ ط¨ط´ط±ط­ ط§ظ„ط¯ط±ط³ ظˆط¨ط¹ط¯ظ‡ط§ ط­ظ„ ط§ظ„ظˆط§ط¬ط¨ ظپظˆط±ظ‹ط§طŒ ظˆط±ط§ط¬ط¹ ط£ط®ط·ط§ط،ظƒ ط£ظˆظ„ ط¨ط£ظˆظ„ ط¹ط´ط§ظ† ط§ظ„طھط±ط§ظƒظ…ط§طھ ظ…طھط²ظٹط¯ط´ ط¹ظ„ظٹظƒ.' };
+      return { text: 'ابدأ بشرح الدرس وبعدها حل الواجب فورظ‹اطŒ وراجع أخطاءك أول بأول عشان التراكمات متزيدش عليك.' };
     }
-    if (/ط§ظ†ط§ ظ…ط´ ظپط§ظ‡ظ… ط§ظ„ط¯ط±ط³|ط§ظ†ط§ ظ…ط´ ظپط§ظ‡ظ…|ظ…ط´ ظپط§ظ‡ظ… ط§ظ„ط¯ط±ط³|ظ…ط´ ظپط§ظ‡ظ…/.test(normalized)) {
-      return { text: 'ظˆظ„ط§ ظٹظ‡ظ…ظƒ â‌¤ï¸ڈ ظ‚ظˆظ„ظ‘ظٹ ط§ظ„ط¬ط²ط، ط§ظ„ظ„ظٹ ظˆط§ظ‚ظپ ظ…ط¹ط§ظƒ ظˆط£ظ†ط§ ظ‡ط­ط§ظˆظ„ ط£ط¨ط³ط·ظ‡ظˆظ„ظƒ ط®ط·ظˆط© ط¨ط®ط·ظˆط©.' };
+    if (/انا مش فاهم الدرس|انا مش فاهم|مش فاهم الدرس|مش فاهم/.test(normalized)) {
+      return { text: 'ولا يهمك â‌¤ï¸ڈ قولظ‘ي الجزء اللي واقف معاك وأنا هحاول أبسطهولك خطوة بخطوة.' };
     }
-    if (/ط§ظ„ط§ط³طھط§ط° ظٹظˆط³ظپ.*ط±ط§ط¬ط¹|ظ‡ظˆ ط§ظ„ط£ط³طھط§ط° ظٹظˆط³ظپ.*ظ…ط±ط§ط¬ط¹ط§طھ|ظٹظ†ط²ظ„ ظ…ط±ط§ط¬ط¹ط§طھ|ظ…ط±ط§ط¬ط¹ط§طھ.*ظٹظˆط³ظپ/.test(normalized)) {
-      return { text: 'ط£ظٹظˆط©طŒ ط§ظ„ظ…ظ†طµط© ظپظٹظ‡ط§ ظ…ط±ط§ط¬ط¹ط§طھ ط¯ظˆط±ظٹط© ظˆظ†ظ‡ط§ط¦ظٹط© ظˆطھط¬ظ…ظٹط¹ط§طھ ظ…ظ‡ظ…ط© ط¬ط¯ظ‹ط§ ظ‚ط¨ظ„ الامتحانات.' };
+    if (/الاستاذ يوسف.*راجع|هو الأستاذ يوسف.*مراجعات|ينزل مراجعات|مراجعات.*يوسف/.test(normalized)) {
+      return { text: 'أيوةطŒ المنصة فيها مراجعات دورية ونهائية وتجميعات مهمة جدظ‹ا قبل الامتحانات.' };
     }
-    if (/ط§ط²ط§ظٹ.*ï¸ڈ?ط§ط¬ظٹط¨ ط¯ط±ط¬ط© ط¹ط§ظ„ظٹط©|ط¥ط²ط§ظٹ.*ط¯ط±ط¬ط© ط¹ط§ظ„ظٹط©|ط§ط²ط§ظٹ ط§ط¬ظٹط¨ ط¯ط±ط¬ط© ط¹ط§ظ„ظٹط©|ط¹ط§ظٹط² ط¯ط±ط¬ط© ط¹ط§ظ„ظٹط©/.test(normalized)) {
-      return { text: 'ط§ظ„ط§ط³طھظ…ط±ط§ط±ظٹط© ط£ظ‡ظ… ظ…ظ† ط¹ط¯ط¯ ط§ظ„ط³ط§ط¹ط§طھطŒ ط°ط§ظƒط± ط£ظˆظ„ ط¨ط£ظˆظ„ ظˆط­ظ„ الامتحانات ظˆالواجبات ط¨طھط±ظƒظٹط².' };
+    if (/ازاي.*ï¸ڈ?اجيب درجة عالية|إزاي.*درجة عالية|ازاي اجيب درجة عالية|عايز درجة عالية/.test(normalized)) {
+      return { text: 'الاستمرارية أهم من عدد الساعاتطŒ ذاكر أول بأول وحل الامتحانات والواجبات بتركيز.' };
     }
     return fallback;
   }
@@ -2237,50 +2237,50 @@
     const facts = getPlatformFacts();
     const normalized = normalizeText(text);
 
-    if (/(dashboard|ظ„ظˆط­ط©|ظ„ظˆط­ط© ط§ظ„طھط­ظƒظ…)/.test(normalized)) {
+    if (/(dashboard|لوحة|لوحة التحكم)/.test(normalized)) {
       if (facts.hasCourses) {
-        return { text: `ط£ظ†طھ ط¯ظ„ظˆظ‚طھظٹ ظ…ط´طھط±ظƒ ظپظٹ ${facts.courseCount} ظƒظˆط±ط³${facts.courseCount > 1 ? 'ط§طھ' : ''} (${facts.courseTitlesString}). ظپطھط­ ظ„ظˆط­ط© ط§ظ„طھط­ظƒظ… ط¹ط´ط§ظ† طھط´ظˆظپ ط§ظ„طھظ‚ط¯ظ…طŒ ط§ظ„ظپظٹط¯ظٹظˆظ‡ط§طھطŒ ظˆالواجبات.` };
+        return { text: `أنت دلوقتي مشترك في ${facts.courseCount} كورس${facts.courseCount > 1 ? 'ات' : ''} (${facts.courseTitlesString}). فتح لوحة التحكم عشان تشوف التقدمطŒ الفيديوهاتطŒ والواجبات.` };
       }
-      return { text: 'ظ„ظˆط­ط© ط§ظ„طھط­ظƒظ… ط¬ط§ظ‡ط²ط© ظ„ظٹظƒطŒ ظ„ظƒظ† ظ„ط³ظ‡ ظ…ط¹ظ†ط¯ظƒط´ ط£ظٹ ظƒظˆط±ط³ ظ…ط´طھط±ظƒ ظپظٹظ‡. ط§ط®طھط§ط± ط£ظˆظ„ ظƒظˆط±ط³ ظ…ظ† طµظپط­ط© الكورسات.' };
+      return { text: 'لوحة التحكم جاهزة ليكطŒ لكن لسه معندكش أي كورس مشترك فيه. اختار أول كورس من صفحة الكورسات.' };
     }
 
-    if (/(progress|ظ†ط³ط¨ط©|طھظ‚ط¯ظ…|ظ…ط³طھظˆظ‰|performance)/.test(normalized)) {
+    if (/(progress|نسبة|تقدم|مستوى|performance)/.test(normalized)) {
       if (facts.hasCourses) {
-        return { text: `ط§ظ„طھظ‚ط¯ظ… ط§ظ„ط­ط§ظ„ظٹ ط¨طھط§ط¹ظƒ: ${facts.progressPercent}% ط§ظ„طھط²ط§ظ…طŒ ط´ط§ظ‡ط¯طھ ${facts.videosWatched} ظپظٹط¯ظٹظˆ${facts.videosWatched === 1 ? '' : 'ط§طھ'}طŒ ظˆط£ظ†ط¬ط²طھ ${facts.homeworkCompleted}/${facts.homeworkTotal} ظˆط§ط¬ط¨ط§طھ.` };
+        return { text: `التقدم الحالي بتاعك: ${facts.progressPercent}% التزامطŒ شاهدت ${facts.videosWatched} فيديو${facts.videosWatched === 1 ? '' : 'ات'}طŒ وأنجزت ${facts.homeworkCompleted}/${facts.homeworkTotal} واجبات.` };
       }
-      return { text: 'ظ…ط§ظپظٹط´ ط¨ظٹط§ظ†ط§طھ طھظ‚ط¯ظ… ظ„ط­ط¯ ط¯ظ„ظˆظ‚طھظٹ ظ„ط£ظ†ظƒ ظ…ط´طھط±ظƒ ظپظٹط´ ظƒظˆط±ط³. ظ„ظˆ ط­ط¨ظٹطھ ط£ط³ط§ط¹ط¯ظƒ طھط®طھط§ط± ظƒظˆط±ط³ ظ…ظ†ط§ط³ط¨طŒ ظ‚ظˆظ„ظ‘ظٹ ط³ظ†ط© ط¯ط±ط§ط³طھظƒ.' };
+      return { text: 'مافيش بيانات تقدم لحد دلوقتي لأنك مشترك فيش كورس. لو حبيت أساعدك تختار كورس مناسبطŒ قولظ‘ي سنة دراستك.' };
     }
 
-    if (/(notification|ط§ط´ط¹ط§ط±|ط§ط´ط¹ط§ط±ط§طھ)/.test(normalized)) {
+    if (/(notification|اشعار|اشعارات)/.test(normalized)) {
       if (facts.notificationCount > 0) {
-        return { text: `ط¹ظ†ط¯ظƒ ${facts.notificationCount} ط¥ط´ط¹ط§ط±${facts.notificationCount > 1 ? 'ط§طھ' : ''} ظپظٹ ط­ط³ط§ط¨ظƒ. طھظ‚ط¯ط± طھظپطھط­ ظ„ظˆط­ط© ط§ظ„طھط­ظƒظ… ظˆطھط´ظˆظپظ‡ظ… ط¯ظ„ظˆظ‚طھظٹ.` };
+        return { text: `عندك ${facts.notificationCount} إشعار${facts.notificationCount > 1 ? 'ات' : ''} في حسابك. تقدر تفتح لوحة التحكم وتشوفهم دلوقتي.` };
       }
-      return { text: 'ظ…ط§ظپظٹط´ ط¥ط´ط¹ط§ط±ط§طھ ط¬ط¯ظٹط¯ط© ط¯ظ„ظˆظ‚طھظٹ. ظ„ظˆ ظ…ط­طھط§ط¬ ظ…ط³ط§ط¹ط¯ط©طŒ ط£ظ†ط§ ظ‡ظ†ط§.' };
+      return { text: 'مافيش إشعارات جديدة دلوقتي. لو محتاج مساعدةطŒ أنا هنا.' };
     }
 
-    if (/(homework|ظˆط§ط¬ط¨)/.test(normalized)) {
+    if (/(homework|واجب)/.test(normalized)) {
       if (facts.hasCourses) {
-        const homeworkStatus = facts.homeworkTotal ? `ط£ظ†ط¬ط²طھ ${facts.homeworkCompleted}/${facts.homeworkTotal} ظˆط§ط¬ط¨ط§طھ` : 'ظ„ط³ظ‡ ظ…ط§ ط§ط¶ظپطھط´ ظˆط§ط¬ط¨ط§طھ ط±ط³ظ…ظٹط© ظ„ط¨ظٹط§ظ†ط§طھظƒ';
+        const homeworkStatus = facts.homeworkTotal ? `أنجزت ${facts.homeworkCompleted}/${facts.homeworkTotal} واجبات` : 'لسه ما اضفتش واجبات رسمية لبياناتك';
         const hint = facts.contentHints.length > 0 ? ` ${facts.contentHints.slice(0, 2).join('طŒ ')}.` : '';
-        return { text: `ط£ظ†طھ ظ…ط´طھط±ظƒ ظپظٹ ${facts.courseCount} ظƒظˆط±ط³${facts.courseCount > 1 ? 'ط§طھ' : ''} (${facts.courseTitlesString}). ${homeworkStatus}.${hint} ط§ظپطھط­ طµظپط­ط© ط§ظ„ظƒظˆط±ط³ ط§ظ„ظ„ظٹ ط´ط؛ط§ظ„ ظپظٹظ‡ ط¹ط´ط§ظ† طھط¯ط®ظ„ ط¹ظ„ظ‰ الواجبات.` };
+        return { text: `أنت مشترك في ${facts.courseCount} كورس${facts.courseCount > 1 ? 'ات' : ''} (${facts.courseTitlesString}). ${homeworkStatus}.${hint} افتح صفحة الكورس اللي شغال فيه عشان تدخل على الواجبات.` };
       }
-      return { text: 'ظ„ظ…ط§ طھطھط£ظƒط¯ ط§ط´طھط±ط§ظƒظƒ ظپظٹ ظƒظˆط±ط³ طھظ‚ط¯ط± طھطھط§ط¨ط¹ الواجبات ظ…ظ† ظ„ظˆط­ط© ط§ظ„طھط­ظƒظ….' };
+      return { text: 'لما تتأكد اشتراكك في كورس تقدر تتابع الواجبات من لوحة التحكم.' };
     }
 
-    if (/(exam|ط§ظ…طھط­ط§ظ†|ط§ط®طھط¨ط§ط±)/.test(normalized)) {
+    if (/(exam|امتحان|اختبار)/.test(normalized)) {
       if (facts.hasCourses) {
-        const examsHint = facts.contentHints.filter(h => h.includes('ط§ظ…طھط­ط§ظ†ط§طھ')).slice(0, 2).join('طŒ ');
-        return { text: `ظپظٹ الكورسات ط§ظ„ظ„ظٹ ط§ظ†طھ ظ…ط´طھط±ظƒ ظپظٹظ‡ط§ ظ…ظ…ظƒظ† طھظ„ط§ظ‚ظٹ ط§ظ…طھط­ط§ظ†ط§طھ ظˆظ…ط±ط§ط¬ط¹ط§طھ. ${examsHint || 'ط§ظپطھط­ ط§ظ„ظƒظˆط±ط³ ط¹ط´ط§ظ† طھط¹ط±ظپ ط§ظ„طھظپط§طµظٹظ„'}.` };
+        const examsHint = facts.contentHints.filter(h => h.includes('امتحانات')).slice(0, 2).join('طŒ ');
+        return { text: `في الكورسات اللي انت مشترك فيها ممكن تلاقي امتحانات ومراجعات. ${examsHint || 'افتح الكورس عشان تعرف التفاصيل'}.` };
       }
-      return { text: 'ظ„ظ…ط§ طھط´طھط±ظƒ ظپظٹ ظƒظˆط±ط³ ظ‡ط¹ط±ظپ ط£ظ‚ظˆظ„ظƒ ط¥ط°ط§ ظƒط§ظ† ظپظٹظ‡ ط§ظ…طھط­ط§ظ†ط§طھ ظˆظ…ط±ط§ط¬ط¹ط§طھ ظ…طھط§ط­ط©.' };
+      return { text: 'لما تشترك في كورس هعرف أقولك إذا كان فيه امتحانات ومراجعات متاحة.' };
     }
 
-    if (/(course|ظƒظˆط±ط³)/.test(normalized) && facts.hasCourses) {
-      return { text: `ط§ظ†طھ ظ…ط´طھط±ظƒ ظپظٹ ${facts.courseCount} ظƒظˆط±ط³${facts.courseCount > 1 ? 'ط§طھ' : ''}: ${facts.courseTitlesString}. طھظ‚ط¯ط± طھظپطھط­ طµظپط­ط© الكورسات ط£ظˆ ظ„ظˆط­ط© ط§ظ„طھط­ظƒظ… ط¹ط´ط§ظ† طھظƒظ…ظ„.` };
+    if (/(course|كورس)/.test(normalized) && facts.hasCourses) {
+      return { text: `انت مشترك في ${facts.courseCount} كورس${facts.courseCount > 1 ? 'ات' : ''}: ${facts.courseTitlesString}. تقدر تفتح صفحة الكورسات أو لوحة التحكم عشان تكمل.` };
     }
 
-    if (/(course|ظƒظˆط±ط³)/.test(normalized) && !facts.hasCourses) {
-      return { text: 'ظ„ظˆ ظ„ط³ظ‡ ظ…ط´طھط±ظƒط´ ظپظٹ ط£ظٹ ظƒظˆط±ط³طŒ طھظ‚ط¯ط± طھط¯ط®ظ„ ط¹ظ„ظ‰ طµظپط­ط© الكورسات ظˆطھط´ظˆظپ ط§ظ„ط¹ط±ظˆط¶ ط§ظ„ظ…طھط§ط­ط© ظˆطھط®طھط§ط± ط§ظ„ظƒظˆط±ط³ ط§ظ„ظ…ظ†ط§ط³ط¨ ظ„طµظپظƒ.' };
+    if (/(course|كورس)/.test(normalized) && !facts.hasCourses) {
+      return { text: 'لو لسه مشتركش في أي كورسطŒ تقدر تدخل على صفحة الكورسات وتشوف العروض المتاحة وتختار الكورس المناسب لصفك.' };
     }
 
     return null;
@@ -2342,10 +2342,10 @@
 
   function getFollowUpReply(text) {
     if (isSameIssueFollowup(text) && chatContext.lastIssue) {
-      return { text: `ظ„ط³ظ‡ ظ†ظپط³ ط§ظ„ظ…ط´ظƒظ„ط©طں ط®ظ„ظٹظ†ظٹ ط£ط±ط§ط¬ط¹ ظ…ط¹ط§ظƒ طھط§ظ†ظٹ. ط§ظ„ظ…ط´ظƒظ„ط© ظƒط§ظ†طھ ظپظٹ: ${chatContext.lastIssue}.` };
+      return { text: `لسه نفس المشكلةطں خليني أراجع معاك تاني. المشكلة كانت في: ${chatContext.lastIssue}.` };
     }
     if (isStudyEmotion(text)) {
-      return { text: 'ط­ط³ظٹطھ ط¥ظ†ظƒ ظ…طھظˆطھط± ط´ظˆظٹط©طŒ ظˆط¯ظ‡ ط·ط¨ظٹط¹ظٹ. ط®ظ„ظٹظƒ ظ…ط±ظƒط² ط®ط·ظˆط© ط¨ط®ط·ظˆط©طŒ ظˆط®ط¯ ط¨ط±ظٹظƒ ط¨ط³ظٹط· ط¨ط¹ط¯ ظƒظ„ ط¬ظ„ط³ط© ظ…ط°ط§ظƒط±ط©طŒ ظˆط£ظٹ ط­ط§ط¬ط© ظ…ط­طھط§ط¬ طھظˆط¶ظٹط­ ظپظٹظ‡ط§ ط§ط¨ط¹طھظ„ظٹ ط¯ظ„ظˆظ‚طھظٹ.' };
+      return { text: 'حسيت إنك متوتر شويةطŒ وده طبيعي. خليك مركز خطوة بخطوةطŒ وخد بريك بسيط بعد كل جلسة مذاكرةطŒ وأي حاجة محتاج توضيح فيها ابعتلي دلوقتي.' };
     }
     return null;
   }
@@ -2492,7 +2492,7 @@
     tickets.push(ticket);
     saveTickets(tickets);
     safeSetItem(localStorage, 'pf_unseen_support_tickets', String((parseInt(safeGetItem(localStorage, 'pf_unseen_support_tickets')||'0')||0)+1));
-    if(window.showToast) window.showToast('طھظ… ط¥ظ†ط´ط§ط، طھط°ظƒط±ط© ط¯ط¹ظ…طŒ ط³ظٹطھظˆط§طµظ„ ظ…ط¹ظƒ ظپط±ظٹظ‚ ط§ظ„ط¯ط¹ظ… ظ‚ط±ظٹط¨ط§ظ‹', 'success');
+    if(window.showToast) window.showToast('تم إنشاء تذكرة دعمطŒ سيتواصل معك فريق الدعم قريباظ‹', 'success');
     return ticket;
   }
 
@@ -2565,7 +2565,7 @@
   }
 
   // Rendering helpers
-  // Fix common mojibake (double-encoded UTF-8 shown as sequences like 'ط§ظ„')
+  // Fix common mojibake (double-encoded UTF-8 shown as sequences like 'ال')
   function parseChatMarkdown(text) {
     if (!text) return '';
     let html = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -2585,8 +2585,8 @@
   function fixMojibake(s){
     if(!s || typeof s !== 'string') return s;
     try{
-      // quick heuristic: contains typical mojibake fragments (ط§ or Ã/Â)
-      if(/ط§|Ã|Â/.test(s)){
+      // quick heuristic: contains typical mojibake fragments (ا or Ã/Â)
+      if(/ا|Ã|Â/.test(s)){
         return decodeURIComponent(escape(s));
       }
       return s;
@@ -2898,13 +2898,13 @@
   // Admin learning: When admin answers a difficult question, teach the AI
   window.pfLearnFromAdmin = (question, adminResponse, context = {}) => {
     learnFromAdmin(question, adminResponse, context);
-    if(window.showToast) window.showToast('طھظ… طھط­ط¯ظٹط« ظ…ط¹ط±ظپط© ط§ظ„ط¨ظˆطµظ„ط© ظ…ظ† ط±ط¯ظƒ', 'success');
+    if(window.showToast) window.showToast('تم تحديث معرفة البوصلة من ردك', 'success');
   };
 
   // Get platform content analysis for better responses
   window.pfAnalyzePlatformContent = () => {
     analyzePlatformContent();
-    if(window.showToast) window.showToast('طھظ… طھط­ط¯ظٹط« ظ…ط­طھظˆظ‰ ط§ظ„ظ…ظ†طµط©', 'success');
+    if(window.showToast) window.showToast('تم تحديث محتوى المنصة', 'success');
   };
 
   // Get AI learning statistics
