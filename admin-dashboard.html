@@ -7,7 +7,7 @@
         if (!sessionStorage.getItem('currentAdmin')) { window.location.replace('admin-login.html'); }
     </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ظ„ظˆط­ط© ط§ظ„ط¥ط¯ط§ط±ط© | يوسف بركات</title>
+    <title>لوحة الإدارة | يوسف بركات</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/style.css?v=1785347365011">
     <link rel="stylesheet" href="css/dashboard.css">
@@ -155,7 +155,7 @@
                                 <th>ط§ط³ظ… ط§ظ„ط·ط§ظ„ط¨</th>
                                 <th>ط±ظ‚ظ… ط§ظ„ظ…ظˆط¨ط§ظٹظ„</th>
                                 <th>طھظپط§طµظٹظ„ ط§ظ„ط´ظƒظˆظ‰</th>
-                                <th>ط§ظ„طھط§ط±ظٹط®</th>
+                                <th>التاريخ</th>
                                 <th>ط§ظ„ط­ط§ظ„ط©</th>
                             </tr>
                         </thead>
@@ -183,7 +183,7 @@
                                 <th>ط±ظ‚ظ… ط§ظ„ظ…ظˆط¨ط§ظٹظ„</th>
                                 <th>ط§ظ„ظƒظˆط±ط³</th>
                                 <th>ط§ظ„ظ…ط¨ظ„ط؛</th>
-                                <th>ط§ظ„طھط§ط±ظٹط®</th>
+                                <th>التاريخ</th>
                                 <th>طµظˆط±ط© ط§ظ„طھط­ظˆظٹظ„</th>
                                 <th>ط§ظ„ط­ط§ظ„ط©</th>
                                 <th>ط¥ط¬ط±ط§ط،</th>
@@ -687,7 +687,7 @@
             let adminCourses = JSON.parse(localStorage.getItem('adminCourses'));
             if (!adminCourses) {
                 adminCourses = [
-                    { id: 'c1', title: 'ظ…ظ†ظ‡ط¬ ط§ظ„ط¬ط؛ط±ط§ظپظٹط§ ظƒط§ظ…ظ„ط§ظ‹ - ط§ظ„طھط±ظ… ط§ظ„ط£ظˆظ„', desc: 'ط´ط±ط­ طھظپطµظٹظ„ظٹ ظ„ظ…ظ†ظ‡ط¬ ط§ظ„ط¬ط؛ط±ط§ظپظٹط§ ظ…ط¹ ط®ط±ط§ط¦ط· ط°ظ‡ظ†ظٹط© ظˆط§ظ…طھط­ط§ظ†ط§طھ ط£ط³ط¨ظˆط¹ظٹط© ظˆطھط¯ط±ظٹط¨ ط¹ظ„ظ‰ ط§ظ„ظ†ط¸ط§ظ… ط§ظ„ط¬ط¯ظٹط¯.', price: '150', grade: 'prep3', image: 'https://via.placeholder.com/400x250/071326/D4A64F?text=Geography' },
+                    { id: 'c1', title: 'ظ…ظ†ظ‡ط¬ الجغرافيا ظƒط§ظ…ظ„ط§ظ‹ - ط§ظ„طھط±ظ… ط§ظ„ط£ظˆظ„', desc: 'ط´ط±ط­ طھظپطµظٹظ„ظٹ ظ„ظ…ظ†ظ‡ط¬ الجغرافيا ظ…ط¹ ط®ط±ط§ط¦ط· ط°ظ‡ظ†ظٹط© ظˆط§ظ…طھط­ط§ظ†ط§طھ ط£ط³ط¨ظˆط¹ظٹط© ظˆطھط¯ط±ظٹط¨ ط¹ظ„ظ‰ ط§ظ„ظ†ط¸ط§ظ… ط§ظ„ط¬ط¯ظٹط¯.', price: '150', grade: 'prep3', image: 'https://via.placeholder.com/400x250/071326/D4A64F?text=Geography' },
                     { id: 'c2', title: 'طھط§ط±ظٹط® ظ…طµط± ط§ظ„ظ‚ط¯ظٹظ…ط© ظˆط§ظ„ط­ط¶ط§ط±ط§طھ', desc: 'ظپظ‡ظ… ط¹ظ…ظٹظ‚ ظ„ظ„طھط§ط±ظٹط® ط¨ط£ط³ظ„ظˆط¨ ظ‚طµطµظٹ ظ…ظ…طھط¹ ظٹط¬ط¹ظ„ظƒ طھط¹ظٹط´ ط§ظ„ط£ط­ط¯ط§ط« ظˆطھط³طھظ†طھط¬ ط§ظ„ط£ط³ط¦ظ„ط©.', price: '200', grade: 'sec1', image: 'https://via.placeholder.com/400x250/071326/58C4DD?text=History' },
                     { id: 'c3', title: 'الدراسات الاجتماعية - طھط£ط³ظٹط³', desc: 'ظƒظˆط±ط³ ط§ظ„طھط£ط³ظٹط³ ط§ظ„ط´ط§ظ…ظ„ ظ„ط·ظ„ط§ط¨ ط§ظ„طµظپ ط§ظ„ط£ظˆظ„ ط§ظ„ط¥ط¹ط¯ط§ط¯ظٹطŒ ظ…ط¯ط®ظ„ظƒ ظ„ظپظ‡ظ… ط§ظ„ظ…ط§ط¯ط© ط¨ط¨ط³ط§ط·ط©.', price: '100', grade: 'prep1', image: 'https://via.placeholder.com/400x250/0A1E3A/D4A64F?text=Social+Studies' }
                 ];
