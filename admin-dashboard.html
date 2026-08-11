@@ -1808,6 +1808,7 @@
         }
     </script>
 
+    
     <!-- Apply Assistant Restrictions -->
     <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -1823,12 +1824,30 @@
                                 btn.style.display = 'none';
                             }
                         });
-                    }, 1000);
+                        
+                        // Hide Bot/Compass related elements silently
+                        document.querySelectorAll('a[href="admin-compass.html"], a[href="admin-bot-monitor.html"]').forEach(el => {
+                            el.style.display = 'none';
+                        });
+                        
+                        // Look for panel titles containing 'البوصلة' and hide their parent .dashboard-section
+                        document.querySelectorAll('.panel-title, h3').forEach(el => {
+                            if (el.textContent.includes('البوصلة') || el.textContent.includes('صراع البوصلة')) {
+                                const section = el.closest('.dashboard-section') || el.closest('.glass-panel');
+                                if (section) section.style.display = 'none';
+                            }
+                        });
+                        
+                        // Hide floating bot button if exists
+                        const gameBtn = document.querySelector('[onclick*="gameWidgetModal"]');
+                        if (gameBtn) gameBtn.style.display = 'none';
+                    }, 500);
                 }
             } catch(e) {}
         }
     });
     </script>
+
     
 </body>
 </html>
