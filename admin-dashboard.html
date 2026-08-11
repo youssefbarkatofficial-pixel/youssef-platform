@@ -1832,7 +1832,7 @@
                         
                         // Look for panel titles containing 'البوصلة' and hide their parent .dashboard-section
                         document.querySelectorAll('.panel-title, h3').forEach(el => {
-                            if (el.textContent.includes('البوصلة') || el.textContent.includes('صراع البوصلة')) {
+                            if ((el.textContent.includes('البوصلة') || el.textContent.includes('صراع البوصلة')) && !el.textContent.includes('تعليم البوصلة')) {
                                 const section = el.closest('.dashboard-section') || el.closest('.glass-panel');
                                 if (section) section.style.display = 'none';
                             }
