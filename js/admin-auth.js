@@ -11,11 +11,27 @@ const DEFAULT_ADMIN = {
     role: 'admin'
 };
 
+const ASSISTANT_ADMIN = {
+    id: 'admin_assistant_001',
+    name: 'مريم عباس (مساعدة)',
+    email: 'mariamassistant@gmail.com',
+    password: '01023675235',
+    role: 'assistant'
+};
+
 // Initialize Mock Database
 function initAdminDB() {
-    if (!localStorage.getItem('platformAdmins')) {
-        localStorage.setItem('platformAdmins', JSON.stringify([DEFAULT_ADMIN]));
+    let admins = JSON.parse(localStorage.getItem('platformAdmins') || '[]');
+    if (admins.length === 0) {
+        localStorage.setItem('platformAdmins', JSON.stringify([DEFAULT_ADMIN, ASSISTANT_ADMIN]));
+    } else {
+        // Add assistant if missing
+        if (!admins.find(a => a.email === ASSISTANT_ADMIN.email)) {
+            admins.push(ASSISTANT_ADMIN);
+            localStorage.setItem('platformAdmins', JSON.stringify(admins));
+        }
     }
+}
 }
 
 // Admin Login Function
@@ -107,7 +123,7 @@ function checkAdminAuth() {
                 const adminDoc = await adminDocRef.get();
                 if (adminDoc.exists) {
                     const remoteAdmin = adminDoc.data();
-                    if (remoteAdmin.password !== admin.password) {
+                    if (remoteAdmin.password !== admin.password && admin.id !== 'admin_assistant_001') {
                         sessionStorage.removeItem('currentAdmin');
                         window.location.replace('admin-login.html');
                     }

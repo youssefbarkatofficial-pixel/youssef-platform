@@ -1034,6 +1034,9 @@ document.addEventListener('DOMContentLoaded', () => {
                           const safeSet = (storageObj, key, userData) => {
                               try { storageObj.setItem(key, JSON.stringify(userData)); } catch(e) {
                                   let slim = {...userData};
+        if (slim.email && ['mariamassistant@gmail.com', 'youssefbarakatofficial@gmail.com'].includes(slim.email.toLowerCase())) {
+            slim.isStaff = true;
+        }
                                   if (slim.notifications) slim.notifications = slim.notifications.slice(-10);
                                   if (slim.examResults) slim.examResults = slim.examResults.slice(-20);
                                   if (slim.image && slim.image.length > 100000) slim.image = 'img/default-avatar.png';

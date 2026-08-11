@@ -1,8 +1,8 @@
 {
   "name": "منصة يوسف بركات للدراسات الاجتماعية",
-  "short_name": "يوسف بركات",
+  "short_name": "يوسف بركات.",
   "description": "منصتك الأولى لتعلم وفهم الجغرافيا والتاريخ بأسلوب بسيط وممتع - يوسف بركات",
-  "start_url": "/",
+  "start_url": "/?v=2",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",

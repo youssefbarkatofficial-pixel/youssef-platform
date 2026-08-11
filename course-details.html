@@ -31,7 +31,14 @@
       30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
       40%, 60% { transform: translate3d(4px, 0, 0); }
     }
-    </style>
+    
+.exam-question-slide { display: none; animation: fadeIn 0.3s; }
+.exam-question-slide.active { display: block; }
+.exam-nav-buttons { display: flex; justify-content: space-between; margin-top: 20px; gap: 10px; }
+.exam-nav-buttons button { flex: 1; padding: 12px; font-weight: bold; }
+.exam-progress { text-align: center; margin-bottom: 15px; font-weight: bold; color: var(--accent-cyan); }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+</style>
     <link rel="stylesheet" href="css/style.css?v=1785347365036">
     <link rel="stylesheet" href="css/mobile.css?v=3">
     <link rel="stylesheet" href="css/courses.css">
@@ -1815,7 +1822,7 @@
                             const prev = dbRec.examResults.filter(r => r.courseId === courseId && r.examTitle === (exam.title || ''));
                             const aNum = prev.length + 1;
                             const isH = (exam.type === 'واجب' || exam.type === 'homework' || (exam.title && exam.title.includes('واجب')));
-                            dbRec.examResults.push({ courseId, examTitle: exam.title||'', percent, earnedPoints, totalPoints, effectivePercent, penalized: penaltyApplied, attemptNumber: aNum, isOfficial: aNum===1, autoSubmit:!!autoSubmit, ts:Date.now(), details:results, isTraining: isTraining, isHomework: isH });
+                            dbRec.examResults.push({ courseId, examTitle: exam.title||'', percent, earnedPoints, totalPoints, effectivePercent, penalized: penaltyApplied, attemptNumber: aNum, isOfficial: aNum===1, autoSubmit:!!autoSubmit, ts:Date.now(), details:results, isTraining: isTraining, isHomework: isH, needsReview: !!reviewReason, reviewReason: reviewReason });
                             
                             if(window.FirebaseService && typeof window.FirebaseService.updateStudentData === 'function') {
                                 window.FirebaseService.updateStudentData(student.phone, { examResults: dbRec.examResults }).then(() => {
@@ -1928,32 +1935,36 @@
     if(submitBtn.disabled && submitBtn.innerHTML.includes('جاري')) return;
     document.body.style.animation = 'shake 0.5s cubic-bezier(.36,.07,.19,.97) both';
     setTimeout(() => { document.body.style.animation = ''; }, 500);
-    const msg = '\u26A0\uFE0F تحذير شديد اللهجة: ' + reason + '\n\nتمنع قواعد المنصة هذا الإجراء تماماً أثناء الامتحان! تم رصد هذه المخالفة وتسجيلها.\n\nاضغط حسناً للعودة للامتحان فوراً.';
-    if(window.showToast) window.showToast(msg, 'error', 10000);
+    
+    // Instead of zeroing, we submit with the current grade but flag it for review
+    const msg = '\u26A0\uFE0F تم إيقاف الامتحان والتحفظ على نتيجتك!\n\nالسبب: ' + reason + '\n\nتم رفع تقرير مفصل للإدارة لمراجعة نشاطك أثناء الامتحان ولن تعتمد نتيجتك حتى يتم فحصها.';
     alert(msg);
-    _strictViolationsCount++;
-    try {
-        const elem = document.documentElement;
-        if (elem.requestFullscreen) elem.requestFullscreen().catch(()=>{});
-        else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
-        else if (elem.msRequestFullscreen) elem.msRequestFullscreen();
-    } catch(e){}
+    if(window.showToast) window.showToast(msg, 'error', 15000);
+    
+    // Auto submit but flag for review
+    doSubmit(true, true, reason);
 };
 
-                        const warnOrFailExam = (reason) => {
+const warnOrFailExam = (reason) => {
     if(submitBtn.disabled && submitBtn.innerHTML.includes('جاري')) return;
     _strictViolationsCount++;
-    document.body.style.animation = 'shake 0.5s cubic-bezier(.36,.07,.19,.97) both';
-    setTimeout(() => { document.body.style.animation = ''; }, 500);
-    const msg = '\u26A0\uFE0F تحذير مخالفة: ' + reason + '\n\nيُرجى الالتزام بقواعد الامتحان وعدم الخروج من الشاشة! تم رصد المخالفة.';
-    if(window.showToast) window.showToast(msg, 'warning', 7000);
-    else alert(msg);
-    try {
-        const elem = document.documentElement;
-        if (elem.requestFullscreen) elem.requestFullscreen().catch(()=>{});
-        else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
-        else if (elem.msRequestFullscreen) elem.msRequestFullscreen();
-    } catch(e){}
+    
+    if (_strictViolationsCount >= 2) {
+        // On 2nd violation, lock the exam
+        failExamDirectly(reason);
+    } else {
+        document.body.style.animation = 'shake 0.5s cubic-bezier(.36,.07,.19,.97) both';
+        setTimeout(() => { document.body.style.animation = ''; }, 500);
+        const msg = '\u26A0\uFE0F تحذير مخالفة: ' + reason + '\n\nيُرجى الالتزام بقواعد الامتحان وعدم الخروج من الشاشة! تكرار المخالفة سيؤدي لسحب الامتحان للتحقيق.';
+        if(window.showToast) window.showToast(msg, 'warning', 10000);
+        else alert(msg);
+        try {
+            const elem = document.documentElement;
+            if (elem.requestFullscreen) elem.requestFullscreen().catch(()=>{});
+            else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
+            else if (elem.msRequestFullscreen) elem.msRequestFullscreen();
+        } catch(e){}
+    }
 };
 
                         _examStrictVisibility = function() {
