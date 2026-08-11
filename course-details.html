@@ -673,7 +673,21 @@
                 actionContainer.innerHTML = `<button class="btn btn-gold" onclick="openPaymentModalDetails('${course.id}')"><i class="fas fa-lock-open mr-2"></i> الاشتراك لفتح المحتوى</button>`;
             }
 
-            const rawContents = course.contents || {};
+            // ===== تحميل محتوى الكورس من 3 مصادر =====
+            let rawContents = course.contents || {};
+            const _hasContent = (c) => !!(c && (c.lectures && c.lectures.length || c.homeworks && c.homeworks.length || c.exams && c.exams.length || c.sections && c.sections.length));
+            if (!_hasContent(rawContents)) {
+                try { const sc = localStorage.getItem('contents_' + courseId); if (sc) { const p = JSON.parse(sc); if (_hasContent(p)) rawContents = p; } } catch(e) {}
+                if (!_hasContent(rawContents) && window.FirebaseService && typeof window.FirebaseService.getCourse === 'function') {
+                    try {
+                        const fc = await window.FirebaseService.getCourse(courseId);
+                        if (fc && fc.contents && _hasContent(fc.contents)) {
+                            rawContents = fc.contents;
+                            try { localStorage.setItem('contents_' + courseId, JSON.stringify(rawContents)); } catch(e) {}
+                        }
+                    } catch(e) { console.warn('Firestore getCourse failed', e); }
+                }
+            }
 // --- DYNAMIC SECTIONS RENDERER ---
 
             function migrateCourseToSections(contents) {
