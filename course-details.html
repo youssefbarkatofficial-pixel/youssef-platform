@@ -1691,7 +1691,7 @@
                                 try {
                                     if(window.PF_Grader && typeof window.PF_Grader.scoreAnswer === 'function' && !item.q.asMcq) {
                                         const res = window.PF_Grader.scoreAnswer(item.answer, item.q.answer, item.q.type || 'explain');
-                                        r = { score: res.score || 0, feedback: res.feedback || (res.score === 1 ? 'إجابة صحيحة تماماًا âœ…' : 'راجع الإجابة'), needsReview: false };
+                                        r = { score: res.score || 0, feedback: res.feedback || (res.score === 1 ? 'إجابة صحيحة تماماً ✅' : 'راجع الإجابة'), needsReview: false };
                                     }
                                 } catch(e) {}
                             }
@@ -1700,7 +1700,7 @@
                                 const correct = (item.q.answer || '').toString().trim().toLowerCase();
                                 const given = String(item.answer || '').trim().toLowerCase();
                                 const ok = given !== '' && given === correct;
-                                r = { score: ok ? 1 : 0, feedback: ok ? 'إجابة صحيحة âœ…' : ('إجابة غير صحيحة â‌Œ — الإجابة الصحيحة: ' + item.q.answer), needsReview: false };
+                                r = { score: ok ? 1 : 0, feedback: ok ? 'إجابة صحيحة ✅' : ('إجابة غير صحيحة ❌ — الإجابة الصحيحة: ' + item.q.answer), needsReview: false };
                             }
                             
                             const pEarned = r.score * qPts;
@@ -1756,7 +1756,7 @@
                         scoreDisp += '</div>';
                         rHtml += scoreDisp;
                         
-                        rHtml += '<div style="font-size:1rem;color:#f39c12;margin-top:5px;"><strong>مجموع النقاط: ' + earnedPoints + ' من ' + totalPoints + '</strong></div>';
+                        rHtml += '<div style="font-size:1rem;color:#f39c12;margin-top:5px;"><strong>مجموع النقاط: ' + (Math.round(earnedPoints * 100) / 100) + ' من ' + totalPoints + '</strong></div>';
                         if(isStrictViolation) rHtml += '<div style="margin-top:10px;padding:10px;background:rgba(230,126,34,0.15);border-radius:8px;color:#e67e22;font-size:0.9rem;">âڑ ï¸ڈ <strong>تم تسليم الامتحان وتسجيل درجاتك الحالية بسبب محاولة الخروج أو مخالفة القواعد.</strong></div>';
                         else if(autoSubmit) rHtml += '<div style="margin-top:8px;color:#e74c3c;font-size:0.9rem;">âڈ° تم التسليم التلقائي بعد انتهاء الوقت.</div>';
                         if(penaltyApplied) rHtml += '<div style="margin-top:10px;padding:10px;background:rgba(231,76,60,0.15);border-radius:8px;color:#e74c3c;font-size:0.9rem;">âڑ ï¸ڈ <strong>تم خصم 20% من درجتك بسبب التأخر في التسليم بعد الموعد النهائي.</strong></div>';
@@ -1794,7 +1794,7 @@
                                 correctAnsHtml = `<br/><span style="color:rgba(255,255,255,0.6);">الإجابة الصحيحة: </span><span style="color:#2ecc71;">${displayCorrect}</span>`;
                             }
                             
-                            p.innerHTML = '<strong>س' + (i+1) + ':</strong> ' + r.question + ' <span style="color:#f39c12;">(' + (r.pointsEarned||0) + '/' + (r.totalPoints||1) + ' نقطة)</span><br/><em style="color:rgba(255,255,255,0.6);">إجابتك:</em> <span style="color:' + (isCorrect ? '#2ecc71' : '#e74c3c') + ';">' + displayStudent + '</span>' + correctAnsHtml + '<br/><em style="color:rgba(255,255,255,0.6);">التعليق:</em> ' + r.feedback;
+                            p.innerHTML = '<strong>س' + (i+1) + ':</strong> ' + r.question + ' <span style="color:#f39c12;">(' + (Math.round((r.pointsEarned||0)*100)/100) + '/' + (r.totalPoints||1) + ' نقطة)</span><br/><em style="color:rgba(255,255,255,0.6);">إجابتك:</em> <span style="color:' + (isCorrect ? '#2ecc71' : '#e74c3c') + ';">' + displayStudent + '</span>' + correctAnsHtml + '<br/><em style="color:rgba(255,255,255,0.6);">التعليق:</em> ' + r.feedback;
                             detEl.appendChild(p);
                         });
 
