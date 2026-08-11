@@ -434,8 +434,17 @@
             let isOwned = false;
             let isPending = false;
             let dbUser = { courses: [], completedItems: [] };
+
+            // ===== فحص Master Preview مبكراً (قبل أي تحقق) =====
+            // حساب الأدمن أو الحساب 0000 يتجاوز كل الفحوصات
+            const adminStrEarly = sessionStorage.getItem('currentAdmin');
+            let isAdminEarly = false;
+            if (adminStrEarly) { try { if(JSON.parse(adminStrEarly).role === 'admin') isAdminEarly = true; } catch(e){} }
+            const isMasterPreviewEarly = isAdminEarly || (userStr && (() => {
+                try { const u = JSON.parse(userStr); return u.phone === '0000' || String(u.email || '').startsWith('0000'); } catch(e){ return false; }
+            })());
             
-            if (userStr) {
+            if (userStr && !isMasterPreviewEarly) {
                 let user = JSON.parse(userStr);
                 
                 // Force Secure Server-Side Verification for Course Ownership
@@ -452,11 +461,9 @@
                             isOwned = false;
                         }
                     } catch(e) {
-                        console.error('Server verification failed', e);
-                        isOwned = false;
-                        alert('تعذر التحقق من ملكيتك للكورس بسبب مشكلة في الاتصال بالإنترنت. يرجى المحاولة لاحقااً.');
-                        window.location.href = 'courses.html';
-                        return;
+                        console.warn('Server verification failed, falling back to local cache', e);
+                        // لا نوقف الطالب — نرجع للكاش المحلي
+                        serverVerified = false;
                     }
                 }
 
@@ -464,8 +471,6 @@
                     dbUser = JSON.parse(localStorage.getItem(`db_${user.phone}`)) || { courses: [], completedItems: [] };
                     isOwned = dbUser.courses && dbUser.courses.includes(courseId);
                 }
-
-                // Removed getPaymentRequests() call because students shouldn't fetch all requests, and it overwrites local pending state if offline sync is pending.
 
                 let paymentRequests = JSON.parse(localStorage.getItem('paymentRequests')) || [];
                 let existingReq = [...paymentRequests].reverse().find(req => req.courseId === courseId && (req.userId === user.phone || req.userPhone === user.phone));

@@ -733,63 +733,92 @@ async function loadLeaderboard(currentGrade) {
             students = JSON.parse(localStorage.getItem('strictUsers') || '[]');
         }
 
-        // Filter by grade
+        // ===== فلترة بالـ grade: نقارن قيمة grade الخام (prep1, sec1...) وليس التسمية =====
+        const currentUser = (() => {
+            try { return JSON.parse(sessionStorage.getItem('currentStudent') || '{}'); } catch(e){ return {}; }
+        })();
+        const currentRawGrade = currentUser.grade || '';
+
         const sameGrade = students.filter(s => {
-            const sGrade = (window.getEffectiveStudentGrade && window.getGradeLabel) 
-                ? window.getGradeLabel(window.getEffectiveStudentGrade(s)) 
-                : (s.grade || '');
-            return sGrade === currentGrade && s.role !== 'admin';
+            if (s.role === 'admin') return false;
+            if (s.phone === '0000') return false;
+            // مقارنة grade خام
+            const sGrade = (s.grade || '').toLowerCase().trim();
+            const cGrade = currentRawGrade.toLowerCase().trim();
+            if (sGrade && cGrade && sGrade === cGrade) return true;
+            // fallback: مقارنة بالتسمية العربية
+            if (window.getEffectiveStudentGrade && window.getGradeLabel) {
+                const sLabel = window.getGradeLabel(window.getEffectiveStudentGrade(s)) || '';
+                return sLabel === currentGrade;
+            }
+            return false;
         });
 
-        // Calculate score
+        // ===== حساب الدرجة الحقيقية من examResults + نشاط الفيديو =====
+        const RANKS = [
+            { name: 'مستكشف ناشئ',      minXp: 0 },
+            { name: 'رحّالة مبتدئ',      minXp: 200 },
+            { name: 'قارئ الخرائط',      minXp: 500 },
+            { name: 'مستكشف الطرق',      minXp: 1000 },
+            { name: 'حامل البوصلة',      minXp: 2000 },
+            { name: 'كاشف الآثار',       minXp: 3500 },
+            { name: 'مؤرخ الحضارات',    minXp: 6000 },
+            { name: 'قائد الرحلات',      minXp: 10000 },
+            { name: 'سيد المسارات',      minXp: 16000 },
+            { name: 'حارس الأطالس',      minXp: 25000 },
+            { name: 'وريث البوصلة',      minXp: 38000 },
+            { name: 'أسطورة الحضارات',  minXp: 55000 },
+            { name: 'سيد القارات',       minXp: 80000 },
+        ];
+
         sameGrade.forEach(s => {
             let score = 0;
+
+            // 1. نقاط من امتحانات الطالب (أفضل نتيجة لكل امتحان)
+            if (s.examResults && s.examResults.length > 0) {
+                const uniqueExams = {};
+                s.examResults.forEach(r => {
+                    const key = `${r.courseId || ''}_${r.examTitle || r.title || ''}`;
+                    const pct = r.effectivePercent || r.percent || 0;
+                    if (!uniqueExams[key] || pct > uniqueExams[key]) uniqueExams[key] = pct;
+                });
+                Object.values(uniqueExams).forEach(pct => {
+                    score += Math.round(pct * 1.5); // كل امتحان يضيف حتى 150 نقطة
+                });
+            }
+
+            // 2. نقاط من stats المحفوظة
             if (s.stats) {
-                score += (s.stats.homeworkCompleted || 0) * 10;
-                score += (s.stats.videosWatched || 0) * 5;
-                score += (s.stats.commitment || 0);
+                score += (s.stats.homeworkCompleted || 0) * 30;
+                score += (s.stats.videosWatched || 0) * 10;
+                score += Math.round((s.stats.commitment || 0) / 2);
             }
-            if (s.gameXp) {
-                score += s.gameXp;
+
+            // 3. نقاط gameXp المباشرة
+            if (s.gameXp) score += s.gameXp;
+
+            // 4. نقاط من completedItems
+            if (s.completedItems && Array.isArray(s.completedItems)) {
+                score += s.completedItems.length * 5;
             }
-            s._leaderboardScore = score;
-            
-            // Assign Rank from Compass Game
-            const RANKS = [
-                { name: 'مستكشف ناشئ', minXp: 0 },
-                { name: 'رحّالة مبتدئ', minXp: 200 },
-                { name: 'قارئ الخرائط', minXp: 500 },
-                { name: 'مستكشف الطرق', minXp: 1000 },
-                { name: 'حامل البوصلة', minXp: 2000 },
-                { name: 'كاشف الآثار', minXp: 3500 },
-                { name: 'مؤرخ الحضارات', minXp: 6000 },
-                { name: 'قائد الرحلات', minXp: 10000 },
-                { name: 'سيد المسارات', minXp: 16000 },
-                { name: 'حارس الأطالس', minXp: 25000 },
-                { name: 'وريث البوصلة', minXp: 38000 },
-                { name: 'أسطورة الحضارات', minXp: 55000 },
-                { name: 'سيد القارات', minXp: 80000 },
-                { name: 'حارس البوصلة الأعظم', minXp: Infinity }
-            ];
-            
+
+            s._leaderboardScore = Math.round(score);
+
+            // تحديد الرتبة
             let rankObj = RANKS[0];
-            for(let i=0; i<RANKS.length; i++){
-                if(score >= RANKS[i].minXp && score < (RANKS[i+1]?.minXp || Infinity)) {
-                    rankObj = RANKS[i];
-                    break;
-                }
+            for (let i = RANKS.length - 1; i >= 0; i--) {
+                if (score >= RANKS[i].minXp) { rankObj = RANKS[i]; break; }
             }
             s._rankName = rankObj.name;
         });
 
-        // Sort descending
+        // ترتيب تنازلي
         sameGrade.sort((a, b) => b._leaderboardScore - a._leaderboardScore);
         
-        // Take top 5
         const topStudents = sameGrade.slice(0, 5);
 
         if (topStudents.length === 0) {
-            container.innerHTML = '<div style="text-align: center; width: 100%; padding: 20px; color: #94A3B8;">لا يوجد طلاب في لوحة الشرف بعد</div>';
+            container.innerHTML = '<div style="text-align: center; width: 100%; padding: 20px; color: #94A3B8;">لا يوجد طلاب مسجلون بنفس مرحلتك بعد</div>';
             return;
         }
 
@@ -800,13 +829,22 @@ async function loadLeaderboard(currentGrade) {
                            index === 2 ? '<i class="fas fa-medal" style="color: #cd7f32; font-size: 1.2rem; margin-bottom: 5px;"></i>' :
                            '<div style="font-weight: bold; font-size: 1.2rem; margin-bottom: 5px; color: #94A3B8;">#' + (index + 1) + '</div>';
             
-            const avatar = student.profilePic || 'https://via.placeholder.com/80/071326/D4A64F?text=' + (student.name ? student.name.charAt(0) : '?');
+            // الصورة الشخصية: من profilePic أو أول حرف من الاسم
+            const nameLetter = student.name ? encodeURIComponent(student.name.charAt(0)) : '?';
+            const avatar = (student.profilePic && !student.profilePic.startsWith('__local__'))
+                ? student.profilePic
+                : `https://ui-avatars.com/api/?name=${nameLetter}&background=071326&color=D4A64F&size=80&bold=true`;
+
+            // هل هذا هو المستخدم الحالي؟
+            const isMe = student.phone === currentUser.phone;
+            const borderColor = isMe ? '#58C4DD' : 'var(--royal-gold)';
+            const bgColor = isMe ? 'rgba(88,196,221,0.08)' : 'rgba(255,255,255,0.05)';
 
             html += `
-                <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); border-radius: 15px; padding: 15px; min-width: 120px; text-align: center; display: flex; flex-direction: column; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                <div style="background: ${bgColor}; border: 1px solid ${borderColor}; border-radius: 15px; padding: 15px; min-width: 120px; text-align: center; display: flex; flex-direction: column; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); ${isMe ? 'transform: scale(1.03);' : ''}">
                     ${rankIcon}
-                    <img src="${avatar}" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; margin-bottom: 10px; border: 2px solid var(--royal-gold);">
-                    <div style="font-weight: bold; font-size: 0.9rem; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;">${student.name || 'طالب مجهول'}</div>
+                    <img src="${avatar}" onerror="this.src='https://ui-avatars.com/api/?name=${nameLetter}&background=071326&color=D4A64F&size=80'" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; margin-bottom: 10px; border: 2px solid ${borderColor};">
+                    <div style="font-weight: bold; font-size: 0.9rem; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 110px;">${student.name || 'طالب'}${isMe ? ' 👤' : ''}</div>
                     <div style="font-size: 0.75rem; color: #D4A64F; margin-top: 3px; font-weight: bold;">${student._rankName}</div>
                     <div style="font-size: 0.8rem; color: var(--accent-cyan); margin-top: 5px;">${student._leaderboardScore} نقطة</div>
                 </div>
@@ -820,3 +858,5 @@ async function loadLeaderboard(currentGrade) {
         container.innerHTML = '<div style="text-align: center; width: 100%; padding: 20px; color: #ef4444;">حدث خطأ في تحميل لوحة الشرف</div>';
     }
 }
+
+
