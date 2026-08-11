@@ -24,6 +24,14 @@
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
     <link rel="preconnect" href="https://www.gstatic.com">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+    @keyframes shake {
+      10%, 90% { transform: translate3d(-1px, 0, 0); }
+      20%, 80% { transform: translate3d(2px, 0, 0); }
+      30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+      40%, 60% { transform: translate3d(4px, 0, 0); }
+    }
+    </style>
     <link rel="stylesheet" href="css/style.css?v=1785347365036">
     <link rel="stylesheet" href="css/mobile.css?v=3">
     <link rel="stylesheet" href="css/courses.css">
@@ -1819,7 +1827,7 @@
                             if(aNum > 1) {
                                 const ntc = document.createElement('div');
                                 ntc.style.cssText = 'margin-top:12px;padding:12px;background:rgba(212,166,79,0.12);border-radius:8px;color:var(--royal-gold);font-size:0.9rem;';
-                                ntc.innerHTML = '<i class="fas fa-info-circle"></i> <strong>تنبيه:</strong> هذه المحاولة رقم ' + aNum + '. <strong>المحاولة الأولى هي الدرجة المعتمدة رسميااً.</strong> المحاولات اللاحقة محفوظة للمراجعة.';
+                                ntc.innerHTML = '<i class="fas fa-info-circle"></i> <strong>تنبيه:</strong> هذه المحاولة رقم ' + aNum + '. <strong>المحاولة الأولى هي الدرجة المعتمدة رسمياًا.</strong> المحاولات اللاحقة محفوظة للمراجعة.';
                                 resultBox.appendChild(ntc);
                             }
                         } catch(e) { console.error('save exam result failed', e); }
@@ -1837,10 +1845,10 @@
                             return;
                         }
                         // WARNING 1
-                        const w1 = confirm('âڑ ï¸ڈ تحذير أول: إذا خرجت الآن، سيتم تسليم إجاباتك الحالية تلقائيااً حتى لو لم تكمل. هل تريد الاستمرار في الخروج؟');
+                        const w1 = confirm('⚠️ تحذير أول: إذا خرجت الآن، سيتم تسليم إجاباتك الحالية تلقائياًا حتى لو لم تكمل. هل تريد الاستمرار في الخروج؟');
                         if (!w1) return;
                         // WARNING 2
-                        const w2 = confirm('âڑ ï¸ڈ تحذير أخير: هذا الإجراء نهائي ولا رجعة فيه. إجاباتك ستُسلّم الآن وسيُحسب عليك كمحاولة. هل أنت متأكد تمامااً؟');
+                        const w2 = confirm('⚠️ تحذير أخير: هذا الإجراء نهائي ولا رجعة فيه. إجاباتك ستُسلّم الآن وسيُحسب عليك كمحاولة. هل أنت متأكد تماماًا؟');
                         if (!w2) return;
                         doSubmit(true);
                         setTimeout(() => { 
@@ -1917,44 +1925,36 @@
                         };
 
                         const failExamDirectly = (reason) => {
-                            if(submitBtn.disabled && submitBtn.innerHTML.includes('جاري')) return;
-                            const confirmExit = confirm(`تحذير نهائي: ${reason}\n\nهل أنت مصر على الخروج؟\n\n- اضغط OK/حسنااً للخروج وتسليم الامتحان بما تم إنجازه مع خصم 10%\n- اضغط Cancel/إلغاء لاستكمال الحل`);
-                            if (!confirmExit) {
-                                if(window.showToast) window.showToast('âœ… تم التراجع عن الخروج، استكمل الامتحان.', 'success');
-                                _strictViolationsCount = Math.max(0, _strictViolationsCount - 1);
-                                try {
-                                    const elem = document.documentElement;
-                                    if (elem.requestFullscreen) elem.requestFullscreen().catch(()=>{});
-                                    else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
-                                    else if (elem.msRequestFullscreen) elem.msRequestFullscreen();
-                                } catch(e){}
-                                return;
-                            }
-                            doSubmit(true, true);
-                            alert(`تم تسليم الامتحان تلقائيااً بسبب خروجك المتعمد، وتم خصم 10% كعقوبة انضباطية.`);
-                        };
+    if(submitBtn.disabled && submitBtn.innerHTML.includes('جاري')) return;
+    document.body.style.animation = 'shake 0.5s cubic-bezier(.36,.07,.19,.97) both';
+    setTimeout(() => { document.body.style.animation = ''; }, 500);
+    const msg = '\u26A0\uFE0F تحذير شديد اللهجة: ' + reason + '\n\nتمنع قواعد المنصة هذا الإجراء تماماً أثناء الامتحان! تم رصد هذه المخالفة وتسجيلها.\n\nاضغط حسناً للعودة للامتحان فوراً.';
+    if(window.showToast) window.showToast(msg, 'error', 10000);
+    alert(msg);
+    _strictViolationsCount++;
+    try {
+        const elem = document.documentElement;
+        if (elem.requestFullscreen) elem.requestFullscreen().catch(()=>{});
+        else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
+        else if (elem.msRequestFullscreen) elem.msRequestFullscreen();
+    } catch(e){}
+};
 
                         const warnOrFailExam = (reason) => {
-                            if(submitBtn.disabled && submitBtn.innerHTML.includes('جاري')) return;
-                            _strictViolationsCount++;
-                            
-                            if (_strictViolationsCount >= 3) {
-                                failExamDirectly(`تجاوزت الحد الأقصى للمخالفات (3 مرات) - السبب الأخير: ${reason}`);
-                            } else {
-                                const remaining = 3 - _strictViolationsCount;
-                                const msg = `âڑ ï¸ڈ تحذير مخالفة (${_strictViolationsCount}/3): ${reason}\n\nيُرجى عدم تكرار ذلك وإلا سيتم سحب الامتحان منك! يتبقى لك ${remaining} تحذيرات.`;
-                                if(window.showToast) window.showToast(msg, 'warning', 7000);
-                                else alert(msg);
-                                
-                                // Try to force fullscreen back
-                                try {
-                                    const elem = document.documentElement;
-                                    if (elem.requestFullscreen) elem.requestFullscreen().catch(()=>{});
-                                    else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
-                                    else if (elem.msRequestFullscreen) elem.msRequestFullscreen();
-                                } catch(e){}
-                            }
-                        };
+    if(submitBtn.disabled && submitBtn.innerHTML.includes('جاري')) return;
+    _strictViolationsCount++;
+    document.body.style.animation = 'shake 0.5s cubic-bezier(.36,.07,.19,.97) both';
+    setTimeout(() => { document.body.style.animation = ''; }, 500);
+    const msg = '\u26A0\uFE0F تحذير مخالفة: ' + reason + '\n\nيُرجى الالتزام بقواعد الامتحان وعدم الخروج من الشاشة! تم رصد المخالفة.';
+    if(window.showToast) window.showToast(msg, 'warning', 7000);
+    else alert(msg);
+    try {
+        const elem = document.documentElement;
+        if (elem.requestFullscreen) elem.requestFullscreen().catch(()=>{});
+        else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
+        else if (elem.msRequestFullscreen) elem.msRequestFullscreen();
+    } catch(e){}
+};
 
                         _examStrictVisibility = function() {
                             if(document.hidden) {
@@ -1962,8 +1962,8 @@
                                     _offlineStartTime = Date.now();
                                 } else {
                                     _awayTimeout = setTimeout(() => {
-                                        failExamDirectly('الخروج من نافذة الامتحان لمدة تزيد عن 15 ثانية متواصلة');
-                                    }, 15000);
+                                        failExamDirectly('الخروج من نافذة الامتحان لمدة تزيد عن 30 ثانية متواصلة');
+                                    }, 30000);
                                 }
                             } else {
                                 if (_awayTimeout) {
@@ -1984,8 +1984,8 @@
                             if (!navigator.onLine) return; // Allow blur if offline
                             if (!_awayTimeout) {
                                 _awayTimeout = setTimeout(() => {
-                                    failExamDirectly('فقدان التركيز على النافذة لمدة تزيد عن 15 ثانية متواصلة');
-                                }, 15000);
+                                    failExamDirectly('فقدان التركيز على النافذة لمدة تزيد عن 30 ثانية متواصلة');
+                                }, 30000);
                             }
                         };
 
