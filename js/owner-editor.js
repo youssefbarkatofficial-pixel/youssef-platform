@@ -13,14 +13,6 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (key === 'ownerBgImage') {
             const bgImgEl = document.getElementById('teacherBgImg');
             if (bgImgEl) bgImgEl.src = val;
-        } else if (key === 'ownerNavLogoImage') {
-            const navLogoImg = document.getElementById('navLogoImg');
-            const navLogoText = document.getElementById('navLogoText');
-            if (navLogoImg && navLogoText) {
-                navLogoImg.src = val;
-                navLogoImg.style.display = 'block';
-                navLogoText.style.display = 'none';
-            }
         } else if (key === 'ownerFeaturesLogoImage') {
             const featuresCenterImg = document.getElementById('featuresCenterImg');
             const featuresCenterText = document.getElementById('featuresCenterText');
