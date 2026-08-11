@@ -5,8 +5,19 @@ document.addEventListener('DOMContentLoaded', () => {
         var raw = JSON.parse(localStorage.getItem('adminCourses') || '[]');
         return raw.map(function(c) {
             if (c.image && c.image.startsWith('__local__')) {
-                var img = localStorage.getItem('img_' + c.id);
-                c.image = img || 'https://via.placeholder.com/400x250/071326/D4A64F?text=Course';
+                // Try IndexedDB first if StorageService exists, else fallback to localStorage
+                if (window.StorageService && typeof window.StorageService.getFile === 'function') {
+                    window.StorageService.getFile(c.image).then(img => {
+                        if (img) {
+                            const imgElements = document.querySelectorAll(`img[src="${c.image}"]`);
+                            imgElements.forEach(el => el.src = img);
+                        }
+                    }).catch(()=>{});
+                } else {
+                    var img = localStorage.getItem('img_' + c.id);
+                    if (img) c.image = img;
+                    else c.image = 'https://via.placeholder.com/400x250/071326/D4A64F?text=Course';
+                }
             }
             if (!c.contents || (!c.contents.lectures && !c.contents.homeworks)) {
                 var stored = localStorage.getItem('contents_' + c.id);

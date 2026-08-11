@@ -693,11 +693,24 @@
             async function fastUpload(courseId, section, itemObj) {
                 // Ensure latest courses before saving
                 let courses = JSON.parse(localStorage.getItem('adminCourses') || '[]');
-                if (window.FirebaseService && typeof window.FirebaseService.getCourses === 'function') {
+                let fullCourse = null;
+
+                if (window.FirebaseService && typeof window.FirebaseService.getCourse === 'function') {
                     try {
-                        const sc = await window.FirebaseService.getCourses();
-                        if(sc && sc.length) courses = sc;
+                        fullCourse = await window.FirebaseService.getCourse(courseId);
                     } catch(e) {}
+                }
+                
+                const idx = courses.findIndex(c => c.id === courseId);
+                let targetCourse = fullCourse || (idx > -1 ? courses[idx] : null);
+
+                if (targetCourse && !targetCourse.contents && idx > -1) {
+                    var stored = localStorage.getItem('contents_' + courseId);
+                    if (stored) { try { targetCourse.contents = JSON.parse(stored); } catch(e) {} }
+                }
+                
+                if (idx > -1) {
+                    courses[idx] = targetCourse;
                 }
 
                 const idx = courses.findIndex(c => c.id === courseId);

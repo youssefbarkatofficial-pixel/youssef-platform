@@ -499,7 +499,15 @@
                 'sec1': 'أولى ثانوي'
             };
 
-            document.getElementById('cdImage').src = course.image;
+            if (course.image && course.image.startsWith('__local__') && window.StorageService) {
+                window.StorageService.getFile(course.image).then(img => {
+                    document.getElementById('cdImage').src = img || 'https://via.placeholder.com/400x250/071326/D4A64F?text=Course';
+                }).catch(() => {
+                    document.getElementById('cdImage').src = 'https://via.placeholder.com/400x250/071326/D4A64F?text=Course';
+                });
+            } else {
+                document.getElementById('cdImage').src = course.image || 'https://via.placeholder.com/400x250/071326/D4A64F?text=Course';
+            }
             document.getElementById('cdTitle').textContent = course.title;
             document.getElementById('cdDesc').textContent = course.desc;
             
