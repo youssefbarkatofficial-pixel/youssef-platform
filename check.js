@@ -4,6 +4,6 @@ files.forEach(f => {
     if(!fs.existsSync(f)) return;
     const c=fs.readFileSync(f,'utf8');
     const hasFFfd = c.includes('\uFFFD');
-    const hasMoji = c.includes('ط§') || c.includes('ظ„');
+    const hasMoji = c.includes('ا') || c.includes('ل');
     console.log(f, hasFFfd ? 'HAS_FFFD' : hasMoji ? 'HAS_MOJIBAKE' : 'OK');
 });

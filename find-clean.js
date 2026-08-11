@@ -10,7 +10,7 @@ for (const commitHash of commits) {
     try {
         const content = cp.execSync(`git show ${commitHash}:js/support-chat.js`, {encoding: 'buffer'});
         const hasFFfd = content.includes(Buffer.from([0xef, 0xbf, 0xbd]));
-        const hasMoji = content.toString('utf8').includes('ط§') || content.toString('utf8').includes('ظ„');
+        const hasMoji = content.toString('utf8').includes('ا') || content.toString('utf8').includes('ل');
         const hasBad = content.toString('utf8').includes('ط') || content.toString('utf8').includes('ط،');
         console.log(`${commitHash}: FFFD=${hasFFfd} Moji=${hasMoji} Bad=${hasBad}`);
         if (!hasFFfd && !hasMoji) {

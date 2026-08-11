@@ -48,7 +48,7 @@ htmlFiles.forEach(f => {
     const lines = content.split('\n');
     lines.forEach((line, i) => {
         if (line.includes('أداط') || line.includes('حللظ') || line.includes('بدخة') || 
-            line.includes('أدانطب') || line.includes('ط') || line.includes('ط§ط')) {
+            line.includes('أدانطب') || line.includes('ط') || line.includes('اط')) {
             console.log(`  ${f}:${i+1}: ${line.trim().substring(0, 100)}`);
         }
     });

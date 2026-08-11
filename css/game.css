@@ -1,12 +1,12 @@
 /* =====================================================
    صراع البوصلة - Game CSS
-   طھطµظ…يظ… قط§بظ„ ظ„ظ„طھط¹ط¯يظ„ - ظƒظ„ section ظ…ط¹ظ„ّظ…ط© بوط¶وط­
+   تصميم قابل للتعديل - كل section معلّمة بوط¶وح
    ===================================================== */
 
 /* === FONTS === */
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap');
 
-/* === CSS VARIABLES (ط؛يّر ط§ظ„ط£ظ„وط§ظ† ظ‡ظ†ط§ بط³) === */
+/* === CSS VARIABLES (ط؛يّر الألوان هنا بس) === */
 :root {
   --gold: #D4AF37;
   --gold-light: #F0D060;
@@ -18,8 +18,8 @@
   --text-white: #F0F4FF;
   --text-muted: #64748B;
   --text-soft: #94A3B8;
-  --player-color: #D4AF37;       /* ظ„وظ† ط§ظ„ظ„ط§ط¹ب ط¹ظ„ظ‰ ط§ظ„ط®ريطط© */
-  --bot-color: #EF4444;          /* ظ„وظ† ط§ظ„ط®طµظ… ط¹ظ„ظ‰ ط§ظ„ط®ريطط© */
+  --player-color: #D4AF37;       /* لون اللاعب على الخريطة */
+  --bot-color: #EF4444;          /* لون الخصم على الخريطة */
   --green-correct: #22C55E;
   --red-wrong: #EF4444;
   --radius: 16px;
@@ -39,7 +39,7 @@ body {
 }
 
 /* =====================================================
-   SCREEN SYSTEM - ظƒظ„ ط´ط§ط´ط© class وط§ط­ط¯ط©
+   SCREEN SYSTEM - كل شاشة class واحدة
    ===================================================== */
 .screen { display: none; min-height: 100vh; flex-direction: column; }
 .screen.active { display: flex; }
@@ -386,7 +386,7 @@ body {
 .grade-btn:hover:not(:disabled) { border-color: var(--gold); color: var(--gold); }
 .grade-btn.selected { background: var(--gold-dim); border-color: var(--gold); color: var(--gold); }
 .grade-btn:disabled { opacity: 0.35; cursor: not-allowed; position: relative; }
-.grade-btn:disabled::after { content: 'قريبط§اً'; display: block; font-size: 0.65rem; color: var(--text-muted); }
+.grade-btn:disabled::after { content: 'قريبااً'; display: block; font-size: 0.65rem; color: var(--text-muted); }
 
 /* Mode buttons */
 .mode-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 24px; }

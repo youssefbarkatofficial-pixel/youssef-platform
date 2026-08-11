@@ -6,7 +6,7 @@ const file = 'index.html';
 const rawBuffer = fs.readFileSync(file);
 let utf8String = rawBuffer.toString('utf8');
 
-// The file currently contains 'ط§ظ„ط¯ط±ط§ط³ط§طھ' which is UTF-8 Mojibake for Windows-1256.
+// The file currently contains 'الدراسات' which is UTF-8 Mojibake for Windows-1256.
 // To fix this, we need to find all these Mojibake sequences and convert them back.
 // The string was parsed as Windows-1256, encoded as UTF-8.
 // To reverse: read the UTF-8 string into a binary buffer (latin1), then decode as Windows-1256.
@@ -26,7 +26,7 @@ function fixMojibake(text) {
 // Since the file has a mix of normal english (ASCII) and Mojibake, 
 // fixing the whole string might work if it was purely encoded wrongly.
 // Let's test a slice
-const sample = utf8String.substring(utf8String.indexOf('ط§ظ„ط¯ط±ط§ط³ط§طھ'), utf8String.indexOf('ط§ظ„ط¯ط±ط§ط³ط§طھ') + 50);
+const sample = utf8String.substring(utf8String.indexOf('الدراسات'), utf8String.indexOf('الدراسات') + 50);
 console.log('Original Sample:', sample);
 console.log('Fixed Sample:', fixMojibake(sample));
 

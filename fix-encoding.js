@@ -3,12 +3,12 @@ const fs = require('fs');
 // Fix encoding issue in all HTML files - replace garbled Arabic with correct text
 const fixes = [
     // Common garbled patterns -> correct Arabic
-    { bad: 'ظ…ظ†طµط© يوط³ظپ ط¨ط±ظƒط§طھ', good: 'منصة يوسف بركات' },
-    { bad: 'ط§ظ„ط±ط¦يط³يط©', good: 'الرئيسية' },
-    { bad: 'ط§ظ„ظƒوط±ط³ط§طھ', good: 'الكورسات' },
-    { bad: 'ط¹ظ† ط§ظ„ظ…ُط¹ظ„ظ…', good: 'عن المعلم' },
-    { bad: 'ط§ظ„ظ…ظ…يط²ط§طھ', good: 'المميزات' },
-    { bad: 'ط§ظ„ظ…ط³ط§ط¹ط¯ط©', good: 'المساعدة' },
+    { bad: 'منصة يوسف بركات', good: 'منصة يوسف بركات' },
+    { bad: 'الرئيسية', good: 'الرئيسية' },
+    { bad: 'الكورسات', good: 'الكورسات' },
+    { bad: 'عن المُعلم', good: 'عن المعلم' },
+    { bad: 'المميزات', good: 'المميزات' },
+    { bad: 'المساعدة', good: 'المساعدة' },
     { bad: 'ي', good: 'ي' },
 ];
 
@@ -21,7 +21,7 @@ for (const file of htmlFiles) {
     let changed = false;
 
     // Detect if garbled
-    if (content.includes('ظ…ظ†طµط©') || content.includes('ظ…ط³ط§ط¹ط¯ط©')) {
+    if (content.includes('منصة') || content.includes('مساعدة')) {
         // Re-read as UTF-8 with replacement
         let utf8content = fs.readFileSync(file, 'utf8');
         for (const fix of fixes) {
