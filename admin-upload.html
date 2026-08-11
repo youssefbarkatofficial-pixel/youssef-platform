@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <link rel="manifest" href="./manifest.json">
@@ -274,23 +274,23 @@
                         <h3 style="color: #f39c12; margin-bottom: 15px;"><i class="fas fa-clock mr-2"></i> إعدادات الوقت والنشر</h3>
                         <div class="form-group" style="display:flex; gap:10px;">
                             <div style="flex:1;">
-                                <label>ًں“… تاريخ بدء الامتحان (اختياري)</label>
+                                <label>📅 تاريخ بدء الامتحان (اختياري)</label>
                                 <input type="datetime-local" id="eAvailableFrom" class="form-control">
                             </div>
                             <div style="flex:1;">
-                                <label>ًں“… تاريخ انتهاء الامتحان (اختياري)</label>
+                                <label>📅 تاريخ انتهاء الامتحان (اختياري)</label>
                                 <input type="datetime-local" id="eAvailableUntil" class="form-control">
                             </div>
                         </div>
                         <div class="form-group" style="display:flex; gap:10px; align-items:flex-end;">
                             <div style="flex:1;">
-                                <label>âڈ±ï¸ڈ مدة الامتحان (بالدقائق، 0 = بدون حد)</label>
+                                <label>⏱️ مدة الامتحان (بالدقائق، 0 = بدون حد)</label>
                                 <input type="number" id="eDuration" class="form-control" placeholder="مثال: 30" min="0" value="0">
                             </div>
                             <div style="flex:1; padding-bottom: 3px;">
                                 <label style="display:flex; align-items:center; gap:10px; cursor:pointer;">
                                     <input type="checkbox" id="eStrictMode" style="width:18px; height:18px;">
-                                    <span>ًں”’ وضع الامتحان الصارم (منع الخروج)</span>
+                                    <span>🔒 وضع الامتحان الصارم (منع الخروج)</span>
                                 </label>
                             </div>
                         </div>
@@ -745,10 +745,10 @@
                         } else {
                             localStorage.setItem('adminCourses', JSON.stringify(courses));
                         }
-                        if(window.showToast) window.showToast('âœ… تم الحفظ بنجاح!', 'success');
+                        if(window.showToast) window.showToast('✅ تم الحفظ بنجاح!', 'success');
                         else alert('تم الحفظ بنجاح!');
                     } catch(err) {
-                        if(window.showToast) window.showToast('â‌Œ خطأ في الحفظ: ' + err.message, 'error');
+                        if(window.showToast) window.showToast('❌ خطأ في الحفظ: ' + err.message, 'error');
                         else alert('خطأ في الحفظ: ' + err.message);
                     }
                 }
