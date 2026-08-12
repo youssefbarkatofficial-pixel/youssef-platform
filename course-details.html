@@ -438,9 +438,9 @@
             // ===== فحص Master Preview مبكراً (قبل أي تحقق) =====
             // حساب الأدمن أو الحساب 0000 يتجاوز كل الفحوصات
             const adminStrEarly = sessionStorage.getItem('currentAdmin');
-            let isAdminEarly = false;
-            if (adminStrEarly) { try { if(JSON.parse(adminStrEarly).role === 'admin') isAdminEarly = true; } catch(e){} }
-            const isMasterPreviewEarly = isAdminEarly || (userStr && (() => {
+            let isAdmin = false;
+            if (adminStrEarly) { try { if(JSON.parse(adminStrEarly).role === 'admin') isAdmin = true; } catch(e){} }
+            const isMasterPreviewEarly = isAdmin || (userStr && (() => {
                 try { const u = JSON.parse(userStr); return u.phone === '0000' || String(u.email || '').startsWith('0000'); } catch(e){ return false; }
             })());
             
@@ -554,14 +554,6 @@
 
 
                         const actionContainer = document.getElementById('cdActionBtnContainer');
-            
-            // Check for admin
-            const adminStr = sessionStorage.getItem('currentAdmin');
-            let isAdmin = false;
-            if (adminStr) {
-                const adminUser = JSON.parse(adminStr);
-                if (adminUser.role === 'admin') isAdmin = true;
-            }
             
             // Allow master preview for admin OR the test user (0000)
             const isMasterPreview = isAdmin || (userStr && (JSON.parse(userStr).phone === '0000' || String(JSON.parse(userStr).email).startsWith('0000')));
