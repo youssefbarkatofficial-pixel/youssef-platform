@@ -776,6 +776,17 @@
                     }
                 });
 
+                // Remove standalone trainings section since they are attached to lectures
+                sections = sections.filter(s => s.id !== 'sec_trainings');
+                
+                // Enforce section ordering: Lectures (1), Homeworks (2), Exams (3)
+                const order = { 'sec_lectures': 1, 'sec_homeworks': 2, 'sec_exams': 3 };
+                sections.sort((a, b) => {
+                    const orderA = order[a.id] || 99;
+                    const orderB = order[b.id] || 99;
+                    return orderA - orderB;
+                });
+
                 return { sections: sections };
             }
 
@@ -1142,7 +1153,8 @@
                     let countText = '';
                     if (sec.id === 'sec_homeworks') countText = `${itemsArr.length} واجبات`;
                     else if (sec.id === 'sec_exams') countText = `${itemsArr.length} امتحانات`;
-                    else countText = `${itemsArr.filter(i => i.type === 'video').length} محاضرات`;
+                    else if (sec.id === 'sec_lectures') countText = `${itemsArr.filter(i => i.type === 'video').length} محاضرات`;
+                    else countText = `${itemsArr.length} عنصر`;
                     
                     let latestBadge = '';
                     if (itemsArr.length > 0) {
@@ -1414,33 +1426,7 @@
                 });
             }
 
-            // Mount Bousala Course Viewer (Independent Module)
-            (async function() {
-                try {
-                    if (!document.getElementById('bousalaCourseStyle')) {
-                        const style = document.createElement('link');
-                        style.id = 'bousalaCourseStyle';
-                        style.rel = 'stylesheet';
-                        style.href = 'css/bousala-course.css';
-                        document.head.appendChild(style);
-                    }
-                    
-                    let bCourseArea = document.getElementById('bousala-course-area');
-                    if (!bCourseArea) {
-                        bCourseArea = document.createElement('div');
-                        bCourseArea.id = 'bousala-course-area';
-                        bCourseArea.style.cssText = 'margin-top: 20px; margin-bottom: 40px;';
-                        if (sectionsContainer && sectionsContainer.parentElement) {
-                            sectionsContainer.parentElement.insertBefore(bCourseArea, sectionsContainer);
-                        }
-                    }
-                    
-                    const { mountCourse } = await import('./js/bousala-course.js?v=2');
-                    mountCourse('bousala-course-area', course, normalizedContents.sections, userStr, markItemCompleted, (item) => {
-                        if (window.openExamModal) window.openExamModal(course.id, item);
-                    });
-                } catch(e) { console.error('Failed to mount Bousala Course Viewer', e); }
-            })();
+
 
             // Add exam modal UI — Full Featured (Timer, Auto-Submit, Strict Mode, Encouragement, Attempts)
             (function(){
