@@ -112,7 +112,7 @@
                 <div id="noHwState" style="display: none; text-align: center; padding: 50px 20px;">
                     <i class="fas fa-book-reader text-gold" style="font-size: 4rem; margin-bottom: 20px; opacity: 0.5;"></i>
                     <h2 style="color: var(--soft-white); margin-bottom: 10px;">لا يوجد كورسات مشترك فيها بعد</h2>
-                    <p style="color: rgba(255,255,255,0.7); margin-bottom: 20px;">اشترك في الكورسات أولااً لتظهر لك الواجبات الخاصة بها</p>
+                    <p style="color: rgba(255,255,255,0.7); margin-bottom: 20px;">اشترك في الكورسات أولاً لتظهر لك الواجبات الخاصة بها</p>
                     <a href="courses.html" class="btn btn-gold btn-large">استكشف الكورسات</a>
                 </div>
             </div>
@@ -179,25 +179,21 @@
                 dbUser.courses.forEach(cId => {
                     const c = adminCourses.find(course => course.id === cId);
                     if (!c) return;
-                    let homeworks = (c.contents && c.contents.homeworks) ? c.contents.homeworks : [];
-                // EXTRACT FROM SECTIONS
-                if (c.contents && Array.isArray(c.contents.sections)) {
-                    c.contents.sections.forEach(sec => {
-                        if (sec.items && Array.isArray(sec.items)) {
-                            sec.items.forEach(item => {
-                                if (item.type === 'homework' || item.type === 'واجب' || item.type === 'task') {
-                                    homeworks.push(item);
-                                }
-                            });
-                        }
-                    });
-                }
-                    if (c.contents && c.contents.sections) {
+                    let homeworks = [];
+                    if (c.contents && c.contents.homeworks) {
+                        homeworks = [...c.contents.homeworks];
+                    }
+                    // EXTRACT FROM SECTIONS
+                    if (c.contents && Array.isArray(c.contents.sections)) {
                         c.contents.sections.forEach(sec => {
-                            if (sec.items) {
+                            if (sec.items && Array.isArray(sec.items)) {
                                 sec.items.forEach(item => {
-                                    if(item.type === 'task' || item.type === 'homework') {
-                                        homeworks.push(item);
+                                    const isTypeHw = (item.type === 'homework' || item.type === 'واجب' || item.type === 'task');
+                                    const isTitleHw = item.title && (item.title.includes('واجب') || item.title.includes('تدريب'));
+                                    if (isTypeHw || isTitleHw || sec.id === 'sec_homeworks') {
+                                        if(!homeworks.find(h => h.id === item.id)) {
+                                            homeworks.push(item);
+                                        }
                                     }
                                 });
                             }

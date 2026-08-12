@@ -4115,7 +4115,7 @@
     tickets.push(ticket);
     saveTickets(tickets);
     safeSetItem(localStorage, 'pf_unseen_support_tickets', String((parseInt(safeGetItem(localStorage, 'pf_unseen_support_tickets')||'0')||0)+1));
-    if(window.showToast) window.showToast('تم إنشاء تذكرة دعمطŒ سيتواصل معك فريق الدعم قريبااً', 'success');
+    if(window.showToast) window.showToast('تم إنشاء تذكرة دعمطŒ سيتواصل معك فريق الدعم قريباً', 'success');
     return ticket;
   }
 

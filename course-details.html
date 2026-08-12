@@ -117,7 +117,7 @@
     <!-- Header -->
     <header class="navbar glass-panel">
         <a href="index.html" class="nav-brand">
-            <div class="logo-circle">ي</div>
+            <div class="logo-circle"><img src="images/logo.png?v=1786475931154" alt="Logo" style="width:100%; height:100%; object-fit:cover; border-radius:50%;"></div>
             <span class="nav-brand-text">منصة يوسف بركات</span>
         </a>
         <ul class="nav-links">
@@ -133,7 +133,7 @@
     <div class="container" style="padding-top: 150px; padding-bottom: 50px; min-height: 80vh;">
         <div class="glass-panel" style="padding: 40px; border-radius: 20px; max-width: 800px; margin: 0 auto;">
             
-            <a href="courses.html" style="color: var(--accent-cyan); text-decoration: none; font-size: 0.9rem; margin-bottom: 20px; display: inline-block;">
+            <a href="courses.html" style="color: var(--accent-cyan); text-decoration: none; font-size: 0.9rem; margin-bottom: 90px; display: inline-block;">
                 <i class="fas fa-arrow-right mr-2"></i> العودة للكورسات
             </a>
 
@@ -172,7 +172,7 @@
                     <h4>فودافون كاش</h4>
                 </div>
                 <div class="pay-method" data-type="fawry" style="opacity: 0.5; pointer-events: none; filter: grayscale(100%); position: relative;">
-                    <span style="position: absolute; top: 5px; left: 5px; background: rgba(0,0,0,0.5); font-size: 0.7rem; padding: 2px 5px; border-radius: 3px;">قريبااً</span>
+                    <span style="position: absolute; top: 5px; left: 5px; background: rgba(0,0,0,0.5); font-size: 0.7rem; padding: 2px 5px; border-radius: 3px;">قريباً</span>
                     <i class="fas fa-store" style="font-size: 2rem; color: #f1c40f; margin-bottom: 10px;"></i>
                     <h4>فوري</h4>
                 </div>
@@ -225,7 +225,7 @@
             <div class="auth-header">
                 <div class="auth-logo"><i class="fas fa-user-graduate"></i></div>
                 <h2>تسجيل الدخول</h2>
-                <p>مرحباً بك مجددااً في منصتك</p>
+                <p>مرحباً بك مجدداً في منصتك</p>
             </div>
             <form id="loginForm">
                 <div class="form-group">
@@ -296,7 +296,7 @@
             <div class="auth-header">
                 <div class="auth-logo"><i class="fas fa-user-graduate"></i></div>
                 <h2>تسجيل الدخول</h2>
-                <p>مرحباً بك مجددااً في منصتك</p>
+                <p>مرحباً بك مجدداً في منصتك</p>
             </div>
             <form id="loginForm">
                 <div class="form-group">
@@ -587,7 +587,7 @@
                             <input type="text" id="adminEditCourseTitle" class="form-control" value="${course.title}">
                         </div>
                         <div class="form-group">
-                            <label>حالة الكورس (مثال: يبدأ فورااً أو 15 أكتوبر)</label>
+                            <label>حالة الكورس (مثال: يبدأ فوراً أو 15 أكتوبر)</label>
                             <input type="text" id="adminEditCourseStatus" class="form-control" value="${course.courseStatus || ''}">
                         </div>
                         <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 15px;">
@@ -673,7 +673,7 @@
                 actionContainer.innerHTML = `<button class="btn btn-outline" style="color:var(--accent-orange); border-color:var(--accent-orange);" onclick="showPendingMessageDetails()"><i class="fas fa-clock mr-2"></i> طلبك قيد المراجعة</button>`;
             } else if (course.isFree || course.price == '0' || course.price === 0) {
                 if (userStr) {
-                    actionContainer.innerHTML = `<button class="btn btn-green" onclick="enrollFreeCourse('${course.id}')"><i class="fas fa-door-open mr-2"></i> دخول الكورس مجانااً</button>`;
+                    actionContainer.innerHTML = `<button class="btn btn-green" onclick="enrollFreeCourse('${course.id}')"><i class="fas fa-door-open mr-2"></i> دخول الكورس مجاناً</button>`;
                 } else {
                     actionContainer.innerHTML = `<button class="btn btn-outline" style="color:#f1c40f; border-color:#f1c40f;" onclick="window.location.href='index.html#login'"><i class="fas fa-user-lock mr-2"></i> يجب تسجيل الدخول للاستمتاع بالكورس المجاني</button>`;
                 }
@@ -700,18 +700,19 @@
 
             function migrateCourseToSections(contents) {
                 const c = contents || {};
-
-                if (c.sections && Array.isArray(c.sections) && c.sections.length > 0) {
-                    return { sections: c.sections };
+                let sections = [];
+                let hasSections = c.sections && Array.isArray(c.sections) && c.sections.length > 0;
+                
+                if (hasSections) {
+                    sections = JSON.parse(JSON.stringify(c.sections));
+                } else {
+                    sections = [
+                        { id: 'sec_lectures', title: 'المحاضرات', items: [] },
+                        { id: 'sec_homeworks', title: 'الواجبات', items: [] },
+                        { id: 'sec_exams', title: 'الامتحانات', items: [] }
+                    ];
                 }
 
-                let defaultSections = [
-                    { id: 'sec_lectures', title: 'المحاضرات', items: [] },
-                    { id: 'sec_homeworks', title: 'الواجبات', items: [] },
-                    { id: 'sec_exams', title: 'الامتحانات', items: [] }
-                ];
-                
-                // Helper to find items attached to a specific lecture
                 function getAttachedItems(lectureId) {
                     let attached = [];
                     ['trainings', 'homeworks', 'exams'].forEach(key => {
@@ -726,79 +727,136 @@
                     return attached;
                 }
 
-                if (c.lectures && c.lectures.length) {
-                    let items = [];
-                    c.lectures.forEach(lec => {
-                        let attachedFromOtherSections = getAttachedItems(lec.id);
-                        let hasChildren = (lec.children && lec.children.length) || attachedFromOtherSections.length > 0;
-                        
-                        if (hasChildren) {
-                            // Don't replace the lecture with a header, push the lecture itself as the main content!
-                            items.push(lec);
-                            if (lec.children) lec.children.forEach(child => {
-                                child._parentLecId = lec.id;
-                                items.push(child);
-                            });
-                            attachedFromOtherSections.forEach(child => {
-                                child._parentLecId = lec.id;
-                                items.push(child);
-                            });
-                        } else {
-                            items.push(lec);
+                const legacyMap = {
+                    'lectures': 'sec_lectures',
+                    'homeworks': 'sec_homeworks',
+                    'exams': 'sec_exams',
+                    'trainings': 'sec_trainings'
+                };
+
+                Object.keys(legacyMap).forEach(legacyKey => {
+                    if (c[legacyKey] && Array.isArray(c[legacyKey]) && c[legacyKey].length > 0) {
+                        let targetSecId = legacyMap[legacyKey];
+                        let sec = sections.find(s => s.id === targetSecId);
+                        if (!sec) {
+                            let titles = { lectures: 'المحاضرات', homeworks: 'الواجبات', exams: 'الامتحانات', trainings: 'التدريبات' };
+                            sec = { id: targetSecId, title: titles[legacyKey], items: [] };
+                            sections.push(sec);
                         }
-                    });
-                    defaultSections[0].items = items;
-                }
-                
-                if (c.homeworks && c.homeworks.length) {
-                    // Filter out items already attached to a lecture to avoid duplication
-                    let unattached = c.homeworks.filter(h => !h.attachedToLectureId);
-                    if (unattached.length) defaultSections[1].items = unattached;
-                }
-                
-                if (c.exams && c.exams.length) {
-                    let unattached = c.exams.filter(e => !e.attachedToLectureId);
-                    if (unattached.length) defaultSections[2].items = unattached;
-                }
-                
-                let sections = defaultSections;
-
-                // Add trainings section if any trainings exist that aren't attached to lectures
-                if (c.trainings && c.trainings.length) {
-                    let unattached = c.trainings.filter(t => !t.attachedToLectureId);
-                    if (unattached.length) {
-                        sections.push({ id: 'sec_trainings', title: 'التدريبات', items: unattached });
+                        c[legacyKey].forEach(item => {
+                            let exists = sections.some(s => s.items && s.items.some(i => i.id === item.id));
+                            if (!exists) {
+                                if (!sec.items) sec.items = [];
+                                sec.items.push(item);
+                            }
+                        });
                     }
-                }
+                });
 
-                if (c.customSections && c.customSections.length) {
+                if (c.customSections && c.customSections.length && !hasSections) {
                     c.customSections.forEach((sec, idx) => {
                         sections.push({ id: 'sec_custom_'+idx, title: sec.name || 'قسم مخصص', items: sec.items || [] });
                     });
                 }
                 
+                sections.forEach(sec => {
+                    if (sec.items && Array.isArray(sec.items)) {
+                        let flattenedItems = [];
+                        sec.items.forEach(item => {
+                            flattenedItems.push(item);
+                            if (item.children && Array.isArray(item.children)) {
+                                item.children.forEach(child => {
+                                    child._parentLecId = item.id;
+                                    flattenedItems.push(child);
+                                });
+                            }
+                            if (item.type === 'video' || sec.id === 'sec_lectures') {
+                                let attached = getAttachedItems(item.id);
+                                attached.forEach(child => {
+                                    if (!flattenedItems.some(f => f.id === child.id)) {
+                                        child._parentLecId = item.id;
+                                        flattenedItems.push(child);
+                                    }
+                                });
+                            }
+                        });
+                        sec.items = flattenedItems;
+                    }
+                });
+
                 return { sections: sections };
             }
 
             const normalizedContents = migrateCourseToSections(rawContents);
             
             function isItemCompleted(itemId) {
-                return dbUser.completedItems && dbUser.completedItems.includes(itemId);
+                if (!dbUser.completedItems) return false;
+                if (dbUser.completedItems.includes(itemId)) return true;
+                
+                let targetItem = null;
+                if (typeof normalizedContents !== 'undefined' && normalizedContents && normalizedContents.sections) {
+                    normalizedContents.sections.forEach(sec => {
+                        if (sec.items) {
+                            sec.items.forEach(i => {
+                                if (i.id === itemId) targetItem = i;
+                            });
+                        }
+                    });
+                }
+                
+                if (targetItem) {
+                    let pId = targetItem._parentLecId || targetItem.attachedToLectureId;
+                    if (pId && dbUser.completedItems.includes(pId)) return true;
+                    
+                    if (targetItem.type === 'header') {
+                        let anyChildDone = false;
+                        normalizedContents.sections.forEach(sec => {
+                            if (sec.items) {
+                                sec.items.forEach(i => {
+                                    if (i._parentLecId === itemId && dbUser.completedItems.includes(i.id)) {
+                                        anyChildDone = true;
+                                    }
+                                });
+                            }
+                        });
+                        if (anyChildDone) return true;
+                    }
+                }
+                
+                return false;
             }
 
             function markItemCompleted(itemId) {
                 if(!dbUser.completedItems) dbUser.completedItems = [];
+                let modified = false;
+                
                 if(!dbUser.completedItems.includes(itemId)) {
                     dbUser.completedItems.push(itemId);
-                    if(userStr) {
-                        let user = JSON.parse(userStr);
-                        if(window.FirebaseService && typeof window.FirebaseService.updateStudentData === 'function') {
-                            window.FirebaseService.updateStudentData(user.phone, { completedItems: dbUser.completedItems }).then(() => {
-                                localStorage.setItem('db_' + user.phone, JSON.stringify(dbUser));
-                            });
-                        } else {
+                    modified = true;
+                }
+                
+                let targetItem = null;
+                if (typeof normalizedContents !== 'undefined' && normalizedContents && normalizedContents.sections) {
+                    normalizedContents.sections.forEach(sec => {
+                        if (sec.items) sec.items.forEach(i => {
+                            if (i.id === itemId) targetItem = i;
+                        });
+                    });
+                }
+                
+                if (targetItem && targetItem._parentLecId && !dbUser.completedItems.includes(targetItem._parentLecId)) {
+                    dbUser.completedItems.push(targetItem._parentLecId);
+                    modified = true;
+                }
+                
+                if (modified && typeof userStr !== 'undefined' && userStr) {
+                    let user = JSON.parse(userStr);
+                    if(window.FirebaseService && typeof window.FirebaseService.updateStudentData === 'function') {
+                        window.FirebaseService.updateStudentData(user.phone, { completedItems: dbUser.completedItems }).then(() => {
                             localStorage.setItem('db_' + user.phone, JSON.stringify(dbUser));
-                        }
+                        });
+                    } else {
+                        localStorage.setItem('db_' + user.phone, JSON.stringify(dbUser));
                     }
                 }
             }
@@ -813,20 +871,20 @@
                             window.location.href = 'index.html?login=true';
                             return;
                         } else {
-                            if(window.showToast) window.showToast('يرجى الضغط على زر "دخول الكورس مجانااً" باللون الأخضر بالأعلى أولااً', 'info');
-                            else alert('يرجى الضغط على زر "دخول الكورس مجانااً" باللون الأخضر بالأعلى أولااً');
+                            if(window.showToast) window.showToast('يرجى الضغط على زر "دخول الكورس مجاناً" باللون الأخضر بالأعلى أولاً', 'info');
+                            else alert('يرجى الضغط على زر "دخول الكورس مجاناً" باللون الأخضر بالأعلى أولاً');
                             return;
                         }
                     } else {
-                        if(window.showToast) window.showToast('هذا المحتوى غير متاح، يجب عليك الاشتراك في الكورس أولااً', 'error');
-                        else alert('هذا المحتوى غير متاح، يجب عليك الاشتراك في الكورس أولااً');
+                        if(window.showToast) window.showToast('هذا المحتوى غير متاح، يجب عليك الاشتراك في الكورس أولاً', 'error');
+                        else alert('هذا المحتوى غير متاح، يجب عليك الاشتراك في الكورس أولاً');
                         return;
                     }
                 }
                 
                 if(isLocked && !isMasterPreview) {
-                    if(window.showToast) window.showToast(lockReason || 'هذا المحتوى مغلق حاليااً', 'error');
-                    else alert(lockReason || 'هذا المحتوى مقفول حاليااً');
+                    if(window.showToast) window.showToast(lockReason || 'هذا المحتوى مغلق حالياً', 'error');
+                    else alert(lockReason || 'هذا المحتوى مقفول حالياً');
                     return;
                 }
 
@@ -991,8 +1049,8 @@
                             <div style="background:#111;border:1px solid #d4a64f;border-radius:15px;padding:30px;max-width:500px;text-align:center;position:relative;box-shadow:0 10px 40px rgba(0,0,0,0.8);">
                                 <button onclick="this.parentElement.parentElement.remove()" style="position:absolute;top:10px;left:15px;background:none;border:none;color:#fff;font-size:1.8rem;cursor:pointer;">&times;</button>
                                 <i class="fas fa-gift" style="font-size:3.5rem;color:#d4a64f;margin-bottom:20px;"></i>
-                                <h3 style="color:#fff;margin-bottom:25px;line-height:1.6;font-size:1.2rem;">نظرااً لوجود تحديث بالمنصة أثناء أدائك للواجب الخاص بالمحاضرة التعريفية وحدث عطل،<br><span style="color:#2ecc71;">حصلت أنت على درجة الواجب كاملة 10/10</span><br>وغدااً في تمام الـ 9 مساءاً يجب أن تحضر الامتحان.</h3>
-                                <button onclick="this.parentElement.parentElement.remove()" class="btn btn-gold" style="padding:10px 30px;border-radius:25px;font-size:1.1rem;">حسنااً، فهمت</button>
+                                <h3 style="color:#fff;margin-bottom:25px;line-height:1.6;font-size:1.2rem;">نظراً لوجود تحديث بالمنصة أثناء أدائك للواجب الخاص بالمحاضرة التعريفية وحدث عطل،<br><span style="color:#2ecc71;">حصلت أنت على درجة الواجب كاملة 10/10</span><br>وغداً في تمام الـ 9 مساءاً يجب أن تحضر الامتحان.</h3>
+                                <button onclick="this.parentElement.parentElement.remove()" class="btn btn-gold" style="padding:10px 30px;border-radius:25px;font-size:1.1rem;">حسناً، فهمت</button>
                             </div>
                         `;
                         document.body.appendChild(customOverlay);
@@ -1003,8 +1061,8 @@
                     if (!isMasterPreview) {
                         const parentLecId = item.attachedToLectureId || item._parentLecId;
                         if (parentLecId && !isItemCompleted(parentLecId)) {
-                            if(window.showToast) window.showToast('ًں”’ يجب مشاهدة المحاضرة كاملااً قبل الدخول للتدريب', 'error');
-                            else alert('يجب مشاهدة المحاضرة كاملااً قبل الدخول للتدريب');
+                            if(window.showToast) window.showToast('ًں”’ يجب مشاهدة المحاضرة كاملاً قبل الدخول للتدريب', 'error');
+                            else alert('يجب مشاهدة المحاضرة كاملاً قبل الدخول للتدريب');
                             return;
                         }
                         const tempStudentStr = sessionStorage.getItem('currentStudent');
@@ -1015,8 +1073,8 @@
                         if (isHomeworkType && item._requiresTraining) {
                             const trainingDone = (dbUser.examResults || []).some(r => r.courseId === course.id && (r.isTraining || ['training', 'تدريب'].includes(r.examType)));
                             if (!trainingDone) {
-                                if(window.showToast) window.showToast('ًں”’ يجب تسليم التدريب أولااً قبل الواجب', 'error');
-                                else alert('يجب تسليم التدريب أولااً قبل الواجب');
+                                if(window.showToast) window.showToast('ًں”’ يجب تسليم التدريب أولاً قبل الواجب', 'error');
+                                else alert('يجب تسليم التدريب أولاً قبل الواجب');
                                 return;
                             }
                         }
@@ -1024,8 +1082,8 @@
                         if (isQuizType && item._requiresHomework) {
                             const hwDone = (dbUser.examResults || []).some(r => r.courseId === course.id && (r.isHomework || ['task', 'homework', 'واجب'].includes(r.examType)));
                             if (!hwDone) {
-                                if(window.showToast) window.showToast('ًں”’ يجب تسليم الواجب أولااً قبل الامتحان', 'error');
-                                else alert('يجب تسليم الواجب أولااً قبل الامتحان');
+                                if(window.showToast) window.showToast('ًں”’ يجب تسليم الواجب أولاً قبل الامتحان', 'error');
+                                else alert('يجب تسليم الواجب أولاً قبل الامتحان');
                                 return;
                             }
                         }
@@ -1041,8 +1099,8 @@
                     if (!isMasterPreview) {
                         const parentLecId = item.attachedToLectureId || item._parentLecId;
                         if (parentLecId && !isItemCompleted(parentLecId)) {
-                            if(window.showToast) window.showToast('ًں”’ يجب مشاهدة المحاضرة كاملااً قبل تحميل الملف', 'error');
-                            else alert('يجب مشاهدة المحاضرة كاملااً قبل تحميل الملف');
+                            if(window.showToast) window.showToast('ًں”’ يجب مشاهدة المحاضرة كاملاً قبل تحميل الملف', 'error');
+                            else alert('يجب مشاهدة المحاضرة كاملاً قبل تحميل الملف');
                             return;
                         }
                     }
@@ -1126,7 +1184,7 @@
                     detailsInner.style.cssText = 'display:flex; flex-direction:column; gap:8px; padding: 15px;';
 
                     if(!sec.items || sec.items.length === 0) {
-                        detailsInner.innerHTML = '<div style="text-align:center; padding: 30px; background: rgba(0,0,0,0.2); border-radius: 12px; margin-top: 10px;"><i class="fas fa-laptop-code mb-3" style="font-size: 2.5rem; color: var(--accent-cyan); opacity: 0.8;"></i><h3 style="color: var(--royal-gold); margin-bottom: 10px;">المحتوى قيد التجهيز ًںڑ€</h3><p style="color: rgba(255,255,255,0.7); line-height: 1.6; font-size: 0.95rem;">يتم الآن إعداد وتجهيز محتوى هذا القسم بأفضل جودة ليكون متاحااً قريبااً، ابقوا متابعين ولا تفوتوا الجديد!</p></div>';
+                        detailsInner.innerHTML = '<div style="text-align:center; padding: 30px; background: rgba(0,0,0,0.2); border-radius: 12px; margin-top: 10px;"><i class="fas fa-laptop-code mb-3" style="font-size: 2.5rem; color: var(--accent-cyan); opacity: 0.8;"></i><h3 style="color: var(--royal-gold); margin-bottom: 10px;">المحتوى قيد التجهيز ًںڑ€</h3><p style="color: rgba(255,255,255,0.7); line-height: 1.6; font-size: 0.95rem;">يتم الآن إعداد وتجهيز محتوى هذا القسم بأفضل جودة ليكون متاحاً قريباً، ابقوا متابعين ولا تفوتوا الجديد!</p></div>';
                     } else {
                         let currentLecGroup = null;
 
@@ -1156,13 +1214,13 @@
                             
                             if (item.type === 'video' && !globalLastExamCompleted) {
                                 isLocked = true;
-                                lockReason = `يجب اجتياز (${lastExamName}) أولااً لفتح المحاضرة`;
+                                lockReason = `يجب اجتياز (${lastExamName}) أولاً لفتح المحاضرة`;
                             }
 
                             if (item.dependsOn) {
                                 if (!isItemCompleted(item.dependsOn)) {
                                     isLocked = true;
-                                    lockReason = 'يجب إكمال المحتوى السابق أولااً';
+                                    lockReason = 'يجب إكمال المحتوى السابق أولاً';
                                 }
                             }
                             
@@ -1189,7 +1247,7 @@
                                     isScheduled = true;
                                     const dt = new Date(availTime);
                                     const dateStr = dt.toLocaleDateString('ar-EG', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-                                    lockReason = `سيكون متاحااً: ${dateStr}`;
+                                    lockReason = `سيكون متاحاً: ${dateStr}`;
                                 }
                             }
                             
@@ -1237,7 +1295,7 @@
                                 try {
                                     const userObj = JSON.parse(userStr);
                                     const dbRec = JSON.parse(localStorage.getItem(`db_${userObj.phone}`) || '{}');
-                                    const results = (dbRec.examResults || []).filter(r => r.courseId === course.id && r.examTitle === item.title);
+                                    const results = (dbRec.examResults || []).filter(r => r.courseId === course.id && ( (r.examId && r.examId === item.id) || (!r.examId && r.examTitle === item.title) ));
                                     if (results.length > 0) {
                                         const official = results.find(r => r.isOfficial || r.attemptNumber === 1) || results[0];
                                         const officialScore = official.effectivePercent || official.percent;
@@ -1478,7 +1536,7 @@
                     const studentObj = studentStr ? JSON.parse(studentStr) : { phone: 'guest' };
                     const dbKey = 'db_' + studentObj.phone;
                     const dbRec = JSON.parse(localStorage.getItem(dbKey) || '{}') || {};
-                    const prevAttempts = (dbRec.examResults || []).filter(r => r.courseId === courseId && r.examTitle === (exam.title || ''));
+                    const prevAttempts = (dbRec.examResults || []).filter(r => r.courseId === courseId && ( (r.examId && r.examId === exam.id) || (!r.examId && r.examTitle === (exam.title || '')) ));
                     if (prevAttempts.length >= 3 && !isMasterPreview) {
                         if(window.showToast) window.showToast('لقد استنفذت الحد الأقصى للمحاولات (3 محاولات).', 'error');
                         else alert('لقد استنفذت الحد الأقصى للمحاولات (3 محاولات).');
@@ -1495,7 +1553,7 @@
 
                     const ewmAttempts = document.getElementById('ewmAttempts');
                     if(ewmAttempts) {
-                        let warningsHtml = `<p style="margin-bottom: 10px;">âڑ ï¸ڈ لديك <strong>${3 - prevAttempts.length}</strong> محاولات متبقية. <br><small style="color: #f39c12;">(المحاولة الأولى فقط هي المحسوبة في التقييم، والمحاولات الإضافية هي لتحسين درجتك وتدريبك ولكنها غير محسوبة رسميااً).</small></p>`;
+                        let warningsHtml = `<p style="margin-bottom: 10px;">âڑ ï¸ڈ لديك <strong>${3 - prevAttempts.length}</strong> محاولات متبقية. <br><small style="color: #f39c12;">(المحاولة الأولى فقط هي المحسوبة في التقييم، والمحاولات الإضافية هي لتحسين درجتك وتدريبك ولكنها غير محسوبة رسمياً).</small></p>`;
                         
                         let durationMins = parseInt(exam.duration) || 0;
                         if (exam.strictMode && durationMins === 0) durationMins = 5;
@@ -1506,7 +1564,7 @@
                         }
 
                         if (exam.strictMode) {
-                            warningsHtml += `<p style="margin-bottom: 10px; color: #e74c3c;">ًںڑ« <strong>الوضع الصارم مفعل! يُمنع الخروج أو التبديل بين التطبيقات!</strong> أي محاولة لفتح تطبيق آخر أو الخروج من النافذة ستؤدي إلى <strong>تسليم الامتحان فورااً بدرجة صفر</strong>.</p>`;
+                            warningsHtml += `<p style="margin-bottom: 10px; color: #e74c3c;">ًںڑ« <strong>الوضع الصارم مفعل! يُمنع الخروج أو التبديل بين التطبيقات!</strong> أي محاولة لفتح تطبيق آخر أو الخروج من النافذة ستؤدي إلى <strong>تسليم الامتحان فوراً بدرجة صفر</strong>.</p>`;
                         } else {
                             warningsHtml += `<p style="margin-bottom: 10px; color: #3498db;">â„¹ï¸ڈ الوضع الصارم غير مفعل لهذا التقييم.</p>`;
                         }
@@ -1659,7 +1717,7 @@
                                 let ansText = ans.answer.trim() ? ans.answer : '<span style="color:#e74c3c">لم تتم الإجابة</span>';
                                 summaryHtml += `<li>س${i+1}: ${ansText}</li>`;
                             });
-                            summaryHtml += '</ul>هل أنت متأكد من تسليم هذا الامتحان نهائيااً؟ لا يمكن التراجع!</div>';
+                            summaryHtml += '</ul>هل أنت متأكد من تسليم هذا الامتحان نهائياً؟ لا يمكن التراجع!</div>';
                             
                             const confirmSubmit = confirm("ملخص الإجابات سيظهر الآن.\n" + summaryHtml.replace(/<[^>]*>?/gm, ' '));
                             if (!confirmSubmit) {
@@ -1760,7 +1818,7 @@
 
                         let encouragement = '', encColor = '', encIcon = '';
                         if (isStrictViolation) {
-                            encouragement = 'âڑ ï¸ڈ تم سحب الامتحان إجباريااً بسبب محاولة الخروج أو الغش âڑ ï¸ڈ<br><span style="font-size:1rem;color:#fff;">(تم احتساب درجاتك التي أجبت عليها فقط)</span>';
+                            encouragement = 'âڑ ï¸ڈ تم سحب الامتحان إجبارياً بسبب محاولة الخروج أو الغش âڑ ï¸ڈ<br><span style="font-size:1rem;color:#fff;">(تم احتساب درجاتك التي أجبت عليها فقط)</span>';
                             encColor = '#e67e22';
                             encIcon = 'â›”';
                         } else {
@@ -1768,7 +1826,7 @@
                             else if(dispPct >= 80) { encouragement = 'جيد جداً! مستوى مبشر ومتميز! ًںŒں'; encColor = '#2ecc71'; encIcon = 'ًںڈ†'; }
                             else if(dispPct >= 65) { encouragement = 'جيد! أداء كويس بس تقدر تعمل أحسن! ًں‘ڈ'; encColor = '#3498db'; encIcon = 'ًں‘چ'; }
                             else if(dispPct >= 50) { encouragement = 'مقبول. محتاج تذاكر أكتر وتركز المرة الجاية! ًں“ڑ'; encColor = '#f39c12'; encIcon = 'âڑ ï¸ڈ'; }
-                            else { encouragement = 'ضعيف جداً! هذا المستوى لا يليق بك، راجع دروسك فورااً! â‌Œ'; encColor = '#e74c3c'; encIcon = 'ًں’”'; }
+                            else { encouragement = 'ضعيف جداً! هذا المستوى لا يليق بك، راجع دروسك فوراً! â‌Œ'; encColor = '#e74c3c'; encIcon = 'ًں’”'; }
                         }
 
                         resultBox.style.display = 'block';
@@ -1850,7 +1908,7 @@
                             const prev = dbRec.examResults.filter(r => r.courseId === courseId && r.examTitle === (exam.title || ''));
                             const aNum = prev.length + 1;
                             const isH = (exam.type === 'واجب' || exam.type === 'homework' || (exam.title && exam.title.includes('واجب')));
-                            dbRec.examResults.push({ courseId, examTitle: exam.title||'', percent, earnedPoints, totalPoints, effectivePercent, penalized: penaltyApplied, attemptNumber: aNum, isOfficial: aNum===1, autoSubmit:!!autoSubmit, ts:Date.now(), details:results, isTraining: isTraining, isHomework: isH, needsReview: !!reviewReason, reviewReason: reviewReason });
+                            dbRec.examResults.push({ courseId, examId: exam.id, examTitle: exam.title||'', percent, earnedPoints, totalPoints, effectivePercent, penalized: penaltyApplied, attemptNumber: aNum, isOfficial: aNum===1, autoSubmit:!!autoSubmit, ts:Date.now(), details:results, isTraining: isTraining, isHomework: isH, needsReview: !!reviewReason, reviewReason: reviewReason });
                             
                             if(window.FirebaseService && typeof window.FirebaseService.updateStudentData === 'function') {
                                 window.FirebaseService.updateStudentData(student.phone, { examResults: dbRec.examResults }).then(() => {
@@ -1947,7 +2005,7 @@
 
                         _examStrictBeforeUnload = function(e) {
                             e.preventDefault();
-                            e.returnValue = 'إذا غادرت الآن سيتم تسليم الامتحان إجباريااً مع خصم 10%!';
+                            e.returnValue = 'إذا غادرت الآن سيتم تسليم الامتحان إجبارياً مع خصم 10%!';
                             return e.returnValue;
                         };
                         
@@ -2316,7 +2374,6 @@ window.enrollFreeCourse = async function(courseId) {
     }
     
     if(window.showToast) window.showToast('مرحباً بك في الكورس المجاني!', 'success');
-    setTimeout(() => {
     setTimeout(() => {
         window.location.reload();
     }, 1000);

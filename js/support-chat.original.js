@@ -511,7 +511,7 @@
       return { text: 'تمام يا جميلطŒ ابعتلي بالصراحة المشكلة أو الكورس اللي معطل معاكطŒ وأنا هديك حل بالمصري والعربي.' };
     }
     if (/انت ذكي|كويس|ممتاز/.test(normalized)) {
-      return { text: 'بحاول أكون كويس دلوقتيطŒ بس اللي فعلااً ذكي هو اللي بيتعب ويبذل مجهود.' };
+      return { text: 'بحاول أكون كويس دلوقتيطŒ بس اللي فعلاً ذكي هو اللي بيتعب ويبذل مجهود.' };
     }
     if (/شكرا|متشكر|ميرسي|تسلم|جزاك الله|جزاك الله خير/.test(normalized)) {
       return { text: 'على عيني يا بطلطŒ ربنا يخليك. لو عندك سؤال غريب أو مش واضحطŒ هابص عليه بسرعة وأحاول أرد عليك صح.' };
@@ -802,7 +802,7 @@
     tickets.push(ticket);
     saveTickets(tickets);
     safeSetItem(localStorage, 'pf_unseen_support_tickets', String((parseInt(safeGetItem(localStorage, 'pf_unseen_support_tickets')||'0')||0)+1));
-    if(window.showToast) window.showToast('تم إنشاء تذكرة دعمطŒ سيتواصل معك فريق الدعم قريبااً', 'success');
+    if(window.showToast) window.showToast('تم إنشاء تذكرة دعمطŒ سيتواصل معك فريق الدعم قريباً', 'success');
     return ticket;
   }
 

@@ -25,7 +25,7 @@
 
     <header class="navbar glass-panel" style="border-bottom-color: var(--royal-gold);">
         <a href="index.html" class="nav-brand">
-            <div class="logo-circle" style="color: #fff; background: var(--royal-gold);">ي</div>
+            <div class="logo-circle" style="color: #fff; background: var(--royal-gold);"><img src="images/logo.png?v=1786475931154" alt="Logo" style="width:100%; height:100%; object-fit:cover; border-radius:50%;"></div>
             <span class="nav-brand-text text-gold"><span class="desktop-text">لوحة الإدارة - يوسف بركات</span><span class="mobile-only-text" style="display: none;">لوحة الإدارة</span></span>
         </a>
         <div class="nav-actions">
@@ -472,7 +472,7 @@
                     const qText = document.getElementById('questionText').value;
                     const qAnswer = document.getElementById('correctAnswer').value;
                     if(!qText || !qAnswer) {
-                        alert('يجب كتابة السؤال والإجابة النموذجية أولااً قبل توليد التقييم.');
+                        alert('يجب كتابة السؤال والإجابة النموذجية أولاً قبل توليد التقييم.');
                         return;
                     }
 
@@ -713,7 +713,6 @@
                     courses[idx] = targetCourse;
                 }
 
-                const idx = courses.findIndex(c => c.id === courseId);
                 if (idx > -1) {
                     if (!courses[idx].contents) courses[idx].contents = { lectures: [], homeworks: [], exams: [], trainings: [] };
                     if (Array.isArray(courses[idx].contents)) {

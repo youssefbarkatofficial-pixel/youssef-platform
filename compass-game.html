@@ -62,11 +62,11 @@
         // التحقق من تسجيل الدخول (نفس Auth المنصة)
         firebase.auth().onAuthStateChanged((user) => {
             if (!user) {
-                // إذا كان الطالب كزائر، نوجهه لتسجيل الدخول أولااً كما ينص القانون
+                // إذا كان الطالب كزائر، نوجهه لتسجيل الدخول أولاً كما ينص القانون
                 window.location.href = 'login.html?redirect=compass-game.html';
             } else {
                 console.log("الطالب مسجل دخول، يمكنه اللعب:", user.email);
-                // مستقبلااً يمكننا إرسال رسالة عبر postMessage للـ iframe لإبلاغ Flutter بمن هو المستخدم!
+                // مستقبلاً يمكننا إرسال رسالة عبر postMessage للـ iframe لإبلاغ Flutter بمن هو المستخدم!
             }
         });
     </script>

@@ -25,7 +25,7 @@
 
     <header class="navbar glass-panel" style="border-bottom-color: var(--royal-gold);">
         <a href="index.html" class="nav-brand">
-            <div class="logo-circle" style="color: #fff; background: var(--royal-gold);">ي</div>
+            <div class="logo-circle" style="color: #fff; background: var(--royal-gold);"><img src="images/logo.png?v=1786475931154" alt="Logo" style="width:100%; height:100%; object-fit:cover; border-radius:50%;"></div>
             <span class="nav-brand-text text-gold"><span class="desktop-text">لوحة الإدارة - يوسف بركات</span><span class="mobile-only-text" style="display: none;">لوحة الإدارة</span></span>
         </a>
         <div class="nav-actions">
@@ -269,7 +269,7 @@
                 }
 
                 if(filteredReqs.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: var(--text-muted); padding: 30px;">لا توجد طلبات دفع بهذه الحالة حاليااً</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: var(--text-muted); padding: 30px;">لا توجد طلبات دفع بهذه الحالة حالياً</td></tr>';
                     return;
                 }
 
@@ -384,7 +384,7 @@
             document.getElementById('pStatusFilter').addEventListener('change', () => renderPayments());
 
             window.approvePayment = async function(id) {
-                if(!confirm('هل أنت متأكد من قبول هذا الطلب؟ سيتم تفعيل الكورس للطالب وفتح محتوياته فورااً.')) return;
+                if(!confirm('هل أنت متأكد من قبول هذا الطلب؟ سيتم تفعيل الكورس للطالب وفتح محتوياته فوراً.')) return;
                 
                 if (!window.firebaseDb) {
                     if(window.showToast) window.showToast('فشل الاتصال السحابي، تأكد من اتصال الإنترنت.', 'error');

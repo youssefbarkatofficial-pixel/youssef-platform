@@ -35,7 +35,7 @@
     <h2>ًں”¥ نتائج Conversation Stress Tests</h2>
     <div id="stressResults" class="card"></div>
 
-    <h2>âڑ ï¸ڈ أقبح 20 ردااً (Top 20 Worst Isolated Responses)</h2>
+    <h2>âڑ ï¸ڈ أقبح 20 رداً (Top 20 Worst Isolated Responses)</h2>
     <div id="worst" class="card"></div>
 
     <button id="downloadBtn" class="btn" style="background:#e67e22;">ًں“¥ تحميل التقرير النهائي (Markdown)</button>
@@ -49,7 +49,7 @@
       "هل تحتاج مساعدة",
       "يرجى توضيح السؤال",
       "أنا هنا لمساعدتك",
-      "أهلااً بك في المنصة"
+      "أهلاً بك في المنصة"
     ];
 
     const TEST_CATEGORIES = {
@@ -362,7 +362,7 @@
       });
       document.getElementById('stressResults').innerHTML = stressHtml;
 
-      md += `## 3. أقبح 20 ردااً من أصل 200 (Worst Responses)\n\n`;
+      md += `## 3. أقبح 20 رداً من أصل 200 (Worst Responses)\n\n`;
       let worstHtml = '';
       worst.forEach((w, i) => {
         let reasonText = w.reasons.length > 0 ? w.reasons.join('، ') : 'رد ضعيف عام';

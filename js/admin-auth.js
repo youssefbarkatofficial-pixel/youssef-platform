@@ -179,6 +179,24 @@ document.addEventListener('DOMContentLoaded', () => {
     if (window.location.pathname.includes('admin-') && !window.location.pathname.includes('admin-login')) {
         const admin = checkAdminAuth();
         if (admin) {
+            if (admin.role === 'assistant' || admin.email === 'mariamassistant@gmail.com') {
+                const style = document.createElement('style');
+                style.innerHTML = `
+                    a[href="admin-compass.html"], 
+                    a[href="admin-bot-monitor.html"], 
+                    .dash-panel:has(.fa-compass),
+                    .owner-compass-summary,
+                    #complaintsRequestsPanel {
+                        display: none !important;
+                    }
+                `;
+                document.head.appendChild(style);
+                
+                if (window.location.pathname.includes('admin-compass') || window.location.pathname.includes('admin-bot-monitor')) {
+                    window.location.replace('admin-dashboard.html');
+                }
+            }
+
             // Setup logout button
             const logoutBtn = document.getElementById('logoutBtn');
             if (logoutBtn) {

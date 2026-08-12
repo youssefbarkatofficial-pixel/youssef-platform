@@ -74,7 +74,7 @@
 
     <header class="navbar glass-panel" style="border-bottom-color: var(--royal-gold);">
         <a href="index.html" class="nav-brand">
-            <div class="logo-circle" style="color: #fff; background: var(--royal-gold);">ي</div>
+            <div class="logo-circle" style="color: #fff; background: var(--royal-gold);"><img src="images/logo.png?v=1786475931154" alt="Logo" style="width:100%; height:100%; object-fit:cover; border-radius:50%;"></div>
             <span class="nav-brand-text text-gold"><span class="desktop-text">لوحة الإدارة - يوسف بركات</span><span class="mobile-only-text" style="display: none;">لوحة الإدارة</span></span>
         </a>
         <div class="nav-actions">
@@ -490,7 +490,7 @@
                         <button class="btn btn-outline" style="padding: 5px 10px; font-size: 0.8rem; border-color: var(--royal-gold); color: var(--royal-gold);" onclick="openCourseSubscribers('${c.id}')"><i class="fas fa-users"></i> المشتركين</button>
                         ${visibilityBtn}
                         ${finishBtn}
-                        <button class="btn btn-outline" style="padding: 5px 10px; font-size: 0.8rem; border-color: #e74c3c; color: #e74c3c;" onclick="deleteCourseSecure('${c.id}')" title="حذف الكورس نهائيااً"><i class="fas fa-trash"></i></button>
+                        <button class="btn btn-outline" style="padding: 5px 10px; font-size: 0.8rem; border-color: #e74c3c; color: #e74c3c;" onclick="deleteCourseSecure('${c.id}')" title="حذف الكورس نهائياً"><i class="fas fa-trash"></i></button>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -515,7 +515,7 @@
                 }
                 adminCourses = adminCourses.filter(c => c.id !== id);
                 renderCoursesTable();
-                window.showToast('تم حذف الكورس نهائيااً', 'success');
+                window.showToast('تم حذف الكورس نهائياً', 'success');
             }
         };
 
@@ -677,7 +677,7 @@ function renderContentLists() {
                             <div style="flex: 1; min-width: 150px;">
                                 <label style="font-size: 0.8rem; color: #3498db; margin-bottom: 2px; display: block;">يعتمد على (مقفل حتى يُنجز)</label>
                                 <select class="form-control" onchange="updateItemField(${sIdx}, ${iIdx}, 'dependsOn', this.value)" style="padding: 4px; font-size: 0.8rem;">
-                                    <option value="">-- لا يوجد (متاح فورااً) --</option>
+                                    <option value="">-- لا يوجد (متاح فوراً) --</option>
                                     ${generateDependsOnOptions(sIdx, iIdx, item.dependsOn)}
                                 </select>
                             </div>
@@ -1190,7 +1190,7 @@ window.updateItemUrl = function(sIdx, iIdx, type, val) {
                     <span>تحديد الكل</span>
                 </label>
                 <div>
-                    <button class="btn btn-outline" style="border-color:#e74c3c; color:#e74c3c; padding:6px 12px; font-size:0.9rem;" onclick="bulkRemoveSubscribers()"><i class="fas fa-trash-alt mr-1"></i> إزالة المحددين صمتااً</button>
+                    <button class="btn btn-outline" style="border-color:#e74c3c; color:#e74c3c; padding:6px 12px; font-size:0.9rem;" onclick="bulkRemoveSubscribers()"><i class="fas fa-trash-alt mr-1"></i> إزالة المحددين صمتاً</button>
                     <button class="btn btn-gold" style="padding:6px 12px; font-size:0.9rem;" onclick="exportSubscribersCSV()"><i class="fas fa-download mr-1"></i> مسودة المشتركين (CSV)</button>
                 </div>
             </div>
@@ -1653,7 +1653,7 @@ window.deleteFlatItem = async function(listKey, idx) {
     if(pwd === null) return;
     if(pwd.trim() !== 'My@36_172001') return alert('كلمة المرور خاطئة');
     
-    if(!confirm('هل أنت متأكد من مسح هذا العنصر نهائيااً؟')) return;
+    if(!confirm('هل أنت متأكد من مسح هذا العنصر نهائياً؟')) return;
     
     const courses = JSON.parse(localStorage.getItem('adminCourses') || '[]');
     const courseIndex = courses.findIndex(c => c.id === window.currentFlatCourseId);
@@ -1674,7 +1674,7 @@ window.deleteFlatChildItem = async function(listKey, parentIdx, childIdx) {
     if(pwd === null) return;
     if(pwd.trim() !== 'My@36_172001') return alert('كلمة المرور خاطئة');
     
-    if(!confirm('هل أنت متأكد من مسح هذا العنصر الفرعي نهائيااً؟')) return;
+    if(!confirm('هل أنت متأكد من مسح هذا العنصر الفرعي نهائياً؟')) return;
     
     const courses = JSON.parse(localStorage.getItem('adminCourses') || '[]');
     const courseIndex = courses.findIndex(c => c.id === window.currentFlatCourseId);

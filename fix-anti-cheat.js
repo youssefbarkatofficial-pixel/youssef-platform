@@ -11,7 +11,7 @@ html = html.replace(/15000/g, '30000');
 html = html.replace(/15 ثانية/g, '30 ثانية');
 
 // 3. Rewrite failExamDirectly to just shake and warn, NOT submit
-const failDirectlyRegex = /const failExamDirectly = \(reason\) => \{[\s\S]*?alert\(`تم تسليم الامتحان تلقائيااً.*`\);\s*\};/m;
+const failDirectlyRegex = /const failExamDirectly = \(reason\) => \{[\s\S]*?alert\(`تم تسليم الامتحان تلقائياً.*`\);\s*\};/m;
 const failDirectlyReplacement = `const failExamDirectly = (reason) => {
     if(submitBtn.disabled && submitBtn.innerHTML.includes('جاري')) return;
     document.body.style.animation = 'shake 0.5s cubic-bezier(.36,.07,.19,.97) both';

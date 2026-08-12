@@ -171,8 +171,8 @@
               <option value="8">ظ¢ إعدادي</option>
               <option value="9">ظ£ إعدادي</option>
               <option value="10">ظ، ثانوي</option>
-              <option value="11" disabled>ظ¢ ثانوي (قريبااً)</option>
-              <option value="12" disabled>ظ£ ثانوي (قريبااً)</option>
+              <option value="11" disabled>ظ¢ ثانوي (قريباً)</option>
+              <option value="12" disabled>ظ£ ثانوي (قريباً)</option>
             </select>
           </div>
         </div>
@@ -205,8 +205,8 @@
               <option value="8">ظ¢ إعدادي</option>
               <option value="9">ظ£ إعدادي</option>
               <option value="10">ظ، ثانوي</option>
-              <option value="11" disabled>ظ¢ ثانوي (قريبااً)</option>
-              <option value="12" disabled>ظ£ ثانوي (قريبااً)</option>
+              <option value="11" disabled>ظ¢ ثانوي (قريباً)</option>
+              <option value="12" disabled>ظ£ ثانوي (قريباً)</option>
             </select>
           </div>
         </div>
@@ -581,7 +581,7 @@ function translateError(code) {
     'auth/invalid-email': 'البريد الإلكتروني غير صالح',
     'auth/weak-password': 'كلمة المرور ضعيفة',
   };
-  return map[code] || 'حدث خطأ، حاول مجددااً';
+  return map[code] || 'حدث خطأ، حاول مجدداً';
 }
 
 // ============================================================
@@ -770,7 +770,7 @@ function launchBattleWithConfig({ mode, subject, grade, questions, botCount, bot
 
   const s = GameEngine.getState();
 
-  // بناء لوحة النتائج العلوية ديناميكيااً
+  // بناء لوحة النتائج العلوية ديناميكياً
   const scoresContainer = document.getElementById('battle-scores-container');
   let scoresHTML = `
     <div class="score-player me" style="border-bottom: 3px solid #D4AF37;">
@@ -994,7 +994,7 @@ function showGameResult() {
       won: result.playerWon,
       draw: result.isDraw,
     }).then(() => {
-      // تحديث الواجهة فورااً
+      // تحديث الواجهة فوراً
       GameEngine.loadPlayerData(s.currentUser.uid).then(data => {
         ui.playerData = data;
         GameEngine.getState().playerXp = data.xp;
@@ -1213,7 +1213,7 @@ function joinRoom() {
 }
 
 function startFriendGame() {
-  launchBattle(); // مؤقتااً تبدأ مباراة عادية
+  launchBattle(); // مؤقتاً تبدأ مباراة عادية
 }
 
 // ============================================================
