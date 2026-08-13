@@ -700,6 +700,32 @@
                 }
             }
 
+            if (window.FirebaseService && typeof window.FirebaseService.setupGlobalListeners === 'function') {
+                window.FirebaseService.setupGlobalListeners();
+            }
+
+            window.addEventListener('paymentRequestsChanged', (e) => {
+                calculateStats();
+                renderPayments();
+            });
+
+            window.addEventListener('supportTicketsChanged', (e) => {
+                renderComplaints();
+            });
+
+            window.addEventListener('studentsChanged', (e) => {
+                calculateStats();
+            });
+            
+            window.addEventListener('coursesChanged', (e) => {
+                calculateStats();
+                // To reflect new course data without reload if applicable
+                const updatedCourses = e.detail;
+                if (updatedCourses && updatedCourses.length > 0) {
+                    adminCourses = updatedCourses;
+                }
+            });
+
             // Real Stats Calculation
             function calculateStats() {
                 let users = JSON.parse(localStorage.getItem('strictUsers') || '[]');
@@ -740,82 +766,6 @@
 
             calculateStats();
 
-            if (window.firebaseDb) {
-                // Sync payment requests
-                window.firebaseDb.collection('paymentRequests')
-                .onSnapshot(snapshot => {
-                    const requests = [];
-                    snapshot.forEach(doc => {
-                        requests.push({ id: doc.id, ...doc.data() });
-                    });
-                    
-                    try {
-                        const cacheReqs = requests.map(r => { 
-                            let copy = {...r}; 
-                            delete copy.proofImage; 
-                            return copy; 
-                        });
-                        localStorage.setItem('paymentRequests', JSON.stringify(cacheReqs));
-                    } catch(e) { console.warn('Cache error:', e); }
-                    
-                    calculateStats();
-                    renderPayments();
-                });
-
-                // Sync support tickets
-                window.firebaseDb.collection('support_tickets')
-                .onSnapshot(snapshot => {
-                    const tickets = [];
-                    snapshot.forEach(doc => {
-                        tickets.push({ id: doc.id, ...doc.data() });
-                    });
-                    localStorage.setItem('supportTickets', JSON.stringify(tickets));
-                    renderComplaints();
-                });
-
-                // Sync students
-                window.firebaseDb.collection('students')
-                .onSnapshot(snapshot => {
-                    const oldUsers = JSON.parse(localStorage.getItem('strictUsers') || '[]');
-                    const oldPwdMap = {};
-                    oldUsers.forEach(u => {
-                        if (u.plainPassword) oldPwdMap[u.phone] = { plain: u.plainPassword, hash: u.password };
-                        else if (u.password) oldPwdMap[u.phone] = { hash: u.password };
-                    });
-
-                    const students = [];
-                    snapshot.forEach(doc => {
-                        const data = doc.data();
-                        
-                        if (oldPwdMap[data.phone]) {
-                            if (!data.plainPassword && oldPwdMap[data.phone].plain) {
-                                data.plainPassword = oldPwdMap[data.phone].plain;
-                            }
-                            if (!data.password && oldPwdMap[data.phone].hash) {
-                                data.password = oldPwdMap[data.phone].hash;
-                            }
-                        }
-                        
-                        students.push(data);
-                        // Update cache for calculateStats
-                        try {
-                            localStorage.setItem(`db_${data.phone}`, JSON.stringify(data));
-                            if(data.uid) localStorage.setItem(`db_${data.uid}`, JSON.stringify(data));
-                        } catch(e) {}
-                    });
-                    const leanStudents = students.filter(s => s && s.phone && s.phone !== 'undefined' && s.name && s.name !== 'undefined').map(s => ({
-                        phone: s.phone,
-                        name: s.name,
-                        courses: s.courses || [],
-                        grade: s.grade,
-                        role: s.role
-                    }));
-                    try { localStorage.setItem('strictUsers', JSON.stringify(leanStudents)); } catch(e) {}
-
-                    calculateStats();
-                });
-            }
-            
             function renderComplaints() {
                 const tbody = document.getElementById('complaintsTableBody');
                 if (!tbody) return;
@@ -1850,6 +1800,72 @@
     </script>
 
     
+
+    <!-- Dashboard UI Redesign Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // 1. Move Payments Panel to the Top (Right after Stats Cards)
+            const cards = document.querySelector('.dash-cards');
+            const payments = document.getElementById('paymentRequestsPanel');
+            if (cards && payments) {
+                cards.after(payments);
+                payments.style.marginBottom = '30px';
+                payments.style.border = '2px solid var(--royal-gold)'; // Highlight payments
+            }
+            
+            // 2. Make other long panels collapsible
+            const allPanels = document.querySelectorAll('.dash-panel:not(#paymentRequestsPanel)');
+            
+            allPanels.forEach(panel => {
+                const header = panel.querySelector('.panel-header');
+                if (!header) return;
+                
+                // create details element
+                const details = document.createElement('details');
+                details.className = panel.className;
+                details.id = panel.id;
+                details.style.cssText = panel.style.cssText;
+                
+                // create summary
+                const summary = document.createElement('summary');
+                summary.style.cssText = 'cursor:pointer; outline:none; list-style:none; display:flex; justify-content:space-between; align-items:center; width:100%;';
+                
+                // wrap header content inside summary
+                while(header.firstChild) {
+                    summary.appendChild(header.firstChild);
+                }
+                summary.className = 'panel-header';
+                
+                details.appendChild(summary);
+                
+                // move all other children of panel to details
+                while(panel.firstChild) {
+                    if (panel.firstChild !== header) {
+                        details.appendChild(panel.firstChild);
+                    } else {
+                        panel.removeChild(panel.firstChild); // remove the empty header
+                    }
+                }
+                
+                // replace panel with details
+                panel.parentNode.replaceChild(details, panel);
+            });
+            
+            // 3. Move Add Course Button to the modal properly, it's currently at the top causing issues
+            const btnAddCourse = document.getElementById('btnAddCourseTop');
+            if(btnAddCourse) {
+                // Keep it but maybe make it less intrusive
+                btnAddCourse.style.position = 'fixed';
+                btnAddCourse.style.bottom = '30px';
+                btnAddCourse.style.right = '30px';
+                btnAddCourse.style.zIndex = '1000';
+                btnAddCourse.style.boxShadow = '0 5px 15px rgba(212,166,79,0.4)';
+                btnAddCourse.style.borderRadius = '50px';
+                btnAddCourse.style.padding = '15px 25px';
+            }
+        });
+    </script>
+
 </body>
 </html>
 

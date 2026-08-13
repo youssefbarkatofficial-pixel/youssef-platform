@@ -112,16 +112,26 @@ document.addEventListener('DOMContentLoaded', () => {
                           return;
                       }
                       
-                      let exists = false;
+                      let exists = true; // Default to true to prevent accidental kick
+                      let checked = false;
                       if (sObj.uid) {
                           const doc = await window.firebaseDb.collection('students').doc(sObj.uid).get();
-                          if (doc.exists) exists = true;
+                          if (doc.exists) {
+                              exists = true;
+                              checked = true;
+                          } else {
+                              exists = false;
+                              checked = true;
+                          }
                       }
-                      if (!exists && sObj.phone) {
+                      if (!checked && sObj.phone) {
                           const snap = await window.firebaseDb.collection('students').where('phone', '==', sObj.phone).limit(1).get();
                           if (!snap.empty) {
                               exists = true;
+                              checked = true;
                           } else {
+                              exists = false;
+                              checked = true;
                               // Check strictUsers fallback
                               const localUsers = JSON.parse(localStorage.getItem('strictUsers') || '[]');
                               if (localUsers.find(u => String(u.phone) === String(sObj.phone))) {
@@ -130,7 +140,7 @@ document.addEventListener('DOMContentLoaded', () => {
                           }
                       }
                       
-                      if (!exists) {
+                      if (checked && !exists) {
                           sessionStorage.removeItem('currentStudent');
                           localStorage.removeItem('currentStudent');
                           let accs = JSON.parse(localStorage.getItem('savedLocalAccounts') || '[]');
@@ -1016,7 +1026,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // --- Welcome Message on Dashboard ---
       let welcomeDelay = 0;
-      if (window.location.pathname.includes('dashboard.html') && (!sessionStorage.getItem('welcomeShown') || sessionStorage.getItem('pfJustLoggedIn') === 'true')) {
+      if (window.location.pathname.includes('dashboard') && (!sessionStorage.getItem('welcomeShown') || sessionStorage.getItem('pfJustLoggedIn') === 'true')) {
           const genSettings = JSON.parse(localStorage.getItem('generalSettings') || '{}');
           const welcomeMsg = genSettings.welcomeMessage || 'مرحباً بك في منصتك التعليمية';
           welcomeDelay = 3500;
@@ -1555,7 +1565,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                   
                                   // If new course was added, reload to reflect unlocked state
                                   if (localCourses.length < remoteCourses.length) {
-                                      if (window.location.pathname.includes('courses.html') || window.location.pathname.includes('course-details.html')) {
+                                      if (window.location.pathname.includes('courses') || window.location.pathname.includes('course-details')) {
                                           if(window.showToast) window.showToast('تم تحديث اشتراكاتك! جاري تحديث الصفحة...', 'success');
                                           setTimeout(() => window.location.reload(), 1500);
                                       }
@@ -1563,7 +1573,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                       // Just update notifications badge in background if possible
                                       const unreadCount = remoteNotifs.filter(n => !n.read).length;
                                       if (remoteNotifs.some(n => n.title && n.title.includes('مشكلة في تأكيد الدفع') && !n.read)) {
-                                          if (window.location.pathname.includes('courses.html') || window.location.pathname.includes('course-details.html')) {
+                                          if (window.location.pathname.includes('courses') || window.location.pathname.includes('course-details')) {
                                               setTimeout(() => window.location.reload(), 1500);
                                           }
                                       }

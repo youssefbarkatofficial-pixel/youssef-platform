@@ -3,6 +3,16 @@
 <head>
     <link rel="manifest" href="./manifest.json">
     <script>
+function getAdminCoursesArray() {
+    if (window.FirebaseService && typeof window.FirebaseService.getCachedCourses === 'function') {
+        const cached = window.FirebaseService.getCachedCourses();
+        if (cached && cached.length > 0) return JSON.parse(JSON.stringify(cached));
+    }
+    return getAdminCoursesArray();
+}
+function saveAdminCoursesArray(courses) {
+    try { saveAdminCoursesArray(courses); } catch(e) {}
+}
         if (!sessionStorage.getItem('currentAdmin')) { window.location.replace('admin-login.html'); }
     </script>
     <meta charset="UTF-8">
@@ -332,7 +342,7 @@
             });
 
             try {
-                localStorage.setItem('adminCourses', JSON.stringify(lightCourses));
+                saveAdminCoursesArray(lightCourses);
             } catch(e) {
                 // If still too big, try saving without contents (keep metadata only)
                 console.warn('Still too large, saving metadata only:', e.message);
@@ -345,7 +355,7 @@
                     };
                 });
                 try {
-                    localStorage.setItem('adminCourses', JSON.stringify(minimalCourses));
+                    saveAdminCoursesArray(minimalCourses);
                     // Store full contents separately per course
                     courses.forEach(function(c) {
                         try {
@@ -359,7 +369,7 @@
         }
 
         function loadCoursesFromStorage() {
-            var raw = JSON.parse(localStorage.getItem('adminCourses') || '[]');
+            var raw = getAdminCoursesArray();
             return raw.map(function(c) {
                 // Restore base64 images from separate keys
                 if (c.image && c.image.startsWith('__local__')) {
@@ -378,7 +388,8 @@
             });
         }
 
-        let adminCourses = loadCoursesFromStorage();
+        let adminCourses = loadCoursesFromStorage() || [];
+        if (!Array.isArray(adminCourses)) adminCourses = [];
         let currentEditingCourse = null;
         let tempContents = { lectures: [], homeworks: [], exams: [], trainings: [], customSections: [] };
         let hasUnsavedChanges = false;
@@ -509,9 +520,9 @@
                 if(window.FirebaseService) {
                     await window.FirebaseService.deleteCourse(id);
                 } else {
-                    let courses = JSON.parse(localStorage.getItem('adminCourses') || '[]');
+                    let courses = getAdminCoursesArray();
                     courses = courses.filter(c => c.id !== id);
-                    localStorage.setItem('adminCourses', JSON.stringify(courses));
+                    saveAdminCoursesArray(courses);
                 }
                 adminCourses = adminCourses.filter(c => c.id !== id);
                 renderCoursesTable();
@@ -901,6 +912,18 @@ window.updateItemUrl = function(sIdx, iIdx, type, val) {
 };
 
         document.addEventListener('DOMContentLoaded', async () => {
+            window.addEventListener('coursesChanged', (e) => {
+                const freshCourses = getAdminCoursesArray();
+                if (window.renderCoursesTable) {
+                    if (typeof adminCourses !== 'undefined') {
+                        adminCourses = freshCourses;
+                    }
+                    renderCoursesTable();
+                    if (document.getElementById('flatContentModal').style.display === 'flex' && window.currentFlatCourseId) {
+                        window.renderFlatContents();
+                    }
+                }
+            });
             // Ensure auth
             const authStr = sessionStorage.getItem('currentAdmin');
             if(!authStr || JSON.parse(authStr).role !== 'admin') {
@@ -1229,7 +1252,7 @@ window.openCourseSubscribers = async function(courseId) {
     modal.style.display = 'flex';
     
     let courseName = "الكورس";
-    const adminCourses = JSON.parse(localStorage.getItem('adminCourses') || '[]');
+    const adminCourses = getAdminCoursesArray();
     const c = adminCourses.find(x => x.id === courseId);
     if(c) courseName = c.title;
     title.innerHTML = '<i class="fas fa-users mr-2"></i> مشتركي: ' + courseName;
@@ -1450,7 +1473,7 @@ window.moveFlatChildItem = function(listKey, parentIdx, childIdx) {
 };
 
 window.openMoveModal = function() {
-    const courses = JSON.parse(localStorage.getItem('adminCourses') || '[]');
+    const courses = getAdminCoursesArray();
     const select = document.getElementById('moveTargetCourse');
     select.innerHTML = '';
     courses.forEach(c => {
@@ -1478,7 +1501,7 @@ window.confirmMoveItem = async function() {
         return;
     }
     
-    const courses = JSON.parse(localStorage.getItem('adminCourses') || '[]');
+    const courses = getAdminCoursesArray();
     const srcCourseIdx = courses.findIndex(c => c.id === window.currentFlatCourseId);
     const dstCourseIdx = courses.findIndex(c => c.id === targetCourseId);
     
@@ -1514,7 +1537,7 @@ window.confirmMoveItem = async function() {
                 await window.FirebaseService.saveCourse(dstCourse);
             }
         }
-        localStorage.setItem('adminCourses', JSON.stringify(courses));
+        saveAdminCoursesArray(courses);
         showToast('تم نقل المحتوى بنجاح', 'success');
         closeMoveModal();
         renderFlatContents(); // refresh view
@@ -1566,7 +1589,7 @@ window.confirmMoveItem = async function() {
         });
 // --- FLAT CONTENT MANAGER ---
 window.openFlatContentManager = function(courseId) {
-    const courses = JSON.parse(localStorage.getItem('adminCourses') || '[]');
+    const courses = getAdminCoursesArray();
     const course = courses.find(c => c.id === courseId);
     if (!course) return;
     
@@ -1576,7 +1599,7 @@ window.openFlatContentManager = function(courseId) {
 };
 
 window.renderFlatContents = function() {
-    const courses = JSON.parse(localStorage.getItem('adminCourses') || '[]');
+    const courses = getAdminCoursesArray();
     const course = courses.find(c => c.id === window.currentFlatCourseId);
     if (!course || !course.contents) return;
     
@@ -1655,13 +1678,13 @@ window.deleteFlatItem = async function(listKey, idx) {
     
     if(!confirm('هل أنت متأكد من مسح هذا العنصر نهائياً؟')) return;
     
-    const courses = JSON.parse(localStorage.getItem('adminCourses') || '[]');
+    const courses = getAdminCoursesArray();
     const courseIndex = courses.findIndex(c => c.id === window.currentFlatCourseId);
     if(courseIndex === -1) return;
     
     courses[courseIndex].contents[listKey].splice(idx, 1);
     
-    localStorage.setItem('adminCourses', JSON.stringify(courses));
+    saveAdminCoursesArray(courses);
     if (window.FirebaseService && typeof window.FirebaseService.saveCourse === 'function') {
         window.FirebaseService.saveCourse(courses[courseIndex]);
     }
@@ -1676,13 +1699,13 @@ window.deleteFlatChildItem = async function(listKey, parentIdx, childIdx) {
     
     if(!confirm('هل أنت متأكد من مسح هذا العنصر الفرعي نهائياً؟')) return;
     
-    const courses = JSON.parse(localStorage.getItem('adminCourses') || '[]');
+    const courses = getAdminCoursesArray();
     const courseIndex = courses.findIndex(c => c.id === window.currentFlatCourseId);
     if(courseIndex === -1) return;
     
     courses[courseIndex].contents[listKey][parentIdx].children.splice(childIdx, 1);
     
-    localStorage.setItem('adminCourses', JSON.stringify(courses));
+    saveAdminCoursesArray(courses);
     if (window.FirebaseService && typeof window.FirebaseService.saveCourse === 'function') {
         window.FirebaseService.saveCourse(courses[courseIndex]);
     }
@@ -1694,7 +1717,7 @@ window.deleteFlatChildItem = async function(listKey, parentIdx, childIdx) {
 let _moveState = { listKey: null, parentIdx: null, childIdx: null };
 window.openMoveItemModal = function(listKey, parentIdx, childIdx = null) {
     _moveState = { listKey, parentIdx, childIdx };
-    const courses = JSON.parse(localStorage.getItem('adminCourses') || '[]');
+    const courses = getAdminCoursesArray();
     
     let courseSelectHtml = '<option value="">اختر الكورس...</option>';
     courses.forEach(c => {
@@ -1714,7 +1737,7 @@ window.confirmMoveItem = async function() {
     
     if(!targetCourseId || !targetSection) return alert('يرجى اختيار الكورس والقسم!');
     
-    const courses = JSON.parse(localStorage.getItem('adminCourses') || '[]');
+    const courses = getAdminCoursesArray();
     const sourceCourseIdx = courses.findIndex(c => c.id === window.currentFlatCourseId);
     const targetCourseIdx = courses.findIndex(c => c.id === targetCourseId);
     
@@ -1735,7 +1758,7 @@ window.confirmMoveItem = async function() {
     
     courses[targetCourseIdx].contents[targetSection].push(itemToMove);
     
-    localStorage.setItem('adminCourses', JSON.stringify(courses));
+    saveAdminCoursesArray(courses);
     if (window.FirebaseService && typeof window.FirebaseService.saveCourse === 'function') {
         // Save both if different, else save once
         if (sourceCourseIdx !== targetCourseIdx) {

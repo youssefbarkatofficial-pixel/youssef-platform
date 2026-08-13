@@ -229,7 +229,7 @@ function getLevelInfo(avg) {
 }
 
 function calcStudentStats(s) {
-    const examResults = s.examResults || [];
+    const examResults = (s.examResults || []).filter(r => r);
     const isT = (r) => r.isTraining || (r.examTitle && r.examTitle.includes('تدريب'));
     const isH = (r) => r.isHomework  || (r.examTitle && r.examTitle.includes('واجب'));
     const exams     = examResults.filter(r => !isT(r) && !isH(r));
@@ -441,7 +441,7 @@ async function openStudentDetail(uid) {
     document.getElementById('modalStudentName').innerHTML = `${s.name||'بدون اسم'} ${waPhone?`<a href="${waHref}" target="_blank" style="margin-right:10px;color:#25d366;font-size:1rem;"><i class="fab fa-whatsapp"></i> واتساب</a>`:''}`;
     document.getElementById('modalStudentMeta').textContent = `${s.phone||''} | ${gradeNames[s.grade]||s.grade||''} | آخر دخول: ${s.lastSeen?new Date(s.lastSeen).toLocaleString('ar-EG'):'غير معروف'}`;
 
-    const examResults = s.examResults || [];
+    const examResults = (s.examResults || []).filter(r => r);
     const isT = r => r.isTraining || (r.examTitle&&r.examTitle.includes('تدريب'));
     const isH = r => r.isHomework  || (r.examTitle&&r.examTitle.includes('واجب'));
     const exams     = examResults.filter(r => !isT(r)&&!isH(r));
@@ -517,8 +517,9 @@ async function openStudentDetail(uid) {
                 </div>`;
 
                 if (fa.details && fa.details.length) {
-                    cHtml += `<div style="margin-top:4px;"><div style="font-size:0.85rem;color:rgba(255,255,255,0.5);margin-bottom:8px;">إجابات الطالب (${fa.details.length} سؤال) — اضغط لتغيير الحكم:</div>`;
-                    fa.details.forEach((d,i)=>{
+                    const validDetails = fa.details.filter(d => d);
+                    cHtml += `<div style="margin-top:4px;"><div style="font-size:0.85rem;color:rgba(255,255,255,0.5);margin-bottom:8px;">إجابات الطالب (${validDetails.length} سؤال) — اضغط لتغيير الحكم:</div>`;
+                    validDetails.forEach((d,i)=>{
                         const ok = d.score>=0.5;
                         const dS = getFullAns(d.rawAnswer,d.options);
                         const cR = d.correctAnswer??d.correct??d.answer??'';

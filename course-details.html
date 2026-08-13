@@ -371,6 +371,17 @@
     <script src="js/dashboard.js?v=10"></script>
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
+            
+            // Real-Time WhatsApp-like Sync
+            window.addEventListener('coursesChanged', (e) => {
+                const freshCourses = e.detail || [];
+                const courseId = new URLSearchParams(window.location.search).get('id');
+                const freshCourse = freshCourses.find(c => c.id === courseId);
+                if (freshCourse && freshCourse.contents) {
+                    let sections = migrateCourseToSections(freshCourse.contents);
+                    renderSections(sections);
+                }
+            });
             const urlParams = new URLSearchParams(window.location.search);
             const courseId = urlParams.get('id');
             
@@ -1560,7 +1571,7 @@
 
                     const ewmAttempts = document.getElementById('ewmAttempts');
                     if(ewmAttempts) {
-                        let warningsHtml = `<p style="margin-bottom: 10px;">âڑ ï¸ڈ لديك <strong>${3 - prevAttempts.length}</strong> محاولات متبقية. <br><small style="color: #f39c12;">(المحاولة الأولى فقط هي المحسوبة في التقييم، والمحاولات الإضافية هي لتحسين درجتك وتدريبك ولكنها غير محسوبة رسمياً).</small></p>`;
+                        let warningsHtml = `<p style="margin-bottom: 10px;">⚠️ لديك <strong>${3 - prevAttempts.length}</strong> محاولات متبقية. <br><small style="color: #f39c12;">(المحاولة الأولى فقط هي المحسوبة في التقييم، والمحاولات الإضافية هي لتحسين درجتك وتدريبك ولكنها غير محسوبة رسمياً).</small></p>`;
                         
                         let durationMins = parseInt(exam.duration) || 0;
                         if (exam.strictMode && durationMins === 0) durationMins = 5;
@@ -1573,13 +1584,13 @@
                         if (exam.strictMode) {
                             warningsHtml += `<p style="margin-bottom: 10px; color: #e74c3c;">ًںڑ« <strong>الوضع الصارم مفعل! يُمنع الخروج أو التبديل بين التطبيقات!</strong> أي محاولة لفتح تطبيق آخر أو الخروج من النافذة ستؤدي إلى <strong>تسليم الامتحان فوراً بدرجة صفر</strong>.</p>`;
                         } else {
-                            warningsHtml += `<p style="margin-bottom: 10px; color: #3498db;">â„¹ï¸ڈ الوضع الصارم غير مفعل لهذا التقييم.</p>`;
+                            warningsHtml += `<p style="margin-bottom: 10px; color: #3498db;">ℹ️ الوضع الصارم غير مفعل لهذا التقييم.</p>`;
                         }
 
                         if (durationMins > 0) {
-                            warningsHtml += `<p style="margin-bottom: 0;">âڈ±ï¸ڈ مدة الامتحان <strong>${durationMins} دقائق</strong>. سيستمر العداد حتى لو انقطع الإنترنت.</p>`;
+                            warningsHtml += `<p style="margin-bottom: 0;">⏱️ مدة الامتحان <strong>${durationMins} دقائق</strong>. سيستمر العداد حتى لو انقطع الإنترنت.</p>`;
                         } else {
-                            warningsHtml += `<p style="margin-bottom: 0;">âڈ±ï¸ڈ الامتحان بدون وقت محدد.</p>`;
+                            warningsHtml += `<p style="margin-bottom: 0;">⏱️ الامتحان بدون وقت محدد.</p>`;
                         }
                         
                         ewmAttempts.innerHTML = warningsHtml;
@@ -1609,7 +1620,7 @@
                     if (isMasterPreview) {
                         const mNote = document.createElement('p');
                         mNote.style.color = '#3498db';
-                        mNote.innerHTML = 'â„¹ï¸ڈ <strong>ملاحظة (حساب الماستر 0000):</strong> هذه هي شاشة التعليمات التي تظهر للطالب.';
+                        mNote.innerHTML = 'ℹ️ <strong>ملاحظة (حساب الماستر 0000):</strong> هذه هي شاشة التعليمات التي تظهر للطالب.';
                         ewmAttempts.appendChild(mNote);
                     }
                     warningModal.classList.add('active');
@@ -1740,6 +1751,8 @@
 
                         // Import Bousala Grader
                         let BousalaGrader = null;
+                        let reviewReason = null;
+                        
                         try {
                             BousalaGrader = await import('./js/bousala-grader.js');
                         } catch(e) { console.warn('BousalaGrader failed to load, falling back to PF_Grader', e); }
@@ -1826,15 +1839,15 @@
 
                         let encouragement = '', encColor = '', encIcon = '';
                         if (isStrictViolation) {
-                            encouragement = 'âڑ ï¸ڈ تم سحب الامتحان إجبارياً بسبب محاولة الخروج أو الغش âڑ ï¸ڈ<br><span style="font-size:1rem;color:#fff;">(تم احتساب درجاتك التي أجبت عليها فقط)</span>';
+                            encouragement = '⚠️ تم سحب الامتحان إجبارياً بسبب محاولة الخروج أو الغش ⚠️<br><span style="font-size:1rem;color:#fff;">(تم احتساب درجاتك التي أجبت عليها فقط)</span>';
                             encColor = '#e67e22';
-                            encIcon = 'â›”';
+                            encIcon = '⛔';
                         } else {
-                            if(dispPct >= 90) { encouragement = 'طالب البوصلة! أداء استثنائي ومثالي! ًں‘‘'; encColor = '#f1c40f'; encIcon = 'ًں§­'; }
-                            else if(dispPct >= 80) { encouragement = 'جيد جداً! مستوى مبشر ومتميز! ًںŒں'; encColor = '#2ecc71'; encIcon = 'ًںڈ†'; }
-                            else if(dispPct >= 65) { encouragement = 'جيد! أداء كويس بس تقدر تعمل أحسن! ًں‘ڈ'; encColor = '#3498db'; encIcon = 'ًں‘چ'; }
-                            else if(dispPct >= 50) { encouragement = 'مقبول. محتاج تذاكر أكتر وتركز المرة الجاية! ًں“ڑ'; encColor = '#f39c12'; encIcon = 'âڑ ï¸ڈ'; }
-                            else { encouragement = 'ضعيف جداً! هذا المستوى لا يليق بك، راجع دروسك فوراً! â‌Œ'; encColor = '#e74c3c'; encIcon = 'ًں’”'; }
+                            if(dispPct >= 90) { encouragement = 'طالب البوصلة! أداء استثنائي ومثالي! 👑'; encColor = '#f1c40f'; encIcon = '🧭'; }
+                            else if(dispPct >= 80) { encouragement = 'جيد جداً! مستوى مبشر ومتميز! 🌟'; encColor = '#2ecc71'; encIcon = '🏆'; }
+                            else if(dispPct >= 65) { encouragement = 'جيد! أداء كويس بس تقدر تعمل أحسن! 👏'; encColor = '#3498db'; encIcon = '👍'; }
+                            else if(dispPct >= 50) { encouragement = 'مقبول. محتاج تذاكر أكتر وتركز المرة الجاية! 📚'; encColor = '#f39c12'; encIcon = '⚠️'; }
+                            else { encouragement = 'ضعيف جداً! هذا المستوى لا يليق بك، راجع دروسك فوراً! ❌'; encColor = '#e74c3c'; encIcon = '💔'; }
                         }
 
                         resultBox.style.display = 'block';
@@ -1850,9 +1863,9 @@
                         rHtml += scoreDisp;
                         
                         rHtml += '<div style="font-size:1rem;color:#f39c12;margin-top:5px;"><strong>مجموع النقاط: ' + (Math.round(earnedPoints * 100) / 100) + ' من ' + totalPoints + '</strong></div>';
-                        if(isStrictViolation) rHtml += '<div style="margin-top:10px;padding:10px;background:rgba(230,126,34,0.15);border-radius:8px;color:#e67e22;font-size:0.9rem;">âڑ ï¸ڈ <strong>تم تسليم الامتحان وتسجيل درجاتك الحالية بسبب محاولة الخروج أو مخالفة القواعد.</strong></div>';
-                        else if(autoSubmit) rHtml += '<div style="margin-top:8px;color:#e74c3c;font-size:0.9rem;">âڈ° تم التسليم التلقائي بعد انتهاء الوقت.</div>';
-                        if(penaltyApplied) rHtml += '<div style="margin-top:10px;padding:10px;background:rgba(231,76,60,0.15);border-radius:8px;color:#e74c3c;font-size:0.9rem;">âڑ ï¸ڈ <strong>تم خصم 20% من درجتك بسبب التأخر في التسليم بعد الموعد النهائي.</strong></div>';
+                        if(isStrictViolation) rHtml += '<div style="margin-top:10px;padding:10px;background:rgba(230,126,34,0.15);border-radius:8px;color:#e67e22;font-size:0.9rem;">⚠️ <strong>تم تسليم الامتحان وتسجيل درجاتك الحالية بسبب محاولة الخروج أو مخالفة القواعد.</strong></div>';
+                        else if(autoSubmit) rHtml += '<div style="margin-top:8px;color:#e74c3c;font-size:0.9rem;">⏰ تم التسليم التلقائي بعد انتهاء الوقت.</div>';
+                        if(penaltyApplied) rHtml += '<div style="margin-top:10px;padding:10px;background:rgba(231,76,60,0.15);border-radius:8px;color:#e74c3c;font-size:0.9rem;">⚠️ <strong>تم خصم 20% من درجتك بسبب التأخر في التسليم بعد الموعد النهائي.</strong></div>';
                         rHtml += '<hr style="border-color:rgba(255,255,255,0.08);margin:14px 0;"><div id="_examResDetails"></div></div>';
                         resultBox.innerHTML = rHtml;
 
@@ -1993,8 +2006,8 @@
                             const urg = secsLeft <= 60;
                             timerEl.style.color = urg ? '#e74c3c' : 'var(--royal-gold)';
                             timerEl.style.borderColor = urg ? 'rgba(231,76,60,0.4)' : 'rgba(212,166,79,0.2)';
-                            timerEl.innerHTML = 'âڈ±ï¸ڈ الوقت المتبقي: <span>' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0') + '</span>';
-                            if(secsLeft <= 0) { _stopTimer(); timerEl.innerHTML = 'âڈ° <span style="color:#e74c3c;">انتهى الوقت! جاري التسليم التلقائي لما تم إجابته...</span>'; setTimeout(() => doSubmit(true), 500); }
+                            timerEl.innerHTML = '⏱️ الوقت المتبقي: <span>' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0') + '</span>';
+                            if(secsLeft <= 0) { _stopTimer(); timerEl.innerHTML = '⏰ <span style="color:#e74c3c;">انتهى الوقت! جاري التسليم التلقائي لما تم إجابته...</span>'; setTimeout(() => doSubmit(true), 500); }
                         }
                         updTm(); _examTimerInterval = setInterval(updTm, 1000);
                     }
@@ -2005,7 +2018,7 @@
                         // Block Links
                         const _preventNavigation = (e) => {
                             e.preventDefault();
-                            if(window.showToast) window.showToast('âڑ ï¸ڈ ممنوع الخروج من الامتحان!', 'error');
+                            if(window.showToast) window.showToast('⚠️ ممنوع الخروج من الامتحان!', 'error');
                         };
                         document.querySelectorAll('a').forEach(link => {
                             link.addEventListener('click', _preventNavigation);
@@ -2119,7 +2132,7 @@ const warnOrFailExam = (reason) => {
                             // Prevent F12, Ctrl+Shift+I, Ctrl+C, Ctrl+V, PrintScreen
                             if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && e.key === 'I') || (e.ctrlKey && e.key === 'c') || (e.ctrlKey && e.key === 'v') || e.key === 'PrintScreen') {
                                 e.preventDefault();
-                                if (window.showToast) window.showToast('âڑ ï¸ڈ محاولة استخدام اختصار ممنوع!', 'error');
+                                if (window.showToast) window.showToast('⚠️ محاولة استخدام اختصار ممنوع!', 'error');
                             }
                         };
 
@@ -2139,7 +2152,7 @@ const warnOrFailExam = (reason) => {
                         history.pushState({ strictExam: true }, null, window.location.href);
                         _examStrictPopstate = function(e) {
                             history.pushState({ strictExam: true }, null, window.location.href);
-                            if(window.showToast) window.showToast('âڑ ï¸ڈ لا يمكنك الرجوع للخلف أثناء الامتحان!', 'error');
+                            if(window.showToast) window.showToast('⚠️ لا يمكنك الرجوع للخلف أثناء الامتحان!', 'error');
                             warnOrFailExam('محاولة الرجوع للخلف (Swipe Back)');
                         };
                         window.addEventListener('popstate', _examStrictPopstate);

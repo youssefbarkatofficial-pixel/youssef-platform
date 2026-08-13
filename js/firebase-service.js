@@ -10,6 +10,7 @@ window.FirebaseService = (function () {
 
     // --- Realtime Listeners ---
     let coursesListenerUnsubscribe = null;
+    let inMemoryCourses = [];
     let paymentRequestsListenerUnsubscribe = null;
 
     // Sanitize localStorage immediately to prevent QuotaExceededError from old stuck requests
@@ -324,7 +325,7 @@ window.FirebaseService = (function () {
      */
     async function getCourses() {
         if (!isFirebaseReady()) {
-            return getCoursesFromStorage();
+            return inMemoryCourses.length > 0 ? inMemoryCourses : getCoursesFromStorage();
         }
         
         function stripContentsIfNotAdmin(coursesArr) {
@@ -347,7 +348,9 @@ window.FirebaseService = (function () {
                 coursesListenerUnsubscribe = getDb().collection('courses').onSnapshot(snap => {
                     let courses = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                     courses = stripContentsIfNotAdmin(courses);
+                    inMemoryCourses = courses;
                     safeStorageSaveCourses(courses);
+                    window.dispatchEvent(new CustomEvent('coursesChanged', { detail: courses }));
                 }, err => console.warn('Courses listener error', err));
             }
 
@@ -365,6 +368,7 @@ window.FirebaseService = (function () {
             }
 
             serverCourses = stripContentsIfNotAdmin(serverCourses);
+            inMemoryCourses = serverCourses;
             safeStorageSaveCourses(serverCourses);
             return serverCourses;
         } catch (e) {
@@ -854,7 +858,7 @@ window.FirebaseService = (function () {
         saveSettings,
         getSettings,
         syncLocalToFirestore,
-        getCachedCourses: getCoursesFromStorage,
+        getCachedCourses: function() { return inMemoryCourses.length > 0 ? inMemoryCourses : getCoursesFromStorage(); },
         askSmartBotCloud
     };
 

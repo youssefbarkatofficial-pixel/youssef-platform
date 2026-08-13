@@ -676,6 +676,7 @@ img, video {
     align-items: center !important;
     justify-content: center !important;
     gap: 10px !important;
+    background: var(--bg-main) !important;
   }
   
   .navbar .nav-brand {
@@ -688,7 +689,9 @@ img, video {
   }
 
   .navbar .nav-brand-text {
-    font-size: 1.4rem !important;
+    font-size: 1.1rem !important;
+    white-space: normal !important;
+    text-align: center;
   }
   
   .navbar .logo-circle {
@@ -714,6 +717,11 @@ img, video {
     width: 100% !important;
   }
   
+  .navbar .nav-links a {
+    color: var(--text-primary) !important;
+    font-size: 1rem !important;
+  }
+
   .nav-actions .btn:not(#themeToggle) {
     padding: 6px 12px !important;
     font-size: 0.8rem !important;

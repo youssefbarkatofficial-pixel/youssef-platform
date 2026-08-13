@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-  if (window.location.pathname.includes('login.html') && (sessionStorage.getItem('currentStudent') || localStorage.getItem('currentStudent'))) {
+  if (window.location.pathname.includes('/login') && (sessionStorage.getItem('currentStudent') || localStorage.getItem('currentStudent'))) {
     window.location.href = 'dashboard.html';
     return;
   }

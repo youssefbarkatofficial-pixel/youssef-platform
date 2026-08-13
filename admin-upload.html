@@ -380,7 +380,7 @@
                             const sc = await window.FirebaseService.getCourses();
                             if(sc && sc.length) {
                                 adminCourses = sc;
-                                localStorage.setItem('adminCourses', JSON.stringify(adminCourses));
+                                try { localStorage.setItem('adminCourses', JSON.stringify(adminCourses)); } catch(e) {}
                                 populateCourseSelects(adminCourses); // Re-populate with fresh data
                             }
                         }
@@ -700,15 +700,31 @@
                 container.innerHTML = '';
                 examQuestions.forEach((q, idx) => {
                     const qDiv = document.createElement('div');
-                    qDiv.style.cssText = 'background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);';
+                    qDiv.style.cssText = 'background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 10px;';
+                    
+                    let optionsHtml = '';
+                    if (q.type === 'choose' && q.options) {
+                        const ans = (q.answer || '').toLowerCase();
+                        optionsHtml = `
+                            <ul style="list-style:none; padding:0; margin:10px 0;">
+                                <li style="color:${ans === 'a' ? '#2ecc71' : 'rgba(255,255,255,0.7)'};"><strong style="color:var(--text-primary)">أ:</strong> ${q.options.a || ''}</li>
+                                <li style="color:${ans === 'b' ? '#2ecc71' : 'rgba(255,255,255,0.7)'};"><strong style="color:var(--text-primary)">ب:</strong> ${q.options.b || ''}</li>
+                                <li style="color:${ans === 'c' ? '#2ecc71' : 'rgba(255,255,255,0.7)'};"><strong style="color:var(--text-primary)">ج:</strong> ${q.options.c || ''}</li>
+                                <li style="color:${ans === 'd' ? '#2ecc71' : 'rgba(255,255,255,0.7)'};"><strong style="color:var(--text-primary)">د:</strong> ${q.options.d || ''}</li>
+                            </ul>
+                        `;
+                    } else if (q.type === 'tf') {
+                        optionsHtml = `<p style="margin:10px 0; color:#2ecc71;">الإجابة الصحيحة: ${q.answer}</p>`;
+                    }
+
                     qDiv.innerHTML = `
                         <div style="display:flex; justify-content:space-between; align-items:start;">
                             <div style="flex:1;">
                                 <p style="margin:0 0 5px 0; color:var(--text-primary);"><strong>السؤال ${idx+1}</strong> <span style="font-size:0.8rem; color:#f39c12; margin-right:10px;">(${q.points || 1} درجة)</span></p>
-                                <p style="margin:0 0 5px 0; color:rgba(255,255,255,0.8);">${q.text.substring(0, 50)}...</p>
-                                <p style="margin:0; color:var(--accent-cyan); font-size:0.9rem;">الإجابة: ${q.answer}</p>
+                                <p style="margin:0 0 5px 0; color:var(--text-primary); font-size: 1.05rem;">${q.text}</p>
+                                ${optionsHtml}
                             </div>
-                            <button type="button" onclick="examQuestions.splice(${idx}, 1); renderQuestionsList();" class="btn btn-outline" style="padding:5px 10px; border-color:#e74c3c; color:#e74c3c;"><i class="fas fa-trash"></i></button>
+                            <button type="button" onclick="examQuestions.splice(${idx}, 1); renderQuestionsList();" class="btn btn-outline" style="padding:5px 10px; border-color:#e74c3c; color:#e74c3c; margin-right: 15px;"><i class="fas fa-trash"></i></button>
                         </div>
                     `;
                     container.appendChild(qDiv);
@@ -795,11 +811,14 @@
                         }
                         if(window.showToast) window.showToast('✅ تم الحفظ بنجاح!', 'success');
                         else alert('تم الحفظ بنجاح!');
+                        return true;
                     } catch(err) {
                         if(window.showToast) window.showToast('❌ خطأ في الحفظ: ' + err.message, 'error');
                         else alert('خطأ في الحفظ: ' + err.message);
+                        return false;
                     }
                 }
+                return false;
             }
 
             document.getElementById('fastUploadVideoForm').addEventListener('submit', async (e) => {
@@ -929,11 +948,13 @@
                         if(linkVal) examObj.lockedUntilTrainingId = linkVal; // homework locked until linked training done
                     }
 
-                    fastUpload(cId, section, examObj);
-                    examQuestions = [];
-                    renderQuestionsList();
-                    e.target.reset();
-                    window.examQuestions = [];
+                    const success = await fastUpload(cId, section, examObj);
+                    if (success) {
+                        examQuestions = [];
+                        renderQuestionsList();
+                        e.target.reset();
+                        window.examQuestions = [];
+                    }
                 });
             }
         });

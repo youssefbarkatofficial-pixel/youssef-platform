@@ -118,28 +118,34 @@
             const systemPrompt = `أنت صانع امتحانات محترف لمادة الدراسات الاجتماعية والتاريخ والجغرافيا في مصر.
 لديك نص مصدر (Source text)، ومهمتك استخراج ${count} سؤال منه.
 
-قواعد صارمة جداً (Quality > Quantity):
-1. **المصدر هو الحقيقة الوحيدة**: لا تضف أي معلومة خارجية، ولا تخترع أسئلة إذا كان النص لا يكفي. استخرج الحد الأقصى الممكن دون اختلاق.
-2. **صيغة JSON فقط**: يجب أن يكون ردك عبارة عن JSON Array حصراً (مصفوفة JSON)، بدون أي نصوص أخرى أو علامات Markdown.
-3. **عدم التكرار**: تأكد من أن الأسئلة تغطي أجزاء مختلفة من النص.
-4. **تنسيق السؤال الاختياري**:
+قواعد صارمة جداً جداً:
+1. المصدر هو الحقيقة الوحيدة. لا تخترع أو تؤلف أي أسئلة أو معلومات من خارج النص المرفق. يجب أن تكون الإجابة موجودة نصاً داخل المرفق.
+2. لا تسأل عن التواريخ، أو الأرقام الفلكية، أو الإحداثيات ما لم تكن مكتوبة بوضوح وصراحة داخل النص الذي أعطيته لك.
+3. الرد يجب أن يكون مصفوفة JSON Array فقط. لا تكتب أي نص آخر.
+3. لتنسيق السؤال الاختياري، تأكد أن 'options' هو كائن (Object) يحتوي على نصوص الاختيارات وليس الأحرف فقط.
+مثال صحيح للسؤال الاختياري:
 {
   "type": "choose",
-  "text": "السؤال هنا؟",
-  "answer": "a", // يجب أن يكون أحد الأحرف a, b, c, d
+  "text": "ما هي عاصمة مصر؟",
+  "answer": "a", // الإجابة الصحيحة كحرف
   "points": 1,
-  "id": "q_" + أرقام عشوائية,
-  "options": { "a": "الخيار الأول", "b": "الخيار الثاني", "c": "الخيار الثالث", "d": "الخيار الرابع" }
+  "id": "q_123",
+  "options": {
+    "a": "القاهرة",
+    "b": "الإسكندرية",
+    "c": "الأقصر",
+    "d": "أسوان"
+  }
 }
-5. **تنسيق سؤال صح وخطأ**:
+4. مثال صحيح لسؤال صح وخطأ:
 {
   "type": "tf",
-  "text": "السؤال هنا",
-  "answer": "صح", // أو "خطأ"
+  "text": "القاهرة هي عاصمة مصر.",
+  "answer": "صح", // الإجابة الصحيحة "صح" أو "خطأ" فقط
   "points": 1,
-  "id": "q_" + أرقام عشوائية
+  "id": "q_456"
 }
-6. قم بتوزيع الأسئلة بين اختياري وصح وخطأ.
+5. وزّع الأسئلة بين اختياري وصح وخطأ.
 `;
 
             const url = "https://api.groq.com/openai/v1/chat/completions";
@@ -175,7 +181,17 @@
             try {
                 json = JSON.parse(responseText);
             } catch (e) {
-                throw new Error("فشل الذكاء الاصطناعي في إرجاع صيغة بيانات صحيحة.");
+                // Try to find array using regex if formatting is heavily broken
+                const match = responseText.match(/\[[\s\S]*\]/);
+                if (match) {
+                    try {
+                        json = JSON.parse(match[0]);
+                    } catch(err) {
+                        throw new Error("فشل الذكاء الاصطناعي في إرجاع صيغة بيانات صحيحة.");
+                    }
+                } else {
+                    throw new Error("فشل الذكاء الاصطناعي في إرجاع صيغة بيانات صحيحة.");
+                }
             }
             
             if (!Array.isArray(json)) {
@@ -194,29 +210,67 @@
             const seenTexts = new Set();
             
             for (const q of questions) {
-                // Ensure ID is generated correctly if missing or format is wrong
                 if (!q.id || !q.id.startsWith('q_')) {
                     q.id = 'q_' + Math.random().toString(36).substr(2, 9);
                 }
 
-                // Check basic structure
                 if (!q.type || !q.text || !q.answer) continue;
 
-                // Duplicate Check
                 const normText = q.text.replace(/\s+/g, ' ').trim();
                 if (seenTexts.has(normText)) continue;
                 seenTexts.add(normText);
 
+                let cleanQ = {
+                    id: String(q.id),
+                    type: String(q.type),
+                    text: String(q.text || ''),
+                    answer: String(q.answer || '').toLowerCase().trim(),
+                    points: parseFloat(q.points) || 1
+                };
+
                 if (q.type === 'choose') {
-                    if (!q.options || !q.options.a || !q.options.b || !q.options.c || !q.options.d) continue;
-                    if (!['a', 'b', 'c', 'd'].includes(q.answer)) continue;
+                    // Try to repair options if it's an array
+                    if (Array.isArray(q.options) && q.options.length >= 4) {
+                        cleanQ.options = {
+                            a: String(q.options[0] || ''),
+                            b: String(q.options[1] || ''),
+                            c: String(q.options[2] || ''),
+                            d: String(q.options[3] || '')
+                        };
+                        // If answer is the index or value, try to map it
+                        if (cleanQ.answer === '0' || cleanQ.answer === '1') cleanQ.answer = ['a','b','c','d'][parseInt(cleanQ.answer)];
+                    } else if (q.options && typeof q.options === 'object') {
+                        cleanQ.options = {
+                            a: String(q.options.a || q.options.A || q.options['أ'] || q.options['1'] || ''),
+                            b: String(q.options.b || q.options.B || q.options['ب'] || q.options['2'] || ''),
+                            c: String(q.options.c || q.options.C || q.options['ج'] || q.options['3'] || ''),
+                            d: String(q.options.d || q.options.D || q.options['د'] || q.options['4'] || '')
+                        };
+                    } else {
+                        continue;
+                    }
+
+                    // Fix if answer is full text instead of letter
+                    if (!['a', 'b', 'c', 'd'].includes(cleanQ.answer)) {
+                        let found = false;
+                        for (const [key, val] of Object.entries(cleanQ.options)) {
+                            if (val && cleanQ.answer.includes(val.toLowerCase())) {
+                                cleanQ.answer = key;
+                                found = true;
+                                break;
+                            }
+                        }
+                        if (!found) cleanQ.answer = 'a'; // Fallback so it doesn't just crash
+                    }
                 } else if (q.type === 'tf') {
-                    if (q.answer !== 'صح' && q.answer !== 'خطأ') continue;
+                    if (cleanQ.answer.includes('صح') || cleanQ.answer === 'true' || cleanQ.answer === 't') cleanQ.answer = 'صح';
+                    else if (cleanQ.answer.includes('خطأ') || cleanQ.answer.includes('غلط') || cleanQ.answer === 'false' || cleanQ.answer === 'f') cleanQ.answer = 'خطأ';
+                    else cleanQ.answer = 'صح';
                 } else {
-                    continue; // Skip unknown types
+                    continue; 
                 }
 
-                valid.push(q);
+                valid.push(cleanQ);
             }
 
             return valid;
