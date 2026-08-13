@@ -830,7 +830,7 @@
                     delete itemObj.attachLectureId;
                     
                     if(!addedToLecture) {
-                        if (courses[idx].contents.sections && Array.isArray(courses[idx].contents.sections)) {
+                        if (false && courses[idx].contents.sections && Array.isArray(courses[idx].contents.sections)) {
                             let secId = 'sec_' + section;
                             let secObj = courses[idx].contents.sections.find(s => s.id === secId);
                             if (!secObj) {
