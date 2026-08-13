@@ -32,7 +32,6 @@ function initAdminDB() {
         }
     }
 }
-}
 
 // Admin Login Function
 function adminLogin(email, password) {
