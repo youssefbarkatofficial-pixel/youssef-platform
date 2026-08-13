@@ -3,6 +3,13 @@
 <head>
     <link rel="manifest" href="./manifest.json">
     <script>
+        window.addEventListener('error', function(e) {
+            alert('Error: ' + e.message + ' at ' + e.filename + ':' + e.lineno);
+        });
+        window.addEventListener('unhandledrejection', function(e) {
+            alert('Unhandled Rejection: ' + (e.reason && e.reason.message ? e.reason.message : e.reason));
+        });
+
 function getAdminCoursesArray() {
     if (window.FirebaseService && typeof window.FirebaseService.getCachedCourses === 'function') {
         const cached = window.FirebaseService.getCachedCourses();
@@ -13,6 +20,31 @@ function getAdminCoursesArray() {
 function saveAdminCoursesArray(courses) {
     try { localStorage.setItem('adminCourses', JSON.stringify(courses)); } catch(e) {}
 }
+
+// ONE-TIME SCRIPT TO DELETE CORRUPTED EXAM
+setTimeout(async () => {
+    try {
+        if (window.FirebaseService && typeof window.FirebaseService.getCourses === 'function') {
+            const serverCourses = await window.FirebaseService.getCourses();
+            let changed = false;
+            for (let c of serverCourses) {
+                if (c.contents && c.contents.exams) {
+                    const originalLength = c.contents.exams.length;
+                    c.contents.exams = c.contents.exams.filter(e => e.title !== 'امتحان الدرس الأول - الوحدة الاولى 3اعدادي');
+                    if (c.contents.exams.length !== originalLength) {
+                        changed = true;
+                        console.log('Found corrupted exam in course: ' + c.title + ', deleting...');
+                        await window.FirebaseService.saveCourse(c);
+                        alert('تم مسح الامتحان المكرر بالخطأ بنجاح!');
+                    }
+                }
+            }
+        }
+    } catch(e) {
+        console.error('Auto-delete script error:', e);
+    }
+}, 4000);
+
         if (!sessionStorage.getItem('currentAdmin')) { window.location.replace('admin-login.html'); }
     </script>
     <meta charset="UTF-8">
