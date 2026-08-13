@@ -582,7 +582,21 @@
                 const course = adminCourses.find(c=>c.id === courseId);
                 if(!course) return;
                 const contents = course.contents || {};
-                const lectures = contents.lectures || [];
+                let lectures = contents.lectures || [];
+                let trainings = contents.trainings || [];
+
+                // Support V2 sections schema
+                if (contents.sections && Array.isArray(contents.sections)) {
+                    let secLectures = contents.sections.find(s => s.id === 'sec_lectures');
+                    if (secLectures && Array.isArray(secLectures.items)) {
+                        lectures = lectures.concat(secLectures.items);
+                    }
+                    let secTrainings = contents.sections.find(s => s.id === 'sec_trainings');
+                    if (secTrainings && Array.isArray(secTrainings.items)) {
+                        trainings = trainings.concat(secTrainings.items);
+                    }
+                }
+
                 lectures.forEach((lec, idx)=>{
                     const val = lec.id || lec.title || ('lec_'+idx);
                     const opt = document.createElement('option'); opt.value = val; opt.textContent = lec.title || ('محاضرة ' + (idx+1));
@@ -591,7 +605,7 @@
                     document.getElementById('pAttachLectureSelect').appendChild(opt.cloneNode(true));
                 });
 
-                const trainings = contents.trainings || [];
+
                 trainings.forEach((t, idx)=>{
                     const val = t.createdAt || ('t_'+idx);
                     const opt = document.createElement('option'); opt.value = val; opt.textContent = t.title || ('تدريب ' + (idx+1));
