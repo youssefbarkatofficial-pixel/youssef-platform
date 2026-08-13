@@ -456,7 +456,16 @@
                             let merged = { ...dbUser, ...remoteUser };
                             merged.courses = [...new Set([...(dbUser.courses||[]), ...(remoteUser.courses||[])])];
                             merged.completedItems = [...new Set([...(dbUser.completedItems||[]), ...(remoteUser.completedItems||[])])];
-                            merged.examResults = { ...(dbUser.examResults||{}), ...(remoteUser.examResults||{}) };
+                            let erLocal = Array.isArray(dbUser.examResults) ? dbUser.examResults : [];
+            let erRemote = Array.isArray(remoteUser.examResults) ? remoteUser.examResults : [];
+            let erMerged = [...erLocal, ...erRemote];
+            let uniqueER = [];
+            let erKeys = new Set();
+            erMerged.forEach(r => {
+                let k = r.courseId + '_' + r.examTitle + '_' + r.attemptNumber;
+                if(!erKeys.has(k)) { erKeys.add(k); uniqueER.push(r); }
+            });
+            merged.examResults = uniqueER;
                             merged.watchProgress = { ...(dbUser.watchProgress||{}), ...(remoteUser.watchProgress||{}) };
                             let payments = JSON.parse(localStorage.getItem('paymentRequests')) || [];
                             let unlocked = payments.filter(p => p.userPhone === user.phone && p.status === 'unlocked').map(p => p.courseId);
@@ -700,6 +709,9 @@
 // --- DYNAMIC SECTIONS RENDERER ---
 
             function migrateCourseToSections(contents) {
+                if (Array.isArray(contents)) {
+                    return { sections: [{ id: 'sec_lectures', title: 'المحتويات', items: contents }] };
+                }
                 const c = contents || {};
                 let sections = [];
                 let hasSections = c.sections && Array.isArray(c.sections) && c.sections.length > 0;
@@ -780,6 +792,12 @@
                                     }
                                 });
                             }
+                        });
+                        // Sort items oldest to newest
+                        flattenedItems.sort((a, b) => {
+                            let ta = a.createdAt || 0;
+                            let tb = b.createdAt || 0;
+                            return ta - tb;
                         });
                         sec.items = flattenedItems;
                     }
@@ -2349,7 +2367,16 @@ window.enrollFreeCourse = async function(courseId) {
             let merged = { ...dbUser, ...remoteUser };
             merged.courses = [...new Set([...(dbUser.courses||[]), ...(remoteUser.courses||[])])];
             merged.completedItems = [...new Set([...(dbUser.completedItems||[]), ...(remoteUser.completedItems||[])])];
-            merged.examResults = { ...(dbUser.examResults||{}), ...(remoteUser.examResults||{}) };
+            let erLocal = Array.isArray(dbUser.examResults) ? dbUser.examResults : [];
+            let erRemote = Array.isArray(remoteUser.examResults) ? remoteUser.examResults : [];
+            let erMerged = [...erLocal, ...erRemote];
+            let uniqueER = [];
+            let erKeys = new Set();
+            erMerged.forEach(r => {
+                let k = r.courseId + '_' + r.examTitle + '_' + r.attemptNumber;
+                if(!erKeys.has(k)) { erKeys.add(k); uniqueER.push(r); }
+            });
+            merged.examResults = uniqueER;
             merged.watchProgress = { ...(dbUser.watchProgress||{}), ...(remoteUser.watchProgress||{}) };
             let payments = JSON.parse(localStorage.getItem('paymentRequests')) || [];
             let unlocked = payments.filter(p => p.userPhone === user.phone && p.status === 'unlocked').map(p => p.courseId);

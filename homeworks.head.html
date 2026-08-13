@@ -100,7 +100,18 @@
                     if (onlineUser) { let merged = { ...dbUser, ...(typeof onlineUser !== 'undefined' ? onlineUser : remoteUser) };
                         merged.courses = [...new Set([...(dbUser.courses||[]), ...(merged.courses||[])])];
                         merged.completedItems = [...new Set([...(dbUser.completedItems||[]), ...(merged.completedItems||[])])];
-                        merged.examResults = { ...(dbUser.examResults||{}), ...(merged.examResults||{}) };
+                        
+                let erLocal = Array.isArray(dbUser.examResults) ? dbUser.examResults : [];
+                let erRemote = Array.isArray(typeof onlineUser !== 'undefined' ? onlineUser.examResults : (typeof remoteUser !== 'undefined' ? remoteUser.examResults : [])) ? (typeof onlineUser !== 'undefined' ? onlineUser.examResults : (typeof remoteUser !== 'undefined' ? remoteUser.examResults : [])) : [];
+                let erMerged = [...erLocal, ...erRemote];
+                let uniqueER = [];
+                let erKeys = new Set();
+                erMerged.forEach(r => {
+                    let k = r.courseId + '_' + r.examTitle + '_' + r.attemptNumber;
+                    if(!erKeys.has(k)) { erKeys.add(k); uniqueER.push(r); }
+                });
+                merged.examResults = uniqueER;
+
                         merged.watchProgress = { ...(dbUser.watchProgress||{}), ...(merged.watchProgress||{}) };
                         
                         let payments = JSON.parse(localStorage.getItem('paymentRequests')) || [];
