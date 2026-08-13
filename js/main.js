@@ -1683,20 +1683,13 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => {
             const pagePath = window.location.pathname.split('/').pop().split('?')[0] || 'index.html';
             
-            let currentUser = null;
-            try {
-                currentUser = JSON.parse(sessionStorage.getItem('currentStudent') || localStorage.getItem('currentStudent'));
-            } catch(e){}
-
             const guideMessages = {
                 'dashboard.html': 'أهلاً بك يا بطل! من هنا تقدر تتابع كورساتك، وتعرف إحصائياتك ونقاطك، وتشوف ترتيبك في لوحة الشرف.',
                 'course-details.html': 'أنت الآن داخل الكورس. لازم تسمع المحاضرة وتخلصها عشان يفتحلك التدريب والواجب بتاعها.',
                 'exams.html': 'صفحة الامتحانات! ركز كويس وتأكد إن الإنترنت مستقر قبل ما تفتح أي امتحان.',
                 'homeworks.html': 'هنا هتلاقي الواجبات. متنساش تحل الواجب عشان تقدر تدخل امتحان الحصة اللي بعدها.',
                 'my-courses.html': 'دي كورساتك اللي إنت مشترك فيها. لو في كورس ناقص، تقدر تتواصل مع الدعم الفني.',
-                'index.html': currentUser 
-                    ? `أهلاً بك يا ${currentUser.name ? currentUser.name.split(' ')[0] : 'بطل'}! أنت مسجل دخولك بالفعل، اضغط على "حسابي" لتدخل لوحة التحكم.` 
-                    : 'أهلاً بك في منصة مستر يوسف بركات! سجل دخولك عشان تبدأ رحلتك.'
+                'index.html': 'أهلاً بك في منصة مستر يوسف بركات! سجل دخولك عشان تبدأ رحلتك.'
             };
 
             const defaultMessage = 'أنا مساعدك الذكي! لو احتجت أي مساعدة، اضغط عليا في أي وقت.';
@@ -1709,7 +1702,7 @@ document.addEventListener('DOMContentLoaded', () => {
             style.innerHTML = `
                 #smart-robot-guide {
                     position: fixed;
-                    bottom: 110px;
+                    bottom: 25px;
                     left: 25px;
                     z-index: 999999;
                     display: flex;
@@ -1827,7 +1820,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 @media (max-width: 768px) {
                     #smart-robot-guide {
-                        bottom: 90px;
+                        bottom: 20px;
                         left: 20px;
                     }
                     .robot-icon-wrapper {
