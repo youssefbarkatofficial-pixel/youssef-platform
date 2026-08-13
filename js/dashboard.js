@@ -763,25 +763,45 @@ async function loadLeaderboard(currentGrade) {
             students = JSON.parse(localStorage.getItem('strictUsers') || '[]');
         }
 
-        // ===== فلترة بالـ grade: نقارن قيمة grade الخام (prep1, sec1...) وليس التسمية =====
+        // ===== فلترة بالـ grade والتأكد من توافق المراحل =====
         const currentUser = (() => {
             try { return JSON.parse(sessionStorage.getItem('currentStudent') || '{}'); } catch(e){ return {}; }
         })();
-        const currentRawGrade = currentUser.grade || '';
+        
+        if (!currentGrade || currentGrade === 'طالب') {
+            container.innerHTML = '<div style="text-align: center; width: 100%; padding: 20px; color: #94A3B8;">يجب تحديد المرحلة الدراسية أولاً لتظهر لك لوحة الشرف.</div>';
+            return;
+        }
+
+        // دمج بيانات الطالب الحالي المحلية (examResults, stats) مع المصفوفة
+        // حتى يتم حساب نقاطه بشكل حقيقي ورفعها ليراها الجميع
+        const localDbStr = localStorage.getItem(`db_${currentUser.phone}`);
+        if (localDbStr) {
+            try {
+                const currentUserDb = JSON.parse(localDbStr);
+                const cIndex = students.findIndex(s => s.phone === currentUser.phone);
+                if (cIndex > -1) {
+                    students[cIndex] = { ...students[cIndex], ...currentUserDb };
+                } else {
+                    students.push({ ...currentUser, ...currentUserDb });
+                }
+            } catch(e) {}
+        }
 
         const sameGrade = students.filter(s => {
-            if (s.role === 'admin') return false;
-            if (s.phone === '0000') return false;
-            // مقارنة grade خام
-            const sGrade = (s.grade || '').toLowerCase().trim();
-            const cGrade = currentRawGrade.toLowerCase().trim();
-            if (sGrade && cGrade && sGrade === cGrade) return true;
-            // fallback: مقارنة بالتسمية العربية
+            if (s.role === 'admin' || s.isAdmin) return false;
+            if (s.phone === '0000') return false; // حساب المعلم مستثنى
+            
+            // استخراج التسمية العربية الموحدة لكل طالب
+            let sLabel = '';
             if (window.getEffectiveStudentGrade && window.getGradeLabel) {
-                const sLabel = window.getGradeLabel(window.getEffectiveStudentGrade(s)) || '';
-                return sLabel === currentGrade;
+                sLabel = window.getGradeLabel(window.getEffectiveStudentGrade(s)).trim();
+            } else {
+                sLabel = (s.grade || 'طالب').trim();
             }
-            return false;
+
+            const cLabel = currentGrade.trim();
+            return sLabel === cLabel;
         });
 
         // ===== حساب الدرجة الحقيقية من examResults + نشاط الفيديو =====
@@ -830,6 +850,29 @@ async function loadLeaderboard(currentGrade) {
             // 4. نقاط من completedItems
             if (s.completedItems && Array.isArray(s.completedItems)) {
                 score += s.completedItems.length * 5;
+            }
+            
+            // إذا كان هذا هو الطالب الحالي، نقوم بمزامنة نقاطه مع القاعدة لكي يراها البقية
+            if (s.phone === currentUser.phone && score > 0) {
+                if (window.FirebaseService && typeof window.FirebaseService.updateStudentData === 'function') {
+                    // تجنب الإرسال المستمر كل ثانية (إرسال فقط إذا اختلفت النقاط المحفوظة)
+                    if (s.leaderboardScore !== score) {
+                        window.FirebaseService.updateStudentData(s.phone, { leaderboardScore: score });
+                        
+                        // تحديث النسخة المحلية أيضاً لكي لا نرسل مرة أخرى
+                        let strictUsers = JSON.parse(localStorage.getItem('strictUsers') || '[]');
+                        let idx = strictUsers.findIndex(u => u.phone === s.phone);
+                        if (idx > -1) {
+                            strictUsers[idx].leaderboardScore = score;
+                            localStorage.setItem('strictUsers', JSON.stringify(strictUsers));
+                        }
+                    }
+                }
+            } else {
+                // إذا كان طالباً آخر ولم يكن لديه نقاط محسوبة محلياً، نستخدم النقاط المزامنة من الداتابيز
+                if (!s.examResults && !s.stats && s.leaderboardScore) {
+                    score = Math.max(score, s.leaderboardScore);
+                }
             }
 
             s._leaderboardScore = Math.round(score);

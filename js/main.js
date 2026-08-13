@@ -1,7 +1,7 @@
 
 // AUTO CACHE CLEAR SCRIPT (Forces refresh across all browsers)
 (function() {
-    const APP_VER = 'v19_cache_buster';
+    const APP_VER = 'v20_leaderboard_fix';
     if (localStorage.getItem('app_version') !== APP_VER) {
         localStorage.setItem('app_version', APP_VER);
         if ('caches' in window) {
