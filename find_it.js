@@ -1,1 +1,0 @@
-const fs=require(\'fs\');const lines=fs.readFileSync(\'homeworks.html\',\'utf8\').split(\'\n\'); for(let i=180;i<210;i++) console.log(lines[i]);
