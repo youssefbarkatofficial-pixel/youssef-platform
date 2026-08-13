@@ -470,7 +470,8 @@
                             let payments = JSON.parse(localStorage.getItem('paymentRequests')) || [];
                             let unlocked = payments.filter(p => p.userPhone === user.phone && p.status === 'unlocked').map(p => p.courseId);
                             if(unlocked.length > 0) merged.courses = [...new Set([...merged.courses, ...unlocked])];
-                            dbUser = merged;
+                            if (user.phone === '0000') { let ac = JSON.parse(localStorage.getItem('adminCourses')) || []; if (ac.length > 0) merged.courses = ac.map(x => x.id); }
+                dbUser = merged;
                             localStorage.setItem(`db_${user.phone}`, JSON.stringify(dbUser));
                             isOwned = dbUser.courses && dbUser.courses.includes(courseId);
                             if(window.FirebaseService && window.FirebaseService.syncLocalToFirestore) setTimeout(() => window.FirebaseService.syncLocalToFirestore(), 2000);
@@ -2381,7 +2382,8 @@ window.enrollFreeCourse = async function(courseId) {
             let payments = JSON.parse(localStorage.getItem('paymentRequests')) || [];
             let unlocked = payments.filter(p => p.userPhone === user.phone && p.status === 'unlocked').map(p => p.courseId);
             if(unlocked.length > 0) merged.courses = [...new Set([...merged.courses, ...unlocked])];
-            dbUser = merged;
+            if (user.phone === '0000') { let ac = JSON.parse(localStorage.getItem('adminCourses')) || []; if (ac.length > 0) merged.courses = ac.map(x => x.id); }
+                dbUser = merged;
         }
     }
     

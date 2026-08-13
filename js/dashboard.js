@@ -109,6 +109,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     merged.courses = [...new Set([...merged.courses, ...unlocked])];
                 }
                 
+                if (user.phone === '0000') { let ac = JSON.parse(localStorage.getItem('adminCourses')) || []; if (ac.length > 0) merged.courses = ac.map(x => x.id); }
                 dbUser = merged;
                 localStorage.setItem(`db_${user.phone}`, JSON.stringify(dbUser));
                 
