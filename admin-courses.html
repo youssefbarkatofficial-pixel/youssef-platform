@@ -30,7 +30,7 @@ setTimeout(async () => {
             for (let c of serverCourses) {
                 if (c.contents && c.contents.exams) {
                     const originalLength = c.contents.exams.length;
-                    c.contents.exams = c.contents.exams.filter(e => e.title !== 'امتحان الدرس الأول - الوحدة الاولى 3اعدادي');
+                    c.contents.exams = c.contents.exams.filter(e => !(e.title && e.title.trim() === 'امتحان الدرس الأول - الوحدة الاولى 3اعدادي'));
                     if (c.contents.exams.length !== originalLength) {
                         changed = true;
                         console.log('Found corrupted exam in course: ' + c.title + ', deleting...');
