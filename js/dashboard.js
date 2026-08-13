@@ -85,8 +85,26 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (window.FirebaseService && typeof window.FirebaseService.getUser === 'function') {
             const onlineUser = await window.FirebaseService.getUser(user.phone);
             if (onlineUser) {
-                dbUser = Object.assign(dbUser, onlineUser);
+                
+                let merged = { ...dbUser, ...(typeof onlineUser !== 'undefined' ? onlineUser : (typeof remoteUser !== 'undefined' ? remoteUser : {})) };
+                merged.courses = [...new Set([...(dbUser.courses||[]), ...(merged.courses||[])])];
+                merged.completedItems = [...new Set([...(dbUser.completedItems||[]), ...(merged.completedItems||[])])];
+                merged.examResults = { ...(dbUser.examResults||{}), ...(merged.examResults||{}) };
+                merged.watchProgress = { ...(dbUser.watchProgress||{}), ...(merged.watchProgress||{}) };
+                
+                let payments = JSON.parse(localStorage.getItem('paymentRequests')) || [];
+                let unlocked = payments.filter(p => p.userPhone === user.phone && p.status === 'unlocked').map(p => p.courseId);
+                if(unlocked.length > 0) {
+                    merged.courses = [...new Set([...merged.courses, ...unlocked])];
+                }
+                
+                dbUser = merged;
                 localStorage.setItem(`db_${user.phone}`, JSON.stringify(dbUser));
+                
+                if(window.FirebaseService && typeof window.FirebaseService.syncLocalToFirestore === 'function') {
+                    setTimeout(() => window.FirebaseService.syncLocalToFirestore(), 2000);
+                }
+
             }
         }
     } catch(e) { console.warn('Failed to fetch user from Firebase', e); }

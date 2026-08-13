@@ -453,9 +453,18 @@
                     try {
                         const remoteUser = await window.FirebaseService.getUser(user.phone);
                         if(remoteUser) {
-                            localStorage.setItem(`db_${user.phone}`, JSON.stringify(remoteUser));
-                            isOwned = remoteUser.courses && remoteUser.courses.includes(courseId);
-                            dbUser = remoteUser;
+                            let merged = { ...dbUser, ...remoteUser };
+                            merged.courses = [...new Set([...(dbUser.courses||[]), ...(remoteUser.courses||[])])];
+                            merged.completedItems = [...new Set([...(dbUser.completedItems||[]), ...(remoteUser.completedItems||[])])];
+                            merged.examResults = { ...(dbUser.examResults||{}), ...(remoteUser.examResults||{}) };
+                            merged.watchProgress = { ...(dbUser.watchProgress||{}), ...(remoteUser.watchProgress||{}) };
+                            let payments = JSON.parse(localStorage.getItem('paymentRequests')) || [];
+                            let unlocked = payments.filter(p => p.userPhone === user.phone && p.status === 'unlocked').map(p => p.courseId);
+                            if(unlocked.length > 0) merged.courses = [...new Set([...merged.courses, ...unlocked])];
+                            dbUser = merged;
+                            localStorage.setItem(`db_${user.phone}`, JSON.stringify(dbUser));
+                            isOwned = dbUser.courses && dbUser.courses.includes(courseId);
+                            if(window.FirebaseService && window.FirebaseService.syncLocalToFirestore) setTimeout(() => window.FirebaseService.syncLocalToFirestore(), 2000);
                             serverVerified = true;
                         } else {
                             isOwned = false;
@@ -2336,7 +2345,17 @@ window.enrollFreeCourse = async function(courseId) {
     let dbUser = JSON.parse(localStorage.getItem('db_' + user.phone)) || {courses:[]};
     if (window.FirebaseService && typeof window.FirebaseService.getUser === 'function') {
         const remoteUser = await window.FirebaseService.getUser(user.phone);
-        if(remoteUser) dbUser = remoteUser;
+        if(remoteUser) {
+            let merged = { ...dbUser, ...remoteUser };
+            merged.courses = [...new Set([...(dbUser.courses||[]), ...(remoteUser.courses||[])])];
+            merged.completedItems = [...new Set([...(dbUser.completedItems||[]), ...(remoteUser.completedItems||[])])];
+            merged.examResults = { ...(dbUser.examResults||{}), ...(remoteUser.examResults||{}) };
+            merged.watchProgress = { ...(dbUser.watchProgress||{}), ...(remoteUser.watchProgress||{}) };
+            let payments = JSON.parse(localStorage.getItem('paymentRequests')) || [];
+            let unlocked = payments.filter(p => p.userPhone === user.phone && p.status === 'unlocked').map(p => p.courseId);
+            if(unlocked.length > 0) merged.courses = [...new Set([...merged.courses, ...unlocked])];
+            dbUser = merged;
+        }
     }
     
     if(!dbUser.courses) dbUser.courses = [];

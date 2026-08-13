@@ -46,6 +46,13 @@ window.FirebaseService = (function () {
 
     // --- Safe localStorage helpers (handle quota exceeded) ---
     function safeStorageSaveCourses(courses) {
+        if (!courses || courses.length === 0) {
+            const existing = JSON.parse(localStorage.getItem('adminCourses') || '[]');
+            if (existing.length > 0) {
+                console.warn('[FIRESTORE] Remote courses empty, refusing to wipe local cache.');
+                return;
+            }
+        }
         var lightCourses = courses.map(function(c) {
             var light = Object.assign({}, c);
             if (light.image && light.image.startsWith('data:')) {

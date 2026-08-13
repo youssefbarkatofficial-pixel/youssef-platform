@@ -104,8 +104,27 @@
                 if (window.FirebaseService && typeof window.FirebaseService.getUser === 'function') {
                     const onlineUser = await window.FirebaseService.getUser(user.phone);
                     if (onlineUser) {
-                        dbUser = onlineUser;
+                        // SMART MERGE TO PREVENT DATA LOSS
+                        let merged = { ...dbUser, ...onlineUser };
+                        merged.courses = [...new Set([...(dbUser.courses||[]), ...(onlineUser.courses||[])])];
+                        merged.completedItems = [...new Set([...(dbUser.completedItems||[]), ...(onlineUser.completedItems||[])])];
+                        merged.examResults = { ...(dbUser.examResults||{}), ...(onlineUser.examResults||{}) };
+                        merged.watchProgress = { ...(dbUser.watchProgress||{}), ...(onlineUser.watchProgress||{}) };
+                        
+                        // SELF-HEALING FROM CACHED PAYMENT REQUESTS
+                        let payments = JSON.parse(localStorage.getItem('paymentRequests')) || [];
+                        let unlocked = payments.filter(p => p.userPhone === user.phone && p.status === 'unlocked').map(p => p.courseId);
+                        if(unlocked.length > 0) {
+                            merged.courses = [...new Set([...merged.courses, ...unlocked])];
+                        }
+                        
+                        dbUser = merged;
                         localStorage.setItem(`db_${user.phone}`, JSON.stringify(dbUser));
+                        
+                        // Try syncing healed data back to cloud
+                        if(window.FirebaseService && typeof window.FirebaseService.syncLocalToFirestore === 'function') {
+                            setTimeout(() => window.FirebaseService.syncLocalToFirestore(), 2000);
+                        }
                     }
                 }
             } catch (e) { console.warn('Firebase user sync failed:', e); }
