@@ -1,5 +1,5 @@
 // CACHE VERSION - bump this number to force cache refresh on all clients
-const CACHE_VERSION = 'v18';
+const CACHE_VERSION = 'v19_cache_buster';
 const CACHE_NAME = 'youssef-platform-cache-' + CACHE_VERSION;
 
 // Static assets to pre-cache (CSS, fonts, icons only - NOT HTML pages)
