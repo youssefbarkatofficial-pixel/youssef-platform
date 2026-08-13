@@ -864,7 +864,7 @@
 
             const examForm = document.getElementById('fastUploadExamForm');
             if(examForm) {
-                examForm.addEventListener('submit', (e) => {
+                examForm.addEventListener('submit', async (e) => {
                     e.preventDefault();
                     const cId = document.getElementById('eCourseSelect').value;
                     const eTitle = document.getElementById('eTitle').value;
