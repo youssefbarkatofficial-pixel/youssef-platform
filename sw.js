@@ -1,5 +1,5 @@
 // CACHE VERSION - bump this number to force cache refresh on all clients
-const CACHE_VERSION = 'v21_fix_all';
+const CACHE_VERSION = 'v22_network_first';
 const CACHE_NAME = 'youssef-platform-cache-' + CACHE_VERSION;
 
 // Static assets to pre-cache (CSS, fonts, icons only - NOT HTML pages)
@@ -67,22 +67,21 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // For static assets (CSS, JS, images): Cache first, network fallback
+  // For static assets (CSS, JS, images): NETWORK FIRST strategy
+  // This guarantees users always see the latest version immediately on refresh.
   event.respondWith(
-    caches.match(event.request).then(cachedResponse => {
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-      return fetch(event.request).then(response => {
-        if (!response || response.status !== 200) {
-          return response;
-        }
-        const responseClone = response.clone();
-        caches.open(CACHE_NAME).then(cache => {
-          cache.put(event.request, responseClone);
-        });
+    fetch(event.request).then(response => {
+      if (!response || response.status !== 200) {
         return response;
+      }
+      const responseClone = response.clone();
+      caches.open(CACHE_NAME).then(cache => {
+        cache.put(event.request, responseClone);
       });
+      return response;
+    }).catch(() => {
+      // Network failed (offline), try cache as fallback
+      return caches.match(event.request);
     })
   );
 });
