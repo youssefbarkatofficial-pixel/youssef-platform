@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <link rel="manifest" href="./manifest.json">
@@ -8,10 +8,10 @@ function getAdminCoursesArray() {
         const cached = window.FirebaseService.getCachedCourses();
         if (cached && cached.length > 0) return JSON.parse(JSON.stringify(cached));
     }
-    return getAdminCoursesArray();
+    return JSON.parse(localStorage.getItem('adminCourses') || '[]');
 }
 function saveAdminCoursesArray(courses) {
-    try { saveAdminCoursesArray(courses); } catch(e) {}
+    try { localStorage.setItem('adminCourses', JSON.stringify(courses)); } catch(e) {}
 }
         if (!sessionStorage.getItem('currentAdmin')) { window.location.replace('admin-login.html'); }
     </script>

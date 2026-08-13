@@ -366,6 +366,34 @@
             }
             populateCourseSelects(adminCourses);
 
+            window.addEventListener('coursesChanged', (e) => {
+                let freshCourses = [];
+                if (window.FirebaseService && typeof window.FirebaseService.getCachedCourses === 'function') {
+                    freshCourses = window.FirebaseService.getCachedCourses();
+                } else {
+                    freshCourses = JSON.parse(localStorage.getItem('adminCourses') || '[]');
+                }
+                if (freshCourses && freshCourses.length > 0) {
+                    // Remember previous selections
+                    const vVal = vSelect ? vSelect.value : null;
+                    const pVal = pSelect ? pSelect.value : null;
+                    const eVal = eSelect ? eSelect.value : null;
+
+                    adminCourses = freshCourses;
+                    populateCourseSelects(adminCourses);
+
+                    // Restore selections
+                    if(vSelect && vVal) vSelect.value = vVal;
+                    if(pSelect && pVal) pSelect.value = pVal;
+                    if(eSelect && eVal) eSelect.value = eVal;
+
+                    if(typeof populateLectureAndTrainingSelectors === 'function') {
+                        if(vSelect && vSelect.value) populateLectureAndTrainingSelectors(vSelect.value);
+                        else if(pSelect && pSelect.value) populateLectureAndTrainingSelectors(pSelect.value);
+                    }
+                }
+            });
+
             // Sync with Firebase in background to refresh lists
             (async function syncCourses() {
                 try {
