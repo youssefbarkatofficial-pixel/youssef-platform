@@ -10,11 +10,11 @@
         if (!btnGenerate) return;
 
         btnGenerate.addEventListener('click', async () => {
-            let apiKey = localStorage.getItem('admin_gemini_key');
+            let apiKey = localStorage.getItem('admin_groq_key');
             if (!apiKey) {
-                apiKey = prompt("يرجى إدخال مفتاح Gemini API الخاص بك لتشغيل الذكاء الاصطناعي (سيتم حفظه محلياً ولن يطلب منك مجدداً):");
+                apiKey = prompt("يرجى إدخال مفتاح Groq API الخاص بك لتشغيل الذكاء الاصطناعي (سيتم حفظه محلياً ولن يطلب منك مجدداً):");
                 if (apiKey) {
-                    localStorage.setItem('admin_gemini_key', apiKey.trim());
+                    localStorage.setItem('admin_groq_key', apiKey.trim());
                 } else {
                     return;
                 }
@@ -50,7 +50,7 @@
 
                 statusDiv.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> جاري تحليل المحتوى وتوليد الأسئلة بواسطة الذكاء الاصطناعي... قد يستغرق ذلك دقيقة.';
                 
-                const questionsJSON = await callGeminiAPI(apiKey, extractedText, count);
+                const questionsJSON = await callGroqAPI(apiKey, extractedText, count);
                 
                 statusDiv.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> جاري فحص الجودة وتجنب التكرار...';
                 
@@ -114,13 +114,13 @@
             throw new Error("لتجنب مشاكل الصلاحيات (CORS) مع روابط Drive، يُرجى تحميل الملف على جهازك ثم رفعه مباشرة باستخدام خيار (ملف المصدر).");
         }
 
-        async function callGeminiAPI(apiKey, text, count) {
+        async function callGroqAPI(apiKey, text, count) {
             const systemPrompt = `أنت صانع امتحانات محترف لمادة الدراسات الاجتماعية والتاريخ والجغرافيا في مصر.
 لديك نص مصدر (Source text)، ومهمتك استخراج ${count} سؤال منه.
 
 قواعد صارمة جداً (Quality > Quantity):
 1. **المصدر هو الحقيقة الوحيدة**: لا تضف أي معلومة خارجية، ولا تخترع أسئلة إذا كان النص لا يكفي. استخرج الحد الأقصى الممكن دون اختلاق.
-2. **صيغة JSON فقط**: يجب أن يكون ردك عبارة عن JSON Array حصراً، بدون أي نصوص أخرى أو علامات Markdown.
+2. **صيغة JSON فقط**: يجب أن يكون ردك عبارة عن JSON Array حصراً (مصفوفة JSON)، بدون أي نصوص أخرى أو علامات Markdown.
 3. **عدم التكرار**: تأكد من أن الأسئلة تغطي أجزاء مختلفة من النص.
 4. **تنسيق السؤال الاختياري**:
 {
@@ -142,26 +142,31 @@
 6. قم بتوزيع الأسئلة بين اختياري وصح وخطأ.
 `;
 
-            const promptText = systemPrompt + "\n\n--- النص المصدر ---\n" + text;
-
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+            const url = "https://api.groq.com/openai/v1/chat/completions";
             
             const response = await fetch(url, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`
+                },
                 body: JSON.stringify({
-                    contents: [{ role: "user", parts: [{ text: promptText }] }],
-                    generationConfig: { temperature: 0.2, maxOutputTokens: 8192 }
+                    model: "llama-3.3-70b-versatile",
+                    messages: [
+                        { role: "system", content: systemPrompt },
+                        { role: "user", content: "--- النص المصدر ---\n" + text }
+                    ],
+                    temperature: 0.2
                 })
             });
 
             if (!response.ok) {
-                if (response.status === 400) throw new Error("مفتاح API غير صالح أو الطلب غير صحيح.");
+                if (response.status === 401) throw new Error("مفتاح API غير صالح.");
                 throw new Error("خطأ في الاتصال بالذكاء الاصطناعي (الكود " + response.status + ")");
             }
 
             const data = await response.json();
-            let responseText = data.candidates?.[0]?.content?.parts?.[0]?.text || "[]";
+            let responseText = data.choices?.[0]?.message?.content || "[]";
             
             // Clean markdown JSON ticks
             responseText = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
@@ -174,7 +179,11 @@
             }
             
             if (!Array.isArray(json)) {
-                throw new Error("صيغة البيانات المستلمة غير صالحة.");
+                if (json.questions && Array.isArray(json.questions)) {
+                    json = json.questions;
+                } else {
+                    throw new Error("صيغة البيانات المستلمة غير صالحة.");
+                }
             }
             
             return json;
