@@ -1,0 +1,1 @@
+﻿const fs = require('fs'); let content = fs.readFileSync('admin-dashboard.html', 'utf8'); content = content.replace('id=\"paymentRequestsPanel\">', 'id=\"paymentRequestsPanel\" style=\"margin-bottom: 120px;\">'); fs.writeFileSync('admin-dashboard.html', content);

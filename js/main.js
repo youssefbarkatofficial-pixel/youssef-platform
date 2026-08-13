@@ -1851,6 +1851,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const container = document.createElement('div');
             container.id = 'smart-robot-guide';
+            container.style.setProperty('display', 'none', 'important');
             container.innerHTML = `
                 <div class="robot-message-bubble" id="robotMessageBubble">
                     <button class="robot-close-btn" id="robotCloseBtn">&times;</button>

@@ -180,7 +180,17 @@
   const CUSTOM_ANSWERS_KEY = 'pf_custom_answers_v1';
   const GUEST_SESSION_ID_KEY = 'pf_support_chat_guest_id';
   const LOGIN_WELCOME_KEY = 'pfJustLoggedIn';
-  const WELCOME = 'أنا البوصلة بتاعتك، أقدر أساعدك إزاي؟';
+  let WELCOME = 'أنا المساعد الذكي الخاص بك، أقدر أساعدك إزاي؟';
+const path = window.location.pathname.toLowerCase();
+if (path.includes('course-details')) {
+    WELCOME = 'أنت الآن داخل الكورس! تقدر تبدأ تذاكر المحاضرات بالترتيب. متنساش تحل الواجب. محتاج مساعدة؟';
+} else if (path.includes('courses')) {
+    WELCOME = 'أهلاً بك في مكتبة الكورسات! اختار الكورس المناسب ليك، لو محتاج مساعدة اضغط عليا.';
+} else if (path.includes('dashboard')) {
+    WELCOME = 'أهلاً بك يا بطل في لوحة القيادة! هنا تقدر تتابع مستواك وإنجازاتك، استمر في التقدم!';
+} else if (path.includes('game') || path.includes('compass')) {
+    WELCOME = 'وقت التحدي! استعد لاختبار معلوماتك واكسب نقاط XP لتتصدر لوحة الشرف.';
+}
   const ESCALATION_SUGGESTION = 'لو مستعجل على حل المشكلة اكتب مشكلة والدعم هيتواصل معاك في أقرب وقت 🙏';
   let complaintCaptureMode = false;
   let escalationSuggested = false;
@@ -2201,10 +2211,10 @@
       return { text: 'ادخل على قسم الكورساتطŒ اختار الكورس المناسب لصفكطŒ واضغط اشتراك. بعد كده هتظهرلك طريقة الدفع والتعليمات الكاملة للتحويل ورفع صورة التحويل.' };
     }
     if (/الكورس مش شغال|الكورس مش شغّال|الكورس مش شغاله|الكورس مش شغال/.test(normalized)) {
-      return { text: 'تأكد الأول من النت وسجل خروج ودخول مرة تانية. لو لسه المشكلةطŒ ابعتلي اسم الكورس أو صورةطŒ وأنا أظبطلك حل سريع.' };
+      if (JSON.parse(localStorage.getItem('currentUser') || 'null')) { return { text: 'تأكد الأول من النت، وحاول تعمل تحديث للصفحة. لو لسه المشكلة، ابعتلي اسم الكورس وأنا أظبطلك حل سريع.' }; } else { return { text: 'تأكد الأول من النت وسجل خروج ودخول مرة تانية. لو لسه المشكلة، ابعتلي اسم الكورس أو صورة، وأنا أظبطلك حل سريع.' }; }
     }
     if (/نسيت.*الباسورد|نسيت.*كلمه المرور|نسيت الباسورد|نسيت كلمة المرور/.test(normalized)) {
-      return { text: "اضغط على 'نسيت كلمة المرور' من صفحة تسجيل الدخول واتبع الخطواتطŒ ولو مش ظبط معاك ابعتلي وهقولك تعمل إيه." };
+      if (JSON.parse(localStorage.getItem('currentUser') || 'null')) { return { text: 'أنت مسجل الدخول بالفعل. هل تواجه مشكلة أخرى؟' }; } else { return { text: "اضغط على 'نسيت كلمة المرور' من صفحة تسجيل الدخول واتبع الخطوات، ولو مش ظبط معاك ابعتلي." }; }
     }
     if (/فين.*الواجبات|فين.*الواجب|الواجب فين/.test(normalized)) {
       return { text: 'الواجبات بتبقى جوه الكورس اللي انت مشترك فيه بعد كل حصة. لو مش لاقيهاطŒ قولّي اسم الكورس وانا أقولك تمشي فين.' };
@@ -2303,7 +2313,7 @@
     const supportNumber = paymentSettings.vCashNum || '01023675235';
 
     if (/(نسيت|استرجاع|استعادة).*(باسورد|كلمة المرور)|باسورد|password/.test(normalized)) {
-      return { text: `لو نسيت الباسورد، اضغط على "نسيت كلمة المرور" في صفحة تسجيل الدخول. لو محتاج مساعدة، تواصل مع الدعم على ${supportNumber}.` };
+      if (JSON.parse(localStorage.getItem('currentUser') || 'null')) { return { text: `يمكنك تغيير الباسورد من ملفك الشخصي. لو محتاج مساعدة تواصل على ${supportNumber}.` }; } else { return { text: `لو نسيت الباسورد، اضغط على "نسيت كلمة المرور" في صفحة تسجيل الدخول. لو محتاج مساعدة، تواصل مع الدعم على ${supportNumber}.` }; }
     }
     if (/(غير.+ايميل|تغيير.+ايميل|تغيير.+البريد|ايميل|البريد)/.test(normalized)) {
       return { text: `لتغيير الإيميل، تواصل مع الدعم الفني عبر الرقم ${supportNumber}، لأن النظام لا يتيح تغيير الإيميل تلقائياً.` };
@@ -2957,11 +2967,12 @@
       // build UI guarded
       try {
         const btn = document.createElement('div');
-        btn.id = 'pfChatBtn'; btn.className = 'pf-chat-btn'; btn.title = 'البوصلة'; btn.innerHTML = '<i class="fas fa-compass" style="font-size:30px; line-height:1; width:100%; text-align:center;"></i>';
+        btn.id = 'pfChatBtn'; btn.className = 'pf-chat-btn'; btn.title = 'البوصلة'; btn.innerHTML = '<i class="fas fa-robot" style="font-size:30px; line-height:1; width:100%; text-align:center;"></i>';
+          btn.classList.add('robot');
         try { btn.style.cssText = 'position:fixed!important;bottom:24px!important;right:24px!important;z-index:999999999!important;display:flex!important;align-items:center!important;justify-content:center!important;visibility:visible!important;opacity:1!important;width:68px!important;height:68px!important;border-radius:50%!important;background:linear-gradient(135deg,#193d80,#0b1d43)!important;border:1px solid rgba(255,241,0,0.95)!important;box-shadow:0 22px 60px rgba(0,0,0,0.42)!important;color:#f1c40f!important;cursor:pointer!important;transition:none!important;'; } catch(e) {}
         try { document.body.appendChild(btn); } catch(e){/* ignore */}
 
-        const bubble = document.createElement('div'); bubble.className='pf-chat-bubble'; bubble.id='pfChatBubble'; bubble.style.display='none'; bubble.style.cssText = 'position:fixed!important;bottom:32px!important;right:116px!important;z-index:999999998!important;display:none!important;max-width:320px!important;padding:14px 18px!important;border-radius:999px!important;background:linear-gradient(135deg,rgba(25,61,128,0.94),rgba(11,29,67,0.94))!important;color:#fff!important;font-size:14px!important;font-weight:600!important;white-space:nowrap!important;text-overflow:ellipsis!important;overflow:hidden!important;box-shadow:0 18px 40px rgba(0,0,0,0.22)!important;cursor:pointer!important;transition:opacity 0.24s ease-in-out!important;backdrop-filter:blur(10px)!important;'; bubble.textContent = WELCOME; try { document.body.appendChild(bubble); } catch(e){}
+        const bubble = document.createElement('div'); bubble.className='pf-chat-bubble'; bubble.id='pfChatBubble'; bubble.style.display='none'; bubble.style.cssText = 'position:fixed!important;bottom:32px!important;right:116px!important;z-index:999999998!important;display:none!important;max-width:320px!important;padding:14px 18px!important;border-radius:999px!important;background:linear-gradient(135deg,rgba(25,61,128,0.94),rgba(11,29,67,0.94))!important;color:#fff!important;font-size:14px!important;font-weight:600!important;white-space:nowrap!important;text-overflow:ellipsis!important;overflow:hidden!important;box-shadow:0 18px 40px rgba(0,0,0,0.22)!important;cursor:pointer!important;transition:opacity 0.24s ease-in-out!important;backdrop-filter:blur(10px)!important;'; bubble.textContent = WELCOME; bubble.onclick = () => { const b = document.getElementById('pfChatBtn'); if(b) b.click(); }; try { document.body.appendChild(bubble); } catch(e){}
 
         const windowEl = document.createElement('div'); windowEl.className='pf-chat-window'; windowEl.id='pfChatWindow'; windowEl.style.display='none';
         windowEl.innerHTML = `

@@ -1,5 +1,5 @@
 // CACHE VERSION - bump this number to force cache refresh on all clients
-const CACHE_VERSION = 'v20_leaderboard_fix';
+const CACHE_VERSION = 'v21_fix_all';
 const CACHE_NAME = 'youssef-platform-cache-' + CACHE_VERSION;
 
 // Static assets to pre-cache (CSS, fonts, icons only - NOT HTML pages)

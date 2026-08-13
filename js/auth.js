@@ -1,4 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
+  if (window.location.pathname.includes('login.html') && (sessionStorage.getItem('currentStudent') || localStorage.getItem('currentStudent'))) {
+    window.location.href = 'dashboard.html';
+    return;
+  }
+
   const savedAdmin = localStorage.getItem('currentAdmin');
   if (savedAdmin && !sessionStorage.getItem('currentAdmin')) {
     sessionStorage.setItem('currentAdmin', savedAdmin);

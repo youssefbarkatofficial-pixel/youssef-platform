@@ -270,3 +270,4 @@
   }
 }
 
+\n/* Robot Animation */\n@keyframes floatRobot { 0% { transform: translateY(0px); } 50% { transform: translateY(-8px); } 100% { transform: translateY(0px); } }\n.pf-chat-btn.robot { animation: floatRobot 3s ease-in-out infinite; background: linear-gradient(135deg, #1f4068, #162447); border-color: #00adb5; }\n.pf-chat-btn.robot:hover { animation: none; transform: scale(1.1); box-shadow: 0 0 20px rgba(0, 173, 181, 0.6); }\n.pf-chat-btn.robot i { color: #00adb5; font-size: 1.6rem; }\n
