@@ -366,22 +366,30 @@
     <script src="js/storage-service.js?v=10"></script>
     <script src="js/main.js?v=10"></script>
     <script src="js/bousala-teach.js?v=1.0"></script><script src="js/bousala-intents.js?v=1.0"></script><script src="js/support-chat.js?v=10"></script>
+    <script src="js/mobile-ui-fixes.js?v=1"></script>
     <script src="js/auth.js?v=10"></script>
     <script src="js/grader.js?v=10"></script>
     <script src="js/dashboard.js?v=10"></script>
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
             
-            // Real-Time WhatsApp-like Sync
-            window.addEventListener('coursesChanged', (e) => {
-                const freshCourses = e.detail || [];
-                const courseId = new URLSearchParams(window.location.search).get('id');
-                const freshCourse = freshCourses.find(c => c.id === courseId);
-                if (freshCourse && freshCourse.contents) {
-                    let sections = migrateCourseToSections(freshCourse.contents);
-                    renderSections(sections);
-                }
-            });
+                // Real-Time WhatsApp-like Sync
+                // Prevent later getCourse() results from overwriting a freshly-received snapshot
+                let receivedCourseSnapshot = false;
+                window.addEventListener('coursesChanged', (e) => {
+                    const freshCourses = e.detail || [];
+                    const courseId = new URLSearchParams(window.location.search).get('id');
+                    const freshCourse = freshCourses.find(c => c.id === courseId);
+                    if (freshCourse && freshCourse.contents) {
+                        receivedCourseSnapshot = true;
+                        let sections = migrateCourseToSections(freshCourse.contents);
+                        renderSections(sections);
+                    }
+                });
+            // Ensure global realtime listeners are attached so this page receives `coursesChanged` events
+            if (window.FirebaseService && typeof window.FirebaseService.setupGlobalListeners === 'function') {
+                window.FirebaseService.setupGlobalListeners().catch && window.FirebaseService.setupGlobalListeners();
+            }
             const urlParams = new URLSearchParams(window.location.search);
             const courseId = urlParams.get('id');
             
@@ -427,7 +435,12 @@
             let course = null;
             if (window.FirebaseService && typeof window.FirebaseService.getCourse === 'function') {
                 try {
-                    course = await window.FirebaseService.getCourse(courseId);
+                    // If we've already received a realtime snapshot for this course, prefer it.
+                    if (!receivedCourseSnapshot) {
+                        course = await window.FirebaseService.getCourse(courseId);
+                    } else {
+                        // skip fallback fetch to avoid overwriting fresh snapshot-rendered data
+                    }
                 } catch(e) { console.error("Error fetching course from Firebase:", e); }
             }
             
@@ -711,10 +724,12 @@
                 try { const sc = localStorage.getItem('contents_' + courseId); if (sc) { const p = JSON.parse(sc); if (_hasContent(p)) rawContents = p; } } catch(e) {}
                 if (!_hasContent(rawContents) && window.FirebaseService && typeof window.FirebaseService.getCourse === 'function') {
                     try {
-                        const fc = await window.FirebaseService.getCourse(courseId);
-                        if (fc && fc.contents && _hasContent(fc.contents)) {
-                            rawContents = fc.contents;
-                            try { localStorage.setItem('contents_' + courseId, JSON.stringify(rawContents)); } catch(e) {}
+                        if (!receivedCourseSnapshot) {
+                            const fc = await window.FirebaseService.getCourse(courseId);
+                            if (fc && fc.contents && _hasContent(fc.contents)) {
+                                rawContents = fc.contents;
+                                try { localStorage.setItem('contents_' + courseId, JSON.stringify(rawContents)); } catch(e) {}
+                            }
                         }
                     } catch(e) { console.warn('Firestore getCourse failed', e); }
                 }

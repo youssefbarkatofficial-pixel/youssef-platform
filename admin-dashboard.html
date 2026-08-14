@@ -1804,57 +1804,63 @@
     <!-- Dashboard UI Redesign Script -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // 1. Move Payments Panel to the Top (Right after Stats Cards)
+            const isMobile = window.matchMedia('(max-width: 768px)').matches;
+            const btnAddCourse = document.getElementById('btnAddCourseTop');
             const cards = document.querySelector('.dash-cards');
             const payments = document.getElementById('paymentRequestsPanel');
+
+            if (isMobile) {
+                if (btnAddCourse) {
+                    btnAddCourse.style.position = 'static';
+                    btnAddCourse.style.bottom = 'auto';
+                    btnAddCourse.style.right = 'auto';
+                    btnAddCourse.style.zIndex = 'auto';
+                    btnAddCourse.style.boxShadow = 'none';
+                    btnAddCourse.style.borderRadius = '14px';
+                    btnAddCourse.style.padding = '10px 18px';
+                }
+                return;
+            }
+
+            // Desktop-only layout adjustments.
             if (cards && payments) {
                 cards.after(payments);
                 payments.style.marginBottom = '30px';
-                payments.style.border = '2px solid var(--royal-gold)'; // Highlight payments
+                payments.style.border = '2px solid var(--royal-gold)';
             }
-            
-            // 2. Make other long panels collapsible
+
             const allPanels = document.querySelectorAll('.dash-panel:not(#paymentRequestsPanel)');
-            
             allPanels.forEach(panel => {
                 const header = panel.querySelector('.panel-header');
                 if (!header) return;
-                
-                // create details element
+
                 const details = document.createElement('details');
                 details.className = panel.className;
                 details.id = panel.id;
                 details.style.cssText = panel.style.cssText;
-                
-                // create summary
+
                 const summary = document.createElement('summary');
                 summary.style.cssText = 'cursor:pointer; outline:none; list-style:none; display:flex; justify-content:space-between; align-items:center; width:100%;';
-                
-                // wrap header content inside summary
-                while(header.firstChild) {
+
+                while (header.firstChild) {
                     summary.appendChild(header.firstChild);
                 }
                 summary.className = 'panel-header';
-                
+
                 details.appendChild(summary);
-                
-                // move all other children of panel to details
-                while(panel.firstChild) {
+
+                while (panel.firstChild) {
                     if (panel.firstChild !== header) {
                         details.appendChild(panel.firstChild);
                     } else {
-                        panel.removeChild(panel.firstChild); // remove the empty header
+                        panel.removeChild(panel.firstChild);
                     }
                 }
-                
-                // replace panel with details
+
                 panel.parentNode.replaceChild(details, panel);
             });
-            
-            // 3. Move Add Course Button to the modal properly, it's currently at the top causing issues
-            const btnAddCourse = document.getElementById('btnAddCourseTop');
-            if(btnAddCourse) {
-                // Keep it but maybe make it less intrusive
+
+            if (btnAddCourse) {
                 btnAddCourse.style.position = 'fixed';
                 btnAddCourse.style.bottom = '30px';
                 btnAddCourse.style.right = '30px';

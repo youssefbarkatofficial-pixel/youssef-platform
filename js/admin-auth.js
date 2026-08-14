@@ -190,6 +190,92 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 `;
                 document.head.appendChild(style);
+
+                const assistantMobileFixes = document.createElement('style');
+                assistantMobileFixes.id = 'assistantMobileFixes';
+                assistantMobileFixes.textContent = `
+                    @media (max-width: 768px) {
+                        .dashboard-layout {
+                            display: block !important;
+                            padding-top: 0 !important;
+                        }
+                        .sidebar {
+                            position: static !important;
+                            width: 100% !important;
+                            height: auto !important;
+                            overflow: visible !important;
+                            padding: 12px !important;
+                            border-left: none !important;
+                            border-bottom: 1px solid rgba(212, 166, 79, 0.2) !important;
+                        }
+                        .sidebar-nav {
+                            display: grid !important;
+                            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+                            gap: 8px !important;
+                        }
+                        .sidebar-nav li a {
+                            padding: 10px 12px !important;
+                            border-right: none !important;
+                            border-bottom: 2px solid transparent !important;
+                            font-size: 0.8rem !important;
+                        }
+                        .main-content {
+                            margin-right: 0 !important;
+                            padding: 14px !important;
+                            min-width: 0 !important;
+                        }
+                        .page-header {
+                            flex-direction: column !important;
+                            align-items: stretch !important;
+                            gap: 8px !important;
+                        }
+                        #ownerWelcomeBanner {
+                            display: none !important;
+                        }
+                        #btnAddCourseTop {
+                            position: static !important;
+                            width: 100% !important;
+                            margin-bottom: 12px !important;
+                            border-radius: 12px !important;
+                            box-shadow: none !important;
+                            z-index: auto !important;
+                        }
+                        .dash-cards {
+                            display: grid !important;
+                            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+                            gap: 12px !important;
+                        }
+                        .dash-card {
+                            padding: 14px !important;
+                            border-radius: 12px !important;
+                            flex-direction: column !important;
+                            align-items: flex-start !important;
+                            text-align: left !important;
+                        }
+                        .dash-card-info h3 {
+                            font-size: 0.75rem !important;
+                        }
+                        .dash-card-info .value {
+                            font-size: 1.2rem !important;
+                        }
+                        .dash-panel,
+                        .glass-panel {
+                            padding: 14px !important;
+                            border-radius: 12px !important;
+                            margin-bottom: 16px !important;
+                        }
+                        #paymentRequestsPanel {
+                            position: relative !important;
+                            z-index: 1 !important;
+                            margin-bottom: 20px !important;
+                            overflow: visible !important;
+                        }
+                        .modal-overlay {
+                            z-index: 30 !important;
+                        }
+                    }
+                `;
+                document.head.appendChild(assistantMobileFixes);
                 
                 if (window.location.pathname.includes('admin-compass') || window.location.pathname.includes('admin-bot-monitor')) {
                     window.location.replace('admin-dashboard.html');
