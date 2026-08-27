@@ -247,6 +247,21 @@
                             <button type="button" id="btnGenerateAIQuestions" class="btn btn-block" style="background-color: #2ecc71; color: white; border-radius: 8px; font-weight: bold; margin-top: 15px;">
                                 <i class="fas fa-magic mr-2"></i> تحليل الملف وإنشاء الأسئلة
                             </button>
+
+                            <div style="display:flex; align-items:center; gap:10px; margin-top:15px;">
+                                <div style="flex:1; height:1px; background:rgba(255,255,255,0.12);"></div>
+                                <span style="color:#aaa; font-size:12px;">أو استيراد أسئلة جاهزة</span>
+                                <div style="flex:1; height:1px; background:rgba(255,255,255,0.12);"></div>
+                            </div>
+                            <div class="form-group" style="margin-top:15px;">
+                                <label>ملف الأسئلة النصي (TXT)</label>
+                                <input type="file" id="readyQuestionsFile" accept=".txt,.text" class="form-control" style="padding: 10px;">
+                            </div>
+                            <button type="button" id="btnImportReadyQuestions" class="btn btn-block" style="background-color:#3498db; color:white; border-radius:8px; font-weight:bold; margin-top:15px;">
+                                <i class="fas fa-file-import mr-2"></i> استيراد أسئلة جاهزة
+                            </button>
+                            <div id="readyQuestionsStatus" style="margin-top:15px; color:#f1c40f; font-weight:bold; display:none; text-align:center;"></div>
+                            <div id="readyQuestionsSummary" style="margin-top:15px; padding:10px; background:rgba(0,0,0,0.2); border-radius:8px; display:none; font-size:0.95rem;"></div>
                             
                             <div id="aiGeneratorStatus" style="margin-top: 15px; color: #f1c40f; font-weight: bold; display: none; text-align: center;"></div>
                             <div id="aiGeneratorSummary" style="margin-top: 15px; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 8px; display: none; font-size: 0.95rem;"></div>
@@ -784,6 +799,18 @@
                 return true;
             }
 
+            // --- Upload operation helpers ---
+            function generateUploadOpId() {
+                return 'u_' + Date.now() + '_' + Math.random().toString(36).slice(2,8);
+            }
+
+            function getPendingUploads() {
+                try { return JSON.parse(localStorage.getItem('pendingUploads') || '{}'); } catch(e) { return {}; }
+            }
+            function setPendingUploads(obj) {
+                try { localStorage.setItem('pendingUploads', JSON.stringify(obj)); } catch(e) {}
+            }
+
             async function fastUpload(courseId, section, itemObj) {
                 // Ensure latest courses before saving
                 let courses = JSON.parse(localStorage.getItem('adminCourses') || '[]');
@@ -815,8 +842,13 @@
                     }
                     if (!courses[idx].contents[section]) courses[idx].contents[section] = [];
 
-                    itemObj.id = itemObj.id || 'res_' + Date.now();
-                    itemObj.createdAt = Date.now();
+                    // Use stable id when available (uploadOpId) to ensure idempotency on retries
+                    if (itemObj.uploadOpId) {
+                        itemObj.id = itemObj.id || itemObj.uploadOpId;
+                    } else {
+                        itemObj.id = itemObj.id || 'res_' + Date.now();
+                    }
+                    itemObj.createdAt = itemObj.createdAt || Date.now();
 
                     let addedToLecture = false;
                     if(section === 'lectures' && itemObj.attachLectureId) {
@@ -830,16 +862,10 @@
                     delete itemObj.attachLectureId;
                     
                     if(!addedToLecture) {
-                        if (false && courses[idx].contents.sections && Array.isArray(courses[idx].contents.sections)) {
-                            let secId = 'sec_' + section;
-                            let secObj = courses[idx].contents.sections.find(s => s.id === secId);
-                            if (!secObj) {
-                                let titles = { lectures: 'المحاضرات', homeworks: 'الواجبات', exams: 'الامتحانات', trainings: 'التدريبات' };
-                                secObj = { id: secId, title: titles[section] || 'قسم جديد', items: [] };
-                                courses[idx].contents.sections.push(secObj);
-                            }
-                            if (!secObj.items) secObj.items = [];
-                            secObj.items.push(itemObj);
+                        // Idempotent insertion: if item with same id exists, replace it; otherwise push
+                        const existingIdx = courses[idx].contents[section].findIndex(i => i && i.id === itemObj.id);
+                        if (existingIdx > -1) {
+                            courses[idx].contents[section][existingIdx] = itemObj;
                         } else {
                             courses[idx].contents[section].push(itemObj);
                         }
@@ -851,10 +877,32 @@
                         } else {
                             localStorage.setItem('adminCourses', JSON.stringify(courses));
                         }
+                        // On success mark any pending upload for this opId as complete
+                        try {
+                            const pending = getPendingUploads();
+                            if (itemObj.uploadOpId && pending[itemObj.uploadOpId]) {
+                                pending[itemObj.uploadOpId].state = 'DATABASE_COMPLETE';
+                                pending[itemObj.uploadOpId].completedAt = Date.now();
+                                setPendingUploads(pending);
+                            }
+                        } catch(e) {}
+
                         if(window.showToast) window.showToast('✅ تم الحفظ بنجاح!', 'success');
                         else alert('تم الحفظ بنجاح!');
                         return true;
                     } catch(err) {
+                        // Mark pending as retryable DB failure
+                        try {
+                            const pending = getPendingUploads();
+                            if (itemObj.uploadOpId) {
+                                pending[itemObj.uploadOpId] = pending[itemObj.uploadOpId] || {};
+                                pending[itemObj.uploadOpId].state = 'FAILED_DB';
+                                pending[itemObj.uploadOpId].lastError = err.message || String(err);
+                                pending[itemObj.uploadOpId].lastAttempt = Date.now();
+                                setPendingUploads(pending);
+                            }
+                        } catch(e) {}
+
                         if(window.showToast) window.showToast('❌ خطأ في الحفظ: ' + err.message, 'error');
                         else alert('خطأ في الحفظ: ' + err.message);
                         return false;
@@ -887,18 +935,54 @@
                     const fileInput = document.getElementById('vFileInput');
                     if (!fileInput.files.length) { alert('يرجى اختيار ملف فيديو'); return; }
                     const file = fileInput.files[0];
-                    const storageRef = window.firebaseStorage.ref('videos/' + Date.now() + '_' + file.name);
+
+                    // Create a stable upload operation id BEFORE starting the upload
+                    const uploadOpId = generateUploadOpId();
+                    const safeStoragePath = 'videos/' + uploadOpId + '_' + file.name;
+
+                    // Persist a pending upload record so retries can resume without duplication
+                    const pending = getPendingUploads();
+                    pending[uploadOpId] = pending[uploadOpId] || {
+                        opId: uploadOpId,
+                        courseId: cId,
+                        section: section,
+                        fileName: file.name,
+                        storagePath: safeStoragePath,
+                        state: 'UPLOADING',
+                        createdAt: Date.now()
+                    };
+                    setPendingUploads(pending);
+
+                    const storageRef = window.firebaseStorage.ref(safeStoragePath);
                     const submitBtn = e.target.querySelector('button[type="submit"]');
                     const originalBtnText = submitBtn.innerHTML;
                     submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الرفع...';
                     submitBtn.disabled = true;
                     try {
-                        const snapshot = await storageRef.put(file);
-                        const downloadURL = await snapshot.ref.getDownloadURL();
-                        itemObj.videoUrl = downloadURL;
-                        itemObj.fileName = file.name; itemObj.availableFrom = document.getElementById('vAvailableFrom').value; itemObj.availableUntil = document.getElementById('vAvailableUntil').value;
+                        // If a previous attempt already uploaded and we have downloadURL, reuse it
+                        if (pending[uploadOpId].downloadURL) {
+                            itemObj.videoUrl = pending[uploadOpId].downloadURL;
+                        } else {
+                            const snapshot = await storageRef.put(file);
+                            const downloadURL = await snapshot.ref.getDownloadURL();
+                            pending[uploadOpId].downloadURL = downloadURL;
+                            pending[uploadOpId].state = 'STORAGE_COMPLETE';
+                            pending[uploadOpId].storageCompletedAt = Date.now();
+                            setPendingUploads(pending);
+                            itemObj.videoUrl = downloadURL;
+                        }
+                        itemObj.fileName = file.name;
+                        itemObj.availableFrom = document.getElementById('vAvailableFrom').value;
+                        itemObj.availableUntil = document.getElementById('vAvailableUntil').value;
+                        itemObj.uploadOpId = uploadOpId;
+                        itemObj.id = itemObj.id || uploadOpId;
                     } catch(err) {
                         console.error('Upload failed', err);
+                        // Mark pending as failed for retry
+                        pending[uploadOpId].state = 'FAILED_STORAGE';
+                        pending[uploadOpId].lastError = err.message || String(err);
+                        pending[uploadOpId].lastAttempt = Date.now();
+                        setPendingUploads(pending);
                         alert('حدث خطأ أثناء رفع الفيديو: ' + err.message);
                         submitBtn.innerHTML = originalBtnText;
                         submitBtn.disabled = false;
@@ -929,18 +1013,51 @@
                     const fileInput = document.getElementById('pFileInput');
                     if (!fileInput.files.length) { alert('يرجى اختيار ملف PDF'); return; }
                     const file = fileInput.files[0];
-                    const storageRef = window.firebaseStorage.ref('pdfs/' + Date.now() + '_' + file.name);
+
+                    // stable opId
+                    const uploadOpId = generateUploadOpId();
+                    const safeStoragePath = 'pdfs/' + uploadOpId + '_' + file.name;
+
+                    const pending = getPendingUploads();
+                    pending[uploadOpId] = pending[uploadOpId] || {
+                        opId: uploadOpId,
+                        courseId: cId,
+                        section: section,
+                        fileName: file.name,
+                        storagePath: safeStoragePath,
+                        state: 'UPLOADING',
+                        createdAt: Date.now()
+                    };
+                    setPendingUploads(pending);
+
+                    const storageRef = window.firebaseStorage.ref(safeStoragePath);
                     const submitBtn = e.target.querySelector('button[type="submit"]');
                     const originalBtnText = submitBtn.innerHTML;
                     submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الرفع...';
                     submitBtn.disabled = true;
                     try {
-                        const snapshot = await storageRef.put(file);
-                        const downloadURL = await snapshot.ref.getDownloadURL();
-                        itemObj.pdfUrl = downloadURL;
-                        itemObj.fileName = file.name; itemObj.availableFrom = document.getElementById('pAvailableFrom').value; itemObj.availableUntil = document.getElementById('pAvailableUntil').value;
+                        if (pending[uploadOpId].downloadURL) {
+                            itemObj.pdfUrl = pending[uploadOpId].downloadURL;
+                        } else {
+                            const snapshot = await storageRef.put(file);
+                            const downloadURL = await snapshot.ref.getDownloadURL();
+                            pending[uploadOpId].downloadURL = downloadURL;
+                            pending[uploadOpId].state = 'STORAGE_COMPLETE';
+                            pending[uploadOpId].storageCompletedAt = Date.now();
+                            setPendingUploads(pending);
+                            itemObj.pdfUrl = downloadURL;
+                        }
+                        itemObj.fileName = file.name;
+                        itemObj.availableFrom = document.getElementById('pAvailableFrom').value;
+                        itemObj.availableUntil = document.getElementById('pAvailableUntil').value;
+                        itemObj.uploadOpId = uploadOpId;
+                        itemObj.id = itemObj.id || uploadOpId;
                     } catch(err) {
                         console.error('Upload failed', err);
+                        pending[uploadOpId].state = 'FAILED_STORAGE';
+                        pending[uploadOpId].lastError = err.message || String(err);
+                        pending[uploadOpId].lastAttempt = Date.now();
+                        setPendingUploads(pending);
                         alert('حدث خطأ أثناء رفع الملف: ' + err.message);
                         submitBtn.innerHTML = originalBtnText;
                         submitBtn.disabled = false;
@@ -990,6 +1107,11 @@
                         if(linkVal) examObj.lockedUntilTrainingId = linkVal; // homework locked until linked training done
                     }
 
+                    // Ensure a stable upload operation id for exams so retries are idempotent
+                    const examUploadOpId = generateUploadOpId();
+                    examObj.uploadOpId = examObj.uploadOpId || examUploadOpId;
+                    examObj.id = examObj.id || examObj.uploadOpId;
+
                     const success = await fastUpload(cId, section, examObj);
                     if (success) {
                         examQuestions = [];
@@ -999,6 +1121,58 @@
                     }
                 });
             }
+
+            // --- Pending uploads modal & retry helpers (small admin tool) ---
+            window.renderPendingUploadsModal = function() {
+                const pending = getPendingUploads();
+                const keys = Object.keys(pending || {});
+                let html = '<div class="modal-overlay" id="pendingUploadsModal" style="display:flex;z-index:100000;">\n<div class="glass-panel modal-content" style="max-width:800px;padding:20px;">\n<button class="close-modal" onclick="document.getElementById(\'pendingUploadsModal\').remove()"><i class="fas fa-times"></i></button>\n<h3>Pending Uploads</h3>\n<div style="max-height:400px; overflow:auto;">';
+                if (keys.length === 0) html += '<div style="color:#aaa; padding:20px;">No pending uploads</div>';
+                keys.forEach(k => {
+                    const p = pending[k];
+                    html += `<div style="border-bottom:1px solid rgba(255,255,255,0.06); padding:8px; display:flex; justify-content:space-between; gap:10px; align-items:center;">`;
+                    html += `<div style="flex:1;"><strong>${p.fileName || p.opId}</strong><div style="color:#ccc; font-size:0.9rem;">Course: ${p.courseId || '-'} • Section: ${p.section || '-'} • State: ${p.state || 'unknown'}</div></div>`;
+                    html += `<div style="display:flex; gap:8px;"><button class="btn btn-outline" onclick="retryPendingUpload('${k}')">Retry</button><button class="btn btn-danger" onclick="removePendingUpload('${k}')">Remove</button></div>`;
+                    html += `</div>`;
+                });
+                html += '</div></div></div>';
+                const wrapper = document.createElement('div'); wrapper.innerHTML = html; document.body.appendChild(wrapper);
+            };
+
+            window.retryPendingUpload = async function(opId) {
+                const pending = getPendingUploads();
+                const p = pending[opId];
+                if (!p) return alert('Pending upload not found');
+                if (!p.courseId || !p.section) return alert('Missing course/section info');
+                try {
+                    // Build minimal item object reusing stored downloadURL
+                    const itemObj = { title: p.title || (p.fileName || 'Uploaded Item'), type: p.type || (p.section === 'exams' ? 'exam' : 'file'), fileName: p.fileName };
+                    if (p.downloadURL) {
+                        if (p.storagePath && p.storagePath.startsWith('videos/')) itemObj.videoUrl = p.downloadURL;
+                        else itemObj.pdfUrl = p.downloadURL;
+                    }
+                    itemObj.uploadOpId = opId;
+                    itemObj.id = itemObj.id || opId;
+                    // Call fastUpload to persist metadata (fastUpload will detect existing id and replace)
+                    const ok = await fastUpload(p.courseId, p.section, itemObj);
+                    if (ok) {
+                        delete pending[opId];
+                        setPendingUploads(pending);
+                        alert('Retry succeeded');
+                        const modal = document.getElementById('pendingUploadsModal'); if (modal) modal.remove();
+                    } else {
+                        alert('Retry failed — check console for errors');
+                    }
+                } catch(e) { console.error('retryPendingUpload failed', e); alert('Retry error: ' + e.message); }
+            };
+
+            window.removePendingUpload = function(opId) {
+                const pending = getPendingUploads();
+                if (pending[opId]) delete pending[opId];
+                setPendingUploads(pending);
+                const modal = document.getElementById('pendingUploadsModal'); if (modal) modal.remove();
+                alert('Removed pending upload: ' + opId);
+            };
         });
     </script>
     <script src="js/bousala-rubric-generator.js?v=9"></script>
@@ -1084,6 +1258,7 @@
     </script>
     
     <script src="js/ai-question-generator.js"></script>
+    <script src="js/ready-question-importer.js"></script>
 </body>
 </html>
 

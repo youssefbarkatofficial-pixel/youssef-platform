@@ -19,6 +19,7 @@ function getAdminCoursesArray() {
 }
 function saveAdminCoursesArray(courses) {
     try { localStorage.setItem('adminCourses', JSON.stringify(courses)); } catch(e) {}
+    window.dispatchEvent(new CustomEvent('coursesChanged', { detail: courses }));
 }
 
 // ONE-TIME SCRIPT TO DELETE CORRUPTED EXAM
@@ -701,6 +702,24 @@ function renderContentLists() {
                     html += `<input type="text" class="form-control" value="${item.pdfUrl || ''}" onchange="updateItemUrl(${sIdx}, ${iIdx}, 'pdf', this.value)" placeholder="رابط المذكرة (PDF)" style="padding: 6px; font-size: 0.9rem;">`;
                 }
 
+                if (['quiz', 'task', 'exam', 'training', 'homework'].includes(item.type) && Array.isArray(item.questions)) {
+                    html += '<div style="margin-top:5px; border-top:1px solid rgba(255,255,255,0.1); padding-top:10px;"><strong style="color:var(--accent-cyan);">أسئلة المحتوى</strong>';
+                    item.questions.forEach((question, qIdx) => {
+                        html += `<div style="margin-top:8px; padding:8px; border:1px solid rgba(255,255,255,0.08); border-radius:6px;">
+                            <input type="text" class="form-control" value="${question.text || ''}" onchange="updateQuestionField(${sIdx}, ${iIdx}, ${qIdx}, 'text', this.value)" placeholder="نص السؤال" style="padding:6px; margin-bottom:6px;">
+                            <input type="text" class="form-control" value="${question.options?.a || ''}" onchange="updateQuestionOption(${sIdx}, ${iIdx}, ${qIdx}, 'a', this.value)" placeholder="اختيار أ" style="padding:6px; margin-bottom:6px;">
+                            <input type="text" class="form-control" value="${question.options?.b || ''}" onchange="updateQuestionOption(${sIdx}, ${iIdx}, ${qIdx}, 'b', this.value)" placeholder="اختيار ب" style="padding:6px; margin-bottom:6px;">
+                            <input type="text" class="form-control" value="${question.options?.c || ''}" onchange="updateQuestionOption(${sIdx}, ${iIdx}, ${qIdx}, 'c', this.value)" placeholder="اختيار ج" style="padding:6px; margin-bottom:6px;">
+                            <input type="text" class="form-control" value="${question.options?.d || ''}" onchange="updateQuestionOption(${sIdx}, ${iIdx}, ${qIdx}, 'd', this.value)" placeholder="اختيار د" style="padding:6px; margin-bottom:6px;">
+                            <select class="form-control" onchange="updateQuestionField(${sIdx}, ${iIdx}, ${qIdx}, 'answer', this.value)" style="padding:6px; margin-bottom:6px;">
+                                <option value="a" ${question.answer === 'a' ? 'selected' : ''}>الإجابة: أ</option><option value="b" ${question.answer === 'b' ? 'selected' : ''}>الإجابة: ب</option><option value="c" ${question.answer === 'c' ? 'selected' : ''}>الإجابة: ج</option><option value="d" ${question.answer === 'd' ? 'selected' : ''}>الإجابة: د</option>
+                            </select>
+                            <button type="button" class="btn btn-outline" style="padding:4px 8px; border-color:#e74c3c; color:#e74c3c;" onclick="removeQuestion(${sIdx}, ${iIdx}, ${qIdx})"><i class="fas fa-trash"></i> حذف السؤال</button>
+                        </div>`;
+                    });
+                    html += '</div>';
+                }
+
                 // Advanced LMS fields (Availability, Deadline, Depends On)
                 if (item.type !== 'header') {
                     html += `
@@ -943,6 +962,79 @@ window.updateItemUrl = function(sIdx, iIdx, type, val) {
     markUnsaved();
 };
 
+function buildContentsForSave(contents) {
+    const result = JSON.parse(JSON.stringify(contents || { sections: [] }));
+    if (Array.isArray(result.sections)) {
+        const sectionMap = { sec_lectures: 'lectures', sec_homeworks: 'homeworks', sec_exams: 'exams', sec_trainings: 'trainings' };
+        result.sections.forEach(section => {
+            const legacyKey = sectionMap[section.id];
+            if (legacyKey) result[legacyKey] = JSON.parse(JSON.stringify(section.items || []));
+        });
+    }
+    return result;
+}
+
+window.updateQuestionField = function(sIdx, iIdx, qIdx, field, val) {
+    const question = tempContents.sections[sIdx].items[iIdx].questions[qIdx];
+    if (!question) return;
+    question[field] = val;
+    markUnsaved();
+};
+
+window.updateQuestionOption = function(sIdx, iIdx, qIdx, optionKey, val) {
+    const question = tempContents.sections[sIdx].items[iIdx].questions[qIdx];
+    if (!question) return;
+    question.options = question.options || {};
+    question.options[optionKey] = val;
+    markUnsaved();
+};
+
+async function getLatestCourseForMutation(courseId) {
+    if (!window.firebaseDb || typeof window.firebaseDb.collection !== 'function') {
+        throw new Error('لا يمكن تنفيذ الحذف بأمان بدون اتصال Firebase.');
+    }
+    const snapshot = await window.firebaseDb.collection('courses').doc(courseId).get({ source: 'server' });
+    if (!snapshot.exists) throw new Error('الكورس غير موجود على الخادم.');
+    return { id: snapshot.id, ...snapshot.data() };
+}
+
+function removeQuestionFromContents(contents, itemId, questionId) {
+    let removed = false;
+    function visit(value) {
+        if (!value || typeof value !== 'object') return;
+        if (value.id === itemId && Array.isArray(value.questions)) {
+            const originalLength = value.questions.length;
+            value.questions = value.questions.filter(question => question && question.id !== questionId);
+            if (value.questions.length !== originalLength) removed = true;
+        }
+        Object.keys(value).forEach(key => visit(value[key]));
+    }
+    visit(contents);
+    return removed;
+}
+
+window.removeQuestion = async function(sIdx, iIdx, qIdx) {
+    const questions = tempContents.sections[sIdx].items[iIdx].questions;
+    const question = questions && questions[qIdx];
+    if (!question) return;
+    if (!confirm('هل أنت متأكد من حذف السؤال المحدد؟\n' + (question.text || 'بدون نص'))) return;
+    if (!currentEditingCourse || !currentEditingCourse.id) return alert('لا يمكن حذف السؤال قبل حفظ الكورس أولاً.');
+    try {
+        const latestCourse = await getLatestCourseForMutation(currentEditingCourse.id);
+        const itemId = tempContents.sections[sIdx].items[iIdx].id;
+        if (!removeQuestionFromContents(latestCourse.contents, itemId, question.id)) {
+            return alert('السؤال المحدد غير موجود في أحدث نسخة على الخادم.');
+        }
+        await window.FirebaseService.saveCourse(latestCourse, { replaceContents: true });
+        tempContents = migrateCourseToSections(latestCourse.contents);
+        currentEditingCourse = latestCourse;
+        hasUnsavedChanges = false;
+        renderContentLists();
+    } catch (error) {
+        alert('فشل حذف السؤال ولم يتم تغيير البيانات: ' + error.message);
+    }
+};
+
         document.addEventListener('DOMContentLoaded', async () => {
             window.addEventListener('coursesChanged', (e) => {
                 const freshCourses = getAdminCoursesArray();
@@ -1121,7 +1213,7 @@ window.updateItemUrl = function(sIdx, iIdx, type, val) {
                                     image: imageVal,
                                     hidden: currentEditingCourse.hidden || false,
                                     finished: currentEditingCourse.finished || false,
-                                    contents: JSON.parse(JSON.stringify(tempContents || { sections: [] }))
+                                    contents: buildContentsForSave(tempContents)
                                 };
                                 adminCourses.push(newCourse);
                                 idx = adminCourses.length - 1;
@@ -1133,13 +1225,13 @@ window.updateItemUrl = function(sIdx, iIdx, type, val) {
                                     image: imageVal,
                                     hidden: currentEditingCourse.hidden || false,
                                     finished: currentEditingCourse.finished || false,
-                                    contents: JSON.parse(JSON.stringify(tempContents || { sections: [] }))
+                                    contents: buildContentsForSave(tempContents)
                                 };
                             }
                             // Save to Firebase if available
                             if (window.FirebaseService && window.FirebaseService.isReady()) {
                                 // Using Promise.race to avoid hanging indefinitely if firebase is disconnected
-                                const savePromise = window.FirebaseService.saveCourse(adminCourses[idx]).catch(e => console.warn('Firebase save failed:', e));
+                                const savePromise = window.FirebaseService.saveCourse(adminCourses[idx], { replaceContents: true }).catch(e => console.warn('Firebase save failed:', e));
                                 const timeoutPromise = new Promise(resolve => setTimeout(resolve, 8000));
                                 await Promise.race([savePromise, timeoutPromise]);
                             }
@@ -1151,12 +1243,12 @@ window.updateItemUrl = function(sIdx, iIdx, type, val) {
                                 image: imageVal,
                                 hidden: false,
                                 finished: false,
-                                contents: JSON.parse(JSON.stringify(tempContents || { sections: [] }))
+                                contents: buildContentsForSave(tempContents)
                             };
                             adminCourses.push(newCourse);
                             // Save to Firebase if available
                             if (window.FirebaseService && window.FirebaseService.isReady()) {
-                                const savePromise = window.FirebaseService.saveCourse(newCourse).catch(e => console.warn('Firebase save failed:', e));
+                                const savePromise = window.FirebaseService.saveCourse(newCourse, { replaceContents: true }).catch(e => console.warn('Firebase save failed:', e));
                                 const timeoutPromise = new Promise(resolve => setTimeout(resolve, 8000));
                                 await Promise.race([savePromise, timeoutPromise]);
                             }
@@ -1232,7 +1324,7 @@ window.updateItemUrl = function(sIdx, iIdx, type, val) {
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
     <script src="js/firebase-config.js?v=9"></script>
-    <script src="js/firebase-service.js?v=9"></script>
+    <script src="js/firebase-service.js?v=10"></script>
     <!-- Course Subscribers Modal -->
     <div id="courseSubscribersModal" class="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; justify-content: center; align-items: center;">
         <div class="glass-panel" style="width: 95%; max-width: 800px; padding: 30px; position: relative; max-height: 90vh; overflow-y: auto;">
@@ -1700,8 +1792,10 @@ window.renderFlatContents = function() {
                         <div style="font-size:0.75rem; color:#aaa; margin-top:3px;">ID: ${item.id || 'N/A'}</div>
                     </div>
                     <div>
-                        <button class="btn btn-outline" style="padding:4px 8px; border-color:var(--royal-gold); color:var(--royal-gold); font-size:0.8rem; margin-left:5px;" onclick="openMoveItemModal('${list.key}', ${idx})"><i class="fas fa-exchange-alt"></i> نقل</button>
-                        <button class="btn btn-outline" style="padding:4px 8px; border-color:#e74c3c; color:#e74c3c; font-size:0.8rem;" onclick="deleteFlatItem('${list.key}', ${idx})"><i class="fas fa-trash"></i> مسح</button>
+                        <button class="btn btn-outline" style="padding:4px 8px; border-color:var(--royal-gold); color:var(--royal-gold); font-size:0.8rem; margin-left:5px;" onclick="openMoveItemModal('${list.key}', '${item.id || ''}')"><i class="fas fa-exchange-alt"></i> نقل</button>
+                        <button class="btn btn-outline" style="padding:4px 7px;" onclick="reorderFlatItem('${list.key}', '${item.id || ''}', -1)" title="تحريك لأعلى"><i class="fas fa-arrow-up"></i></button>
+                        <button class="btn btn-outline" style="padding:4px 7px;" onclick="reorderFlatItem('${list.key}', '${item.id || ''}', 1)" title="تحريك لأسفل"><i class="fas fa-arrow-down"></i></button>
+                        <button class="btn btn-outline" style="padding:4px 8px; border-color:#e74c3c; color:#e74c3c; font-size:0.8rem;" onclick="deleteFlatItem('${list.key}', '${item.id || ''}')"><i class="fas fa-trash"></i> مسح</button>
                     </div>
                 </div>
                 `;
@@ -1720,8 +1814,8 @@ window.renderFlatContents = function() {
                                 <strong style="color:#eee; font-size:0.9rem;">- ${child.title || 'بدون عنوان'}</strong> ${cDetails}
                             </div>
                             <div>
-                                <button class="btn btn-outline" style="padding:2px 6px; border-color:var(--royal-gold); color:var(--royal-gold); font-size:0.75rem; margin-left:5px;" onclick="openMoveItemModal('${list.key}', ${idx}, ${cIdx})"><i class="fas fa-exchange-alt"></i> نقل</button>
-                                <button class="btn btn-outline" style="padding:2px 6px; border-color:#e74c3c; color:#e74c3c; font-size:0.75rem;" onclick="deleteFlatChildItem('${list.key}', ${idx}, ${cIdx})"><i class="fas fa-trash"></i> مسح</button>
+                                <button class="btn btn-outline" style="padding:2px 6px; border-color:var(--royal-gold); color:var(--royal-gold); font-size:0.75rem; margin-left:5px;" onclick="openMoveItemModal('${list.key}', '${item.id || ''}', '${child.id || ''}')"><i class="fas fa-exchange-alt"></i> نقل</button>
+                                <button class="btn btn-outline" style="padding:2px 6px; border-color:#e74c3c; color:#e74c3c; font-size:0.75rem;" onclick="deleteFlatChildItem('${list.key}', '${item.id || ''}', '${child.id || ''}')"><i class="fas fa-trash"></i> مسح</button>
                             </div>
                         </div>
                         `;
@@ -1739,52 +1833,104 @@ window.renderFlatContents = function() {
     container.innerHTML = html;
 };
 
-window.deleteFlatItem = async function(listKey, idx) {
+window.deleteFlatItem = async function(listKey, itemId) {
+    if (!itemId) return alert('لا يمكن حذف عنصر بلا ID محدد.');
     const pwd = await window.requireAdminPassword();
     if(pwd === null) return;
     if(pwd.trim() !== 'My@36_172001') return alert('كلمة المرور خاطئة');
     
-    if(!confirm('هل أنت متأكد من مسح هذا العنصر نهائياً؟')) return;
-    
     const courses = getAdminCoursesArray();
     const courseIndex = courses.findIndex(c => c.id === window.currentFlatCourseId);
     if(courseIndex === -1) return;
-    
-    courses[courseIndex].contents[listKey].splice(idx, 1);
-    
-    saveAdminCoursesArray(courses);
-    if (window.FirebaseService && typeof window.FirebaseService.saveCourse === 'function') {
-        window.FirebaseService.saveCourse(courses[courseIndex]);
+    const originalCourses = JSON.parse(JSON.stringify(courses));
+    let latestCourse;
+    try {
+        latestCourse = await getLatestCourseForMutation(window.currentFlatCourseId);
+    } catch (error) {
+        return alert('تعذر قراءة أحدث نسخة من الكورس، ولم يتم الحذف: ' + error.message);
     }
-    window.renderFlatContents();
-    alert('تم المسح بنجاح');
+    const candidate = JSON.parse(JSON.stringify(latestCourse));
+    const list = candidate.contents[listKey] || [];
+    const itemIndex = list.findIndex(item => item && item.id === itemId);
+    if (itemIndex === -1) return alert('العنصر المحدد غير موجود.');
+    const itemName = list[itemIndex].title || 'بدون اسم';
+    if(!confirm('هل أنت متأكد من حذف العنصر المحدد؟\n' + itemName)) return;
+    list.splice(itemIndex, 1);
+    try {
+        if (window.FirebaseService && typeof window.FirebaseService.saveCourse === 'function') await window.FirebaseService.saveCourse(candidate, { replaceContents: true });
+        courses[courseIndex] = candidate;
+        saveAdminCoursesArray(courses);
+        window.renderFlatContents();
+        alert('تم حذف "' + itemName + '" بنجاح');
+    } catch (error) {
+        saveAdminCoursesArray(originalCourses);
+        alert('فشل حذف "' + itemName + '" ولم يتم تغيير المصدر: ' + error.message);
+    }
 };
 
-window.deleteFlatChildItem = async function(listKey, parentIdx, childIdx) {
+window.deleteFlatChildItem = async function(listKey, parentId, childId) {
+    if (!parentId || !childId) return alert('لا يمكن حذف عنصر فرعي بلا ID محدد.');
     const pwd = await window.requireAdminPassword();
     if(pwd === null) return;
     if(pwd.trim() !== 'My@36_172001') return alert('كلمة المرور خاطئة');
     
-    if(!confirm('هل أنت متأكد من مسح هذا العنصر الفرعي نهائياً؟')) return;
-    
     const courses = getAdminCoursesArray();
     const courseIndex = courses.findIndex(c => c.id === window.currentFlatCourseId);
     if(courseIndex === -1) return;
-    
-    courses[courseIndex].contents[listKey][parentIdx].children.splice(childIdx, 1);
-    
-    saveAdminCoursesArray(courses);
-    if (window.FirebaseService && typeof window.FirebaseService.saveCourse === 'function') {
-        window.FirebaseService.saveCourse(courses[courseIndex]);
+    const originalCourses = JSON.parse(JSON.stringify(courses));
+    let latestCourse;
+    try {
+        latestCourse = await getLatestCourseForMutation(window.currentFlatCourseId);
+    } catch (error) {
+        return alert('تعذر قراءة أحدث نسخة من الكورس، ولم يتم الحذف: ' + error.message);
     }
-    window.renderFlatContents();
-    alert('تم المسح بنجاح');
+    const candidate = JSON.parse(JSON.stringify(latestCourse));
+    const parent = (candidate.contents[listKey] || []).find(item => item && item.id === parentId);
+    const childIndex = parent && Array.isArray(parent.children) ? parent.children.findIndex(child => child && child.id === childId) : -1;
+    if (childIndex === -1) return alert('العنصر الفرعي المحدد غير موجود.');
+    const itemName = parent.children[childIndex].title || 'بدون اسم';
+    if(!confirm('هل أنت متأكد من حذف العنصر الفرعي المحدد؟\n' + itemName)) return;
+    parent.children.splice(childIndex, 1);
+    try {
+        if (window.FirebaseService && typeof window.FirebaseService.saveCourse === 'function') await window.FirebaseService.saveCourse(candidate, { replaceContents: true });
+        courses[courseIndex] = candidate;
+        saveAdminCoursesArray(courses);
+        window.renderFlatContents();
+        alert('تم حذف "' + itemName + '" بنجاح');
+    } catch (error) {
+        saveAdminCoursesArray(originalCourses);
+        alert('فشل حذف "' + itemName + '" ولم يتم تغيير المصدر: ' + error.message);
+    }
+};
+
+window.reorderFlatItem = async function(listKey, itemId, direction) {
+    if (!itemId) return alert('لا يمكن إعادة ترتيب عنصر بلا ID محدد.');
+    const courses = getAdminCoursesArray();
+    const courseIndex = courses.findIndex(c => c.id === window.currentFlatCourseId);
+    if (courseIndex === -1) return;
+    const originalCourses = JSON.parse(JSON.stringify(courses));
+    const candidate = JSON.parse(JSON.stringify(courses));
+    const list = candidate[courseIndex].contents[listKey] || [];
+    const itemIndex = list.findIndex(item => item && item.id === itemId);
+    const targetIndex = itemIndex + direction;
+    if (itemIndex === -1 || targetIndex < 0 || targetIndex >= list.length) return;
+    [list[itemIndex], list[targetIndex]] = [list[targetIndex], list[itemIndex]];
+    try {
+        if (window.FirebaseService && typeof window.FirebaseService.saveCourse === 'function') await window.FirebaseService.saveCourse(candidate[courseIndex], { replaceContents: true });
+        saveAdminCoursesArray(candidate);
+        window.renderFlatContents();
+    } catch (error) {
+        saveAdminCoursesArray(originalCourses);
+        alert('فشل تغيير ترتيب العنصر: ' + error.message);
+    }
 };
 
 // --- Move Item Logic ---
-let _moveState = { listKey: null, parentIdx: null, childIdx: null };
-window.openMoveItemModal = function(listKey, parentIdx, childIdx = null) {
-    _moveState = { listKey, parentIdx, childIdx };
+let _moveState = { listKey: null, parentId: null, childId: null };
+window.openMoveItemModal = function(listKey, parentId, childId = null) {
+    if (!parentId || (childId !== null && !childId)) return alert('العنصر المحدد بلا ID صالح.');
+    _moveState = { listKey, parentId, childId };
+    document.getElementById('flatContentModal').style.display = 'none';
     const courses = getAdminCoursesArray();
     
     let courseSelectHtml = '<option value="">اختر الكورس...</option>';
@@ -1799,7 +1945,30 @@ window.openMoveItemModal = function(listKey, parentIdx, childIdx = null) {
     document.getElementById('moveItemModal').style.display = 'flex';
 };
 
+function collectContentIds(value, ids = new Set()) {
+    if (!value || typeof value !== 'object') return ids;
+    if (value.id) ids.add(String(value.id));
+    Object.keys(value).forEach(key => collectContentIds(value[key], ids));
+    return ids;
+}
+
+function createMovedItemId(usedIds) {
+    let id;
+    do { id = 'item_' + Date.now() + '_' + Math.random().toString(36).slice(2, 9); } while (usedIds.has(id));
+    return id;
+}
+
+function refreshMovedItemIds(value, usedIds) {
+    if (!value || typeof value !== 'object') return;
+    if (value.id) {
+        value.id = createMovedItemId(usedIds);
+        usedIds.add(value.id);
+    }
+    Object.keys(value).forEach(key => refreshMovedItemIds(value[key], usedIds));
+}
+
 window.confirmMoveItem = async function() {
+    if (!_moveState.parentId) return;
     const targetCourseId = document.getElementById('moveCourseSelect').value;
     const targetSection = document.getElementById('moveSectionSelect').value;
     
@@ -1811,34 +1980,61 @@ window.confirmMoveItem = async function() {
     
     if(sourceCourseIdx === -1 || targetCourseIdx === -1) return alert('خطأ في تحديد الكورس!');
     
+    const originalCourses = JSON.parse(JSON.stringify(courses));
+    const candidateCourses = JSON.parse(JSON.stringify(courses));
+    const sourceList = candidateCourses[sourceCourseIdx].contents[_moveState.listKey] || [];
+    const sourceParentIndex = sourceList.findIndex(item => item && item.id === _moveState.parentId);
+    if (sourceParentIndex === -1) return alert('العنصر المصدر غير موجود.');
     let itemToMove;
-    if(_moveState.childIdx !== null) {
-        itemToMove = courses[sourceCourseIdx].contents[_moveState.listKey][_moveState.parentIdx].children[_moveState.childIdx];
-        courses[sourceCourseIdx].contents[_moveState.listKey][_moveState.parentIdx].children.splice(_moveState.childIdx, 1);
+    if (_moveState.childId !== null) {
+        const parent = sourceList[sourceParentIndex];
+        const childIndex = Array.isArray(parent.children) ? parent.children.findIndex(child => child && child.id === _moveState.childId) : -1;
+        if (childIndex === -1) return alert('العنصر الفرعي المصدر غير موجود.');
+        itemToMove = JSON.parse(JSON.stringify(parent.children[childIndex]));
     } else {
-        itemToMove = courses[sourceCourseIdx].contents[_moveState.listKey][_moveState.parentIdx];
-        courses[sourceCourseIdx].contents[_moveState.listKey].splice(_moveState.parentIdx, 1);
+        itemToMove = JSON.parse(JSON.stringify(sourceList[sourceParentIndex]));
     }
-    
-    // Add to target
-    if(!courses[targetCourseIdx].contents) courses[targetCourseIdx].contents = { lectures:[], homeworks:[], exams:[], trainings:[] };
-    if(!courses[targetCourseIdx].contents[targetSection]) courses[targetCourseIdx].contents[targetSection] = [];
-    
-    courses[targetCourseIdx].contents[targetSection].push(itemToMove);
-    
-    saveAdminCoursesArray(courses);
-    if (window.FirebaseService && typeof window.FirebaseService.saveCourse === 'function') {
-        // Save both if different, else save once
+    const itemName = itemToMove.title || 'بدون عنوان';
+    const targetContents = candidateCourses[targetCourseIdx].contents || (candidateCourses[targetCourseIdx].contents = { lectures:[], homeworks:[], exams:[], trainings:[] });
+    const targetList = targetContents[targetSection] || (targetContents[targetSection] = []);
+    const targetIds = collectContentIds(targetList);
+    const movedIds = collectContentIds(itemToMove);
+    const hasIdConflict = Array.from(movedIds).some(id => targetIds.has(id));
+    if (hasIdConflict || targetList.some(item => item && item.title === itemName)) {
+        refreshMovedItemIds(itemToMove, targetIds);
+    }
+    const sourceName = candidateCourses[sourceCourseIdx].title || 'الكورس الحالي';
+    const targetName = candidateCourses[targetCourseIdx].title || 'الكورس الوجهة';
+    if (!confirm('نقل "' + itemName + '" من "' + sourceName + '" إلى "' + targetName + '"؟')) return;
+    targetList.push(itemToMove);
+    if (sourceCourseIdx === targetCourseIdx) {
+        if (_moveState.childId !== null) sourceList[sourceParentIndex].children = sourceList[sourceParentIndex].children.filter(child => child.id !== _moveState.childId);
+        else sourceList.splice(sourceParentIndex, 1);
+    }
+    try {
+        if (!window.FirebaseService || typeof window.FirebaseService.saveCourse !== 'function') throw new Error('خدمة Firebase غير متاحة.');
         if (sourceCourseIdx !== targetCourseIdx) {
-            await window.FirebaseService.saveCourse(courses[sourceCourseIdx]);
+            await window.FirebaseService.saveCourse(candidateCourses[targetCourseIdx], { replaceContents: true });
+            const verified = await window.firebaseDb.collection('courses').doc(candidateCourses[targetCourseIdx].id).get({ source: 'server' });
+            if (!verified.exists || !collectContentIds(verified.data().contents?.[targetSection]).has(String(itemToMove.id))) throw new Error('تعذر التحقق من كتابة العنصر في الكورس الوجهة.');
+            const sourceAfterMove = JSON.parse(JSON.stringify(originalCourses[sourceCourseIdx]));
+            const sourceItems = sourceAfterMove.contents[_moveState.listKey] || [];
+            const sourceIndex = sourceItems.findIndex(item => item && item.id === _moveState.parentId);
+            if (_moveState.childId !== null) sourceItems[sourceIndex].children = sourceItems[sourceIndex].children.filter(child => child.id !== _moveState.childId);
+            else sourceItems.splice(sourceIndex, 1);
+            candidateCourses[sourceCourseIdx] = sourceAfterMove;
+            await window.FirebaseService.saveCourse(candidateCourses[sourceCourseIdx], { replaceContents: true });
+        } else {
+            await window.FirebaseService.saveCourse(candidateCourses[sourceCourseIdx], { replaceContents: true });
         }
-        await window.FirebaseService.saveCourse(courses[targetCourseIdx]);
+        saveAdminCoursesArray(candidateCourses);
+        document.getElementById('moveItemModal').style.display = 'none';
+        window.renderFlatContents();
+        if(window.showToast) window.showToast('تم نقل "' + itemName + '" بنجاح!', 'success');
+    } catch (error) {
+        saveAdminCoursesArray(originalCourses);
+        alert('فشل نقل "' + itemName + '". لم يتم حذف المصدر: ' + error.message);
     }
-    
-    document.getElementById('moveItemModal').style.display = 'none';
-    window.renderFlatContents();
-    if(window.showToast) window.showToast('تم نقل المحتوى بنجاح!', 'success');
-    else alert('تم نقل المحتوى بنجاح!');
 };
     </script>
     

@@ -357,13 +357,17 @@ window.FirebaseService = (function () {
             const snap = await getDb().collection('courses').get();
             let serverCourses = snap.docs.map(d => ({ id: d.id, ...d.data() }));
             
-            // Check if server is empty but local has courses (prevent wiping unsynced data)
+            // Check if server returned empty while local cache has data.
+            // IMPORTANT SAFETY: do NOT interpret an empty server result as "Firebase is empty".
+            // Many failure modes (permissions, network, initialization race) can cause an empty result.
+            // Therefore we MUST NOT automatically write local data back to Firestore here.
+            // A manual sync is available via `syncLocalToFirestore()` for administrators.
             const localCourses = getCoursesFromStorage();
             if (serverCourses.length === 0 && localCourses.length > 0) {
-                console.warn('Firestore has no courses, but local has data. Syncing local to Firestore...');
-                for (let c of localCourses) {
-                    await saveCourse(c);
-                }
+                console.warn('Firestore returned 0 courses while local cache has data. Not auto-syncing to avoid accidental overwrite. Use syncLocalToFirestore() explicitly if you intend to restore local data to Firestore.');
+                try {
+                    localStorage.setItem('firestore_empty_detection', JSON.stringify({ detectedAt: Date.now(), localCount: localCourses.length }));
+                } catch (e) {}
                 return stripContentsIfNotAdmin(localCourses);
             }
 
@@ -380,20 +384,75 @@ window.FirebaseService = (function () {
     /**
      * حفظ / تعديل كورس
      */
-    async function saveCourse(course) {
+    async function saveCourse(course, options = {}) {
         const id = course.id || ('c' + Date.now());
         const data = { ...course, id };
 
-        // local cache first (for speed) — using safe save to avoid quota errors
+        // local cache first (for speed) — safe save to avoid quota errors
         let courses = getCoursesFromStorage();
         const idx = courses.findIndex(c => c.id === id);
         if (idx > -1) courses[idx] = data; else courses.push(data);
         safeStorageSaveCourses(courses);
 
         if (!isFirebaseReady()) throw new Error("Firebase is not ready. Course saved locally but not to cloud.");
+
         try {
-            await getDb().collection('courses').doc(id).set(data, { merge: true });
-        } catch (e) { 
+            // Attempt to merge with server-side arrays to avoid blind overwrite of other's concurrent changes.
+            const docRef = getDb().collection('courses').doc(id);
+            let serverData = null;
+            try {
+                const snap = await docRef.get();
+                if (snap.exists) serverData = snap.data();
+            } catch(e) {
+                console.warn('saveCourse: failed to fetch server doc for merge check', e);
+            }
+
+            if (options.replaceContents) {
+                await docRef.set(data, { merge: true });
+            } else if (serverData && serverData.contents && data.contents) {
+                // Merge arrays by id for common content lists to reduce data-loss risk
+                const keys = ['lectures', 'homeworks', 'exams', 'trainings', 'customSections'];
+                const mergedContents = Object.assign({}, serverData.contents || {});
+
+                keys.forEach(k => {
+                    const serverArr = Array.isArray(serverData.contents[k]) ? serverData.contents[k] : [];
+                    const localArr = Array.isArray(data.contents[k]) ? data.contents[k] : [];
+                    const map = new Map();
+                    serverArr.forEach(item => { if (item && item.id) map.set(item.id, item); });
+                    localArr.forEach(item => { if (item && item.id) map.set(item.id, item); else if (item) map.set(item.id || ('tmp_' + Math.random().toString(36).slice(2,8)), item); });
+                    mergedContents[k] = Array.from(map.values());
+                });
+
+                // Sections handling: if server has sections array, try to merge by section id and items
+                if (Array.isArray(serverData.contents.sections) || Array.isArray(data.contents.sections)) {
+                    const serverSecs = Array.isArray(serverData.contents.sections) ? serverData.contents.sections : [];
+                    const localSecs = Array.isArray(data.contents.sections) ? data.contents.sections : [];
+                    const secMap = new Map();
+                    serverSecs.forEach(s => { if (s && s.id) secMap.set(s.id, JSON.parse(JSON.stringify(s))); });
+                    localSecs.forEach(s => {
+                        if (!s || !s.id) return;
+                        const existing = secMap.get(s.id) || { id: s.id, title: s.title, items: [] };
+                        // merge items by id
+                        const itemMap = new Map();
+                        (existing.items || []).forEach(i => { if (i && i.id) itemMap.set(i.id, i); });
+                        (s.items || []).forEach(i => { if (i && i.id) itemMap.set(i.id, i); else if (i) itemMap.set(i.id || ('tmp_' + Math.random().toString(36).slice(2,8)), i); });
+                        existing.items = Array.from(itemMap.values());
+                        existing.title = s.title || existing.title;
+                        secMap.set(s.id, existing);
+                    });
+                    mergedContents.sections = Array.from(secMap.values());
+                }
+
+                // Construct merged data copy
+                const finalData = Object.assign({}, serverData, data);
+                finalData.contents = Object.assign({}, serverData.contents || {}, mergedContents);
+
+                await docRef.set(finalData, { merge: true });
+            } else {
+                // No server contents to merge with or server missing — do a normal merge set
+                await docRef.set(data, { merge: true });
+            }
+        } catch (e) {
             console.error('saveCourse Firestore failed', e);
             throw e;
         }
@@ -725,6 +784,14 @@ window.FirebaseService = (function () {
      * استخدمها مرة واحدة بس من console الأدمن
      */
     async function syncLocalToFirestore() {
+        // Safety gate: require explicit admin approval via localStorage key
+        // to avoid accidental bulk writes from pages. To run an explicit sync,
+        // set `localStorage.setItem('syncLocalToFirestoreAllow','1')` in the console
+        // (admin) before calling this function, then remove the key after.
+        if (localStorage.getItem('syncLocalToFirestoreAllow') !== '1') {
+            console.warn('syncLocalToFirestore blocked: admin approval key not present');
+            return;
+        }
         if (!isFirebaseReady()) {
             console.error('Firebase not ready for sync');
             return;
@@ -820,6 +887,34 @@ window.FirebaseService = (function () {
     }
 
     // Aliases used by pages (getUser, getCourse)
+    /**
+     * Ensure global realtime listeners are established.
+     * Pages call this to opt-in to realtime updates for courses and payment requests.
+     */
+    async function setupGlobalListeners() {
+        // If Firebase isn't ready yet, wait a short while for it to initialize
+        if (!isFirebaseReady()) {
+            let retries = 0;
+            while (!isFirebaseReady() && retries < 20) {
+                await new Promise(r => setTimeout(r, 200));
+                retries++;
+            }
+        }
+
+        if (!isFirebaseReady()) {
+            console.warn('[FirebaseService] setupGlobalListeners: Firebase not ready, listeners not attached');
+            return;
+        }
+
+        try {
+            // Reuse existing helpers which attach listeners when appropriate
+            await getCourses().catch(e => console.warn('setupGlobalListeners.getCourses failed', e));
+            await getPaymentRequests().catch(e => console.warn('setupGlobalListeners.getPaymentRequests failed', e));
+            console.log('[FirebaseService] Global listeners initialized');
+        } catch (e) {
+            console.warn('[FirebaseService] setupGlobalListeners error', e);
+        }
+    }
     async function getUser(phone) {
         return getStudentByPhone(phone);
     }
@@ -844,6 +939,7 @@ window.FirebaseService = (function () {
         loginStudent,
         getStudentByPhone,
         getUser,
+        setupGlobalListeners,
         getCourse,
         getCourses,
         saveCourse,
