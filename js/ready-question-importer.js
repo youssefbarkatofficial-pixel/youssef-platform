@@ -66,7 +66,7 @@
                 return;
             }
             if (line.indexOf('الإجابة:') === 0) {
-                const answerMatch = line.match(/^الإجابة:\s*(أ|ب|ج|د)(?:\s|$)/);
+                const answerMatch = line.match(/^الإجابة:\s*(أ|ب|ج|د)(?:\)|\s|$)/);
                 current.answerKey = answerMatch ? answerKeys[answerMatch[1]] : '';
                 if (!answerMatch) current.invalidAnswer = true;
                 return;
