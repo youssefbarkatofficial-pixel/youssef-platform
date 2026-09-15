@@ -143,6 +143,10 @@ window.FirebaseService = (function () {
             const userCredential = await getAuth().createUserWithEmailAndPassword(userData.email, password || userData.password);
             const user = userCredential.user;
             
+            const currentMonth = new Date().getMonth();
+            const currentDay = new Date().getDate();
+            const currentAcademicYear = (currentMonth > 6 || (currentMonth === 6 && currentDay >= 25)) ? new Date().getFullYear() : new Date().getFullYear() - 1;
+
             const extraData = {
                 name: userData.name,
                 phone: userData.phone,
@@ -152,7 +156,8 @@ window.FirebaseService = (function () {
                 studentCode: userData.studentCode || ('ST-' + Math.random().toString(36).substring(2, 8).toUpperCase()),
                 plainPassword: password || userData.password,
                 courses: [],
-                notifications: []
+                notifications: [],
+                lastUpdatedAcademicYear: currentAcademicYear
             };
             
             const saved = await saveStudentProfile(user, extraData);
@@ -1029,7 +1034,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Global Encoded ID (Anti-Piracy)
         try {
-            const studentStr = sessionStorage.getItem('currentUser');
+            const studentStr = sessionStorage.getItem('currentStudent');
             if (studentStr) {
                 const student = JSON.parse(studentStr);
                 if (student && student.phone) {

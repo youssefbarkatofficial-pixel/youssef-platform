@@ -611,6 +611,65 @@ document.addEventListener('DOMContentLoaded', () => {
           // Check user specific mute settings dynamically
           let muted = false;
           let userStr = sessionStorage.getItem('currentStudent') || localStorage.getItem('currentStudent');
+    
+    // Global Self-Healing for lost courses
+    if (userStr) {
+        try {
+            let u = JSON.parse(userStr);
+            if (u.notifications && Array.isArray(u.notifications) && window.firebaseDb) {
+                let missingCourses = [];
+                u.notifications.forEach(n => {
+                    if (n.title && n.title.includes('تم قبول اشتراكك') && n.courseId) {
+                        if (!u.courses) u.courses = [];
+                        if (!u.courses.includes(n.courseId)) {
+                            missingCourses.push(n.courseId);
+                            u.courses.push(n.courseId);
+                        }
+                    }
+                });
+                if (missingCourses.length > 0) {
+                    sessionStorage.setItem('currentStudent', JSON.stringify(u));
+                    localStorage.setItem('currentStudent', JSON.stringify(u));
+                    setTimeout(async () => {
+                        try {
+                            const docRef = window.firebaseDb.collection('students').doc(u.uid || u.phone);
+                            for (const cid of missingCourses) {
+                                await docRef.update({ courses: firebase.firestore.FieldValue.arrayUnion(cid) });
+                            }
+                            console.log('Self-healed missing courses:', missingCourses);
+                            window.location.reload();
+                        } catch(e) {}
+                    }, 4000);
+                }
+            }
+        } catch(e){}
+    }
+    // Fix specific student
+    if (window.location.pathname.includes('dashboard') && userStr) {
+        try {
+            let u = JSON.parse(userStr);
+            if (u.phone === '01129649095' && window.firebaseDb) {
+                setTimeout(async () => {
+                    try {
+                        const snap = await window.firebaseDb.collection('courses').where('grade', '==', 'الصف الثالث الإعدادي').get();
+                        if (!snap.empty) {
+                            let courseId = snap.docs[0].id;
+                            if (!u.courses) u.courses = [];
+                            if (!u.courses.includes(courseId)) {
+                                u.courses.push(courseId);
+                                sessionStorage.setItem('currentStudent', JSON.stringify(u));
+                                localStorage.setItem('currentStudent', JSON.stringify(u));
+                                const docRef = window.firebaseDb.collection('students').doc(u.uid || '01129649095');
+                                await docRef.update({ courses: firebase.firestore.FieldValue.arrayUnion(courseId) });
+                                window.location.reload();
+                            }
+                        }
+                    } catch(e){}
+                }, 3000);
+            }
+        } catch (e) {}
+    }
+ || localStorage.getItem('currentStudent');
           if (userStr) {
               let user = JSON.parse(userStr);
               let prefs = JSON.parse(localStorage.getItem(`prefs_${user.phone}`) || '{"sound":true,"globalSound":true}');

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <link rel="manifest" href="./manifest.json">
@@ -443,7 +443,7 @@
                         });
                         
                         // Update in Firestore
-                        await userDocRef.update({ notifications });
+                        await userDocRef.update({ notifications, courses });
                         
                         // Cache locally
                         localStorage.setItem(`db_${userId}`, JSON.stringify({...userData, courses, notifications}));

@@ -4,7 +4,7 @@
  */
 document.addEventListener('DOMContentLoaded', () => {
     // Only run for logged-in students
-    const userStr = sessionStorage.getItem('currentUser');
+    const userStr = sessionStorage.getItem('currentStudent');
     if (!userStr) return;
     
     const user = JSON.parse(userStr);

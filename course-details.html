@@ -2350,7 +2350,7 @@ const warnOrFailExam = (reason) => {
 <script>
 window.injectVideoWatermark = function(container) {
     try {
-        const studentStr = sessionStorage.getItem('currentUser');
+        const studentStr = sessionStorage.getItem('currentStudent');
         if (!studentStr) return;
         const student = JSON.parse(studentStr);
         if (!student || !student.phone) return;
