@@ -215,25 +215,24 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Login Modal Toggle
-  const loginBtns = document.querySelectorAll('.open-login');
-  const loginModal = document.getElementById('loginModal');
-  const closeModal = document.querySelector('.close-modal');
-
-  loginBtns.forEach(btn => {
-    btn.addEventListener('click', (e) => {
+  document.body.addEventListener('click', (e) => {
+    const loginBtn = e.target.closest('.open-login');
+    if (loginBtn) {
       e.preventDefault();
-      if(loginModal) loginModal.classList.add('active');
-    });
+      const lm = document.getElementById('loginModal');
+      if(lm) lm.classList.add('active');
+    }
+    
+    const closeBtn = e.target.closest('.close-modal');
+    if (closeBtn) {
+      const lm = document.getElementById('loginModal');
+      if(lm) lm.classList.remove('active');
+    }
+    
+    if (e.target.id === 'loginModal' || e.target.classList.contains('modal-overlay')) {
+       if (e.target.id === 'loginModal') e.target.classList.remove('active');
+    }
   });
-
-  if(closeModal && loginModal) {
-    closeModal.addEventListener('click', () => {
-      loginModal.classList.remove('active');
-    });
-    loginModal.addEventListener('click', (e) => {
-      if(e.target === loginModal) loginModal.classList.remove('active');
-    });
-  }
 
   // Open login modal automatically if hash is #login or URL param login=true
   // if (loginModal && (window.location.hash === '#login' || new URLSearchParams(window.location.search).get('login') === 'true')) {
@@ -1965,3 +1964,5 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 500);
     });
 })();
+
+
