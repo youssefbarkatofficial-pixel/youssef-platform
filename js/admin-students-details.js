@@ -111,19 +111,27 @@ document.addEventListener('DOMContentLoaded', () => {
             const coursesCount = (s.courses && Array.isArray(s.courses)) ? s.courses.length : 0;
             coursesSum += coursesCount;
 
-            // Generate realistic Last Active and Engagement based on real DB if exists, otherwise simulated fallback based on registration
-            let lastActive = s.lastActive || s.date || now - Math.floor(Math.random() * threeWeeks);
-            let timeDiff = now - new Date(lastActive).getTime();
+            // Real Last Active based on DB
+            let lastActive = s.lastActive;
+            let timeDiff = lastActive ? (now - new Date(lastActive).getTime()) : null;
             
-            let activityLevel = 'متوسط';
-            let activityColor = 'badge-blue';
-            if (timeDiff < oneWeek) {
-                activityLevel = 'عالي التفاعل';
-                activityColor = 'badge-green';
-                activeCount++;
-            } else if (timeDiff > threeWeeks) {
-                activityLevel = 'منقطع / غياب';
-                activityColor = 'badge-red';
+            let activityLevel = 'لا توجد بيانات نشاط';
+            let activityColor = 'badge-gray';
+            if (lastActive) {
+                if (timeDiff < oneWeek) {
+                    activityLevel = 'عالي التفاعل';
+                    activityColor = 'badge-green';
+                    activeCount++;
+                } else if (timeDiff > threeWeeks) {
+                    activityLevel = 'منقطع / غياب';
+                    activityColor = 'badge-red';
+                    absentCount++;
+                } else {
+                    activityLevel = 'متوسط';
+                    activityColor = 'badge-blue';
+                }
+            } else {
+                lastActive = 'لا توجد بيانات';
                 absentCount++;
             }
 
@@ -134,7 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td style="color:var(--text-secondary);">${new Date(s.date || Date.now()).toLocaleDateString('ar-EG')}</td>
                 <td><span class="detail-badge" style="background: rgba(255,255,255,0.1); color:#fff;">${coursesCount} كورسات</span></td>
                 <td><span class="detail-badge ${activityColor}">${activityLevel}</span></td>
-                <td style="color:var(--text-secondary);">${new Date(lastActive).toLocaleDateString('ar-EG')}</td>
+                <td style="color:var(--text-secondary);">${lastActive === 'لا توجد بيانات' ? 'لا يوجد' : new Date(lastActive).toLocaleDateString('ar-EG')}</td>
             `;
             detailsTableBody.appendChild(tr);
         });
@@ -198,3 +206,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     loadData();
 });
+
+
+

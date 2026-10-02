@@ -1,8 +1,8 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 
 <head>
-    <link rel="manifest" href="./manifest.json?v=1786458966085">
+    <link rel="manifest" href="./manifest.json?v=11">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>منصة يوسف بركات | شرح التاريخ والجغرافيا للثانوية والإعدادية</title>
@@ -67,11 +67,11 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <!-- Styles -->
-    <link rel="stylesheet" href="css/style.css?v=202607292300">
-    <link rel="stylesheet" href="css/home.css?v=202607292300">
-    <link rel="stylesheet" href="css/courses.css?v=202607292300">
-    <link rel="stylesheet" href="css/auth.css?v=202607292300">
-    <link rel="stylesheet" href="css/mobile.css?v=3">
+    <link rel="stylesheet" href="css/style.css?v=11">
+    <link rel="stylesheet" href="css/home.css?v=11">
+    <link rel="stylesheet" href="css/courses.css?v=11">
+    <link rel="stylesheet" href="css/auth.css?v=11">
+    <link rel="stylesheet" href="css/mobile.css?v=11">
 
     <!-- PWA Install Banner Styles -->
     <style>
@@ -168,17 +168,16 @@
         #pwaInstallBanner .pwa-text strong { font-size: 0.88rem; }
     }
     </style>
-    <link rel="icon" type="image/png" href="images/logo.png?v=6">
+    <link rel="icon" type="image/png" href="images/logo.png?v=11">
 </head>
 
 <body>
     <!-- Premium Preloader -->
-    <div id="premiumPreloader"
-        style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--bg-main); z-index: 9999999999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.6s cubic-bezier(0.165, 0.84, 0.44, 1), visibility 0.6s ease;">
+    <div id="premiumPreloader" class="idx-preloader">
         <div class="logo-circle"
-            style="width: 80px; height: 80px; margin-bottom: 20px; animation: safePulse 1.5s infinite;"><img src="images/logo.png?v=1786475931154" alt="Logo" style="width:100%; height:100%; object-fit:cover; border-radius:50%;"></div>
+            class="idx-preloader-logo"><img src="images/logo.png?v=11" alt="Logo" class="idx-logo-img"></div>
         <h2
-            style="color: var(--royal-gold); letter-spacing: 1px; font-weight: 700; opacity: 0; animation: pfFadeIn 0.8s ease 0.2s forwards;">
+            class="idx-preloader-title">
             منصة يوسف بركات</h2>
     </div>
     <script>
@@ -211,7 +210,7 @@
     <!-- Header / Navbar -->
     <header class="navbar glass-panel">
         <a href="index.html" class="nav-brand" id="navBrandLogoBtn">
-            <div class="logo-circle" id="navLogoContainer" style="position: relative; overflow: hidden;"><img src="images/logo.png?v=1786475931154" alt="Logo" style="width:100%; height:100%; object-fit:cover; border-radius:50%;"></div>
+            <div class="logo-circle idx-logo-wrap" id="navLogoContainer"><img src="images/logo.png?v=11" alt="Logo" class="idx-logo-img"></div>
             <span class="nav-brand-text"> منصة يوسف بركات</span>
         </a>
 
@@ -225,13 +224,13 @@
 
         <div class="nav-actions">
             <a href="#" id="themeToggle" class="btn btn-outline"
-                style="padding: 10px; border-radius: 50%; width: 45px; height: 45px; display: flex; justify-content: center; border: none; font-size: 1.2rem;"><i
+                class="idx-theme-toggle"><i
                     class="fas fa-moon"></i></a>
-            <a href="#" class="btn btn-outline open-login" title="تسجيل الدخول">
-                <i class="fas fa-sign-in-alt mobile-icon" style="margin-left: 5px;"></i><span class="desktop-text">تسجيل الدخول</span>
+            <a href="#" class="btn btn-outline open-login" title="تسجيل الدخول" onclick="event.preventDefault(); document.getElementById('loginModal').classList.add('active');">
+                <i class="fas fa-sign-in-alt mobile-icon idx-icon-gap"></i><span class="desktop-text">تسجيل الدخول</span>
             </a>
             <a href="register.html" class="btn btn-gold" title="حساب جديد">
-                <i class="fas fa-user-plus mobile-icon" style="margin-left: 5px;"></i><span class="desktop-text">حساب جديد</span>
+                <i class="fas fa-user-plus mobile-icon idx-icon-gap"></i><span class="desktop-text">حساب جديد</span>
             </a>
         </div>
     </header>
@@ -242,7 +241,7 @@
     <section class="hero">
         <div class="hero-container">
             <div class="hero-content">
-                <h1 class="heading-luxury mb-1" style="font-size: clamp(1.5rem, 6vw, 4rem) !important;">الدراسات مع يوسف بركات</h1>
+                <h1 class="heading-luxury mb-1 idx-hero-heading">الدراسات مع يوسف بركات</h1>
                 <h2 class="hero-subtitle font-serif">منصتــك الأولى لتعلــم وفهــم الجغرافيــا والتاريــخ بأسلـــوب
                     بسيــــط
                     وممتــــع</h2>
@@ -251,7 +250,7 @@
 
                 <div class="hero-btns">
                     <a href="register.html" id="heroSubscribeBtn" class="btn btn-gold btn-large">اشترك الآن <i
-                            class="fas fa-arrow-left mr-2" style="margin-right: 10px;"></i></a>
+                            class="fas fa-arrow-left mr-2 idx-btn-arrow"></i></a>
                     <a href="#latest-courses" id="heroExploreBtn" class="btn btn-outline btn-large">استكشف الكورسات</a>
                 </div>
             </div>
@@ -262,20 +261,20 @@
                 <div class="teacher-frame" id="editableTeacherFrame">
                     <!-- Background image and clipped foreground (inside the circle) -->
                     <div class="frame-circle">
-                        <img id="teacherBgImg" src="https://via.placeholder.com/600x600/0A1E3A/d4a64f?text=Background"
-                            alt="منصة يوسف بركات للدراسات الاجتماعية" class="teacher-bg-img" loading="lazy">
+                        <img id="teacherBgImg" src="images/logo.png"
+                            alt="منصة يوسف بركات" class="teacher-bg-img" loading="lazy">
 
                         <img id="teacherFgImgClipped"
-                            src="https://via.placeholder.com/500x700/transparent/d4a64f?text=Teacher+Image"
-                            alt="مستر يوسف بركات - مدرس الدراسات الاجتماعية" class="teacher-fg-img clipped"
-                            style="pointer-events: none;" loading="lazy">
+                            src="images/logo.png"
+                            alt="يوسف بركات" class="teacher-fg-img clipped"
+                            style="pointer-events: none; opacity: 0;" loading="lazy">
                     </div>
                     <!-- Foreground image (pops out of the circle, top half only) -->
                     <div class="pop-out-wrapper">
                         <img id="teacherHeroImg"
-                            src="https://via.placeholder.com/500x700/transparent/d4a64f?text=Teacher+Image"
-                            alt="شرح الدراسات الاجتماعية مع يوسف بركات - منصة تعليمية" class="teacher-fg-img pop-out"
-                            loading="eager">
+                            src="images/logo.png"
+                            alt="" class="teacher-fg-img pop-out"
+                            loading="eager" style="opacity: 0;">
                     </div>
                 </div>
             </div>
@@ -306,39 +305,38 @@
             <h2 class="heading-luxury features-heading">ليه تختار منصتنا؟</h2>
 
             <div class="features-circle-container">
-                <div class="center-logo open-login" id="featuresCenterLogoContainer"
-                    style="overflow: hidden; cursor: pointer;">
+                <div class="center-logo open-login idx-features-center" id="featuresCenterLogoContainer">
                     <span id="featuresCenterText">يوسف<br>بركات</span>
                     <img loading="lazy" id="featuresCenterImg" src=""
-                        style="display:none; position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; image-rendering:high-quality;">
+                        class="idx-features-center-img">
                 </div>
 
                 <div class="feature-node"><i class="fas fa-brain mb-1"
-                        style="font-size:1.5rem;color:var(--accent-cyan)"></i>
+                        class="idx-feature-icon"></i>
                     <h4>شرح بسيط ومفهوم</h4>
                 </div>
                 <div class="feature-node"><i class="fas fa-video mb-1"
-                        style="font-size:1.5rem;color:var(--accent-cyan)"></i>
+                        class="idx-feature-icon"></i>
                     <h4>فيديوهات برسومات توضيحية</h4>
                 </div>
                 <div class="feature-node"><i class="fas fa-tasks mb-1"
-                        style="font-size:1.5rem;color:var(--accent-cyan)"></i>
+                        class="idx-feature-icon"></i>
                     <h4>تمارين على الدروس</h4>
                 </div>
                 <div class="feature-node"><i class="fas fa-bullseye mb-1"
-                        style="font-size:1.5rem;color:var(--accent-cyan)"></i>
+                        class="idx-feature-icon"></i>
                     <h4>تركيز تام فى المذاكرة</h4>
                 </div>
                 <div class="feature-node"><i class="fas fa-file-alt mb-1"
-                        style="font-size:1.5rem;color:var(--accent-cyan)"></i>
+                        class="idx-feature-icon"></i>
                     <h4>امتحان قبل كل حصة</h4>
                 </div>
                 <div class="feature-node"><i class="fas fa-users mb-1"
-                        style="font-size:1.5rem;color:var(--accent-cyan)"></i>
+                        class="idx-feature-icon"></i>
                     <h4>تواصل دوري مع أولياء الأمور</h4>
                 </div>
                 <div class="feature-node"><i class="fas fa-book mb-1"
-                        style="font-size:1.5rem;color:var(--accent-cyan)"></i>
+                        class="idx-feature-icon"></i>
                     <h4>أقوى الملازم والتلاخيص</h4>
                 </div>
             </div>
@@ -346,22 +344,19 @@
     </section>
 
     <!-- Latest Courses & Offers (Dynamic) -->
-    <section id="latest-courses" class="features-section" style="padding-top: 50px; background: transparent;">
+    <section id="latest-courses" class="features-section idx-latest-section">
         <div class="container">
             <h2 class="heading-luxury features-heading">أحدث الكورسات</h2>
-            <div class="courses-carousel-wrapper" style="position: relative; margin-top: 40px;">
-                <button id="scrollRightBtn"
-                    style="position: absolute; right: -20px; top: 50%; transform: translateY(-50%); z-index: 10; background: var(--card-bg); border: 1px solid var(--border-color); color: var(--royal-gold); width: 40px; height: 40px; border-radius: 50%; cursor: pointer; opacity: 0.5; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-color); transition: opacity 0.3s;"><i
+            <div class="courses-carousel-wrapper idx-carousel-wrapper">
+                <button id="scrollRightBtn" class="idx-carousel-btn idx-carousel-btn--right"><i
                         class="fas fa-chevron-right"></i></button>
-                <div id="homeCoursesContainer"
-                     style="display: flex; overflow-x: auto; scroll-behavior: smooth; gap: 20px; padding-bottom: 90px; scrollbar-width: none; -ms-overflow-style: none; margin: 0 auto; width: max-content; max-width: 100%;">
+                <div id="homeCoursesContainer" class="idx-carousel-track">
                     <!-- Courses will be loaded dynamically by JS -->
                 </div>
-                <button id="scrollLeftBtn"
-                    style="position: absolute; left: -20px; top: 50%; transform: translateY(-50%); z-index: 10; background: var(--card-bg); border: 1px solid var(--border-color); color: var(--royal-gold); width: 40px; height: 40px; border-radius: 50%; cursor: pointer; opacity: 0.5; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-color); transition: opacity 0.3s;"><i
+                <button id="scrollLeftBtn" class="idx-carousel-btn idx-carousel-btn--left"><i
                         class="fas fa-chevron-left"></i></button>
             </div>
-            <div style="text-align: center; margin-top: 40px;">
+            <div class="idx-view-all-wrapper">
                 <a href="courses.html" class="btn btn-gold btn-large">عرض كل الكورسات <i
                         class="fas fa-arrow-left mr-2"></i></a>
             </div>
@@ -406,22 +401,21 @@
     </section>
 
     <!-- SEO Content Section -->
-    <section class="seo-section"
-        style="padding: 60px 0; background: linear-gradient(135deg, rgba(7, 19, 38, 0.8), rgba(0, 0, 0, 0.9)); text-align: right; border-top: 1px solid rgba(212, 166, 79, 0.1);">
-        <div class="container" style="max-width: 1000px; margin: 0 auto; padding: 0 20px;">
-            <h2 class="text-gold" style="font-size: 2rem; margin-bottom: 20px;">منصة يوسف بركات: دليلك لتفوقك في
+    <section class="seo-section idx-seo-section">
+        <div class="container idx-seo-container">
+            <h2 class="text-gold idx-seo-heading">منصة يوسف بركات: دليلك لتفوقك في
                 الدراسات الاجتماعية</h2>
-            <p style="color: rgba(255, 255, 255, 0.85); font-size: 1.1rem; line-height: 1.8; margin-bottom: 15px;">
+            <p class="idx-seo-text">
                 تعتبر <strong>منصة يوسف بركات</strong> الخيار الأول للطلاب الباحثين عن التفوق في مادة <strong>الدراسات
                     الاجتماعية</strong>. نقدم <strong>شرح تاريخ</strong> و<strong>شرح جغرافيا</strong> بطرق علمية حديثة
                 ومبسطة تضمن للطلاب استيعاب المنهج بالكامل للمرحلتين الإعدادية والثانوية.
             </p>
-            <p style="color: rgba(255, 255, 255, 0.85); font-size: 1.1rem; line-height: 1.8; margin-bottom: 15px;">
+            <p class="idx-seo-text">
                 مع <strong>مستر يوسف بركات</strong>، ستجد بيئة <strong>تعليم اونلاين</strong> متكاملة تحتوي على فيديوهات
                 بجودة عالية، ومذكرات تفاعلية، و<strong>مراجعة دراسات اجتماعية</strong> شاملة. بالإضافة إلى الامتحانات
                 الدورية التي تهيئ الطالب لاجتياز الاختبارات النهائية بثقة.
             </p>
-            <p style="color: rgba(255, 255, 255, 0.85); font-size: 1.1rem; line-height: 1.8;">
+            <p class="idx-seo-text">
                 انضم الآن إلى أفضل <strong>منصة تعليمية دراسات</strong> واستفد من خبرة مستر يوسف بركات الطويلة في تسهيل
                 المادة العلمية وجعلها رحلة ممتعة نحو التفوق.
             </p>
@@ -434,10 +428,10 @@
             <div class="footer-content">
                 <div class="footer-col">
                     <a href="index.html" class="nav-brand mb-2" id="footerBrandLogoBtn">
-                        <div class="logo-circle" id="footerLogoContainer" style="position: relative; overflow: hidden;"><img src="images/logo.png?v=1786475931154" alt="Logo" style="width:100%; height:100%; object-fit:cover; border-radius:50%;"></div>
+                        <div class="logo-circle idx-logo-wrap" id="footerLogoContainer"><img src="images/logo.png?v=11" alt="Logo" class="idx-logo-img"></div>
                         <span class="nav-brand-text">منصة يوسف بركات</span>
                     </a>
-                    <p style="color: rgba(255,255,255,0.7); line-height: 1.6; margin-bottom: 20px;">
+                    <p class="idx-footer-desc">
                         منصتك الأولى لتعلم وفهم الجغرافيا والتاريخ بأسلوب بسيط وممتع.
                     </p>
                     <div class="social-icons">
@@ -477,7 +471,7 @@
 
             <div class="footer-bottom font-serif">
                 <p>جميع الحقوق محفوظة آ© 2026 | منصة يوسف بركات</p>
-                <p style="margin-top: 10px; font-size: 0.9rem;">تمت برمجة المنصة والذكاء الاصطناعي المساعد للطلبة
+                <p class="idx-footer-credit">تمت برمجة المنصة والذكاء الاصطناعي المساعد للطلبة
                     (البوصلة) بواسطة الأستاذ يوسف بركات.</p>
             </div>
         </div>
@@ -504,36 +498,32 @@
                     <input type="password" id="loginPassword" class="form-control" placeholder="أدخل كلمة المرور"
                         autocomplete="current-password" required>
                 </div>
-                <div id="loginError" class="error-message"
-                    style="display:none; color: #e74c3c; background: rgba(231,76,60,0.1); padding: 10px; border-radius: 8px; margin-bottom: 15px; font-size: 0.9rem; text-align: center; border: 1px solid rgba(231,76,60,0.3);">
+                <div id="loginError" class="error-message idx-login-error" style="display:none;">
                 </div>
 
-                <div class="form-group" style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
-                    <input type="checkbox" id="rememberMe" style="width: auto; cursor: pointer;">
-                    <label for="rememberMe" style="margin: 0; cursor: pointer; color: var(--text-secondary);">تذكرني في
+                <div class="form-group idx-remember-row">
+                    <input type="checkbox" id="rememberMe" class="idx-checkbox">
+                    <label for="rememberMe" class="idx-checkbox-label">تذكرني في
                         المرة القادمة</label>
                 </div>
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <a href="#" id="forgotPasswordLink" style="color: var(--accent-cyan); font-weight: 700;">نسيت كلمة
+                <div class="idx-login-links-row">
+                    <a href="#" id="forgotPasswordLink" class="idx-forgot-link">نسيت كلمة
                         المرور؟</a>
-                    <span style="color: rgba(255,255,255,0.6); font-size: 0.92rem;">تسجيل الدخول الآمن</span>
+                    <span class="idx-login-secure-text">تسجيل الدخول الآمن</span>
                 </div>
 
                 <button type="submit" class="btn btn-green btn-block">تسجيل الدخول</button>
             </form>
 
-            <div id="forgotPasswordModal" class="modal-overlay"
-                style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 10000; justify-content: center; align-items: center; padding: 20px;">
-                <div class="glass-panel"
-                    style="max-width: 520px; width: 100%; padding: 30px; position: relative; border-radius: 20px;">
+            <div id="forgotPasswordModal" class="modal-overlay idx-fp-overlay" style="display: none;">
+                <div class="glass-panel idx-fp-panel">
                     <button onclick="document.getElementById('forgotPasswordModal').style.display='none'"
-                        style="position: absolute; top: 18px; right: 18px; background: transparent; border: none; color: var(--text-primary); font-size: 1.4rem; cursor: pointer;"><i
+                        class="idx-fp-close"><i
                             class="fas fa-times"></i></button>
-                    <h2 style="margin-bottom: 20px; color: var(--royal-gold);">استعادة كلمة المرور</h2>
-                    <p style="margin-bottom: 20px; color: var(--text-secondary);">اكتب رقم ولي الأمر المرتبط بحسابك
+                    <h2 class="idx-fp-heading">استعادة كلمة المرور</h2>
+                    <p class="idx-fp-desc">اكتب رقم ولي الأمر المرتبط بحسابك
                         وهيتم إرسال كود تأكيد لتغيير كلمة السر.</p>
-                    <div id="fpStatusText"
-                        style="display:none; margin-bottom: 20px; padding: 12px 14px; border-radius: 16px; font-size: 0.95rem; line-height:1.5;">
+                    <div id="fpStatusText" class="idx-fp-status" style="display:none;">
                     </div>
                     <form id="forgotPasswordForm">
                         <div class="form-group">
@@ -553,13 +543,10 @@
                                     <input type="text" id="fpOtpCode" class="form-control" placeholder="xxxxx"
                                         maxlength="5">
                                 </div>
-                                <div class="form-group"
-                                    style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
-                                    <button type="button" id="fpResendBtn" class="btn btn-outline"
-                                        style="display:none; padding: 10px 14px; min-width:150px;">إعادة إرسال
+                                <div class="form-group idx-fp-otp-row">
+                                    <button type="button" id="fpResendBtn" class="btn btn-outline idx-fp-resend-btn" style="display:none;">إعادة إرسال
                                         الكود</button>
-                                    <span id="fpOtpHelp"
-                                        style="flex:1 1 100%; color: rgba(255,255,255,0.72); font-size: 0.92rem;">الكود
+                                    <span id="fpOtpHelp" class="idx-fp-otp-help">الكود
                                         صالح لمدة 10 دقائق ولا يتم مشاركته مع أي شخص.</span>
                                 </div>
                                 <div class="form-group">
@@ -576,7 +563,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div style="display:flex; justify-content: space-between; gap: 10px; margin-top: 20px;">
+                        <div class="idx-fp-actions-row">
                             <button type="button" class="btn btn-outline"
                                 onclick="document.getElementById('forgotPasswordModal').style.display='none'">إلغاء</button>
                             <button type="submit" id="fpSubmitBtn" class="btn btn-green">إرسال الكود عبر واتساب</button>
@@ -596,16 +583,17 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging-compat.js"></script>
 
-    <script src="js/firebase-config.js?v=10"></script>
-    <script src="js/firebase-service.js?v=10"></script>
-    <script src="js/storage-service.js?v=10"></script>
-    <script src="js/main.js?v=10"></script>
-    <script src="js/bousala-teach.js?v=202607292300"></script><script src="js/bousala-intents.js?v=202607292300"></script><script src="js/support-chat.js?v=10"></script>
-    <script src="js/mobile-ui-fixes.js?v=1"></script>
-    <script src="js/auth.js?v=1786459781726"></script>
-    <script src="js/owner-editor.js?v=10"></script>
-    <script src="js/courses-renderer.js?v=10"></script>
+    <script src="js/firebase-config.js?v=11"></script>
+    <script src="js/firebase-service.js?v=11"></script>
+    <script src="js/storage-service.js?v=11"></script>
+    <script src="js/main.js?v=11"></script>
+    <script src="js/bousala-teach.js?v=11"></script><script src="js/bousala-intents.js?v=11"></script><script src="js/support-chat.js?v=11"></script>
+    <script src="js/mobile-ui-fixes.js?v=11"></script>
+    <script src="js/auth.js?v=11"></script>
+    <script src="js/owner-editor.js?v=11"></script>
+    <script src="js/courses-renderer.js?v=11"></script>
     <script>
         // Setup Carousel Scrolling
         document.addEventListener('DOMContentLoaded', () => {
@@ -634,21 +622,20 @@
     </script>
 
     <!-- Game Widget Modal (صراع البوصلة) -->
-    <div id="gameWidgetModal" class="modal-overlay"
-        style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 999999999; padding: 0; margin: 0; overflow: hidden;">
-        <div style="width: 100%; height: 100%; position: relative;">
+    <div id="gameWidgetModal" class="modal-overlay idx-game-modal" style="display: none;">
+        <div class="idx-game-inner">
             <button
                 onclick="document.getElementById('gameWidgetModal').style.display='none'; document.body.style.overflow='auto'; var b=document.getElementById('pfChatBtn'); if(b) b.style.display='flex'; var c=document.getElementById('pfChatBubble'); if(c) c.style.display='block';"
-                style="position: absolute; top: 20px; left: 20px; background: rgba(0,0,0,0.6); border: 2px solid #D4AF37; color: white; width: 50px; height: 50px; border-radius: 50%; font-size: 1.5rem; cursor: pointer; z-index: 100; display: flex; justify-content: center; align-items: center; transition: 0.3s; box-shadow: 0 0 15px rgba(212,175,55,0.4);"><i
+                class="idx-game-close"><i
                     class="fas fa-times"></i></button>
-            <iframe src="game.html" style="width: 100%; height: 100%; border: none; background: #0A0E1A;"></iframe>
+            <iframe src="game.html" class="idx-game-iframe"></iframe>
         </div>
     </div>
 
     <!-- Floating Game Button -->
     <button
         onclick="document.getElementById('gameWidgetModal').style.display='block'; document.body.style.overflow='hidden'; var b=document.getElementById('pfChatBtn'); if(b) b.style.display='none'; var c=document.getElementById('pfChatBubble'); if(c) c.style.display='none';"
-        style="display: none !important; position: fixed; bottom: 30px; left: 30px; background: linear-gradient(135deg, #d4a64f, #f39c12); color: #000; border: none; width: 70px; height: 70px; border-radius: 50%; box-shadow: 0 0 20px rgba(212,166,79,0.6); cursor: pointer; z-index: 9999; justify-content: center; align-items: center; font-size: 2.5rem; transition: transform 0.3s; animation: safePulse 2s infinite;"
+        class="idx-float-game-btn"
         title="إلعب صراع البوصلة" onmouseover="this.style.transform='scale(1.1) rotate(5deg)'"
         onmouseout="this.style.transform='scale(1) rotate(0)'">
         <i class="fas fa-gamepad"></i>
@@ -732,7 +719,7 @@
 
     <!-- Floating Install App Button (Left Side) - Always visible -->
     <button onclick="pwaInstallNow()" id="floatingInstallBtn"
-        style="display: flex; position: fixed; bottom: 30px; left: 30px; background: linear-gradient(135deg, #2ecc71, #27ae60); color: #fff; border: none; width: 60px; height: 60px; border-radius: 50%; box-shadow: 0 0 15px rgba(46,204,113,0.5); cursor: pointer; z-index: 9998; justify-content: center; align-items: center; font-size: 1.8rem; transition: transform 0.3s; animation: safePulse 2s infinite;"
+        class="idx-float-install-btn"
         title="تثبيت تطبيق المنصة"
         onmouseover="this.style.transform='scale(1.1)'"
         onmouseout="this.style.transform='scale(1)'">
@@ -741,3 +728,5 @@
 </body>
 
 </html>
+
+

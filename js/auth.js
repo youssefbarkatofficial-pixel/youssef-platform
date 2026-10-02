@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', () => {
+﻿document.addEventListener('DOMContentLoaded', () => {
   if (window.location.pathname.includes('/login') && (sessionStorage.getItem('currentStudent') || localStorage.getItem('currentStudent'))) {
     window.location.href = 'dashboard.html';
     return;
@@ -845,114 +845,45 @@ document.addEventListener('DOMContentLoaded', () => {
       try {
         const checkId = rawId.toLowerCase();
         
-        // STUDENT PREVIEW BYPASS
-        if ((rawId === '0000' && pwd === '0000') || (rawId === '01099616091' && pwd === '0000')) {
-          const fakeStudent = {
-            name: 'حساب الفحص السريع',
-            phone: rawId,
-            grade: '3',
-            password: pwd,
-            timestamp: new Date().toISOString()
-          };
-          sessionStorage.setItem('currentStudent', JSON.stringify(fakeStudent));
-          sessionStorage.setItem('pfJustLoggedIn', 'true');
-          if (rememberMe) {
-            localStorage.setItem('rememberedCredentials', JSON.stringify({ phone: rawId, pwd }));
-            localStorage.setItem('currentStudent', JSON.stringify(fakeStudent));
-          } else {
-            localStorage.removeItem('rememberedCredentials');
-          }
-          window.location.href = 'dashboard.html';
-          return;
-        }
-        
-        
-        // ASSISTANT DASHBOARD BYPASS
-        if (checkId === 'mariamassistant@gmail.com' && pwd === '01023675235') {
-            const assistantAdmin = {
-                id: 'admin_assistant_001',
-                name: 'مريم عباس (مساعدة)',
-                email: 'mariamassistant@gmail.com',
-                password: '01023675235',
-                role: 'assistant'
-            };
-            
-            try {
-                sessionStorage.setItem('currentAdmin', JSON.stringify(assistantAdmin));
-            } catch(e) {}
-            
-            if (rememberMe) {
-                try { localStorage.setItem('rememberedCredentials', JSON.stringify({ phone: rawId, pwd })); } catch(e){}
-                try { localStorage.setItem('currentAdmin', JSON.stringify(assistantAdmin)); } catch(e){}
-            } else {
-                localStorage.removeItem('rememberedCredentials');
+                // ADMIN FIREBASE AUTH
+        if (checkId.includes('@')) {
+            if (window.firebaseAuth && window.firebaseDb) {
+                try {
+                    const userCredential = await firebaseAuth.signInWithEmailAndPassword(checkId, pwd);
+                    const uid = userCredential.user.uid;
+                    const adminDoc = await firebaseDb.collection('platformAdmins').doc(uid).get();
+                    
+                    if (adminDoc.exists) {
+                        const adminData = adminDoc.data();
+                        adminData.id = uid;
+                        adminData.email = checkId;
+                        
+                        try { sessionStorage.setItem('currentAdmin', JSON.stringify(adminData)); } catch(e) {}
+                        
+                        if (rememberMe) {
+                            try { localStorage.setItem('rememberedCredentials', JSON.stringify({ phone: rawId, pwd })); } catch(e){}
+                            try { localStorage.setItem('currentAdmin', JSON.stringify(adminData)); } catch(e){}
+                        } else {
+                            localStorage.removeItem('rememberedCredentials');
+                        }
+                        
+                        if (window.showToast) window.showToast('تم تسجيل الدخول بنجاح.', 'success');
+                        setTimeout(() => { window.location.href = 'admin-dashboard.html'; }, 1000);
+                        return;
+                    } else {
+                        // User exists in Auth but not in platformAdmins
+                        await firebaseAuth.signOut();
+                        showLoginError('ليس لديك صلاحيات للوحة التحكم.');
+                        return;
+                    }
+                } catch (err) {
+                    console.error('Admin Auth Error:', err);
+                    showLoginError('بيانات الدخول غير صحيحة.');
+                    return;
+                }
             }
-            
-            if (window.showToast) window.showToast('أهلاً بكِ أستاذة مريم في لوحة التحكم.', 'success', { title: 'مرحباً', duration: 1500 });
-            setTimeout(() => { window.location.href = 'admin-dashboard.html'; }, 1500);
-            return;
         }
-        
-        // ADMIN DASHBOARD BYPASS
-        if ((checkId === 'youssefbarkatofficial@gmail.com' && pwd === 'YoussefMBarakat175235') || 
-            (checkId === 'youssef@barakat.com' && pwd === 'YoussefMBarakat175235')) {
-          const ownerAdmin = {
-            id: 'admin_001',
-            name: 'يوسف محمد بركات',
-            email: 'youssefbarkatofficial@gmail.com',
-            password: 'YoussefMBarakat175235',
-            role: 'admin'
-          };
-          
-          try {
-            sessionStorage.setItem('currentAdmin', JSON.stringify(ownerAdmin));
-          } catch(e) { console.warn("Admin session save failed", e); }
-          
-          if (rememberMe) {
-            try { localStorage.setItem('rememberedCredentials', JSON.stringify({ phone: rawId, pwd })); } catch(e){}
-            try { localStorage.setItem('currentAdmin', JSON.stringify(ownerAdmin)); } catch(e){}
-            try {
-              let savedAccounts = JSON.parse(localStorage.getItem('savedLocalAccounts') || '[]');
-              savedAccounts = savedAccounts.filter(a => a.phone !== rawId);
-              savedAccounts.push({ phone: rawId, pwd, name: 'المالك - الإدارة' });
-              localStorage.setItem('savedLocalAccounts', JSON.stringify(savedAccounts));
-            } catch(e){}
-          } else {
-            localStorage.removeItem('rememberedCredentials');
-          }
-          
-          if (window.showToast) window.showToast('أهلا بك يا صانع المجد في مملكتك.\nمنصتك جاهزة لإبداعك اليومي.', 'majestic', { title: '👑 مرحبا بك يا أستاذ يوسف', duration: 1500 });
-          setTimeout(() => { window.location.href = 'admin-dashboard.html'; }, 1500);
-          return;
-        } else if (rawId === 'youssefda3m@gmail.com' && pwd === 'Da3mYoussef@36') {
-          const supportStudent = {
-            name: 'الدعم الفني',
-            email: 'youssefda3m@gmail.com',
-            phone: 'support_000',
-            grade: 'prep2',
-            role: 'student',
-            isTestAccount: true
-          };
-          sessionStorage.setItem('currentStudent', JSON.stringify(supportStudent));
-          sessionStorage.setItem('pfJustLoggedIn', 'true');
-          if (rememberMe) {
-            localStorage.setItem('rememberedCredentials', JSON.stringify({ phone: rawId, pwd }));
-            localStorage.setItem('currentStudent', JSON.stringify(supportStudent));
-            let savedAccounts = JSON.parse(localStorage.getItem('savedLocalAccounts') || '[]');
-            savedAccounts = savedAccounts.filter(a => a.phone !== rawId);
-            savedAccounts.push({ phone: rawId, pwd, name: 'الدعم الفني' });
-            localStorage.setItem('savedLocalAccounts', JSON.stringify(savedAccounts));
-          } else {
-            localStorage.removeItem('rememberedCredentials');
-          }
-          if (typeof window.pfTransferGuestSupportSessionToAccount === 'function') {
-            window.pfTransferGuestSupportSessionToAccount(supportStudent);
-          }
-          if (window.showToast) window.showToast('تم تسجيل الدخول بحساب الدعم الفني التجريبي.', 'info');
-          setTimeout(() => { window.location.href = 'dashboard.html'; }, 1000);
-          return;
-        }
-        const phone = rawId;
+                const phone = rawId;
         const email = isEmailInput ? rawId : `${phone}@student.youssefbarakat.com`;
         if (window.FirebaseService && window.FirebaseService.isReady()) {
           try {
@@ -1206,3 +1137,5 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
 });
+
+

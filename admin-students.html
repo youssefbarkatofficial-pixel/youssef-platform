@@ -9,7 +9,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>إدارة الطلاب - لوحة الإدارة</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="css/style.css?v=1785347365029">
+    <link rel="stylesheet" href="css/style.css?v=11">
     <link rel="stylesheet" href="css/dashboard.css">
     <style>
         .student-modal {
@@ -59,15 +59,15 @@
         .student-avatar-clickable { cursor: zoom-in !important; transition: transform 0.2s, box-shadow 0.2s; }
         .student-avatar-clickable:hover { transform: scale(1.15); box-shadow: 0 0 12px rgba(212,175,55,0.6); }
     </style>
-    <link rel="stylesheet" href="css/mobile.css?v=3">
-    <link rel="icon" type="image/png" href="images/logo.png?v=6">
+    <link rel="stylesheet" href="css/mobile.css?v=11">
+    <link rel="icon" type="image/png" href="images/logo.png?v=11">
 </head>
 <body>
     <div class="bg-effects"></div>
 
     <header class="navbar glass-panel" style="border-bottom-color: var(--royal-gold);">
         <a href="index.html" class="nav-brand">
-            <div class="logo-circle" style="color: #fff; background: var(--royal-gold);"><img src="images/logo.png?v=1786475931154" alt="Logo" style="width:100%; height:100%; object-fit:cover; border-radius:50%;"></div>
+            <div class="logo-circle" style="color: #fff; background: var(--royal-gold);"><img src="images/logo.png?v=11" alt="Logo" style="width:100%; height:100%; object-fit:cover; border-radius:50%;"></div>
             <span class="nav-brand-text text-gold"><span class="desktop-text">لوحة الإدارة - يوسف بركات</span><span class="mobile-only-text" style="display: none;">لوحة الإدارة</span></span>
         </a>
         <div class="nav-actions">
@@ -202,7 +202,7 @@
         </div>
     </div>
 
-    <script src="js/admin-auth.js?v=9"></script>
+    <script src="js/admin-auth.js?v=11"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const authStr = sessionStorage.getItem('currentAdmin');
@@ -590,13 +590,14 @@
             renderStudentsTable();
         });
     </script>
-    <script src="js/bousala-teach.js?v=1.0"></script><script src="js/bousala-intents.js?v=1.0"></script><script src="js/support-chat.js?v=9"></script>
+    <script src="js/bousala-teach.js?v=11.0"></script><script src="js/bousala-intents.js?v=11.0"></script><script src="js/support-chat.js?v=11"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
-    <script src="js/firebase-config.js?v=9"></script>
-    <script src="js/firebase-service.js?v=9"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging-compat.js"></script>
+    <script src="js/firebase-config.js?v=11"></script>
+    <script src="js/firebase-service.js?v=11"></script>
     <div id="decoderModal" class="confirm-modal">
         <div class="confirm-modal-content" style="max-width: 500px; padding: 30px;">
             <i class="fas fa-search-plus text-gold" style="font-size: 3rem; margin-bottom: 15px;"></i>
@@ -666,30 +667,66 @@
             }
         } 
 
-        window.deleteCurrentStudent = async function() { if (!currentStudentPhone) return; const pass = window.prompt("⚠️ تحذير: أنت على وشك حذف هذا الطالب نهائياً من قاعدة البيانات!\n\nللاستمرار، يرجى إدخال كلمة مرور المالك:"); if (pass !== "My@36_172001") { if (pass !== null) alert("كلمة المرور غير صحيحة. تم إلغاء الحذف."); return; } if (!confirm("هل أنت متأكد 100% أنك تريد حذف هذا الطالب وكل بياناته؟ لا يمكن التراجع عن هذه الخطوة!")) return; try { if (window.firebaseDb) { const snap = await window.firebaseDb.collection("students").where("phone", "==", currentStudentPhone).get(); if (!snap.empty) { const docId = snap.docs[0].id; await window.firebaseDb.collection("students").doc(docId).delete(); } } let cachedUsers = JSON.parse(localStorage.getItem("cached_students") || "[]"); cachedUsers = cachedUsers.filter(u => String(u.phone) !== String(currentStudentPhone)); localStorage.setItem("cached_students", JSON.stringify(cachedUsers)); let strictUsers = JSON.parse(localStorage.getItem("strictUsers") || "[]"); strictUsers = strictUsers.filter(u => String(u.phone) !== String(currentStudentPhone)); localStorage.setItem("strictUsers", JSON.stringify(strictUsers)); localStorage.removeItem("db_" + currentStudentPhone); alert("تم حذف الطالب بنجاح."); document.getElementById("studentEditorModal").style.display = "none"; window.location.reload(); } catch (err) { alert("حدث خطأ أثناء الحذف: " + err.message); } };\n\n        window.promptChangePassword = async function(phone) {
+                window.deleteCurrentStudent = async function() {
+            if (!currentStudentPhone) return;
             const adminData = JSON.parse(sessionStorage.getItem('currentAdmin') || '{}');
-            const adminPass = window.prompt("للحماية: برجاء إدخال كلمة مرور مدير المنصة (الأدمن) الخاصة بك لتأكيد التعديل:");
+            if (!adminData.email) { alert('يجب تسجيل الدخول كمسؤول أولاً.'); return; }
             
+            const pass = window.prompt("⚠️ تحذير: سيتم مسح حساب هذا الطالب بالكامل!\nللتأكيد، أدخل كلمة مرور لوحة التحكم الخاصة بك:");
+            if (!pass) return;
+            
+            try {
+                // Re-authenticate Admin
+                await firebase.auth().signInWithEmailAndPassword(adminData.email, pass);
+                
+                if (!confirm("هل أنت متأكد 100%؟")) return;
+                
+                if (window.firebaseDb) {
+                    const snap = await window.firebaseDb.collection("students").where("phone", "==", currentStudentPhone).get();
+                    if (!snap.empty) {
+                        const docId = snap.docs[0].id;
+                        await window.firebaseDb.collection("students").doc(docId).delete();
+                    }
+                }
+                
+                let cachedUsers = JSON.parse(localStorage.getItem("cached_students") || "[]");
+                cachedUsers = cachedUsers.filter(u => String(u.phone) !== String(currentStudentPhone));
+                localStorage.setItem("cached_students", JSON.stringify(cachedUsers));
+                
+                localStorage.removeItem("db_" + currentStudentPhone);
+                alert("تم الحذف بنجاح.");
+                document.getElementById("studentEditorModal").style.display = "none";
+                window.location.reload();
+            } catch (err) {
+                console.error(err);
+                alert("كلمة المرور غير صحيحة أو حدث خطأ: " + err.message);
+            }
+        };
+
+                window.promptChangePassword = async function(phone) {
+            const adminData = JSON.parse(sessionStorage.getItem('currentAdmin') || '{}');
+            if (!adminData.email) { alert('بيانات المسؤول غير موجودة.'); return; }
+            
+            const adminPass = window.prompt("تأكيد: أدخل كلمة المرور الخاصة بك للمتابعة:");
             if (!adminPass) return;
             
-            if (adminPass !== adminData.password && adminPass !== 'YoussefMBarakat175235') {
-                alert("كلمة مرور المدير غير صحيحة. تم إلغاء العملية.");
-                return;
-            }
-
-            const newPwd = window.prompt("أدخل كلمة المرور الجديدة التي تريد تسجيلها لهذا الطالب:");
-            if (newPwd) {
-                if (typeof window.adminOverwriteStudentPassword === 'function') {
-                    try {
+            try {
+                // Re-authenticate Admin
+                await firebase.auth().signInWithEmailAndPassword(adminData.email, adminPass);
+                
+                const newPwd = window.prompt("أدخل كلمة المرور الجديدة للطالب:");
+                if (newPwd) {
+                    if (typeof window.adminOverwriteStudentPassword === 'function') {
                         await window.adminOverwriteStudentPassword(phone, newPwd);
                         document.getElementById('pwdDisplaySpan').textContent = newPwd;
-                        if (window.showToast) window.showToast('تم حفظ الباسورد الجديد بنجاح', 'success');
-                    } catch(e) {
-                        alert('حدث خطأ أثناء حفظ الباسورد: ' + e.message);
+                        if (window.showToast) window.showToast('تم تغيير كلمة السر بنجاح', 'success');
+                    } else {
+                        alert("وظيفة التغيير غير متاحة.");
                     }
-                } else {
-                    alert('وظيفة الحفظ غير متوفرة حالياً.');
                 }
+            } catch(e) {
+                console.error(e);
+                alert("كلمة المرور غير صحيحة أو حدث خطأ.");
             }
         };
     </script>
@@ -734,7 +771,7 @@
             }
         });
     </script>
-    <script src="js/mobile.js?v=3"></script>
+    <script src="js/mobile.js?v=11"></script>
 
     <!-- Image Lightbox -->
     <div id="imgLightbox" onclick="this.style.display='none'; document.body.style.overflow='';">
@@ -777,3 +814,7 @@
     
 </body>
 </html>
+
+
+
+

@@ -10,7 +10,7 @@
     .card { background: rgba(255,255,255,0.03); padding: 24px; border-radius: 12px; max-width:600px; margin:auto; text-align:center; }
     button { padding: 12px 20px; font-size:16px; border-radius:8px; cursor:pointer; }
   </style>
-    <link rel="icon" type="image/png" href="images/logo.png?v=6">
+    <link rel="icon" type="image/png" href="images/logo.png?v=11">
 </head>
 <body>
   <div class="card">
@@ -19,7 +19,7 @@
     <button id="run">ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½ï؟½</button>
     <p id="status" style="margin-top:12px; color:#ffd166"></p>
   </div>
-  <script src="js/main.js?v=9"></script>
+  <script src="js/main.js?v=11"></script>
   <script>
     document.getElementById('run').addEventListener('click', async function(){
       try {
@@ -45,8 +45,9 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
-    <script src="js/firebase-config.js?v=9"></script>
-    <script src="js/firebase-service.js?v=9"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging-compat.js"></script>
+    <script src="js/firebase-config.js?v=11"></script>
+    <script src="js/firebase-service.js?v=11"></script>
 
     <script>
         if ('serviceWorker' in navigator) {
@@ -57,4 +58,6 @@
     </script>
 </body>
 </html>
+
+
 

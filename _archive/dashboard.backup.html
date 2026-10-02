@@ -73,46 +73,34 @@
                 <a href="stats.html" class="glass-panel dash-card stat-link">
                     <div class="dash-card-info">
                         <h3>نسبة الالتزام</h3>
-                        <span class="value text-gold skeleton-text" id="statCommitment">0%</span>
+                        <span class="value text-gold" id="statCommitment">0%</span>
                     </div>
                     <div class="dash-card-icon"><i class="fas fa-fire"></i></div>
                 </a>
                 <a href="my-courses.html" class="glass-panel dash-card stat-link">
                     <div class="dash-card-info">
                         <h3>فيديوهات تمت مشاهدتها</h3>
-                        <span class="value text-gold skeleton-text" id="statVideosWatched">0</span>
+                        <span class="value text-gold" id="statVideosWatched">0</span>
                     </div>
                     <div class="dash-card-icon"><i class="fas fa-play-circle"></i></div>
                 </a>
                 <a href="homeworks.html" class="glass-panel dash-card stat-link">
                     <div class="dash-card-info">
                         <h3>الواجبات المكتملة</h3>
-                        <span class="value text-gold skeleton-text" id="statHomework">0/0</span>
+                        <span class="value text-gold" id="statHomework">0/0</span>
                     </div>
                     <div class="dash-card-icon"><i class="fas fa-check-square"></i></div>
                 </a>
                 <a href="exams.html" class="glass-panel dash-card stat-link">
                     <div class="dash-card-info">
                         <h3>الامتحانات المكتملة</h3>
-                        <span class="value text-gold skeleton-text" id="statExams">0</span>
+                        <span class="value text-gold" id="statExams">0</span>
                     </div>
                     <div class="dash-card-icon"><i class="fas fa-clipboard-check"></i></div>
                 </a>
             </div>
 
             <div class="dashboard-grid">
-                <!-- Continue Learning (Hero Card for Active Course) -->
-                <div class="glass-panel dash-panel continue-learning-card" style="grid-column: 1 / -1; background: linear-gradient(135deg, rgba(212,175,55,0.1) 0%, rgba(10,20,35,0.9) 100%); border-left: 4px solid var(--royal-gold);">
-                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
-                        <div>
-                            <p style="color: var(--royal-gold); font-size: 0.8rem; margin-bottom: 5px;"><i class="fas fa-play-circle"></i> أكمل من حيث توقفت</p>
-                            <h2 style="font-size: 1.2rem; margin: 0; line-height: 1.4;" id="continueCourseTitle">جاري تحميل بيانات دورتك...</h2>
-                            <p style="font-size: 0.85rem; color: rgba(255,255,255,0.6); margin-top: 5px;" id="continueLessonTitle">...</p>
-                        </div>
-                        <a href="my-courses.html" class="btn" style="background: var(--royal-gold); color: #000; font-weight: bold; padding: 10px 20px; border-radius: 20px;"><i class="fas fa-arrow-left"></i> استكمال الدرس</a>
-                    </div>
-                </div>
-
                 <!-- Leaderboard Section (لوحة الشرف) -->
                 <div class="glass-panel dash-panel" style="grid-column: 1 / -1; border-color: var(--royal-gold);">
                     <div class="panel-header">
@@ -132,15 +120,7 @@
                         <h2 class="panel-title"><i class="fas fa-video mr-2"></i> كورساتي</h2>
                     </div>
                     
-                    <div class="search-container" style="max-width: 100%; margin: 0 auto 15px auto; position: relative;">
-                        <i class="fas fa-search" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: rgba(255,255,255,0.5);"></i>
-                        <input type="text" id="dashCourseSearchInput" placeholder="ابحث عن كورس بالاسم..." style="width: 100%; padding: 10px 40px 10px 15px; border-radius: 8px; border: 1px solid var(--glass-border); background: rgba(0,0,0,0.3); color: white; outline: none; font-family: inherit;">
-                    </div>
-
                     <div id="coursesProgressContainer" style="display: grid; grid-template-columns: 1fr; gap: 15px;">
-                        <!-- Skeleton Loading Cards -->
-                        <div class="skeleton-card" style="height: 120px;"></div>
-                        <div class="skeleton-card" style="height: 120px;"></div>
                         <!-- User courses will be rendered here dynamically -->
                     </div>
 
@@ -204,56 +184,6 @@
         </main>
     </div>
 
-    <!-- Mobile Bottom Navigation -->
-    <nav class="mobile-bottom-nav d-lg-none" style="display: none;"> <!-- Managed by JS or CSS media query -->
-        <ul>
-            <li>
-                <a href="dashboard.html" class="active">
-                    <i class="fas fa-home"></i>
-                    <span>الرئيسية</span>
-                </a>
-            </li>
-            <li>
-                <a href="my-courses.html">
-                    <i class="fas fa-play-circle"></i>
-                    <span>دوراتي</span>
-                </a>
-            </li>
-            <li>
-                <a href="stats.html">
-                    <i class="fas fa-chart-pie"></i>
-                    <span>الإحصائيات</span>
-                </a>
-            </li>
-            <li>
-                <a href="profile.html">
-                    <i class="fas fa-user"></i>
-                    <span>حسابي</span>
-                </a>
-            </li>
-        </ul>
-    </nav>
-
-    <!-- Mobile UI Handlers -->
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // Remove skeleton loader when data is injected
-            const statElements = document.querySelectorAll('.skeleton-text');
-            const observer = new MutationObserver((mutations) => {
-                mutations.forEach((mutation) => {
-                    if (mutation.type === 'childList' || mutation.type === 'characterData') {
-                        mutation.target.classList.remove('skeleton-text');
-                    }
-                });
-            });
-
-            statElements.forEach(el => {
-                observer.observe(el, { childList: true, characterData: true, subtree: true });
-                // Fallback timeout just in case it's already loaded
-                setTimeout(() => el.classList.remove('skeleton-text'), 2000);
-            });
-        });
-    </script>
     <script src="js/storage-service.js?v=11"></script>
     <script src="js/main.js?v=11"></script>
     <script src="js/bousala-teach.js?v=11.0"></script><script src="js/bousala-intents.js?v=11.0"></script><script src="js/support-chat.js?v=11"></script>
@@ -337,7 +267,6 @@
     </script>
 </body>
 </html>
-
 
 
 

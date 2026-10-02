@@ -74,7 +74,7 @@
 
             } catch (err) {
                 console.error(err);
-                statusDiv.innerHTML = `<i class="fas fa-exclamation-triangle mr-2" style="color: #e74c3c;"></i> خطأ: ${err.message}`;
+                statusDiv.innerHTML = `<i class="fas fa-exclamation-triangle mr-2" style="color: #e74c3c;"></i> خطأ: ${escHtml(err.message)}`;
             } finally {
                 btnGenerate.disabled = false;
                 setTimeout(() => { if (statusDiv.innerHTML.includes('نجاح')) statusDiv.style.display = 'none'; }, 5000);

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <link rel="manifest" href="./manifest.json">
@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/dashboard.css">
-    <link rel="stylesheet" href="css/mobile.css?v=3">
+    <link rel="stylesheet" href="css/mobile.css?v=11">
     <style>
         .course-hw-row {
             background: rgba(255,255,255,0.05);
@@ -61,7 +61,7 @@
             border-radius: 8px;
         }
     </style>
-    <link rel="icon" type="image/png" href="images/logo.png?v=6">
+    <link rel="icon" type="image/png" href="images/logo.png?v=11">
 </head>
 <body>
     <div class="bg-effects"></div>
@@ -123,12 +123,13 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
-    <script src="js/firebase-config.js?v=9"></script>
-    <script src="js/firebase-service.js?v=9"></script>
-    <script src="js/profile-guard.js?v=9"></script>
-    <script src="js/storage-service.js?v=9"></script>
-    <script src="js/main.js?v=9"></script>
-    <script src="js/bousala-teach.js?v=1.0"></script><script src="js/bousala-intents.js?v=1.0"></script><script src="js/support-chat.js?v=9"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging-compat.js"></script>
+    <script src="js/firebase-config.js?v=11"></script>
+    <script src="js/firebase-service.js?v=11"></script>
+    <script src="js/profile-guard.js?v=11"></script>
+    <script src="js/storage-service.js?v=11"></script>
+    <script src="js/main.js?v=11"></script>
+    <script src="js/bousala-teach.js?v=11.0"></script><script src="js/bousala-intents.js?v=11.0"></script><script src="js/support-chat.js?v=11"></script>
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
             let userStr = sessionStorage.getItem('currentStudent');
@@ -195,7 +196,7 @@
             }
             
             // ADMIN BYPASS
-            const isAdmin = (user.phone === '0000' || user.phone === '01099616091' || user.phone === '01023675235');
+            const isAdmin = !!sessionStorage.getItem('currentAdmin');
             if (isAdmin) {
                 dbUser.courses = adminCourses.map(c => c.id);
             }
@@ -268,7 +269,7 @@
             if (logoutBtn) logoutBtn.addEventListener('click', e => { e.preventDefault(); sessionStorage.removeItem('currentStudent'); window.location.href = 'index.html'; });
         });
     </script>
-    <script src="js/mobile.js?v=3"></script>
+    <script src="js/mobile.js?v=11"></script>
 
     <script>
         if ('serviceWorker' in navigator) {
@@ -279,5 +280,8 @@
     </script>
 </body>
 </html>
+
+
+
 
 

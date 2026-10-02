@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <link rel="manifest" href="./manifest.json">
@@ -9,7 +9,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>تحليلات الطلاب التفصيلية - لوحة الإدارة</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="css/style.css?v=10">
+    <link rel="stylesheet" href="css/style.css?v=11">
     <link rel="stylesheet" href="css/dashboard.css">
     <style>
         .filter-bar { display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin-bottom:20px; }
@@ -63,15 +63,15 @@
         .admin-table th[data-sort]:hover { color:var(--royal-gold); }
         .sort-icon { margin-right:4px; font-size:0.75rem; opacity:0.6; }
     </style>
-    <link rel="stylesheet" href="css/mobile.css?v=3">
-    <link rel="icon" type="image/png" href="images/logo.png?v=6">
+    <link rel="stylesheet" href="css/mobile.css?v=11">
+    <link rel="icon" type="image/png" href="images/logo.png?v=11">
 </head>
 <body>
 <div class="bg-effects"></div>
 
 <header class="navbar glass-panel" style="border-bottom-color: var(--royal-gold);">
     <a href="index.html" class="nav-brand">
-        <div class="logo-circle" style="color:#fff; background:var(--royal-gold);"><img src="images/logo.png?v=1786475931154" alt="Logo" style="width:100%; height:100%; object-fit:cover; border-radius:50%;"></div>
+        <div class="logo-circle" style="color:#fff; background:var(--royal-gold);"><img src="images/logo.png?v=11" alt="Logo" style="width:100%; height:100%; object-fit:cover; border-radius:50%;"></div>
         <span class="nav-brand-text text-gold">تحليلات الطلاب</span>
     </a>
     <div class="nav-actions">
@@ -206,7 +206,8 @@
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
-<script src="js/firebase-config.js?v=10"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging-compat.js"></script>
+<script src="js/firebase-config.js?v=11"></script>
 <script src="js/admin-auth.js"></script>
 <script>
 let allStudentsData = [];
@@ -347,7 +348,7 @@ function subscribeStudents(grade) {
         renderStudentsTable(filterBySearch(allStudentsData));
     }).catch(err => {
         const tbody = document.getElementById('studentsTableBody');
-        if (tbody) tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:#e74c3c;">خطأ: ${err.message}</td></tr>`;
+        if (tbody) tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:#e74c3c;">خطأ: ${escHtml(err.message)}</td></tr>`;
     });
 }
 
@@ -409,7 +410,7 @@ function renderStudentsTable(students) {
         const fmt = v => v !== null ? `${v}%` : '<span style="color:rgba(255,255,255,0.3);">—</span>';
 
         return `<tr onclick="openStudentDetail('${s._uid}')">
-            <td><div style="display:flex;align-items:center;gap:8px;">${waBtnHtml}<div><strong>${s.name||'بدون اسم'}</strong><br><span style="font-size:0.75rem;color:rgba(255,255,255,0.45);">${s.phone||''}</span></div></div></td>
+            <td><div style="display:flex;align-items:center;gap:8px;">${waBtnHtml}<div><strong>${escHtml(s.name||'بدون اسم')}</strong><br><span style="font-size:0.75rem;color:rgba(255,255,255,0.45);">${escHtml(s.phone||'')}</span></div></div></td>
             <td>${gradeNames[s.grade]||s.grade||'-'}</td>
             <td><span style="color:${col(stats.avgExam)};font-weight:700;font-size:1rem;">${fmt(stats.avgExam)}</span></td>
             <td><span style="color:${col(stats.avgHomework)};font-weight:700;font-size:1rem;">${fmt(stats.avgHomework)}</span></td>
@@ -438,7 +439,7 @@ async function openStudentDetail(uid) {
     const waPhone  = rawPhone ? '2'+rawPhone.replace(/^0/,'') : '';
     const waHref   = waPhone  ? `https://wa.me/${waPhone}` : '';
 
-    document.getElementById('modalStudentName').innerHTML = `${s.name||'بدون اسم'} ${waPhone?`<a href="${waHref}" target="_blank" style="margin-right:10px;color:#25d366;font-size:1rem;"><i class="fab fa-whatsapp"></i> واتساب</a>`:''}`;
+    document.getElementById('modalStudentName').innerHTML = `${escHtml(s.name||'بدون اسم')} ${waPhone?`<a href="${waHref}" target="_blank" style="margin-right:10px;color:#25d366;font-size:1rem;"><i class="fab fa-whatsapp"></i> واتساب</a>`:''}`;
     document.getElementById('modalStudentMeta').textContent = `${s.phone||''} | ${gradeNames[s.grade]||s.grade||''} | آخر دخول: ${s.lastSeen?new Date(s.lastSeen).toLocaleString('ar-EG'):'غير معروف'}`;
 
     const examResults = (s.examResults || []).filter(r => r);
@@ -525,9 +526,9 @@ async function openStudentDetail(uid) {
                         const cR = d.correctAnswer??d.correct??d.answer??'';
                         const dC = cR!==''?getFullAns(cR,d.options):'';
                         cHtml+=`<div class="q-card ${ok?'correct':'wrong'}"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">
-                            <div style="flex:1;"><div style="font-size:0.88rem;margin-bottom:5px;"><strong>س${i+1}:</strong> ${d.question||''}</div>
-                            <div style="font-size:0.83rem;"><span style="color:rgba(255,255,255,0.55);">إجابة الطالب: </span><span style="color:${ok?'#2ecc71':'#e74c3c'};font-weight:600;">${dS}</span></div>
-                            ${!ok&&dC?`<div style="font-size:0.82rem;margin-top:3px;"><span style="color:rgba(255,255,255,0.45);">الإجابة الصحيحة: </span><span style="color:#2ecc71;">${dC}</span></div>`:''}
+                            <div style="flex:1;"><div style="font-size:0.88rem;margin-bottom:5px;"><strong>س${i+1}:</strong> ${escHtml(d.question||'')}</div>
+                            <div style="font-size:0.83rem;"><span style="color:rgba(255,255,255,0.55);">إجابة الطالب: </span><span style="color:${ok?'#2ecc71':'#e74c3c'};font-weight:600;">${escHtml(dS)}</span></div>
+                            ${!ok&&dC?`<div style="font-size:0.82rem;margin-top:3px;"><span style="color:rgba(255,255,255,0.45);">الإجابة الصحيحة: </span><span style="color:#2ecc71;">${escHtml(dC)}</span></div>`:''}
                             <div style="font-size:0.73rem;color:rgba(255,255,255,0.3);margin-top:3px;">${Math.round((d.score||0)*100)}% — (${d.pointsEarned||0}/${d.totalPoints||1} نقطة)</div></div>
                             <button class="toggle-score-btn" onclick="window.toggleQuestionScore('${uid}','${safe}',${i},this)">${ok?'â‌Œ اجعله خطأ':'âœ… اجعله صحيح'}</button>
                         </div></div>`;
@@ -613,7 +614,7 @@ window.toggleQuestionScore = function(uid, examTitle, qIndex, btn) {
             };
             const dS=gA(q.rawAnswer), cR=q.correctAnswer!==undefined?q.correctAnswer:q.correct!==undefined?q.correct:q.answer!==undefined?q.answer:'', dC=cR!==''?gA(cR):'';
             const td=par.querySelector('div>div');
-            if(td) td.innerHTML=`<strong>س${qIndex+1}:</strong> ${q.question||''}<br><span style="color:rgba(255,255,255,0.6);">إجابة الطالب: </span><span style="color:${isOk?'#2ecc71':'#e74c3c'};">${dS}</span>${(!isOk&&dC)?`<br><span style="color:rgba(255,255,255,0.45);">الإجابة الصحيحة: </span><span style="color:#2ecc71;">${dC}</span>`:''}<br><span style="color:rgba(255,255,255,0.4);font-size:0.78rem;"> | ${Math.round((q.score||0)*100)}% (${q.pointsEarned||0}/${q.totalPoints||1} نقطة)</span>`;
+            if(td) td.innerHTML=`<strong>س${qIndex+1}:</strong> ${escHtml(q.question||'')}<br><span style="color:rgba(255,255,255,0.6);">إجابة الطالب: </span><span style="color:${isOk?'#2ecc71':'#e74c3c'};">${escHtml(dS)}</span>${(!isOk&&dC)?`<br><span style="color:rgba(255,255,255,0.45);">الإجابة الصحيحة: </span><span style="color:#2ecc71;">${escHtml(dC)}</span>`:''}<br><span style="color:rgba(255,255,255,0.4);font-size:0.78rem;"> | ${Math.round((q.score||0)*100)}% (${q.pointsEarned||0}/${q.totalPoints||1} نقطة)</span>`;
             const tId=(uid+'_'+examTitle).replace(/\s/g,'_').replace(/[^a-zA-Z0-9_\u0600-\u06FF]/g,'');
             const inp=document.getElementById(`score_${tId}`); if(inp){inp.value=r.percent;inp.style.boxShadow='0 0 10px rgba(212,175,55,0.5)';setTimeout(()=>inp.style.boxShadow='none',1000);}
             const sb=document.getElementById(`saveBtn_${tId}`); if(sb){sb.classList.add('urgent');sb.textContent='âڑ ï¸ڈ احفظ الآن!';}
@@ -692,15 +693,15 @@ async function loadLateStudents() {
         container.innerHTML = summaryHtml + lateList.map(({student:s,missed})=>{
             const byType={};
             missed.forEach(m=>{ const lbl=T[m.type]||m.type; (byType[lbl]=byType[lbl]||[]).push(m.title); });
-            const details=Object.entries(byType).map(([lbl,titles])=>`<div style="margin-top:5px;"><span style="color:rgba(255,255,255,0.5);font-size:0.78rem;">${lbl}:</span> ${titles.slice(0,3).map(t=>`<span style="background:rgba(231,76,60,0.12);border-radius:4px;padding:1px 7px;margin:2px;display:inline-block;font-size:0.78rem;">${t}</span>`).join('')}${titles.length>3?`<span style="font-size:0.73rem;color:rgba(255,255,255,0.35);"> +${titles.length-3} أخرى</span>`:''}</div>`).join('');
+            const details=Object.entries(byType).map(([lbl,titles])=>`<div style="margin-top:5px;"><span style="color:rgba(255,255,255,0.5);font-size:0.78rem;">${lbl}:</span> ${titles.slice(0,3).map(t=>`<span style="background:rgba(231,76,60,0.12);border-radius:4px;padding:1px 7px;margin:2px;display:inline-block;font-size:0.78rem;">${escHtml(t)}</span>`).join('')}${titles.length>3?`<span style="font-size:0.73rem;color:rgba(255,255,255,0.35);"> +${titles.length-3} أخرى</span>`:''}</div>`).join('');
             const waText=`عزيزي ولي أمر الطالب ${s.name}،\nنود إبلاغك بأن ${s.name} متأخر عن إتمام:\n`+Object.entries(byType).map(([t,it])=>`• ${t}: ${it.slice(0,2).join('، ')}${it.length>2?` (+${it.length-2})`:''}`).join('\n')+`\nبرجاء متابعة الطالب لإتمام المحتوى. شكراً ًں™ڈ`;
             const waP=s.phone?'2'+s.phone.replace(/^0/,''):'';
             return `<div class="late-card" style="margin-bottom:12px;"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;">
-                <div style="flex:1;"><div class="late-msg"><strong style="color:var(--royal-gold);">${s.name}</strong><span style="background:rgba(231,76,60,0.15);color:#e74c3c;font-size:0.73rem;padding:2px 8px;border-radius:12px;margin-right:8px;">${missed.length} عنصر</span></div>${s.phone?`<div style="font-size:0.73rem;color:rgba(255,255,255,0.38);margin-top:2px;">${s.phone}</div>`:''} ${details}</div>
+                <div style="flex:1;"><div class="late-msg"><strong style="color:var(--royal-gold);">${escHtml(s.name)}</strong><span style="background:rgba(231,76,60,0.15);color:#e74c3c;font-size:0.73rem;padding:2px 8px;border-radius:12px;margin-right:8px;">${missed.length} عنصر</span></div>${s.phone?`<div style="font-size:0.73rem;color:rgba(255,255,255,0.38);margin-top:2px;">${escHtml(s.phone)}</div>`:''} ${details}</div>
                 <div style="display:flex;gap:6px;flex-shrink:0;padding-top:4px;"><button class="copy-btn" onclick='copyMsg(${JSON.stringify(waText)},this)' style="font-size:0.78rem;"><i class="fas fa-copy"></i> نسخ</button>${waP?`<a href="https://wa.me/${waP}?text=${encodeURIComponent(waText)}" target="_blank" class="copy-btn" style="font-size:0.78rem;text-decoration:none;background:rgba(37,211,102,0.12);color:#25d366;border-color:rgba(37,211,102,0.3);"><i class="fab fa-whatsapp"></i></a>`:''}</div>
             </div></div>`;
         }).join('');
-    } catch(e) { container.innerHTML=`<p style="color:#e74c3c;">خطأ: ${e.message}</p>`; console.error('loadLateStudents error:',e); }
+    } catch(e) { container.innerHTML=`<p style="color:#e74c3c;">خطأ: ${escHtml(e.message)}</p>`; console.error('loadLateStudents error:',e); }
 }
 
 function copyMsg(msg,btn) { navigator.clipboard.writeText(msg).then(()=>{ btn.textContent='âœ… تم النسخ'; setTimeout(()=>{ btn.innerHTML='<i class="fas fa-copy"></i> نسخ'; },1500); }); }
@@ -725,7 +726,7 @@ async function loadLevels() {
         const display = grade ? allStudentsData.filter(s=>s.grade===grade) : allStudentsData;
         allStudentsData = display;
         filterLevel(currentLevelFilter);
-    } catch(e) { document.getElementById('levelsContainer').innerHTML=`<p style="color:#e74c3c;">خطأ: ${e.message}</p>`; }
+    } catch(e) { document.getElementById('levelsContainer').innerHTML=`<p style="color:#e74c3c;">خطأ: ${escHtml(e.message)}</p>`; }
 }
 
 function filterLevel(level, btn) {
@@ -757,7 +758,7 @@ function filterLevel(level, btn) {
         filtered.sort((a,b) => (calcStudentStats(b).avgExam||0) - (calcStudentStats(a).avgExam||0)).map(s => {
             const stats = calcStudentStats(s);
             return `<div class="section-block" style="display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="openStudentDetail('${s._uid}')">
-                <div><strong>${s.name || 'بدون اسم'}</strong><br><span style="font-size:0.8rem; color:rgba(255,255,255,0.5);">${s.phone || ''}</span></div>
+                <div><strong>${escHtml(s.name || 'بدون اسم')}</strong><br><span style="font-size:0.8rem; color:rgba(255,255,255,0.5);">${escHtml(s.phone || '')}</span></div>
                 <div style="text-align:center;"><div style="font-size:1.4rem; font-weight:700; color:var(--royal-gold);">${stats.avgExam !== null ? stats.avgExam + '%' : '-'}</div><div style="font-size:0.75rem; color:rgba(255,255,255,0.4);">متوسط الدرجات</div></div>
             </div>`;
         }).join('');
@@ -784,7 +785,7 @@ document.getElementById('studentDetailModal').addEventListener('click', function
     if (e.target === this) closeDetailModal();
 });
 </script>
-    <script src="js/mobile.js?v=3"></script>
+    <script src="js/mobile.js?v=11"></script>
 
     <script>
         if ('serviceWorker' in navigator) {
@@ -817,4 +818,6 @@ document.getElementById('studentDetailModal').addEventListener('click', function
     
 </body>
 </html>
+
+
 

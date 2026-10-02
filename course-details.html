@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <link rel="manifest" href="./manifest.json">
@@ -39,8 +39,8 @@
 .exam-progress { text-align: center; margin-bottom: 15px; font-weight: bold; color: var(--accent-cyan); }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 </style>
-    <link rel="stylesheet" href="css/style.css?v=1785347365036">
-    <link rel="stylesheet" href="css/mobile.css?v=3">
+    <link rel="stylesheet" href="css/style.css?v=11">
+    <link rel="stylesheet" href="css/mobile.css?v=11">
     <link rel="stylesheet" href="css/courses.css">
     <link rel="stylesheet" href="css/auth.css">
     <!-- Dynamic SEO title/OG per course -->
@@ -109,7 +109,7 @@
         font-weight: bold;
     }
     </style>
-    <link rel="icon" type="image/png" href="images/logo.png?v=6">
+    <link rel="icon" type="image/png" href="images/logo.png?v=11">
 <style>body.strict-exam-active #pfChatBtn, body.strict-exam-active #pfChatBubble, body.strict-exam-active #pfChatWindow { display: none !important; }</style>
 </head>
 <body>
@@ -118,7 +118,7 @@
     <!-- Header -->
     <header class="navbar glass-panel">
         <a href="index.html" class="nav-brand">
-            <div class="logo-circle"><img src="images/logo.png?v=1786475931154" alt="Logo" style="width:100%; height:100%; object-fit:cover; border-radius:50%;"></div>
+            <div class="logo-circle"><img src="images/logo.png?v=11" alt="Logo" class="cd-hero-image"></div>
             <span class="nav-brand-text">منصة يوسف بركات</span>
         </a>
         <ul class="nav-links">
@@ -131,50 +131,50 @@
         </div>
     </header>
 
-    <div class="container" style="padding-top: 150px; padding-bottom: 50px; min-height: 80vh;">
-        <div class="glass-panel" style="padding: 40px; border-radius: 20px; max-width: 800px; margin: 0 auto;">
+    <div class="container" class="cd-course-hero">
+        <div class="glass-panel" class="cd-hero-card">
             
-            <a href="courses.html" style="color: var(--accent-cyan); text-decoration: none; font-size: 0.9rem; margin-bottom: 90px; display: inline-block;">
+            <a href="courses.html" class="cd-back-link">
                 <i class="fas fa-arrow-right mr-2"></i> العودة للكورسات
             </a>
 
-            <div style="display: flex; flex-wrap: wrap; gap: 30px; margin-bottom: 40px; align-items: flex-start;">
-                <div style="width: 100%; max-width: 300px; aspect-ratio: 16/9; overflow: hidden; border-radius: 15px; border: 1px solid var(--border-color); background: var(--secondary-navy, #0a1e3a);">
-                    <img loading="lazy" id="cdImage" src="" style="width: 100%; height: 100%; object-fit: cover; object-position: center; display: block;" alt="Course">
+            <div class="cd-hero-content-row">
+                <div class="cd-course-img-wrapper">
+                    <img loading="lazy" id="cdImage" src="" class="cd-course-img" alt="Course">
                 </div>
-                <div style="flex: 1; min-width: 250px;">
-                    <span id="cdGrade" class="badge" style="background: rgba(212, 166, 79, 0.2); color: var(--royal-gold); padding: 5px 15px; border-radius: 20px; font-size: 0.9rem; margin-bottom: 15px; display: inline-block;"></span>
-                    <div id="cdSchedule" style="margin-bottom: 15px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.05); padding: 10px 15px; border-radius: 8px; font-size: 0.9rem; color: #e0e0e0; display: none; align-items: center; justify-content: center; text-align: center; gap: 10px; flex-wrap: wrap;"></div>
+                <div class="cd-hero-text-col">
+                    <span id="cdGrade" class="badge cd-grade-badge"></span>
+                    <div id="cdSchedule" class="cd-schedule-container" style="display:none;"></div>
                     <h1 id="cdTitle" class="heading-luxury mb-1"></h1>
-                    <p id="cdDesc" style="color: rgba(255,255,255,0.8); line-height: 1.6; margin-bottom: 20px;"></p>
-                    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px; margin-bottom: 20px; text-align: center; width: 100%;">
-                        <div style="font-weight: bold; color: var(--royal-gold);" id="cdPrice"></div>
-                        <div id="cdActionBtnContainer" style="margin-bottom: 2px; width: 100%; display: flex; justify-content: center;"></div>
+                    <p id="cdDesc" class="cd-desc-text"></p>
+                    <div class="cd-price-action-wrapper">
+                        <div class="cd-price-tag" id="cdPrice"></div>
+                        <div id="cdActionBtnContainer" class="cd-hero-image-wrap"></div>
                     </div>
                 </div>
             </div>
             
-            <div id="cdSectionsContainer" style="margin-top: 20px;"></div>
+            <div id="cdSectionsContainer" class="cd-mt-20"></div>
             
         </div>
     </div>
 
     <!-- Payment Modal (Duplicated for standalone use) -->
     <div class="modal-overlay" id="paymentModal">
-        <div class="glass-panel modal-content" style="padding: 30px; max-width: 500px;">
+        <div class="glass-panel modal-content" class="cd-modal-content">
             <button class="close-modal" onclick="document.getElementById('paymentModal').classList.remove('active')"><i class="fas fa-times"></i></button>
             <h2 class="text-gold mb-2 text-center">تأكيد الاشتراك والدفع</h2>
             
-            <p style="margin-bottom: 20px; text-align: center;">اختر طريقة الدفع المناسبة لك:</p>
+            <p class="cd-hero-badges">اختر طريقة الدفع المناسبة لك:</p>
             
             <div class="payment-methods">
                 <div class="pay-method active" data-type="vodafone">
-                    <i class="fas fa-mobile-alt" style="font-size: 2rem; color: #e60000; margin-bottom: 10px;"></i>
+                    <i class="fas fa-mobile-alt" class="cd-hero-price-youtube"></i>
                     <h4>فودافون كاش</h4>
                 </div>
-                <div class="pay-method" data-type="fawry" style="opacity: 0.5; pointer-events: none; filter: grayscale(100%); position: relative;">
-                    <span style="position: absolute; top: 5px; left: 5px; background: rgba(0,0,0,0.5); font-size: 0.7rem; padding: 2px 5px; border-radius: 3px;">قريباً</span>
-                    <i class="fas fa-store" style="font-size: 2rem; color: #f1c40f; margin-bottom: 10px;"></i>
+                <div class="pay-method" data-type="fawry" class="cd-unit-locked">
+                    <span class="cd-unit-locked-badge">قريباً</span>
+                    <i class="fas fa-store" class="cd-hero-price-gold"></i>
                     <h4>فوري</h4>
                 </div>
             </div>
@@ -182,39 +182,39 @@
             <div class="payment-details" id="vodafoneDetails">
                 <p>قم بتحويل المبلغ على الرقم التالي عبر فودافون كاش:</p>
                 <div class="copy-box">
-                    <span id="vCashNum" style="font-size: 1.2rem; font-weight: bold; letter-spacing: 2px;">01023675235</span>
+                    <span id="vCashNum" class="cd-auth-title">01023675235</span>
                     <button class="copy-btn" data-target="vCashNum"><i class="fas fa-copy"></i></button>
                 </div>
-                <p style="font-size: 0.85rem; margin-top: 10px; color: var(--accent-cyan);">* برجاء الاحتفاظ بصورة التحويل (الاسكرين شوت) لرفعها بعد الدفع.</p>
+                <p class="cd-auth-subtitle">* برجاء الاحتفاظ بصورة التحويل (الاسكرين شوت) لرفعها بعد الدفع.</p>
             </div>
 
-            <div class="payment-details" id="fawryDetails" style="display: none;">
+            <div class="payment-details" id="fawryDetails" style="display:none;">
                 <p>توجه لأقرب ماكينة فوري واستخدم كود الدفع التالي:</p>
                 <div class="copy-box">
-                    <span id="fawryCode" style="font-size: 1.2rem; font-weight: bold; letter-spacing: 2px;">784512</span>
+                    <span id="fawryCode" class="cd-auth-title">784512</span>
                     <button class="copy-btn" data-target="fawryCode"><i class="fas fa-copy"></i></button>
                 </div>
-                <p style="font-size: 0.85rem; margin-top: 10px; color: var(--accent-cyan);">* الكود صالح لمدة 24 ساعة فقط.</p>
+                <p class="cd-auth-subtitle">* الكود صالح لمدة 24 ساعة فقط.</p>
             </div>
 
-            <div class="form-group" style="margin-top: 20px;">
+            <div class="form-group" class="cd-mt-20">
                 <label>ارفع صورة التحويل</label>
-                <input type="file" id="paymentProofImage" class="form-control" style="padding: 10px;" accept="image/*">
+                <input type="file" id="paymentProofImage" class="form-control" class="cd-p-10" accept="image/*">
             </div>
 
-            <div style="display: flex; gap: 10px; margin-top: 20px;">
-                <button class="btn btn-outline" style="flex: 1;" onclick="document.getElementById('paymentModal').classList.remove('active')">تراجع</button>
-                <button type="button" class="btn btn-green" style="flex: 1;" id="confirmPayment" onclick="submitPaymentRequest()">استمرار</button>
+            <div class="cd-flex-gap-10 cd-mt-20">
+                <button class="btn btn-outline" class="cd-flex-1" onclick="document.getElementById('paymentModal').classList.remove('active')">تراجع</button>
+                <button type="button" class="btn btn-green" class="cd-flex-1" id="confirmPayment" onclick="submitPaymentRequest()">استمرار</button>
             </div>
         </div>
     </div>
 
         <!-- Video Modal -->
     <div class="modal-overlay" id="videoModal">
-        <div class="glass-panel modal-content" style="padding: 20px; max-width: 900px; width: 95%;">
+        <div class="glass-panel modal-content cd-video-modal-content">
             <button class="close-modal" onclick="document.getElementById('videoModal').classList.remove('active'); document.getElementById('videoPlayerContainer').innerHTML='';"><i class="fas fa-times"></i></button>
-            <h2 id="videoModalTitle" style="margin-bottom: 20px; color: var(--royal-gold);"></h2>
-            <div id="videoPlayerContainer" style="width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 12px; overflow: hidden;">
+            <h2 id="videoModalTitle" class="cd-video-title"></h2>
+            <div id="videoPlayerContainer" class="cd-video-player-container">
             </div>
         </div>
     </div>
@@ -236,20 +236,20 @@
                 <div class="form-group">
                     <label>كلمة المرور</label>
                     <input type="password" id="loginPassword" class="form-control" placeholder="أدخل كلمة المرور" required>
-                  <div id="loginError" class="error-message" style="display:none; color: #e74c3c; background: rgba(231,76,60,0.1); padding: 10px; border-radius: 8px; margin-top: 15px; font-size: 0.9rem; text-align: center; border: 1px solid rgba(231,76,60,0.3);"></div>
+                  <div id="loginError" class="error-message" class="cd-alert cd-alert-error" style="display:none;"></div>
                 </div>
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <a href="#" id="forgotPasswordLink" style="color: var(--accent-cyan); font-weight: 700;">نسيت كلمة المرور؟</a>
-                    <span style="color: rgba(0,0,0,0.6); font-size: 0.92rem;">تسجيل الدخول الآمن</span>
+                <div class="cd-invoice-header">
+                    <a href="#" id="forgotPasswordLink" class="cd-invoice-title">نسيت كلمة المرور؟</a>
+                    <span class="cd-invoice-label">تسجيل الدخول الآمن</span>
                 </div>
                 <button type="submit" class="btn btn-green btn-block">تسجيل الدخول</button>
             </form>
-            <div id="forgotPasswordModal" class="modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 10000; justify-content: center; align-items: center; padding: 20px;">
-                <div class="glass-panel" style="max-width: 520px; width: 100%; padding: 30px; position: relative; border-radius: 20px;">
-                    <button onclick="document.getElementById('forgotPasswordModal').style.display='none'" style="position: absolute; top: 18px; right: 18px; background: transparent; border: none; color: var(--text-primary); font-size: 1.4rem; cursor: pointer;"><i class="fas fa-times"></i></button>
-                    <h2 style="margin-bottom: 20px; color: var(--royal-gold);">استعادة كلمة المرور</h2>
-                    <p style="margin-bottom: 20px; color: var(--text-secondary);">اكتب رقم ولي الأمر المرتبط بحسابك وهيتم إرسال كود تأكيد لتغيير كلمة السر.</p>
-                    <div id="fpStatusText" style="display:none; margin-bottom: 20px; padding: 12px 14px; border-radius: 16px; font-size: 0.95rem; line-height:1.5;"></div>
+            <div id="forgotPasswordModal" class="modal-overlay" class="cd-modal-overlay" style="display:none;">
+                <div class="glass-panel" class="cd-modal-content">
+                    <button onclick="document.getElementById('forgotPasswordModal').style.display='none'" class="cd-modal-close"><i class="fas fa-times"></i></button>
+                    <h2 class="cd-modal-title">استعادة كلمة المرور</h2>
+                    <p class="cd-modal-desc">اكتب رقم ولي الأمر المرتبط بحسابك وهيتم إرسال كود تأكيد لتغيير كلمة السر.</p>
+                    <div id="fpStatusText" class="cd-alert cd-alert-dynamic" style="display:none;"></div>
                     <form id="forgotPasswordForm">
                         <div class="form-group">
                             <label>رقم الطالب</label>
@@ -264,9 +264,9 @@
                                 <label>أدخل كود التحقق</label>
                                 <input type="text" id="fpOtpCode" class="form-control" placeholder="xxxxx" maxlength="5">
                             </div>
-                            <div class="form-group" style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
-                                <button type="button" id="fpResendBtn" class="btn btn-outline" style="display:none; padding: 10px 14px; min-width:150px;">إعادة إرسال الكود</button>
-                                <span id="fpOtpHelp" style="flex:1 1 100%; color: rgba(0,0,0,0.72); font-size: 0.92rem;">الكود صالح لمدة 10 دقائق ولا يتم مشاركته مع أي شخص.</span>
+                            <div class="form-group" class="cd-modal-actions">
+                                <button type="button" id="fpResendBtn" class="btn btn-outline" class="btn cd-btn-pay" style="display:none;">إعادة إرسال الكود</button>
+                                <span id="fpOtpHelp" class="cd-invoice-label-full">الكود صالح لمدة 10 دقائق ولا يتم مشاركته مع أي شخص.</span>
                             </div>
                             <div class="form-group">
                                 <label>كلمة المرور الجديدة</label>
@@ -279,7 +279,7 @@
                             </div>
                         </div>
                         </div>
-                        <div style="display:flex; justify-content: space-between; gap: 10px; margin-top: 20px;">
+                        <div class="cd-invoice-actions">
                             <button type="button" class="btn btn-outline" onclick="document.getElementById('forgotPasswordModal').style.display='none'">إلغاء</button>
                             <button type="submit" id="fpSubmitBtn" class="btn btn-green">إرسال الكود عبر واتساب</button>
                         </div>
@@ -307,20 +307,20 @@
                 <div class="form-group">
                     <label>كلمة المرور</label>
                     <input type="password" id="loginPassword" class="form-control" placeholder="أدخل كلمة المرور" required>
-                  <div id="loginError" class="error-message" style="display:none; color: #e74c3c; background: rgba(231,76,60,0.1); padding: 10px; border-radius: 8px; margin-top: 15px; font-size: 0.9rem; text-align: center; border: 1px solid rgba(231,76,60,0.3);"></div>
+                  <div id="loginError" class="error-message" class="cd-alert cd-alert-error" style="display:none;"></div>
                 </div>
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <a href="#" id="forgotPasswordLink" style="color: var(--accent-cyan); font-weight: 700;">نسيت كلمة المرور؟</a>
-                    <span style="color: rgba(0,0,0,0.6); font-size: 0.92rem;">تسجيل الدخول الآمن</span>
+                <div class="cd-invoice-header">
+                    <a href="#" id="forgotPasswordLink" class="cd-invoice-title">نسيت كلمة المرور؟</a>
+                    <span class="cd-invoice-label">تسجيل الدخول الآمن</span>
                 </div>
                 <button type="submit" class="btn btn-green btn-block">تسجيل الدخول</button>
             </form>
-            <div id="forgotPasswordModal" class="modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 10000; justify-content: center; align-items: center; padding: 20px;">
-                <div class="glass-panel" style="max-width: 520px; width: 100%; padding: 30px; position: relative; border-radius: 20px;">
-                    <button onclick="document.getElementById('forgotPasswordModal').style.display='none'" style="position: absolute; top: 18px; right: 18px; background: transparent; border: none; color: var(--text-primary); font-size: 1.4rem; cursor: pointer;"><i class="fas fa-times"></i></button>
-                    <h2 style="margin-bottom: 20px; color: var(--royal-gold);">استعادة كلمة المرور</h2>
-                    <p style="margin-bottom: 20px; color: var(--text-secondary);">اكتب رقم ولي الأمر المرتبط بحسابك وهيتم إرسال كود تأكيد لتغيير كلمة السر.</p>
-                    <div id="fpStatusText" style="display:none; margin-bottom: 20px; padding: 12px 14px; border-radius: 16px; font-size: 0.95rem; line-height:1.5;"></div>
+            <div id="forgotPasswordModal" class="modal-overlay" class="cd-modal-overlay" style="display:none;">
+                <div class="glass-panel" class="cd-modal-content">
+                    <button onclick="document.getElementById('forgotPasswordModal').style.display='none'" class="cd-modal-close"><i class="fas fa-times"></i></button>
+                    <h2 class="cd-modal-title">استعادة كلمة المرور</h2>
+                    <p class="cd-modal-desc">اكتب رقم ولي الأمر المرتبط بحسابك وهيتم إرسال كود تأكيد لتغيير كلمة السر.</p>
+                    <div id="fpStatusText" class="cd-alert cd-alert-dynamic" style="display:none;"></div>
                     <form id="forgotPasswordForm">
                         <div class="form-group">
                             <label>رقم الطالب</label>
@@ -335,9 +335,9 @@
                                 <label>أدخل كود التحقق</label>
                                 <input type="text" id="fpOtpCode" class="form-control" placeholder="xxxxx" maxlength="5">
                             </div>
-                            <div class="form-group" style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
-                                <button type="button" id="fpResendBtn" class="btn btn-outline" style="display:none; padding: 10px 14px; min-width:150px;">إعادة إرسال الكود</button>
-                                <span id="fpOtpHelp" style="flex:1 1 100%; color: rgba(0,0,0,0.72); font-size: 0.92rem;">الكود صالح لمدة 10 دقائق ولا يتم مشاركته مع أي شخص.</span>
+                            <div class="form-group" class="cd-modal-actions">
+                                <button type="button" id="fpResendBtn" class="btn btn-outline" class="btn cd-btn-pay" style="display:none;">إعادة إرسال الكود</button>
+                                <span id="fpOtpHelp" class="cd-invoice-label-full">الكود صالح لمدة 10 دقائق ولا يتم مشاركته مع أي شخص.</span>
                             </div>
                             <div class="form-group">
                                 <label>كلمة المرور الجديدة</label>
@@ -350,7 +350,7 @@
                             </div>
                         </div>
                         </div>
-                        <div style="display:flex; justify-content: space-between; gap: 10px; margin-top: 20px;">
+                        <div class="cd-invoice-actions">
                             <button type="button" class="btn btn-outline" onclick="document.getElementById('forgotPasswordModal').style.display='none'">إلغاء</button>
                             <button type="submit" id="fpSubmitBtn" class="btn btn-green">إرسال الكود عبر واتساب</button>
                         </div>
@@ -363,13 +363,13 @@
         </div>
     </div>
 
-    <script src="js/storage-service.js?v=10"></script>
-    <script src="js/main.js?v=10"></script>
-    <script src="js/bousala-teach.js?v=1.0"></script><script src="js/bousala-intents.js?v=1.0"></script><script src="js/support-chat.js?v=10"></script>
-    <script src="js/mobile-ui-fixes.js?v=1"></script>
-    <script src="js/auth.js?v=10"></script>
-    <script src="js/grader.js?v=10"></script>
-    <script src="js/dashboard.js?v=10"></script>
+    <script src="js/storage-service.js?v=11"></script>
+    <script src="js/main.js?v=11"></script>
+    <script src="js/bousala-teach.js?v=11.0"></script><script src="js/bousala-intents.js?v=11.0"></script><script src="js/support-chat.js?v=11"></script>
+    <script src="js/mobile-ui-fixes.js?v=11"></script>
+    <script src="js/auth.js?v=11"></script>
+    <script src="js/grader.js?v=11"></script>
+    <script src="js/dashboard.js?v=11"></script>
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
             
@@ -558,9 +558,9 @@
             const priceContainer = document.getElementById('cdPrice');
             if (course.hasDiscount && course.discountPrice && (!course.discountExpiry || course.discountExpiry > Date.now())) {
                 priceContainer.innerHTML = `
-                    <div style="display:flex; flex-direction:column; align-items:center; line-height: 1;">
-                        <span style="text-decoration: line-through; font-size: 1.1rem; color: var(--text-muted); opacity: 0.8; margin-bottom: 5px;">${course.price} ج.م</span>
-                        <span style="color: #2ecc71; font-size: 2.2rem;">${course.discountPrice} ج.م</span>
+                    <div class="cd-price-block">
+                        <span class="cd-old-price">${course.price} ج.م</span>
+                        <span class="cd-new-price">${course.discountPrice} ج.م</span>
                     </div>
                 `;
                 if (course.discountExpiry && !isOwned && !isPending && !isAdmin) {
@@ -568,7 +568,7 @@
                     timerDiv.className = 'discount-countdown';
                     timerDiv.setAttribute('data-expiry', course.discountExpiry);
                     timerDiv.style.cssText = 'background: rgba(231, 76, 60, 0.1); border: 1px solid rgba(231, 76, 60, 0.3); border-radius: 8px; padding: 10px 15px; margin-top: 15px; margin-left: auto; margin-right: auto; text-align: center; color: #e74c3c; font-weight: bold; font-size: 0.95rem; animation: pulse 2s infinite; width: fit-content; max-width: 100%; display: flex; justify-content: center; align-items: center; gap: 8px; flex-wrap: nowrap; white-space: nowrap; line-height: 1;';
-                    timerDiv.innerHTML = '<i class="fas fa-clock" style="font-size: 1.1rem;"></i> <span>ينتهي الخصم خلال:</span> <span class="cd-timer" style="direction: ltr; unicode-bidi: embed;">...</span>';
+                    timerDiv.innerHTML = '<i class="fas fa-clock" class="cd-fs-11"></i> <span>ينتهي الخصم خلال:</span> <span class="cd-timer" class="cd-ltr-text">...</span>';
                     // We'll append this after setting the grade, just below the title area.
                     setTimeout(() => {
                         const actContainer = document.getElementById('cdActionBtnContainer');
@@ -578,7 +578,7 @@
                     }, 0);
                 }
             } else {
-                priceContainer.innerHTML = `<span style="font-size: 2.2rem; color: var(--royal-gold); line-height: 1;">${course.price} ج.م</span>`;
+                priceContainer.innerHTML = `<span class="cd-price-tag">${course.price} ج.م</span>`;
             }
             
             document.getElementById('cdGrade').textContent = grades[course.grade] || course.grade;
@@ -587,11 +587,11 @@
             if (course.grade && course.grade.startsWith('prep')) {
                 scheduleEl.style.display = 'flex';
                 scheduleEl.className = 'schedule-pulse';
-                scheduleEl.innerHTML = '<div style="display:flex; justify-content:center; align-items:center; gap:12px; flex-wrap:wrap; width:100%;"><span style="color:var(--royal-gold);"><i class="fas fa-calendar-alt"></i> الشرح والتدريب: الخميس</span> <span style="color:rgba(255,255,255,0.3);">|</span> <span style="color:#3498db;"><i class="fas fa-edit"></i> الواجب: الثلاثاء</span> <span style="color:rgba(255,255,255,0.3);">|</span> <span style="color:#e74c3c;"><i class="fas fa-trophy"></i> الامتحان: الأربعاء</span></div><span class="schedule-time-badge"><i class="far fa-clock"></i> جميع المواعيد المذكورة الساعة 9 مساءاً</span>';
+                scheduleEl.innerHTML = '<div class="cd-flex-center-wrap"><span style="color:var(--royal-gold);"><i class="fas fa-calendar-alt"></i> الشرح والتدريب: الخميس</span> <span class="cd-text-muted">|</span> <span class="cd-text-blue"><i class="fas fa-edit"></i> الواجب: الثلاثاء</span> <span class="cd-text-muted">|</span> <span class="cd-text-red"><i class="fas fa-trophy"></i> الامتحان: الأربعاء</span></div><span class="schedule-time-badge"><i class="far fa-clock"></i> جميع المواعيد المذكورة الساعة 9 مساءاً</span>';
             } else if (course.grade && course.grade.startsWith('sec')) {
                 scheduleEl.style.display = 'flex';
                 scheduleEl.className = 'schedule-pulse';
-                scheduleEl.innerHTML = '<div style="display:flex; justify-content:center; align-items:center; gap:12px; flex-wrap:wrap; width:100%;"><span style="color:var(--royal-gold);"><i class="fas fa-calendar-alt"></i> الشرح والتدريب: الجمعة</span> <span style="color:rgba(255,255,255,0.3);">|</span> <span style="color:#3498db;"><i class="fas fa-edit"></i> الواجب: الثلاثاء</span> <span style="color:rgba(255,255,255,0.3);">|</span> <span style="color:#e74c3c;"><i class="fas fa-trophy"></i> الامتحان: الأربعاء</span></div><span class="schedule-time-badge"><i class="far fa-clock"></i> جميع المواعيد المذكورة الساعة 9 مساءاً</span>';
+                scheduleEl.innerHTML = '<div class="cd-flex-center-wrap"><span style="color:var(--royal-gold);"><i class="fas fa-calendar-alt"></i> الشرح والتدريب: الجمعة</span> <span class="cd-text-muted">|</span> <span class="cd-text-blue"><i class="fas fa-edit"></i> الواجب: الثلاثاء</span> <span class="cd-text-muted">|</span> <span class="cd-text-red"><i class="fas fa-trophy"></i> الامتحان: الأربعاء</span></div><span class="schedule-time-badge"><i class="far fa-clock"></i> جميع المواعيد المذكورة الساعة 9 مساءاً</span>';
             } else {
                 scheduleEl.style.display = 'none';
             }
@@ -604,10 +604,10 @@
 
             if (isAdmin) {
                 actionContainer.innerHTML = `
-                    <button class="btn btn-outline" style="border-color: var(--accent-cyan); color: var(--accent-cyan); margin-left: 10px;" onclick="openAdminCourseEdit()">
+                    <button class="cd-main-action-btn is-admin" onclick="openAdminCourseEdit()">
                         <i class="fas fa-edit mr-2"></i> تعديل بيانات الكورس
                     </button>
-                    <button class="btn btn-outline" style="border-color: var(--royal-gold); color: var(--royal-gold);" onclick="window.location.href='admin-courses.html?id=${course.id}'">
+                    <button class="cd-main-action-btn is-admin-gold" onclick="window.location.href='admin-courses.html?id=${course.id}'">
                         <i class="fas fa-layer-group mr-2"></i> تعديل المحتوى
                     </button>
                 `;
@@ -615,7 +615,7 @@
                 // Add modal for editing course details
                 const editModalHTML = `
                 <div class="modal-overlay" id="adminEditCourseModal">
-                    <div class="glass-panel modal-content" style="padding: 30px; max-width: 500px;">
+                    <div class="glass-panel modal-content" class="cd-modal-content">
                         <button class="close-modal" onclick="document.getElementById('adminEditCourseModal').classList.remove('active')"><i class="fas fa-times"></i></button>
                         <h2 class="text-gold mb-2 text-center">تعديل بيانات الكورس</h2>
                         <div class="form-group mt-2">
@@ -626,17 +626,17 @@
                             <label>حالة الكورس (مثال: يبدأ فوراً أو 15 أكتوبر)</label>
                             <input type="text" id="adminEditCourseStatus" class="form-control" value="${course.courseStatus || ''}">
                         </div>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+                        <div class="cd-grid-3">
                             <div class="form-group">
-                                <label style="font-size: 0.85rem;">المحاضرات</label>
+                                <label class="cd-fs-small">المحاضرات</label>
                                 <input type="text" id="adminEditLecSchedule" class="form-control" value="${course.lecSchedule || ''}" placeholder="السبت 8 م">
                             </div>
                             <div class="form-group">
-                                <label style="font-size: 0.85rem;">الواجبات</label>
+                                <label class="cd-fs-small">الواجبات</label>
                                 <input type="text" id="adminEditHwSchedule" class="form-control" value="${course.hwSchedule || ''}" placeholder="الأحد 10 ص">
                             </div>
                             <div class="form-group">
-                                <label style="font-size: 0.85rem;">الامتحانات</label>
+                                <label class="cd-fs-small">الامتحانات</label>
                                 <input type="text" id="adminEditExamSchedule" class="form-control" value="${course.examSchedule || ''}" placeholder="الإثنين 12 ظ">
                             </div>
                         </div>
@@ -693,28 +693,28 @@
                     if (course.grade && course.grade.startsWith('prep')) {
                         scheduleEl.style.display = 'flex';
                         scheduleEl.className = 'schedule-pulse';
-                        scheduleEl.innerHTML = '<div style="display:flex; justify-content:center; align-items:center; gap:12px; flex-wrap:wrap; width:100%;"><span style="color:var(--royal-gold);"><i class="fas fa-calendar-alt"></i> الشرح والتدريب: الخميس</span> <span style="color:rgba(255,255,255,0.3);">|</span> <span style="color:#3498db;"><i class="fas fa-edit"></i> الواجب: الثلاثاء</span> <span style="color:rgba(255,255,255,0.3);">|</span> <span style="color:#e74c3c;"><i class="fas fa-trophy"></i> الامتحان: الأربعاء</span></div><span class="schedule-time-badge"><i class="far fa-clock"></i> جميع المواعيد المذكورة الساعة 9 مساءاً</span>';
+                        scheduleEl.innerHTML = '<div class="cd-flex-center-wrap"><span style="color:var(--royal-gold);"><i class="fas fa-calendar-alt"></i> الشرح والتدريب: الخميس</span> <span class="cd-text-muted">|</span> <span class="cd-text-blue"><i class="fas fa-edit"></i> الواجب: الثلاثاء</span> <span class="cd-text-muted">|</span> <span class="cd-text-red"><i class="fas fa-trophy"></i> الامتحان: الأربعاء</span></div><span class="schedule-time-badge"><i class="far fa-clock"></i> جميع المواعيد المذكورة الساعة 9 مساءاً</span>';
                     } else if (course.grade && course.grade.startsWith('sec')) {
                         scheduleEl.style.display = 'flex';
                         scheduleEl.className = 'schedule-pulse';
-                        scheduleEl.innerHTML = '<div style="display:flex; justify-content:center; align-items:center; gap:12px; flex-wrap:wrap; width:100%;"><span style="color:var(--royal-gold);"><i class="fas fa-calendar-alt"></i> الشرح والتدريب: الجمعة</span> <span style="color:rgba(255,255,255,0.3);">|</span> <span style="color:#3498db;"><i class="fas fa-edit"></i> الواجب: الثلاثاء</span> <span style="color:rgba(255,255,255,0.3);">|</span> <span style="color:#e74c3c;"><i class="fas fa-trophy"></i> الامتحان: الأربعاء</span></div><span class="schedule-time-badge"><i class="far fa-clock"></i> جميع المواعيد المذكورة الساعة 9 مساءاً</span>';
+                        scheduleEl.innerHTML = '<div class="cd-flex-center-wrap"><span style="color:var(--royal-gold);"><i class="fas fa-calendar-alt"></i> الشرح والتدريب: الجمعة</span> <span class="cd-text-muted">|</span> <span class="cd-text-blue"><i class="fas fa-edit"></i> الواجب: الثلاثاء</span> <span class="cd-text-muted">|</span> <span class="cd-text-red"><i class="fas fa-trophy"></i> الامتحان: الأربعاء</span></div><span class="schedule-time-badge"><i class="far fa-clock"></i> جميع المواعيد المذكورة الساعة 9 مساءاً</span>';
                     } else {
                         scheduleEl.style.display = 'none';
                     }               document.getElementById('adminEditCourseModal').classList.remove('active');
                 };
             }
             else if (isOwned || isMasterPreview) {
-                actionContainer.innerHTML = `<button class="btn btn-green"><i class="fas fa-check-circle mr-2"></i> المحتوى مفتوح لك (وضع المالك)</button>`;
+                actionContainer.innerHTML = `<button class="cd-main-action-btn is-owned"><i class="fas fa-check-circle"></i> المحتوى مفتوح لك (وضع المالك)</button>`;
             } else if (isPending) {
-                actionContainer.innerHTML = `<button class="btn btn-outline" style="color:var(--accent-orange); border-color:var(--accent-orange);" onclick="showPendingMessageDetails()"><i class="fas fa-clock mr-2"></i> طلبك قيد المراجعة</button>`;
+                actionContainer.innerHTML = `<button class="cd-main-action-btn is-pending" onclick="showPendingMessageDetails()"><i class="fas fa-clock"></i> طلبك قيد المراجعة</button>`;
             } else if (course.isFree || course.price == '0' || course.price === 0) {
                 if (userStr) {
-                    actionContainer.innerHTML = `<button class="btn btn-green" onclick="enrollFreeCourse('${course.id}')"><i class="fas fa-door-open mr-2"></i> دخول الكورس مجاناً</button>`;
+                    actionContainer.innerHTML = `<button class="cd-main-action-btn is-free-enroll" onclick="enrollFreeCourse('${course.id}')"><i class="fas fa-door-open"></i> دخول الكورس مجاناً</button>`;
                 } else {
-                    actionContainer.innerHTML = `<button class="btn btn-outline" style="color:#f1c40f; border-color:#f1c40f;" onclick="window.location.href='index.html#login'"><i class="fas fa-user-lock mr-2"></i> يجب تسجيل الدخول للاستمتاع بالكورس المجاني</button>`;
+                    actionContainer.innerHTML = `<button class="cd-main-action-btn is-free-login" onclick="window.location.href='index.html#login'"><i class="fas fa-user-lock"></i> يجب تسجيل الدخول للاستمتاع بالكورس المجاني</button>`;
                 }
             } else {
-                actionContainer.innerHTML = `<button class="btn btn-gold" onclick="openPaymentModalDetails('${course.id}')"><i class="fas fa-lock-open mr-2"></i> الاشتراك لفتح المحتوى</button>`;
+                actionContainer.innerHTML = `<button class="cd-main-action-btn is-paid" onclick="openPaymentModalDetails('${course.id}')"><i class="fas fa-lock-open"></i> الاشتراك لفتح المحتوى</button>`;
             }
 
             // ===== تحميل محتوى الكورس من 3 مصادر =====
@@ -910,12 +910,16 @@
                 if (modified && typeof userStr !== 'undefined' && userStr) {
                     let user = JSON.parse(userStr);
                     if(window.FirebaseService && typeof window.FirebaseService.updateStudentData === 'function') {
-                        window.FirebaseService.updateStudentData(user.phone, { completedItems: dbUser.completedItems }).then(() => {
-                            localStorage.setItem('db_' + user.phone, JSON.stringify(dbUser));
-                        });
-                    } else {
-                        localStorage.setItem('db_' + user.phone, JSON.stringify(dbUser));
-                    }
+                                            // Save locally first (synchronously)
+                    localStorage.setItem('db_' + user.phone, JSON.stringify(dbUser));
+                    
+                    window.FirebaseService.updateStudentData(user.phone, { completedItems: dbUser.completedItems }).catch((e) => {
+                        console.error('Failed to sync completedItems to Firebase, saving locally for auto-retry.', e);
+                        let unsynced = JSON.parse(localStorage.getItem('unsyncedCompletedItems') || '[]');
+                        unsynced.push({ phone: user.phone, items: dbUser.completedItems, ts: Date.now() });
+                        localStorage.setItem('unsyncedCompletedItems', JSON.stringify(unsynced));
+                    });
+                }
                 }
             }
 
@@ -970,7 +974,7 @@
                                 }
                             } catch(e) {}
                             if(videoId) {
-                                container.innerHTML = `<div id="ytplayer_${videoId}" style="width:100%; height:100%;"></div>`;
+                                container.innerHTML = `<div class="video-modal-wrapper"><div id="ytplayer_${videoId}" class="cd-w-100 cd-h-100"></div></div>`;
                                 if (window.injectVideoWatermark) window.injectVideoWatermark(container);
                                 
                                 const handleVideoEnded = () => {
@@ -1048,7 +1052,7 @@
                                         vimeoUrl = `https://player.vimeo.com/video/${vMatch[1]}`;
                                     }
                                 }
-                                container.innerHTML = `<iframe src="${vimeoUrl}" width="100%" height="100%" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>`;
+                                container.innerHTML = `<div class="video-modal-wrapper"><iframe src="${vimeoUrl}" width="100%" height="100%" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div>`;
                                 if (window.injectVideoWatermark) window.injectVideoWatermark(container);
                                 // For iframe we can't easily track ended event without Vimeo API, so mark it completed after a delay
                                 setTimeout(() => {
@@ -1057,7 +1061,7 @@
                                 }, 30000);
                             } else {
                                 const posterAttr = item.thumbnail ? `poster="${item.thumbnail}"` : '';
-                                container.innerHTML = `<video width="100%" height="100%" controls controlsList="nodownload" autoplay ${posterAttr}><source src="${item.videoUrl}" type="video/mp4">متصفحك لا يدعم تشغيل الفيديو.</video>`;
+                                container.innerHTML = `<div class="video-modal-wrapper"><video width="100%" height="100%" controls controlsList="nodownload" autoplay ${posterAttr}><source src="${item.videoUrl}" type="video/mp4">متصفحك لا يدعم الفيديو.</video></div>`;
                                 if (window.injectVideoWatermark) window.injectVideoWatermark(container);
                                 const vidEl = container.querySelector('video');
                                 if(vidEl) {
@@ -1104,11 +1108,11 @@
                         const customOverlay = document.createElement('div');
                         customOverlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:999999;display:flex;align-items:center;justify-content:center;padding:20px;';
                         customOverlay.innerHTML = `
-                            <div style="background:#111;border:1px solid #d4a64f;border-radius:15px;padding:30px;max-width:500px;text-align:center;position:relative;box-shadow:0 10px 40px rgba(0,0,0,0.8);">
-                                <button onclick="this.parentElement.parentElement.remove()" style="position:absolute;top:10px;left:15px;background:none;border:none;color:#fff;font-size:1.8rem;cursor:pointer;">&times;</button>
-                                <i class="fas fa-gift" style="font-size:3.5rem;color:#d4a64f;margin-bottom:20px;"></i>
-                                <h3 style="color:#fff;margin-bottom:25px;line-height:1.6;font-size:1.2rem;">نظراً لوجود تحديث بالمنصة أثناء أدائك للواجب الخاص بالمحاضرة التعريفية وحدث عطل،<br><span style="color:#2ecc71;">حصلت أنت على درجة الواجب كاملة 10/10</span><br>وغداً في تمام الـ 9 مساءاً يجب أن تحضر الامتحان.</h3>
-                                <button onclick="this.parentElement.parentElement.remove()" class="btn btn-gold" style="padding:10px 30px;border-radius:25px;font-size:1.1rem;">حسناً، فهمت</button>
+                            <div class="cd-promo-modal-content">
+                                <button onclick="this.parentElement.parentElement.remove()" class="cd-promo-modal-close">&times;</button>
+                                <i class="fas fa-gift" class="cd-promo-icon"></i>
+                                <h3 class="cd-promo-text">نظراً لوجود تحديث بالمنصة أثناء أدائك للواجب الخاص بالمحاضرة التعريفية وحدث عطل،<br><span class="cd-text-green">حصلت أنت على درجة الواجب كاملة 10/10</span><br>وغداً في تمام الـ 9 مساءاً يجب أن تحضر الامتحان.</h3>
+                                <button onclick="this.parentElement.parentElement.remove()" class="btn btn-gold" class="cd-promo-btn">حسناً، فهمت</button>
                             </div>
                         `;
                         document.body.appendChild(customOverlay);
@@ -1183,16 +1187,49 @@
             if (sectionsContainer) {
                 sectionsContainer.innerHTML = '';
                 
+                // Calculate and inject Progress Bar
+                if (typeof isOwned !== 'undefined' && (isOwned || (typeof isMasterPreview !== 'undefined' && isMasterPreview))) {
+                    let totalTrackableItems = 0;
+                    let completedTrackableItems = 0;
+                    
+                    normalizedContents.sections.forEach(sec => {
+                        (sec.items || []).forEach(item => {
+                            if (item.type !== 'header') {
+                                totalTrackableItems++;
+                                if (isItemCompleted(item.id)) {
+                                    completedTrackableItems++;
+                                }
+                            }
+                        });
+                    });
+                    
+                    if (totalTrackableItems > 0) {
+                        const progressPct = Math.round((completedTrackableItems / totalTrackableItems) * 100);
+                        const progressHtml = `
+                            <div class="cd-course-progress-container">
+                                <div class="cd-progress-header">
+                                    <span class="cd-progress-label">نسبة الإنجاز</span>
+                                    <span class="cd-progress-value">${progressPct}%</span>
+                                </div>
+                                <div class="cd-progress-track">
+                                    <div class="cd-progress-fill" style="width: ${progressPct}%;"></div>
+                                </div>
+                            </div>
+                        `;
+                        sectionsContainer.insertAdjacentHTML('beforeend', progressHtml);
+                    }
+                }
+
                 let globalLastExamCompleted = true;
                 let lastExamName = '';
 
                 normalizedContents.sections.forEach((sec, sIdx) => {
                     const secWrapper = document.createElement('div');
-                    secWrapper.style.cssText = 'border:1px solid rgba(255,255,255,0.1); border-radius: 18px; overflow: hidden; background: rgba(255,255,255,0.02); margin-bottom: 20px;';
+                    secWrapper.className = 'cd-section-wrapper';
                     
                     const header = document.createElement('button');
                     header.type = 'button';
-                    header.style.cssText = 'width:100%; text-align:right; padding: 22px 24px; display:flex; align-items:center; justify-content:space-between; gap:15px; background: rgba(0,0,0,0.2); border:none; border-bottom: 1px solid rgba(255,255,255,0.05); color: var(--text-primary); cursor: pointer;';
+                    header.className = 'cd-accordion-header';
                     
                     let scheduleText = '';
                     if (sec.id === 'sec_lectures' && course.lecSchedule) scheduleText = course.lecSchedule;
@@ -1201,7 +1238,7 @@
                     
                     let scheduleHtml = '';
                     if (scheduleText) {
-                        scheduleHtml = `<div style="color: rgba(255,255,255,0.6); font-size: 0.85rem; margin-top: 5px; font-weight: normal;"><i class="fas fa-clock mr-1"></i> موعد النزول: ${scheduleText}</div>`;
+                        scheduleHtml = `<div class="cd-header-schedule"><i class="fas fa-clock mr-1"></i> موعد النزول: ${scheduleText}</div>`;
                     }
                     
                     const itemsArr = sec.items || [];
@@ -1215,35 +1252,36 @@
                     if (itemsArr.length > 0) {
                         const lastItem = itemsArr[itemsArr.length - 1];
                         const badgeLabel = sec.id === 'sec_homeworks' ? 'واجب جديد' : (sec.id === 'sec_exams' ? 'امتحان جديد' : 'أحدث إضافة');
-                        latestBadge = `<div style="display:inline-block; margin-top:8px; padding: 4px 10px; background: rgba(52, 152, 219, 0.15); border: 1px solid rgba(52, 152, 219, 0.3); border-radius: 6px; color: #3498db; font-size: 0.8rem; font-weight: bold;"><i class="fas fa-star" style="color:var(--royal-gold); margin-left:5px; font-size:0.75rem;"></i>${badgeLabel}: ${lastItem.title || 'بدون عنوان'}</div>`;
+                        latestBadge = `<div class="cd-header-badge"><i class="fas fa-star cd-header-badge-icon"></i>${badgeLabel}: ${lastItem.title || 'بدون عنوان'}</div>`;
                     }
 
                     header.innerHTML = `
-                        <div style="display:flex; align-items:center; gap:16px; flex:1;">
-                            <i class="fas fa-folder-open text-gold" style="font-size:1.4rem;"></i>
-                            <div style="text-align:right; min-width:0;">
-                                <div style="font-size:1.2rem; font-weight:bold; color: var(--accent-cyan); white-space:normal;">${sec.title}</div>
+                        <div class="cd-header-content">
+                            <i class="fas fa-folder-open cd-header-icon"></i>
+                            <div class="cd-header-text-container">
+                                <div class="cd-header-title">${sec.title}</div>
                                 ${scheduleHtml}
-                                <div style="color: rgba(255,255,255,0.5); font-size:0.9rem; margin-top:4px;">${countText}</div>
+                                <div class="cd-header-count">${countText}</div>
                                 ${latestBadge}
                             </div>
                         </div>
-                        <i class="fas fa-chevron-down" style="color: rgba(255,255,255,0.5); transition: transform 0.3s;" id="chevron_${sIdx}"></i>
+                        <i class="fas fa-chevron-down cd-chevron-icon" id="chevron_${sIdx}"></i>
                     `;
 
                     const details = document.createElement('div');
                     // Start expanded if it's the first section
                     const isFirst = sIdx === 0;
-                    details.style.cssText = `max-height: ${isFirst ? '2000px' : '0'}; overflow: hidden; transition: max-height 0.4s ease; background: transparent;`;
+                    details.className = 'cd-accordion-content';
+                    details.style.maxHeight = isFirst ? '2000px' : '0';
                     if (isFirst) {
                         setTimeout(() => { header.querySelector('i.fa-chevron-down').style.transform = 'rotate(180deg)'; }, 50);
                     }
 
                     const detailsInner = document.createElement('div');
-                    detailsInner.style.cssText = 'display:flex; flex-direction:column; gap:8px; padding: 15px;';
+                    detailsInner.className = 'cd-accordion-inner';
 
                     if(!sec.items || sec.items.length === 0) {
-                        detailsInner.innerHTML = '<div style="text-align:center; padding: 30px; background: rgba(0,0,0,0.2); border-radius: 12px; margin-top: 10px;"><i class="fas fa-laptop-code mb-3" style="font-size: 2.5rem; color: var(--accent-cyan); opacity: 0.8;"></i><h3 style="color: var(--royal-gold); margin-bottom: 10px;">المحتوى قيد التجهيز ًںڑ€</h3><p style="color: rgba(255,255,255,0.7); line-height: 1.6; font-size: 0.95rem;">يتم الآن إعداد وتجهيز محتوى هذا القسم بأفضل جودة ليكون متاحاً قريباً، ابقوا متابعين ولا تفوتوا الجديد!</p></div>';
+                        detailsInner.innerHTML = '<div class="cd-empty-state"><i class="fas fa-laptop-code mb-3 cd-empty-icon"></i><h3 class="cd-empty-title">المحتوى قيد التجهيز ًںڑ€</h3><p class="cd-empty-desc">يتم الآن إعداد وتجهيز محتوى هذا القسم بأفضل جودة ليكون متاحاً قريباً، ابقوا متابعين ولا تفوتوا الجديد!</p></div>';
                     } else {
                         let currentLecGroup = null;
 
@@ -1254,7 +1292,7 @@
                                     currentLecGroup = null;
                                 }
                                 const hDiv = document.createElement('div');
-                                hDiv.style.cssText = 'padding: 12px 15px; border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--royal-gold); font-weight: bold; font-size: 1.1rem; display: flex; align-items: center; gap: 10px; margin-bottom: 10px; background: rgba(0,0,0,0.15); border-radius:12px; border-right: 3px solid var(--accent-cyan);';
+                                hDiv.className = 'cd-lesson-header-div';
                                 hDiv.innerHTML = `<i class="fas fa-bookmark"></i> ${item.title}`;
                                 detailsInner.appendChild(hDiv);
                                 return;
@@ -1327,27 +1365,27 @@
 
                             const isCompleted = isItemCompleted(item.id);
                             
-                            let glowStyle = '';
+                            let glowClass = '';
                             let iconColor = 'var(--accent-cyan)';
                             
                             if (isScheduled && !isMasterPreview) {
                                 iconColor = '#f1c40f';
-                                glowStyle = `box-shadow: 0 0 15px rgba(241, 196, 15, 0.2); border-color: rgba(241, 196, 15, 0.4);`;
+                                glowClass = 'glow-scheduled';
                             } else if (isCompleted) {
                                 iconColor = '#2ecc71';
-                                glowStyle = `box-shadow: 0 0 15px rgba(46, 204, 113, 0.2); border-color: rgba(46, 204, 113, 0.4);`;
+                                glowClass = 'glow-completed';
                             } else {
                                 iconColor = '#3498db';
-                                glowStyle = `box-shadow: 0 0 15px rgba(52, 152, 219, 0.2); border-color: rgba(52, 152, 219, 0.4);`;
+                                glowClass = 'glow-available';
                             }
                             
                             if (isLocked && !isScheduled) {
                                 iconColor = 'rgba(255,255,255,0.4)';
-                                glowStyle = ''; // No glow if just permanently locked/not purchased
+                                glowClass = ''; // No glow if just permanently locked/not purchased
                             }
 
                             const row = document.createElement('div');
-                            row.style.cssText = `display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 14px; border-radius:8px; background: rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.05); transition: all 0.3s ease; ${glowStyle} ${isLocked ? 'opacity: 0.6; filter: grayscale(0.8); cursor: not-allowed;' : ''}`;
+                            row.className = `cd-lesson-row ${glowClass} ${isLocked ? 'locked' : ''}`;
 
                             let attemptsText = '';
                             if(isCompleted && item.type !== 'video' && item.type !== 'pdf' && typeof userStr !== 'undefined' && userStr) {
@@ -1358,43 +1396,41 @@
                                     if (results.length > 0) {
                                         const official = results.find(r => r.isOfficial || r.attemptNumber === 1) || results[0];
                                         const officialScore = official.effectivePercent || official.percent;
-                                        attemptsText += `<span style="font-size:0.75rem; color:var(--accent-cyan); margin-right:5px; background:rgba(0,255,255,0.1); padding:2px 6px; border-radius:4px;">(${officialScore}%)</span>`;
+                                        attemptsText += `<span class="cd-lesson-attempt-official">(${officialScore}%)</span>`;
                                         
                                         const otherAttempts = results.filter(r => r !== official);
                                         if (otherAttempts.length > 0) {
                                             const othersText = otherAttempts.map(r => `${r.effectivePercent || r.percent}%`).join(' - ');
-                                            attemptsText += `<span style="font-size:0.65rem; color:rgba(255,255,255,0.3); margin-right:4px;">[ ${othersText} ]</span>`;
+                                            attemptsText += `<span class="cd-lesson-attempt-others">[ ${othersText} ]</span>`;
                                         }
                                     }
                                 } catch(e) {}
                             }
-                            const statusBadge = isCompleted ? `<span style="background:#2ecc71; color:#000; font-size:0.7rem; padding:2px 6px; border-radius:4px; margin-right:8px;">مكتمل</span> ${attemptsText}` : '';
+                            const statusBadge = isCompleted ? `<span class="cd-lesson-status-badge">مكتمل</span> ${attemptsText}` : '';
 
                             row.innerHTML = `
-                                <div style="display:flex; align-items:center; gap:15px; flex:1;">
-                                    <div style="width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center;">
-                                        <i class="fas ${toItemIcon(item.type)}" style="color: ${iconColor}; font-size: 1.2rem; filter: drop-shadow(0 0 5px ${iconColor});"></i>
+                                <div class="cd-lesson-content-wrapper">
+                                    <div class="cd-lesson-icon-wrapper">
+                                        <i class="fas ${toItemIcon(item.type)} cd-lesson-type-icon" style="color: ${iconColor};"></i>
                                     </div>
-                                    <div style="min-width:0;">
-                                        <div style="color: var(--text-primary); font-weight: 700; font-size: 1.05rem;">${item.title} ${statusBadge}</div>
-                                        <div style="font-size:0.8rem; color: rgba(255,255,255,0.5); margin-top: 4px;">
+                                    <div class="cd-lesson-text-wrapper">
+                                        <div class="cd-lesson-title">${item.title} ${statusBadge}</div>
+                                        <div class="cd-lesson-desc">
                                             ${item.type === 'video' ? 'فيديو مسجل' : item.type === 'pdf' ? 'مذكرة' : ['task', 'homework', 'واجب'].includes(item.type) ? 'واجب' : ['training', 'تدريب'].includes(item.type) ? 'تدريب' : 'امتحان'}
-                                            ${item.deadlineDate ? ` <span style="color: #e74c3c; margin-right: 10px;"><i class="fas fa-clock"></i> الديدلاين: ${new Date(item.deadlineDate).toLocaleDateString('ar-EG')}</span>` : ''}
-                                            ${lockReason ? ` <br><span style="color: ${isScheduled ? '#f1c40f' : 'var(--accent-orange)'};"><i class="fas fa-info-circle"></i> ${lockReason}</span>` : ''}
+                                            ${item.deadlineDate ? ` <span class="cd-lesson-deadline"><i class="fas fa-clock"></i> الديدلاين: ${new Date(item.deadlineDate).toLocaleDateString('ar-EG')}</span>` : ''}
+                                            ${lockReason ? ` <br><span class="${isScheduled ? 'cd-lesson-lock-reason-scheduled' : 'cd-lesson-lock-reason'}"><i class="fas fa-info-circle"></i> ${lockReason}</span>` : ''}
                                         </div>
                                     </div>
                                 </div>
                             `;
 
                             const actionBtn = document.createElement('a');
-                            actionBtn.className = 'btn btn-outline';
-                            actionBtn.style.cssText = 'padding: 6px 12px; border-radius: 6px; font-size: 0.85rem; white-space: nowrap; text-decoration: none; display: inline-block; text-align: center;';
+                            actionBtn.className = 'btn btn-outline cd-lesson-action-btn';
                             if (item.id) actionBtn.dataset.itemId = item.id;
                             
                             if (isLocked) {
                                 actionBtn.innerHTML = '<i class="fas fa-lock"></i> مقفول';
-                                actionBtn.style.borderColor = isScheduled ? '#f1c40f' : 'rgba(255,255,255,0.2)';
-                                actionBtn.style.color = isScheduled ? '#f1c40f' : 'rgba(255,255,255,0.5)';
+                                if (isScheduled) { actionBtn.classList.add('is-locked-scheduled'); } else { actionBtn.classList.add('is-locked'); }
                                 actionBtn.href = "#";
                                 actionBtn.addEventListener('click', (e) => { e.preventDefault(); openCourseResource(item, isLocked, lockReason); });
                             } else {
@@ -1414,12 +1450,12 @@
                                         actionBtn.innerHTML = '<i class="fas fa-download"></i> تحميل الملف';
                                     }
                                     
-                                    if (isCompleted && item.type !== 'pdf') {
-                                        actionBtn.style.borderColor = '#2ecc71';
-                                        actionBtn.style.color = '#2ecc71';
-                                    } else if (item.type !== 'pdf') {
-                                        actionBtn.style.borderColor = 'var(--accent-cyan)';
-                                        actionBtn.style.color = 'var(--accent-cyan)';
+                                    if (item.type === 'pdf') {
+                                        actionBtn.classList.add('is-pdf');
+                                    } else if (isCompleted) {
+                                        actionBtn.classList.add('is-completed');
+                                    } else {
+                                        actionBtn.classList.add('is-active');
                                     }
                                 } else {
                                     if (isFreeCourse) {
@@ -1427,8 +1463,7 @@
                                     } else {
                                         actionBtn.textContent = 'اشترك لفتح';
                                     }
-                                    actionBtn.style.borderColor = 'var(--accent-orange)';
-                                    actionBtn.style.color = 'var(--accent-orange)';
+                                    actionBtn.classList.add('is-not-enrolled');
                                     actionBtn.href = "#";
                                 }
                             }
@@ -1439,20 +1474,17 @@
                             if (item._parentLecId || item.attachedToLectureId) {
                                 if (!currentLecGroup) {
                                     currentLecGroup = document.createElement('div');
-                                    currentLecGroup.style.cssText = 'background: rgba(0,0,0,0.1); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 4px; margin-bottom: 10px; display: flex; flex-direction: column; gap: 2px; max-height: 300px; overflow-y: auto;';
+                                    currentLecGroup.className = 'cd-lesson-group sub-group';
                                     detailsInner.appendChild(currentLecGroup);
                                 }
-                                row.style.margin = "0 8px 0 0";
-                                row.style.padding = "8px 12px";
-                                row.style.borderRight = "2px dashed rgba(0,255,255,0.4)";
+                                row.classList.add('cd-sub-lesson');
                                 currentLecGroup.appendChild(row);
                             } else {
                                 if (currentLecGroup) {
                                     detailsInner.appendChild(currentLecGroup);
                                 }
-                                row.style.padding = "10px 14px";
                                 currentLecGroup = document.createElement('div');
-                                currentLecGroup.style.cssText = 'background: rgba(0,0,0,0.15); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 4px; margin-bottom: 10px; display: flex; flex-direction: column; gap: 2px; max-height: 350px; overflow-y: auto;';
+                                currentLecGroup.className = 'cd-lesson-group';
                                 currentLecGroup.appendChild(row);
                             }
                         });
@@ -1487,12 +1519,12 @@
             (function(){
                 const examModalHtml = `
                 <div class="modal-overlay" id="examWarningModal" style="z-index: 10001;">
-                  <div class="glass-panel modal-content" style="padding: 30px; max-width: 500px; text-align: center;">
-                    <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #f39c12; margin-bottom: 20px;"></i>
-                    <h2 id="ewmTitle" style="margin-bottom: 15px; color: #f39c12;">تنبيه هام قبل بدء الامتحان</h2>
-                    <div style="text-align: right; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; margin-bottom: 20px; font-size: 0.95rem; line-height: 1.6;" id="ewmAttempts">
+                  <div class="glass-panel modal-content cd-exam-warning-modal">
+                    <i class="fas fa-exclamation-triangle cd-exam-warning-icon"></i>
+                    <h2 id="ewmTitle" class="cd-exam-warning-title">تنبيه هام قبل بدء الامتحان</h2>
+                    <div id="ewmAttempts" class="cd-exam-warning-attempts">
                     </div>
-                    <div style="display: flex; gap: 10px; justify-content: center;">
+                    <div class="cd-exam-warning-actions">
                         <button class="btn btn-outline" id="ewmCancelBtn">رجوع</button>
                         <button class="btn btn-gold" id="ewmStartBtn">فاهم وموافق — ابدأ</button>
                     </div>
@@ -1500,15 +1532,15 @@
                 </div>
 
                 <div class="modal-overlay" id="examModal">
-                  <div class="glass-panel modal-content" style="padding: 20px; max-width: 800px; position:relative;">
+                  <div class="glass-panel modal-content cd-exam-main-modal">
                     <button class="close-modal" id="examModalCloseBtn"><i class="fas fa-times"></i></button>
-                    <h2 id="examModalTitle" style="margin-bottom:10px;">امتحان</h2>
-                    <div id="examQuestionsContainer" style="display:block; max-height:50vh; overflow:auto; gap:10px; margin-bottom:12px;"></div>
-                    <div style="display:flex; gap:10px; justify-content:flex-end;">
+                    <h2 id="examModalTitle" class="cd-exam-main-title">امتحان</h2>
+                    <div id="examQuestionsContainer" class="cd-exam-q-container"></div>
+                    <div class="cd-exam-actions">
                       <button class="btn btn-outline" id="examCancelBtn">إلغاء</button>
                       <button class="btn btn-green" id="submitExamBtn">تسليم الإجابات</button>
                     </div>
-                    <div id="examResultContainer" style="margin-top:12px; display:none;"></div>
+                    <div id="examResultContainer" class="cd-exam-result"></div>
                   </div>
                 </div>`;
                 const wrapper = document.createElement('div'); wrapper.innerHTML = examModalHtml;
@@ -1586,7 +1618,7 @@
 
                     const ewmAttempts = document.getElementById('ewmAttempts');
                     if(ewmAttempts) {
-                        let warningsHtml = `<p style="margin-bottom: 10px;">⚠️ لديك <strong>${3 - prevAttempts.length}</strong> محاولات متبقية. <br><small style="color: #f39c12;">(المحاولة الأولى فقط هي المحسوبة في التقييم، والمحاولات الإضافية هي لتحسين درجتك وتدريبك ولكنها غير محسوبة رسمياً).</small></p>`;
+                        let warningsHtml = `<p class="cd-mb-10">⚠️ لديك <strong>${3 - prevAttempts.length}</strong> محاولات متبقية. <br><small style="color: #f39c12;">(المحاولة الأولى فقط هي المحسوبة في التقييم، والمحاولات الإضافية هي لتحسين درجتك وتدريبك ولكنها غير محسوبة رسمياً).</small></p>`;
                         
                         let durationMins = parseInt(exam.duration) || 0;
                         if (exam.strictMode && durationMins === 0) durationMins = 5;
@@ -1603,9 +1635,9 @@
                         }
 
                         if (durationMins > 0) {
-                            warningsHtml += `<p style="margin-bottom: 0;">⏱️ مدة الامتحان <strong>${durationMins} دقائق</strong>. سيستمر العداد حتى لو انقطع الإنترنت.</p>`;
+                            warningsHtml += `<p class="cd-mb-0">⏱️ مدة الامتحان <strong>${durationMins} دقائق</strong>. سيستمر العداد حتى لو انقطع الإنترنت.</p>`;
                         } else {
-                            warningsHtml += `<p style="margin-bottom: 0;">⏱️ الامتحان بدون وقت محدد.</p>`;
+                            warningsHtml += `<p class="cd-mb-0">⏱️ الامتحان بدون وقت محدد.</p>`;
                         }
                         
                         ewmAttempts.innerHTML = warningsHtml;
@@ -1660,16 +1692,16 @@
                     
                     questions.forEach((q, idx) => {
                         const qDiv = document.createElement('div');
-                        qDiv.style.cssText = 'background: rgba(0,0,0,0.06); padding:14px; margin-bottom:10px; border-radius:10px; border:1px solid rgba(255,255,255,0.08);';
+                        qDiv.className = 'cd-exam-question';
                         let inputHtml = '';
                         if(q.type === 'choose' || q.asMcq){
-                            inputHtml = '<div>' + ['a','b','c','d'].map(k => '<label style="display:block;margin-bottom:8px;cursor:pointer;"><input type=radio name=qa_' + idx + ' value="' + k + '"/> ' + (q.options && q.options[k] ? q.options[k] : k) + '</label>').join('') + '</div>';
+                            inputHtml = '<div>' + ['a','b','c','d'].map(k => '<label class="cd-exam-radio-label"><input type=radio name=qa_' + idx + ' value="' + k + '"/> ' + (q.options && q.options[k] ? q.options[k] : k) + '</label>').join('') + '</div>';
                         } else if(q.type === 'tf'){
-                            inputHtml = '<label style="cursor:pointer;"><input type=radio name=qa_' + idx + ' value="صح"/> صح</label><label style="margin-right:15px;cursor:pointer;"><input type=radio name=qa_' + idx + ' value="خطأ"/> خطأ</label>';
+                            inputHtml = '<label class="cd-exam-radio-label"><input type=radio name=qa_' + idx + ' value="صح"/> صح</label><label class="cd-exam-radio-label cd-exam-tf-label"><input type=radio name=qa_' + idx + ' value="خطأ"/> خطأ</label>';
                         } else {
-                            inputHtml = '<textarea name=qa_' + idx + ' rows=3 style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);color:#fff;border-radius:6px;padding:8px;" placeholder="اكتب إجابتك هنا"></textarea>';
+                            inputHtml = '<textarea name=qa_' + idx + ' rows=3 class="cd-exam-textarea" placeholder="اكتب إجابتك هنا"></textarea>';
                         }
-                        qDiv.innerHTML = '<p style="margin:0 0 10px 0;font-weight:600;"><span style="color:var(--royal-gold);">س' + (idx+1) + ':</span> <span style="font-size:0.8rem; color:#f39c12; margin-right:10px;">(' + (q.points || 1) + ' درجة)</span><br>' + q.text + '</p>' + inputHtml;
+                        qDiv.innerHTML = '<p class="cd-exam-question-title"><span class="cd-exam-question-num">س' + (idx+1) + ':</span> <span class="cd-exam-question-pts">(' + (q.points || 1) + ' درجة)</span><br>' + q.text + '</p>' + inputHtml;
                         container.appendChild(qDiv);
                     });
                     
@@ -1746,7 +1778,7 @@
                         });
 
                         if (!autoSubmit) {
-                            let summaryHtml = '<div style="text-align:right;"><strong>ملخص إجاباتك قبل التسليم النهائي:</strong><ul style="margin-top:10px;">';
+                            let summaryHtml = '<div class="cd-text-right"><strong>ملخص إجاباتك قبل التسليم النهائي:</strong><ul class="cd-mt-10">';
                             answers.forEach((ans, i) => {
                                 let ansText = ans.answer.trim() ? ans.answer : '<span style="color:#e74c3c">لم تتم الإجابة</span>';
                                 summaryHtml += `<li>س${i+1}: ${ansText}</li>`;
@@ -1866,22 +1898,22 @@
                         }
 
                         resultBox.style.display = 'block';
-                        let rHtml = '<div style="background:rgba(255,255,255,0.04);padding:20px;border-radius:14px;border:1px solid rgba(255,255,255,0.1);">';
-                        rHtml += '<div style="font-size:2.5rem;margin-bottom:6px;">' + encIcon + '</div>';
+                        let rHtml = '<div class="cd-exam-result-box">';
+                        rHtml += '<div class="cd-exam-score-val">' + encIcon + '</div>';
                         rHtml += '<div style="font-size:1.3rem;font-weight:bold;color:' + encColor + ';margin-bottom:10px;">' + encouragement + '</div>';
                         
-                        let scoreDisp = '<div style="font-size:1.1rem;"><strong>الدرجة الأساسية: ' + percent + '%</strong>';
+                        let scoreDisp = '<div class="cd-exam-score-label"><strong>الدرجة الأساسية: ' + percent + '%</strong>';
                         if (penaltyApplied) {
-                            scoreDisp += ' <br/><span style="color:#e74c3c; font-size: 1.2rem; font-weight: bold;">(الدرجة النهائية بعد الخصم: ' + effectivePercent + '%)</span>';
+                            scoreDisp += ' <br/><span class="cd-text-red-bold">(الدرجة النهائية بعد الخصم: ' + effectivePercent + '%)</span>';
                         }
                         scoreDisp += '</div>';
                         rHtml += scoreDisp;
                         
                         rHtml += '<div style="font-size:1rem;color:#f39c12;margin-top:5px;"><strong>مجموع النقاط: ' + (Math.round(earnedPoints * 100) / 100) + ' من ' + totalPoints + '</strong></div>';
-                        if(isStrictViolation) rHtml += '<div style="margin-top:10px;padding:10px;background:rgba(230,126,34,0.15);border-radius:8px;color:#e67e22;font-size:0.9rem;">⚠️ <strong>تم تسليم الامتحان وتسجيل درجاتك الحالية بسبب محاولة الخروج أو مخالفة القواعد.</strong></div>';
-                        else if(autoSubmit) rHtml += '<div style="margin-top:8px;color:#e74c3c;font-size:0.9rem;">⏰ تم التسليم التلقائي بعد انتهاء الوقت.</div>';
-                        if(penaltyApplied) rHtml += '<div style="margin-top:10px;padding:10px;background:rgba(231,76,60,0.15);border-radius:8px;color:#e74c3c;font-size:0.9rem;">⚠️ <strong>تم خصم 20% من درجتك بسبب التأخر في التسليم بعد الموعد النهائي.</strong></div>';
-                        rHtml += '<hr style="border-color:rgba(255,255,255,0.08);margin:14px 0;"><div id="_examResDetails"></div></div>';
+                        if(isStrictViolation) rHtml += '<div class="cd-exam-warning">⚠️ <strong>تم تسليم الامتحان وتسجيل درجاتك الحالية بسبب محاولة الخروج أو مخالفة القواعد.</strong></div>';
+                        else if(autoSubmit) rHtml += '<div class="cd-exam-error-text">⏰ تم التسليم التلقائي بعد انتهاء الوقت.</div>';
+                        if(penaltyApplied) rHtml += '<div class="exam-result-penalty">⚠️ <strong>تم خصم 20% من درجتك بسبب التأخر في التسليم بعد الموعد النهائي.</strong></div>';
+                        rHtml += '<hr class="cd-divider"><div id="_examResDetails"></div></div>';
                         resultBox.innerHTML = rHtml;
 
                         const detEl = document.getElementById('_examResDetails');
@@ -1912,10 +1944,11 @@
                             let isCorrect = (r.score >= 0.5);
                             let correctAnsHtml = '';
                             if (!isCorrect && displayCorrect) {
-                                correctAnsHtml = `<br/><span style="color:rgba(255,255,255,0.6);">الإجابة الصحيحة: </span><span style="color:#2ecc71;">${displayCorrect}</span>`;
+                                correctAnsHtml = `<br/><span class="cd-text-semi-muted">الإجابة الصحيحة: </span><span class="cd-text-green">${displayCorrect}</span>`;
                             }
                             
-                            p.innerHTML = '<strong>س' + (i+1) + ':</strong> ' + r.question + ' <span style="color:#f39c12;">(' + (Math.round((r.pointsEarned||0)*100)/100) + '/' + (r.totalPoints||1) + ' نقطة)</span><br/><em style="color:rgba(255,255,255,0.6);">إجابتك:</em> <span style="color:' + (isCorrect ? '#2ecc71' : '#e74c3c') + ';">' + displayStudent + '</span>' + correctAnsHtml + '<br/><em style="color:rgba(255,255,255,0.6);">التعليق:</em> ' + r.feedback;
+                            p.className = 'exam-question-card';
+                            p.innerHTML = '<strong>س' + (i+1) + ':</strong> ' + r.question + ' <span style="color:#f39c12;">(' + (Math.round((r.pointsEarned||0)*100)/100) + '/' + (r.totalPoints||1) + ' نقطة)</span><br/><em class="cd-text-semi-muted">إجابتك:</em> <span style="color:' + (isCorrect ? '#2ecc71' : '#e74c3c') + ';">' + displayStudent + '</span>' + correctAnsHtml + '<br/><em class="cd-text-semi-muted">التعليق:</em> ' + r.feedback;
                             detEl.appendChild(p);
                         });
 
@@ -1947,11 +1980,18 @@
                             dbRec.examResults.push({ courseId, examId: exam.id, examTitle: exam.title||'', percent, earnedPoints, totalPoints, effectivePercent, penalized: penaltyApplied, attemptNumber: aNum, isOfficial: aNum===1, autoSubmit:!!autoSubmit, ts:Date.now(), details:results, isTraining: isTraining, isHomework: isH, needsReview: !!reviewReason, reviewReason: reviewReason });
                             
                             if(window.FirebaseService && typeof window.FirebaseService.updateStudentData === 'function') {
-                                window.FirebaseService.updateStudentData(student.phone, { examResults: dbRec.examResults }).then(() => {
-                                    localStorage.setItem(dbKey, JSON.stringify(dbRec));
-                                });
-                            } else {
+                                                                // Save locally FIRST (Synchronously) to avoid losing actual scores
                                 localStorage.setItem(dbKey, JSON.stringify(dbRec));
+                                
+                                window.FirebaseService.updateStudentData(student.phone, { examResults: dbRec.examResults }).catch((e) => {
+                                    console.error('Failed to sync exam results to Firebase:', e);
+                                    if(window.showToast) {
+                                        window.showToast('نتيجتك محفوظة عندك، بس لسه مبعتتش للسيرفر (لضعف النت)، هنحاول تاني تلقائياً.', 'warning');
+                                    }
+                                    let unsynced = JSON.parse(localStorage.getItem('unsyncedExamResults') || '[]');
+                                    unsynced.push({ phone: student.phone, results: dbRec.examResults, ts: Date.now() });
+                                    localStorage.setItem('unsyncedExamResults', JSON.stringify(unsynced));
+                                });
                             }
                             if(aNum > 1) {
                                 const ntc = document.createElement('div');
@@ -2022,7 +2062,7 @@
                             timerEl.style.color = urg ? '#e74c3c' : 'var(--royal-gold)';
                             timerEl.style.borderColor = urg ? 'rgba(231,76,60,0.4)' : 'rgba(212,166,79,0.2)';
                             timerEl.innerHTML = '⏱️ الوقت المتبقي: <span>' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0') + '</span>';
-                            if(secsLeft <= 0) { _stopTimer(); timerEl.innerHTML = '⏰ <span style="color:#e74c3c;">انتهى الوقت! جاري التسليم التلقائي لما تم إجابته...</span>'; setTimeout(() => doSubmit(true), 500); }
+                            if(secsLeft <= 0) { _stopTimer(); timerEl.innerHTML = '⏰ <span class="cd-text-red">انتهى الوقت! جاري التسليم التلقائي لما تم إجابته...</span>'; setTimeout(() => doSubmit(true), 500); }
                         }
                         updTm(); _examTimerInterval = setInterval(updTm, 1000);
                     }
@@ -2279,16 +2319,16 @@ const warnOrFailExam = (reason) => {
 
             window.showPendingMessageDetails = function(courseId) {
                 let msgHTML = `
-                    <div style="text-align: center;">
-                        <i class="fas fa-clock" style="font-size: 3rem; color: var(--accent-orange); margin-bottom: 15px;"></i>
-                        <h3 style="color: var(--text-primary); margin-bottom: 10px;">طلب الدفع تحت المراجعة</h3>
-                        <p style="color: rgba(255,255,255,0.8); margin-bottom: 20px;">سيتم تفعيل الكورس فور التأكد من التحويل</p>
-                        <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+                    <div class="cd-text-center">
+                        <i class="fas fa-clock" class="cd-error-icon-big"></i>
+                        <h3 class="cd-error-title">طلب الدفع تحت المراجعة</h3>
+                        <p class="cd-error-subtitle">سيتم تفعيل الكورس فور التأكد من التحويل</p>
+                        <div class="cd-error-details-box">
                             <p style="font-size: 0.9rem; margin-bottom: 10px;">إذا قمت بالتحويل بالفعل ولم يتم التفعيل بعد، تواصل عبر الرقم:<br><strong style="font-size: 1.2rem; color: var(--accent-cyan);">01023675235</strong></p>
                         </div>
                         <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
                             <a href="https://wa.me/201023675235" target="_blank" class="btn btn-green" style="background-color: #25D366; border-color: #25D366; flex: 1;"><i class="fab fa-whatsapp"></i> واتساب</a>
-                            <a href="tel:01023675235" class="btn btn-outline" style="flex: 1;"><i class="fas fa-phone"></i> اتصال</a>
+                            <a href="tel:01023675235" class="btn btn-outline" class="cd-flex-1"><i class="fas fa-phone"></i> اتصال</a>
                             <button class="btn btn-gold" onclick="document.getElementById('pendingMsgModal').classList.remove('active'); window.openPaymentModalDetails('${courseId}')" style="flex: 1 1 100%;"><i class="fas fa-redo"></i> إعادة محاولة الدفع</button>
                         </div>
                     </div>
@@ -2313,6 +2353,10 @@ const warnOrFailExam = (reason) => {
     </script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            const userStr = sessionStorage.getItem('currentStudent') || localStorage.getItem('currentStudent');
+            if (userStr && window.FirebaseService && window.FirebaseService.setupStudentPaymentListener) {
+                window.FirebaseService.setupStudentPaymentListener(JSON.parse(userStr).phone);
+            }
             const forgotLink = document.getElementById('forgotPasswordLink');
             const loginPhone = document.getElementById('loginPhone');
             const fpStudent = document.getElementById('fpStudentPhone');
@@ -2344,9 +2388,10 @@ const warnOrFailExam = (reason) => {
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
-    <script src="js/firebase-config.js?v=10"></script>
-    <script src="js/firebase-service.js?v=10"></script>
-    <script src="js/profile-guard.js?v=10"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging-compat.js"></script>
+    <script src="js/firebase-config.js?v=11"></script>
+    <script src="js/firebase-service.js?v=11"></script>
+    <script src="js/profile-guard.js?v=11"></script>
 <script>
 window.injectVideoWatermark = function(container) {
     try {
@@ -2487,8 +2532,8 @@ setInterval(() => {
             }
         });
     </script>
-    <script src="js/flow-system.js?v=1"></script>
-    <script src="js/mobile.js?v=3"></script>
+    <script src="js/flow-system.js?v=11"></script>
+    <script src="js/mobile.js?v=11"></script>
 
     <script>
         if ('serviceWorker' in navigator) {
@@ -2499,6 +2544,11 @@ setInterval(() => {
     </script>
 </body>
 </html>
+
+
+
+
+
 
 
 

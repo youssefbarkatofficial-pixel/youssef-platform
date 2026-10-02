@@ -9,7 +9,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>لوحة الإدارة | يوسف بركات</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="css/style.css?v=1785347365011">
+    <link rel="stylesheet" href="css/style.css?v=11">
     <link rel="stylesheet" href="css/dashboard.css">
     <style>
         @media (max-width: 768px) {
@@ -20,15 +20,15 @@
             #closeOwnerWelcome { position: absolute; top: 15px; left: 15px; } /* left because RTL */
         }
     </style>
-    <link rel="stylesheet" href="css/mobile.css?v=3">
-    <link rel="icon" type="image/png" href="images/logo.png?v=6">
+    <link rel="stylesheet" href="css/mobile.css?v=11">
+    <link rel="icon" type="image/png" href="images/logo.png?v=11">
 </head>
 <body>
     <div class="bg-effects"></div>
 
     <header class="navbar glass-panel" style="border-bottom-color: var(--royal-gold);">
         <a href="index.html" class="nav-brand">
-            <div class="logo-circle" style="color: #fff; background: var(--royal-gold);"><img src="images/logo.png?v=1786475931154" alt="Logo" style="width:100%; height:100%; object-fit:cover; border-radius:50%;"></div>
+            <div class="logo-circle" style="color: #fff; background: var(--royal-gold);"><img src="images/logo.png?v=11" alt="Logo" style="width:100%; height:100%; object-fit:cover; border-radius:50%;"></div>
             <span class="nav-brand-text text-gold"><span class="desktop-text">لوحة الإدارة - يوسف بركات</span><span class="mobile-only-text" style="display: none;">لوحة الإدارة</span></span>
         </a>
         <div class="nav-actions">
@@ -244,6 +244,20 @@
                         <input type="checkbox" id="adminEnableFawry" style="width: auto;">
                         <label for="adminEnableFawry" style="color: var(--text-primary); margin: 0;">تفعيل الدفع عبر فوري</label>
                     </div>
+                </div>
+            </div>
+
+            <!-- Database Migration Section -->
+            <div class="glass-panel dash-panel" style="margin-top: 30px;">
+                <div class="panel-header">
+                    <h2 class="panel-title" style="color: var(--royal-gold);"><i class="fas fa-database mr-2"></i> صيانة قاعدة البيانات (Migration)</h2>
+                </div>
+                <div style="margin-top: 10px;">
+                    <p style="color: var(--text-secondary); margin-bottom: 15px; font-size: 0.95rem;">
+                        استخدم هذه الأداة لمرة واحدة لنقل الصور المحلية المخزنة في جهازك إلى التخزين السحابي (Firebase Storage)، مما يحل مشكلة اختفاء صور الكورسات عند الطلاب وعلى الأجهزة الأخرى.
+                    </p>
+                    <button class="btn btn-gold" id="btnMigrateImages" style="padding: 10px 20px;"><i class="fas fa-cloud-upload-alt mr-2"></i> ترحيل صور الكورسات لـ Storage</button>
+                    <div id="migrationLog" style="margin-top: 15px; font-family: monospace; font-size: 0.85rem; color: #a8b2d1; white-space: pre-wrap; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 5px; display: none; max-height: 200px; overflow-y: auto;"></div>
                 </div>
             </div>
 
@@ -790,9 +804,9 @@
                     
                     html += `
                         <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-                            <td>${userName}</td>
-                            <td style="direction:ltr; text-align:right;">${userPhone}</td>
-                            <td style="max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${ticket.message.replace(/"/g, '&quot;')}">${ticket.message}</td>
+                            <td>${escHtml(userName)}</td>
+                            <td style="direction:ltr; text-align:right;">${escHtml(userPhone)}</td>
+                            <td style="max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${ticket.message.replace(/"/g, '&quot;')}">${escHtml(ticket.message)}</td>
                             <td><span style="font-size:0.85rem; color:var(--text-secondary);">${date}</span></td>
                             <td><span style="background:${badgeColor}; color:#fff; padding:3px 8px; border-radius:12px; font-size:0.8rem;">${statusTxt}</span></td>
                         </tr>
@@ -921,15 +935,15 @@
                         row.innerHTML = `
                             <td>
                                 <div style="display: flex; align-items: center; gap: 10px;">
-                                    <img loading="lazy" src="${uPicSrc}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid var(--royal-gold); background: #071326; padding: 4px;">
-                                    <strong>${req.userName || 'طالب'}</strong>
+                                    <img loading="lazy" src="${safeSrc(uPicSrc)}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid var(--royal-gold); background: #071326; padding: 4px;">
+                                    <strong>${escHtml(req.userName || 'طالب')}</strong>
                                 </div>
                             </td>
-                            <td dir="ltr" style="text-align: right;">${req.userId || 'غير معروف'}</td>
-                            <td>${courseName}${courseGradeHtml}</td>
+                            <td dir="ltr" style="text-align: right;">${escHtml(req.userId || 'غير معروف')}</td>
+                            <td>${escHtml(courseName)}${courseGradeHtml}</td>
                             <td>${price} ج.م</td>
                             <td>${date}</td>
-                            <td>${imgSrc ? `<div style="display:flex;flex-direction:column;align-items:center;gap:6px;"><a href="${imgSrc}" target="_blank"><img loading="lazy" src="${imgSrc}" style="width:70px;height:70px;object-fit:cover;border-radius:8px;cursor:pointer;border:2px solid var(--royal-gold);box-shadow:0 0 10px rgba(212,166,79,0.3);" onerror="this.style.display='none'"></a><button class="btn btn-outline" style="padding:4px 8px;font-size:0.75rem;" onclick='window.downloadProof(${JSON.stringify(imgSrc)}, "proof_${req.id}.png")'><i class='fas fa-download'></i> تحميل</button></div>` : `<button class="btn btn-outline" style="padding:5px 10px;font-size:0.78rem;border-color:var(--royal-gold);color:var(--royal-gold);" onclick="window.fetchProofImageAndShow('${req.id}', this)"><i class="fas fa-image mr-1"></i> عرض الصورة</button>`}</td>
+                            <td>${imgSrc ? `<div style="display:flex;flex-direction:column;align-items:center;gap:6px;"><a href="${safeSrc(imgSrc)}" target="_blank"><img loading="lazy" src="${safeSrc(imgSrc)}" style="width:70px;height:70px;object-fit:cover;border-radius:8px;cursor:pointer;border:2px solid var(--royal-gold);box-shadow:0 0 10px rgba(212,166,79,0.3);" onerror="this.style.display='none'"></a><button class="btn btn-outline" style="padding:4px 8px;font-size:0.75rem;" onclick='window.downloadProof(${JSON.stringify(imgSrc)}, "proof_${req.id}.png")'><i class='fas fa-download'></i> تحميل</button></div>` : `<button class="btn btn-outline" style="padding:5px 10px;font-size:0.78rem;border-color:var(--royal-gold);color:var(--royal-gold);" onclick="window.fetchProofImageAndShow('${req.id}', this)"><i class="fas fa-image mr-1"></i> عرض الصورة</button>`}</td>
                             <td>${statusBadge}</td>
                             <td style="display: flex; flex-direction: column; gap: 5px;">${actionButtons}</td>
                         `;
@@ -971,8 +985,8 @@
                     if (imgSrc) {
                         const cell = btn.closest('td');
                         cell.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
-                            <a href="${imgSrc}" target="_blank">
-                                <img loading="lazy" src="${imgSrc}" style="width:70px;height:70px;object-fit:cover;border-radius:8px;cursor:pointer;border:2px solid var(--royal-gold);box-shadow:0 0 10px rgba(212,166,79,0.3);">
+                            <a href="${safeSrc(imgSrc)}" target="_blank">
+                                <img loading="lazy" src="${safeSrc(imgSrc)}" style="width:70px;height:70px;object-fit:cover;border-radius:8px;cursor:pointer;border:2px solid var(--royal-gold);box-shadow:0 0 10px rgba(212,166,79,0.3);">
                             </a>
                             <button class="btn btn-outline" style="padding:4px 8px;font-size:0.75rem;" onclick='window.downloadProof(${JSON.stringify(imgSrc)}, "proof_${reqId}.png")'><i class='fas fa-download'></i> تحميل</button>
                         </div>`;
@@ -1263,10 +1277,10 @@
                     card.style.borderRadius = '10px';
                     card.innerHTML = `
                         <div style="width: 100%; aspect-ratio: 16/9; overflow: hidden; border-radius: 8px; margin-bottom: 15px; background: var(--secondary-navy, #0a1e3a);">
-                            <img loading="lazy" src="${course.image}" alt="Course" style="width: 100%; height: 100%; object-fit: cover; object-position: center; display: block;">
+                            <img loading="lazy" src="${safeSrc(course.image)}" alt="Course" style="width: 100%; height: 100%; object-fit: cover; object-position: center; display: block;">
                         </div>
                         <span class="badge" style="background: rgba(212, 166, 79, 0.2); color: var(--royal-gold); padding: 5px 10px; border-radius: 5px; font-size: 0.8rem;">${course.grade}</span>
-                        <h4 style="color: var(--text-primary); margin: 10px 0;">${course.title}</h4>
+                        <h4 style="color: var(--text-primary); margin: 10px 0;">${escHtml(course.title)}</h4>
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; border-top: 1px solid var(--border-color); padding-top: 10px;">
                             <span style="font-size: 1rem; color: var(--royal-gold); font-weight: bold;">${course.price} ج.م</span>
                             <div style="display: flex; gap: 10px;">
@@ -1280,6 +1294,58 @@
             }
 
             document.getElementById('adminGradeFilter').addEventListener('change', renderCourses);
+
+            // Handle Migration of Images
+            document.getElementById('btnMigrateImages')?.addEventListener('click', async () => {
+                if(!confirm('هل أنت متأكد من بدء ترحيل الصور؟ سيتم سحب الصور من متصفحك الحالي ورفعها إلى السحابة.')) return;
+                
+                const btn = document.getElementById('btnMigrateImages');
+                const log = document.getElementById('migrationLog');
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> جاري الترحيل...';
+                log.style.display = 'block';
+                log.innerHTML = 'بدء عملية الترحيل...\n';
+                
+                try {
+                    const courses = await window.FirebaseService.getCourses();
+                    let successCount = 0;
+                    let missingCount = 0;
+                    let errorCount = 0;
+                    
+                    for (const course of courses) {
+                        if (course.image && course.image.startsWith('__local__')) {
+                            log.innerHTML += `\n- الكورس [${escHtml(course.title || course.id)}] يحتوي على صورة محلية... `;
+                            const localBase64 = localStorage.getItem('img_' + course.id);
+                            if (localBase64 && localBase64.startsWith('data:')) {
+                                try {
+                                    log.innerHTML += `جاري الرفع... `;
+                                    const newUrl = await window.FirebaseService.uploadCourseImage(course.id, localBase64);
+                                    course.image = newUrl;
+                                    await window.FirebaseService.saveCourse(course, { replaceContents: true });
+                                    localStorage.removeItem('img_' + course.id);
+                                    log.innerHTML += `<span style="color:#2ecc71">تم بنجاح ✓</span>`;
+                                    successCount++;
+                                } catch(e) {
+                                    log.innerHTML += `<span style="color:#e74c3c">فشل الرفع ✗</span>`;
+                                    errorCount++;
+                                }
+                            } else {
+                                log.innerHTML += `<span style="color:#f1c40f">الصورة مفقودة من هذا الجهاز ⚠️ (يرجى رفع صورة جديدة يدوياً)</span>`;
+                                missingCount++;
+                            }
+                        }
+                    }
+                    
+                    log.innerHTML += `\n\n=== اكتمل الترحيل ===\n`;
+                    log.innerHTML += `نجاح: ${successCount}\nمفقود: ${missingCount}\nفشل: ${errorCount}`;
+                    if(window.showToast) window.showToast('اكتملت عملية الترحيل', 'success');
+                } catch(e) {
+                    log.innerHTML += `\n<span style="color:#e74c3c">خطأ عام: ${escHtml(e.message)}</span>`;
+                }
+                
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-cloud-upload-alt mr-2"></i> ترحيل صور الكورسات لـ Storage';
+            });
 
             // Handle Course Image Upload
             const editCourseImageFile = document.getElementById('editCourseImageFile');
@@ -1452,11 +1518,11 @@
             renderCourses();
         });
     </script>
-    <script src="js/admin-auth.js?v=10"></script>
-    <script src="js/storage-service.js?v=10"></script>
-    <script src="js/main.js?v=10"></script>
-    <script src="js/bousala-intents.js?v=1.0"></script><script src="js/support-chat.js?v=10"></script>
-    <script src="js/dashboard.js?v=10"></script>
+    <script src="js/admin-auth.js?v=11"></script>
+    <script src="js/storage-service.js?v=11"></script>
+    <script src="js/main.js?v=11"></script>
+    <script src="js/bousala-intents.js?v=11.0"></script><script src="js/support-chat.js?v=11"></script>
+    <script src="js/dashboard.js?v=11"></script>
     
     <!-- Game Widget Modal (صراع البوصلة) -->
     <div id="gameWidgetModal" class="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 999999999; padding: 0; margin: 0; overflow: hidden;">
@@ -1523,9 +1589,10 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
-    <script src="js/firebase-config.js?v=10"></script>
-    <script src="js/firebase-service.js?v=10"></script>
-    <script src="js/profile-guard.js?v=10"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging-compat.js"></script>
+    <script src="js/firebase-config.js?v=11"></script>
+    <script src="js/firebase-service.js?v=11"></script>
+    <script src="js/profile-guard.js?v=11"></script>
     <!-- Notification Auto-Fix Script v2 -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -1620,7 +1687,7 @@
             }, 6000);
         });
     </script>
-    <script src="js/bousala-teach.js?v=10"></script>
+    <script src="js/bousala-teach.js?v=11"></script>
     <script>
     // ===== لوجيك خانة تعليم البوصلة =====
     (function() {
@@ -1749,7 +1816,7 @@
             }
         });
     </script>
-    <script src="js/mobile.js?v=3"></script>
+    <script src="js/mobile.js?v=11"></script>
 
     <script>
         if ('serviceWorker' in navigator) {
@@ -1924,6 +1991,11 @@
     </script>
 </body>
 </html>
+
+
+
+
+
 
 
 

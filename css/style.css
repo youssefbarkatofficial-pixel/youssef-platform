@@ -927,3 +927,25 @@ button[title="إلعب صراع البوصلة"],
  . h e r o   . h e a d i n g - l u x u r y   {   f o n t - s i z e :   c l a m p ( 2 . 5 r e m ,   7 v w ,   4 r e m )   ! i m p o r t a n t ;   } 
   
  
+/* Skeleton Loading */
+@keyframes skeleton-loading {
+  0% { background-color: rgba(255, 255, 255, 0.05); }
+  50% { background-color: rgba(255, 255, 255, 0.15); }
+  100% { background-color: rgba(255, 255, 255, 0.05); }
+}
+
+.skeleton-card {
+  height: 380px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  animation: skeleton-loading 1.5s infinite ease-in-out;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.skeleton-text {
+  animation: skeleton-loading 1.5s infinite ease-in-out;
+  color: transparent !important;
+  border-radius: 4px;
+  min-width: 50px;
+  display: inline-block;
+}

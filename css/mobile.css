@@ -178,12 +178,11 @@
   }
 
   .nav-brand-text {
-    font-size: 0.82rem !important;
+    font-size: 1rem !important;
     white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    max-width: 140px !important;
-    flex-shrink: 1 !important;
+    overflow: visible !important;
+    max-width: none !important;
+    flex-shrink: 0 !important;
     line-height: 1.2 !important;
   }
 
@@ -767,7 +766,7 @@
      HOME PAGE: Hero
      ===================== */
   .hero {
-    padding: 80px 5% 30px !important;
+    padding: 140px 5% 30px !important;
     min-height: unset !important;
   }
 

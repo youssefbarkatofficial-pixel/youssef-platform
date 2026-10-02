@@ -40,3 +40,9 @@ server.js
 .env
 .env.local
 *.key
+
+*.json
+!package.json
+!package-lock.json
+!firebase.json
+!database.rules.json

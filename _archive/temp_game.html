@@ -1,0 +1,1244 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <!-- FORCE NO-CACHE FOR ALL BROWSERS -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
+    <link rel="manifest" href="./manifest.json">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>صراع البوصلة âڑ”ï¸ڈ | منصة يوسف بركات</title>
+  <meta name="description" content="صراع البوصلة - لعبة التعليم التنافسية داخل المنصة التعليمية">
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Game CSS -->
+  <link rel="stylesheet" href="css/game.css">
+    <link rel="icon" type="image/png" href="images/logo.png?v=11">
+</head>
+
+<body>
+
+<!-- ========================================================
+     TOAST CONTAINER
+======================================================== -->
+<div id="toast-container"></div>
+
+<!-- ========================================================
+     SCREEN 1: LOADING
+======================================================== -->
+<div id="screen-loading" class="screen active">
+  <div class="loading-logo">
+    <span class="loading-compass">ًں§­</span>
+    <h1 class="loading-title">صراع البوصلة</h1>
+    <p class="loading-subtitle">لعبة التحدي التعليمي</p>
+    <div class="loading-bar-wrap"><div class="loading-bar"></div></div>
+  </div>
+</div>
+
+<!-- ========================================================
+     SCREEN 2: LOGIN
+======================================================== -->
+<div id="screen-login" class="screen">
+  <div class="login-card">
+    <div class="login-logo">
+      <span class="compass-icon">ًں§­</span>
+      <h1>صراع البوصلة</h1>
+      <p>سجّل دخولك لتبدأ المبارزة</p>
+    </div>
+    <div class="login-tabs">
+      <button class="login-tab active" id="tab-login" onclick="switchLoginTab('login')">دخول</button>
+      <button class="login-tab" id="tab-register" onclick="switchLoginTab('register')">حساب جديد</button>
+    </div>
+
+    <!-- Login Form -->
+    <div id="form-login">
+      <div class="form-group">
+        <label>البريد الإلكتروني</label>
+        <input type="email" id="login-email" placeholder="example@email.com" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label>كلمة المرور</label>
+        <input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password">
+      </div>
+      <button class="btn-primary" onclick="doLogin()">دخول âڑ”ï¸ڈ</button>
+    </div>
+
+    <!-- Register Form -->
+    <div id="form-register" class="hidden">
+      <div class="form-group">
+        <label>الاسم الكامل</label>
+        <input type="text" id="reg-name" placeholder="اسمك بالكامل">
+      </div>
+      <div class="form-group">
+        <label>الصف الدراسي</label>
+        <select id="reg-grade">
+          <option value="7">أول إعدادي</option>
+          <option value="8">ثاني إعدادي</option>
+          <option value="9">ثالث إعدادي</option>
+          <option value="10">أول ثانوي</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>البريد الإلكتروني</label>
+        <input type="email" id="reg-email" placeholder="example@email.com" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label>كلمة المرور</label>
+        <input type="password" id="reg-pass" placeholder="6 أحرف على الأقل" autocomplete="new-password">
+      </div>
+      <button class="btn-primary" onclick="doRegister()">إنشاء حساب ًںڑ€</button>
+    </div>
+
+    <div class="login-error" id="login-error"></div>
+  </div>
+</div>
+
+<!-- ========================================================
+     SCREEN 3: LOBBY
+======================================================== -->
+<div id="screen-lobby" class="screen">
+  <!-- Header -->
+  <div class="lobby-header">
+    <div class="player-avatar" id="lobby-avatar">؟</div>
+    <div class="player-info">
+      <div class="name" id="lobby-name">جاري التحميل...</div>
+      <div class="rank" id="lobby-rank">ًں§­ ---</div>
+      <div class="xp-bar-wrap">
+        <div class="xp-bar"><div class="xp-bar-fill" id="lobby-xp-bar" style="width:0%"></div></div>
+        <span class="xp-label" id="lobby-xp-label">0 XP</span>
+      </div>
+    </div>
+    <button onclick="exitGame()" style="background:transparent;border:none;color:var(--text-muted);font-size:1.3rem;cursor:pointer;padding:8px;transition:0.3s;" onmouseover="this.style.color='#e74c3c'" onmouseout="this.style.color='var(--text-muted)'" title="إغلاق اللعبة">
+      <i class="fas fa-sign-out-alt"></i>
+    </button>
+  </div>
+
+  <!-- Stats -->
+  <div class="lobby-stats">
+    <div class="stat-box"><div class="val" id="stat-wins">0</div><div class="lbl">انتصارات</div></div>
+    <div class="stat-box"><div class="val" id="stat-losses">0</div><div class="lbl">هزائم</div></div>
+    <div class="stat-box"><div class="val" id="stat-rate">0%</div><div class="lbl">نسبة الفوز</div></div>
+  </div>
+
+  <!-- Nav Tabs -->
+  <div class="lobby-nav">
+    <button class="nav-tab active" onclick="showLobbyTab('play')">âڑ”ï¸ڈ العب</button>
+    <button class="nav-tab" onclick="showLobbyTab('training')">ًں“ڑ تدريب</button>
+    <button class="nav-tab" onclick="showLobbyTab('friends')">ًں‘¥ أصدقاء</button>
+    <button class="nav-tab" onclick="showLobbyTab('leaderboard')">ًںڈ† المتصدرون</button>
+  </div>
+
+  <!-- Lobby Content -->
+  <div class="lobby-content" id="lobby-content">
+
+    <!-- ====== PLAY TAB ====== -->
+    <div id="tab-play" class="lobby-tab-content">
+      <p class="section-title">وضع اللعب</p>
+      <div class="mode-grid">
+        <button class="mode-btn selected" data-mode="ranked" onclick="selectMode(this,'ranked')">
+          <span class="icon">ًںڈ†</span>
+          <span class="title">مصنفة</span>
+          <span class="desc">تنافس على الترتيب</span>
+        </button>
+        <button class="mode-btn" data-mode="bot_only" onclick="selectMode(this,'bot_only')">
+          <span class="icon">ًں¤–</span>
+          <span class="title">ضد الأيجنت</span>
+          <span class="desc">بدون تأثير على الرتبة</span>
+        </button>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+        <div>
+          <p class="section-title">المادة الدراسية</p>
+          <div class="select-wrapper">
+            <select class="custom-select" onchange="ui.subject = this.value">
+              <option value="history">تاريخ ًں“œ</option>
+              <option value="geography">جغرافيا ًںŒچ</option>
+              <option value="mixed">مدمج âڑ–ï¸ڈ</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <p class="section-title">الصف الدراسي</p>
+          <div class="select-wrapper">
+            <select class="custom-select" onchange="ui.grade = this.value">
+              <option value="general">عام</option>
+              <option value="7">ظ، إعدادي</option>
+              <option value="8">ظ¢ إعدادي</option>
+              <option value="9">ظ£ إعدادي</option>
+              <option value="10">ظ، ثانوي</option>
+              <option value="11" disabled>ظ¢ ثانوي (قريباً)</option>
+              <option value="12" disabled>ظ£ ثانوي (قريباً)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn-start" id="btn-start" onclick="proceedToBotSetup()">
+        <i class="fas fa-bolt"></i> ابدأ المبارزة
+      </button>
+    </div>
+
+    <!-- ====== TRAINING TAB ====== -->
+    <div id="tab-training" class="lobby-tab-content hidden">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+        <div>
+          <p class="section-title">المادة الدراسية</p>
+          <div class="select-wrapper">
+            <select class="custom-select" onchange="ui.trainSubject = this.value; updateTrainLessonPicker();">
+              <option value="history">تاريخ ًں“œ</option>
+              <option value="geography">جغرافيا ًںŒچ</option>
+              <option value="mixed">مدمج âڑ–ï¸ڈ</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <p class="section-title">الصف الدراسي</p>
+          <div class="select-wrapper">
+            <select class="custom-select" onchange="ui.trainGrade = this.value; ui.trainUnit = null; ui.trainLesson = null; updateTrainLessonPicker();">
+              <option value="general">عام</option>
+              <option value="7">ظ، إعدادي</option>
+              <option value="8">ظ¢ إعدادي</option>
+              <option value="9">ظ£ إعدادي</option>
+              <option value="10">ظ، ثانوي</option>
+              <option value="11" disabled>ظ¢ ثانوي (قريباً)</option>
+              <option value="12" disabled>ظ£ ثانوي (قريباً)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div id="train-lesson-picker" class="hidden">
+        <p class="section-title">تحديد الوحدة والدرس</p>
+        <div id="train-units" class="grade-grid"></div>
+        <div id="train-lessons" class="grade-grid" style="margin-top:8px;"></div>
+      </div>
+
+      <button class="btn-start" style="margin-top:16px;" onclick="startTraining()">
+        <i class="fas fa-graduation-cap"></i> ابدأ التدريب
+      </button>
+    </div>
+
+    <!-- ====== FRIENDS TAB ====== -->
+    <div id="tab-friends" class="lobby-tab-content hidden">
+      <div style="text-align:center;padding:20px 0;">
+        <div style="font-size:4rem;margin-bottom:12px;">ًں‘¥</div>
+        <p style="color:var(--text-soft);font-size:1rem;margin-bottom:20px;">العب مع أصدقائك بكود الغرفة</p>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;">
+        <button class="mode-btn" onclick="createRoom()">
+          <span class="icon">â‍•</span>
+          <span class="title">إنشاء غرفة</span>
+          <span class="desc">شارك الكود مع صديقك</span>
+        </button>
+        <button class="mode-btn" onclick="showJoinRoom()">
+          <span class="icon">ًں”‘</span>
+          <span class="title">انضمام</span>
+          <span class="desc">أدخل كود صديقك</span>
+        </button>
+      </div>
+
+      <div id="room-created" class="hidden">
+        <div class="room-code-display" onclick="copyRoomCode()">
+          <div class="code" id="room-code-text">------</div>
+          <div class="hint">اضغط لنسخ الكود</div>
+        </div>
+        <p style="text-align:center;color:var(--text-muted);font-size:0.8rem;">شارك هذا الكود مع أصدقائك ليدخلوا الغرفة</p>
+        <button class="btn-start" style="margin-top:12px;" onclick="startFriendGame()">
+          <i class="fas fa-play"></i> ابدأ اللعبة
+        </button>
+      </div>
+
+      <div id="room-join" class="hidden">
+        <div class="form-group">
+          <label>كود الغرفة</label>
+          <input type="text" id="join-code-input" placeholder="XXXXXX" maxlength="6" style="text-align:center;letter-spacing:6px;font-size:1.4rem;text-transform:uppercase;">
+        </div>
+        <button class="btn-primary" onclick="joinRoom()">دخول الغرفة</button>
+      </div>
+    </div>
+
+    <!-- ====== LEADERBOARD TAB ====== -->
+    <div id="tab-leaderboard" class="lobby-tab-content hidden">
+      <div class="leaderboard-grade-filter" id="lb-filter"></div>
+      <div id="lb-content">
+        <p style="text-align:center;color:var(--text-muted);padding:40px 0;">جاري التحميل...</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ========================================================
+     SCREEN 4: BOT SETUP
+======================================================== -->
+<div id="screen-bot-setup" class="screen">
+  <div class="bot-setup-card">
+    <button onclick="showScreen('lobby')" style="background:transparent;border:none;color:var(--text-muted);cursor:pointer;margin-bottom:12px;font-size:0.9rem;">
+      â†گ رجوع
+    </button>
+    <h2>âڑ”ï¸ڈ إعداد المبارزة</h2>
+    <p>اختر عدد المنافسين ومستوى صعوبتهم</p>
+
+    <p class="section-title">عدد الخصوم</p>
+    <div class="bot-count-grid">
+      <button class="bot-count-btn selected" data-count="1" onclick="selectBotCount(this,1)"><span class="num">1</span>خصم</button>
+      <button class="bot-count-btn" data-count="2" onclick="selectBotCount(this,2)"><span class="num">2</span>خصوم</button>
+      <button class="bot-count-btn" data-count="3" onclick="selectBotCount(this,3)"><span class="num">3</span>خصوم</button>
+      <button class="bot-count-btn" data-count="6" onclick="selectBotCount(this,6)"><span class="num">6</span>خصوم</button>
+    </div>
+
+    <p class="section-title">مستوى الصعوبة</p>
+    <div class="difficulty-grid">
+      <button class="diff-btn selected" data-diff="beginner" onclick="selectDifficulty(this,'beginner')">
+        <span class="icon">ًںŒ±</span>مبتدئ
+      </button>
+      <button class="diff-btn" data-diff="medium" onclick="selectDifficulty(this,'medium')">
+        <span class="icon">âڑ،</span>متوسط
+      </button>
+      <button class="diff-btn" data-diff="pro" onclick="selectDifficulty(this,'pro')">
+        <span class="icon">ًں”¥</span>محترف
+      </button>
+      <button class="diff-btn" data-diff="commander" onclick="selectDifficulty(this,'commander')">
+        <span class="icon">ًں‘‘</span>قائد
+      </button>
+    </div>
+
+    <button class="btn-start" onclick="launchBattle()">
+      <i class="fas fa-sword"></i> انطلق للمعركة!
+    </button>
+  </div>
+</div>
+
+<!-- ========================================================
+     SCREEN 5: BATTLE
+======================================================== -->
+<div id="screen-battle" class="screen">
+
+  <!-- Header -->
+  <div class="battle-header">
+    <div class="battle-title">âڑ”ï¸ڈ صراع البوصلة</div>
+    <div class="battle-round" id="battle-round-label">جولة 1 / 7</div>
+    <div style="display:flex; gap:10px;">
+      <button onclick="confirmQuit()" style="background:transparent;border:1px solid var(--dark-border);border-radius:8px;color:var(--text-muted);font-size:0.75rem;padding:4px 10px;cursor:pointer;">
+        إنهاء
+      </button>
+      <button onclick="exitGame()" style="background:transparent;border:1px solid #e74c3c;border-radius:8px;color:#e74c3c;font-size:0.75rem;padding:4px 10px;cursor:pointer;">
+        خروج
+      </button>
+    </div>
+  </div>
+
+  <!-- Scores -->
+  <div class="battle-scores" id="battle-scores-container">
+    <!-- Generated Dynamically -->
+  </div>
+
+  <!-- World Map SVG -->
+  <div class="map-container">
+    [SVG REMOVED]
+  </div>
+
+  <div class="phase-indicator" id="phase-indicator" style="text-align:center; padding: 10px; background: rgba(0,0,0,0.5); color: #fff; font-size: 1.1rem; border-bottom: 1px solid #333;">
+    <span id="phase-title">جاري التجهيز للملحمة...</span>
+  </div>
+
+  <!-- Bot Status -->
+  <div class="bot-status" id="bot-status"></div>
+
+  <!-- Timer + Question -->
+  <div class="timer-container">
+    <div class="timer-ring-wrap">
+      [SVG REMOVED]
+      <div class="timer-num" id="timer-num">15</div>
+    </div>
+    <div class="question-text-wrap">
+      <div class="question-category" id="q-category">---</div>
+      <div class="question-text" id="q-text">جاري تحميل السؤال...</div>
+    </div>
+  </div>
+
+  <!-- Change Hint -->
+  <div class="change-hint" id="change-hint">يمكنك تغيير إجابتك حتى انتهاء الوقت</div>
+
+  <!-- Options -->
+  <div class="options-grid" id="options-grid">
+    <button class="option-btn" id="opt-0" onclick="playerSelectAnswer(0)">---</button>
+    <button class="option-btn" id="opt-1" onclick="playerSelectAnswer(1)">---</button>
+    <button class="option-btn" id="opt-2" onclick="playerSelectAnswer(2)">---</button>
+    <button class="option-btn" id="opt-3" onclick="playerSelectAnswer(3)">---</button>
+  </div>
+
+</div>
+
+<!-- ========================================================
+     SCREEN 6: RESULT
+======================================================== -->
+<div id="screen-result" class="screen">
+  <div class="result-card">
+    <span class="result-trophy" id="result-trophy">ًںڈ†</span>
+    <div class="result-title" id="result-title">انتصار!</div>
+    <div class="result-sub" id="result-sub">أحسنت! لقد فزت بالمبارزة</div>
+
+    <div class="result-stats">
+      <div class="result-stat">
+        <div class="val" id="res-correct">0</div>
+        <div class="lbl">إجابات صح</div>
+      </div>
+      <div class="result-stat">
+        <div class="val" id="res-rounds">7</div>
+      </div>
+      <div class="result-stat">
+        <div class="val" id="res-chunks">0</div>
+        <div class="lbl">مناطق السيطرة</div>
+        <div class="lbl">جولات</div>
+      </div>
+      <div class="result-stat">
+        <div class="val" id="res-accuracy">0%</div>
+        <div class="lbl">دقة</div>
+      </div>
+    </div>
+
+    <div class="xp-gained">
+      <div class="big" id="res-xp">+0 XP</div>
+      <div class="lbl">نقاط أثر مكتسبة</div>
+    </div>
+
+    <!-- خريطة ملخص -->
+    <div class="result-leaderboard" id="result-leaderboard" style="margin: 32px 0; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 16px; padding: 24px; box-shadow: inset 0 0 20px rgba(0,0,0,0.5);">
+      <h3 style="color: #D4AF37; margin-top:0; margin-bottom: 20px; font-size: 1.3rem; font-weight: 900; text-align:center; text-shadow: 0 0 10px rgba(212,175,55,0.3); letter-spacing: 0.5px;">الترتيب النهائي للسيطرة</h3>
+      <div id="leaderboard-list" style="display: flex; flex-direction: column; gap: 10px;">
+      </div>
+    </div>
+    <div class="result-map-preview" id="result-map-preview"></div>
+
+    <div class="result-actions">
+      <button class="btn-primary" onclick="playAgain()">âڑ”ï¸ڈ مبارزة جديدة</button>
+      <button class="btn-secondary" onclick="showScreen('lobby')">ًںڈ  العودة للوبي</button>
+      <button class="btn-secondary" onclick="exitGame()" style="color:#e74c3c; border-color:#e74c3c; grid-column: 1 / -1;">ًںڑھ خروج من اللعبة</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================================
+     FIREBASE CONFIG
+======================================================== -->
+<script src="js/firebase-config.js?v=11"></script>
+
+<!-- ========================================================
+     GAME SCRIPTS
+======================================================== -->
+<script src="js/game-questions.js?v=11"></script>
+<script src="js/game-engine.js?v=11"></script>
+
+<script>
+// ============================================================
+// GAME UI CONTROLLER
+// ============================================================
+
+// -- State local للـ UI --
+let ui = {
+  subject: 'history',
+  grade: 'general',
+  mode: 'ranked',
+  trainSubject: 'history',
+  trainGrade: 'general',
+  trainUnit: null,
+  trainLesson: null,
+  botCount: 1,
+  botDifficulty: 'beginner',
+  playerData: null,
+};
+
+// ============================================================
+// INIT: تهيئة Firebase Auth
+// ============================================================
+document.addEventListener('DOMContentLoaded', () => {
+  setTimeout(() => {
+    // 1. Check Platform Login (Bypass Firebase Auth)
+    const pStudentStr = sessionStorage.getItem('currentStudent') || localStorage.getItem('currentStudent');
+    const pAdminStr = sessionStorage.getItem('currentAdmin') || localStorage.getItem('currentAdmin');
+    let pUser = null;
+    try {
+      if (pStudentStr) pUser = JSON.parse(pStudentStr);
+      else if (pAdminStr) pUser = JSON.parse(pAdminStr);
+    } catch(e) {}
+
+    if (pUser && (pUser.email || pUser.phone)) {
+      const fakeUser = {
+        uid: pUser.email || pUser.phone,
+        email: pUser.email || '',
+        displayName: pUser.name || 'أدمن المنصة'
+      };
+      initLobby(fakeUser);
+      return;
+    }
+
+    // 2. Fallback to Firebase Auth
+    if (!window.firebaseAuth) {
+      showScreen('login');
+      return;
+    }
+    window.firebaseAuth.onAuthStateChanged(async (user) => {
+      if (user) {
+        await initLobby(user);
+      } else {
+        showScreen('login');
+      }
+    });
+  }, 2000); // وقت شاشة التحميل
+});
+
+// ============================================================
+// SCREEN MANAGER
+// ============================================================
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+}
+
+// ============================================================
+// LOGIN / REGISTER / LOGOUT
+// ============================================================
+function switchLoginTab(tab) {
+  document.getElementById('tab-login').classList.toggle('active', tab === 'login');
+  document.getElementById('tab-register').classList.toggle('active', tab === 'register');
+  document.getElementById('form-login').classList.toggle('hidden', tab !== 'login');
+  document.getElementById('form-register').classList.toggle('hidden', tab !== 'register');
+  document.getElementById('login-error').style.display = 'none';
+}
+
+async function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pass  = document.getElementById('login-pass').value;
+  if (!email || !pass) return showError('أدخل البريد وكلمة المرور');
+  try {
+    await window.firebaseAuth.signInWithEmailAndPassword(email, pass);
+  } catch(e) {
+    showError(translateError(e.code));
+  }
+}
+
+async function doRegister() {
+  const name  = document.getElementById('reg-name').value.trim();
+  const grade = document.getElementById('reg-grade').value;
+  const email = document.getElementById('reg-email').value.trim();
+  const pass  = document.getElementById('reg-pass').value;
+  if (!name || !email || !pass) return showError('الرجاء ملء جميع الحقول');
+  if (pass.length < 6) return showError('كلمة المرور 6 أحرف على الأقل');
+  try {
+    const cred = await window.firebaseAuth.createUserWithEmailAndPassword(email, pass);
+    await window.firebaseDb.collection('users').doc(cred.user.uid).set({
+      name, grade, email,
+      gameXp: 0, gameWins: 0, gameLosses: 0, gamesPlayed: 0,
+      createdAt: new Date().toISOString()
+    }, { merge: true });
+    await cred.user.updateProfile({ displayName: name });
+  } catch(e) {
+    showError(translateError(e.code));
+  }
+}
+
+async function doLogout() {
+  await window.firebaseAuth.signOut();
+  showScreen('login');
+}
+
+function showError(msg) {
+  const el = document.getElementById('login-error');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+function translateError(code) {
+  const map = {
+    'auth/user-not-found': 'البريد الإلكتروني غير موجود',
+    'auth/wrong-password': 'كلمة المرور غير صحيحة',
+    'auth/email-already-in-use': 'البريد مستخدم بالفعل',
+    'auth/invalid-email': 'البريد الإلكتروني غير صالح',
+    'auth/weak-password': 'كلمة المرور ضعيفة',
+  };
+  return map[code] || 'حدث خطأ، حاول مجدداً';
+}
+
+// ============================================================
+// LOBBY INIT
+// ============================================================
+async function initLobby(user) {
+  showScreen('lobby');
+  const data = await GameEngine.loadPlayerData(user.uid);
+  ui.playerData = { ...data, uid: user.uid };
+  GameEngine.getState().currentUser = user;
+  GameEngine.getState().playerXp = data.xp;
+  GameEngine.getState().isLoggedIn = true;
+
+  // تحديث Header
+  const initials = data.name.trim().split(' ').map(w => w[0]).slice(0,2).join('');
+  document.getElementById('lobby-avatar').textContent = initials;
+  if (data.photoURL) {
+    document.getElementById('lobby-avatar').innerHTML = `<img loading="lazy" src="${data.photoURL}" alt="avatar">`;
+  }
+  document.getElementById('lobby-name').textContent = data.name;
+  const rank = GameEngine.getRank(data.xp);
+  document.getElementById('lobby-rank').textContent = `ًں§­ ${rank.name}`;
+
+  const progress = GameEngine.getProgress(data.xp) * 100;
+  document.getElementById('lobby-xp-bar').style.width = progress + '%';
+  document.getElementById('lobby-xp-label').textContent = `${data.xp} XP`;
+
+  // Stats
+  document.getElementById('stat-wins').textContent = data.wins;
+  document.getElementById('stat-losses').textContent = data.losses;
+  const total = data.wins + data.losses;
+  const rate = total > 0 ? Math.round(data.wins/total*100) : 0;
+  document.getElementById('stat-rate').textContent = rate + '%';
+
+  // تهيئة فلتر المتصدرين
+  initLeaderboardFilter(data.grade);
+}
+
+// ============================================================
+// LOBBY TABS
+// ============================================================
+function showLobbyTab(tab) {
+  document.querySelectorAll('.lobby-tab-content').forEach(el => el.classList.add('hidden'));
+  document.getElementById('tab-' + tab).classList.remove('hidden');
+  document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  if (tab === 'leaderboard') loadLeaderboard();
+}
+
+// ============================================================
+// PLAY TAB SELECTIONS
+// ============================================================
+function selectSubject(btn, val) {
+  document.querySelectorAll('#tab-play .subject-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  ui.subject = val;
+}
+
+function selectGrade(btn, val) {
+  document.querySelectorAll('#tab-play .grade-btn:not(:disabled)').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  ui.grade = val;
+}
+
+function selectMode(btn, val) {
+  document.querySelectorAll('#tab-play .mode-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  ui.mode = val;
+}
+
+// ============================================================
+// TRAINING TAB SELECTIONS
+// ============================================================
+function selectTrainSubject(btn, val) {
+  document.querySelectorAll('#tab-training .subject-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  ui.trainSubject = val;
+  updateTrainLessonPicker();
+}
+
+function selectTrainGrade(btn, val) {
+  document.querySelectorAll('#tab-training .grade-btn:not(:disabled)').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  ui.trainGrade = val;
+  ui.trainUnit = null;
+  ui.trainLesson = null;
+  updateTrainLessonPicker();
+}
+
+function updateTrainLessonPicker() {
+  const picker = document.getElementById('train-lesson-picker');
+  if (ui.trainGrade === 'general') { picker.classList.add('hidden'); return; }
+  const { units, lessons } = GameEngine.getLessonsForGrade ? 
+    { units:[], lessons:{} } : 
+    window.GameQuestions.getLessonsForGrade(ui.trainGrade, ui.trainSubject);
+  
+  if (units.length === 0) { picker.classList.add('hidden'); return; }
+  picker.classList.remove('hidden');
+
+  const unitsEl = document.getElementById('train-units');
+  unitsEl.innerHTML = units.map(u => `
+    <button class="grade-btn${ui.trainUnit===u?' selected':''}" onclick="selectTrainUnit('${u}')">وحدة ${u}</button>
+  `).join('');
+}
+
+function selectTrainUnit(unit) {
+  ui.trainUnit = unit;
+  ui.trainLesson = null;
+  document.querySelectorAll('#train-units .grade-btn').forEach(b => {
+    b.classList.toggle('selected', b.textContent.includes(unit));
+  });
+  updateTrainLessons(unit);
+}
+
+function updateTrainLessons(unit) {
+  const { lessons } = window.GameQuestions.getLessonsForGrade(ui.trainGrade, ui.trainSubject);
+  const ls = lessons[unit] || [];
+  const el = document.getElementById('train-lessons');
+  el.innerHTML = ls.map(l => `
+    <button class="grade-btn" onclick="selectTrainLesson('${l}')">درس ${l}</button>
+  `).join('');
+}
+
+function selectTrainLesson(lesson) {
+  ui.trainLesson = lesson;
+  document.querySelectorAll('#train-lessons .grade-btn').forEach(b => {
+    b.classList.toggle('selected', b.textContent.includes(lesson));
+  });
+}
+
+function startTraining() {
+  const questions = window.GameQuestions.getQuestions({
+    subject: ui.trainSubject,
+    grade: ui.trainGrade,
+    unit: ui.trainUnit,
+    lesson: ui.trainLesson,
+    count: 7
+  });
+  launchBattleWithConfig({ mode:'training', subject:ui.trainSubject, grade:ui.trainGrade, questions, botCount:1, botDifficulty:'medium' });
+}
+
+// ============================================================
+// BOT SETUP
+// ============================================================
+function proceedToBotSetup() {
+  showScreen('bot-setup');
+}
+
+function selectBotCount(btn, count) {
+  document.querySelectorAll('.bot-count-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  ui.botCount = count;
+}
+
+function selectDifficulty(btn, diff) {
+  document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  ui.botDifficulty = diff;
+}
+
+function launchBattle() {
+  const questions = window.GameQuestions.getQuestions({
+    subject: ui.subject,
+    grade: ui.grade,
+    count: GameEngine.ROUNDS
+  });
+  launchBattleWithConfig({
+    mode: ui.mode,
+    subject: ui.subject,
+    grade: ui.grade,
+    questions,
+    botCount: ui.botCount,
+    botDifficulty: ui.botDifficulty
+  });
+}
+
+// ============================================================
+// BATTLE LOGIC
+// ============================================================
+let _botTimers = [];
+
+function launchBattleWithConfig({ mode, subject, grade, questions, botCount, botDifficulty }) {
+  showScreen('battle');
+
+  GameEngine.startGame({ mode, subject, grade, botCount, botDifficulty, questions });
+
+  const s = GameEngine.getState();
+
+  // بناء لوحة النتائج العلوية ديناميكياً
+  const scoresContainer = document.getElementById('battle-scores-container');
+  let scoresHTML = `
+    <div class="score-player me" style="border-bottom: 3px solid #D4AF37;">
+      <div class="score-name" id="battle-player-name" style="color:#D4AF37;">${ui.playerData?.name || 'اللاعب'}</div>
+      <div class="score-num" id="battle-player-score" style="color:#D4AF37;">0</div>
+    </div>
+  `;
+
+  const botColors = ['#EF4444', '#A855F7', '#F97316', '#3B82F6', '#10B981'];
+  s.bots.forEach((bot, idx) => {
+    const c = botColors[idx % botColors.length];
+    if (s.bots.length === 1) scoresHTML += `<div class="score-divider">ضد</div>`;
+    scoresHTML += `
+      <div class="score-player enemy" style="background: ${c}10; border-bottom: 3px solid ${c}; flex: 1;">
+        <div class="score-name" id="battle-bot-name-${idx}" style="color: #fff; font-size: 0.9rem;">${bot.name}</div>
+        <div class="score-num" id="battle-bot-score-${idx}" style="color:${c};">0</div>
+      </div>
+    `;
+  });
+  scoresContainer.innerHTML = scoresHTML;
+
+  renderBotStatus();
+  startBattleRound();
+}
+
+function startBattleRound() {
+  clearBotTimers();
+  const s = GameEngine.getState();
+  const q = GameEngine.getCurrentQuestion();
+  if (!q) { showGameResult(); return; }
+
+  // تحديث UI
+  document.getElementById('battle-round-label').textContent = `جولة ${s.currentRound + 1} / ${GameEngine.ROUNDS}`;
+  document.getElementById('battle-player-score').textContent = s.scores.player;
+  s.bots.forEach((bot, idx) => {
+    const el = document.getElementById(`battle-bot-score-${idx}`);
+    if (el) el.textContent = s.scores.bots[idx] || 0;
+  });
+
+  // تحديث مؤشر المرحلة
+  updatePhaseIndicator();
+
+  // السؤال
+  const catMap = { history: 'ًں“œ تاريخ', geography: 'ًںŒچ جغرافيا' };
+  document.getElementById('q-category').textContent = catMap[q.category] || q.category;
+  document.getElementById('q-text').textContent = q.text;
+
+  // الخيارات - reset
+  document.getElementById('change-hint').classList.remove('visible');
+  for (let i = 0; i < 4; i++) {
+    const btn = document.getElementById('opt-' + i);
+    btn.textContent = q.options[i] || '---';
+    btn.className = 'option-btn';
+    btn.disabled = false;
+  }
+
+  // بدء الجولة
+  GameEngine.startRound(
+    // onTick
+    (secondsLeft) => updateTimer(secondsLeft),
+    // onBotUpdate
+    (bot, idx) => {
+      renderBotStatus();
+    },
+    // onRoundEnd
+    (result) => showRoundResult(result)
+  );
+}
+
+function playerSelectAnswer(idx) {
+  const s = GameEngine.getState();
+  if (s.roundLocked) return;
+
+  const success = GameEngine.selectAnswer(idx);
+  if (!success) return;
+
+  // تحديث visual
+  for (let i = 0; i < 4; i++) {
+    document.getElementById('opt-' + i).classList.remove('selected');
+  }
+  document.getElementById('opt-' + idx).classList.add('selected');
+  document.getElementById('change-hint').classList.add('visible');
+}
+
+function updateTimer(secondsLeft) {
+  document.getElementById('timer-num').textContent = secondsLeft;
+  const isDanger = secondsLeft <= 5;
+  document.getElementById('timer-num').classList.toggle('danger', isDanger);
+
+  const ring = document.getElementById('timer-ring');
+  const maxDash = 163;
+  const progress = secondsLeft / GameEngine.QUESTION_TIME;
+  ring.style.strokeDashoffset = maxDash * (1 - progress);
+  ring.classList.toggle('danger', isDanger);
+}
+
+function showRoundResult(result) {
+  // تلوين الأزرار
+  for (let i = 0; i < 4; i++) {
+    const btn = document.getElementById('opt-' + i);
+    btn.disabled = true;
+    if (i === result.correctIndex) {
+      btn.classList.add('correct');
+    } else if (i === result.playerAnswer && i !== result.correctIndex) {
+      btn.classList.add('wrong');
+    }
+  }
+
+  // تحديث الخريطة الجديدة
+  updateAllTerritories();
+
+  // toast
+  if (result.playerCorrect) {
+    showToast('âœ… إجابة صحيحة! +10 XP', 'success');
+  } else {
+    showToast('â‌Œ إجابة خاطئة', 'error');
+  }
+
+  // تحديث النتائج
+  document.getElementById('battle-player-score').textContent = result.scores.player;
+  result.bots.forEach((bot, idx) => {
+    const el = document.getElementById(`battle-bot-score-${idx}`);
+    if (el) el.textContent = result.scores.bots[idx] || 0;
+  });
+
+  // انتقال للجولة التالية بعد 3 ثواني
+  setTimeout(() => {
+    GameEngine.nextRound();
+    const s = GameEngine.getState();
+    if (s.currentRound >= GameEngine.ROUNDS) {
+      showGameResult();
+    } else {
+      startBattleRound();
+    }
+  }, 2500);
+}
+
+// ============================================================
+// MAP FUNCTIONS
+// ============================================================
+function getColorForEntity(id) {
+  if (id === 'player') return '#D4AF37'; // ذهبي
+  if (!id) return '#1A2540'; // حيادي (رمادي/أزرق داكن)
+  if (id.startsWith('bot_')) {
+     const idx = parseInt(id.split('_')[1]);
+     const botColors = ['#EF4444', '#A855F7', '#F97316', '#3B82F6', '#10B981'];
+     return botColors[idx % botColors.length];
+  }
+  return '#1A2540';
+}
+
+function updateAllTerritories() {
+  const s = GameEngine.getState();
+  const svgDefs = document.getElementById('map-defs');
+  if (!svgDefs) return;
+  let defsHTML = '';
+  
+  s.territories.forEach(terr => {
+     const el = document.getElementById('map-' + terr.id);
+     if (!el) return;
+
+     const chunkColors = terr.chunks.map(c => getColorForEntity(c));
+     let stops = '';
+     for (let i = 0; i < 5; i++) {
+        stops += `<stop offset="${i * 25}%" stop-color="${chunkColors[i]}"/>`;
+     }
+     
+     defsHTML += `<linearGradient id="grad-${terr.id}" x1="0%" y1="0%" x2="100%" y2="0%">${stops}</linearGradient>`;
+     el.style.fill = `url(#grad-${terr.id})`;
+     el.style.transition = "fill 0.8s ease";
+  });
+
+  svgDefs.innerHTML = defsHTML;
+}
+
+function updatePhaseIndicator() {
+  const s = GameEngine.getState();
+  const titleEl = document.getElementById('phase-title');
+  if (!titleEl) return;
+  const phase = s.currentRound < 5 ? 'المرحلة 1: تعزيز النفوذ (قارتك)' : 'المرحلة 2: الغزو والهيمنة';
+  const targetId = s.targets['player'];
+  const targetTerritory = s.territories.find(t => t.id === targetId);
+  const targetName = targetTerritory ? targetTerritory.name : 'مجهول';
+  titleEl.innerHTML = `<strong>${phase}</strong> | الجولة ${s.currentRound + 1}/${GameEngine.ROUNDS} | âڑ”ï¸ڈ هدفك: ${targetName}`;
+}
+
+  function renderBotStatus() {
+    const s = GameEngine.getState();
+    const container = document.getElementById('bot-status');
+    const botColors = ['#EF4444', '#A855F7', '#F97316', '#3B82F6', '#10B981'];
+    container.innerHTML = s.bots.map((bot, i) => {
+      const c = botColors[i % botColors.length];
+      const dotBg = bot.answered ? c : 'transparent';
+      const animClass = bot.isThinking ? 'thinking' : '';
+      return `
+      <div class="bot-indicator" style="border: 1px solid ${c}30; background: ${c}10; border-radius: 20px; padding: 4px 12px;">
+        <div class="bot-dot ${animClass}" style="background:${dotBg}; border-color:${c}"></div>
+        <div class="bot-name" style="color:#fff; font-weight:600;">${bot.name}</div>
+      </div>
+      `;
+    }).join('');
+  }
+
+function clearBotTimers() {
+  _botTimers.forEach(t => { clearTimeout(t.timeout); clearInterval(t.phraseInterval); });
+  _botTimers = [];
+}
+
+// ============================================================
+// GAME RESULT
+// ============================================================
+function showGameResult() {
+  const result = GameEngine.endGame();
+  const s = GameEngine.getState();
+
+  // حفظ في Firebase
+  if (s.isLoggedIn && s.currentUser && s.gameMode !== 'training') {
+    GameEngine.saveGameResult({
+      uid: s.currentUser.uid,
+      xpDelta: result.xpGained,
+      won: result.playerWon,
+      draw: result.isDraw,
+    }).then(() => {
+      // تحديث الواجهة فوراً
+      GameEngine.loadPlayerData(s.currentUser.uid).then(data => {
+        ui.playerData = data;
+        GameEngine.getState().playerXp = data.xp;
+        const rank = GameEngine.getRank(data.xp);
+        document.getElementById('lobby-rank').textContent = `ًں§­ ${rank.name}`;
+        const progress = GameEngine.getProgress(data.xp) * 100;
+        document.getElementById('lobby-xp-bar').style.width = progress + '%';
+        document.getElementById('lobby-xp-label').textContent = `${data.xp} XP`;
+      });
+    });
+  }
+
+  // شاشة النتيجة
+  showScreen('result');
+
+  if (result.playerWon) {
+    document.getElementById('result-trophy').textContent = 'ًںڈ†';
+    document.getElementById('result-title').textContent = 'انتصار!';
+    document.getElementById('result-title').className = 'result-title win';
+    document.getElementById('result-sub').textContent = 'أحسنت! سيطرت على خريطة العالم';
+    launchConfetti();
+  } else if (result.isDraw) {
+    document.getElementById('result-trophy').textContent = 'ًں¤‌';
+    document.getElementById('result-title').textContent = 'تعادل!';
+    document.getElementById('result-title').className = 'result-title draw';
+    document.getElementById('result-sub').textContent = 'معركة متكافئة!';
+  } else {
+    document.getElementById('result-trophy').textContent = 'ًں“ڑ';
+    document.getElementById('result-title').textContent = 'هزيمة!';
+    document.getElementById('result-title').className = 'result-title lose';
+    document.getElementById('result-sub').textContent = 'لا تستسلم، تدرب أكثر وعد!';
+  }
+
+  document.getElementById('res-correct').textContent = result.scores?.player || 0;
+  document.getElementById('res-chunks').textContent = result.playerScore || 0;
+  document.getElementById('res-rounds').textContent = GameEngine.ROUNDS;
+  const acc = Math.round(((result.scores?.player || 0) / GameEngine.ROUNDS) * 100);
+  document.getElementById('res-accuracy').textContent = acc + '%';
+
+  const xpText = result.xpGained >= 0 ? `+${result.xpGained} XP` : `${result.xpGained} XP`;
+  document.getElementById('res-xp').textContent = xpText;
+
+  // خريطة ملخص مصغّرة
+  // Build Leaderboard HTML
+  let allScores = {};
+  allScores['player'] = { name: ui.playerData?.name || 'Player', color: 'var(--player-color)', score: result.playerScore || 0, isPlayer: true };
+  const s2 = GameEngine.getState();
+  s2.bots.forEach((b, idx) => {
+    allScores['bot'+idx] = { name: b.name, color: b.color, score: result.botScores[idx] || 0, isPlayer: false };
+  });
+
+  const sortedScores = Object.values(allScores).sort((a,b)=> b.score - a.score);
+  let lbHtml = '';
+  sortedScores.forEach((entry, idx) => {
+    const isWinner = idx === 0;
+    const rankColor = idx === 0 ? '#FFD700' : (idx === 1 ? '#C0C0C0' : (idx === 2 ? '#CD7F32' : 'var(--text-muted)'));
+    const isPlayerClass = entry.isPlayer ? 'background: rgba(212,175,55,0.15); border: 1px solid var(--gold);' : 'background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05);';
+    const crown = isWinner ? 'W' : '';
+    
+    lbHtml += `
+      <div style="display:flex; align-items:center; gap:12px; padding: 12px; border-radius: 12px; ${isPlayerClass} margin-bottom: 8px;">
+        <div style="font-weight:900; color:${rankColor}; width:24px; text-align:center;">#${idx+1}</div>
+        <div style="width:12px; height:12px; border-radius:50%; background:${entry.color}; box-shadow: 0 0 8px ${entry.color}"></div>
+        <div style="flex:1; text-align:right; font-weight:700; color:var(--text-white);">${entry.name} ${crown}</div>
+        <div style="font-weight:900; color:var(--gold); font-size:1.1rem;">${entry.score}</div>
+      </div>
+    `;
+  });
+  document.getElementById('leaderboard-list').innerHTML = lbHtml;
+
+  renderResultMap(result.territories);
+
+}
+
+function renderResultMap(territories) {
+  const preview = document.getElementById('result-map-preview');
+  preview.innerHTML = `
+    [SVG REMOVED]`;
+}
+
+function getTerritoryColor(territories, id) {
+  const t = territories.find(t => t.id === id);
+  if (!t || !t.owner) return '#1A2540';
+  if (t.owner === 'player') return '#D4AF37';
+  if (t.owner.startsWith('bot_')) {
+    const idx = parseInt(t.owner.split('_')[1]);
+    const botColors = ['#EF4444', '#A855F7', '#F97316', '#3B82F6', '#10B981'];
+    return botColors[idx % botColors.length];
+  }
+  return '#1A2540';
+}
+
+function playAgain() {
+  showScreen('bot-setup');
+}
+
+function confirmQuit() {
+  if (confirm('هل أنت متأكد أنك تريد المغادرة؟')) {
+    clearBotTimers();
+    clearInterval(GameEngine.getState().timerInterval);
+    showScreen('lobby');
+  }
+}
+
+function exitGame() {
+  if(window.parent && window.parent.document.getElementById('gameWidgetModal')) {
+    window.parent.document.getElementById('gameWidgetModal').style.display = 'none';
+    window.parent.document.body.style.overflow = 'auto';
+    var b = window.parent.document.getElementById('pfChatBtn');
+    if(b) b.style.display = 'flex';
+    var c = window.parent.document.getElementById('pfChatBubble');
+    if(c) c.style.display = 'block';
+  } else {
+    alert("لا يمكن الخروج من هذه النافذة");
+  }
+}
+
+// ============================================================
+// LEADERBOARD
+// ============================================================
+function initLeaderboardFilter(userGrade) {
+  const grades = ['general','7','8','9','10'];
+  const names = { general:'عام', '7':'ظ، إعدادي', '8':'ظ¢ إعدادي', '9':'ظ£ إعدادي', '10':'ظ، ثانوي' };
+  document.getElementById('lb-filter').innerHTML = grades.map(g => `
+    <button class="filter-btn ${g===userGrade?'active':''}" onclick="loadLeaderboard('${g}', this)">${names[g]}</button>
+  `).join('');
+}
+
+async function loadLeaderboard(grade = 'general', btn = null) {
+  if (btn) {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+
+  const lbContent = document.getElementById('lb-content');
+  lbContent.innerHTML = '<p style="text-align:center;color:var(--text-muted);padding:24px;">جاري التحميل...</p>';
+
+  const players = await GameEngine.loadLeaderboard(grade);
+
+  let html = `
+    <div class="owner-entry">
+      <span class="owner-badge">ًں‘‘</span>
+      <div>
+        <div class="owner-name">يوسف بركات</div>
+        <div class="owner-rank">â­گ حارس البوصلة الأعظم</div>
+      </div>
+      <div class="owner-xp">âˆ‍ XP</div>
+    </div>
+  `;
+
+  if (players.length === 0) {
+    html += '<p style="text-align:center;color:var(--text-muted);padding:20px;">لا يوجد لاعبون بعد</p>';
+  } else {
+    players.forEach((p, i) => {
+      const rankClass = i === 0 ? 'top1' : i === 1 ? 'top2' : i === 2 ? 'top3' : '';
+      const medal = i === 0 ? 'ًں¥‡' : i === 1 ? 'ًں¥ˆ' : i === 2 ? 'ًں¥‰' : (i+1);
+      const rank = GameEngine.getRank(p.gameXp || 0);
+      const initials = (p.name || '؟').split(' ').map(w=>w[0]).slice(0,2).join('');
+      html += `
+        <div class="lb-entry">
+          <div class="lb-rank ${rankClass}">${medal}</div>
+          <div class="lb-avatar">${initials}</div>
+          <div class="lb-info">
+            <div class="lb-name">${p.name || 'مجهول'}</div>
+            <div class="lb-detail">${rank.name} آ· ${p.gameWins||0} انتصار</div>
+          </div>
+          <div class="lb-xp">${(p.gameXp||0).toLocaleString()} XP</div>
+        </div>`;
+    });
+  }
+
+  lbContent.innerHTML = html;
+}
+
+// ============================================================
+// FRIENDS ROOM
+// ============================================================
+function createRoom() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  const code = Array.from({length:6}, () => chars[Math.floor(Math.random()*chars.length)]).join('');
+  document.getElementById('room-code-text').textContent = code;
+  document.getElementById('room-created').classList.remove('hidden');
+  document.getElementById('room-join').classList.add('hidden');
+}
+
+function copyRoomCode() {
+  const code = document.getElementById('room-code-text').textContent;
+  navigator.clipboard.writeText(code).then(() => showToast('تم نسخ الكود! ًں“‹', 'info'));
+}
+
+function showJoinRoom() {
+  document.getElementById('room-join').classList.remove('hidden');
+  document.getElementById('room-created').classList.add('hidden');
+}
+
+function joinRoom() {
+  const code = document.getElementById('join-code-input').value.trim().toUpperCase();
+  if (code.length !== 6) return showToast('الكود 6 أحرف', 'error');
+  showToast('جاري البحث عن الغرفة...', 'info');
+  // TODO: Firebase room lookup
+}
+
+function startFriendGame() {
+  launchBattle(); // مؤقتاً تبدأ مباراة عادية
+}
+
+// ============================================================
+// TOAST
+// ============================================================
+function showToast(msg, type = 'info') {
+  const container = document.getElementById('toast-container');
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.textContent = msg;
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.style.animation = 'toastOut 0.3s ease forwards';
+    setTimeout(() => toast.remove(), 300);
+  }, 2500);
+}
+
+// ============================================================
+// CONFETTI
+// ============================================================
+function launchConfetti() {
+  const colors = ['#D4AF37','#F0D060','#FFD700','#FFF8DC','#FF6B6B','#4ECDC4'];
+  for (let i = 0; i < 60; i++) {
+    setTimeout(() => {
+      const piece = document.createElement('div');
+      piece.className = 'confetti-piece';
+      piece.style.cssText = `
+        left: ${Math.random()*100}%;
+        top: -20px;
+        background: ${colors[Math.floor(Math.random()*colors.length)]};
+        border-radius: ${Math.random() > 0.5 ? '50%' : '2px'};
+        width: ${6 + Math.random()*8}px;
+        height: ${6 + Math.random()*8}px;
+        animation-duration: ${2 + Math.random()*2}s;
+        animation-delay: ${Math.random()*0.5}s;
+      `;
+      document.body.appendChild(piece);
+      setTimeout(() => piece.remove(), 4000);
+    }, i * 30);
+  }
+}
+</script>
+
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW registration failed:', err));
+            });
+        }
+    </script>
+</body>
+</html>
+
+
+

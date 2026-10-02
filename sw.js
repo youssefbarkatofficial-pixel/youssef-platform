@@ -1,12 +1,19 @@
-// CACHE VERSION - bump this number to force cache refresh on all clients
-const CACHE_VERSION = 'v27_sync_fix';
+﻿// CACHE VERSION - bump this number to force cache refresh on all clients
+const CACHE_VERSION = 'v28_unified_cache';
 const CACHE_NAME = 'youssef-platform-cache-' + CACHE_VERSION;
 
-// Static assets to pre-cache (CSS, fonts, icons only - NOT HTML pages)
+// Static assets to pre-cache (CSS, fonts, icons, JS - NOT HTML pages)
 const STATIC_CACHE = [
   './favicon.ico',
   './css/style.css',
-  './css/mobile.css'
+  './css/mobile.css',
+  './css/dashboard.css',
+  './css/courses.css',
+  './js/main.js',
+  './js/auth.js',
+  './js/firebase-service.js',
+  './js/firebase-config.js',
+  './js/courses-renderer.js'
 ];
 
 // Install: cache only static assets
@@ -136,4 +143,33 @@ self.addEventListener('notificationclick', function(event) {
       }
     })
   );
+});
+
+
+// --- FIREBASE CLOUD MESSAGING ---
+importScripts('https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging-compat.js');
+importScripts('./js/firebase-config.js'); // Assumes this initializes firebase apps
+
+try {
+  const messaging = firebase.messaging();
+  messaging.onBackgroundMessage((payload) => {
+    console.log('[firebase-messaging-sw.js] Received background message ', payload);
+    const notificationTitle = payload.notification.title || 'إشعار جديد';
+    const notificationOptions = {
+      body: payload.notification.body,
+      icon: payload.notification.icon || '/favicon.ico',
+      data: { url: payload.notification.clickAction || '/' }
+    };
+    self.registration.showNotification(notificationTitle, notificationOptions);
+  });
+} catch(e) {
+  console.warn('FCM SW Initialization failed', e);
+}
+
+self.addEventListener('notificationclick', function(event) {
+  event.notification.close();
+  if (event.notification.data && event.notification.data.url) {
+    event.waitUntil(clients.openWindow(event.notification.data.url));
+  }
 });

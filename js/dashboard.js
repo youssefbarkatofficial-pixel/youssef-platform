@@ -1,4 +1,4 @@
-// Sidebar toggle logic moved to mobile.js
+﻿// Sidebar toggle logic moved to mobile.js
 
 document.addEventListener('DOMContentLoaded', async () => {
   // Check auth
@@ -227,10 +227,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                     card.innerHTML = `
                         <div style="display: flex; align-items: center; gap: 15px;">
                             <div style="width: 60px; height: 60px; overflow: hidden; border-radius: 8px; flex-shrink: 0; background: var(--secondary-navy, #0a1e3a);">
-                                <img src="${c.image}" style="width: 100%; height: 100%; object-fit: cover; object-position: center; display: block;">
+                                <img src="${safeSrc(c.image)}" style="width: 100%; height: 100%; object-fit: cover; object-position: center; display: block;">
                             </div>
                             <div>
-                                <h4 style="color: var(--text-primary); margin-bottom: 5px;">${c.title}</h4>
+                                <h4 style="color: var(--text-primary); margin-bottom: 5px;">${escHtml(c.title)}</h4>
                                 <span class="badge" style="background: rgba(88, 196, 221, 0.2); color: var(--accent-cyan); font-size: 0.8rem;">${c.grade === 'prep1' ? 'أولى إعدادي' : c.grade === 'prep2' ? 'تانية إعدادي' : c.grade === 'prep3' ? 'تالتة إعدادي' : 'أولى ثانوي'}</span>
                             </div>
                         </div>
@@ -285,7 +285,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     card.style.cssText = 'background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; border: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;';
                     card.innerHTML = `
                         <div>
-                            <h4 style="color: var(--text-primary); margin-bottom: 5px;">${hw.examTitle}</h4>
+                            <h4 style="color: var(--text-primary); margin-bottom: 5px;">${escHtml(hw.examTitle)}</h4>
                             <span style="color: var(--accent-cyan); font-size: 0.85rem;">الدرجة: ${hw.percent}%</span>
                         </div>
                         <a href="homeworks.html" class="btn btn-outline" style="padding: 6px 12px; font-size: 0.8rem;">عرض</a>
@@ -309,7 +309,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     card.style.cssText = 'background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; border: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;';
                     card.innerHTML = `
                         <div>
-                            <h4 style="color: var(--text-primary); margin-bottom: 5px;">${ex.examTitle}</h4>
+                            <h4 style="color: var(--text-primary); margin-bottom: 5px;">${escHtml(ex.examTitle)}</h4>
                             <span style="color: var(--accent-cyan); font-size: 0.85rem;">الدرجة: ${ex.percent}%</span>
                         </div>
                         <a href="exams.html?openExam=${encodeURIComponent(ex.examTitle)}" class="btn btn-outline" style="padding: 6px 12px; font-size: 0.8rem;">النتيجة</a>
@@ -351,7 +351,7 @@ document.addEventListener('DOMContentLoaded', async () => {
               item.setAttribute('data-timestamp', n.timestamp || '');
               const left = document.createElement('div');
               left.style.cssText = 'flex:1;';
-              left.innerHTML = `<div style="font-weight:700;color:var(--text-primary)">${n.title || 'إشعار جديد'}</div><div style="font-size:0.9rem;color:var(--text-secondary);margin-top:4px;">${n.message || ''}</div>`;
+              left.innerHTML = `<div style="font-weight:700;color:var(--text-primary)">${escHtml(n.title || 'إشعار جديد')}</div><div style="font-size:0.9rem;color:var(--text-secondary);margin-top:4px;">${escHtml(n.message || '')}</div>`;
               const right = document.createElement('div');
               right.innerHTML = `<small style="color:var(--text-secondary);font-size:0.8rem;">${n.timestamp ? new Date(n.timestamp).toLocaleString() : ''}</small>`;
               item.appendChild(left);
@@ -638,13 +638,27 @@ document.addEventListener('DOMContentLoaded', async () => {
       const proofImageKey = 'proof_' + Date.now() + '_' + encodeURIComponent(user.phone);
       await savePaymentProofImage(proofImageKey, proofImageBase64);
 
-      // Upload to Firebase Storage is disabled because it hangs for unauthenticated students.
-      // The image is already compressed to <500KB, so it is safe to send directly to Firestore.
-      let proofImageUrl = null;
-              console.log('[UPLOAD] Image uploaded to Storage:', proofImageUrl);
-
-
-
+            let proofImageUrl = null;
+      if (window.firebaseStorage) {
+          try {
+              const storageRef = window.firebaseStorage.ref('payments/' + proofImageKey + '.jpg');
+              // Convert base64 to blob
+              const res = await fetch(proofImageBase64);
+              const blob = await res.blob();
+              
+              const uploadPromise = storageRef.put(blob);
+              const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Upload timeout')), 20000));
+              const snapshot = await Promise.race([uploadPromise, timeoutPromise]);
+              proofImageUrl = await snapshot.ref.getDownloadURL();
+          } catch (e) {
+              console.error('Failed to upload payment proof to Storage:', e);
+              alert('فشل رفع صورة الإثبات. يرجى التحقق من اتصالك بالإنترنت والمحاولة مرة أخرى.');
+              return;
+          }
+      } else {
+          alert('خدمة الرفع غير متوفرة حالياً.');
+          return;
+      }
 
       let courseName = 'غير معروف';
       const cTitleEl = document.querySelector(`.course-card[data-course-id="${courseId}"] .course-title`);
@@ -659,7 +673,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         userEmail: user.email || `${user.phone}@student.youssefbarakat.com`,
         proofImageKey: proofImageKey,
         proofImageUrl: proofImageUrl,
-        proofImage: proofImageBase64 // Compressed <500KB image sent directly to Firestore
+        proofImage: null // Removed, using proofImageUrl instead
       };
 
       console.log('[PAYMENT DATA]', requestData);
@@ -916,8 +930,8 @@ async function loadLeaderboard(currentGrade) {
             html += `
                 <div style="background: ${bgColor}; border: 1px solid ${borderColor}; border-radius: 15px; padding: 15px; min-width: 120px; text-align: center; display: flex; flex-direction: column; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); ${isMe ? 'transform: scale(1.03);' : ''}">
                     ${rankIcon}
-                    <img src="${avatar}" onerror="this.src='https://ui-avatars.com/api/?name=${nameLetter}&background=071326&color=D4A64F&size=80'" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; margin-bottom: 10px; border: 2px solid ${borderColor};">
-                    <div style="font-weight: bold; font-size: 0.9rem; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 110px;">${student.name || 'طالب'}${isMe ? ' 👤' : ''}</div>
+                    <img src="${safeSrc(avatar)}" onerror="this.src='https://ui-avatars.com/api/?name=${nameLetter}&background=071326&color=D4A64F&size=80'" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; margin-bottom: 10px; border: 2px solid ${borderColor};">
+                    <div style="font-weight: bold; font-size: 0.9rem; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 110px;">${escHtml(student.name || 'طالب')}${isMe ? ' 👤' : ''}</div>
                     <div style="font-size: 0.75rem; color: #D4A64F; margin-top: 3px; font-weight: bold;">${student._rankName}</div>
                     <div style="font-size: 0.8rem; color: var(--accent-cyan); margin-top: 5px;">${student._leaderboardScore} نقطة</div>
                 </div>
@@ -931,5 +945,32 @@ async function loadLeaderboard(currentGrade) {
         container.innerHTML = '<div style="text-align: center; width: 100%; padding: 20px; color: #ef4444;">حدث خطأ في تحميل لوحة الشرف</div>';
     }
 }
+
+
+
+document.addEventListener('DOMContentLoaded', () => {
+    const dashSearchInput = document.getElementById('dashCourseSearchInput');
+    if (dashSearchInput) {
+        dashSearchInput.addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase();
+            const coursesContainer = document.getElementById('coursesProgressContainer');
+            if (coursesContainer) {
+                const courseCards = coursesContainer.querySelectorAll('.dash-course-card');
+                courseCards.forEach(card => {
+                    const titleEl = card.querySelector('h3');
+                    const title = titleEl ? titleEl.textContent.toLowerCase() : '';
+                    if (title.includes(query)) {
+                        card.style.display = 'flex';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            }
+        });
+    }
+});
+
+
+
 
 

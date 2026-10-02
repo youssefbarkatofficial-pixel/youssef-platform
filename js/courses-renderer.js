@@ -116,25 +116,48 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const coursesGrid = document.getElementById('coursesGrid');
     const filterBtns = document.querySelectorAll('.filter-btn');
+    const searchInput = document.getElementById('courseSearchInput');
+
+    function applyFilters() {
+        if (!coursesGrid) return;
+        const activeBtn = document.querySelector('.filter-btn.active');
+        const filterValue = activeBtn ? activeBtn.getAttribute('data-filter') : 'all';
+        const searchQuery = searchInput ? searchInput.value.toLowerCase() : '';
+        
+        const allCards = coursesGrid.querySelectorAll('.course-card');
+        allCards.forEach(card => {
+            const titleEl = card.querySelector('.course-title');
+            const title = titleEl ? titleEl.textContent.toLowerCase() : '';
+            const gradeMatch = (filterValue === 'all' || card.getAttribute('data-grade') === filterValue);
+            const searchMatch = (searchQuery === '' || title.includes(searchQuery));
+            
+            card.style.display = (gradeMatch && searchMatch) ? 'flex' : 'none';
+        });
+    }
 
     function attachCourseFilters() {
         if (!coursesGrid) return;
-        if (!filterBtns.length) return;
-
-        filterBtns.forEach(btn => {
-            btn.removeEventListener('click', btn._courseFilterHandler);
-            const handler = (e) => {
-                filterBtns.forEach(b => b.classList.remove('active'));
-                e.target.classList.add('active');
-                const filterValue = e.target.getAttribute('data-filter');
-                const allCards = coursesGrid.querySelectorAll('.course-card');
-                allCards.forEach(card => {
-                    card.style.display = (filterValue === 'all' || card.getAttribute('data-grade') === filterValue) ? 'flex' : 'none';
-                });
+        if (filterBtns.length) {
+            filterBtns.forEach(btn => {
+                btn.removeEventListener('click', btn._courseFilterHandler);
+                const handler = (e) => {
+                    filterBtns.forEach(b => b.classList.remove('active'));
+                    e.target.classList.add('active');
+                    applyFilters();
+                };
+                btn._courseFilterHandler = handler;
+                btn.addEventListener('click', handler);
+            });
+        }
+        
+        if (searchInput) {
+            searchInput.removeEventListener('input', searchInput._courseSearchHandler);
+            const searchHandler = (e) => {
+                applyFilters();
             };
-            btn._courseFilterHandler = handler;
-            btn.addEventListener('click', handler);
-        });
+            searchInput._courseSearchHandler = searchHandler;
+            searchInput.addEventListener('input', searchHandler);
+        }
     }
 
     window.renderCourses = async function() {

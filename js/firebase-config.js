@@ -1,4 +1,4 @@
-// إعدادات المنصة المحدثة
+﻿// إعدادات المنصة المحدثة
 const firebaseConfig = {
     apiKey: "AIzaSyCT05MbiNBz15USSAPzqx1xxdIiDxykvHs",
     authDomain: "youssefbarakatplatform-8abff.firebaseapp.com",
@@ -12,10 +12,12 @@ let app, auth, db, storage;
 
 // Unclog offline persistence queue natively before Firebase initializes
 try {
-    if (!localStorage.getItem('unclog_firestore_v2')) {
-        window.indexedDB.deleteDatabase('firestore/[DEFAULT]/youssefbarakatplatform-8abff/main');
-        localStorage.setItem('unclog_firestore_v2', 'true');
-        console.log('Cleared Firestore IndexedDB to unclog queues');
+    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+        if (!localStorage.getItem('unclog_firestore_v2')) {
+            window.indexedDB.deleteDatabase('firestore/[DEFAULT]/youssefbarakatplatform-8abff/main');
+            localStorage.setItem('unclog_firestore_v2', 'true');
+            console.log('Cleared Firestore IndexedDB to unclog queues');
+        }
     }
 } catch(e) {}
 
@@ -49,21 +51,6 @@ console.log('Firestore Exists:', !!window.firebaseDb);
 console.log('Auth Exists:', !!window.firebaseAuth);
 console.log('Firebase Ready:', !!window.firebase);
 
-// STEP 3 — FORCE TEST WRITE
-(async () => {
-    if (window.firebaseDb) {
-        try {
-            const testRef = await window.firebaseDb
-                .collection('debug_test')
-                .add({
-                    test: true,
-                    timestamp: new Date().toISOString()
-                });
+// Initialization confirmed
 
-            console.log('TEST WRITE SUCCESS:', testRef.id);
 
-        } catch (err) {
-            console.error('TEST WRITE FAILED:', err);
-        }
-    }
-})();

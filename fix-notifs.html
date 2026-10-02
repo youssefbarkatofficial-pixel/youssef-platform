@@ -1,9 +1,9 @@
-ï»¿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <link rel="manifest" href="./manifest.json">
     <meta charset="UTF-8">
-    <title>Ø¥ØµÙ„Ø§Ø­ Ø§Ù„Ø¥Ø´Ø¹Ø§Ø±Ø§Øª</title>
+    <title>ÅÕáÇÍ ÇáÅÔÚÇÑÇÊ</title>
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
@@ -11,17 +11,17 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
     
     <!-- Config -->
-    <script src="js/firebase-config.js"></script>
+    <script src="js/firebase-config.js?v=11"></script>
     
     <style>
         body { font-family: Arial, sans-serif; padding: 50px; background: #111; color: #fff; }
         button { padding: 15px 30px; font-size: 1.2rem; cursor: pointer; }
     </style>
-    <link rel="icon" type="image/png" href="images/logo.png?v=6">
+    <link rel="icon" type="image/png" href="images/logo.png?v=11">
 </head>
 <body>
-    <h1>Ø¥ØµÙ„Ø§Ø­ Ø¥Ø´Ø¹Ø§Ø±Ø§Øª ØªØ¹Ø¯ÙŠÙ„ Ø§Ù„Ø¯Ø±Ø¬Ø© Ø§Ù„Ù‚Ø¯ÙŠÙ…Ø©</h1>
-    <button id="fixBtn">Ø§Ø¨Ø¯Ø£ Ø§Ù„Ø¥ØµÙ„Ø§Ø­ Ø§Ù„Ø¢Ù†</button>
+    <h1>ÅÕáÇÍ ÅÔÚÇÑÇÊ ÊÚÏíá ÇáÏÑÌÉ ÇáŞÏíãÉ</h1>
+    <button id="fixBtn">ÇÈÏÃ ÇáÅÕáÇÍ ÇáÂä</button>
     <p id="status"></p>
 
     <script>
@@ -29,7 +29,7 @@
             const btn = document.getElementById('fixBtn');
             const status = document.getElementById('status');
             btn.disabled = true;
-            status.innerHTML = 'Ø¬Ø§Ø±ÙŠ Ø§Ù„Ø¨Ø­Ø« ÙÙŠ Ù‚Ø§Ø¹Ø¯Ø© Ø§Ù„Ø¨ÙŠØ§Ù†Ø§Øª...';
+            status.innerHTML = 'ÌÇÑí ÇáÈÍË İí ŞÇÚÏÉ ÇáÈíÇäÇÊ...';
             
             try {
                 const snapshot = await window.firebaseDb.collection('students').get();
@@ -41,15 +41,15 @@
                     
                     if (data.notifications && Array.isArray(data.notifications)) {
                         const newNotifs = data.notifications.map(n => {
-                            if (n.title && n.title.includes('ØªØ¹Ø¯ÙŠÙ„ Ø¯Ø±Ø¬Ø©')) {
+                            if (n.title && n.title.includes('ÊÚÏíá ÏÑÌÉ')) {
                                 changed = true;
-                                let type = 'Ø§Ù…ØªØ­Ø§Ù†';
-                                if (n.title.includes('ØªØ¯Ø±ÙŠØ¨')) type = 'ØªØ¯Ø±ÙŠØ¨';
-                                if (n.title.includes('ÙˆØ§Ø¬Ø¨')) type = 'ÙˆØ§Ø¬Ø¨';
+                                let type = 'ÇãÊÍÇä';
+                                if (n.title.includes('ÊÏÑíÈ')) type = 'ÊÏÑíÈ';
+                                if (n.title.includes('æÇÌÈ')) type = 'æÇÌÈ';
                                 
                                 return {
-                                    title: `ØªÙ… Ø¥Ø¹Ø§Ø¯Ø© ØªØµØ­ÙŠØ­ ${type}`,
-                                    message: n.body || n.message || `ØªÙ… Ø¥Ø¹Ø§Ø¯Ø© ØªØµØ­ÙŠØ­ ${type} Ø§Ù„Ø®Ø§Øµ Ø¨Ùƒ ÙˆØªØ¹Ø¯ÙŠÙ„ Ø¯Ø±Ø¬ØªÙƒ.`,
+                                    title: `Êã ÅÚÇÏÉ ÊÕÍíÍ ${type}`,
+                                    message: n.body || n.message || `Êã ÅÚÇÏÉ ÊÕÍíÍ ${type} ÇáÎÇÕ Èß æÊÚÏíá ÏÑÌÊß.`,
                                     timestamp: n.ts || n.timestamp || Date.now(),
                                     read: false,
                                     link: 'exams.html'
@@ -61,14 +61,14 @@
                         if (changed) {
                             await doc.ref.update({ notifications: newNotifs });
                             updatedCount++;
-                            status.innerHTML += `<br>ØªÙ… ØªØ­Ø¯ÙŠØ« Ø¨ÙŠØ§Ù†Ø§Øª Ø§Ù„Ø·Ø§Ù„Ø¨ ${data.name || doc.id}`;
+                            status.innerHTML += `<br>Êã ÊÍÏíË ÈíÇäÇÊ ÇáØÇáÈ ${data.name || doc.id}`;
                         }
                     }
                 }
                 
-                status.innerHTML += `<br><br><b>Ø§Ù†ØªÙ‡Ù‰! ØªÙ… ØªØ­Ø¯ÙŠØ« Ø¥Ø´Ø¹Ø§Ø±Ø§Øª ${updatedCount} Ø·Ø§Ù„Ø¨ Ø¨Ù†Ø¬Ø§Ø­.</b>`;
+                status.innerHTML += `<br><br><b>ÇäÊåì! Êã ÊÍÏíË ÅÔÚÇÑÇÊ ${updatedCount} ØÇáÈ ÈäÌÇÍ.</b>`;
             } catch(e) {
-                status.innerHTML += `<br><span style="color:red">Ø®Ø·Ø£: ${e.message}</span>`;
+                status.innerHTML += `<br><span style="color:red">ÎØÃ: ${e.message}</span>`;
             }
             
             btn.disabled = false;
@@ -84,3 +84,4 @@
     </script>
 </body>
 </html>
+

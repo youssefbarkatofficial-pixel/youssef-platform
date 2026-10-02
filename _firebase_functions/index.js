@@ -1,4 +1,4 @@
-const functions = require('firebase-functions');
+﻿const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 
 // Initialize Firebase Admin
@@ -80,7 +80,7 @@ exports.askAlBouslaLLM = functions.https.onCall(async (data, context) => {
         const { searchLearnedMemory, saveToLearnedMemory } = require('./rag/learned-memory');
 
         const db = admin.firestore();
-        const userId = context?.auth?.uid || 'anonymous';
+        
         
         // Quota Protection
         if (!(await checkQuota(userId, db))) {
@@ -180,3 +180,75 @@ exports.askAlBouslaLLM = functions.https.onCall(async (data, context) => {
         return { reply: safeMsg };
     }
 });
+
+// --- REAL FCM PUSH NOTIFICATIONS ---
+exports.onStudentNotificationAdded = functions.firestore
+    .document('students/{phone}')
+    .onUpdate(async (change, context) => {
+        const before = change.before.data();
+        const after = change.after.data();
+        
+        const notifsBefore = before.notifications || [];
+        const notifsAfter = after.notifications || [];
+        
+        // If a new notification was added
+        if (notifsAfter.length > notifsBefore.length) {
+            const newNotif = notifsAfter[notifsAfter.length - 1];
+            
+            // Check if student has FCM token registered
+            if (after.fcmToken) {
+                const payload = {
+                    notification: {
+                        title: newNotif.title || 'إشعار جديد',
+                        body: 'تم قبول اشتراكك في الكورس',
+                        icon: '/favicon.ico',
+                        clickAction: 'https://youssefbarakat.com/dashboard.html'
+                    }
+                };
+                
+                try {
+                    await admin.messaging().sendToDevice(after.fcmToken, payload);
+                    console.log(`FCM sent successfully`);
+                } catch (e) {
+                    console.error(`Failed to send FCM`, e);
+                }
+            }
+        }
+    });
+
+exports.onPaymentRequestApproved = functions.firestore
+    .document('paymentRequests/{reqId}')
+    .onUpdate(async (change, context) => {
+        const before = change.before.data();
+        const after = change.after.data();
+        
+        if (before.status !== 'approved' && after.status === 'approved') {
+            const userPhone = after.userId || after.userPhone;
+            if (userPhone) {
+                try {
+                    const snap = await admin.firestore().collection('students').doc(userPhone).get();
+                    if (snap.exists) {
+                        const student = snap.data();
+                        if (student.fcmToken) {
+                            const payload = {
+                                notification: {
+                                    title: 'تم قبول دفع الكورس',
+                                    body: 'تم قبول اشتراكك في الكورس',
+                                    icon: '/favicon.ico',
+                                    clickAction: 'https://youssefbarakat.com/dashboard.html'
+                                }
+                            };
+                            await admin.messaging().sendToDevice(student.fcmToken, payload);
+                            console.log(`FCM payment approval sent`);
+                        }
+                    }
+                } catch(e) {
+                    console.error('FCM payment push error:', e);
+                }
+            }
+        }
+    });
+
+
+
+

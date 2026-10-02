@@ -1,4 +1,4 @@
-/**
+﻿/**
  * ==========================================
  * Firebase Service Layer - يوسف بركات منصة
  * ==========================================
@@ -6,7 +6,105 @@
  * localStorage كـ cache محلي للسرعة
  */
 
+/**
+ * Global HTML sanitization utilities
+ * Used across all pages to prevent XSS when injecting user data into innerHTML
+ */
+window.escHtml = function(s) {
+    if (s == null) return '';
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+};
+
+window.safeSrc = function(url, placeholder) {
+    if (!url || typeof url !== 'string') return placeholder || 'images/logo.png';
+    var trimmed = url.trim();
+    if (/^https?:\/\//i.test(trimmed) || /^data:image\//i.test(trimmed)) return trimmed;
+    return placeholder || 'images/logo.png';
+};
+
 window.FirebaseService = (function () {
+
+
+    // --- Auto Retry Local Payments ---
+    async function retryLocalPayments() {
+        if (!isFirebaseReady()) return;
+        let reqs = JSON.parse(localStorage.getItem('paymentRequests') || '[]');
+        let pendingLocals = reqs.filter(r => r.id && r.id.toString().startsWith('local_'));
+        
+        if (pendingLocals.length === 0) return;
+        console.log(`Found ${pendingLocals.length} local payment requests. Attempting auto-retry...`);
+        
+        let remainingLocals = [];
+        for (const req of pendingLocals) {
+            try {
+                // Prepare for addPaymentRequest (it expects data without id or status 'pending' if we want to treat it as fresh, but let's just pass it)
+                const payload = { ...req };
+                delete payload.id;
+                delete payload.status;
+                delete payload.createdAt;
+                
+                const res = await addPaymentRequest(payload);
+                if (!res.success) {
+                    remainingLocals.push(req);
+                } else {
+                    console.log('Successfully auto-retried local payment:', req.courseId);
+                }
+            } catch(e) {
+                console.error('Auto-retry failed for payment', req, e);
+                remainingLocals.push(req);
+            }
+        }
+        
+        // Update local storage
+        let nonLocals = reqs.filter(r => !r.id || !r.id.toString().startsWith('local_'));
+        localStorage.setItem('paymentRequests', JSON.stringify([...nonLocals, ...remainingLocals]));
+    }
+    
+
+    // --- Auto Retry Local Data (Exams/CompletedItems) ---
+    async function retryLocalStudentData() {
+        if (!isFirebaseReady()) return;
+        
+        // Retry Exam Results
+        let unsyncedExams = JSON.parse(localStorage.getItem('unsyncedExamResults') || '[]');
+        if (unsyncedExams.length > 0) {
+            console.log(`Found ${unsyncedExams.length} unsynced exam results. Retrying...`);
+            let remaining = [];
+            for (let req of unsyncedExams) {
+                try {
+                    await updateStudentData(req.phone, { examResults: req.results });
+                    console.log('Successfully auto-synced exam results for', req.phone);
+                } catch(e) {
+                    remaining.push(req);
+                }
+            }
+            localStorage.setItem('unsyncedExamResults', JSON.stringify(remaining));
+        }
+
+        // Retry Completed Items
+        let unsyncedItems = JSON.parse(localStorage.getItem('unsyncedCompletedItems') || '[]');
+        if (unsyncedItems.length > 0) {
+            console.log(`Found ${unsyncedItems.length} unsynced completed items. Retrying...`);
+            let remaining = [];
+            for (let req of unsyncedItems) {
+                try {
+                    await updateStudentData(req.phone, { completedItems: req.items });
+                    console.log('Successfully auto-synced completed items for', req.phone);
+                } catch(e) {
+                    remaining.push(req);
+                }
+            }
+            localStorage.setItem('unsyncedCompletedItems', JSON.stringify(remaining));
+        }
+    }
+    
+    // Call retry periodically if Firebase becomes ready
+    setInterval(() => {
+        if (isFirebaseReady()) {
+            retryLocalPayments();
+            retryLocalStudentData();
+        }
+    }, 15000); // Check every 15 seconds
 
     // --- Realtime Listeners ---
     let coursesListenerUnsubscribe = null;
@@ -467,6 +565,28 @@ window.FirebaseService = (function () {
     /**
      * حذف كورس
      */
+    async function uploadCourseImage(courseId, base64Data) {
+        if (!isFirebaseReady()) throw new Error("Firebase is not ready. Cannot upload image.");
+        try {
+            // Convert base64 to Blob
+            const response = await fetch(base64Data);
+            const blob = await response.blob();
+            
+            // Upload to Storage
+            const storageRef = firebase.storage().ref();
+            const imageRef = storageRef.child(`courses/${courseId}_${Date.now()}.jpg`);
+            
+            console.log('Uploading course image to Storage...');
+            const snapshot = await imageRef.put(blob);
+            const downloadURL = await snapshot.ref.getDownloadURL();
+            console.log('Upload complete. URL:', downloadURL);
+            return downloadURL;
+        } catch(e) {
+            console.error('Failed to upload course image to Storage:', e);
+            throw e;
+        }
+    }
+
     async function deleteCourse(id) {
         let courses = JSON.parse(localStorage.getItem('adminCourses') || '[]');
         courses = courses.filter(c => c.id !== id);
@@ -694,7 +814,35 @@ window.FirebaseService = (function () {
     /**
      * جلب كل طلبات الدفع (للأدمن)
      */
-    async function getPaymentRequests() {
+        function setupStudentPaymentListener(phone, callback) {
+        if (!isFirebaseReady()) return () => {};
+        const db = getDb();
+        return db.collection('paymentRequests').where('userPhone', '==', phone).onSnapshot(snapshot => {
+            let reqs = [];
+            snapshot.forEach(doc => {
+                reqs.push({ id: doc.id, ...doc.data() });
+            });
+            localStorage.setItem('paymentRequests', JSON.stringify(reqs));
+            
+            snapshot.docChanges().forEach(change => {
+                if (change.type === 'modified') {
+                    const data = change.doc.data();
+                    if (data.status === 'approved') {
+                        if (window.showToast) window.showToast('تم قبول اشتراكك في الكورس: ' + (data.courseName || ''), 'success');
+                    } else if (data.status === 'rejected') {
+                        if (window.showToast) window.showToast('تم رفض اشتراكك في الكورس: ' + (data.courseName || ''), 'error');
+                    }
+                }
+            });
+            
+            if (callback) callback(reqs);
+            window.dispatchEvent(new CustomEvent('paymentsUpdated'));
+        }, err => {
+            console.error('Payment listener error:', err);
+        });
+    }
+
+async function getPaymentRequests() {
         let reqs = JSON.parse(localStorage.getItem('paymentRequests') || '[]');
         if (!isFirebaseReady()) return reqs;
 
@@ -945,9 +1093,11 @@ window.FirebaseService = (function () {
         getStudentByPhone,
         getUser,
         setupGlobalListeners,
+        setupStudentPaymentListener,
         getCourse,
         getCourses,
         saveCourse,
+        uploadCourseImage,
         deleteCourse,
         getStudentData,
         updateStudentData,
@@ -1050,3 +1200,17 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch(e) {}
     }
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+

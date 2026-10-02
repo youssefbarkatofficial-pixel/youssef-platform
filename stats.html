@@ -6,9 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>الإحصائيات - منصة يوسف بركات</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="css/style.css?v=1785347365071">
+    <link rel="stylesheet" href="css/style.css?v=11">
     <link rel="stylesheet" href="css/dashboard.css">
-    <link rel="stylesheet" href="css/mobile.css?v=3">
+    <link rel="stylesheet" href="css/mobile.css?v=11">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         /* ===== STATS PAGE PREMIUM STYLES ===== */
@@ -157,13 +157,13 @@
         }
         .empty-stats i { font-size: 4rem; display: block; margin-bottom: 20px; opacity: 0.3; }
     </style>
-    <link rel="icon" type="image/png" href="images/logo.png?v=6">
+    <link rel="icon" type="image/png" href="images/logo.png?v=11">
 </head>
 <body>
 <div class="bg-effects"></div>
 <header class="navbar glass-panel">
     <a href="index.html" class="nav-brand">
-        <div class="logo-circle" style="width:40px;height:40px;font-size:1.2rem;"><img src="images/logo.png?v=1786475931154" alt="Logo" style="width:100%; height:100%; object-fit:cover; border-radius:50%;"></div>
+        <div class="logo-circle" style="width:40px;height:40px;font-size:1.2rem;"><img src="images/logo.png?v=11" alt="Logo" style="width:100%; height:100%; object-fit:cover; border-radius:50%;"></div>
         <span class="nav-brand-text">منصة يوسف بركات</span>
     </a>
     <div class="nav-actions">
@@ -308,11 +308,12 @@
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
-<script src="js/firebase-config.js?v=9"></script>
-<script src="js/firebase-service.js?v=9"></script>
-<script src="js/profile-guard.js?v=9"></script>
-<script src="js/storage-service.js?v=9"></script>
-<script src="js/main.js?v=9"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging-compat.js"></script>
+<script src="js/firebase-config.js?v=11"></script>
+<script src="js/firebase-service.js?v=11"></script>
+<script src="js/profile-guard.js?v=11"></script>
+<script src="js/storage-service.js?v=11"></script>
+<script src="js/main.js?v=11"></script>
 
 <script>
 document.addEventListener('DOMContentLoaded', async () => {
@@ -718,7 +719,7 @@ function buildInsight(avg, videos, totalVids, examsCount, history) {
     card.style.display = 'flex';
 }
 </script>
-    <script src="js/mobile.js?v=3"></script>
+    <script src="js/mobile.js?v=11"></script>
 
     <script>
         if ('serviceWorker' in navigator) {
@@ -729,5 +730,7 @@ function buildInsight(avg, videos, totalVids, examsCount, history) {
     </script>
 </body>
 </html>
+
+
 
 

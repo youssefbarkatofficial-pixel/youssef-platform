@@ -1,4 +1,4 @@
-
+﻿
 // AUTO CACHE CLEAR SCRIPT (Forces refresh across all browsers)
 (function() {
     const APP_VER = 'v20_leaderboard_fix';
@@ -612,7 +612,7 @@ document.addEventListener('DOMContentLoaded', () => {
           let userStr = sessionStorage.getItem('currentStudent') || localStorage.getItem('currentStudent');
     
     // Global Self-Healing for lost courses
-    if (userStr) {
+    if (userStrLocal) {
         try {
             let u = JSON.parse(userStr);
             if (u.notifications && Array.isArray(u.notifications) && window.firebaseDb) {
@@ -668,9 +668,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } catch (e) {}
     }
- || localStorage.getItem('currentStudent');
-          if (userStr) {
-              let user = JSON.parse(userStr);
+
+    let userStrLocal = sessionStorage.getItem('currentStudent') || localStorage.getItem('currentStudent');
+    if (userStrLocal) {
+              let user = JSON.parse(userStrLocal);
               let prefs = JSON.parse(localStorage.getItem(`prefs_${user.phone}`) || '{"sound":true,"globalSound":true}');
               if (soundName === 'notifArrive' || soundName === 'notifOpen') {
                   muted = (prefs.sound === false);
@@ -1964,5 +1965,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 500);
     });
 })();
+
 
 

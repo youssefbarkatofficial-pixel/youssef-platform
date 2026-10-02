@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <link rel="manifest" href="./manifest.json">
@@ -52,7 +52,7 @@ setTimeout(async () => {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>إدارة الكورسات - لوحة الإدارة</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="css/style.css?v=1785347365008">
+    <link rel="stylesheet" href="css/style.css?v=11">
     <link rel="stylesheet" href="css/dashboard.css">
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     <style>
@@ -107,8 +107,8 @@ setTimeout(async () => {
             background: linear-gradient(135deg, #7b5a18, #e67e22);
         }
     </style>
-    <link rel="stylesheet" href="css/mobile.css?v=3">
-    <link rel="icon" type="image/png" href="images/logo.png?v=6">
+    <link rel="stylesheet" href="css/mobile.css?v=11">
+    <link rel="icon" type="image/png" href="images/logo.png?v=11">
 </head>
 <body>
     <div class="bg-effects"></div>
@@ -117,7 +117,7 @@ setTimeout(async () => {
 
     <header class="navbar glass-panel" style="border-bottom-color: var(--royal-gold);">
         <a href="index.html" class="nav-brand">
-            <div class="logo-circle" style="color: #fff; background: var(--royal-gold);"><img src="images/logo.png?v=1786475931154" alt="Logo" style="width:100%; height:100%; object-fit:cover; border-radius:50%;"></div>
+            <div class="logo-circle" style="color: #fff; background: var(--royal-gold);"><img src="images/logo.png?v=11" alt="Logo" style="width:100%; height:100%; object-fit:cover; border-radius:50%;"></div>
             <span class="nav-brand-text text-gold"><span class="desktop-text">لوحة الإدارة - يوسف بركات</span><span class="mobile-only-text" style="display: none;">لوحة الإدارة</span></span>
         </a>
         <div class="nav-actions">
@@ -334,7 +334,7 @@ setTimeout(async () => {
         </div>
     </div>
 
-    <script src="js/admin-auth.js?v=9"></script>
+    <script src="js/admin-auth.js?v=11"></script>
     <script>
         // ============================
         // Local Toast Notification
@@ -1193,11 +1193,11 @@ window.removeQuestion = async function(sIdx, iIdx, qIdx) {
                                     const snapshot = await Promise.race([uploadPromise, timeoutPromise]);
                                     imageVal = await snapshot.ref.getDownloadURL();
                                     fileInput.value = '';
-                                    document.getElementById('fcImage').value = imageVal;
-                                }
-                            } catch (e) {
-                                console.warn('Failed to upload image to Firebase Storage, continuing without image update.', e);
-                                // Falls back to whatever imageVal currently is
+                                    document.getElementById('fcImage').value = imageVal; } } catch (e) {
+                                console.error('Failed to upload image to Firebase Storage:', e);
+                                alert('فشل رفع صورة الكورس أو انتهى وقت الاتصال. يرجى التحقق من الإنترنت والمحاولة مرة أخرى.\n\nلم يتم حفظ الكورس.');
+                                setButtonState(submitBtn, 'حفظ التعديلات', false);
+                                return; // STOP SAVING
                             }
                         }
 
@@ -1317,14 +1317,15 @@ window.removeQuestion = async function(sIdx, iIdx, qIdx) {
             }
         });
     </script>
-    <script src="js/bousala-teach.js?v=1.0"></script><script src="js/bousala-intents.js?v=1.0"></script><script src="js/support-chat.js?v=9"></script>
+    <script src="js/bousala-teach.js?v=11.0"></script><script src="js/bousala-intents.js?v=11.0"></script><script src="js/support-chat.js?v=11"></script>
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
-    <script src="js/firebase-config.js?v=9"></script>
-    <script src="js/firebase-service.js?v=10"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging-compat.js"></script>
+    <script src="js/firebase-config.js?v=11"></script>
+    <script src="js/firebase-service.js?v=11"></script>
     <!-- Course Subscribers Modal -->
     <div id="courseSubscribersModal" class="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; justify-content: center; align-items: center;">
         <div class="glass-panel" style="width: 95%; max-width: 800px; padding: 30px; position: relative; max-height: 90vh; overflow-y: auto;">
@@ -1837,7 +1838,7 @@ window.deleteFlatItem = async function(listKey, itemId) {
     if (!itemId) return alert('لا يمكن حذف عنصر بلا ID محدد.');
     const pwd = await window.requireAdminPassword();
     if(pwd === null) return;
-    if(pwd.trim() !== 'My@36_172001') return alert('كلمة المرور خاطئة');
+    /* ADMIN_AUTH_CHECK_HANDLED */
     
     const courses = getAdminCoursesArray();
     const courseIndex = courses.findIndex(c => c.id === window.currentFlatCourseId);
@@ -1872,7 +1873,7 @@ window.deleteFlatChildItem = async function(listKey, parentId, childId) {
     if (!parentId || !childId) return alert('لا يمكن حذف عنصر فرعي بلا ID محدد.');
     const pwd = await window.requireAdminPassword();
     if(pwd === null) return;
-    if(pwd.trim() !== 'My@36_172001') return alert('كلمة المرور خاطئة');
+    /* ADMIN_AUTH_CHECK_HANDLED */
     
     const courses = getAdminCoursesArray();
     const courseIndex = courses.findIndex(c => c.id === window.currentFlatCourseId);
@@ -2063,7 +2064,7 @@ window.confirmMoveItem = async function() {
         </div>
     </div>
     
-    <script src="js/mobile.js?v=3"></script>
+    <script src="js/mobile.js?v=11"></script>
 
     <script>
         if ('serviceWorker' in navigator) {
@@ -2094,8 +2095,60 @@ window.confirmMoveItem = async function() {
     });
     </script>
     
+    <script>
+    // Migration script for local images
+    async function migrateLocalImagesToStorage() {
+        if (!window.FirebaseService || !window.FirebaseService.isReady()) return;
+        const courses = JSON.parse(localStorage.getItem('adminCourses') || '[]');
+        let missingImagesReport = [];
+        let migratedCount = 0;
+        
+        for (let i = 0; i < courses.length; i++) {
+            let c = courses[i];
+            if (c.image && c.image.startsWith('__local__')) {
+                const base64Img = localStorage.getItem('img_' + c.id);
+                if (base64Img) {
+                    try {
+                        console.log(`Migrating image for course ${c.id}...`);
+                        const url = await window.FirebaseService.uploadCourseImage(c.id, base64Img);
+                        c.image = url;
+                        await window.FirebaseService.saveCourse(c, { replaceContents: true });
+                        migratedCount++;
+                        localStorage.removeItem('img_' + c.id);
+                    } catch (e) {
+                        console.error(`Failed to migrate image for course ${c.id}:`, e);
+                        missingImagesReport.push(`${c.title} (Upload Failed)`);
+                    }
+                } else {
+                    missingImagesReport.push(c.title);
+                }
+            }
+        }
+        
+        if (migratedCount > 0) {
+            localStorage.setItem('adminCourses', JSON.stringify(courses));
+            alert(`تم رفع ${migratedCount} صورة كورس لـ Firebase Storage بنجاح!`);
+        }
+        
+        if (missingImagesReport.length > 0) {
+            console.warn('Missing course images:', missingImagesReport);
+            alert('لم يتم العثور على صور الكورسات التالية في التخزين المحلي:\n' + missingImagesReport.join('\n'));
+        }
+    }
+    
+    document.addEventListener('DOMContentLoaded', () => {
+        setTimeout(migrateLocalImagesToStorage, 3000);
+    });
+
+</script>
 </body>
 </html>
+
+
+
+
+
+
 
 
 

@@ -1,4 +1,4 @@
-ï»¿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <link rel="manifest" href="./manifest.json">
@@ -7,20 +7,20 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
-    <script src="js/firebase-config.js"></script>
-    <script src="js/firebase-service.js"></script>
-    <link rel="icon" type="image/png" href="images/logo.png?v=6">
+    <script src="js/firebase-config.js?v=11"></script>
+    <script src="js/firebase-service.js?v=11"></script>
+    <link rel="icon" type="image/png" href="images/logo.png?v=11">
 </head>
 <body style="font-family: sans-serif; text-align: center; padding: 50px;">
-    <h1>Ø¬Ø§Ø±ÙŠ Ø§Ù„ØªØ­Ø¯ÙŠØ«...</h1>
-    <p id="status">Ø§Ù„Ø±Ø¬Ø§Ø¡ Ø§Ù„Ø§Ù†ØªØ¸Ø§Ø±</p>
+    <h1>ÌÇÑí ÇáÊÍÏíË...</h1>
+    <p id="status">ÇáÑÌÇÁ ÇáÇäÊÙÇÑ</p>
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
             try {
                 const courses = await window.fbService.getCourses();
                 const prep3 = courses.find(c => c.id === 'prep3');
                 if (!prep3) {
-                    document.getElementById('status').innerText = 'Ù„Ù… ÙŠØªÙ… Ø§Ù„Ø¹Ø«ÙˆØ± Ø¹Ù„Ù‰ ÙƒÙˆØ±Ø³ prep3.';
+                    document.getElementById('status').innerText = 'áã íÊã ÇáÚËæÑ Úáì ßæÑÓ prep3.';
                     return;
                 }
 
@@ -28,29 +28,29 @@
                 let hwItem = null;
                 for (const sec of prep3.sections) {
                     if (sec.items) {
-                        const found = sec.items.find(i => i.title === 'ÙˆØ§Ø¬Ø¨ Ø§Ù„Ù…Ø­Ø§Ø¶Ø±Ø© Ø§Ù„ØªØ¹Ø±ÙŠÙÙŠØ©');
+                        const found = sec.items.find(i => i.title === 'æÇÌÈ ÇáãÍÇÖÑÉ ÇáÊÚÑíİíÉ');
                         if (found) { hwItem = found; break; }
                     }
                 }
 
                 if (!hwItem) {
-                    document.getElementById('status').innerText = 'Ù„Ù… ÙŠØªÙ… Ø§Ù„Ø¹Ø«ÙˆØ± Ø¹Ù„Ù‰ Ø§Ù„ÙˆØ§Ø¬Ø¨ Ù„Ù†Ø³Ø®Ù‡.';
+                    document.getElementById('status').innerText = 'áã íÊã ÇáÚËæÑ Úáì ÇáæÇÌÈ áäÓÎå.';
                     return;
                 }
 
                 // Make sure Exams section exists
-                let examsSec = prep3.sections.find(s => s.title === 'Ø§Ù„Ø§Ù…ØªØ­Ø§Ù†Ø§Øª' || s.id === 'exams-section');
+                let examsSec = prep3.sections.find(s => s.title === 'ÇáÇãÊÍÇäÇÊ' || s.id === 'exams-section');
                 if (!examsSec) {
-                    examsSec = { id: 'sec-' + Date.now(), title: 'Ø§Ù„Ø§Ù…ØªØ­Ø§Ù†Ø§Øª', items: [] };
+                    examsSec = { id: 'sec-' + Date.now(), title: 'ÇáÇãÊÍÇäÇÊ', items: [] };
                     prep3.sections.push(examsSec);
                 }
                 
                 if (!examsSec.items) examsSec.items = [];
 
                 // Check if already migrated
-                const existingExam = examsSec.items.find(i => i.title === 'Ø§Ù…ØªØ­Ø§Ù† Ø§Ù„Ù…Ø­Ø§Ø¶Ø±Ø© Ø§Ù„ØªØ¹Ø±ÙŠÙÙŠØ©');
+                const existingExam = examsSec.items.find(i => i.title === 'ÇãÊÍÇä ÇáãÍÇÖÑÉ ÇáÊÚÑíİíÉ');
                 if (existingExam) {
-                    document.getElementById('status').innerText = 'ØªÙ… Ø¥Ù†Ø´Ø§Ø¡ Ø§Ù„Ø§Ù…ØªØ­Ø§Ù† Ù…Ø³Ø¨Ù‚Ø§Ù‹.';
+                    document.getElementById('status').innerText = 'Êã ÅäÔÇÁ ÇáÇãÊÍÇä ãÓÈŞÇğ.';
                     return;
                 }
 
@@ -62,7 +62,7 @@
                 // Clone the homework into an exam
                 const newExam = JSON.parse(JSON.stringify(hwItem));
                 newExam.id = 'exam-' + Date.now();
-                newExam.title = 'Ø§Ù…ØªØ­Ø§Ù† Ø§Ù„Ù…Ø­Ø§Ø¶Ø±Ø© Ø§Ù„ØªØ¹Ø±ÙŠÙÙŠØ©';
+                newExam.title = 'ÇãÊÍÇä ÇáãÍÇÖÑÉ ÇáÊÚÑíİíÉ';
                 newExam.type = 'exam';
                 newExam.availableFrom = nextWed.toISOString();
                 
@@ -70,10 +70,10 @@
                 if (newExam.questions) {
                     newExam.questions.forEach(q => {
                         if (q.text) {
-                            if (q.text.includes('Ø¨Ù… ØªÙØ³Ø±') && !q.text.includes('[Ø¨Ù… ØªÙØ³Ø±]')) {
-                                q.text = '[Ø¨Ù… ØªÙØ³Ø±] ' + q.text.replace('Ø¨Ù… ØªÙØ³Ø±', '').trim();
-                            } else if (q.text.includes('Ù…Ø§ Ø§Ù„Ù†ØªØ§Ø¦Ø¬') && !q.text.includes('[Ù…Ø§ Ø§Ù„Ù†ØªØ§Ø¦Ø¬]')) {
-                                q.text = '[Ù…Ø§ Ø§Ù„Ù†ØªØ§Ø¦Ø¬] ' + q.text.replace('Ù…Ø§ Ø§Ù„Ù†ØªØ§Ø¦Ø¬', '').trim();
+                            if (q.text.includes('Èã ÊİÓÑ') && !q.text.includes('[Èã ÊİÓÑ]')) {
+                                q.text = '[Èã ÊİÓÑ] ' + q.text.replace('Èã ÊİÓÑ', '').trim();
+                            } else if (q.text.includes('ãÇ ÇáäÊÇÆÌ') && !q.text.includes('[ãÇ ÇáäÊÇÆÌ]')) {
+                                q.text = '[ãÇ ÇáäÊÇÆÌ] ' + q.text.replace('ãÇ ÇáäÊÇÆÌ', '').trim();
                             }
                         }
                     });
@@ -82,10 +82,10 @@
                 examsSec.items.push(newExam);
                 
                 await window.fbService.saveCourse(prep3);
-                document.getElementById('status').innerHTML = '<b>ØªÙ… Ø¨Ù†Ø¬Ø§Ø­! ØªÙ… Ø¥Ù†Ø´Ø§Ø¡ Ø§Ù…ØªØ­Ø§Ù† Ø§Ù„Ù…Ø­Ø§Ø¶Ø±Ø© Ø§Ù„ØªØ¹Ø±ÙŠÙÙŠØ© Ù„ÙŠÙØªØ­ Ø§Ù„Ø£Ø±Ø¨Ø¹Ø§Ø¡ 9 Ù…Ø³Ø§Ø¡Ø§Ù‹. ÙŠÙ…ÙƒÙ†Ùƒ Ø­Ø°Ù Ù‡Ø°Ø§ Ø§Ù„Ù…Ù„Ù Ø§Ù„Ø¢Ù†.</b>';
+                document.getElementById('status').innerHTML = '<b>Êã ÈäÌÇÍ! Êã ÅäÔÇÁ ÇãÊÍÇä ÇáãÍÇÖÑÉ ÇáÊÚÑíİíÉ áíİÊÍ ÇáÃÑÈÚÇÁ 9 ãÓÇÁÇğ. íãßäß ÍĞİ åĞÇ Çáãáİ ÇáÂä.</b>';
             } catch (err) {
                 console.error(err);
-                document.getElementById('status').innerText = 'Ø­Ø¯Ø« Ø®Ø·Ø£: ' + err.message;
+                document.getElementById('status').innerText = 'ÍÏË ÎØÃ: ' + err.message;
             }
         });
     </script>
@@ -99,3 +99,4 @@
     </script>
 </body>
 </html>
+
