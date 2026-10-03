@@ -3,7 +3,7 @@
 <head>
     <link rel="manifest" href="./manifest.json">
     <meta charset="UTF-8">
-    <title>еуАгм гАетзгягй</title>
+    <title>О©╫О©╫О©╫О©╫О©╫ О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫</title>
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
@@ -18,10 +18,11 @@
         button { padding: 15px 30px; font-size: 1.2rem; cursor: pointer; }
     </style>
     <link rel="icon" type="image/png" href="images/logo.png?v=11">
+    <link rel="stylesheet" href="css/consistency.css?v=1">
 </head>
 <body>
-    <h1>еуАгм етзгягй йзоМА гАояли гАчоМЦи</h1>
-    <button id="fixBtn">гхоц гАеуАгм гАбД</button>
+    <h1>О©╫О©╫О©╫О©╫О©╫ О©╫О©╫О©╫О©╫О©╫О©╫О©╫ О©╫О©╫О©╫О©╫О©╫ О©╫О©╫О©╫О©╫О©╫О©╫ О©╫О©╫О©╫О©╫О©╫О©╫О©╫</h1>
+    <button id="fixBtn">О©╫О©╫О©╫О©╫ О©╫О©╫О©╫О©╫О©╫О©╫О©╫ О©╫О©╫О©╫О©╫</button>
     <p id="status"></p>
 
     <script>
@@ -29,7 +30,7 @@
             const btn = document.getElementById('fixBtn');
             const status = document.getElementById('status');
             btn.disabled = true;
-            status.innerHTML = 'лгяМ гАхмк щМ чгзои гАхМгДгй...';
+            status.innerHTML = 'О©╫О©╫О©╫О©╫ О©╫О©╫О©╫О©╫О©╫ О©╫О©╫ О©╫О©╫О©╫О©╫О©╫ О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫...';
             
             try {
                 const snapshot = await window.firebaseDb.collection('students').get();
@@ -41,15 +42,15 @@
                     
                     if (data.notifications && Array.isArray(data.notifications)) {
                         const newNotifs = data.notifications.map(n => {
-                            if (n.title && n.title.includes('йзоМА ояли')) {
+                            if (n.title && n.title.includes('О©╫О©╫О©╫О©╫О©╫ О©╫О©╫О©╫О©╫')) {
                                 changed = true;
-                                let type = 'гЦймгД';
-                                if (n.title.includes('йояМх')) type = 'йояМх';
-                                if (n.title.includes('Фглх')) type = 'Фглх';
+                                let type = 'О©╫О©╫О©╫О©╫О©╫О©╫';
+                                if (n.title.includes('О©╫О©╫О©╫О©╫О©╫')) type = 'О©╫О©╫О©╫О©╫О©╫';
+                                if (n.title.includes('О©╫О©╫О©╫О©╫')) type = 'О©╫О©╫О©╫О©╫';
                                 
                                 return {
-                                    title: `йЦ езгои йумМм ${type}`,
-                                    message: n.body || n.message || `йЦ езгои йумМм ${type} гАнгу хъ ФйзоМА оялйъ.`,
+                                    title: `О©╫О©╫ О©╫О©╫О©╫О©╫О©╫ О©╫О©╫О©╫О©╫О©╫ ${type}`,
+                                    message: n.body || n.message || `О©╫О©╫ О©╫О©╫О©╫О©╫О©╫ О©╫О©╫О©╫О©╫О©╫ ${type} О©╫О©╫О©╫О©╫О©╫ О©╫О©╫ О©╫О©╫О©╫О©╫О©╫О©╫ О©╫О©╫О©╫О©╫О©╫.`,
                                     timestamp: n.ts || n.timestamp || Date.now(),
                                     read: false,
                                     link: 'exams.html'
@@ -61,14 +62,14 @@
                         if (changed) {
                             await doc.ref.update({ notifications: newNotifs });
                             updatedCount++;
-                            status.innerHTML += `<br>йЦ ймоМк хМгДгй гАьгАх ${data.name || doc.id}`;
+                            status.innerHTML += `<br>О©╫О©╫ О©╫О©╫О©╫О©╫О©╫ О©╫О©╫О©╫О©╫О©╫О©╫ О©╫О©╫О©╫О©╫О©╫О©╫ ${data.name || doc.id}`;
                         }
                     }
                 }
                 
-                status.innerHTML += `<br><br><b>гДйЕЛ! йЦ ймоМк етзгягй ${updatedCount} ьгАх хДлгм.</b>`;
+                status.innerHTML += `<br><br><b>О©╫О©╫О©╫О©╫О©╫! О©╫О©╫ О©╫О©╫О©╫О©╫О©╫ О©╫О©╫О©╫О©╫О©╫О©╫О©╫ ${updatedCount} О©╫О©╫О©╫О©╫ О©╫О©╫О©╫О©╫О©╫.</b>`;
             } catch(e) {
-                status.innerHTML += `<br><span style="color:red">ньц: ${e.message}</span>`;
+                status.innerHTML += `<br><span style="color:red">О©╫О©╫О©╫: ${e.message}</span>`;
             }
             
             btn.disabled = false;
