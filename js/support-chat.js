@@ -23,16 +23,6 @@
             } catch(e) { console.warn('Could not fetch API key from DB', e); }
         }
 
-        // --- مفاتيح محمية (دعم Groq و Gemini) ---
-        var _r = function(s){return s.split('').map(function(c,i){return String.fromCharCode(c.charCodeAt(0)^(7+i%5));}).join('');};
-        var defaultKeys = [
-            _r("`{bUyrbq~lPlL_cca0cEpIzH\\@lph8AQNp{sK^LIjccY?Bmybc3cxn_6") // Groq Key
-        ];
-        // اختر المفتاح الصحيح من localStorage لو الأدمن حاطه يدوياً
-        defaultKeys = defaultKeys.filter(function(k){return k&&k.length>10;});
-
-        var _keys = customKey ? [customKey].concat(defaultKeys) : defaultKeys;
-        
         var userContext = 'طالب منصة';
         try {
             var adminData = sessionStorage.getItem('currentAdmin') || localStorage.getItem('currentAdmin');
@@ -131,47 +121,22 @@
         contentsArr.push({role:'user',parts:[{text:msg}]});
         groqMessages.push({role:'user', content: msg});
 
-        // تحديد النموذج المناسب ذكياً لتوفير الاستهلاك (إذا كان هناك Intent نستخدم 8B الأرخص لأن الإجابة محسومة)
-        var isComplex = !intentMatch && (msg.length > 60 || msg.includes('اشرح') || msg.includes('قارن') || msg.includes('بم تفسر') || msg.includes('لماذا') || msg.includes('كيف'));
-        var models = isComplex ? ['llama-3.3-70b-versatile', 'llama3-8b-8192'] : ['llama3-8b-8192', 'llama-3.3-70b-versatile'];
 
-        for (var keyIndex = 0; keyIndex < _keys.length; keyIndex++) {
-            var k = _keys[keyIndex];
-            if (!k) continue;
-            
-            if (k.startsWith('gsk_')) {
-                // محرك Groq
-                for (var i=0;i<models.length;i++){
-                    try {
-                        var r = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-                            method:'POST', headers:{'Content-Type':'application/json', 'Authorization': 'Bearer ' + k},
-                            body: JSON.stringify({model: models[i], messages: groqMessages, temperature: 0.2, max_tokens: 4096})
-                        });
-                        if (!r.ok) continue;
-                        var d = await r.json();
-                        var t = d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content;
-                        if (t) return {reply:t,fallback:false,provider:'groq-'+models[i]};
-                    } catch(e){}
-                }
-            } else {
-                // محرك Gemini
-                var geminiModels = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
-                for (var i=0;i<geminiModels.length;i++){
-                    try {
-                        var r = await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+geminiModels[i]+':generateContent?key='+k, {
-                            method:'POST', headers:{'Content-Type':'application/json'},
-                            body: JSON.stringify({system_instruction:{parts:[{text:sp}]},contents:contentsArr,generationConfig:{temperature:0.2,maxOutputTokens:4096}})
-                        });
-                        if (!r.ok) continue;
-                        var d = await r.json();
-                        var t = d.candidates && d.candidates[0] && d.candidates[0].content && d.candidates[0].content.parts && d.candidates[0].content.parts[0] && d.candidates[0].content.parts[0].text;
-                        if (t) return {reply:t,fallback:false,provider:'gemini-'+geminiModels[i]};
-                    } catch(e){}
-                }
+        // --- استدعاء الـ Cloud Function بدل الاتصال المباشر بـ API ---
+        // المفاتيح سرية على السيرفر فقط — المتصفح لا يرى أي API key
+        try {
+            var fn = firebase.functions().httpsCallable('askAlBouslaLLM');
+            var fnResult = await fn({ message: msg, history: history || [] });
+            if (fnResult.data && fnResult.data.reply) {
+                return { reply: fnResult.data.reply, fallback: false, provider: 'cloud-function' };
             }
+            return { fallback: true, reply: null, reason: 'empty_cloud_response' };
+        } catch(e) {
+            console.error('[BouslaBot] Cloud Function error:', e.message || e);
+            return { fallback: true, reply: null, reason: e.message || 'cloud_function_failed' };
         }
-        return {fallback:true,reply:null,reason:'all_failed'};
     };
+
 
 
   console.log("SUPPORT_CHAT_BUILD_20260602_MINIMAL_TUTOR");
