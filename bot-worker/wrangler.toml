@@ -1,0 +1,21 @@
+name = "bot-worker"
+main = "src/index.ts"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+account_id = "07ba1709fc85915f811c97f8269ae394"
+
+[vars]
+CORS_ORIGIN = "http://localhost:5173,https://youssef-barakat.web.app,https://youssefbarakat.com"
+FIREBASE_PROJECT_ID = "youssefbarakatplatform-8abff"
+GROQ_PRIMARY_MODEL = "openai/gpt-oss-120b"
+GROQ_FAST_MODEL = "openai/gpt-oss-20b"
+OWNER_EMAIL = "youssefbarkatofficial@gmail.com"
+ENVIRONMENT = "production"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "bousala-db"
+database_id = "c4c143d1-da92-445c-8080-8a9ea9c7c159"
+
+[triggers]
+crons = ["0 3 * * *"]

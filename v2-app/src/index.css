@@ -1,0 +1,19 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    @apply bg-navy-950;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-navy-950 font-sans text-slate-200 antialiased;
+  }
+
+  ::selection {
+    background: #d4a64f;
+    color: #071326;
+  }
+}

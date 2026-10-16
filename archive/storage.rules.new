@@ -1,0 +1,79 @@
+// قواعد Storage الجديدة (النسخة الثانية: المرحلة 3).
+// ملف فقط، غير منشور. تُنشر يوم التحويل النهائي بطلب من المالك.
+// قبل النشر لازم نراجع كل المسارات التي تستخدمها المنصة القديمة في Storage،
+// لأن أي مسار غير مذكور هنا سيصبح ممنوعًا.
+
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function hasEmail() {
+      return isSignedIn() && request.auth.token.email != null;
+    }
+
+    function isOwner() {
+      return hasEmail()
+        && request.auth.token.email.lower() == 'youssefbarkatofficial@gmail.com';
+    }
+
+    function isExtraAdmin() {
+      return hasEmail()
+        && firestore.exists(
+          /databases/(default)/documents/platformAdmins/$(request.auth.token.email.lower())
+        );
+    }
+
+    function isAdmin() {
+      return isOwner() || isExtraAdmin();
+    }
+
+    // صور أغلفة الكورسات الجديدة: قراءة عامة، والرفع للأدمن فقط (صور حتى 5 ميجابايت).
+    // الرفع بأسماء جديدة فقط، فلا تعديل ولا حذف.
+    match /course-covers/{fileName} {
+      allow read: if true;
+      allow create: if isAdmin()
+        && request.resource.size < 5 * 1024 * 1024
+        && request.resource.contentType.matches('image/(png|jpeg|webp)');
+      allow update, delete: if false;
+    }
+
+    // إثباتات الدفع: اسم الملف <uid>_<الوقت>.jpg.
+    // الطالب يرفع ملفه هو فقط ويقرأه، والأدمن يقرأ الكل، ولا تعديل ولا حذف.
+    match /payments/{fileName} {
+      allow create: if isSignedIn()
+        && fileName.matches(request.auth.uid + '_[0-9]+[.]jpg')
+        && request.resource.size < 5 * 1024 * 1024
+        && request.resource.contentType == 'image/jpeg';
+      allow read: if isSignedIn()
+        && (fileName.matches(request.auth.uid + '_.*') || isAdmin());
+      allow update, delete: if false;
+    }
+
+    // المسار القديم لصور الكورسات: قراءة فقط حتى تظل الصور القديمة ظاهرة.
+    match /courses/{allPaths=**} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // فيديوهات وملفات PDF المرفوعة من المنصة القديمة: قراءة فقط حتى تظل شغالة.
+    // (الرفع الجديد يُضاف في المرحلة الخاصة بالرفع، ولا نفتح الكتابة الآن.)
+    match /videos/{allPaths=**} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    match /pdfs/{allPaths=**} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // أي مسار آخر ممنوع.
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

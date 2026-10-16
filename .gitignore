@@ -18,7 +18,11 @@ inject.js
 
 # مجلد النسخ الاحتياطية
 backup/
+backups/
 scratch/
+v2-app-backup-*/
+*.zip
+firestore.rules.new
 
 # ملفات الاختبار
 test-email.html
@@ -46,3 +50,7 @@ server.js
 !package-lock.json
 !firebase.json
 !database.rules.json
+
+# Bot export & secrets
+tools/bot-export/
+.dev.vars
