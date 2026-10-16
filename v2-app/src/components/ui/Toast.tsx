@@ -25,9 +25,9 @@ const icons: Record<ToastType, LucideIcon> = {
 };
 
 const styles: Record<ToastType, string> = {
-  success: 'border-emerald-500/50 text-emerald-300',
-  error: 'border-red-500/50 text-red-300',
-  info: 'border-gold-500/50 text-gold-300',
+  success: 'border-emerald-500/50 text-emerald-400',
+  error: 'border-rose-500/50 text-rose-400',
+  info: 'border-theme-gold/50 text-theme-gold',
 };
 
 export function ToastProvider({ children }: { children: ReactNode }) {
@@ -59,17 +59,17 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               key={toast.id}
               role="alert"
               className={cn(
-                'flex items-start gap-3 rounded-xl border bg-navy-900 p-4 shadow-soft',
+                'flex items-start gap-3 rounded-card border bg-theme-surface p-4 shadow-soft text-theme-text transition-all',
                 styles[toast.type],
               )}
             >
               <Icon className="mt-0.5 h-5 w-5 shrink-0" />
-              <p className="flex-1 text-sm text-slate-100">{toast.message}</p>
+              <p className="flex-1 text-sm text-theme-text">{toast.message}</p>
               <button
                 type="button"
                 onClick={() => dismiss(toast.id)}
                 aria-label="إغلاق"
-                className="text-slate-400 hover:text-white"
+                className="text-theme-text-muted hover:text-theme-text"
               >
                 <X className="h-4 w-4" />
               </button>

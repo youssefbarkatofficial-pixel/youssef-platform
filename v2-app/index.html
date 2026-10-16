@@ -60,12 +60,20 @@
       }
     </script>
 
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap"
-      rel="stylesheet"
-    />
+    <script>
+      (function() {
+        try {
+          var variant = localStorage.getItem('yb_theme_variant') || 'compass';
+          var mode = localStorage.getItem('yb_theme_mode') || 'dark';
+          document.documentElement.setAttribute('data-theme', variant);
+          if (mode === 'light') {
+            document.documentElement.classList.add('light');
+          } else {
+            document.documentElement.classList.remove('light');
+          }
+        } catch(e) {}
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

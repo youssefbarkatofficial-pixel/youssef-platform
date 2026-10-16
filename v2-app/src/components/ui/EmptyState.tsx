@@ -22,11 +22,11 @@ export default function EmptyState({
 
   return (
     <div className={cn('flex flex-col items-center px-4 py-10 text-center', className)}>
-      <div className="mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-navy-800 text-gold-400">
+      <div className="mb-4 grid h-14 w-14 place-items-center rounded-btn border border-theme-border/60 bg-theme-surface text-theme-gold shadow-sm">
         <Icon className="h-7 w-7" />
       </div>
-      <h3 className="text-lg font-bold text-white">{title}</h3>
-      {description && <p className="mt-1.5 max-w-sm text-sm text-slate-400">{description}</p>}
+      <h3 className="text-lg font-bold text-theme-text">{title}</h3>
+      {description && <p className="mt-1.5 max-w-sm text-sm text-theme-text-muted">{description}</p>}
       {action && <div className="mt-5">{action}</div>}
     </div>
   );

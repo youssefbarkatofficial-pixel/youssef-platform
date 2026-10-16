@@ -16,7 +16,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     return (
       <div className="w-full">
         {label && (
-          <label htmlFor={inputId} className="mb-1.5 block text-sm font-medium text-slate-300">
+          <label htmlFor={inputId} className="mb-1.5 block text-sm font-bold text-theme-text-secondary">
             {label}
           </label>
         )}
@@ -25,19 +25,19 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           id={inputId}
           aria-invalid={error ? true : undefined}
           className={cn(
-            'h-11 w-full rounded-xl border bg-navy-900 px-3 text-white placeholder:text-slate-500',
-            'transition-colors focus:outline-none focus:ring-2 focus:ring-gold-500/40',
+            'h-11 w-full rounded-btn border bg-theme-surface px-3.5 text-theme-text placeholder:text-theme-text-muted',
+            'transition-colors focus:outline-none focus:ring-2 focus:ring-theme-border-focus/30',
             error
-              ? 'border-red-500 focus:border-red-500'
-              : 'border-navy-700 focus:border-gold-500',
+              ? 'border-rose-500 focus:border-rose-500 focus:ring-rose-500/20'
+              : 'border-theme-border focus:border-theme-border-focus',
             className,
           )}
           {...rest}
         />
         {error ? (
-          <p className="mt-1.5 text-sm text-red-400">{error}</p>
+          <p className="mt-1.5 text-sm font-medium text-rose-400">{error}</p>
         ) : hint ? (
-          <p className="mt-1.5 text-sm text-slate-500">{hint}</p>
+          <p className="mt-1.5 text-sm text-theme-text-muted">{hint}</p>
         ) : null}
       </div>
     );

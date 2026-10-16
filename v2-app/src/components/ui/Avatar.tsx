@@ -32,7 +32,7 @@ export default function Avatar({ name = '', src, size = 'md', className }: Avata
     <span
       aria-label={name}
       className={cn(
-        'grid shrink-0 place-items-center rounded-full bg-gold-500/20 font-bold text-gold-300',
+        'grid shrink-0 place-items-center rounded-full bg-theme-gold/20 font-bold text-theme-gold',
         sizes[size],
         className,
       )}

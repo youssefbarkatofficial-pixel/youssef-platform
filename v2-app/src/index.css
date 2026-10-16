@@ -2,18 +2,220 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ==========================================================================
+   1. Local Typography Setup (Zero external CDN requests, font-display: swap)
+   ========================================================================== */
+
+/* --- Theme 1: IBM Plex Sans Arabic --- */
+@font-face {
+  font-family: 'IBM Plex Sans Arabic';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/ibm-plex-arabic-400.woff2') format('woff2');
+  unicode-range: U+0600-06FF, U+0750-077F, U+0870-0891, U+0897-08E1, U+08E3-08FF, U+FB50-FDFF, U+FE70-FEFC;
+}
+
+@font-face {
+  font-family: 'IBM Plex Sans Arabic';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/ibm-plex-latin-400.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122;
+}
+
+@font-face {
+  font-family: 'IBM Plex Sans Arabic';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/fonts/ibm-plex-arabic-600.woff2') format('woff2');
+  unicode-range: U+0600-06FF, U+0750-077F, U+0870-0891, U+0897-08E1, U+08E3-08FF, U+FB50-FDFF, U+FE70-FEFC;
+}
+
+@font-face {
+  font-family: 'IBM Plex Sans Arabic';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/ibm-plex-arabic-700.woff2') format('woff2');
+  unicode-range: U+0600-06FF, U+0750-077F, U+0870-0891, U+0897-08E1, U+08E3-08FF, U+FB50-FDFF, U+FE70-FEFC;
+}
+
+/* --- Theme 2: Readex Pro --- */
+@font-face {
+  font-family: 'Readex Pro';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('/fonts/readex-pro-arabic.woff2') format('woff2');
+  unicode-range: U+0600-06FF, U+0750-077F, U+0870-0891, U+0897-08E1, U+08E3-08FF, U+FB50-FDFF, U+FE70-FEFC;
+}
+
+@font-face {
+  font-family: 'Readex Pro';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('/fonts/readex-pro-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122;
+}
+
+/* --- Numbers & Western: Plus Jakarta Sans --- */
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/fonts/plus-jakarta-sans-500.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122;
+}
+
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/plus-jakarta-sans-700.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122;
+}
+
+/* ==========================================================================
+   2. Design Tokens: Dual Theme (Compass / Atlas) + Modes (Dark / Light)
+   ========================================================================== */
+
+:root,
+html,
+html[data-theme="compass"] {
+  /* Theme 1: البوصلة الذهبية (Dark Default) */
+  --bg-base: #071326;
+  --bg-surface: #0d1e38;
+  --bg-surface-hover: #112546;
+  --bg-elevated: #152b4e;
+  --border-subtle: rgba(212, 166, 79, 0.16);
+  --border-focus: #d4a64f;
+  --brand-gold: #d4a64f;
+  --brand-gold-hover: #e2b863;
+  --brand-gold-subtle: rgba(212, 166, 79, 0.12);
+  --brand-accent: #2dd4bf;
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --font-ar: 'IBM Plex Sans Arabic', system-ui, sans-serif;
+  --font-num: 'Plus Jakarta Sans', sans-serif;
+  --radius-btn: 0.75rem;
+  --radius-card: 1rem;
+  --card-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+  --glow-shadow: 0 0 35px rgba(212, 166, 79, 0.2);
+}
+
+html[data-theme="atlas"] {
+  /* Theme 2: أطلس المعرفة (Dark Default) */
+  --bg-base: #091424;
+  --bg-surface: #0f223d;
+  --bg-surface-hover: #162e52;
+  --bg-elevated: #1e3a66;
+  --border-subtle: rgba(56, 189, 248, 0.16);
+  --border-focus: #38bdf8;
+  --brand-gold: #eab308;
+  --brand-gold-hover: #facc15;
+  --brand-gold-subtle: rgba(234, 179, 8, 0.14);
+  --brand-accent: #38bdf8;
+  --text-primary: #ffffff;
+  --text-secondary: #cbd5e1;
+  --text-muted: #64748b;
+  --font-ar: 'Readex Pro', system-ui, sans-serif;
+  --font-num: 'Plus Jakarta Sans', sans-serif;
+  --radius-btn: 0.875rem;
+  --radius-card: 1.25rem;
+  --card-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.45);
+  --glow-shadow: 0 0 35px rgba(56, 189, 248, 0.22);
+}
+
+/* --- Light Mode Overrides for Theme 1 (Compass) --- */
+html.light,
+html.light[data-theme="compass"] {
+  --bg-base: #f8fafc;
+  --bg-surface: #ffffff;
+  --bg-surface-hover: #f1f5f9;
+  --bg-elevated: #ffffff;
+  --border-subtle: rgba(180, 132, 26, 0.2);
+  --border-focus: #b4841a;
+  --brand-gold: #b4841a;
+  --brand-gold-hover: #966a2c;
+  --brand-gold-subtle: rgba(180, 132, 26, 0.1);
+  --brand-accent: #0f766e;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  --card-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+  --glow-shadow: 0 0 25px rgba(180, 132, 26, 0.15);
+}
+
+/* --- Light Mode Overrides for Theme 2 (Atlas) --- */
+html.light[data-theme="atlas"] {
+  --bg-base: #f4f7fb;
+  --bg-surface: #ffffff;
+  --bg-surface-hover: #f1f5f9;
+  --bg-elevated: #ffffff;
+  --border-subtle: #e2e8f0;
+  --border-focus: #0284c7;
+  --brand-gold: #ca8a04;
+  --brand-gold-hover: #a16207;
+  --brand-gold-subtle: rgba(202, 138, 4, 0.1);
+  --brand-accent: #0284c7;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  --card-shadow: 0 8px 24px rgba(2, 132, 199, 0.07);
+  --glow-shadow: 0 0 25px rgba(2, 132, 199, 0.18);
+}
+
+/* ==========================================================================
+   3. Base Global Settings
+   ========================================================================== */
+
 @layer base {
   html {
-    @apply bg-navy-950;
+    background-color: var(--bg-base);
+    color: var(--text-primary);
+    font-family: var(--font-ar);
     scroll-behavior: smooth;
+    transition: background-color 0.25s ease, color 0.25s ease;
   }
 
   body {
-    @apply bg-navy-950 font-sans text-slate-200 antialiased;
+    background-color: var(--bg-base);
+    color: var(--text-primary);
+    font-family: var(--font-ar);
+    line-height: 1.75;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   ::selection {
-    background: #d4a64f;
+    background-color: var(--brand-gold);
     color: #071326;
+  }
+
+  /* Custom Scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--bg-base);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--bg-surface-hover);
+    border-radius: 9999px;
+    border: 2px solid var(--bg-base);
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--brand-gold);
   }
 }

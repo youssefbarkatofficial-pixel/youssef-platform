@@ -17,3 +17,5 @@ export type { TabItem } from './Tabs';
 export { default as ProgressBar } from './ProgressBar';
 export { default as Avatar } from './Avatar';
 export { default as StatCard } from './StatCard';
+export { default as ThemeSwitcher } from './ThemeSwitcher';
+export type { ThemeVariant, ThemeMode } from './ThemeSwitcher';

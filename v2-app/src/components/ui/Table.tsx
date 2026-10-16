@@ -25,9 +25,9 @@ export default function Table<T>({
   emptyMessage = 'لا توجد بيانات',
 }: TableProps<T>) {
   return (
-    <div className="overflow-x-auto rounded-2xl border border-navy-700/60 bg-navy-900">
+    <div className="overflow-x-auto rounded-card border border-theme-border bg-theme-surface shadow-soft">
       <table className="w-full text-start text-sm">
-        <thead className="bg-navy-800 text-slate-300">
+        <thead className="bg-theme-surface-hover text-theme-text-secondary">
           <tr>
             {columns.map((column) => (
               <th key={column.key} className={cn('px-4 py-3 text-start font-bold', column.className)}>
@@ -39,21 +39,21 @@ export default function Table<T>({
         <tbody>
           {loading ? (
             <tr>
-              <td colSpan={columns.length} className="px-4 py-10 text-center text-gold-400">
+              <td colSpan={columns.length} className="px-4 py-10 text-center text-theme-gold">
                 <Spinner />
               </td>
             </tr>
           ) : rows.length === 0 ? (
             <tr>
-              <td colSpan={columns.length} className="px-4 py-10 text-center text-slate-400">
+              <td colSpan={columns.length} className="px-4 py-10 text-center text-theme-text-muted">
                 {emptyMessage}
               </td>
             </tr>
           ) : (
             rows.map((row) => (
-              <tr key={rowKey(row)} className="border-t border-navy-800 hover:bg-navy-800/50">
+              <tr key={rowKey(row)} className="border-t border-theme-border/60 hover:bg-theme-surface-hover/50 transition-colors">
                 {columns.map((column) => (
-                  <td key={column.key} className={cn('px-4 py-3 text-slate-200', column.className)}>
+                  <td key={column.key} className={cn('px-4 py-3 text-theme-text', column.className)}>
                     {column.render
                       ? column.render(row)
                       : String((row as unknown as Record<string, unknown>)[column.key] ?? '')}

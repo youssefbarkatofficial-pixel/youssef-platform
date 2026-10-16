@@ -1,9 +1,27 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ['./index.html', './src/**/*.{ts,tsx}'],
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
+        // Dynamic theme tokens (dual-theme + light/dark responsive)
+        theme: {
+          base: 'var(--bg-base)',
+          surface: 'var(--bg-surface)',
+          'surface-hover': 'var(--bg-surface-hover)',
+          elevated: 'var(--bg-elevated)',
+          border: 'var(--border-subtle)',
+          'border-focus': 'var(--border-focus)',
+          gold: 'var(--brand-gold)',
+          'gold-hover': 'var(--brand-gold-hover)',
+          'gold-subtle': 'var(--brand-gold-subtle)',
+          accent: 'var(--brand-accent)',
+          text: 'var(--text-primary)',
+          'text-secondary': 'var(--text-secondary)',
+          'text-muted': 'var(--text-muted)',
+        },
+        // Static palette preserved for 100% backward compatibility
         navy: {
           50: '#eef3fb',
           100: '#d9e3f3',
@@ -31,11 +49,16 @@ export default {
         },
       },
       fontFamily: {
-        sans: ['Tajawal', 'system-ui', 'sans-serif'],
+        sans: ['var(--font-ar)', 'system-ui', 'sans-serif'],
+        num: ['var(--font-num)', 'sans-serif'],
       },
       boxShadow: {
-        soft: '0 8px 30px rgba(0, 0, 0, 0.25)',
-        glow: '0 0 40px rgba(212, 166, 79, 0.25)',
+        soft: 'var(--card-shadow, 0 8px 30px rgba(0, 0, 0, 0.25))',
+        glow: 'var(--glow-shadow, 0 0 40px rgba(212, 166, 79, 0.25))',
+      },
+      borderRadius: {
+        btn: 'var(--radius-btn, 0.75rem)',
+        card: 'var(--radius-card, 1rem)',
       },
     },
   },

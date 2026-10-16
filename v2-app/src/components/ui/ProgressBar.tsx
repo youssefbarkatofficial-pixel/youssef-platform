@@ -19,8 +19,8 @@ export default function ProgressBar({
     <div className={cn('w-full', className)}>
       {(label || showValue) && (
         <div className="mb-1.5 flex items-center justify-between text-sm">
-          <span className="text-slate-300">{label}</span>
-          {showValue && <span className="font-bold text-gold-400">{Math.round(safeValue)}%</span>}
+          <span className="font-medium text-theme-text-secondary">{label}</span>
+          {showValue && <span className="font-bold text-theme-gold">{Math.round(safeValue)}%</span>}
         </div>
       )}
       <div
@@ -28,10 +28,10 @@ export default function ProgressBar({
         aria-valuemin={0}
         aria-valuemax={100}
         aria-valuenow={Math.round(safeValue)}
-        className="h-2.5 w-full overflow-hidden rounded-full bg-navy-800"
+        className="h-2.5 w-full overflow-hidden rounded-full bg-theme-surface border border-theme-border/40"
       >
         <div
-          className="h-full rounded-full bg-gradient-to-l from-gold-300 to-gold-600 transition-all duration-500"
+          className="h-full rounded-full bg-gradient-to-l from-theme-gold to-theme-gold/70 transition-all duration-500 shadow-sm"
           style={{ width: `${safeValue}%` }}
         />
       </div>
