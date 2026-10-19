@@ -45,6 +45,7 @@ const StudentAnalyticsPage = lazy(() => import('../pages/admin/StudentAnalyticsP
 const PaymentsPage = lazy(() => import('../pages/admin/PaymentsPage'));
 const NotificationsPage = lazy(() => import('../pages/admin/NotificationsPage'));
 const SettingsPage = lazy(() => import('../pages/admin/SettingsPage'));
+const ChangePasswordPage = lazy(() => import('../pages/admin/ChangePasswordPage'));
 const AdminSupportPage = lazy(() => import('../pages/admin/AdminSupportPage'));
 const BotMonitorPage = lazy(() => import('../pages/admin/BotMonitorPage'));
 const GameManagementPage = lazy(() => import('../pages/admin/GameManagementPage'));
@@ -108,6 +109,7 @@ export default function AppRoutes() {
             <Route path="payments" element={<PaymentsPage />} />
             <Route path="notifications" element={<NotificationsPage />} />
             <Route path="settings" element={<SettingsPage />} />
+            <Route path="change-password" element={<ChangePasswordPage />} />
             <Route element={<SeniorRoute />}>
               <Route path="support" element={<AdminSupportPage />} />
               <Route path="bot" element={<BotMonitorPage />} />

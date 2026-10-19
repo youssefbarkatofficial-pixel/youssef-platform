@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import type { FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { X, LogIn } from 'lucide-react';
+import { X, LogIn, Eye, EyeOff } from 'lucide-react';
 import { Button, Input } from '../ui';
 import FormAlert from './FormAlert';
 import { toEnglishDigits } from '../../lib/phone';
@@ -21,6 +21,7 @@ export default function LoginModal({ open, onClose }: LoginModalProps) {
   const location = useLocation();
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState('');
 
@@ -94,14 +95,16 @@ export default function LoginModal({ open, onClose }: LoginModalProps) {
     event.preventDefault();
     setFormError('');
 
-    if (!identifier.trim() || !password) {
+    const trimmed = identifier.trim();
+    const cleanIdentifier = trimmed.includes('@') ? trimmed.toLowerCase() : trimmed;
+    if (!cleanIdentifier || !password) {
       setFormError('اكتب رقم الموبايل (أو البريد الإلكتروني) وكلمة المرور.');
       return;
     }
 
     setSubmitting(true);
     try {
-      await loginWithIdentifier(identifier, password);
+      await loginWithIdentifier(cleanIdentifier, password);
       onClose();
 
       // نفس منطق LoginPage للتوجيه:
@@ -120,7 +123,7 @@ export default function LoginModal({ open, onClose }: LoginModalProps) {
         }
       }
     } catch (error) {
-      setFormError(getAuthErrorMessage(error, identifier));
+      setFormError(getAuthErrorMessage(error, cleanIdentifier));
     } finally {
       setSubmitting(false);
     }
@@ -168,18 +171,34 @@ export default function LoginModal({ open, onClose }: LoginModalProps) {
             ref={inputRef}
             label="رقم الموبايل أو البريد الإلكتروني"
             dir="ltr"
+            type={identifier.includes('@') ? 'email' : 'text'}
+            inputMode={identifier.includes('@') ? 'email' : 'text'}
             autoComplete="username"
+            autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck="false"
             value={identifier}
             onChange={(event) => setIdentifier(toEnglishDigits(event.target.value))}
           />
 
           <Input
             label="كلمة المرور"
-            type="password"
+            type={showPassword ? 'text' : 'password'}
             dir="ltr"
             autoComplete="current-password"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
+            rightElement={
+              <button
+                type="button"
+                tabIndex={-1}
+                aria-label={showPassword ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'}
+                className="text-slate-400 hover:text-white transition-colors"
+                onClick={() => setShowPassword((prev) => !prev)}
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            }
           />
 
           <div className="flex items-center justify-between text-xs">

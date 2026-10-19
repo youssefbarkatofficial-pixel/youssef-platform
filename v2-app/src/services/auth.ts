@@ -107,7 +107,7 @@ export function getAuthErrorMessage(error: unknown, identifier?: string): string
     case 'auth/user-not-found':
     case 'auth/invalid-email':
       return isEmail
-        ? 'الإيميل أو كلمة المرور غير صحيحة.'
+        ? 'اتأكد إن الإيميل مكتوب صح بدون مسافات أو حروف كبيرة، أو استخدم نسيت كلمة المرور.'
         : 'رقم الموبايل أو كلمة المرور غير صحيحة.';
     case 'auth/too-many-requests':
       return 'محاولات كثيرة. انتظر قليلًا ثم حاول مرة أخرى.';

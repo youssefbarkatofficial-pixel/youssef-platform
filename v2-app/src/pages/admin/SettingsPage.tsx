@@ -30,6 +30,7 @@ import {
 import type { PlatformMediaSettings, MediaDocType, PlatformStats } from '../../services/settings';
 import { processImageUpload, MEDIA_SPECS } from '../../lib/imageUpload';
 import ImageCropModal from '../../components/admin/ImageCropModal';
+import ChangePasswordCard from '../../components/admin/ChangePasswordCard';
 
 const textareaClass =
   'w-full rounded-xl border border-navy-700 bg-navy-900 px-3 py-2.5 text-white placeholder:text-slate-500 transition-colors focus:border-gold-500 focus:outline-none focus:ring-2 focus:ring-gold-500/40';
@@ -715,6 +716,7 @@ export default function SettingsPage() {
           فتح صفحة المدفوعات
         </Link>
       </Card>
+      <ChangePasswordCard />
       {adminRole === 'owner' && <AdminsCard />}
     </div>
   );

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { Link, Navigate } from 'react-router-dom';
+import { Eye, EyeOff } from 'lucide-react';
 import AccountProblemScreen from '../../components/auth/AccountProblemScreen';
 import FormAlert from '../../components/auth/FormAlert';
 import Brand from '../../components/layout/Brand';
@@ -21,10 +22,10 @@ function getAdminErrorMessage(error: unknown): string {
     code === 'auth/user-not-found' ||
     code === 'auth/invalid-email'
   ) {
-    return 'البريد الإلكتروني أو كلمة المرور غير صحيحة.';
+    return 'اتأكد إن الإيميل مكتوب صح بدون مسافات أو حروف كبيرة، أو استخدم نسيت كلمة المرور.';
   }
 
-  return getAuthErrorMessage(error);
+  return getAuthErrorMessage(error, 'admin@domain.com');
 }
 
 export default function AdminLoginPage() {
@@ -32,6 +33,7 @@ export default function AdminLoginPage() {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState('');
 
@@ -45,14 +47,15 @@ export default function AdminLoginPage() {
     event.preventDefault();
     setFormError('');
 
-    if (!email.includes('@') || !password) {
+    const cleanEmail = email.trim().toLowerCase();
+    if (!cleanEmail.includes('@') || !password) {
       setFormError('اكتب البريد الإلكتروني الخاص بحساب الإدارة وكلمة المرور.');
       return;
     }
 
     setSubmitting(true);
     try {
-      await loginWithIdentifier(email, password);
+      await loginWithIdentifier(cleanEmail, password);
     } catch (error) {
       setFormError(getAdminErrorMessage(error));
     } finally {
@@ -77,19 +80,34 @@ export default function AdminLoginPage() {
             <Input
               label="البريد الإلكتروني"
               type="email"
+              inputMode="email"
               dir="ltr"
               autoComplete="username"
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck="false"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
             />
 
             <Input
               label="كلمة المرور"
-              type="password"
+              type={showPassword ? 'text' : 'password'}
               dir="ltr"
               autoComplete="current-password"
               value={password}
               onChange={(event) => setPassword(event.target.value)}
+              rightElement={
+                <button
+                  type="button"
+                  tabIndex={-1}
+                  aria-label={showPassword ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'}
+                  className="text-slate-400 hover:text-white transition-colors"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              }
             />
 
             <div className="text-end">

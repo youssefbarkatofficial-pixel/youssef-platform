@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { Link, Navigate, useLocation } from 'react-router-dom';
+import { Eye, EyeOff } from 'lucide-react';
 import AccountProblemScreen from '../../components/auth/AccountProblemScreen';
 import FormAlert from '../../components/auth/FormAlert';
 import { Button, Card, Input, Spinner } from '../../components/ui';
@@ -14,6 +15,7 @@ export default function LoginPage() {
 
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState('');
 
@@ -46,16 +48,18 @@ export default function LoginPage() {
     event.preventDefault();
     setFormError('');
 
-    if (!identifier.trim() || !password) {
+    const trimmed = identifier.trim();
+    const cleanIdentifier = trimmed.includes('@') ? trimmed.toLowerCase() : trimmed;
+    if (!cleanIdentifier || !password) {
       setFormError('اكتب رقم الموبايل (أو البريد الإلكتروني) وكلمة المرور.');
       return;
     }
 
     setSubmitting(true);
     try {
-      await loginWithIdentifier(identifier, password);
+      await loginWithIdentifier(cleanIdentifier, password);
     } catch (error) {
-      setFormError(getAuthErrorMessage(error, identifier));
+      setFormError(getAuthErrorMessage(error, cleanIdentifier));
     } finally {
       setSubmitting(false);
     }
@@ -73,18 +77,34 @@ export default function LoginPage() {
           <Input
             label="رقم الموبايل أو البريد الإلكتروني"
             dir="ltr"
+            type={identifier.includes('@') ? 'email' : 'text'}
+            inputMode={identifier.includes('@') ? 'email' : 'text'}
             autoComplete="username"
+            autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck="false"
             value={identifier}
             onChange={(event) => setIdentifier(toEnglishDigits(event.target.value))}
           />
 
           <Input
             label="كلمة المرور"
-            type="password"
+            type={showPassword ? 'text' : 'password'}
             dir="ltr"
             autoComplete="current-password"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
+            rightElement={
+              <button
+                type="button"
+                tabIndex={-1}
+                aria-label={showPassword ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'}
+                className="text-slate-400 hover:text-white transition-colors"
+                onClick={() => setShowPassword((prev) => !prev)}
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            }
           />
 
           <div className="text-end">

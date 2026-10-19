@@ -14,8 +14,10 @@ if (!token) {
   } catch (e) {}
 }
 
+const targetCommit = (process.argv[2] || 'b819cb1').slice(0, 7);
+
 async function main() {
-  console.log('Waiting for Cloudflare Pages deployment of commit b844dee...');
+  console.log(`Waiting for Cloudflare Pages deployment of commit ${targetCommit}...`);
   for (let i = 0; i < 40; i++) {
     try {
       const res = await fetch(`https://api.cloudflare.com/client/v4/accounts/${accountId}/pages/projects/${project}/deployments`, {
@@ -28,7 +30,7 @@ async function main() {
       const status = d?.latest_stage?.status;
       console.log(`[${new Date().toISOString()}] #${i+1}: ID=${d?.id} | Stage=${stage} (${status}) | Commit=${commit} | Env=${d?.environment}`);
 
-      if (commit === 'b844dee') {
+      if (commit === targetCommit) {
         if (status === 'success' && stage === 'deploy') {
           console.log('\n=== SUCCESS: PRODUCTION DEPLOYMENT FINISHED ===');
           console.log(`Deployment ID: ${d.id}`);
