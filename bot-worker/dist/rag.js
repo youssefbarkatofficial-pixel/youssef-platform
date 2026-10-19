@@ -80,7 +80,7 @@ async function loadLessonChunks(db) {
     if (isolateChunksCache && isolateChunksCache.expiresAt > now) {
         return isolateChunksCache.chunks;
     }
-    const { results } = await db.prepare(`SELECT lc.id, lc.lesson_id, lc.text, lc.keywords, lc.grade, lc.unit, lc.subject, lc.created_at, l.title as lesson_title 
+    const { results } = await db.prepare(`SELECT lc.id, lc.course_id, lc.lesson_id, lc.stage, lc.kind, lc.status, lc.text, lc.keywords, lc.grade, lc.unit, lc.subject, lc.source_note, lc.created_at, lc.updated_at, l.title as lesson_title 
      FROM lesson_chunks lc 
      LEFT JOIN lessons l ON lc.lesson_id = l.id 
      WHERE (l.archived IS NULL OR l.archived = 0)`).all();
@@ -92,16 +92,29 @@ async function loadLessonChunks(db) {
         catch {
             kw = keywords(r.text || '');
         }
+        const createdAt = Number(r.created_at) || now;
+        const updatedAt = Number(r.updated_at) || createdAt;
         return {
             id: r.id,
+            course_id: r.course_id || undefined,
+            courseId: r.course_id || undefined,
             lesson_id: r.lesson_id,
+            lessonId: r.lesson_id,
+            stage: r.stage || undefined,
+            kind: r.kind || 'شرح',
+            status: r.status || 'verified',
             lesson_title: r.lesson_title || undefined,
             text: r.text,
             keywords: kw,
             grade: r.grade,
             unit: r.unit,
             subject: r.subject,
-            created_at: r.created_at
+            source_note: r.source_note || undefined,
+            sourceNote: r.source_note || undefined,
+            created_at: createdAt,
+            createdAt,
+            updated_at: updatedAt,
+            updatedAt
         };
     });
     isolateChunksCache = {

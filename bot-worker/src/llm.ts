@@ -6,6 +6,7 @@ export interface LlmResult {
   modelUsed: string;
   finishReason?: string;
   completionTokens?: number;
+  totalTokens?: number;
 }
 
 const FRIENDLY_BUSY_MESSAGE = 'الخدمة مشغولة حاليًا بضغط كبير، جرّب بعد دقيقة يا صديقي وهكون معاك فورًا.';
@@ -14,7 +15,8 @@ export async function callLlm(
   systemPrompt: string,
   userMessage: string,
   history: ChatMessage[] = [],
-  env: Env
+  env: Env,
+  maxTokens = 500
 ): Promise<LlmResult> {
   const groqKey = env.GROQ_API_KEY;
   const geminiKey = env.GEMINI_API_KEY;
@@ -23,7 +25,8 @@ export async function callLlm(
     return {
       reply: 'مفتاح الذكاء الاصطناعي غير مضبوط حالياً. يُرجى مراجعة إدارة المنصة.',
       source: 'fallback',
-      modelUsed: 'none'
+      modelUsed: 'none',
+      totalTokens: 0
     };
   }
 
@@ -34,18 +37,19 @@ export async function callLlm(
   const isComplex = userMessage.length > 150 || history.length > 4;
   const targetModel = isComplex ? primaryModel : fastModel;
 
+  // سقف طول سجل المحادثة (بحد أقصى 6 رسائل وبطول 400 حرف لمنع تضخم التوكنز)
+  const groqMessages = [
+    { role: 'system', content: systemPrompt },
+    ...history.slice(-6).map(h => ({
+      role: h.role === 'assistant' ? 'assistant' : 'user',
+      content: h.content.slice(0, 400)
+    })),
+    { role: 'user', content: userMessage.slice(0, 500) }
+  ];
+
   // محاولة الاتصال بـ Groq
   if (groqKey) {
     try {
-      const groqMessages = [
-        { role: 'system', content: systemPrompt },
-        ...history.slice(-12).map(h => ({
-          role: h.role === 'assistant' ? 'assistant' : 'user',
-          content: h.content.slice(0, 800)
-        })),
-        { role: 'user', content: userMessage.slice(0, 500) }
-      ];
-
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 25000);
 
@@ -59,7 +63,7 @@ export async function callLlm(
           model: targetModel,
           messages: groqMessages,
           temperature: 0.2,
-          max_completion_tokens: 2048,
+          max_completion_tokens: maxTokens,
           reasoning_effort: 'low'
         }),
         signal: controller.signal
@@ -73,7 +77,7 @@ export async function callLlm(
         const reply = choice?.message?.content?.trim();
         const finishReason = choice?.finish_reason;
         const completionTokens = data.usage?.completion_tokens;
-        const totalTokens = data.usage?.total_tokens;
+        const totalTokens = data.usage?.total_tokens || ((data.usage?.prompt_tokens || 0) + (data.usage?.completion_tokens || 0)) || 0;
 
         console.error(`[GROQ_COMPLETION] model=${targetModel} finish_reason=${finishReason} completion_tokens=${completionTokens} total_tokens=${totalTokens}`);
 
@@ -83,7 +87,8 @@ export async function callLlm(
             source: 'llm_groq',
             modelUsed: targetModel,
             finishReason,
-            completionTokens
+            completionTokens,
+            totalTokens
           };
         }
       }
@@ -100,7 +105,7 @@ export async function callLlm(
             model: fastModel,
             messages: groqMessages,
             temperature: 0.2,
-            max_completion_tokens: 2048,
+            max_completion_tokens: maxTokens,
             reasoning_effort: 'low'
           })
         });
@@ -111,6 +116,7 @@ export async function callLlm(
           const reply = fbChoice?.message?.content?.trim();
           const finishReason = fbChoice?.finish_reason;
           const completionTokens = fbData.usage?.completion_tokens;
+          const totalTokens = fbData.usage?.total_tokens || ((fbData.usage?.prompt_tokens || 0) + (fbData.usage?.completion_tokens || 0)) || 0;
 
           console.error(`[GROQ_FALLBACK_COMPLETION] model=${fastModel} finish_reason=${finishReason} completion_tokens=${completionTokens}`);
 
@@ -120,7 +126,8 @@ export async function callLlm(
               source: 'llm_groq',
               modelUsed: fastModel,
               finishReason,
-              completionTokens
+              completionTokens,
+              totalTokens
             };
           }
         }

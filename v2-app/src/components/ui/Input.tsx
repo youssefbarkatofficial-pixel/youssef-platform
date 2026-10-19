@@ -25,11 +25,11 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           id={inputId}
           aria-invalid={error ? true : undefined}
           className={cn(
-            'h-11 w-full rounded-btn border bg-theme-surface px-3.5 text-theme-text placeholder:text-theme-text-muted',
-            'transition-colors focus:outline-none focus:ring-2 focus:ring-theme-border-focus/30',
+            'h-11 w-full rounded-btn border bg-theme-surface-hover/70 px-3.5 text-theme-text placeholder:text-theme-text-muted',
+            'transition-all focus:outline-none focus:ring-2 focus:ring-theme-gold/30',
             error
               ? 'border-rose-500 focus:border-rose-500 focus:ring-rose-500/20'
-              : 'border-theme-border focus:border-theme-border-focus',
+              : 'border-theme-border/80 focus:border-theme-gold',
             className,
           )}
           {...rest}

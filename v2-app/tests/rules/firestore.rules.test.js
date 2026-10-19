@@ -3,6 +3,7 @@
 // (يحتاج Java مثبتًا، وتثبيت الحزم بـ npm install)
 
 import { readFileSync } from 'node:fs';
+import assert from 'node:assert';
 import { after, before, beforeEach, describe, it } from 'node:test';
 import { assertFails, assertSucceeds, initializeTestEnvironment } from '@firebase/rules-unit-testing';
 import firebase from 'firebase/compat/app';
@@ -32,6 +33,7 @@ const aliceDb = () => testEnv.authenticatedContext('alice', { email: ALICE_EMAIL
 const bobDb = () => testEnv.authenticatedContext('bob', { email: BOB_EMAIL }).firestore();
 const carolDb = () => testEnv.authenticatedContext('carol', { email: CAROL_EMAIL }).firestore();
 const adminDb = () => testEnv.authenticatedContext('adminUid', { email: OWNER_EMAIL }).firestore();
+const anonDb = () => testEnv.unauthenticatedContext().firestore();
 
 function studentDoc(phone, email, courses) {
   return {
@@ -294,12 +296,30 @@ describe('نسخة النتيجة في examResults', () => {
     );
   });
 
+  it('أول نتيجة امتحان لطالب (examResults فارغة مسبقاً) مسموحة في معاملة', async () => {
+    await seedSubmission(1);
+    const value = result();
+    const doc = await aliceDb().doc('students/alice').get();
+    assert.deepStrictEqual(doc.data().examResults, []);
+    await assertSucceeds(gradeInTransaction(aliceDb(), value, value));
+  });
+
   it('تعديل نتيجة قديمة مرفوض', async () => {
     const legacy = result({ examId: 'legacyExam1', courseId: 'oldCourse' });
     await testEnv.withSecurityRulesDisabled(async (context) => {
       await context.firestore().doc('students/alice').update({ examResults: [legacy] });
     });
 
+    // تعديل النتيجة مع الحفاظ على نفس الطول مرفوض
+    await assertFails(
+      aliceDb()
+        .doc('students/alice')
+        .update({
+          examResults: [{ ...legacy, percent: 100 }],
+        }),
+    );
+
+    // تعديل النتيجة مع إضافة عنصر جديد مرفوض
     await assertFails(
       aliceDb()
         .doc('students/alice')
@@ -495,9 +515,10 @@ describe('تعديلات المراجعة: تقدم الطالب، كورس ال
       method: 'vodafone',
       amount: 100,
     };
-    const batch = carolDb().batch();
-    batch.set(carolDb().doc('paymentRequests/reqX'), data);
-    batch.set(carolDb().doc('paymentProofs/reqX'), {
+    const db = carolDb();
+    const batch = db.batch();
+    batch.set(db.doc('paymentRequests/reqX'), data);
+    batch.set(db.doc('paymentProofs/reqX'), {
       userId: 'carol',
       dataUrl: `data:image/jpeg;base64,${'A'.repeat(1000)}`,
       mime: 'image/jpeg',
@@ -565,6 +586,16 @@ describe('المرحلة 5: أدوار الأدمن والدعم والإشعا�
         status: 'pending',
         createdAt: '2026-10-02T10:00:00.000Z',
       });
+      await db.doc('paymentRequests/pay3').set({
+        courseId: 'course1',
+        courseName: 'كورس',
+        userId: 'carol',
+        userName: 'Carol',
+        userPhone: '01000000003',
+        userEmail: CAROL_EMAIL,
+        status: 'approved',
+        createdAt: '2026-10-03T10:00:00.000Z',
+      });
     });
   });
 
@@ -596,7 +627,7 @@ describe('المرحلة 5: أدوار الأدمن والدعم والإشعا�
     await assertFails(fullAdminDb().doc('paymentRequests/pay1').update({ ...mark, status: 'rejected' }));
     await assertFails(fullAdminDb().doc('paymentRequests/pay2').update(mark));
     await assertSucceeds(fullAdminDb().doc('paymentRequests/pay1').update(mark));
-    await assertSucceeds(adminDb().doc('paymentRequests/pay1').update(mark));
+    await assertSucceeds(adminDb().doc('paymentRequests/pay3').update(mark));
   });
 
   it('المساعد يراجع الدفع كالأدمن، والمعطّل لا يستطيع', async () => {
@@ -667,6 +698,44 @@ describe('المرحلة 5: أدوار الأدمن والدعم والإشعا�
         replies: arrayUnion({ from: 'student', text: 'شكرًا', ts: 2 }),
         status: 'open',
         updatedAt: 2,
+      }),
+    );
+  });
+
+  it('أول رد أدمن على تذكرة دعم بدون ردود مسبقة مسموح', async () => {
+    await seedTicket('t_empty', { replies: [] });
+    await assertSucceeds(
+      fullAdminDb().doc('support_tickets/t_empty').update({
+        replies: [{ from: 'admin', text: 'أول رد من الأدمن', ts: 100 }],
+        status: 'answered',
+        updatedAt: 100,
+      }),
+    );
+  });
+
+  it('إضافة ردين دفعة واحدة في الدعم مرفوضة', async () => {
+    await seedTicket('t_double', { replies: [] });
+    await assertFails(
+      fullAdminDb().doc('support_tickets/t_double').update({
+        replies: [
+          { from: 'admin', text: 'رد 1', ts: 100 },
+          { from: 'admin', text: 'رد 2', ts: 101 },
+        ],
+        status: 'answered',
+        updatedAt: 101,
+      }),
+    );
+  });
+
+  it('تعديل رد قديم في الدعم مرفوض', async () => {
+    await seedTicket('t_edit', {
+      replies: [{ from: 'admin', text: 'رد قديم', ts: 100 }],
+    });
+    await assertFails(
+      fullAdminDb().doc('support_tickets/t_edit').update({
+        replies: [{ from: 'admin', text: 'رد معدل', ts: 100 }],
+        status: 'answered',
+        updatedAt: 101,
       }),
     );
   });
@@ -763,5 +832,77 @@ describe('المرحلة 5: أدوار الأدمن والدعم والإشعا�
       await context.firestore().doc('settings/generalSettings').set({ allowRegistration: true });
     });
     await assertSucceeds(dave().doc('students/dave').set(newStudent()));
+  });
+
+  describe('المهمة S: صور المنصة والهوية البصرية platform_media و platform_settings', () => {
+    it('قراءة platform_settings/generalSettings و platform_media مسموحة للعامة والطلاب', async () => {
+      await testEnv.withSecurityRulesDisabled(async (context) => {
+        const db = context.firestore();
+        await db.doc('platform_settings/generalSettings').set({
+          heroBgUrl: '/assets/images/ownerBgImage-legacy.webp',
+          mediaVersions: { heroBg: 123 },
+        });
+        await db.doc('platform_media/heroBg').set({
+          dataUrl: 'data:image/webp;base64,UklGRiQAAABXRUJQVlA4IBgAAAAwAQCdASoBAAEAAQAcJaQAA3AA/v39gAA=',
+          version: 123,
+          sizeBytes: 100,
+        });
+      });
+
+      await assertSucceeds(anonDb().doc('platform_settings/generalSettings').get());
+      await assertSucceeds(anonDb().doc('platform_media/heroBg').get());
+      await assertSucceeds(aliceDb().doc('platform_media/heroBg').get());
+    });
+
+    it('طالب غير مصرح له لا يرفع صوراً إلى platform_media أو يعدل إعدادات الهوية', async () => {
+      await assertFails(
+        aliceDb().doc('platform_media/heroBg').set({
+          dataUrl: 'data:image/webp;base64,1234',
+          version: 1,
+          sizeBytes: 10,
+        }),
+      );
+      await assertFails(
+        aliceDb().doc('platform_settings/generalSettings').set({
+          heroBgUrl: 'https://evil.com/bg.png',
+        }),
+      );
+    });
+
+    it('أدمن يرفع صورة صالحة ضمن سقف الحجم بنجاح ويحدث نسختها', async () => {
+      await assertSucceeds(
+        adminDb().doc('platform_media/logo').set({
+          dataUrl: 'data:image/webp;base64,' + 'A'.repeat(1000),
+          version: 123456,
+          sizeBytes: 800,
+        }),
+      );
+      await assertSucceeds(
+        adminDb().doc('platform_settings/generalSettings').set({
+          mediaVersions: { logo: 123456 },
+        }, { merge: true }),
+      );
+    });
+
+    it('أدمن يرفع صورة تتجاوز سقف الحجم المسموح تُرفض فورًا', async () => {
+      // سقف الشعار 45,000 حرف dataUrl
+      await assertFails(
+        adminDb().doc('platform_media/logo').set({
+          dataUrl: 'data:image/webp;base64,' + 'A'.repeat(50000),
+          version: 123456,
+          sizeBytes: 40000,
+        }),
+      );
+    });
+
+    it('أدمن يسترجع الصورة الافتراضية بحذف مستند platform_media مسموح', async () => {
+      await testEnv.withSecurityRulesDisabled(async (context) => {
+        await context.firestore().doc('platform_media/logo').set({
+          dataUrl: 'data:image/webp;base64,123',
+          version: 1,
+        });
+      });
+      await assertSucceeds(adminDb().doc('platform_media/logo').delete());
+    });
   });
 });

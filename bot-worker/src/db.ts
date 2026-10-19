@@ -99,6 +99,79 @@ export async function checkAndIncrementUsage(
   };
 }
 
+// ===================== نظام الرصيد بالتوكنز Token Budget =====================
+export interface TokenBudgetCheck {
+  allowed: boolean;
+  remainingTokens: number;
+  usedTokens: number;
+  limit: number;
+  tier: 'visitor' | 'free' | 'subscribed';
+  reason?: 'quota_exceeded' | 'bot_disabled' | 'global_cap';
+}
+
+export async function checkTokenBudget(
+  db: D1Database,
+  userKey: string,
+  tier: 'visitor' | 'free' | 'subscribed'
+): Promise<TokenBudgetCheck> {
+  const settings = await getAllSettings(db);
+  const enabled = (settings['enabled'] || 'true') === 'true';
+  if (!enabled) {
+    return { allowed: false, remainingTokens: 0, usedTokens: 0, limit: 0, tier, reason: 'bot_disabled' };
+  }
+
+  const windowHours = parseInt(settings['token_window_hours'] || '5', 10);
+  const windowMs = windowHours * 60 * 60 * 1000;
+  const cutoff = Date.now() - windowMs;
+
+  let limit = 25000;
+  if (tier === 'visitor') {
+    limit = parseInt(settings['token_limit_visitor'] || '5000', 10);
+  } else if (tier === 'subscribed') {
+    limit = parseInt(settings['token_limit_subscribed'] || '50000', 10);
+  } else {
+    limit = parseInt(settings['token_limit_free'] || '25000', 10);
+  }
+
+  const row = await db.prepare(
+    'SELECT SUM(tokens) as total_used FROM token_usage WHERE user_key = ? AND created_at >= ?'
+  ).bind(userKey, cutoff).first();
+
+  const usedTokens = Number((row as any)?.total_used) || 0;
+
+  if (usedTokens >= limit) {
+    return {
+      allowed: false,
+      remainingTokens: 0,
+      usedTokens,
+      limit,
+      tier,
+      reason: 'quota_exceeded'
+    };
+  }
+
+  return {
+    allowed: true,
+    remainingTokens: Math.max(0, limit - usedTokens),
+    usedTokens,
+    limit,
+    tier
+  };
+}
+
+export async function recordTokenUsage(
+  db: D1Database,
+  userKey: string,
+  tier: 'visitor' | 'free' | 'subscribed',
+  tokens: number
+): Promise<void> {
+  if (!tokens || tokens <= 0) return;
+  const id = `tu_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+  await db.prepare(
+    'INSERT INTO token_usage (id, user_key, tier, tokens, created_at) VALUES (?, ?, ?, ?, ?)'
+  ).bind(id, userKey, tier, tokens, Date.now()).run();
+}
+
 // ===================== كاش الإجابات Answer Cache =====================
 async function hashText(str: string): Promise<string> {
   const encoder = new TextEncoder();
@@ -258,4 +331,148 @@ export async function cleanupOldLogs(db: D1Database): Promise<number> {
 
   return res.meta?.changes || 0;
 }
+
+// ===================== نموذج بيانات التعليم Teaching Data Model =====================
+export interface TeachingChunkRow {
+  id: string;
+  course_id: string | null;
+  lesson_id: string | null;
+  stage: string | null;
+  kind: string;
+  status: string;
+  text: string;
+  keywords: string;
+  grade: string | null;
+  unit: string | null;
+  subject: string | null;
+  source_note: string | null;
+  created_at: number;
+  updated_at: number;
+  lesson_title?: string;
+}
+
+export interface TeachingDistribution {
+  totalChunks: number;
+  byLesson: Array<{
+    lessonId: string;
+    lessonTitle: string;
+    courseId: string | null;
+    stage: string | null;
+    grade: string | null;
+    kind: string;
+    status: string;
+    count: number;
+    isOrphan: boolean;
+  }>;
+  byStage: Record<string, number>;
+  orphanCount: number;
+  orphanChunkIds: string[];
+}
+
+export async function getTeachingChunksDistribution(
+  db: D1Database,
+  firestoreLessonIds: string[] = []
+): Promise<TeachingDistribution> {
+  const { results } = await db.prepare(`
+    SELECT lc.id, lc.course_id, lc.lesson_id, lc.stage, lc.kind, lc.status, lc.grade, lc.unit, l.title as lesson_title
+    FROM lesson_chunks lc
+    LEFT JOIN lessons l ON lc.lesson_id = l.id
+    ORDER BY lc.created_at ASC
+  `).all();
+
+  const rows = (results || []) as any[];
+  const totalChunks = rows.length;
+  const byStage: Record<string, number> = {};
+  const lessonMap = new Map<string, {
+    lessonId: string;
+    lessonTitle: string;
+    courseId: string | null;
+    stage: string | null;
+    grade: string | null;
+    kind: string;
+    status: string;
+    count: number;
+    isOrphan: boolean;
+  }>();
+
+  const fsSet = new Set(firestoreLessonIds);
+  const orphanChunkIds: string[] = [];
+
+  for (const r of rows) {
+    const lId = r.lesson_id || 'unlinked';
+    const stg = r.stage || r.grade || 'unknown';
+    byStage[stg] = (byStage[stg] || 0) + 1;
+
+    // المقطع يتيم إذا كان بلا lesson_id أو لا يطابق أي محاضرة في Firestore (إن قُدمت القائمة)
+    const isOrphan = !r.lesson_id || (fsSet.size > 0 && !fsSet.has(r.lesson_id));
+    if (isOrphan) {
+      orphanChunkIds.push(r.id);
+    }
+
+    const key = `${r.course_id || 'no_course'}::${lId}::${r.kind || 'شرح'}::${r.status || 'draft'}`;
+    const existing = lessonMap.get(key);
+    if (existing) {
+      existing.count += 1;
+    } else {
+      lessonMap.set(key, {
+        lessonId: lId,
+        lessonTitle: r.lesson_title || r.unit || 'بدون عنوان',
+        courseId: r.course_id || null,
+        stage: r.stage || null,
+        grade: r.grade || null,
+        kind: r.kind || 'شرح',
+        status: r.status || 'verified',
+        count: 1,
+        isOrphan
+      });
+    }
+  }
+
+  return {
+    totalChunks,
+    byLesson: Array.from(lessonMap.values()),
+    byStage,
+    orphanCount: orphanChunkIds.length,
+    orphanChunkIds
+  };
+}
+
+export async function getTeachingChunks(
+  db: D1Database,
+  filter?: { courseId?: string; lessonId?: string; stage?: string; status?: string }
+): Promise<TeachingChunkRow[]> {
+  let sql = `
+    SELECT lc.id, lc.course_id, lc.lesson_id, lc.stage, lc.kind, lc.status, lc.text, lc.keywords,
+           lc.grade, lc.unit, lc.subject, lc.source_note, lc.created_at, lc.updated_at, l.title as lesson_title
+    FROM lesson_chunks lc
+    LEFT JOIN lessons l ON lc.lesson_id = l.id
+    WHERE 1=1
+  `;
+  const binds: any[] = [];
+
+  if (filter?.courseId) {
+    sql += ' AND lc.course_id = ?';
+    binds.push(filter.courseId);
+  }
+  if (filter?.lessonId) {
+    sql += ' AND lc.lesson_id = ?';
+    binds.push(filter.lessonId);
+  }
+  if (filter?.stage) {
+    sql += ' AND (lc.stage = ? OR lc.grade = ?)';
+    binds.push(filter.stage, filter.stage);
+  }
+  if (filter?.status) {
+    sql += ' AND lc.status = ?';
+    binds.push(filter.status);
+  }
+
+  sql += ' ORDER BY lc.created_at ASC';
+
+  const stmt = db.prepare(sql);
+  const bound = binds.length > 0 ? stmt.bind(...binds) : stmt;
+  const { results } = await bound.all();
+  return (results || []) as unknown as TeachingChunkRow[];
+}
+
 

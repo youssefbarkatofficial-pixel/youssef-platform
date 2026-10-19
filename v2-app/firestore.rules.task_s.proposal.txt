@@ -1,0 +1,49 @@
+# ==============================================================================
+# مقترح قواعد أمان Firestore للمهمة S (platform_settings + platform_media)
+# تنبيه صارم: هذا الملف للمراجعة والتوثيق والاعتماد المستقبلي فقط.
+# يمنع نشر هذه القواعد على السيرفر الحي نهائيًا حتى يصدر أمر صريح ومباشر من أ. يوسف.
+# ==============================================================================
+
+```cel
+    // ---------- منصة يوسف بركات: الصور والهوية البصرية (المهمة S) ----------
+
+    match /platform_settings/{settingId} {
+      // قراءة مفردة عامة لجميع الزوار والطلاب لجلب روابط وصور الهوية وشريط الاقتباسات
+      allow get: if true;
+      allow list: if isAdmin();
+
+      // الكتابة والتعديل محصوران في الأدمن المعتمد مع تدقيق الحقول والسعات
+      allow create, update: if isAdmin()
+        && settingId == 'generalSettings'
+        && (!('heroBgUrl' in request.resource.data) || (request.resource.data.heroBgUrl is string && request.resource.data.heroBgUrl.size() <= 2000))
+        && (!('youssefCutoutUrl' in request.resource.data) || (request.resource.data.youssefCutoutUrl is string && request.resource.data.youssefCutoutUrl.size() <= 2000))
+        && (!('logoUrl' in request.resource.data) || (request.resource.data.logoUrl is string && request.resource.data.logoUrl.size() <= 2000))
+        && (!('tickerQuotes' in request.resource.data) || (request.resource.data.tickerQuotes is list && request.resource.data.tickerQuotes.size() <= 50))
+        && (!('mediaVersions' in request.resource.data) || request.resource.data.mediaVersions is map);
+
+      // الحذف مرفوض للحفاظ على استقرار الواجهة
+      allow delete: if false;
+    }
+
+    match /platform_media/{imageId} {
+      // قراءة عامة للزوار والطلاب لتنزيل الصور المضغوطة
+      allow get: if true;
+      allow list: if isAdmin();
+
+      // الكتابة والتعديل محصوران في الأدمن المعتمد مع تطبيق سقف الحجم الصارم لكل صورة:
+      // - الشعار logo: حجم dataUrl <= 45,000 حرف (~30KB ثنائي)
+      // - خلفية الهيرو heroBg: حجم dataUrl <= 280,000 حرف (~200KB ثنائي)
+      // - صورة يوسف youssefCutout: حجم dataUrl <= 490,000 حرف (~350KB ثنائي)
+      allow create, update: if isAdmin()
+        && request.resource.data.dataUrl is string
+        && request.resource.data.version is number
+        && (
+          (imageId == 'logo' && request.resource.data.dataUrl.size() <= 45000) ||
+          (imageId == 'heroBg' && request.resource.data.dataUrl.size() <= 280000) ||
+          (imageId == 'youssefCutout' && request.resource.data.dataUrl.size() <= 490000)
+        );
+
+      // الحذف مسموح للأدمن فقط عند استرجاع الصور الافتراضية المدمجة
+      allow delete: if isAdmin();
+    }
+```

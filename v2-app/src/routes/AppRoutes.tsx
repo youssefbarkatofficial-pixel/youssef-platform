@@ -1,5 +1,5 @@
 import { Suspense, lazy } from 'react';
-import { Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes } from 'react-router-dom';
 import PublicLayout from '../layouts/PublicLayout';
 import StudentLayout from '../layouts/StudentLayout';
 import AdminLayout from '../layouts/AdminLayout';
@@ -75,6 +75,9 @@ export default function AppRoutes() {
             <Route path="leaderboard" element={<LeaderboardPage />} />
             <Route path="game" element={<GamePage />} />
             <Route path="profile" element={<ProfilePage />} />
+            <Route path="settings" element={<Navigate to="/student/profile" replace />} />
+            <Route path="notifications" element={<Navigate to="/student" replace />} />
+            <Route path="homeworks" element={<Navigate to="/student/exams" replace />} />
             <Route path="support" element={<SupportPage />} />
           </Route>
         </Route>
@@ -106,6 +109,7 @@ export default function AppRoutes() {
             <Route element={<SeniorRoute />}>
               <Route path="support" element={<AdminSupportPage />} />
               <Route path="bot" element={<BotMonitorPage />} />
+              <Route path="bot-monitor" element={<Navigate to="/admin/bot" replace />} />
               <Route path="game" element={<GameManagementPage />} />
             </Route>
           </Route>

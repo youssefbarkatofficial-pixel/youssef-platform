@@ -50,7 +50,7 @@ export default function Modal({
         aria-modal="true"
         aria-label={title}
         className={cn(
-          'w-full max-w-lg rounded-card border border-theme-border bg-theme-surface text-theme-text shadow-soft transition-all duration-200',
+          'w-full max-w-lg rounded-card bg-theme-surface text-theme-text shadow-2xl transition-all duration-300',
           className,
         )}
         onClick={(event) => event.stopPropagation()}

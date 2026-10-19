@@ -5,7 +5,7 @@ compatibility_flags = ["nodejs_compat"]
 account_id = "07ba1709fc85915f811c97f8269ae394"
 
 [vars]
-CORS_ORIGIN = "http://localhost:5173,https://youssef-barakat.web.app,https://youssefbarakat.com"
+CORS_ORIGIN = "http://localhost:5173,https://youssefbarakat.pages.dev,https://youssefbarakat.com,https://www.youssefbarakat.com,https://youssef-barakat.web.app"
 FIREBASE_PROJECT_ID = "youssefbarakatplatform-8abff"
 GROQ_PRIMARY_MODEL = "openai/gpt-oss-120b"
 GROQ_FAST_MODEL = "openai/gpt-oss-20b"

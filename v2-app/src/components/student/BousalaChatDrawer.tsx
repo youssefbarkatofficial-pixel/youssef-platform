@@ -65,6 +65,38 @@ const DEFAULT_QUESTIONS = [
   'ما هي فروع مادة الدراسات الاجتماعية وطريقة توزيع الدرجات؟',
 ];
 
+// أسئلة شائعة ثابتة ومخزنة (زراير جاهزة) لا تستهلك أي توكنز
+export const VISITOR_FAQS = [
+  {
+    q: 'كيف أسجّل؟',
+    a: 'للتسجيل في المنصة:\nاضغط على زر "ابدأ الآن مجانًا" في الصفحة الرئيسية أو ادخل على صفحة [إنشاء الحساب](/register).\n\nاكتب اسمك ثلاثيًا، رقم هاتفك ورقم ولي الأمر، واختر صفك الدراسي ومحافظتك وكلمة المرور، ثم اضغط على زر "إنشاء الحساب" لتفعيل دخولك فورًا.',
+  },
+  {
+    q: 'كيف أشترك في كورس؟',
+    a: 'للاشتراك في أي كورس:\n1. افتح صفحة [الكورسات](/courses) من القائمة العلوية.\n2. اختر الكورس المناسب لمرحلتك الدراسية واضغط على "تفاصيل الكورس".\n3. اضغط على زر "اشترك الآن"، وسيتم نقلك لصفحة إتمام الدفع وتأكيد الحجز.',
+  },
+  {
+    q: 'طرق الدفع؟',
+    a: 'طريقة الدفع المعتمدة:\nيتم تحويل رسوم الكورس عبر **فودافون كاش (أو أي محفظة إلكترونية)** إلى الرقم المعتمد (01023675235).\n\nبعد التحويل، ارفع صورة إيصال التحويل ورقم المحفظة التي قمت بالتحويل منها في صفحة تأكيد الطلب، وسيتم تفعيل الكورس في حسابك بأسرع وقت.',
+  },
+  {
+    q: 'إزاي أدخل الكورسات بعد الاشتراك؟',
+    a: 'بمجرد تفعيل اشتراكك:\nسجّل دخولك لحسابك، واضغط على **[كورساتي](/student/my-courses)** من القائمة الجانبية (أو من صفحة "لوحتي").\n\nستجد الكورس متاحًا، اضغط على "دخول الكورس" لمشاهدة الحصص والفيديوهات والملحقات مباشرة.',
+  },
+  {
+    q: 'نسيت كلمة السر؟',
+    a: 'إذا نسيت كلمة المرور:\nادخل على صفحة [تسجيل الدخول](/login) واضغط على رابط "نسيت كلمة المرور؟" (أو توجه مباشرة إلى [/forgot-password](/forgot-password)).\n\nاكتب بريدك الإلكتروني المسجل وستصلك رسالة لإعادة تعيين كلمة المرور، أو تواصل مع الدعم الفني لمساعدتك فورًا.',
+  },
+  {
+    q: 'الامتحانات والواجبات؟',
+    a: 'الامتحانات والواجبات:\nتجدها في صفحة [الامتحانات والواجبات](/student/exams) أو داخل كل كورس بعد الانتهاء من الحصة.\n\nاضغط على "بدء الامتحان" أو "حل الواجب" للإجابة وتأكيد التسليم، وستظهر نتيجتك فورًا مع إمكانية مراجعة الإجابات الصحيحة والتصحيح النموذجي.\n\n(ملاحظة: تُغلق البوصلة تلقائيًا أثناء أداء الاختبارات للحفاظ على التركيز).',
+  },
+  {
+    q: 'إزاي أتواصل مع الدعم؟',
+    a: 'قنوات التواصل المباشرة مع الدعم الفني:\n- فتح تذكرة دعم فني من لوحة الطالب: [الدعم الفني](/student/support).\n- التواصل عبر واتساب أو هاتفياً على الرقم الرسمي للمنصة: **01023675235** وسنكون سعداء بمساعدتك دائمًا!',
+  },
+];
+
 export default function BousalaChatDrawer() {
   const { firebaseUser, student } = useAuth();
   const location = useLocation();
@@ -73,7 +105,6 @@ export default function BousalaChatDrawer() {
   const [messages, setMessages] = useState<BotChatMessage[]>([]);
   const [inputMessage, setInputMessage] = useState('');
   const [loading, setLoading] = useState(false);
-  const [remainingQuota, setRemainingQuota] = useState<number | null>(null);
   const [isPaused, setIsPaused] = useState(false);
   const [errorAlert, setErrorAlert] = useState<string | null>(null);
 
@@ -92,7 +123,9 @@ export default function BousalaChatDrawer() {
   const getWelcomeMessage = (): BotChatMessage => ({
     id: 'welcome',
     role: 'assistant',
-    content: `أهلاً بك يا ${studentFirstName}! 🧭 أنا "البوصلة"، رفيقك الذكي لمادة الدراسات الاجتماعية. أنا هنا لمساعدتك في فهم أي درس أو إجابة أي سؤال في منهجك. اسألني في أي وقت وسأجيبك فوراً!`,
+    content: firebaseUser
+      ? `أهلاً بك يا ${studentFirstName}! 🧭 البوصلة بتساعدك فى المذاكرة.. اسألني أي حاجة في منهج الدراسات الاجتماعية، وراجع دايماً إجاباتك مع كتابك المدرسي للتأكد والتفوق.`
+      : 'أهلاً بك في منصة الأستاذ يوسف بركات! 🧭 أنا البوصلة، اختر أي سؤال شائع أدناه للتعرف على المنصة، أو اكتب سؤالك مباشرة.',
     createdAt: Date.now(),
   });
 
@@ -111,7 +144,7 @@ export default function BousalaChatDrawer() {
       // Ignore sessionStorage parsing errors
     }
     setMessages([getWelcomeMessage()]);
-  }, [studentFirstName]);
+  }, [studentFirstName, Boolean(firebaseUser)]);
 
   // حفظ الرسائل في sessionStorage بحد أقصى 20 رسالة
   useEffect(() => {
@@ -131,13 +164,12 @@ export default function BousalaChatDrawer() {
     }
   }, [messages, isOpen, loading]);
 
-  // جلب الرصيد وحالة الإيقاف عند فتح الشات
+  // جلب حالة الإيقاف عند فتح الشات
   useEffect(() => {
     if (isOpen && firebaseUser) {
       void firebaseUser.getIdToken().then((token) => {
         getBotUsage(token)
           .then((data) => {
-            setRemainingQuota(data.remaining);
             if (data.paused !== undefined) {
               setIsPaused(data.paused);
             }
@@ -152,6 +184,32 @@ export default function BousalaChatDrawer() {
     if (isOpen) {
       setTimeout(() => inputRef.current?.focus(), 150);
     }
+  }, [isOpen]);
+
+  // قفل سكرول الصفحة الرئيسية عند فتح نافذة الشات على الموبايل والكمبيوتر وiOS Safari
+  useEffect(() => {
+    if (!isOpen) return;
+    const scrollY = window.scrollY;
+    const originalPosition = document.body.style.position;
+    const originalTop = document.body.style.top;
+    const originalWidth = document.body.style.width;
+    const originalOverflow = document.body.style.overflow;
+    const originalTouchAction = document.body.style.touchAction;
+
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.width = '100%';
+    document.body.style.overflow = 'hidden';
+    document.body.style.touchAction = 'none';
+
+    return () => {
+      document.body.style.position = originalPosition;
+      document.body.style.top = originalTop;
+      document.body.style.width = originalWidth;
+      document.body.style.overflow = originalOverflow;
+      document.body.style.touchAction = originalTouchAction;
+      window.scrollTo(0, scrollY);
+    };
   }, [isOpen]);
 
   // استطلاع ردود المعلم كل 10 ثوانٍ إذا كانت المحادثة موقوفة والنافذة مفتوحة (Polling)
@@ -216,10 +274,39 @@ export default function BousalaChatDrawer() {
     return null;
   }
 
+  // الرد على الأسئلة الشائعة فوراً بدون استهلاك أي توكنز
+  const handleFaqClick = (faq: { q: string; a: string }) => {
+    const userMsg: BotChatMessage = {
+      id: `user_${Date.now()}`,
+      role: 'user',
+      content: faq.q,
+      createdAt: Date.now(),
+    };
+    const botReplyMsg: BotChatMessage = {
+      id: `faq_${Date.now()}`,
+      role: 'assistant',
+      content: faq.a,
+      createdAt: Date.now() + 50,
+      source: 'direct',
+    };
+    setMessages((prev) => [...prev, userMsg, botReplyMsg]);
+    setErrorAlert(null);
+  };
+
   // إرسال رسالة
   const handleSendMessage = async (textToSend?: string) => {
     const rawText = (textToSend !== undefined ? textToSend : inputMessage).trim();
-    if (!rawText || loading || !firebaseUser) return;
+    if (!rawText || loading) return;
+
+    // فحص الأسئلة الشائعة أولاً للرد فوراً بدون توكنز
+    const matchedFaq = VISITOR_FAQS.find(
+      (f) => f.q === rawText || rawText.includes(f.q),
+    );
+    if (matchedFaq) {
+      handleFaqClick(matchedFaq);
+      setInputMessage('');
+      return;
+    }
 
     if (rawText.length > MAX_CHAR_LIMIT) {
       setErrorAlert(`الرسالة تتجاوز الحد المسموح (${MAX_CHAR_LIMIT} حرف). اختصر سؤالك قليلًا.`);
@@ -242,7 +329,7 @@ export default function BousalaChatDrawer() {
     setLoading(true);
 
     try {
-      const token = await firebaseUser.getIdToken();
+      const token = firebaseUser ? await firebaseUser.getIdToken() : null;
 
       // تجهيز سجل المحادثة (بحد أقصى آخر 12 رسالة) بدون رسائل الخطأ
       const history = updatedMessages
@@ -271,16 +358,54 @@ export default function BousalaChatDrawer() {
       };
 
       setMessages((prev) => [...prev, botReplyMsg]);
-      setRemainingQuota(data.remaining);
     } catch (err: any) {
-      const errMsg =
-        err?.message || 'تعذر إرسال رسالتك حالياً. يُرجى التحقق من الاتصال والمحاولة مجدداً.';
-      setErrorAlert(errMsg);
+      const rawMessage = (err?.message || '').toLowerCase();
+      let categorizedError = '';
+
+      if (
+        rawMessage.includes('429') ||
+        rawMessage.includes('رصيد') ||
+        rawMessage.includes('استراحة') ||
+        rawMessage.includes('استنفدت')
+      ) {
+        categorizedError = 'استراحة قصيرة، ارجع بعد شوية 🧭';
+      } else if (
+        rawMessage.includes('401') ||
+        rawMessage.includes('صلاحية') ||
+        rawMessage.includes('تسجيل الدخول') ||
+        rawMessage.includes('token')
+      ) {
+        categorizedError = 'انتهت صلاحية تسجيل الدخول، يُرجى تسجيل الدخول مجددًا لمواصلة المحادثة.';
+      } else if (
+        rawMessage.includes('اتصال') ||
+        rawMessage.includes('شبكة') ||
+        rawMessage.includes('failed to fetch') ||
+        rawMessage.includes('network') ||
+        rawMessage.includes('cors') ||
+        rawMessage.includes('typeerror')
+      ) {
+        categorizedError = 'تعذر الاتصال بالشبكة، يُرجى التحقق من اتصالك بالإنترنت والمحاولة مجددًا.';
+      } else if (
+        rawMessage.includes('500') ||
+        rawMessage.includes('502') ||
+        rawMessage.includes('503') ||
+        rawMessage.includes('صيانة') ||
+        rawMessage.includes('سيرفر') ||
+        rawMessage.includes('خادم')
+      ) {
+        categorizedError = 'خادم البوصلة غير متاح حاليًا أو يخضع للصيانة الدورية، يُرجى المحاولة بعد قليل.';
+      } else if (err?.message) {
+        categorizedError = err.message;
+      } else {
+        categorizedError = 'حدث خطأ أثناء معالجة السؤال، يُرجى المحاولة مجددًا.';
+      }
+
+      setErrorAlert(categorizedError);
 
       const errorMsg: BotChatMessage = {
         id: `err_${Date.now()}`,
         role: 'assistant',
-        content: `⚠️ عذراً، ${errMsg}`,
+        content: `⚠️ ${categorizedError}`,
         createdAt: Date.now(),
         error: true,
       };
@@ -350,7 +475,7 @@ export default function BousalaChatDrawer() {
         <div
           role="dialog"
           aria-label="محادثة البوصلة"
-          className="fixed inset-0 z-50 flex flex-col bg-navy-950/95 sm:inset-auto sm:bottom-6 sm:end-6 sm:h-[620px] sm:w-[420px] sm:max-h-[calc(100vh-4rem)] sm:rounded-2xl sm:border sm:border-navy-700/80 sm:bg-navy-900/95 sm:shadow-2xl sm:backdrop-blur-xl transition-all duration-300 overflow-hidden"
+          className="fixed inset-0 z-50 flex flex-col bg-navy-950/95 sm:inset-auto sm:bottom-6 sm:end-6 h-[100dvh] max-h-[100dvh] sm:h-[620px] sm:w-[420px] sm:max-h-[calc(100vh-4rem)] sm:rounded-2xl sm:border sm:border-navy-700/80 sm:bg-navy-900/95 sm:shadow-2xl sm:backdrop-blur-xl transition-all duration-300 overflow-hidden overscroll-contain"
         >
           {/* Header */}
           <div className="flex items-center justify-between border-b border-navy-800 bg-navy-950/70 px-4 py-3 sm:px-5">
@@ -361,19 +486,17 @@ export default function BousalaChatDrawer() {
               <div>
                 <div className="flex items-center gap-2">
                   <h3 className="text-sm font-extrabold text-white">البوصلة</h3>
-                  <span className="inline-flex items-center rounded-md bg-gold-500/10 px-1.5 py-0.5 text-[10px] font-bold text-gold-400 border border-gold-500/20">
-                    مساعدك الذكي
-                  </span>
                   {isPaused && (
                     <span className="inline-flex items-center rounded-md bg-emerald-500/10 px-1.5 py-0.5 text-[10px] font-bold text-emerald-400 border border-emerald-500/20">
                       مراجعة المعلم
                     </span>
                   )}
                 </div>
-                <p className="text-[11px] text-slate-400">
-                  {remainingQuota !== null
-                    ? `المتبقي اليوم: ${remainingQuota} سؤال`
-                    : 'استشارات منهج الدراسات'}
+                <p className="text-[11px] font-bold text-gold-400">
+                  البوصلة بتساعدك فى المذاكرة.. اسألني أي حاجة
+                </p>
+                <p className="text-[10px] text-slate-400">
+                  استشارات منهج الدراسات • راجع إجاباتها مع كتابك
                 </p>
               </div>
             </div>
@@ -419,7 +542,7 @@ export default function BousalaChatDrawer() {
           )}
 
           {/* Messages Area */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          <div className="flex-1 overflow-y-auto p-4 space-y-4 overscroll-contain">
             {messages.map((msg) => {
               const isUser = msg.role === 'user';
               const isTeacher = msg.source === 'teacher';
@@ -433,7 +556,7 @@ export default function BousalaChatDrawer() {
                   {!isUser && isTeacher && (
                     <div className="mb-1 flex items-center gap-1.5 px-1 text-xs font-bold text-emerald-400">
                       <UserCheck className="h-3.5 w-3.5" />
-                      <span>فريق البوصلة</span>
+                      <span>رد المعلم</span>
                     </div>
                   )}
 
@@ -522,20 +645,52 @@ export default function BousalaChatDrawer() {
               <div className="pt-2 space-y-2">
                 <div className="flex items-center gap-1.5 text-xs font-bold text-slate-400">
                   <Sparkles className="h-3.5 w-3.5 text-gold-400" />
-                  <span>أسئلة شائعة يمكنك البدء بها:</span>
+                  <span>
+                    {!firebaseUser ? 'أسئلة شائعة عن المنصة (إجابات فورية):' : 'أسئلة شائعة يمكنك البدء بها:'}
+                  </span>
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  {suggestedQuestions.map((q, idx) => (
-                    <button
-                      key={idx}
-                      type="button"
-                      onClick={() => handleSendMessage(q)}
-                      className="text-right rounded-xl border border-navy-800 bg-navy-950/40 p-2.5 text-xs text-slate-300 transition-all hover:border-gold-500/40 hover:bg-navy-800/60 hover:text-gold-300"
-                    >
-                      {q}
-                    </button>
-                  ))}
+                  {!firebaseUser
+                    ? VISITOR_FAQS.map((faq, idx) => (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => handleFaqClick(faq)}
+                          className="text-right rounded-xl border border-navy-800 bg-navy-950/40 p-2.5 text-xs text-slate-300 transition-all hover:border-gold-500/40 hover:bg-navy-800/60 hover:text-gold-300"
+                        >
+                          {faq.q}
+                        </button>
+                      ))
+                    : suggestedQuestions.map((q, idx) => (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => handleSendMessage(q)}
+                          className="text-right rounded-xl border border-navy-800 bg-navy-950/40 p-2.5 text-xs text-slate-300 transition-all hover:border-gold-500/40 hover:bg-navy-800/60 hover:text-gold-300"
+                        >
+                          {q}
+                        </button>
+                      ))}
                 </div>
+
+                {/* زر إضافي للطلاب لعرض الأسئلة الشائعة عن المنصة */}
+                {firebaseUser && (
+                  <div className="pt-2 border-t border-navy-800/50">
+                    <p className="text-[11px] font-bold text-slate-400 mb-1.5">أسئلة شائعة عن المنصة:</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {VISITOR_FAQS.slice(0, 4).map((faq, idx) => (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => handleFaqClick(faq)}
+                          className="rounded-lg border border-navy-800 bg-navy-950/60 px-2 py-1 text-[11px] text-slate-300 hover:border-gold-500/40 hover:text-gold-300"
+                        >
+                          {faq.q}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
@@ -560,7 +715,7 @@ export default function BousalaChatDrawer() {
                   onChange={(e) => setInputMessage(e.target.value)}
                   disabled={loading}
                   placeholder="اكتب سؤالك هنا في المنهج..."
-                  className="w-full rounded-xl border border-navy-700 bg-navy-900 px-3.5 py-2.5 text-sm text-white placeholder:text-slate-500 focus:border-gold-500 focus:outline-none focus:ring-2 focus:ring-gold-500/30 disabled:opacity-50"
+                  className="w-full rounded-xl border border-navy-700 bg-navy-900 px-3.5 py-2.5 text-base sm:text-sm text-white placeholder:text-slate-500 focus:border-gold-500 focus:outline-none focus:ring-2 focus:ring-gold-500/30 disabled:opacity-50"
                 />
                 {inputMessage.length > 400 && (
                   <span className="absolute left-2.5 bottom-1 text-[10px] text-slate-500">
@@ -579,7 +734,7 @@ export default function BousalaChatDrawer() {
               </button>
             </form>
             <p className="mt-2 text-center text-[10px] text-slate-500">
-              قد يراجع فريق المنصة المحادثات لتحسين الإجابات
+              البوصلة بتساعدك فى المذاكرة.. اسألني أي حاجة
             </p>
           </div>
         </div>

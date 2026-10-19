@@ -167,25 +167,44 @@ export function getBotBaseUrl(): string {
   return url.replace(/\/+$/, '');
 }
 
+export function getOrCreateDeviceId(): string {
+  try {
+    let id = localStorage.getItem('yb_visitor_device_id');
+    if (!id) {
+      id = 'dev_' + Math.random().toString(36).substring(2, 12) + Date.now().toString(36);
+      localStorage.setItem('yb_visitor_device_id', id);
+    }
+    return id;
+  } catch {
+    return 'dev_ephemeral_' + Date.now();
+  }
+}
+
 // ---------------- Student API ----------------
 
 /**
  * إرسال رسالة شات جديدة للبوت
  */
 export async function sendMessageToBot(
-  token: string,
-  params: SendChatParams,
+  token?: string | null,
+  params: SendChatParams = { message: '' },
 ): Promise<ChatResponseData> {
   const baseUrl = getBotBaseUrl();
+  const deviceId = getOrCreateDeviceId();
+
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    'x-device-id': deviceId,
+  };
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
 
   let response: Response;
   try {
     response = await fetch(`${baseUrl}/chat`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
+      headers,
       body: JSON.stringify(params),
     });
   } catch {
@@ -209,8 +228,7 @@ export async function sendMessageToBot(
     }
     if (response.status === 429) {
       throw new Error(
-        errorMsg ||
-          'لقد استنفدت رصيدك اليومي من الأسئلة (30 رسالة). يتجدد رصيدك تلقائيًا غدًا إن شاء الله!',
+        errorMsg || 'استراحة قصيرة، ارجع بعد شوية',
       );
     }
     if (response.status === 503 || response.status >= 500) {

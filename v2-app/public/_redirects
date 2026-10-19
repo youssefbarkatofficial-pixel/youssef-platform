@@ -1,12 +1,41 @@
-/index.html / 301
-/courses.html /courses 301
-/login.html /login 301
-/register.html /register 301
-/dashboard.html /student 301
-/my-courses.html /student/my-courses 301
-/exams.html /student/exams 301
-/stats.html /student/stats 301
-/profile.html /student/profile 301
-/settings.html /student/profile 301
-/support.html /student/support 301
-/* /index.html 200
+# ------------------------------------------------------------------------------
+# Cloudflare Pages Redirects & SPA Rewrite Rules
+# منصة الأستاذ يوسف بركات - قواعد التحويل 301 للمسارات القديمة + قاعدة الـ SPA
+# ------------------------------------------------------------------------------
+
+# 1. الصفحات العامة القديمة (301 Permanent Redirect)
+/index.html                     /                           301
+/login.html                     /login                      301
+/register.html                  /register                   301
+/courses.html                   /courses                    301
+/course-details.html            /courses                    301
+/forgot-password.html           /forgot-password            301
+/checkout.html                  /courses                    301
+
+# 2. صفحات الطالب القديمة (301 Permanent Redirect)
+/dashboard.html                 /student                    301
+/my-courses.html                /student/my-courses         301
+/exams.html                     /student/exams              301
+/homeworks.html                 /student/exams              301
+/stats.html                     /student/stats              301
+/profile.html                   /student/profile            301
+/settings.html                  /student/profile            301
+/support.html                   /student/support            301
+/notifications.html             /student/notifications      301
+/game.html                      /student                    301
+
+# 3. صفحات الأدمن القديمة (301 Permanent Redirect)
+/admin.html                     /admin/login                301
+/admin-dashboard.html           /admin/dashboard            301
+/admin-courses.html             /admin/courses              301
+/admin-students.html            /admin/students             301
+/admin-support.html             /admin/support              301
+/admin-payments.html            /admin/payments             301
+/admin-settings.html            /admin/settings             301
+/admin-notifications.html       /admin/notifications        301
+/admin-analytics.html           /admin/analytics            301
+/admin-question-bank.html       /admin/question-bank        301
+/admin-bot.html                 /admin/bot                  301
+
+# 4. قاعدة SPA Rewrite لجميع المسارات الحديثة
+/*                              /index.html                 200

@@ -1,11 +1,13 @@
-import { Env, ChatRequest, ChatResponse, ChatMessage } from './types';
-import { verifyFirebaseToken, fetchStudentProfile, verifyAdmin } from './auth';
+import { Env, ChatRequest, ChatResponse, ChatMessage, StudentProfile } from './types';
+import { verifyFirebaseToken, fetchStudentProfile, verifyAdmin, computeVisitorKey } from './auth';
 import { matchIntent } from './intents';
 import { findLessonContext } from './rag';
 import { buildSystemPrompt } from './prompts';
 import { callLlm } from './llm';
 import {
   checkAndIncrementUsage,
+  checkTokenBudget,
+  recordTokenUsage,
   getAnswerFromCache,
   findLearnedAnswer,
   logChat,
@@ -26,16 +28,34 @@ function getCorsHeaders(request: Request, env: Env): HeadersInit {
 
   const headers: Record<string, string> = {
     'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-device-id',
     'Access-Control-Max-Age': '86400',
     'Vary': 'Origin'
   };
 
-  if (origin && allowlist.includes(origin.toLowerCase())) {
+  const isAllowed = allowlist.includes(origin.toLowerCase()) ||
+    origin.endsWith('.youssefbarakat.pages.dev') ||
+    origin === 'https://youssefbarakat.pages.dev';
+
+  if (origin && isAllowed) {
     headers['Access-Control-Allow-Origin'] = origin;
   }
 
   return headers;
+}
+
+function isGreeting(msg: string): boolean {
+  const clean = msg.trim().replace(/[؟?!.،,]/g, '').trim();
+  if (!clean) return true;
+  const words = clean.split(/\s+/).filter(Boolean);
+  if (words.length > 5) return false;
+  const greetings = [
+    'سلام', 'السلام', 'عليكم', 'وعليكم', 'ورحمة', 'ورحمه', 'وبركاته', 'مرحبا', 'مرحباً', 'اهلا', 'أهلا', 'أهلاً',
+    'صباح', 'الخير', 'مساء', 'النور', 'ازيك', 'إزيك', 'عامل', 'ايه', 'إيه',
+    'شكرا', 'شكراً', 'تمام', 'تسلم', 'جزاك', 'الله', 'خيرا', 'خيراً',
+    'هلا', 'يا', 'مستر', 'استاذ', 'أستاذ', 'باي', 'مع', 'السلامة', 'عفوا', 'عفواً'
+  ];
+  return words.every(w => greetings.some(g => w === g || w.includes(g)));
 }
 
 export default {
@@ -97,35 +117,38 @@ export default {
         });
       }
 
-      // 4. GET /usage (فحص رصيد الطالب المتبقي لليوم)
+      // 4. GET /usage (فحص رصيد التوكنز وحالة المحادثة)
       if (request.method === 'GET' && url.pathname === '/usage') {
         const authHeader = request.headers.get('Authorization') || '';
         const token = authHeader.replace(/^Bearer\s+/i, '').trim();
-        if (!token) {
-          return Response.json({ error: 'Unauthorized' }, { status: 401, headers: corsHeaders });
+
+        let userKey = '';
+        let studentName = 'زائر';
+        let tier: 'visitor' | 'free' | 'subscribed' = 'visitor';
+
+        if (token) {
+          const { uid } = await verifyFirebaseToken(token, env);
+          const student = await fetchStudentProfile(uid, token, env);
+          userKey = student.uid;
+          studentName = student.name;
+          const activeCourses = Array.isArray(student.courses) ? student.courses.filter(Boolean) : [];
+          tier = activeCourses.length > 0 ? 'subscribed' : 'free';
+        } else {
+          userKey = await computeVisitorKey(request);
+          tier = 'visitor';
         }
 
-        const { uid } = await verifyFirebaseToken(token, env);
-        const student = await fetchStudentProfile(uid, token, env);
-
-        const dateKey = new Date().toISOString().slice(0, 10);
-        const studentDailyLimit = parseInt(await getSetting(env.DB, 'daily_student_limit', '30'), 10);
-        const studentUsageId = `${dateKey}:${student.uid}`;
-
-        const row = await env.DB.prepare(
-          'SELECT count FROM usage_daily WHERE id = ?'
-        ).bind(studentUsageId).first();
-
-        const used = (row as any)?.count || 0;
-        const remaining = Math.max(0, studentDailyLimit - used);
-
-        const convState = await checkConversationState(env.DB, student.uid);
+        const budget = await checkTokenBudget(env.DB, userKey, tier);
+        const convState = token ? await checkConversationState(env.DB, userKey) : { paused: false };
 
         return Response.json({
-          studentName: student.name,
-          usedToday: used,
-          limit: studentDailyLimit,
-          remaining,
+          studentName,
+          tier,
+          usedTokens: budget.usedTokens,
+          limitTokens: budget.limit,
+          remainingTokens: budget.remainingTokens,
+          remaining: budget.remainingTokens,
+          limit: budget.limit,
           paused: convState.paused
         }, { headers: corsHeaders });
       }
@@ -204,29 +227,43 @@ export default {
 
       // 7. POST /chat (المسار الرئيسي للمحادثة)
       if (request.method === 'POST' && url.pathname === '/chat') {
-        // التحقق من التوكن أولاً
         const authHeader = request.headers.get('Authorization') || '';
         const token = authHeader.replace(/^Bearer\s+/i, '').trim();
-        if (!token) {
-          return Response.json({ error: 'يجب تسجيل الدخول أولاً للوصول إلى البوصلة.' }, { status: 401, headers: corsHeaders });
-        }
 
         let studentUid = '';
-        let studentProfile;
-        try {
-          const verified = await verifyFirebaseToken(token, env);
-          studentUid = verified.uid;
-          studentProfile = await fetchStudentProfile(studentUid, token, env);
-        } catch (e: any) {
-          const isArchived = e?.message?.includes('archived');
-          const isExpired = e?.message?.includes('expired');
-          const status = isArchived ? 403 : 401;
-          const userMsg = isArchived
-            ? 'تم إيقاف حسابك مؤقتاً، يرجى التواصل مع إدارة المنصة.'
-            : (isExpired
-              ? 'انتهت صلاحية الجلسة، يُرجى تسجيل الدخول مجدداً.'
-              : 'تعذر التحقق من بيانات تسجيل الدخول، يُرجى إعادة تسجيل الدخول.');
-          return Response.json({ error: userMsg }, { status, headers: corsHeaders });
+        let studentProfile: StudentProfile;
+        let tier: 'visitor' | 'free' | 'subscribed' = 'visitor';
+
+        if (token) {
+          try {
+            const verified = await verifyFirebaseToken(token, env);
+            studentUid = verified.uid;
+            studentProfile = await fetchStudentProfile(studentUid, token, env);
+            const activeCourses = Array.isArray(studentProfile.courses) ? studentProfile.courses.filter(Boolean) : [];
+            tier = activeCourses.length > 0 ? 'subscribed' : 'free';
+          } catch (e: any) {
+            const isArchived = e?.message?.includes('archived');
+            const isExpired = e?.message?.includes('expired');
+            const status = isArchived ? 403 : 401;
+            const userMsg = isArchived
+              ? 'تم إيقاف حسابك مؤقتاً، يرجى التواصل مع إدارة المنصة.'
+              : (isExpired
+                ? 'انتهت صلاحية الجلسة، يُرجى تسجيل الدخول مجدداً.'
+                : 'تعذر التحقق من بيانات تسجيل الدخول، يُرجى إعادة تسجيل الدخول.');
+            return Response.json({ error: userMsg }, { status, headers: corsHeaders });
+          }
+        } else {
+          // وضع الزائر (بدون إجبار على التسجيل، مع هوية مشفرة بملح سري)
+          studentUid = await computeVisitorKey(request);
+          tier = 'visitor';
+          studentProfile = {
+            uid: studentUid,
+            name: 'زائر',
+            firstName: 'يا بطل',
+            grade: 'عام',
+            courses: [],
+            archived: false
+          };
         }
 
         // قراءة الـ body والتحقق من الشروط الصارمة
@@ -267,59 +304,56 @@ export default {
 
         const examActive = Boolean(body.examActive);
 
-        // (0) فحص حالة المحادثة وتدخل المعلم المباشر (bot_paused)
-        const convState = await checkConversationState(env.DB, studentProfile.uid);
-        if (convState.paused) {
-          const cpuMs = Math.round((performance.now() - startTime) * 100) / 100;
-          const pausedReply = 'لحظة، بنراجع سؤالك ونرد عليك';
-          const logId = await logChat(
-            env.DB,
-            studentProfile.uid,
-            rawMessage,
-            pausedReply,
-            'direct',
-            cpuMs
-          );
-          await recordStudentMessageInState(env.DB, studentProfile.uid);
+        // (0) فحص حالة المحادثة وتدخل المعلم المباشر (bot_paused) - للطلاب المسجلين
+        if (token) {
+          const convState = await checkConversationState(env.DB, studentProfile.uid);
+          if (convState.paused) {
+            const cpuMs = Math.round((performance.now() - startTime) * 100) / 100;
+            const pausedReply = 'لحظة، بنراجع سؤالك ونرد عليك';
+            const logId = await logChat(
+              env.DB,
+              studentProfile.uid,
+              rawMessage,
+              pausedReply,
+              'direct',
+              cpuMs
+            );
+            await recordStudentMessageInState(env.DB, studentProfile.uid);
 
-          const dateKey = new Date().toISOString().slice(0, 10);
-          const studentDailyLimit = parseInt(await getSetting(env.DB, 'daily_student_limit', '30'), 10);
-          const studentUsageId = `${dateKey}:${studentProfile.uid}`;
-          const usageRow = await env.DB.prepare('SELECT count FROM usage_daily WHERE id = ?').bind(studentUsageId).first();
-          const used = (usageRow as any)?.count || 0;
-          const remaining = Math.max(0, studentDailyLimit - used);
+            const dateKey = new Date().toISOString().slice(0, 10);
+            const studentDailyLimit = parseInt(await getSetting(env.DB, 'daily_student_limit', '30'), 10);
+            const studentUsageId = `${dateKey}:${studentProfile.uid}`;
+            const usageRow = await env.DB.prepare('SELECT count FROM usage_daily WHERE id = ?').bind(studentUsageId).first();
+            const used = (usageRow as any)?.count || 0;
+            const remaining = Math.max(0, studentDailyLimit - used);
 
-          return Response.json({
-            reply: pausedReply,
-            source: 'direct',
-            remaining,
-            logId,
-            cpuMs,
-            paused: true
-          } satisfies ChatResponse, { headers: corsHeaders });
+            return Response.json({
+              reply: pausedReply,
+              source: 'direct',
+              remaining,
+              logId,
+              cpuMs,
+              paused: true
+            } satisfies ChatResponse, { headers: corsHeaders });
+          }
         }
 
-        // (أ) فحص الحدود اليومية
-        const rateCheck = await checkAndIncrementUsage(env.DB, studentProfile.uid);
-        if (!rateCheck.allowed) {
-          if (rateCheck.reason === 'bot_disabled') {
+        // (أ) فحص رصيد التوكنز داخل نافذة الـ 5 ساعات (قابلة للتعديل من الإعدادات)
+        const tokenBudget = await checkTokenBudget(env.DB, studentProfile.uid, tier);
+        if (!tokenBudget.allowed) {
+          if (tokenBudget.reason === 'bot_disabled') {
             return Response.json({
               error: 'البوصلة متوقفة حالياً لأعمال الصيانة، سنعود قريباً بإذن الله.'
             }, { status: 503, headers: corsHeaders });
           }
-          if (rateCheck.reason === 'student_limit') {
-            return Response.json({
-              error: 'وصلت للحد الأقصى اليومي لرسائل البوصلة (30 رسالة). سيتجدد رصيدك تلقائياً غداً!'
-            }, { status: 429, headers: corsHeaders });
-          }
-          if (rateCheck.reason === 'global_cap') {
-            return Response.json({
-              error: 'المنصة تشهد ضغطاً استثنائياً اليوم، تم بلوغ السقف اليومي العام للبوت. يُرجى التجربة لاحقاً.'
-            }, { status: 429, headers: corsHeaders });
-          }
+          return Response.json({
+            error: 'استراحة قصيرة، ارجع بعد شوية'
+          }, { status: 429, headers: corsHeaders });
         }
 
-        await recordStudentMessageInState(env.DB, studentProfile.uid);
+        if (token) {
+          await recordStudentMessageInState(env.DB, studentProfile.uid);
+        }
 
         // (ب) محرك النوايا Semantic Intents
         const intentMatch = await matchIntent(env.DB, rawMessage);
@@ -329,7 +363,7 @@ export default {
           return Response.json({
             reply: intentMatch.answer,
             source: 'system_override',
-            remaining: rateCheck.remaining,
+            remaining: tokenBudget.remainingTokens,
             logId,
             cpuMs
           } satisfies ChatResponse, { headers: corsHeaders });
@@ -343,7 +377,7 @@ export default {
           return Response.json({
             reply: cachedAnswer,
             source: 'cache',
-            remaining: rateCheck.remaining,
+            remaining: tokenBudget.remainingTokens,
             logId,
             cpuMs
           } satisfies ChatResponse, { headers: corsHeaders });
@@ -354,6 +388,34 @@ export default {
 
         // (هـ) استرجاع مقاطع الدروس من RAG (مع كاش isolate فائق السرعة)
         const ragResult = await findLessonContext(env.DB, rawMessage, 3, studentProfile.grade);
+
+        // (و) الردود التلقائية المجانية بصفر توكنز
+        if (isGreeting(rawMessage)) {
+          const cpuMs = Math.round((performance.now() - startTime) * 100) / 100;
+          const helloReply = 'أهلاً بك يا بطل في منصة الأستاذ يوسف بركات! 🧭 أنا البوصلة، معاك لأي سؤال في منهج الدراسات الاجتماعية. تحب نراجع إيه النهاردة؟';
+          const logId = await logChat(env.DB, studentProfile.uid, rawMessage, helloReply, 'intent', cpuMs);
+          return Response.json({
+            reply: helloReply,
+            source: 'intent',
+            remaining: tokenBudget.remainingTokens,
+            logId,
+            cpuMs
+          } satisfies ChatResponse, { headers: corsHeaders });
+        }
+
+        // أمان المحتوى: الأسئلة الدراسية بدون مقاطع منهج معتمدة تُرفض فوراً وبأدب بصفر توكنز
+        if (!learnedAnswer && !intentMatch && ragResult.chunks.length === 0) {
+          const cpuMs = Math.round((performance.now() - startTime) * 100) / 100;
+          const rejectionReply = 'ده مش في شرح الأستاذ، اسأل الأستاذ أو راجع الدرس';
+          const logId = await logChat(env.DB, studentProfile.uid, rawMessage, rejectionReply, 'fallback', cpuMs);
+          return Response.json({
+            reply: rejectionReply,
+            source: 'fallback',
+            remaining: tokenBudget.remainingTokens,
+            logId,
+            cpuMs
+          } satisfies ChatResponse, { headers: corsHeaders });
+        }
 
         // جلب المواعيد من جدول settings
         const prepSchedule = await getSetting(
@@ -384,8 +446,14 @@ export default {
           intentContext: intentContext || undefined
         });
 
-        // (و) استدعاء نموذج الذكاء الاصطناعي (Groq مع Fallback و Gemini احتياطي)
-        const llmResult = await callLlm(systemPrompt, rawMessage, history, env);
+        // (ز) استدعاء نموذج الذكاء الاصطناعي مع سقف التوكنز للرد
+        const maxTokens = parseInt(await getSetting(env.DB, 'max_completion_tokens', '500'), 10);
+        const llmResult = await callLlm(systemPrompt, rawMessage, history, env, maxTokens);
+
+        const usedTokens = llmResult.totalTokens || 0;
+        if (usedTokens > 0) {
+          await recordTokenUsage(env.DB, studentProfile.uid, tier, usedTokens);
+        }
 
         const cpuMs = Math.round((performance.now() - startTime) * 100) / 100;
         const logId = await logChat(
@@ -397,10 +465,12 @@ export default {
           cpuMs
         );
 
+        const remainingTokens = Math.max(0, tokenBudget.remainingTokens - usedTokens);
+
         return Response.json({
           reply: llmResult.reply,
           source: llmResult.source,
-          remaining: rateCheck.remaining,
+          remaining: remainingTokens,
           lessonTitles: ragResult.lessonTitles.length ? ragResult.lessonTitles : undefined,
           logId,
           cpuMs

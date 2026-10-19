@@ -12,8 +12,8 @@ const require = createRequire(import.meta.url);
 
 import { norm, keywords, similarity, findLessonContext, invalidateChunksCache } from '../dist/rag.js';
 import { matchIntent } from '../dist/intents.js';
-import { verifyFirebaseToken, fetchStudentProfile, verifyAdmin, _testInjectToken } from '../dist/auth.js';
-import { checkAndIncrementUsage, getAnswerFromCache, findLearnedAnswer } from '../dist/db.js';
+import { verifyFirebaseToken, fetchStudentProfile, verifyAdmin, _testInjectToken, computeVisitorKey } from '../dist/auth.js';
+import { checkAndIncrementUsage, checkTokenBudget, recordTokenUsage, getAnswerFromCache, findLearnedAnswer, getTeachingChunksDistribution, getTeachingChunks } from '../dist/db.js';
 import { buildSystemPrompt } from '../dist/prompts.js';
 import workerModule from '../dist/index.js';
 
@@ -29,6 +29,7 @@ function createMockD1() {
     learned_answers: new Map(),
     chat_logs: new Map(),
     usage_daily: new Map(),
+    token_usage: new Map(),
     answer_cache: new Map(),
     conversation_states: new Map(),
     self_learning_pending: new Map()
@@ -60,6 +61,10 @@ function createMockD1() {
             }
             return { c: items.length };
           }
+          if (sqlLower.includes('from lesson_chunks where id = ?')) {
+            const id = this._params[0];
+            return tables.lesson_chunks.get(id) || null;
+          }
           if (sqlLower.includes('from self_learning_pending where id = ?')) {
             const id = this._params[0];
             const item = tables.self_learning_pending.get(id);
@@ -79,6 +84,16 @@ function createMockD1() {
               return { total };
             }
             return { total: tables.chat_logs.size };
+          }
+          if (sqlLower.includes('sum(tokens) as total_used from token_usage')) {
+            const [userKey, cutoff] = this._params;
+            let total_used = 0;
+            for (const item of tables.token_usage.values()) {
+              if (item.user_key === userKey && item.created_at >= cutoff) {
+                total_used += item.tokens;
+              }
+            }
+            return { total_used };
           }
           const res = await this.all();
           return res.results[0] || null;
@@ -222,6 +237,12 @@ function createMockD1() {
             return { success: true };
           }
 
+          if (sqlLower.includes('into token_usage')) {
+            const [id, userKey, tier, tokens, createdAt] = this._params;
+            tables.token_usage.set(id, { id, user_key: userKey, tier, tokens, created_at: createdAt });
+            return { success: true };
+          }
+
           if (sqlLower.includes('into answer_cache')) {
             const [hash, qNorm, ans, src, cr, exp] = this._params;
             tables.answer_cache.set(hash, {
@@ -339,6 +360,40 @@ function createMockD1() {
             return { success: true };
           }
 
+          if (sqlLower.includes('update lesson_chunks set status = ?, updated_at = ? where id = ?')) {
+            const [st, up, id] = this._params;
+            const item = tables.lesson_chunks.get(id);
+            if (item) {
+              item.status = st;
+              item.updated_at = up;
+            }
+            return { success: true };
+          }
+
+          if (sqlLower.includes('update lesson_chunks set')) {
+            const id = this._params[this._params.length - 1];
+            const item = tables.lesson_chunks.get(id);
+            if (item) {
+              const [course_id, lesson_id, stage, kind, status, text, kwJson, source_note, updated_at] = this._params;
+              if (course_id !== null) item.course_id = course_id;
+              if (lesson_id !== null) item.lesson_id = lesson_id;
+              if (stage !== null) item.stage = stage;
+              if (kind !== null) item.kind = kind;
+              if (status !== null) item.status = status;
+              if (text !== null) item.text = text;
+              if (kwJson) item.keywords = kwJson;
+              if (source_note !== null) item.source_note = source_note;
+              item.updated_at = updated_at;
+            }
+            return { success: true };
+          }
+
+          if (sqlLower.includes('delete from lesson_chunks where id = ?')) {
+            const id = this._params[0];
+            tables.lesson_chunks.delete(id);
+            return { success: true };
+          }
+
           return { success: true };
         }
       };
@@ -349,6 +404,25 @@ function createMockD1() {
           const id = s._params[0];
           const curr = tables.usage_daily.get(id) || 0;
           tables.usage_daily.set(id, curr + 1);
+        }
+        if (s._sql.toLowerCase().includes('into lesson_chunks')) {
+          const [id, course_id, lesson_id, stage, kind, status, text, keywords, grade, unit, subject, source_note, created_at, updated_at] = s._params;
+          tables.lesson_chunks.set(id, {
+            id,
+            course_id,
+            lesson_id,
+            stage,
+            kind,
+            status,
+            text,
+            keywords,
+            grade,
+            unit,
+            subject,
+            source_note,
+            created_at,
+            updated_at
+          });
         }
       }
       return [];
@@ -1636,8 +1710,296 @@ describe('جناح اختبارات بوت البوصلة (Phase 6 - Part 1)', (
     });
 
     assert.ok(prompt.includes('7. للأسئلة الدراسية (تاريخ، جغرافيا، تربية وطنية)'), 'يجب أن يحتوي البرومت على بند 7');
-    assert.ok(prompt.includes('ده من معلوماتي العامة، راجع كتابك أو اسأل الأستاذ للتأكد'), 'يجب أن يحتوي على عبارة التحفظ المحددة');
-    assert.ok(prompt.includes('مش متأكد، راجع الكتاب'), 'يجب أن يحتوي على عبارة عدم التأكد');
+    assert.ok(prompt.includes('ممنوع منعاً باتاً الإجابة من معلوماتك العامة'), 'يجب أن يمنع الإجابة من المعلومات العامة');
+    assert.ok(prompt.includes('ده مش في شرح الأستاذ، اسأل الأستاذ أو راجع الدرس'), 'يجب أن يحتوي على عبارة الرفض المحددة');
+  });
+
+  // 30. اختبار: هوية الزائر (computeVisitorKey) مشتقة بـ SHA-256 و salt ولا تحفظ IP صريح
+  it('30. اختبار: هوية الزائر (computeVisitorKey) مشتقة بـ SHA-256 وملح سري ولا تحفظ IP صريح', async () => {
+    const req1 = new Request('http://localhost/chat', {
+      headers: {
+        'x-device-id': 'dev_uuid_111',
+        'CF-Connecting-IP': '198.51.100.25'
+      }
+    });
+
+    const req2 = new Request('http://localhost/chat', {
+      headers: {
+        'x-device-id': 'dev_uuid_222',
+        'CF-Connecting-IP': '198.51.100.25'
+      }
+    });
+
+    const key1 = await computeVisitorKey(req1);
+    const key2 = await computeVisitorKey(req2);
+
+    assert.ok(key1.startsWith('vis_'), 'مفتاح الزائر يبدأ بـ vis_');
+    assert.equal(key1.length, 20, 'المفتاح يتكون من vis_ متبوعاً بـ 16 حرف ست عشري');
+    assert.equal(key1.includes('198.51.100.25'), false, 'ممنوع حفظ الـ IP الصريح في المفتاح');
+    assert.notEqual(key1, key2, 'أجهزة مختلفة تنتج مفاتيح مختلفة حتى لو على نفس الـ IP');
+
+    // التأكد من أن نفس المدخلات تنتج نفس المفتاح (deterministic)
+    const key1Repeat = await computeVisitorKey(req1);
+    assert.equal(key1, key1Repeat, 'تطابق الهاش لنفس الزائر لضمان متابعة الرصيد');
+  });
+
+  // 31. اختبار: فئات رصيد التوكنز الثلاث (visitor=5000, free=25000, subscribed=50000) ونافذة الـ 5 ساعات
+  it('31. اختبار: فئات رصيد التوكنز الثلاث ونافذة الـ 5 ساعات وحساب الاستهلاك', async () => {
+    const vKey = 'vis_test_budget_1';
+    const fKey = 'student_free_user_1';
+    const sKey = 'student_sub_user_1';
+
+    // 1) فحص الحدود الافتراضية
+    const budgetV = await checkTokenBudget(mockDb, vKey, 'visitor');
+    assert.equal(budgetV.limit, 5000, 'سقف الزائر 5000 توكن');
+    assert.equal(budgetV.remainingTokens, 5000);
+    assert.equal(budgetV.allowed, true);
+
+    const budgetF = await checkTokenBudget(mockDb, fKey, 'free');
+    assert.equal(budgetF.limit, 25000, 'سقف المسجل المجاني 25000 توكن');
+    assert.equal(budgetF.remainingTokens, 25000);
+
+    const budgetS = await checkTokenBudget(mockDb, sKey, 'subscribed');
+    assert.equal(budgetS.limit, 50000, 'سقف المشترك في كورس أو أكثر 50000 توكن');
+    assert.equal(budgetS.remainingTokens, 50000);
+
+    // 2) تسجيل استهلاك توكنز واقتطاعها
+    await recordTokenUsage(mockDb, vKey, 'visitor', 4000);
+    const budgetVAfter = await checkTokenBudget(mockDb, vKey, 'visitor');
+    assert.equal(budgetVAfter.usedTokens, 4000);
+    assert.equal(budgetVAfter.remainingTokens, 1000);
+    assert.equal(budgetVAfter.allowed, true);
+
+    // 3) تجاوز السقف -> allowed = false و reason = quota_exceeded
+    await recordTokenUsage(mockDb, vKey, 'visitor', 1500);
+    const budgetVExceeded = await checkTokenBudget(mockDb, vKey, 'visitor');
+    assert.equal(budgetVExceeded.usedTokens, 5500);
+    assert.equal(budgetVExceeded.remainingTokens, 0);
+    assert.equal(budgetVExceeded.allowed, false);
+    assert.equal(budgetVExceeded.reason, 'quota_exceeded');
+
+    // 4) نافذة الـ 5 ساعات: توكنز أقدم من 5 ساعات تسقط تلقائياً من الحساب
+    const oldKey = 'vis_old_window_user';
+    const sixHoursAgo = Date.now() - 6 * 60 * 60 * 1000;
+    mockDb.tables.token_usage.set('old_tu_1', {
+      id: 'old_tu_1',
+      user_key: oldKey,
+      tier: 'visitor',
+      tokens: 4900,
+      created_at: sixHoursAgo
+    });
+
+    const budgetOld = await checkTokenBudget(mockDb, oldKey, 'visitor');
+    assert.equal(budgetOld.usedTokens, 0, 'الاستهلاك الأقدم من 5 ساعات سقط تلقائياً');
+    assert.equal(budgetOld.remainingTokens, 5000);
+    assert.equal(budgetOld.allowed, true);
+  });
+
+  // 32. اختبار: أمان المحتوى - رفض سؤال الفاطميين فورياً بصفر توكنز عند غياب مقاطع المنهج
+  it('32. اختبار: رفض سؤال الفاطميين فورياً بصفر توكنز لعدم وجود مقاطع منهج معتمدة', async () => {
+    const initialTuCount = mockDb.tables.token_usage.size;
+
+    const reqFatimid = new Request('http://localhost/chat', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-device-id': 'dev_fatimid_tester'
+      },
+      body: JSON.stringify({ message: 'من هو مؤسس الدولة الفاطمية؟' })
+    });
+
+    const res = await worker.fetch(reqFatimid, mockEnv, ctx);
+    assert.equal(res.status, 200, 'الاستجابة ناجحة بدون خطأ سيرفر');
+    const data = await res.json();
+
+    assert.equal(data.reply, 'ده مش في شرح الأستاذ، اسأل الأستاذ أو راجع الدرس', 'الرفض اللطيف الفوري الحصري');
+    assert.equal(data.source, 'fallback');
+
+    // التأكد من استهلاك 0 توكنز في قاعدة البيانات
+    const finalTuCount = mockDb.tables.token_usage.size;
+    assert.equal(finalTuCount, initialTuCount, 'صفر استهلاك توكنز تماماً للموديل في هذا السؤال');
+  });
+
+  // 33. اختبار: وضع الزائر يعمل بحرية ويرد على التحيات بصفر توكنز
+  it('33. اختبار: وضع الزائر يرد على التحيات بصفر توكنز ويحظر بأدب عند نفاد الرصيد', async () => {
+    // 1) رد التحية للزائر بدون تسجيل وبدون استهلاك توكنز
+    const reqGreeting = new Request('http://localhost/chat', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-device-id': 'dev_visitor_greet'
+      },
+      body: JSON.stringify({ message: 'السلام عليكم ورحمة الله وبركاته' })
+    });
+
+    const resGreet = await worker.fetch(reqGreeting, mockEnv, ctx);
+    assert.equal(resGreet.status, 200);
+    const dataGreet = await resGreet.json();
+    assert.match(dataGreet.reply, /أهلاً بك يا بطل/);
+    assert.equal(dataGreet.source, 'intent');
+
+    // 2) استنفاد رصيد زائر -> إرجاع 429 مع الرسالة اللطيفة بدون أرقام
+    const exhaustedDevId = 'dev_exhausted_visitor';
+    const visKey = await computeVisitorKey(new Request('http://localhost/', { headers: { 'x-device-id': exhaustedDevId } }));
+    await recordTokenUsage(mockDb, visKey, 'visitor', 6000);
+
+    const reqBlocked = new Request('http://localhost/chat', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-device-id': exhaustedDevId
+      },
+      body: JSON.stringify({ message: 'سؤال بعد نفاد الرصيد' })
+    });
+
+    const resBlocked = await worker.fetch(reqBlocked, mockEnv, ctx);
+    assert.equal(resBlocked.status, 429, 'كود 429 عند نفاد الرصيد');
+    const dataBlocked = await resBlocked.json();
+    assert.equal(dataBlocked.error, 'استراحة قصيرة، ارجع بعد شوية', 'رسالة الاستراحة اللطيفة بدون أرقام');
+  });
+
+  // 34. اختبار: getTeachingChunksDistribution يعيد توزيع المقاطع ويكشف المقاطع اليتيمة بدقة
+  it('34. اختبار: getTeachingChunksDistribution يعيد توزيع المقاطع ويكشف المقاطع اليتيمة بدقة', async () => {
+    // تجهيز مقاطع مطابقة لبيئة الإنتاج (تانية إعدادي)
+    mockDb.tables.lesson_chunks.clear();
+    for (let i = 1; i <= 44; i++) {
+      mockDb.tables.lesson_chunks.set(`chunk_${i}`, {
+        id: `chunk_${i}`,
+        course_id: 'c1785199571849',
+        lesson_id: 'lesson_prep2_u1_l1',
+        stage: 'prep2',
+        kind: 'شرح',
+        status: 'verified',
+        text: `محتوى تدريسي للمقطع ${i}`,
+        keywords: JSON.stringify(['تضاريس', 'جبال']),
+        grade: 'الثاني الإعدادي',
+        unit: 'الوحدة الأولى',
+        subject: 'دراسات اجتماعية',
+        created_at: 1700000000000 + i,
+        updated_at: 1700000000000 + i
+      });
+    }
+
+    // 1) فحص مع قائمة محاضرات Firestore لا تحتوي على 'lesson_prep2_u1_l1' (مثل الوضع الحالي لكورس تانية إعدادي)
+    const distOrphan = await getTeachingChunksDistribution(mockDb, ['res_lecture_1', 'res_lecture_2']);
+    assert.equal(distOrphan.totalChunks, 44, 'إجمالي المقاطع 44');
+    assert.equal(distOrphan.byStage['prep2'], 44, 'كل المقاطع تتبع prep2');
+    assert.equal(distOrphan.orphanCount, 44, 'جميع المقاطع يتيمة لأن المعرف غير موجود في قائمة محاضرات الكورس');
+    assert.equal(distOrphan.byLesson[0].isOrphan, true);
+    assert.equal(distOrphan.byLesson[0].lessonId, 'lesson_prep2_u1_l1');
+
+    // 2) فحص عند وجود المعرف في قائمة محاضرات Firestore
+    const distLinked = await getTeachingChunksDistribution(mockDb, ['lesson_prep2_u1_l1']);
+    assert.equal(distLinked.orphanCount, 0, 'المقاطع غير يتيمة بعد مطابقة معرّف المحاضرة الفعلي');
+    assert.equal(distLinked.byLesson[0].isOrphan, false);
+  });
+
+  // 35. اختبار: POST /admin/teaching/chunks يشترط معرّف المحاضرة (lessonId) ويقسّم النص ويحفظ الحقول
+  it('35. اختبار: POST /admin/teaching/chunks يشترط معرّف المحاضرة (lessonId) ويقسّم النص ويحفظ الحقول', async () => {
+    const ownerToken = 'token_for_owner_teaching';
+    _testInjectToken(ownerToken, 'owner_teaching_uid', 'youssefbarkatofficial@gmail.com');
+
+    // 1) رفض الطلب إن كان lessonId مفقوداً (ربط بالمعرف فقط لا بالعنوان)
+    const reqNoLessonId = new Request('http://localhost/admin/teaching/chunks', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${ownerToken}`
+      },
+      body: JSON.stringify({
+        text: 'فقرة تعليمية جديدة للأستاذ يوسف بركات تشرح هضاب الوطن العربي.',
+        courseId: 'c1785199571849'
+      })
+    });
+    const resNoLessonId = await worker.fetch(reqNoLessonId, mockEnv, ctx);
+    assert.equal(resNoLessonId.status, 400);
+    const dataNoLessonId = await resNoLessonId.json();
+    assert.match(dataNoLessonId.error, /معرف المحاضرة/);
+
+    // 2) قبول الطلب مع lessonId وتقسيمه وتخزين الحقول الجديدة (courseId, stage, kind, status)
+    const reqValid = new Request('http://localhost/admin/teaching/chunks', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${ownerToken}`
+      },
+      body: JSON.stringify({
+        courseId: 'c1785241200444',
+        lessonId: 'res_1786642923546',
+        stage: 'prep3',
+        kind: 'تدريب',
+        status: 'draft',
+        text: 'سؤال تدريبي: ما هي أهم العوامل المؤثرة في مناخ الوطن العربي؟ الإجابة: الموقع الفلكي والقرب من المسطحات المائية والتضاريس.',
+        sourceNote: 'تدريب صفحة 15 من مذكرة التفوق'
+      })
+    });
+    const resValid = await worker.fetch(reqValid, mockEnv, ctx);
+    assert.equal(resValid.status, 200);
+    const dataValid = await resValid.json();
+    assert.equal(dataValid.success, true);
+    assert.ok(dataValid.createdCount >= 1);
+
+    // التحقق من الحفظ في قاعدة البيانات
+    const createdId = dataValid.createdIds[0];
+    const savedChunk = mockDb.tables.lesson_chunks.get(createdId);
+    assert.ok(savedChunk, 'المقطع تم حفظه بنجاح');
+    assert.equal(savedChunk.course_id, 'c1785241200444');
+    assert.equal(savedChunk.lesson_id, 'res_1786642923546');
+    assert.equal(savedChunk.stage, 'prep3');
+    assert.equal(savedChunk.kind, 'تدريب');
+    assert.equal(savedChunk.status, 'draft');
+    assert.equal(savedChunk.source_note, 'تدريب صفحة 15 من مذكرة التفوق');
+  });
+
+  // 36. اختبار: PUT و DELETE /admin/teaching/chunks يدعم التعديل والاعتماد والحذف الناعم
+  it('36. اختبار: PUT و DELETE /admin/teaching/chunks يدعم التعديل والاعتماد والحذف الناعم', async () => {
+    const ownerToken = 'token_for_owner_teaching_edit';
+    _testInjectToken(ownerToken, 'owner_teaching_edit_uid', 'youssefbarkatofficial@gmail.com');
+
+    const testId = 'chunk_test_edit_1';
+    mockDb.tables.lesson_chunks.set(testId, {
+      id: testId,
+      course_id: 'c1785241200444',
+      lesson_id: 'res_1786642923546',
+      stage: 'prep3',
+      kind: 'شرح',
+      status: 'draft',
+      text: 'نص مسودة أولي',
+      keywords: JSON.stringify(['مسودة']),
+      created_at: 1000,
+      updated_at: 1000
+    });
+
+    // 1) اعتماد المقطع وتحديث النص والحالة
+    const reqUpdate = new Request(`http://localhost/admin/teaching/chunks/${testId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${ownerToken}`
+      },
+      body: JSON.stringify({
+        status: 'verified',
+        text: 'نص معتمد ومراجع بالكامل لشرح ثورة 1919'
+      })
+    });
+    const resUpdate = await worker.fetch(reqUpdate, mockEnv, ctx);
+    assert.equal(resUpdate.status, 200);
+    const updated = mockDb.tables.lesson_chunks.get(testId);
+    assert.equal(updated.status, 'verified', 'الحالة تحولت إلى verified معتمد');
+    assert.match(updated.text, /ثورة 1919/);
+
+    // 2) الحذف الناعم (soft delete) -> تحويل الحالة إلى archived
+    const reqSoftDel = new Request(`http://localhost/admin/teaching/chunks/${testId}?soft=true`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${ownerToken}`
+      }
+    });
+    const resSoftDel = await worker.fetch(reqSoftDel, mockEnv, ctx);
+    assert.equal(resSoftDel.status, 200);
+    const softDeleted = mockDb.tables.lesson_chunks.get(testId);
+    assert.ok(softDeleted, 'المقطع لم يُمسح نهائياً بل تم حفظه بحالة مؤرشف');
+    assert.equal(softDeleted.status, 'archived');
   });
 });
 

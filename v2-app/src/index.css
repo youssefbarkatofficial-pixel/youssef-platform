@@ -6,7 +6,7 @@
    1. Local Typography Setup (Zero external CDN requests, font-display: swap)
    ========================================================================== */
 
-/* --- Theme 1: IBM Plex Sans Arabic --- */
+/* --- Primary Arabic Font: IBM Plex Sans Arabic --- */
 @font-face {
   font-family: 'IBM Plex Sans Arabic';
   font-style: normal;
@@ -37,139 +37,105 @@
 @font-face {
   font-family: 'IBM Plex Sans Arabic';
   font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/fonts/ibm-plex-latin-600.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122;
+}
+
+@font-face {
+  font-family: 'IBM Plex Sans Arabic';
+  font-style: normal;
   font-weight: 700;
   font-display: swap;
   src: url('/fonts/ibm-plex-arabic-700.woff2') format('woff2');
   unicode-range: U+0600-06FF, U+0750-077F, U+0870-0891, U+0897-08E1, U+08E3-08FF, U+FB50-FDFF, U+FE70-FEFC;
 }
 
-/* --- Theme 2: Readex Pro --- */
 @font-face {
-  font-family: 'Readex Pro';
-  font-style: normal;
-  font-weight: 400 700;
-  font-display: swap;
-  src: url('/fonts/readex-pro-arabic.woff2') format('woff2');
-  unicode-range: U+0600-06FF, U+0750-077F, U+0870-0891, U+0897-08E1, U+08E3-08FF, U+FB50-FDFF, U+FE70-FEFC;
-}
-
-@font-face {
-  font-family: 'Readex Pro';
-  font-style: normal;
-  font-weight: 400 700;
-  font-display: swap;
-  src: url('/fonts/readex-pro-latin.woff2') format('woff2');
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122;
-}
-
-/* --- Numbers & Western: Plus Jakarta Sans --- */
-@font-face {
-  font-family: 'Plus Jakarta Sans';
-  font-style: normal;
-  font-weight: 500;
-  font-display: swap;
-  src: url('/fonts/plus-jakarta-sans-500.woff2') format('woff2');
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122;
-}
-
-@font-face {
-  font-family: 'Plus Jakarta Sans';
+  font-family: 'IBM Plex Sans Arabic';
   font-style: normal;
   font-weight: 700;
   font-display: swap;
-  src: url('/fonts/plus-jakarta-sans-700.woff2') format('woff2');
+  src: url('/fonts/ibm-plex-latin-700.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122;
+}
+
+/* --- Numbers & Western: Plus Jakarta Sans (Variable Font: weights 400-800) --- */
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
+  src: url('/fonts/plus-jakarta-sans.woff2') format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122;
 }
 
 /* ==========================================================================
-   2. Design Tokens: Dual Theme (Compass / Atlas) + Modes (Dark / Light)
+   2. Design Tokens: Compass Theme Only (Dark / Light Modes) with WCAG AAA (>= 7:1)
    ========================================================================== */
 
 :root,
-html,
-html[data-theme="compass"] {
-  /* Theme 1: البوصلة الذهبية (Dark Default) */
+html {
+  /* --- Dark Mode (Default) --- */
   --bg-base: #071326;
-  --bg-surface: #0d1e38;
-  --bg-surface-hover: #112546;
-  --bg-elevated: #152b4e;
-  --border-subtle: rgba(212, 166, 79, 0.16);
+  --bg-surface: #0c1b33;
+  --bg-surface-hover: #122442;
+  --bg-elevated: #172c4e;
+  --border-subtle: rgba(212, 166, 79, 0.12);
   --border-focus: #d4a64f;
   --brand-gold: #d4a64f;
   --brand-gold-hover: #e2b863;
   --brand-gold-subtle: rgba(212, 166, 79, 0.12);
   --brand-accent: #2dd4bf;
-  --text-primary: #f8fafc;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
+  --text-primary: #f8fafc; /* Contrast 18.2:1 (AAA) */
+  --text-secondary: #cbd5e1; /* Contrast 11.2:1 (AAA) */
+  --text-muted: #94a3b8; /* Contrast 7.25:1 on base (AAA >= 7:1) */
+
+  /* Dedicated Sidebar Tokens (Dark) */
+  --sidebar-bg: #071326;
+  --sidebar-text: #f8fafc;
+  --sidebar-text-muted: #cbd5e1;
+  --sidebar-icon: #d4a64f;
+  --sidebar-active-bg: rgba(212, 166, 79, 0.15);
+  --sidebar-active-text: #d4a64f;
+
   --font-ar: 'IBM Plex Sans Arabic', system-ui, sans-serif;
   --font-num: 'Plus Jakarta Sans', sans-serif;
-  --radius-btn: 0.75rem;
-  --radius-card: 1rem;
-  --card-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
-  --glow-shadow: 0 0 35px rgba(212, 166, 79, 0.2);
+  --radius-btn: 9999px; /* Modern Pill */
+  --radius-card: 1.5rem; /* 24px rounded corners */
+  --card-shadow: 0 12px 36px -8px rgba(0, 0, 0, 0.55), inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
+  --glow-shadow: 0 0 35px rgba(212, 166, 79, 0.22);
 }
 
-html[data-theme="atlas"] {
-  /* Theme 2: أطلس المعرفة (Dark Default) */
-  --bg-base: #091424;
-  --bg-surface: #0f223d;
-  --bg-surface-hover: #162e52;
-  --bg-elevated: #1e3a66;
-  --border-subtle: rgba(56, 189, 248, 0.16);
-  --border-focus: #38bdf8;
-  --brand-gold: #eab308;
-  --brand-gold-hover: #facc15;
-  --brand-gold-subtle: rgba(234, 179, 8, 0.14);
-  --brand-accent: #38bdf8;
-  --text-primary: #ffffff;
-  --text-secondary: #cbd5e1;
-  --text-muted: #64748b;
-  --font-ar: 'Readex Pro', system-ui, sans-serif;
-  --font-num: 'Plus Jakarta Sans', sans-serif;
-  --radius-btn: 0.875rem;
-  --radius-card: 1.25rem;
-  --card-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.45);
-  --glow-shadow: 0 0 35px rgba(56, 189, 248, 0.22);
-}
-
-/* --- Light Mode Overrides for Theme 1 (Compass) --- */
-html.light,
-html.light[data-theme="compass"] {
+/* --- Light Mode Overrides (Contrast >= 7:1 AAA) --- */
+html.light {
   --bg-base: #f8fafc;
   --bg-surface: #ffffff;
   --bg-surface-hover: #f1f5f9;
   --bg-elevated: #ffffff;
-  --border-subtle: rgba(180, 132, 26, 0.2);
-  --border-focus: #b4841a;
-  --brand-gold: #b4841a;
-  --brand-gold-hover: #966a2c;
-  --brand-gold-subtle: rgba(180, 132, 26, 0.1);
-  --brand-accent: #0f766e;
-  --text-primary: #0f172a;
-  --text-secondary: #475569;
-  --text-muted: #94a3b8;
-  --card-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
-  --glow-shadow: 0 0 25px rgba(180, 132, 26, 0.15);
-}
+  --border-subtle: rgba(120, 79, 4, 0.12);
+  --border-focus: #784f04;
+  --brand-gold: #784f04; /* Contrast 7.11:1 on white (AAA >= 7:1) */
+  --brand-gold-hover: #5c3b02;
+  --brand-gold-subtle: rgba(120, 79, 4, 0.1);
+  --brand-accent: #115e59; /* Contrast 7.55:1 on white (AAA >= 7:1) */
+  --text-primary: #0f172a; /* Contrast 18.2:1 (AAA) */
+  --text-secondary: #334155; /* Contrast 10.5:1 (AAA) */
+  --text-muted: #475569; /* Contrast 7.48:1 on white (AAA >= 7:1) */
 
-/* --- Light Mode Overrides for Theme 2 (Atlas) --- */
-html.light[data-theme="atlas"] {
-  --bg-base: #f4f7fb;
-  --bg-surface: #ffffff;
-  --bg-surface-hover: #f1f5f9;
-  --bg-elevated: #ffffff;
-  --border-subtle: #e2e8f0;
-  --border-focus: #0284c7;
-  --brand-gold: #ca8a04;
-  --brand-gold-hover: #a16207;
-  --brand-gold-subtle: rgba(202, 138, 4, 0.1);
-  --brand-accent: #0284c7;
-  --text-primary: #0f172a;
-  --text-secondary: #475569;
-  --text-muted: #94a3b8;
-  --card-shadow: 0 8px 24px rgba(2, 132, 199, 0.07);
-  --glow-shadow: 0 0 25px rgba(2, 132, 199, 0.18);
+  /* Dedicated Sidebar Tokens (Light: Light background with crisp dark text & icons >= 7:1) */
+  --sidebar-bg: #ffffff;
+  --sidebar-text: #0f172a; /* 18.2:1 */
+  --sidebar-text-muted: #334155; /* 10.5:1 */
+  --sidebar-icon: #784f04; /* 7.11:1 */
+  --sidebar-active-bg: rgba(120, 79, 4, 0.1);
+  --sidebar-active-text: #784f04;
+
+  --radius-btn: 9999px;
+  --radius-card: 1.5rem;
+  --card-shadow: 0 10px 30px -4px rgba(15, 23, 42, 0.07), 0 2px 6px -1px rgba(15, 23, 42, 0.04);
+  --glow-shadow: 0 0 25px rgba(120, 79, 4, 0.16);
 }
 
 /* ==========================================================================
@@ -183,6 +149,8 @@ html.light[data-theme="atlas"] {
     font-family: var(--font-ar);
     scroll-behavior: smooth;
     transition: background-color 0.25s ease, color 0.25s ease;
+    overflow-x: hidden;
+    width: 100%;
   }
 
   body {
@@ -192,11 +160,18 @@ html.light[data-theme="atlas"] {
     line-height: 1.75;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+    width: 100%;
   }
 
   ::selection {
     background-color: var(--brand-gold);
-    color: #071326;
+    color: #ffffff;
+  }
+
+  input, textarea, select {
+    background-color: var(--bg-surface);
+    color: var(--text-primary);
   }
 
   /* Custom Scrollbar */
@@ -219,3 +194,135 @@ html.light[data-theme="atlas"] {
     background: var(--brand-gold);
   }
 }
+
+/* ==========================================================================
+   4. Motion & Keyframe Animations (Strict prefers-reduced-motion safe)
+   ========================================================================== */
+
+@keyframes heroFloat {
+  0%, 100% {
+    transform: translateX(-50%) translateY(0);
+  }
+  50% {
+    transform: translateX(-50%) translateY(-6px);
+  }
+}
+
+@keyframes heroRingBreathe {
+  0%, 100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.65;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.05);
+    opacity: 0.95;
+  }
+}
+
+@keyframes slowRotateCompass {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes shimmerSweep {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes tickerSlide {
+  0% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  10% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  90% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ==========================================================================
+   4. Universal Theme & Contrast Adaptation (AAA >= 7:1 & No Strokes)
+   ========================================================================== */
+
+html.light .text-white {
+  color: var(--text-primary);
+}
+
+html.light .text-slate-200 {
+  color: var(--text-primary);
+}
+
+html.light .text-slate-300 {
+  color: var(--text-secondary);
+}
+
+html.light .text-slate-400 {
+  color: var(--text-muted);
+}
+
+html.light .text-slate-500 {
+  color: var(--text-muted);
+}
+
+html.light .bg-navy-950,
+html.light .bg-navy-900 {
+  background-color: var(--bg-surface-hover);
+  color: var(--text-primary);
+}
+
+html.light [class*="bg-navy-950/"],
+html.light [class*="bg-navy-900/"] {
+  background-color: var(--bg-surface-hover);
+}
+
+/* Subtle elevation replacement for hard strokes */
+html.light .border-navy-700,
+html.light .border-navy-800,
+html.light [class*="border-navy-700/"],
+html.light [class*="border-navy-800/"] {
+  border-color: var(--border-subtle);
+}
+
+/* Assessment View Protection: Strict Zero Animation */
+.no-motion,
+[data-no-motion="true"] {
+  animation: none !important;
+  transition: none !important;
+  transform: none !important;
+}
+
+/* Hero Portrait Responsive Sizing (1080p and 768p full circle visibility) */
+.hero-portrait-frame {
+  --hero-size: clamp(315px, 82vw, 360px);
+}
+@media (min-width: 768px) {
+  .hero-portrait-frame {
+    --hero-size: clamp(340px, min(38vw, calc((100vh - 160px) * 0.72)), 520px);
+  }
+}
+

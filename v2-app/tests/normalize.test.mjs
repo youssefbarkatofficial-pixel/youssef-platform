@@ -126,3 +126,54 @@ test('normalizeCourseContent respects layoutVersion: 2 directly', () => {
   // Old sections must be ignored when layoutVersion === 2
   assert.ok(!norm.lectures.some(l => l.id === 'ignored_item'));
 });
+
+test('deleted training stays deleted after save and reload (ignores legacy contents.trainings when layoutVersion === 2)', () => {
+  // 1. Initial course state with legacy trainings array
+  const legacyCourse = {
+    contents: {
+      sections: [
+        {
+          id: 'sec_1',
+          title: 'الوحدة الأولى',
+          items: [
+            { id: 'lec_1', title: 'المحاضرة الأولى', type: 'video', youtubeUrl: 'https://youtu.be/abc' },
+          ]
+        }
+      ],
+      trainings: [
+        { id: 'tr_to_delete', title: 'تدريب يجب حذفه', attachedToLectureId: 'lec_1' },
+        { id: 'tr_to_keep', title: 'تدريب باقٍ', attachedToLectureId: 'lec_1' }
+      ]
+    }
+  };
+
+  // 2. Initial load (legacy conversion)
+  const initialNorm = normalizeCourseContent(legacyCourse);
+  assert.equal(initialNorm.lectures[0].trainings.length, 2, 'Initially should have 2 trainings');
+
+  // 3. User deletes "tr_to_delete" in admin panel
+  const updatedTrainings = initialNorm.lectures[0].trainings.filter(t => t.id !== 'tr_to_delete');
+  const updatedLectures = [{ ...initialNorm.lectures[0], trainings: updatedTrainings }];
+
+  // 4. Simulated save to Firestore: preserves existing legacy contents (...existingContents), but sets layoutVersion: 2 and new lectures
+  const savedCourseData = {
+    contents: {
+      ...legacyCourse.contents, // Still contains contents.trainings from legacy!
+      layoutVersion: 2,
+      lectures: updatedLectures,
+      homeworks: initialNorm.homeworks,
+      exams: initialNorm.exams
+    }
+  };
+
+  // 5. Subsequent reload
+  const reloadedNorm = normalizeCourseContent(savedCourseData);
+
+  // 6. Verify deleted training DOES NOT reappear
+  assert.equal(reloadedNorm.lectures[0].trainings.length, 1, 'Should have exactly 1 training remaining');
+  assert.equal(reloadedNorm.lectures[0].trainings[0].id, 'tr_to_keep');
+  assert.ok(
+    !reloadedNorm.lectures[0].trainings.some(t => t.id === 'tr_to_delete'),
+    'Deleted training must stay deleted and not be re-injected from legacy contents.trainings'
+  );
+});

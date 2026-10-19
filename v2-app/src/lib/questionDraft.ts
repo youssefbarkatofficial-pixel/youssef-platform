@@ -42,7 +42,10 @@ export const OPTION_KEYS = ['a', 'b', 'c', 'd'] as const;
 
 export const QUESTION_TYPES: QuestionType[] = [
   'choose',
+  'multi_select',
   'tf',
+  'fill',
+  'short',
   'explain',
   'result',
   'prove',
@@ -53,17 +56,20 @@ export const QUESTION_TYPES: QuestionType[] = [
 
 export const QUESTION_TYPE_LABELS: Record<QuestionType, string> = {
   choose: 'اختيار من متعدد',
+  multi_select: 'اختيار متعدد الإجابات',
   tf: 'صح أو خطأ',
-  explain: 'اشرح',
-  result: 'ما النتيجة',
-  prove: 'علّل أو أثبت',
-  relation: 'اربط بين',
-  whatif: 'ماذا لو',
-  meaning: 'ما معنى',
+  fill: 'أكمل الفراغ',
+  short: 'إجابة قصيرة',
+  explain: 'اشرح / بم تفسر',
+  result: 'ما النتائج المترتبة',
+  prove: 'دلل / أثبت',
+  relation: 'ما العلاقة بين',
+  whatif: 'ماذا يحدث إذا',
+  meaning: 'ما المقصود بـ',
 };
 
 export function isEssayType(type: QuestionType): boolean {
-  return type !== 'choose' && type !== 'tf';
+  return type !== 'choose' && type !== 'multi_select' && type !== 'tf' && type !== 'fill' && type !== 'short';
 }
 
 export function newQuestionId(): string {

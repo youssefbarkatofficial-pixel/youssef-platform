@@ -4,6 +4,7 @@ exports._testInjectToken = _testInjectToken;
 exports.verifyFirebaseToken = verifyFirebaseToken;
 exports.fetchStudentProfile = fetchStudentProfile;
 exports.verifyAdmin = verifyAdmin;
+exports.computeVisitorKey = computeVisitorKey;
 let jwksCache = null;
 const importedCryptoKeys = new Map();
 const verifiedTokenCache = new Map();
@@ -207,4 +208,21 @@ async function verifyAdmin(email, token, env) {
         isOwner,
         name
     };
+}
+/**
+ * توليد معرّف مشفر للزائر بناءً على معرّف الجهاز وتجزئة IP مشفرة (بدون حفظ IP خام)
+ */
+async function computeVisitorKey(request) {
+    const deviceId = request.headers.get('x-device-id') || 'dev_guest';
+    const rawIp = request.headers.get('CF-Connecting-IP') ||
+        request.headers.get('x-forwarded-for') ||
+        '127.0.0.1';
+    const cleanIp = rawIp.split(',')[0].trim();
+    const salt = 'yb_visitor_salt_2026_antigravity';
+    const raw = `${deviceId}:${cleanIp}:${salt}`;
+    const buffer = new TextEncoder().encode(raw);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hex = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+    return `vis_${hex.slice(0, 16)}`;
 }

@@ -2,14 +2,15 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.callLlm = callLlm;
 const FRIENDLY_BUSY_MESSAGE = 'الخدمة مشغولة حاليًا بضغط كبير، جرّب بعد دقيقة يا صديقي وهكون معاك فورًا.';
-async function callLlm(systemPrompt, userMessage, history = [], env) {
+async function callLlm(systemPrompt, userMessage, history = [], env, maxTokens = 500) {
     const groqKey = env.GROQ_API_KEY;
     const geminiKey = env.GEMINI_API_KEY;
     if (!groqKey && !geminiKey) {
         return {
             reply: 'مفتاح الذكاء الاصطناعي غير مضبوط حالياً. يُرجى مراجعة إدارة المنصة.',
             source: 'fallback',
-            modelUsed: 'none'
+            modelUsed: 'none',
+            totalTokens: 0
         };
     }
     // اختيار النموذج (كبير للأسئلة المعقدة، سريع للبسيطة)
@@ -17,17 +18,18 @@ async function callLlm(systemPrompt, userMessage, history = [], env) {
     const fastModel = env.GROQ_FAST_MODEL || 'llama-3.1-8b-instant';
     const isComplex = userMessage.length > 150 || history.length > 4;
     const targetModel = isComplex ? primaryModel : fastModel;
+    // سقف طول سجل المحادثة (بحد أقصى 6 رسائل وبطول 400 حرف لمنع تضخم التوكنز)
+    const groqMessages = [
+        { role: 'system', content: systemPrompt },
+        ...history.slice(-6).map(h => ({
+            role: h.role === 'assistant' ? 'assistant' : 'user',
+            content: h.content.slice(0, 400)
+        })),
+        { role: 'user', content: userMessage.slice(0, 500) }
+    ];
     // محاولة الاتصال بـ Groq
     if (groqKey) {
         try {
-            const groqMessages = [
-                { role: 'system', content: systemPrompt },
-                ...history.slice(-12).map(h => ({
-                    role: h.role === 'assistant' ? 'assistant' : 'user',
-                    content: h.content.slice(0, 800)
-                })),
-                { role: 'user', content: userMessage.slice(0, 500) }
-            ];
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 25000);
             const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
@@ -40,7 +42,7 @@ async function callLlm(systemPrompt, userMessage, history = [], env) {
                     model: targetModel,
                     messages: groqMessages,
                     temperature: 0.2,
-                    max_completion_tokens: 2048,
+                    max_completion_tokens: maxTokens,
                     reasoning_effort: 'low'
                 }),
                 signal: controller.signal
@@ -52,7 +54,7 @@ async function callLlm(systemPrompt, userMessage, history = [], env) {
                 const reply = choice?.message?.content?.trim();
                 const finishReason = choice?.finish_reason;
                 const completionTokens = data.usage?.completion_tokens;
-                const totalTokens = data.usage?.total_tokens;
+                const totalTokens = data.usage?.total_tokens || ((data.usage?.prompt_tokens || 0) + (data.usage?.completion_tokens || 0)) || 0;
                 console.error(`[GROQ_COMPLETION] model=${targetModel} finish_reason=${finishReason} completion_tokens=${completionTokens} total_tokens=${totalTokens}`);
                 if (reply) {
                     return {
@@ -60,7 +62,8 @@ async function callLlm(systemPrompt, userMessage, history = [], env) {
                         source: 'llm_groq',
                         modelUsed: targetModel,
                         finishReason,
-                        completionTokens
+                        completionTokens,
+                        totalTokens
                     };
                 }
             }
@@ -76,7 +79,7 @@ async function callLlm(systemPrompt, userMessage, history = [], env) {
                         model: fastModel,
                         messages: groqMessages,
                         temperature: 0.2,
-                        max_completion_tokens: 2048,
+                        max_completion_tokens: maxTokens,
                         reasoning_effort: 'low'
                     })
                 });
@@ -86,6 +89,7 @@ async function callLlm(systemPrompt, userMessage, history = [], env) {
                     const reply = fbChoice?.message?.content?.trim();
                     const finishReason = fbChoice?.finish_reason;
                     const completionTokens = fbData.usage?.completion_tokens;
+                    const totalTokens = fbData.usage?.total_tokens || ((fbData.usage?.prompt_tokens || 0) + (fbData.usage?.completion_tokens || 0)) || 0;
                     console.error(`[GROQ_FALLBACK_COMPLETION] model=${fastModel} finish_reason=${finishReason} completion_tokens=${completionTokens}`);
                     if (reply) {
                         return {
@@ -93,7 +97,8 @@ async function callLlm(systemPrompt, userMessage, history = [], env) {
                             source: 'llm_groq',
                             modelUsed: fastModel,
                             finishReason,
-                            completionTokens
+                            completionTokens,
+                            totalTokens
                         };
                     }
                 }

@@ -3,10 +3,8 @@ import {
   BookOpen,
   ClipboardList,
   CreditCard,
-  Gamepad2,
   LayoutDashboard,
   LifeBuoy,
-  Trophy,
   User,
 } from 'lucide-react';
 import { useEffect } from 'react';
@@ -23,8 +21,6 @@ const items: NavItem[] = [
   { to: '/student/payments', label: 'طلبات الدفع', icon: CreditCard },
   { to: '/student/exams', label: 'الامتحانات والواجبات', icon: ClipboardList },
   { to: '/student/stats', label: 'الإحصائيات', icon: BarChart3 },
-  { to: '/student/leaderboard', label: 'الترتيب', icon: Trophy },
-  { to: '/student/game', label: 'لعبة البوصلة', icon: Gamepad2 },
   { to: '/student/profile', label: 'الملف الشخصي', icon: User },
   { to: '/student/support', label: 'الدعم الفني', icon: LifeBuoy },
 ];

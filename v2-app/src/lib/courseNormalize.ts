@@ -142,9 +142,9 @@ export function normalizeCourseContent(
   const examsMap = new Map<string, RawObject>();
   const trainingsMap = new Map<string, RawObject>();
 
-  function addItemToMap(item: unknown, targetMap: Map<string, RawObject>) {
+  function addItemToMap(item: unknown, targetMap: Map<string, RawObject>, fallbackPrefix = 'item') {
     if (!isObject(item)) return;
-    const id = asString(item.id) || `item_${Math.random().toString(36).slice(2, 9)}`;
+    const id = asString(item.id) || `${fallbackPrefix}_${targetMap.size + 1}`;
     if (targetMap.has(id)) {
       const existing = targetMap.get(id)!;
       targetMap.set(id, { ...item, ...existing, id });
@@ -157,7 +157,7 @@ export function normalizeCourseContent(
   if (Array.isArray(contents.lectures)) {
     contents.lectures.forEach((lec, idx) => {
       if (isObject(lec)) {
-        addItemToMap({ order: asOptionalNumber(lec.order) ?? (idx + 1), ...lec }, lecturesMap);
+        addItemToMap({ order: asOptionalNumber(lec.order) ?? (idx + 1), ...lec }, lecturesMap, 'lec');
       }
     });
   }
@@ -165,7 +165,7 @@ export function normalizeCourseContent(
   if (Array.isArray(contents.homeworks)) {
     contents.homeworks.forEach((hw, idx) => {
       if (isObject(hw)) {
-        addItemToMap({ order: asOptionalNumber(hw.order) ?? (idx + 1), ...hw }, homeworksMap);
+        addItemToMap({ order: asOptionalNumber(hw.order) ?? (idx + 1), ...hw }, homeworksMap, 'hw');
       }
     });
   }
@@ -173,15 +173,15 @@ export function normalizeCourseContent(
   if (Array.isArray(contents.exams)) {
     contents.exams.forEach((ex, idx) => {
       if (isObject(ex)) {
-        addItemToMap({ order: asOptionalNumber(ex.order) ?? (idx + 1), ...ex }, examsMap);
+        addItemToMap({ order: asOptionalNumber(ex.order) ?? (idx + 1), ...ex }, examsMap, 'exam');
       }
     });
   }
 
-  // Handle root trainings
-  if (Array.isArray(contents.trainings)) {
+  // Handle root trainings (only for legacy layouts where layoutVersion !== 2; when layoutVersion === 2, lecture.trainings is authoritative)
+  if (!isLayoutV2 && Array.isArray(contents.trainings)) {
     contents.trainings.forEach((tr) => {
-      if (isObject(tr)) addItemToMap(tr, trainingsMap);
+      if (isObject(tr)) addItemToMap(tr, trainingsMap, 'tr');
     });
   }
 

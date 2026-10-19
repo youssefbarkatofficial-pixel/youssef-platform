@@ -366,6 +366,7 @@ export default function AssessmentPage() {
   if (stage === 'taking') {
     content = (
       <ExamTaker
+        examId={assessment.id}
         questions={questions}
         durationSeconds={durationMinutes * 60}
         strict={strict}
@@ -536,7 +537,7 @@ export default function AssessmentPage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-3xl space-y-5">
+    <div data-no-motion="true" className="no-motion mx-auto w-full max-w-3xl space-y-5">
       {stage !== 'taking' && backLink}
       {content}
     </div>

@@ -1,5 +1,5 @@
 import { Env } from './types';
-import { getAllSettings, setSetting, getSetting } from './db';
+import { getAllSettings, setSetting, getSetting, getTeachingChunksDistribution, getTeachingChunks } from './db';
 import { chunkLesson, keywords, norm, invalidateChunksCache } from './rag';
 
 const MAX_LESSON_CONTENT_LENGTH = 50_000;
@@ -49,6 +49,48 @@ const ALLOWED_SETTINGS: Record<
   unsupported_subject_reply: {
     validate: (v) => typeof v === 'string' && v.trim().length > 0 && v.length <= 500,
     errorMsg: 'نص الرد على المواد غير المدعومة لا يمكن أن يكون فارغاً أو يتجاوز 500 حرف.',
+  },
+  token_limit_visitor: {
+    validate: (v) => {
+      const n = Number(v);
+      return Number.isInteger(n) && n >= 500 && n <= 50000;
+    },
+    errorMsg: 'ميزانية توكنز الزائر يجب أن تكون رقماً بين 500 و50000.',
+  },
+  token_limit_free: {
+    validate: (v) => {
+      const n = Number(v);
+      return Number.isInteger(n) && n >= 1000 && n <= 200000;
+    },
+    errorMsg: 'ميزانية توكنز المسجل المجاني يجب أن تكون رقماً بين 1000 و200000.',
+  },
+  token_limit_subscribed: {
+    validate: (v) => {
+      const n = Number(v);
+      return Number.isInteger(n) && n >= 5000 && n <= 500000;
+    },
+    errorMsg: 'ميزانية توكنز المشترك المفعل يجب أن تكون رقماً بين 5000 و500000.',
+  },
+  token_window_hours: {
+    validate: (v) => {
+      const n = Number(v);
+      return Number.isInteger(n) && n >= 1 && n <= 48;
+    },
+    errorMsg: 'نافذة حساب التوكنز بالساعات يجب أن تكون رقماً بين 1 و48 ساعة.',
+  },
+  max_completion_tokens: {
+    validate: (v) => {
+      const n = Number(v);
+      return Number.isInteger(n) && n >= 100 && n <= 2048;
+    },
+    errorMsg: 'سقف توكنز الرد يجب أن يكون رقماً بين 100 و2048.',
+  },
+  max_history_messages: {
+    validate: (v) => {
+      const n = Number(v);
+      return Number.isInteger(n) && n >= 2 && n <= 20;
+    },
+    errorMsg: 'طول سجل التاريخ يجب أن يكون رقماً بين 2 و20 رسالة.',
   },
 };
 
@@ -531,6 +573,152 @@ export async function handleAdminRoute(
     invalidateChunksCache();
 
     return Response.json({ success: true, lessonId, archived: archivedVal === 1 });
+  }
+
+  // 16b. GET /admin/teaching/distribution (توزيع المقاطع وحصر المقاطع اليتيمة)
+  if (method === 'GET' && path === '/admin/teaching/distribution') {
+    const fsIdsParam = url.searchParams.get('firestoreLessonIds') || '';
+    const fsIds = fsIdsParam ? fsIdsParam.split(',').map((s) => s.trim()).filter(Boolean) : [];
+    const dist = await getTeachingChunksDistribution(env.DB, fsIds);
+    return Response.json(dist);
+  }
+
+  // 16c. GET /admin/teaching/chunks (استعراض المقاطع المفلترة)
+  if (method === 'GET' && path === '/admin/teaching/chunks') {
+    const courseId = url.searchParams.get('courseId') || undefined;
+    const lessonId = url.searchParams.get('lessonId') || undefined;
+    const stage = url.searchParams.get('stage') || undefined;
+    const status = url.searchParams.get('status') || undefined;
+    const chunks = await getTeachingChunks(env.DB, { courseId, lessonId, stage, status });
+    return Response.json({ chunks });
+  }
+
+  // 16d. POST /admin/teaching/chunks (إضافة أو تقطيع محتوى تعليمي مرتبط بمحاضرة وكورس)
+  if (method === 'POST' && path === '/admin/teaching/chunks') {
+    const parsed = await parseJsonBody(request);
+    if (parsed.error) return parsed.error;
+    const body = parsed.data || {};
+    const { courseId, lessonId, stage, kind, status, text, grade, unit, subject, sourceNote } = body;
+
+    if (!text || typeof text !== 'string' || text.trim().length === 0) {
+      return Response.json({ error: 'محتوى النص التعليمي مطلوب.' }, { status: 400 });
+    }
+
+    if (!lessonId) {
+      return Response.json({ error: 'معرف المحاضرة (lessonId) مطلوب للربط بالمعرف لا بالعنوان.' }, { status: 400 });
+    }
+
+    const rawChunks = chunkLesson(text.trim());
+    const now = Date.now();
+    const statements: D1PreparedStatement[] = [];
+    const createdIds: string[] = [];
+
+    for (let i = 0; i < rawChunks.length; i++) {
+      const chunkText = rawChunks[i];
+      const chunkId = `chunk_${now}_${Math.random().toString(36).slice(2, 8)}_${i + 1}`;
+      createdIds.push(chunkId);
+      const kw = keywords(chunkText);
+
+      statements.push(
+        env.DB.prepare(`
+          INSERT INTO lesson_chunks (
+            id, course_id, lesson_id, stage, kind, status, text, keywords, grade, unit, subject, source_note, created_at, updated_at
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `).bind(
+          chunkId,
+          courseId || null,
+          lessonId,
+          stage || grade || 'general',
+          kind || 'شرح',
+          status || 'draft',
+          chunkText,
+          JSON.stringify(kw),
+          grade || '',
+          unit || '',
+          subject || 'دراسات اجتماعية',
+          sourceNote || null,
+          now,
+          now,
+        ),
+      );
+    }
+
+    if (statements.length > 0) {
+      await env.DB.batch(statements);
+    }
+
+    invalidateChunksCache();
+
+    return Response.json({
+      success: true,
+      createdCount: rawChunks.length,
+      createdIds,
+    });
+  }
+
+  // 16e. PUT /admin/teaching/chunks/:id (تعديل مقطع أو تحديث حالته كمسودة أو معتمد)
+  if (method === 'PUT' && path.match(/^\/admin\/teaching\/chunks\/[^/]+$/)) {
+    const chunkId = path.split('/')[4];
+    const parsed = await parseJsonBody(request);
+    if (parsed.error) return parsed.error;
+    const body = parsed.data || {};
+    const { status, kind, text, sourceNote, courseId, lessonId, stage } = body;
+
+    const existing = await env.DB.prepare('SELECT id, text, keywords FROM lesson_chunks WHERE id = ?').bind(chunkId).first();
+    if (!existing) {
+      return Response.json({ error: 'المقطع غير موجود.' }, { status: 404 });
+    }
+
+    const now = Date.now();
+    let kwJson = (existing as any).keywords;
+    if (text && typeof text === 'string') {
+      kwJson = JSON.stringify(keywords(text));
+    }
+
+    await env.DB.prepare(`
+      UPDATE lesson_chunks SET
+        course_id = COALESCE(?, course_id),
+        lesson_id = COALESCE(?, lesson_id),
+        stage = COALESCE(?, stage),
+        kind = COALESCE(?, kind),
+        status = COALESCE(?, status),
+        text = COALESCE(?, text),
+        keywords = ?,
+        source_note = COALESCE(?, source_note),
+        updated_at = ?
+      WHERE id = ?
+    `).bind(
+      courseId || null,
+      lessonId || null,
+      stage || null,
+      kind || null,
+      status || null,
+      text ? text.trim() : null,
+      kwJson,
+      sourceNote || null,
+      now,
+      chunkId,
+    ).run();
+
+    invalidateChunksCache();
+    return Response.json({ success: true, chunkId });
+  }
+
+  // 16f. DELETE /admin/teaching/chunks/:id (حذف ناعم أو نهائي لمقطع)
+  if (method === 'DELETE' && path.match(/^\/admin\/teaching\/chunks\/[^/]+$/)) {
+    const chunkId = path.split('/')[4];
+    const soft = url.searchParams.get('soft') !== 'false';
+
+    if (soft) {
+      await env.DB.prepare('UPDATE lesson_chunks SET status = ?, updated_at = ? WHERE id = ?')
+        .bind('archived', Date.now(), chunkId)
+        .run();
+    } else {
+      await env.DB.prepare('DELETE FROM lesson_chunks WHERE id = ?').bind(chunkId).run();
+    }
+
+    invalidateChunksCache();
+    return Response.json({ success: true, chunkId, softDeleted: soft });
   }
 
   // 17. GET /admin/learned

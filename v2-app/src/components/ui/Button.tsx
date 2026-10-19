@@ -7,10 +7,14 @@ export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
 export type ButtonSize = 'sm' | 'md' | 'lg';
 
 const variants: Record<ButtonVariant, string> = {
-  primary: 'bg-theme-gold text-navy-950 hover:bg-theme-gold-hover shadow-soft font-bold active:scale-[0.98]',
-  secondary: 'border border-theme-border bg-theme-surface text-theme-text hover:bg-theme-surface-hover active:scale-[0.98]',
-  ghost: 'bg-transparent text-theme-text-secondary hover:bg-theme-surface-hover hover:text-theme-text active:scale-[0.98]',
-  danger: 'bg-rose-600 text-white hover:bg-rose-500 active:scale-[0.98] shadow-sm',
+  primary:
+    'bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:from-amber-400 hover:to-amber-300 text-navy-950 font-extrabold shadow-soft active:scale-[0.98]',
+  secondary:
+    'bg-theme-surface/80 hover:bg-theme-surface-hover text-theme-text active:scale-[0.98] shadow-sm',
+  ghost:
+    'bg-transparent text-theme-text-secondary hover:bg-theme-surface-hover hover:text-theme-text active:scale-[0.98]',
+  danger:
+    'bg-rose-600 text-white hover:bg-rose-500 active:scale-[0.98] shadow-sm',
 };
 
 const sizes: Record<ButtonSize, string> = {

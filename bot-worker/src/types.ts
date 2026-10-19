@@ -48,14 +48,30 @@ export interface ChatResponse {
   paused?: boolean;
 }
 
+export type TeachingStage = 'prep1' | 'prep2' | 'prep3' | 'sec1' | 'sec2' | 'sec3' | 'general';
+export type TeachingKind = 'شرح' | 'تدريب' | 'واجب';
+export type TeachingStatus = 'draft' | 'verified';
+
 export interface LessonChunk {
   id: string;
+  course_id?: string;
+  courseId?: string;
   lesson_id?: string;
+  lessonId?: string;
+  stage?: TeachingStage | string;
+  kind?: TeachingKind | string;
+  status?: TeachingStatus | string;
   lesson_title?: string;
   text: string;
   keywords: string[];
   grade?: string;
   unit?: string;
   subject?: string;
+  source_note?: string;
+  sourceNote?: string;
   created_at: number;
+  createdAt?: number;
+  updated_at?: number;
+  updatedAt?: number;
 }
+

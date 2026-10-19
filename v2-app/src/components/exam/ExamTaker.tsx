@@ -1,27 +1,31 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ChevronLeft, ChevronRight, Clock, ShieldAlert } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Clock, ShieldAlert, CheckSquare, Square } from 'lucide-react';
 import { Badge, Button, Card } from '../ui';
 import { cn } from '../ui/cn';
 import { getAnswerMode } from '../../lib/grading';
 import type { Question } from '../../lib/grading';
 
 interface ExamTakerProps {
+  examId?: string;
   questions: Question[];
   // بالثواني، 0 = وقت مفتوح
   durationSeconds: number;
-  // وضع منع الغش: الخروج من الصفحة يسلّم الإجابات تلقائيًا
+  // وضع منع الغش: الخروج من الصفحة يسجل تحذيراً فقط بلا رسوب تلقائي
   strict: boolean;
-  // معاينة الأدمن: بدون تسليم تلقائي عند الخروج
+  // معاينة الأدمن
   previewMode: boolean;
   submitting: boolean;
-  // يرجع true عند نجاح التسليم، وfalse عند الفشل (ليتمكن الطالب من المحاولة مرة أخرى)
-  onSubmit: (answers: Record<string, string>, autoSubmit: boolean) => Promise<boolean>;
+  // يرجع true عند نجاح التسليم، وfalse عند الفشل
+  onSubmit: (answers: Record<string, string>, autoSubmit: boolean, tabExitCount?: number) => Promise<boolean>;
 }
 
-const OPTION_LABELS: Record<string, string> = { a: 'أ', b: 'ب', c: 'ج', d: 'د' };
+const OPTION_LABELS: Record<string, string> = { a: 'أ', b: 'ب', c: 'ج', d: 'د', e: 'هـ', f: 'و' };
 
 const textareaClass =
   'w-full rounded-xl border border-navy-700 bg-navy-900 px-3 py-2.5 text-white placeholder:text-slate-500 transition-colors focus:border-gold-500 focus:outline-none focus:ring-2 focus:ring-gold-500/40';
+
+const inputClass =
+  'w-full rounded-xl border border-navy-700 bg-navy-900 px-4 py-3 text-white placeholder:text-slate-500 transition-colors focus:border-gold-500 focus:outline-none focus:ring-2 focus:ring-gold-500/40 text-lg';
 
 function formatClock(totalSeconds: number): string {
   const hours = Math.floor(totalSeconds / 3600);
@@ -32,6 +36,7 @@ function formatClock(totalSeconds: number): string {
 }
 
 export default function ExamTaker({
+  examId,
   questions,
   durationSeconds,
   strict,
@@ -39,17 +44,36 @@ export default function ExamTaker({
   submitting,
   onSubmit,
 }: ExamTakerProps) {
-  const [answers, setAnswers] = useState<Record<string, string>>({});
+  // استرجاع التقدم المحفوظ تلقائياً في حال انقطاع الإنترنت أو تحديث الصفحة
+  const storageKey = examId ? `yb_exam_draft_${examId}` : null;
+
+  const [answers, setAnswers] = useState<Record<string, string>>(() => {
+    if (storageKey && typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem(storageKey);
+        if (saved) return JSON.parse(saved);
+      } catch {
+        // ignore error
+      }
+    }
+    return {};
+  });
+
   const [index, setIndex] = useState(0);
   const [remaining, setRemaining] = useState<number | null>(
     durationSeconds > 0 ? durationSeconds : null,
   );
-  const [leftPage, setLeftPage] = useState(false);
+  const [tabExitCount, setTabExitCount] = useState(0);
+  const [showExitWarning, setShowExitWarning] = useState(false);
 
-  const answersRef = useRef<Record<string, string>>({});
+  const answersRef = useRef<Record<string, string>>(answers);
   const submittedRef = useRef(false);
   const onSubmitRef = useRef(onSubmit);
-  const endAtRef = useRef(Date.now() + durationSeconds * 1000);
+  const tabExitCountRef = useRef(0);
+
+  // مؤقت مقاوم للعبث: يعتمد على الوقت المنقضي الرتيب performance.now() بدلاً من ساعة النظام القابلة للتغيير
+  const startPerfRef = useRef<number>(performance.now());
+  const initialDurationRef = useRef<number>(durationSeconds);
 
   useEffect(() => {
     onSubmitRef.current = onSubmit;
@@ -59,16 +83,30 @@ export default function ExamTaker({
     if (submittedRef.current) return;
     submittedRef.current = true;
 
-    const ok = await onSubmitRef.current(answersRef.current, auto);
-    if (!ok) submittedRef.current = false;
-  }, []);
+    const ok = await onSubmitRef.current(answersRef.current, auto, tabExitCountRef.current);
+    if (ok) {
+      if (storageKey) {
+        try {
+          localStorage.removeItem(storageKey);
+        } catch {
+          // ignore
+        }
+      }
+    } else {
+      submittedRef.current = false;
+    }
+  }, [storageKey]);
 
-  // المؤقت: عند انتهاء الوقت يُسلَّم الاختبار تلقائيًا.
+  // المؤقت الرتيب المتين
   useEffect(() => {
     if (durationSeconds <= 0) return;
 
+    startPerfRef.current = performance.now();
+    initialDurationRef.current = durationSeconds;
+
     const timer = window.setInterval(() => {
-      const left = Math.max(0, Math.ceil((endAtRef.current - Date.now()) / 1000));
+      const elapsedSeconds = (performance.now() - startPerfRef.current) / 1000;
+      const left = Math.max(0, Math.ceil(initialDurationRef.current - elapsedSeconds));
       setRemaining(left);
 
       if (left <= 0) {
@@ -80,15 +118,15 @@ export default function ExamTaker({
     return () => window.clearInterval(timer);
   }, [durationSeconds, triggerSubmit]);
 
-  // ترك الصفحة: تسليم تلقائي في وضع منع الغش، وتنبيه فقط في الوضع العادي.
+  // تسجيل خروج التبويب كتحذير فقط بلا رسوب تلقائي
   useEffect(() => {
     const handleVisibility = () => {
       if (!document.hidden) return;
 
-      if (strict && !previewMode) {
-        void triggerSubmit(true);
-      } else {
-        setLeftPage(true);
+      if (!previewMode) {
+        tabExitCountRef.current += 1;
+        setTabExitCount(tabExitCountRef.current);
+        setShowExitWarning(true);
       }
     };
 
@@ -104,12 +142,21 @@ export default function ExamTaker({
       document.removeEventListener('visibilitychange', handleVisibility);
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
-  }, [strict, previewMode, triggerSubmit]);
+  }, [previewMode]);
 
   const setAnswer = (questionId: string, value: string) => {
     const next = { ...answersRef.current, [questionId]: value };
     answersRef.current = next;
     setAnswers(next);
+
+    // حفظ فوري في التخزين المحلي لاسترجاع التقدم
+    if (storageKey) {
+      try {
+        localStorage.setItem(storageKey, JSON.stringify(next));
+      } catch {
+        // ignore
+      }
+    }
   };
 
   const handleFinish = () => {
@@ -130,6 +177,8 @@ export default function ExamTaker({
   const lowTime = remaining !== null && remaining <= 60;
 
   let input;
+
+  // 1. اختيار من متعدد فردي
   if (mode === 'choice' && question.options) {
     input = (
       <div className="space-y-2.5">
@@ -161,7 +210,61 @@ export default function ExamTaker({
         })}
       </div>
     );
-  } else if (mode === 'tf') {
+  }
+  // 2. اختيار متعدد الإجابات (multi_select)
+  else if (mode === 'multi_choice' && question.options) {
+    let selectedKeys: string[] = [];
+    try {
+      if (value.startsWith('[') && value.endsWith(']')) {
+        selectedKeys = JSON.parse(value);
+      } else if (value.trim()) {
+        selectedKeys = value.split(',').map((x) => x.trim().toLowerCase());
+      }
+    } catch {
+      selectedKeys = [];
+    }
+
+    const toggleOption = (optKey: string) => {
+      const set = new Set(selectedKeys);
+      if (set.has(optKey)) {
+        set.delete(optKey);
+      } else {
+        set.add(optKey);
+      }
+      setAnswer(question.id, JSON.stringify(Array.from(set)));
+    };
+
+    input = (
+      <div className="space-y-2.5">
+        <p className="text-xs text-gold-400 font-bold mb-2">
+          (يمكنك اختيار أكثر من إجابة صحيحة لهذا السؤال)
+        </p>
+        {Object.keys(question.options).map((key) => {
+          const isSelected = selectedKeys.includes(key);
+          return (
+            <button
+              key={key}
+              type="button"
+              onClick={() => toggleOption(key)}
+              className={cn(
+                'flex w-full items-start gap-3 rounded-xl border px-4 py-3 text-start transition-colors',
+                isSelected
+                  ? 'border-gold-500 bg-gold-500/15 text-white'
+                  : 'border-navy-700 bg-navy-900 text-slate-200 hover:border-navy-500',
+              )}
+            >
+              <span className="mt-0.5 shrink-0 text-gold-400">
+                {isSelected ? <CheckSquare className="h-5 w-5" /> : <Square className="h-5 w-5 text-slate-400" />}
+              </span>
+              <span className="flex-1 leading-relaxed">{question.options?.[key]}</span>
+            </button>
+          );
+        })}
+      </div>
+    );
+  }
+  // 3. صح أو خطأ
+  else if (mode === 'tf') {
     input = (
       <div className="grid grid-cols-2 gap-3">
         {['صح', 'خطأ'].map((choice) => {
@@ -184,12 +287,31 @@ export default function ExamTaker({
         })}
       </div>
     );
-  } else {
+  }
+  // 4. إكمال أو إجابة قصيرة
+  else if (mode === 'fill') {
+    input = (
+      <div className="space-y-2">
+        <input
+          type="text"
+          value={value}
+          placeholder="اكتب الإجابة المختصرة هنا..."
+          onChange={(event) => setAnswer(question.id, event.target.value)}
+          className={inputClass}
+        />
+        <p className="text-xs text-slate-400">
+          تلميح: يتم تطبيع الهمزات والتشكيل والمسافات تلقائيًا فلا تقلق بشأن علامات الترقيم.
+        </p>
+      </div>
+    );
+  }
+  // 5. مقالي
+  else {
     input = (
       <textarea
         rows={6}
         value={value}
-        placeholder="اكتب إجابتك هنا..."
+        placeholder="اكتب إجابتك هنا بأسلوبك ووضح النقاط الرئيسية..."
         onChange={(event) => setAnswer(question.id, event.target.value)}
         className={textareaClass}
       />
@@ -203,6 +325,9 @@ export default function ExamTaker({
           <span className="font-bold text-white">
             السؤال {index + 1} من {questions.length}
           </span>
+          {question.sectionTitle && (
+            <Badge variant="neutral">{question.sectionTitle}</Badge>
+          )}
           {previewMode && <Badge variant="info">معاينة الأدمن</Badge>}
         </div>
 
@@ -219,17 +344,23 @@ export default function ExamTaker({
         )}
       </Card>
 
-      {strict && !previewMode && (
-        <div className="flex items-start gap-2.5 rounded-xl border border-red-500/30 bg-red-500/10 px-3.5 py-3 text-sm text-red-300">
-          <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0" />
-          وضع منع الغش مفعّل: الخروج من هذه الصفحة أو تغيير التبويب يسلّم إجاباتك تلقائيًا.
+      {/* تنبيه الخروج من التبويب كتحذير مرئي بلا رسوب تلقائي */}
+      {showExitWarning && (
+        <div className="flex items-start gap-2.5 rounded-xl border border-gold-500/40 bg-gold-500/10 px-3.5 py-3 text-sm text-gold-200">
+          <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0 text-gold-400" />
+          <div>
+            <p className="font-bold">تنبيه: تم رصد مغادرة نافذة الاختبار (عدد المرات: {tabExitCount}).</p>
+            <p className="text-xs text-gold-300/80 mt-0.5">
+              هذا التنبيه يُسجل في تقرير المتابعة للمعلم كتحذير. يرجى البقاء في صفحة الاختبار حتى الانتهاء.
+            </p>
+          </div>
         </div>
       )}
 
-      {leftPage && !strict && (
-        <div className="flex items-start gap-2.5 rounded-xl border border-gold-500/30 bg-gold-500/10 px-3.5 py-3 text-sm text-gold-200">
-          <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0" />
-          غادرت هذه الصفحة أثناء الاختبار. من فضلك ابقَ في الصفحة حتى تنتهي.
+      {strict && !showExitWarning && (
+        <div className="flex items-start gap-2.5 rounded-xl border border-navy-700 bg-navy-900/60 px-3.5 py-2.5 text-xs text-slate-300">
+          <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0 text-gold-400" />
+          وضع المتابعة الدقيقة مفعّل: يتم تسجيل أي مغادرة للنافذة في تقرير المعلم.
         </div>
       )}
 

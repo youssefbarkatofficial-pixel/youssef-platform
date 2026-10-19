@@ -19,19 +19,28 @@ CREATE TABLE IF NOT EXISTS lessons (
     created_at INTEGER NOT NULL
 );
 
--- 3. Academic Lesson Chunks (For RAG retrieval)
+-- 3. Academic Lesson Chunks (For RAG retrieval & Teaching Data Model)
 CREATE TABLE IF NOT EXISTS lesson_chunks (
     id TEXT PRIMARY KEY,
+    course_id TEXT,
     lesson_id TEXT,
+    stage TEXT, -- 'prep1' | 'prep2' | 'prep3' | 'sec1' | 'sec2' | 'sec3' | 'general'
+    kind TEXT DEFAULT 'شرح', -- 'شرح' | 'تدريب' | 'واجب'
+    status TEXT DEFAULT 'draft', -- 'draft' | 'verified'
     text TEXT NOT NULL,
     keywords TEXT NOT NULL, -- JSON array of strings
     grade TEXT,
     unit TEXT,
     subject TEXT,
-    created_at INTEGER NOT NULL
+    source_note TEXT,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_chunks_lesson ON lesson_chunks(lesson_id);
 CREATE INDEX IF NOT EXISTS idx_chunks_grade ON lesson_chunks(grade);
+CREATE INDEX IF NOT EXISTS idx_chunks_course_lesson ON lesson_chunks(course_id, lesson_id);
+CREATE INDEX IF NOT EXISTS idx_chunks_stage ON lesson_chunks(stage);
+CREATE INDEX IF NOT EXISTS idx_chunks_status ON lesson_chunks(status);
 
 -- 4. Self Learning Pending (Student questions/answers isolated for admin review)
 CREATE TABLE IF NOT EXISTS self_learning_pending (
@@ -100,3 +109,13 @@ CREATE TABLE IF NOT EXISTS answer_cache (
     expires_at INTEGER NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_cache_expires ON answer_cache(expires_at);
+
+-- 10. Token Usage Ledger (5-hour sliding window rate limits)
+CREATE TABLE IF NOT EXISTS token_usage (
+    id TEXT PRIMARY KEY,
+    user_key TEXT NOT NULL, -- student uid or visitor hash 'vis_...'
+    tier TEXT NOT NULL,     -- 'visitor' | 'free' | 'subscribed'
+    tokens INTEGER NOT NULL,
+    created_at INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_token_usage_key_time ON token_usage(user_key, created_at);

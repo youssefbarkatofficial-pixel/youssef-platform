@@ -25,9 +25,9 @@ export default function Table<T>({
   emptyMessage = 'لا توجد بيانات',
 }: TableProps<T>) {
   return (
-    <div className="overflow-x-auto rounded-card border border-theme-border bg-theme-surface shadow-soft">
+    <div className="overflow-x-auto rounded-card bg-theme-surface shadow-soft">
       <table className="w-full text-start text-sm">
-        <thead className="bg-theme-surface-hover text-theme-text-secondary">
+        <thead className="bg-theme-surface-hover/80 text-theme-text-secondary">
           <tr>
             {columns.map((column) => (
               <th key={column.key} className={cn('px-4 py-3 text-start font-bold', column.className)}>
