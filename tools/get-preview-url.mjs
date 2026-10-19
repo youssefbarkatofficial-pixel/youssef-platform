@@ -6,11 +6,17 @@ const tomlPath = 'C:\\Users\\mohammed\\AppData\\Roaming\\xdg.config\\.wrangler\\
 const content = fs.readFileSync(tomlPath, 'utf8');
 const token = content.match(/oauth_token\s*=\s*"([^"]+)"/)?.[1];
 
-const res = await fetch(`https://api.cloudflare.com/client/v4/accounts/${accountId}/pages/projects/${project}/deployments/6759cafc-c968-4242-8a5c-7b75b32cd48c`, {
+const res = await fetch(`https://api.cloudflare.com/client/v4/accounts/${accountId}/pages/projects/${project}/deployments?per_page=5`, {
   headers: { Authorization: `Bearer ${token}` }
 });
 const data = await res.json();
-console.log('Preview URL:', data.result?.url);
-console.log('Aliases:', data.result?.aliases);
-console.log('Environment:', data.result?.environment);
-console.log('Stage Status:', data.result?.latest_stage?.status);
+console.log(JSON.stringify(data.result?.map((d) => ({
+  id: d.id,
+  branch: d.deployment_trigger?.metadata?.branch,
+  commit: d.deployment_trigger?.metadata?.commit_hash?.slice(0, 7),
+  status: d.latest_stage?.status,
+  url: d.url,
+  aliases: d.aliases,
+  environment: d.environment,
+  created: d.created_on
+})), null, 2));
