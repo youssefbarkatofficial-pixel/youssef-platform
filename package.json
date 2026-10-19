@@ -3,7 +3,11 @@
   "version": "1.0.0",
   "description": "منصة يوسف بركات التعليمية",
   "scripts": {
-    "build": "cd v2-app && npm run build"
+    "build": "cd v2-app && npm run build",
+    "deploy": "node -e \"console.error('نشر القديمة مقفول'); process.exit(1)\"",
+    "deploy:pages": "node -e \"console.error('نشر القديمة مقفول'); process.exit(1)\"",
+    "deploy:legacy": "node -e \"console.error('نشر القديمة مقفول'); process.exit(1)\"",
+    "deploy:hosting": "node -e \"console.error('نشر القديمة مقفول'); process.exit(1)\""
   },
   "dependencies": {
     "iconv-lite": "^0.7.3"

@@ -85,7 +85,7 @@ export async function sendResetEmail(email: string): Promise<void> {
   await sendPasswordResetEmail(auth, email.trim().toLowerCase());
 }
 
-export function getAuthErrorMessage(error: unknown): string {
+export function getAuthErrorMessage(error: unknown, identifier?: string): string {
   if (error instanceof ProfileCreationError) {
     return 'تم إنشاء حسابك لكن تعذر حفظ بياناتك. تواصل مع إدارة المنصة.';
   }
@@ -95,14 +95,20 @@ export function getAuthErrorMessage(error: unknown): string {
       ? String((error as { code: unknown }).code)
       : '';
 
+  const isEmail = typeof identifier === 'string' && identifier.includes('@');
+
   switch (code) {
     case 'auth/email-already-in-use':
-      return 'رقم الموبايل هذا مسجّل بالفعل. جرّب تسجيل الدخول.';
+      return isEmail
+        ? 'البريد الإلكتروني هذا مسجّل بالفعل. جرّب تسجيل الدخول.'
+        : 'رقم الموبايل هذا مسجّل بالفعل. جرّب تسجيل الدخول.';
     case 'auth/invalid-credential':
     case 'auth/wrong-password':
     case 'auth/user-not-found':
     case 'auth/invalid-email':
-      return 'رقم الموبايل أو كلمة المرور غير صحيحة.';
+      return isEmail
+        ? 'الإيميل أو كلمة المرور غير صحيحة.'
+        : 'رقم الموبايل أو كلمة المرور غير صحيحة.';
     case 'auth/too-many-requests':
       return 'محاولات كثيرة. انتظر قليلًا ثم حاول مرة أخرى.';
     case 'auth/network-request-failed':

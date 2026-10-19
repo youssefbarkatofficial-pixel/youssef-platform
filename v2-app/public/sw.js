@@ -1,6 +1,7 @@
-// خدمة قديمة كانت تحفظ نسخة من المنصة القديمة في متصفحات الطلاب.
-// هذا الملف يمسح كل الكاش القديم ثم يلغي نفسه، فيرى كل طالب النسخة الجديدة فورًا.
-// يجب أن يبقى باسم sw.js وعلى نفس المسار حتى يلتقطه المتصفح القديم.
+// Kill-switch Service Worker
+// يمسح كل الكاش القديم (v28_unified_cache وغيرها) من متصفحات الطلاب
+// ثم يلغي تسجيل نفسه ويعيد تحميل الصفحات المفتوحة مرة واحدة لترى المنصة الجديدة فوراً
+
 self.addEventListener('install', () => {
   self.skipWaiting();
 });
@@ -8,26 +9,38 @@ self.addEventListener('install', () => {
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     (async () => {
+      // 1) مسح كافة الكاشات المخزنة في المتصفح
       try {
-        const keys = await caches.keys();
-        await Promise.all(keys.map((key) => caches.delete(key)));
+        const cacheNames = await caches.keys();
+        await Promise.all(cacheNames.map((name) => caches.delete(name)));
       } catch (error) {
-        // نتجاهل أي خطأ في مسح الكاش ونكمل.
+        // تجاهل أي خطأ والاستمرار
       }
+
+      // 2) إلغاء تسجيل هذا الـ Service Worker بالكامل
       try {
         await self.registration.unregister();
       } catch (error) {
-        // نتجاهل.
+        // تجاهل
       }
+
+      // 3) إعادة تحميل الصفحات المفتوحة لجلب v2 مباشرة من السيرفر بدون أي كاش قديم
       try {
-        const windows = await self.clients.matchAll({ type: 'window' });
-        windows.forEach((client) => client.navigate(client.url));
+        const clientsList = await self.clients.matchAll({
+          type: 'window',
+          includeUncontrolled: true,
+        });
+        for (const client of clientsList) {
+          if (client.url && 'navigate' in client) {
+            client.navigate(client.url);
+          }
+        }
       } catch (error) {
-        // نتجاهل.
+        // تجاهل
       }
     })(),
   );
 });
 
-// لا نخدم أي ملف من الكاش: كل الطلبات تذهب للشبكة مباشرة.
+// لا نخزن أي ملف ولا نتدخل في أي طلب، كل شيء يذهب للشبكة مباشرة
 self.addEventListener('fetch', () => {});

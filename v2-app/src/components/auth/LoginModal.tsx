@@ -120,7 +120,7 @@ export default function LoginModal({ open, onClose }: LoginModalProps) {
         }
       }
     } catch (error) {
-      setFormError(getAuthErrorMessage(error));
+      setFormError(getAuthErrorMessage(error, identifier));
     } finally {
       setSubmitting(false);
     }

@@ -55,7 +55,7 @@ export default function LoginPage() {
     try {
       await loginWithIdentifier(identifier, password);
     } catch (error) {
-      setFormError(getAuthErrorMessage(error));
+      setFormError(getAuthErrorMessage(error, identifier));
     } finally {
       setSubmitting(false);
     }

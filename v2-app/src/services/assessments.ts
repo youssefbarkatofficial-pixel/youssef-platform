@@ -6,6 +6,7 @@ import {
   hasAnswerKeys,
   parseAttemptResult,
   parseQuestions,
+  sanitizeAttemptForStorage,
 } from '../lib/grading';
 import type { AssessmentKind, AttemptResult, Question } from '../lib/grading';
 import type { CourseItem, CourseSection } from './courses';
@@ -450,7 +451,8 @@ export async function submitWithClientGrading(params: LegacySubmitParams): Promi
       availableUntil: assessment.availableUntil,
     });
 
-    transaction.update(studentRef, { examResults: [...list, result] });
+    const sanitized = sanitizeAttemptForStorage(result);
+    transaction.update(studentRef, { examResults: [...list, sanitized] });
     return result;
   });
 }
@@ -550,8 +552,9 @@ export async function gradeSubmittedAttempt(params: GradeParams): Promise<Attemp
     const existing = studentSnapshot.data().examResults;
     const list: unknown[] = Array.isArray(existing) ? existing : [];
 
-    transaction.update(submissionRef, { result, gradedAt: new Date().toISOString() });
-    transaction.update(studentRef, { examResults: [...list, result] });
+    const sanitized = sanitizeAttemptForStorage(result);
+    transaction.update(submissionRef, { result: sanitized, gradedAt: new Date().toISOString() });
+    transaction.update(studentRef, { examResults: [...list, sanitized] });
 
     return result;
   });

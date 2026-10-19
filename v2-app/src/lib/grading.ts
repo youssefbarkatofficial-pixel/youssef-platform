@@ -296,7 +296,7 @@ function normalizeTf(value: string): 'صح' | 'خطأ' | '' {
 function isTfCorrect(question: Question, given: string): boolean {
   const picked = normalizeTf(given);
   if (!picked || question.answer === null) return false;
-  return [question.answer, ...question.altAnswers].some((item) => normalizeTf(item) === picked);
+  return [question.answer, ...(question.altAnswers || [])].some((item) => normalizeTf(item) === picked);
 }
 
 // مطابقة اختيار من متعدد (مفتاح خيار a-d أو نص الخيار نفسه)
@@ -307,7 +307,7 @@ function isChoiceCorrect(question: Question, given: string): boolean {
   const pickedText = question.options ? question.options[rawPicked] : undefined;
   const normGivenText = normalizeArabicForMatching(pickedText || rawPicked);
 
-  return [question.answer, ...question.altAnswers].some((item) => {
+  return [question.answer, ...(question.altAnswers || [])].some((item) => {
     if (item.trim().toLowerCase() === rawPicked) return true;
     const normItem = normalizeArabicForMatching(item);
     return normItem !== '' && normGivenText === normItem;
@@ -687,6 +687,31 @@ export function buildAttemptResult(input: BuildResultInput): AttemptResult {
     tabExitCount: input.tabExitCount || 0,
     displayReviewAt,
     canShowReview,
+  };
+}
+
+/**
+ * تنقية النتيجة قبل تخزينها في Firestore لتطابق قواعد الأمان (hasOnly) بدقة 100%.
+ */
+export function sanitizeAttemptForStorage(result: AttemptResult): Record<string, unknown> {
+  return {
+    courseId: result.courseId,
+    examId: result.examId,
+    examTitle: result.examTitle,
+    percent: result.percent,
+    earnedPoints: result.earnedPoints,
+    totalPoints: result.totalPoints,
+    effectivePercent: result.effectivePercent,
+    penalized: result.penalized,
+    attemptNumber: result.attemptNumber,
+    isOfficial: result.isOfficial,
+    autoSubmit: result.autoSubmit,
+    ts: result.ts,
+    details: result.details,
+    isTraining: result.isTraining,
+    isHomework: result.isHomework,
+    needsReview: result.needsReview,
+    reviewReason: result.reviewReason,
   };
 }
 
