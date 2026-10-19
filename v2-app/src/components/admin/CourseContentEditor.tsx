@@ -10,6 +10,7 @@ import {
   ClipboardList,
   ExternalLink,
   FileText,
+  GripVertical,
   Pencil,
   PlayCircle,
   Plus,
@@ -52,6 +53,12 @@ export default function CourseContentEditor({
   const [content, setContent] = useState<NormalizedCourseContent>(initialContent);
   const [dirty, setDirty] = useState(false);
   const [modal, setModal] = useState<ModalType>(null);
+
+  // Drag and drop states
+  const [draggedLecIdx, setDraggedLecIdx] = useState<number | null>(null);
+  const [draggedTr, setDraggedTr] = useState<{ lectureId: string; idx: number } | null>(null);
+  const [draggedHwIdx, setDraggedHwIdx] = useState<number | null>(null);
+  const [draggedExamIdx, setDraggedExamIdx] = useState<number | null>(null);
 
   // Form states for modals
   const [formTitle, setFormTitle] = useState('');
@@ -345,6 +352,7 @@ export default function CourseContentEditor({
   };
 
   const handleSaveAll = async () => {
+    if (!window.confirm('هل تريد بالتأكيد حفظ محتوى الكورس وترتيب العناصر الجديد؟')) return;
     try {
       await onSave(content);
       setDirty(false);
@@ -393,11 +401,36 @@ export default function CourseContentEditor({
             {content.lectures.map((lec, idx) => (
               <div
                 key={lec.id}
-                className="space-y-3 rounded-xl border border-navy-700/80 bg-navy-950/60 p-4 transition-all hover:border-navy-600"
+                draggable
+                onDragStart={() => setDraggedLecIdx(idx)}
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={() => {
+                  if (draggedLecIdx !== null && draggedLecIdx !== idx) {
+                    const newLectures = [...content.lectures];
+                    const [moved] = newLectures.splice(draggedLecIdx, 1);
+                    newLectures.splice(idx, 0, moved);
+                    const reindexed = newLectures.map((l, i) => ({ ...l, order: i + 1 }));
+                    setContent({ ...content, lectures: reindexed });
+                    setDirty(true);
+                  }
+                  setDraggedLecIdx(null);
+                }}
+                className={`space-y-3 rounded-xl border p-4 transition-all ${
+                  draggedLecIdx === idx
+                    ? 'border-gold-400 bg-navy-900/90 shadow-glow opacity-80'
+                    : 'border-navy-700/80 bg-navy-950/60 hover:border-navy-600'
+                }`}
               >
                 {/* Lecture row */}
                 <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2.5">
+                    <span
+                      className="cursor-grab active:cursor-grabbing p-1 text-slate-500 hover:text-gold-400 touch-none"
+                      title="اسحب المحاضرة لإعادة ترتيبها"
+                      aria-label="مقبض السحب لإعادة الترتيب"
+                    >
+                      <GripVertical className="h-4 w-4" />
+                    </span>
                     <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-navy-800 text-xs font-bold text-gold-400">
                       #{lec.order}
                     </span>
@@ -475,9 +508,40 @@ export default function CourseContentEditor({
                       {lec.trainings.map((tr, trIdx) => (
                         <div
                           key={tr.id}
-                          className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-navy-950/70 px-3 py-2 text-xs"
+                          draggable
+                          onDragStart={(e) => {
+                            e.stopPropagation();
+                            setDraggedTr({ lectureId: lec.id, idx: trIdx });
+                          }}
+                          onDragOver={(e) => e.preventDefault()}
+                          onDrop={(e) => {
+                            e.stopPropagation();
+                            if (draggedTr && draggedTr.lectureId === lec.id && draggedTr.idx !== trIdx) {
+                              const newTrainings = [...lec.trainings];
+                              const [moved] = newTrainings.splice(draggedTr.idx, 1);
+                              newTrainings.splice(trIdx, 0, moved);
+                              const reindexedTr = newTrainings.map((t, i) => ({ ...t, order: i + 1 }));
+                              const newLectures = [...content.lectures];
+                              newLectures[idx] = { ...lec, trainings: reindexedTr };
+                              setContent({ ...content, lectures: newLectures });
+                              setDirty(true);
+                            }
+                            setDraggedTr(null);
+                          }}
+                          className={`flex flex-wrap items-center justify-between gap-2 rounded-lg px-3 py-2 text-xs transition-all ${
+                            draggedTr?.lectureId === lec.id && draggedTr?.idx === trIdx
+                              ? 'border border-gold-400/60 bg-navy-900 shadow-soft'
+                              : 'bg-navy-950/70 hover:bg-navy-950'
+                          }`}
                         >
                           <div className="flex items-center gap-2">
+                            <span
+                              className="cursor-grab active:cursor-grabbing p-0.5 text-slate-500 hover:text-gold-400 touch-none"
+                              title="اسحب التدريب لإعادة ترتيبه"
+                              aria-label="مقبض السحب"
+                            >
+                              <GripVertical className="h-3.5 w-3.5" />
+                            </span>
                             <span className="text-slate-500">#{tr.order}</span>
                             <span className="font-medium text-slate-200">{tr.title}</span>
                             {tr.questions && tr.questions.length > 0 && (
@@ -556,9 +620,34 @@ export default function CourseContentEditor({
             {content.homeworks.map((hw, idx) => (
               <div
                 key={hw.id}
-                className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-navy-700/80 bg-navy-950/60 p-4 transition-all hover:border-navy-600"
+                draggable
+                onDragStart={() => setDraggedHwIdx(idx)}
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={() => {
+                  if (draggedHwIdx !== null && draggedHwIdx !== idx) {
+                    const newHws = [...content.homeworks];
+                    const [moved] = newHws.splice(draggedHwIdx, 1);
+                    newHws.splice(idx, 0, moved);
+                    const reindexed = newHws.map((h, i) => ({ ...h, order: i + 1 }));
+                    setContent({ ...content, homeworks: reindexed });
+                    setDirty(true);
+                  }
+                  setDraggedHwIdx(null);
+                }}
+                className={`flex flex-wrap items-center justify-between gap-3 rounded-xl border p-4 transition-all ${
+                  draggedHwIdx === idx
+                    ? 'border-gold-400 bg-navy-900/90 shadow-glow opacity-80'
+                    : 'border-navy-700/80 bg-navy-950/60 hover:border-navy-600'
+                }`}
               >
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2.5">
+                  <span
+                    className="cursor-grab active:cursor-grabbing p-1 text-slate-500 hover:text-gold-400 touch-none"
+                    title="اسحب الواجب لإعادة ترتيبه"
+                    aria-label="مقبض السحب"
+                  >
+                    <GripVertical className="h-4 w-4" />
+                  </span>
                   <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-navy-800 text-xs font-bold text-gold-400">
                     #{hw.order}
                   </span>
@@ -640,9 +729,34 @@ export default function CourseContentEditor({
             {content.exams.map((exam, idx) => (
               <div
                 key={exam.id}
-                className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-navy-700/80 bg-navy-950/60 p-4 transition-all hover:border-navy-600"
+                draggable
+                onDragStart={() => setDraggedExamIdx(idx)}
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={() => {
+                  if (draggedExamIdx !== null && draggedExamIdx !== idx) {
+                    const newExs = [...content.exams];
+                    const [moved] = newExs.splice(draggedExamIdx, 1);
+                    newExs.splice(idx, 0, moved);
+                    const reindexed = newExs.map((e, i) => ({ ...e, order: i + 1 }));
+                    setContent({ ...content, exams: reindexed });
+                    setDirty(true);
+                  }
+                  setDraggedExamIdx(null);
+                }}
+                className={`flex flex-wrap items-center justify-between gap-3 rounded-xl border p-4 transition-all ${
+                  draggedExamIdx === idx
+                    ? 'border-gold-400 bg-navy-900/90 shadow-glow opacity-80'
+                    : 'border-navy-700/80 bg-navy-950/60 hover:border-navy-600'
+                }`}
               >
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2.5">
+                  <span
+                    className="cursor-grab active:cursor-grabbing p-1 text-slate-500 hover:text-gold-400 touch-none"
+                    title="اسحب الامتحان لإعادة ترتيبه"
+                    aria-label="مقبض السحب"
+                  >
+                    <GripVertical className="h-4 w-4" />
+                  </span>
                   <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-navy-800 text-xs font-bold text-gold-400">
                     #{exam.order}
                   </span>

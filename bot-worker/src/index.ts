@@ -53,7 +53,7 @@ function isGreeting(msg: string): boolean {
     'سلام', 'السلام', 'عليكم', 'وعليكم', 'ورحمة', 'ورحمه', 'وبركاته', 'مرحبا', 'مرحباً', 'اهلا', 'أهلا', 'أهلاً',
     'صباح', 'الخير', 'مساء', 'النور', 'ازيك', 'إزيك', 'عامل', 'ايه', 'إيه',
     'شكرا', 'شكراً', 'تمام', 'تسلم', 'جزاك', 'الله', 'خيرا', 'خيراً',
-    'هلا', 'يا', 'مستر', 'استاذ', 'أستاذ', 'باي', 'مع', 'السلامة', 'عفوا', 'عفواً'
+    'هلا', 'يا', 'مستر', 'استاذ', 'أستاذ', 'بوصلة', 'البوصلة', 'باي', 'مع', 'السلامة', 'عفوا', 'عفواً'
   ];
   return words.every(w => greetings.some(g => w === g || w.includes(g)));
 }
@@ -403,19 +403,7 @@ export default {
           } satisfies ChatResponse, { headers: corsHeaders });
         }
 
-        // أمان المحتوى: الأسئلة الدراسية بدون مقاطع منهج معتمدة تُرفض فوراً وبأدب بصفر توكنز
-        if (!learnedAnswer && !intentMatch && ragResult.chunks.length === 0) {
-          const cpuMs = Math.round((performance.now() - startTime) * 100) / 100;
-          const rejectionReply = 'ده مش في شرح الأستاذ، اسأل الأستاذ أو راجع الدرس';
-          const logId = await logChat(env.DB, studentProfile.uid, rawMessage, rejectionReply, 'fallback', cpuMs);
-          return Response.json({
-            reply: rejectionReply,
-            source: 'fallback',
-            remaining: tokenBudget.remainingTokens,
-            logId,
-            cpuMs
-          } satisfies ChatResponse, { headers: corsHeaders });
-        }
+        const isOutOfSyllabus = !learnedAnswer && !intentMatch && ragResult.chunks.length === 0;
 
         // جلب المواعيد من جدول settings
         const prepSchedule = await getSetting(
@@ -443,12 +431,20 @@ export default {
           examActive,
           lessonChunks: ragResult.chunks,
           learnedRules: learnedAnswer ? `إرشادات معتمدة من إدارة المنصة: ${learnedAnswer}` : undefined,
-          intentContext: intentContext || undefined
+          intentContext: intentContext || undefined,
+          isOutOfSyllabus,
         });
 
         // (ز) استدعاء نموذج الذكاء الاصطناعي مع سقف التوكنز للرد
-        const maxTokens = parseInt(await getSetting(env.DB, 'max_completion_tokens', '500'), 10);
+        const maxTokensSetting = parseInt(await getSetting(env.DB, 'max_completion_tokens', '500'), 10);
+        const maxTokens = isOutOfSyllabus ? Math.min(maxTokensSetting, 300) : maxTokensSetting;
         const llmResult = await callLlm(systemPrompt, rawMessage, history, env, maxTokens);
+
+        // ضمان وجود التنبيه الصريح "مش من المنهج راجع الكتاب" إذا كان خارج المنهج
+        let finalReply = llmResult.reply;
+        if (isOutOfSyllabus && !finalReply.includes('مش من المنهج راجع الكتاب')) {
+          finalReply = `${finalReply}\n\n(تنبيه: مش من المنهج راجع الكتاب)`;
+        }
 
         const usedTokens = llmResult.totalTokens || 0;
         if (usedTokens > 0) {
@@ -460,7 +456,7 @@ export default {
           env.DB,
           studentProfile.uid,
           rawMessage,
-          llmResult.reply,
+          finalReply,
           llmResult.source,
           cpuMs
         );
@@ -468,7 +464,7 @@ export default {
         const remainingTokens = Math.max(0, tokenBudget.remainingTokens - usedTokens);
 
         return Response.json({
-          reply: llmResult.reply,
+          reply: finalReply,
           source: llmResult.source,
           remaining: remainingTokens,
           lessonTitles: ragResult.lessonTitles.length ? ragResult.lessonTitles : undefined,

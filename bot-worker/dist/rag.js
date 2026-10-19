@@ -6,6 +6,8 @@ exports.similarity = similarity;
 exports.chunkLesson = chunkLesson;
 exports.invalidateChunksCache = invalidateChunksCache;
 exports.loadLessonChunks = loadLessonChunks;
+exports.normalizeGrade = normalizeGrade;
+exports.gradesMatch = gradesMatch;
 exports.findLessonContext = findLessonContext;
 // ===================== تطبيع النص =====================
 function norm(t) {
@@ -123,6 +125,36 @@ async function loadLessonChunks(db) {
     };
     return loaded;
 }
+// ===================== تطبيع ومطابقة الصفوف الدراسية =====================
+function normalizeGrade(grade) {
+    if (!grade)
+        return '';
+    const g = norm(grade).replace(/^الصف\s+/, '').trim();
+    if (g.includes('prep1') || g.includes('اول اعدادي') || g.includes('اولى اعدادي') || g.includes('اول الاعدادي'))
+        return 'prep1';
+    if (g.includes('prep2') || g.includes('ثاني اعدادي') || g.includes('تانية اعدادي') || g.includes('ثاني الاعدادي'))
+        return 'prep2';
+    if (g.includes('prep3') || g.includes('ثالث اعدادي') || g.includes('تالتة اعدادي') || g.includes('ثالث الاعدادي'))
+        return 'prep3';
+    if (g.includes('sec1') || g.includes('اول ثانوي') || g.includes('اولى ثانوي') || g.includes('اول الثانوي'))
+        return 'sec1';
+    if (g.includes('sec2') || g.includes('ثاني ثانوي') || g.includes('تانية ثانوي') || g.includes('ثاني الثانوي'))
+        return 'sec2';
+    if (g.includes('sec3') || g.includes('ثالث ثانوي') || g.includes('تالتة ثانوي') || g.includes('ثالث الثانوي'))
+        return 'sec3';
+    return g;
+}
+function gradesMatch(g1, g2) {
+    if (!g1 || !g2)
+        return true;
+    if (g1 === 'عام' || g2 === 'عام')
+        return true;
+    const n1 = normalizeGrade(g1);
+    const n2 = normalizeGrade(g2);
+    if (!n1 || !n2)
+        return true;
+    return n1 === n2 || n1.includes(n2) || n2.includes(n1);
+}
 async function findLessonContext(db, question, topK = 3, studentGrade) {
     const kw = keywords(question);
     if (!kw.length)
@@ -135,8 +167,8 @@ async function findLessonContext(db, question, topK = 3, studentGrade) {
     const scored = [];
     for (let i = 0; i < allChunks.length; i++) {
         const chunk = allChunks[i];
-        // فلترة مسبقة سريعة: إذا كان المقطع مخصصًا لصف آخر غير عام وغير صف الطالب، نتخطاه لتوفير الـ CPU
-        if (studentGrade && chunk.grade && chunk.grade !== 'عام' && !chunk.grade.includes(studentGrade)) {
+        // فلترة مسبقة سريعة: مطابقة صف الطالب مع صف المقطع
+        if (studentGrade && chunk.grade && !gradesMatch(studentGrade, chunk.grade)) {
             continue;
         }
         const cKw = chunk.keywords;
@@ -149,7 +181,7 @@ async function findLessonContext(db, question, topK = 3, studentGrade) {
         }
         if (matches > 0) {
             let s = matches / Math.sqrt(qLen * cKw.length);
-            if (studentGrade && chunk.grade && chunk.grade.includes(studentGrade)) {
+            if (studentGrade && chunk.grade && gradesMatch(studentGrade, chunk.grade)) {
                 s *= 1.2; // ترجيح لصف الطالب
             }
             if (s > 0.1) {

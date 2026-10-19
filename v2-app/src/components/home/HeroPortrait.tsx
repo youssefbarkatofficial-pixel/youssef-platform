@@ -9,9 +9,26 @@ interface HeroPortraitProps {
   className?: string;
 }
 
+const CACHE_KEY_BG = 'yb_cached_hero_bg';
+const CACHE_KEY_ME = 'yb_cached_hero_me';
+
+const DEFAULT_BG = '/assets/images/ownerBgImage-legacy.webp';
+const DEFAULT_ME = '/assets/images/youssef-hero.webp';
+
+function getInitialCachedUrl(key: string, propUrl?: string, fallback: string = ''): string {
+  if (propUrl) return propUrl;
+  if (typeof window !== 'undefined') {
+    try {
+      const cached = localStorage.getItem(key);
+      if (cached) return cached;
+    } catch {}
+  }
+  return fallback;
+}
+
 export default function HeroPortrait({
-  bgUrl = '/assets/images/ownerBgImage-legacy.webp',
-  meUrl = '/assets/images/youssef-hero.webp',
+  bgUrl,
+  meUrl,
   className = '',
 }: HeroPortraitProps) {
   const { firebaseUser, isAdmin } = useAuth();
@@ -22,6 +39,26 @@ export default function HeroPortrait({
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [mouseOffset, setMouseOffset] = useState({ x: 0, y: 0 });
   const [reducedMotion, setReducedMotion] = useState(false);
+
+  const [bgLoaded, setBgLoaded] = useState(false);
+  const [meLoaded, setMeLoaded] = useState(false);
+
+  const [activeBgUrl, setActiveBgUrl] = useState(() => getInitialCachedUrl(CACHE_KEY_BG, bgUrl, DEFAULT_BG));
+  const [activeMeUrl, setActiveMeUrl] = useState(() => getInitialCachedUrl(CACHE_KEY_ME, meUrl, DEFAULT_ME));
+
+  useEffect(() => {
+    if (bgUrl && bgUrl !== activeBgUrl) {
+      setActiveBgUrl(bgUrl);
+      try { localStorage.setItem(CACHE_KEY_BG, bgUrl); } catch {}
+    }
+  }, [bgUrl, activeBgUrl]);
+
+  useEffect(() => {
+    if (meUrl && meUrl !== activeMeUrl) {
+      setActiveMeUrl(meUrl);
+      try { localStorage.setItem(CACHE_KEY_ME, meUrl); } catch {}
+    }
+  }, [meUrl, activeMeUrl]);
 
   const containerRef = useRef<HTMLButtonElement>(null);
   const clickTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -142,15 +179,25 @@ export default function HeroPortrait({
             transitionTimingFunction: 'cubic-bezier(0.2, 0.8, 0.2, 1)',
           }}
         >
+          {/* Shimmer skeleton before image loads */}
+          <div
+            className={`absolute inset-0 bg-theme-surface-subtle transition-opacity ${
+              reducedMotion ? 'duration-0' : 'duration-500'
+            } ${bgLoaded ? 'opacity-0 pointer-events-none' : 'opacity-100 animate-pulse'}`}
+          />
           <img
-            src={bgUrl}
+            src={activeBgUrl}
+            onLoad={() => setBgLoaded(true)}
             onError={(e) => {
               (e.currentTarget as HTMLImageElement).src = '/assets/images/hero-circle-bg.svg';
+              setBgLoaded(true);
             }}
             alt=""
             loading="eager"
             decoding="async"
-            className="h-full w-full object-cover transition-transform duration-700"
+            className={`h-full w-full object-cover transition-all ${
+              reducedMotion ? 'duration-0' : 'duration-700'
+            } ${bgLoaded ? 'opacity-100' : 'opacity-0'}`}
             style={{
               transform: `scale(${isActive && !reducedMotion ? 1.06 : 1})`,
             }}
@@ -176,22 +223,29 @@ export default function HeroPortrait({
           }}
         >
           <img
-            src={meUrl || '/assets/images/youssef-hero.webp'}
+            src={activeMeUrl}
             srcSet={
-              !meUrl || meUrl === '/assets/images/youssef-hero.webp'
+              activeMeUrl === DEFAULT_ME
                 ? '/assets/images/youssef-hero-sm.webp 460w, /assets/images/youssef-hero.webp 800w'
                 : undefined
             }
             sizes={
-              !meUrl || meUrl === '/assets/images/youssef-hero.webp'
+              activeMeUrl === DEFAULT_ME
                 ? '(max-width: 640px) 320px, (max-width: 1024px) 440px, 530px'
                 : undefined
             }
+            onLoad={() => setMeLoaded(true)}
+            onError={(e) => {
+              (e.currentTarget as HTMLImageElement).src = DEFAULT_ME;
+              setMeLoaded(true);
+            }}
             alt="الأستاذ يوسف بركات"
             loading="eager"
             fetchPriority="high"
             decoding="async"
-            className="h-full w-full object-contain object-bottom drop-shadow-2xl"
+            className={`h-full w-full object-contain object-bottom drop-shadow-2xl transition-opacity ${
+              reducedMotion ? 'duration-0' : 'duration-500'
+            } ${meLoaded ? 'opacity-100' : 'opacity-0'}`}
           />
         </div>
 

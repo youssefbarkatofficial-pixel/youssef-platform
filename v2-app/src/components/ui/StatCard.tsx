@@ -15,20 +15,22 @@ export default function StatCard({ label, value, hint, icon: Icon, className }: 
   return (
     <div
       className={cn(
-        'rounded-card bg-theme-surface p-5 shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:shadow-glow',
+        'rounded-card bg-theme-surface p-5 shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:shadow-glow flex h-full flex-col justify-between',
         className,
       )}
     >
-      <div className="flex items-start justify-between gap-3">
-        <p className="text-sm font-bold text-theme-text-secondary">{label}</p>
-        {Icon && (
-          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-btn bg-theme-gold/15 text-theme-gold">
-            <Icon className="h-5 w-5" />
-          </span>
-        )}
+      <div>
+        <div className="flex items-start justify-between gap-3">
+          <p className="text-sm font-bold text-theme-text-secondary">{label}</p>
+          {Icon && (
+            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-btn bg-theme-gold/15 text-theme-gold">
+              <Icon className="h-5 w-5" />
+            </span>
+          )}
+        </div>
+        <p className="mt-2 font-num text-2xl font-extrabold text-theme-text md:text-3xl">{value}</p>
       </div>
-      <p className="mt-2 font-num text-2xl font-extrabold text-theme-text md:text-3xl">{value}</p>
-      {hint && <p className="mt-1 text-xs text-theme-text-muted">{hint}</p>}
+      {hint && <p className="mt-2 text-xs text-theme-text-muted">{hint}</p>}
     </div>
   );
 }

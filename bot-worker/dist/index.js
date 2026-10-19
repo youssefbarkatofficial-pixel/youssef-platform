@@ -37,7 +37,7 @@ function isGreeting(msg) {
         'سلام', 'السلام', 'عليكم', 'وعليكم', 'ورحمة', 'ورحمه', 'وبركاته', 'مرحبا', 'مرحباً', 'اهلا', 'أهلا', 'أهلاً',
         'صباح', 'الخير', 'مساء', 'النور', 'ازيك', 'إزيك', 'عامل', 'ايه', 'إيه',
         'شكرا', 'شكراً', 'تمام', 'تسلم', 'جزاك', 'الله', 'خيرا', 'خيراً',
-        'هلا', 'يا', 'مستر', 'استاذ', 'أستاذ', 'باي', 'مع', 'السلامة', 'عفوا', 'عفواً'
+        'هلا', 'يا', 'مستر', 'استاذ', 'أستاذ', 'بوصلة', 'البوصلة', 'باي', 'مع', 'السلامة', 'عفوا', 'عفواً'
     ];
     return words.every(w => greetings.some(g => w === g || w.includes(g)));
 }
@@ -341,19 +341,7 @@ exports.default = {
                         cpuMs
                     }, { headers: corsHeaders });
                 }
-                // أمان المحتوى: الأسئلة الدراسية بدون مقاطع منهج معتمدة تُرفض فوراً وبأدب بصفر توكنز
-                if (!learnedAnswer && !intentMatch && ragResult.chunks.length === 0) {
-                    const cpuMs = Math.round((performance.now() - startTime) * 100) / 100;
-                    const rejectionReply = 'ده مش في شرح الأستاذ، اسأل الأستاذ أو راجع الدرس';
-                    const logId = await (0, db_1.logChat)(env.DB, studentProfile.uid, rawMessage, rejectionReply, 'fallback', cpuMs);
-                    return Response.json({
-                        reply: rejectionReply,
-                        source: 'fallback',
-                        remaining: tokenBudget.remainingTokens,
-                        logId,
-                        cpuMs
-                    }, { headers: corsHeaders });
-                }
+                const isOutOfSyllabus = !learnedAnswer && !intentMatch && ragResult.chunks.length === 0;
                 // جلب المواعيد من جدول settings
                 const prepSchedule = await (0, db_1.getSetting)(env.DB, 'schedule_prep', 'مواعيد المنصة الثابتة: للمرحلة الإعدادية (شرح وتدريب يوم الخميس، واجب يوم الثلاثاء، امتحان يوم الأربعاء الساعة 9 مساءً).');
                 const secSchedule = await (0, db_1.getSetting)(env.DB, 'schedule_sec', 'للمرحلة الثانوية (شرح وتدريب يوم الجمعة، واجب يوم الثلاثاء، امتحان يوم الأربعاء الساعة 9 مساءً).');
@@ -370,20 +358,27 @@ exports.default = {
                     examActive,
                     lessonChunks: ragResult.chunks,
                     learnedRules: learnedAnswer ? `إرشادات معتمدة من إدارة المنصة: ${learnedAnswer}` : undefined,
-                    intentContext: intentContext || undefined
+                    intentContext: intentContext || undefined,
+                    isOutOfSyllabus,
                 });
                 // (ز) استدعاء نموذج الذكاء الاصطناعي مع سقف التوكنز للرد
-                const maxTokens = parseInt(await (0, db_1.getSetting)(env.DB, 'max_completion_tokens', '500'), 10);
+                const maxTokensSetting = parseInt(await (0, db_1.getSetting)(env.DB, 'max_completion_tokens', '500'), 10);
+                const maxTokens = isOutOfSyllabus ? Math.min(maxTokensSetting, 300) : maxTokensSetting;
                 const llmResult = await (0, llm_1.callLlm)(systemPrompt, rawMessage, history, env, maxTokens);
+                // ضمان وجود التنبيه الصريح "مش من المنهج راجع الكتاب" إذا كان خارج المنهج
+                let finalReply = llmResult.reply;
+                if (isOutOfSyllabus && !finalReply.includes('مش من المنهج راجع الكتاب')) {
+                    finalReply = `${finalReply}\n\n(تنبيه: مش من المنهج راجع الكتاب)`;
+                }
                 const usedTokens = llmResult.totalTokens || 0;
                 if (usedTokens > 0) {
                     await (0, db_1.recordTokenUsage)(env.DB, studentProfile.uid, tier, usedTokens);
                 }
                 const cpuMs = Math.round((performance.now() - startTime) * 100) / 100;
-                const logId = await (0, db_1.logChat)(env.DB, studentProfile.uid, rawMessage, llmResult.reply, llmResult.source, cpuMs);
+                const logId = await (0, db_1.logChat)(env.DB, studentProfile.uid, rawMessage, finalReply, llmResult.source, cpuMs);
                 const remainingTokens = Math.max(0, tokenBudget.remainingTokens - usedTokens);
                 return Response.json({
-                    reply: llmResult.reply,
+                    reply: finalReply,
                     source: llmResult.source,
                     remaining: remainingTokens,
                     lessonTitles: ragResult.lessonTitles.length ? ragResult.lessonTitles : undefined,

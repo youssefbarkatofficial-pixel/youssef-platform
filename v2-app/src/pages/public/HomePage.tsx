@@ -569,15 +569,15 @@ export default function HomePage() {
         <Reveal direction="up">
           <SectionTitle title="ليه تختار منصتنا؟" subtitle="كل ما تحتاجه للتفوق في مكان واحد" />
         </Reveal>
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 items-stretch">
           {FEATURES.map((feature, idx) => (
-            <Reveal key={feature.title} direction="up" delay={idx * 80}>
-              <Card hoverable className="p-6 transition-all duration-300 hover:-translate-y-1.5">
+            <Reveal key={feature.title} direction="up" delay={idx * 80} className="h-full">
+              <Card hoverable className="h-full flex flex-col p-6 transition-all duration-300 hover:-translate-y-1.5">
                 <div className="mb-4 grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-theme-gold/20 to-amber-600/10 text-theme-gold shadow-soft">
                   <feature.icon className="h-6 w-6" />
                 </div>
                 <h3 className="text-lg font-extrabold text-theme-text">{feature.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-theme-text-muted">{feature.text}</p>
+                <p className="mt-2 text-sm leading-relaxed text-theme-text-muted flex-1">{feature.text}</p>
               </Card>
             </Reveal>
           ))}
@@ -593,21 +593,23 @@ export default function HomePage() {
           />
         </Reveal>
 
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-12 items-center">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-12 items-stretch">
           {/* Quotes Card (Left / 7 cols) */}
-          <Reveal direction="up" className="lg:col-span-7">
-            <Card className="relative overflow-hidden p-8 sm:p-10 border-theme-border/30 bg-gradient-to-br from-theme-surface to-theme-surface/90 shadow-soft">
-              <div className="relative space-y-6">
-                <div className="inline-flex items-center gap-2 rounded-full bg-theme-gold/15 px-3.5 py-1 text-xs font-black text-theme-gold">
-                  <span>أ. يوسف بركات</span>
+          <Reveal direction="up" className="lg:col-span-7 h-full">
+            <Card className="h-full flex flex-col justify-between relative overflow-hidden p-8 sm:p-10 border-theme-border/30 bg-gradient-to-br from-theme-surface to-theme-surface/90 shadow-soft">
+              <div className="relative space-y-6 flex-1 flex flex-col justify-between">
+                <div className="space-y-6">
+                  <div className="inline-flex items-center gap-2 rounded-full bg-theme-gold/15 px-3.5 py-1 text-xs font-black text-theme-gold">
+                    <span>أ. يوسف بركات</span>
+                  </div>
+                  <blockquote className="text-xl sm:text-2xl font-black leading-snug text-theme-text font-serif">
+                    "اعتنوا بأبنائكم فالعلم وُضع لأمثالهم"
+                  </blockquote>
+                  <p className="text-sm sm:text-base leading-relaxed text-theme-text-secondary font-serif">
+                    "هدفنا ليس الوصول إلى المجد.. بل أن نصنع المجد بأنفسنا ووضع بصمة عريقة ذات أصالة فى أبنائنا فـ بالعلم تضاء حياتنا فالعلم نور، ونور الله لا يُهدى إلا للمتقين.. فاتقِ الله"
+                  </p>
                 </div>
-                <blockquote className="text-xl sm:text-2xl font-black leading-snug text-theme-text font-serif">
-                  "اعتنوا بأبنائكم فالعلم وُضع لأمثالهم"
-                </blockquote>
-                <p className="text-sm sm:text-base leading-relaxed text-theme-text-secondary font-serif">
-                  "هدفنا ليس الوصول إلى المجد.. بل أن نصنع المجد بأنفسنا ووضع بصمة عريقة ذات أصالة فى أبنائنا فـ بالعلم تضاء حياتنا فالعلم نور، ونور الله لا يُهدى إلا للمتقين.. فاتقِ الله"
-                </p>
-                <div className="pt-2 flex items-center gap-3 text-xs font-bold text-theme-gold">
+                <div className="pt-4 flex items-center gap-3 text-xs font-bold text-theme-gold mt-auto">
                   <span className="h-1.5 w-1.5 rounded-full bg-theme-gold" />
                   <span>معلم خبير في التاريخ والجغرافيا للمرحلتين الإعدادية والثانوية</span>
                 </div>
@@ -616,8 +618,8 @@ export default function HomePage() {
           </Reveal>
 
           {/* Feature Cards (Right / 5 cols) */}
-          <Reveal direction="up" delay={150} className="lg:col-span-5 space-y-4">
-            <Card hoverable className="flex items-center gap-4 p-5 transition-all duration-300 hover:-translate-y-1">
+          <Reveal direction="up" delay={150} className="lg:col-span-5 flex flex-col justify-between gap-4 h-full">
+            <Card hoverable className="flex flex-1 items-center gap-4 p-5 transition-all duration-300 hover:-translate-y-1">
               <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-amber-500/25 to-amber-600/10 text-theme-gold shadow-soft">
                 <Video className="h-6 w-6" />
               </div>
@@ -627,7 +629,7 @@ export default function HomePage() {
               </div>
             </Card>
 
-            <Card hoverable className="flex items-center gap-4 p-5 transition-all duration-300 hover:-translate-y-1">
+            <Card hoverable className="flex flex-1 items-center gap-4 p-5 transition-all duration-300 hover:-translate-y-1">
               <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-sky-500/25 to-sky-600/10 text-sky-400 shadow-soft">
                 <Compass className="h-6 w-6" />
               </div>
@@ -637,7 +639,7 @@ export default function HomePage() {
               </div>
             </Card>
 
-            <Card hoverable className="flex items-center gap-4 p-5 transition-all duration-300 hover:-translate-y-1">
+            <Card hoverable className="flex flex-1 items-center gap-4 p-5 transition-all duration-300 hover:-translate-y-1">
               <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-emerald-500/25 to-emerald-600/10 text-emerald-400 shadow-soft">
                 <ClipboardCheck className="h-6 w-6" />
               </div>

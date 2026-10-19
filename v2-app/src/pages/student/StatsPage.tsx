@@ -64,7 +64,7 @@ export default function StatsPage() {
         </Card>
       ) : (
         <>
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-4 items-stretch">
             <StatCard
               label="معدل الالتزام"
               value={commitment === null ? '-' : `${commitment}%`}
