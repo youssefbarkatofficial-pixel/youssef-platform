@@ -10,7 +10,14 @@ import {
   Plus,
   ServerCrash,
   Trash2,
+  UploadCloud,
+  FileText,
 } from 'lucide-react';
+import {
+  parseQuestionsFromJson,
+  parseQuestionsFromTxt,
+  parseQuestionsFromDocx,
+} from '../../lib/questionImport';
 import QuestionForm from '../../components/admin/QuestionForm';
 import QuestionPicker from '../../components/admin/QuestionPicker';
 import {
@@ -138,6 +145,76 @@ export default function AdminAssessmentEditPage() {
   const [pickerOpen, setPickerOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState('');
+
+  // استيراد الأسئلة (JSON / TXT / Word)
+  const [importModalOpen, setImportModalOpen] = useState(false);
+  const [importSourceType, setImportSourceType] = useState<'json' | 'txt' | 'docx'>('json');
+  const [importText, setImportText] = useState('');
+  const [importPreviewQuestions, setImportPreviewQuestions] = useState<QuestionDraft[]>([]);
+  const [importWarnings, setImportWarnings] = useState<string[]>([]);
+  const [importProcessing, setImportProcessing] = useState(false);
+
+  const handleImportFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setImportProcessing(true);
+    setImportWarnings([]);
+    try {
+      const fileName = file.name.toLowerCase();
+      if (fileName.endsWith('.json')) {
+        setImportSourceType('json');
+        const text = await file.text();
+        setImportText(text);
+        const res = parseQuestionsFromJson(text);
+        setImportPreviewQuestions(res.questions);
+        setImportWarnings(res.warnings);
+      } else if (fileName.endsWith('.docx')) {
+        setImportSourceType('docx');
+        const buffer = await file.arrayBuffer();
+        const res = await parseQuestionsFromDocx(buffer);
+        setImportPreviewQuestions(res.questions);
+        setImportWarnings(res.warnings);
+      } else {
+        setImportSourceType('txt');
+        const text = await file.text();
+        setImportText(text);
+        const res = parseQuestionsFromTxt(text);
+        setImportPreviewQuestions(res.questions);
+        setImportWarnings(res.warnings);
+      }
+    } catch (err: any) {
+      setImportWarnings([`حدث خطأ أثناء قراءة الملف: ${err.message}`]);
+    } finally {
+      setImportProcessing(false);
+    }
+  };
+
+  const handleParsePastedText = () => {
+    if (!importText.trim()) return;
+    if (importSourceType === 'json') {
+      const res = parseQuestionsFromJson(importText);
+      setImportPreviewQuestions(res.questions);
+      setImportWarnings(res.warnings);
+    } else {
+      const res = parseQuestionsFromTxt(importText);
+      setImportPreviewQuestions(res.questions);
+      setImportWarnings(res.warnings);
+    }
+  };
+
+  const handleConfirmImport = () => {
+    if (importPreviewQuestions.length === 0) return;
+    setQuestions((prev) => [...prev, ...importPreviewQuestions]);
+    showToast(
+      `تم استيراد ${importPreviewQuestions.length} سؤال بنجاح كمسودة. اضغط «حفظ التعديلات» لحفظها.`,
+      'success',
+    );
+    setImportModalOpen(false);
+    setImportPreviewQuestions([]);
+    setImportText('');
+    setImportWarnings([]);
+  };
 
   useEffect(() => {
     let active = true;
@@ -441,6 +518,10 @@ export default function AdminAssessmentEditPage() {
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
+            <Button variant="secondary" size="sm" onClick={() => setImportModalOpen(true)}>
+              <UploadCloud className="h-4 w-4" />
+              استيراد سريع (JSON / TXT / Word)
+            </Button>
             <Button variant="secondary" size="sm" onClick={() => setPickerOpen(true)}>
               <Library className="h-4 w-4" />
               من البنك
@@ -564,6 +645,101 @@ export default function AdminAssessmentEditPage() {
             }
           />
         )}
+      </Modal>
+
+      {/* مودال استيراد الأسئلة السريع */}
+      <Modal
+        open={importModalOpen}
+        onClose={() => setImportModalOpen(false)}
+        title="الاستيراد السريع للأسئلة (JSON / TXT / Word docx)"
+      >
+        <div className="space-y-4">
+          <div className="rounded-xl border border-navy-700 bg-navy-950/60 p-3 text-xs text-slate-300 space-y-1">
+            <p className="font-bold text-gold-400">الصيغ المدعومة:</p>
+            <p>• <b>ملف JSON:</b> يدعم مصفوفة الأسئلة المباشرة أو ملفات الفيكستشر (مثل fixture-draft_3prep_unit2_mcq.json).</p>
+            <p>• <b>ملف TXT أو نص ملصوق:</b> ترقيم الأسئلة (1. س:)، الاختيارات (أ، ب، ج، د)، والإجابة (ج: أو الإجابة:).</p>
+            <p>• <b>مستند Word (.docx):</b> استخراج مباشر للنص والأسئلة كمسودة تحتاج مراجعة المعلم.</p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <label className="flex items-center gap-2 cursor-pointer rounded-xl border border-gold-500/30 bg-gold-500/10 px-4 py-2 text-xs font-bold text-gold-400 hover:bg-gold-500/20">
+              <UploadCloud className="h-4 w-4" />
+              <span>اختر ملف من جهازك (JSON, TXT, DOCX)</span>
+              <input
+                type="file"
+                accept=".json,.txt,.docx"
+                className="hidden"
+                onChange={(e) => void handleImportFile(e)}
+              />
+            </label>
+            {importProcessing && <Spinner className="h-4 w-4 text-gold-400" />}
+          </div>
+
+          <div>
+            <label className="block mb-1.5 text-xs font-bold text-slate-300">أو الصق النص هنا مباشرة:</label>
+            <textarea
+              rows={5}
+              value={importText}
+              onChange={(e) => setImportText(e.target.value)}
+              placeholder="الصق نص الأسئلة أو كود JSON هنا..."
+              className="w-full rounded-xl border border-navy-700 bg-navy-900 p-3 text-xs text-white placeholder:text-slate-500 focus:border-gold-500 focus:outline-none"
+            />
+            <div className="mt-2 flex justify-end">
+              <Button size="sm" variant="secondary" onClick={handleParsePastedText} disabled={!importText.trim()}>
+                تحليل النص الملصوق
+              </Button>
+            </div>
+          </div>
+
+          {importWarnings.length > 0 && (
+            <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-amber-300 space-y-1">
+              <p className="font-bold">تنبيهات الاستيراد:</p>
+              {importWarnings.map((w, idx) => (
+                <p key={idx}>• {w}</p>
+              ))}
+            </div>
+          )}
+
+          {importPreviewQuestions.length > 0 && (
+            <div className="space-y-2 border-t border-navy-800 pt-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-bold text-white">
+                  تم استخراج {importPreviewQuestions.length} سؤالاً (معاينة مسودة):
+                </span>
+                <Badge variant="gold">مسودة تحتاج مراجعة</Badge>
+              </div>
+
+              <div className="max-h-60 overflow-y-auto space-y-2 rounded-xl border border-navy-800 bg-navy-950/40 p-2">
+                {importPreviewQuestions.map((q, idx) => (
+                  <div key={idx} className="rounded-lg border border-navy-800/80 bg-navy-900/60 p-2 text-xs space-y-1">
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-slate-200">{idx + 1}. {q.text}</span>
+                      <Badge variant="neutral">{q.type === 'choose' ? 'اختيار' : q.type === 'tf' ? 'صح/خطأ' : 'مقالي'}</Badge>
+                    </div>
+                    {q.options && (
+                      <div className="text-[11px] text-slate-400 grid grid-cols-2 gap-1 pt-1">
+                        {Object.entries(q.options).map(([k, val]) => (
+                          <span key={k} className={q.answer === k ? 'text-gold-400 font-bold' : ''}>
+                            {k}) {val}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2">
+                <Button variant="ghost" size="sm" onClick={() => setImportModalOpen(false)}>
+                  إلغاء
+                </Button>
+                <Button variant="primary" size="sm" onClick={handleConfirmImport}>
+                  تأكيد واستيراد {importPreviewQuestions.length} سؤال للمسودة
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
       </Modal>
     </div>
   );

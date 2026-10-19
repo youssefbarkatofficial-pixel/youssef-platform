@@ -19,6 +19,8 @@ export interface QuestionDraft {
   altAnswers: string[];
   // بنود التقييم للأسئلة المقالية
   rubric: RubricItem[];
+  // علامة للمسودة إذا كانت تحتاج مراجعة المعلم وتحديد إجابة
+  needsReview?: boolean;
 }
 
 // الجزء الذي يراه الطالب (بدون answer وaltAnswers وrubric).

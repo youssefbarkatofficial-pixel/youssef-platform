@@ -16,6 +16,7 @@ import {
   PlayCircle,
   Plus,
   Trash2,
+  UploadCloud,
 } from 'lucide-react';
 import { Badge, Button, Card, Input, Modal, buttonClasses, useToast } from '../ui';
 import type {
@@ -25,6 +26,11 @@ import type {
   NormalizedTraining,
   LectureFile,
 } from '../../lib/courseNormalize';
+import {
+  parseBulkLectureInput,
+  proposeLectureOrderingFromFiles,
+} from '../../lib/questionImport';
+import type { ProposedLectureDraft } from '../../lib/questionImport';
 
 function toLocalDatetimeString(ms?: number | null): string {
   if (!ms) return '';
@@ -90,6 +96,48 @@ export default function CourseContentEditor({
   const [formDuration, setFormDuration] = useState('');
   const [formStrictMode, setFormStrictMode] = useState(false);
   const [formError, setFormError] = useState('');
+
+  // Quick Upload for Lectures state
+  const [quickUploadOpen, setQuickUploadOpen] = useState(false);
+  const [bulkTextInput, setBulkTextInput] = useState('');
+  const [bulkMode, setBulkMode] = useState<'text' | 'files'>('text');
+  const [proposedDrafts, setProposedDrafts] = useState<ProposedLectureDraft[]>([]);
+
+  const handleBulkTextChange = (text: string) => {
+    setBulkTextInput(text);
+    setProposedDrafts(parseBulkLectureInput(text));
+  };
+
+  const handleBulkFilesSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    const names = Array.from(e.target.files).map((f) => f.name);
+    setProposedDrafts(proposeLectureOrderingFromFiles(names));
+  };
+
+  const handleApplyProposedLectures = () => {
+    if (proposedDrafts.length === 0) return;
+    const currentCount = content.lectures.length;
+    const newLecs: NormalizedLecture[] = proposedDrafts.map((draft, i) => ({
+      id: `lec_${Date.now()}_${i}_${Math.random().toString(36).slice(2, 6)}`,
+      order: currentCount + i + 1,
+      title: draft.title || `محاضرة ${currentCount + i + 1}`,
+      youtubeUrl: draft.videoUrl || '',
+      pdfUrl: '',
+      trainings: [],
+      files: [],
+      published: true,
+      openAt: null,
+    }));
+    setContent({
+      ...content,
+      lectures: [...content.lectures, ...newLecs],
+    });
+    setDirty(true);
+    setQuickUploadOpen(false);
+    setBulkTextInput('');
+    setProposedDrafts([]);
+    showToast(`تمت إضافة ${newLecs.length} محاضرات لمسودة الكورس. اضغط «حفظ محتوى الكورس» للاعتماد`, 'success');
+  };
 
   const openAddLecture = () => {
     setFormTitle('');
@@ -435,10 +483,24 @@ export default function CourseContentEditor({
             <h3 className="text-xl font-bold text-white">1. المحاضرات</h3>
             <Badge variant="neutral">{content.lectures.length}</Badge>
           </div>
-          <Button size="sm" variant="secondary" onClick={openAddLecture}>
-            <Plus className="h-4 w-4" />
-            إضافة محاضرة
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={() => {
+                setBulkTextInput('');
+                setProposedDrafts([]);
+                setQuickUploadOpen(true);
+              }}
+            >
+              <UploadCloud className="h-4 w-4" />
+              رفع سريع للدروس
+            </Button>
+            <Button size="sm" variant="secondary" onClick={openAddLecture}>
+              <Plus className="h-4 w-4" />
+              إضافة محاضرة
+            </Button>
+          </div>
         </div>
 
         {content.lectures.length === 0 ? (
@@ -1150,6 +1212,141 @@ export default function CourseContentEditor({
           }
         >
           <p className="text-sm text-slate-300">{modal.title}</p>
+        </Modal>
+      )}
+
+      {/* 5. Quick Upload Lectures Modal */}
+      {quickUploadOpen && (
+        <Modal
+          open={true}
+          onClose={() => setQuickUploadOpen(false)}
+          title="رفع سريع للدروس (استيراد مجمّع)"
+          footer={
+            <>
+              <Button variant="secondary" onClick={() => setQuickUploadOpen(false)}>
+                إلغاء
+              </Button>
+              <Button
+                variant="primary"
+                disabled={proposedDrafts.length === 0}
+                onClick={handleApplyProposedLectures}
+              >
+                تأكيد وإضافة للمسودة ({proposedDrafts.length} دروس)
+              </Button>
+            </>
+          }
+        >
+          <div className="space-y-4">
+            <div className="flex rounded-lg border border-navy-800 bg-navy-950/70 p-1">
+              <button
+                type="button"
+                onClick={() => setBulkMode('text')}
+                className={`flex-1 rounded-md py-1.5 text-xs font-bold transition-all ${
+                  bulkMode === 'text'
+                    ? 'bg-gold-500 text-navy-950 shadow-soft'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                لصق روابط / نصوص
+              </button>
+              <button
+                type="button"
+                onClick={() => setBulkMode('files')}
+                className={`flex-1 rounded-md py-1.5 text-xs font-bold transition-all ${
+                  bulkMode === 'files'
+                    ? 'bg-gold-500 text-navy-950 shadow-soft'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                ترتيب تلقائي من ملفات
+              </button>
+            </div>
+
+            {bulkMode === 'text' ? (
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-slate-300">
+                  الصق قائمة الروابط أو عناوين المحاضرات (سطر لكل درس):
+                </label>
+                <textarea
+                  value={bulkTextInput}
+                  onChange={(e) => handleBulkTextChange(e.target.value)}
+                  rows={6}
+                  dir="ltr"
+                  placeholder={`1. مقدمة المنهج - https://youtu.be/xxxx\n2. الدرس الأول: التفاعلات الكيميائية - https://youtu.be/yyyy\n3. الدرس الثاني: سرعة التفاعل`}
+                  className="w-full rounded-xl border border-navy-700 bg-navy-950 p-3 text-xs text-white placeholder-slate-500 focus:border-gold-400 focus:outline-none focus:ring-1 focus:ring-gold-400 font-mono"
+                />
+                <p className="text-[11px] text-slate-400">
+                  يدعم صيغ: &quot;العنوان - رابط اليوتيوب&quot;، أو أرقام الدروس، أو روابط مستقلة. المحرك يستخرج العناوين والروابط ويرتبها تلقائياً.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <label className="text-xs font-bold text-slate-300">
+                  اختر ملفات الدروس أو الفيديوهات لتحليل أسمائها وترتيبها تلقائياً:
+                </label>
+                <input
+                  type="file"
+                  multiple
+                  onChange={handleBulkFilesSelect}
+                  className="block w-full text-xs text-slate-400 file:me-4 file:rounded-xl file:border-0 file:bg-gold-500 file:px-4 file:py-2.5 file:text-xs file:font-bold file:text-navy-950 hover:file:bg-gold-400 cursor-pointer"
+                />
+                <p className="text-[11px] text-slate-400">
+                  المحرك يتعرف على أرقام الملفات (مثلاً: Lecture_01, الدرس 2) ويرتبها تصاعدياً مع تنظيف الأسماء من الامتدادات والشرطات.
+                </p>
+              </div>
+            )}
+
+            {/* Proposed lectures preview */}
+            {proposedDrafts.length > 0 && (
+              <div className="space-y-2 rounded-xl border border-navy-700 bg-navy-900/60 p-3">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-xs font-bold text-gold-400">
+                    معاينة الدروس المقترحة ({proposedDrafts.length})
+                  </h4>
+                  <span className="text-[11px] text-slate-400">يمكنك تعديل أي عنوان قبل إضافته</span>
+                </div>
+                <div className="max-h-60 overflow-y-auto space-y-2 pe-1">
+                  {proposedDrafts.map((draft, idx) => (
+                    <div
+                      key={idx}
+                      className="flex items-center gap-2 rounded-lg border border-navy-800 bg-navy-950/80 p-2 text-xs"
+                    >
+                      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded bg-navy-800 font-bold text-gold-400">
+                        {draft.order}
+                      </span>
+                      <input
+                        type="text"
+                        value={draft.title}
+                        onChange={(e) => {
+                          const updated = [...proposedDrafts];
+                          updated[idx] = { ...draft, title: e.target.value };
+                          setProposedDrafts(updated);
+                        }}
+                        placeholder="عنوان الدرس"
+                        className="flex-1 rounded border border-navy-800 bg-navy-900 px-2 py-1 text-xs text-white focus:border-gold-400 focus:outline-none"
+                      />
+                      {draft.videoUrl && (
+                        <span className="shrink-0 text-[10px] text-emerald-400 max-w-[140px] truncate" title={draft.videoUrl}>
+                          {draft.videoUrl}
+                        </span>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const updated = proposedDrafts.filter((_, i) => i !== idx);
+                          setProposedDrafts(updated.map((d, i) => ({ ...d, order: i + 1 })));
+                        }}
+                        className="p-1 text-slate-500 hover:text-red-400"
+                        title="حذف هذا الدرس من المقترحات"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
         </Modal>
       )}
     </div>

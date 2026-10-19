@@ -19,7 +19,7 @@ const items: NavItem[] = [
   { to: '/admin', label: 'الرئيسية', icon: LayoutDashboard, end: true },
   { to: '/admin/courses', label: 'الكورسات', icon: BookOpen },
   { to: '/admin/question-bank', label: 'بنك الأسئلة', icon: HelpCircle },
-  { to: '/admin/quick-upload', label: 'الرفع السريع', icon: Upload, badge: 'قريبًا' },
+  { to: '/admin/quick-upload', label: 'الرفع السريع', icon: Upload },
   { to: '/admin/students', label: 'الطلاب', icon: Users },
   { to: '/admin/payments', label: 'المدفوعات', icon: CreditCard },
   { to: '/admin/notifications', label: 'الإشعارات', icon: Bell },

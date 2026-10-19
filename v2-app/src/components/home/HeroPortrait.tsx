@@ -6,29 +6,48 @@ import LoginModal from '../auth/LoginModal';
 interface HeroPortraitProps {
   bgUrl?: string;
   meUrl?: string;
+  bgVersion?: number;
+  meVersion?: number;
   className?: string;
 }
 
-const CACHE_KEY_BG = 'yb_cached_hero_bg';
-const CACHE_KEY_ME = 'yb_cached_hero_me';
+// Invalidate legacy unversioned cache keys
+if (typeof window !== 'undefined') {
+  try {
+    localStorage.removeItem('yb_cached_hero_bg');
+    localStorage.removeItem('yb_cached_hero_me');
+  } catch {}
+}
 
-const DEFAULT_BG = '/assets/images/ownerBgImage-legacy.webp';
-const DEFAULT_ME = '/assets/images/youssef-hero.webp';
-
-function getInitialCachedUrl(key: string, propUrl?: string, fallback: string = ''): string {
+function getVersionCachedUrl(type: 'bg' | 'me', version?: number, propUrl?: string): string {
   if (propUrl) return propUrl;
-  if (typeof window !== 'undefined') {
-    try {
-      const cached = localStorage.getItem(key);
-      if (cached) return cached;
-    } catch {}
+  if (!version || typeof window === 'undefined') return '';
+  try {
+    const key = `yb_hero_${type}_v${version}`;
+    return localStorage.getItem(key) || '';
+  } catch {
+    return '';
   }
-  return fallback;
+}
+
+function setVersionCachedUrl(type: 'bg' | 'me', version: number | undefined, url: string) {
+  if (!version || !url || typeof window === 'undefined') return;
+  try {
+    for (let i = localStorage.length - 1; i >= 0; i--) {
+      const k = localStorage.key(i);
+      if (k && k.startsWith(`yb_hero_${type}_v`) && k !== `yb_hero_${type}_v${version}`) {
+        localStorage.removeItem(k);
+      }
+    }
+    localStorage.setItem(`yb_hero_${type}_v${version}`, url);
+  } catch {}
 }
 
 export default function HeroPortrait({
   bgUrl,
   meUrl,
+  bgVersion,
+  meVersion,
   className = '',
 }: HeroPortraitProps) {
   const { firebaseUser, isAdmin } = useAuth();
@@ -43,22 +62,22 @@ export default function HeroPortrait({
   const [bgLoaded, setBgLoaded] = useState(false);
   const [meLoaded, setMeLoaded] = useState(false);
 
-  const [activeBgUrl, setActiveBgUrl] = useState(() => getInitialCachedUrl(CACHE_KEY_BG, bgUrl, DEFAULT_BG));
-  const [activeMeUrl, setActiveMeUrl] = useState(() => getInitialCachedUrl(CACHE_KEY_ME, meUrl, DEFAULT_ME));
+  const [activeBgUrl, setActiveBgUrl] = useState(() => getVersionCachedUrl('bg', bgVersion, bgUrl));
+  const [activeMeUrl, setActiveMeUrl] = useState(() => getVersionCachedUrl('me', meVersion, meUrl));
 
   useEffect(() => {
     if (bgUrl && bgUrl !== activeBgUrl) {
       setActiveBgUrl(bgUrl);
-      try { localStorage.setItem(CACHE_KEY_BG, bgUrl); } catch {}
+      setVersionCachedUrl('bg', bgVersion, bgUrl);
     }
-  }, [bgUrl, activeBgUrl]);
+  }, [bgUrl, bgVersion, activeBgUrl]);
 
   useEffect(() => {
     if (meUrl && meUrl !== activeMeUrl) {
       setActiveMeUrl(meUrl);
-      try { localStorage.setItem(CACHE_KEY_ME, meUrl); } catch {}
+      setVersionCachedUrl('me', meVersion, meUrl);
     }
-  }, [meUrl, activeMeUrl]);
+  }, [meUrl, meVersion, activeMeUrl]);
 
   const containerRef = useRef<HTMLButtonElement>(null);
   const clickTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -183,25 +202,24 @@ export default function HeroPortrait({
           <div
             className={`absolute inset-0 bg-theme-surface-subtle transition-opacity ${
               reducedMotion ? 'duration-0' : 'duration-500'
-            } ${bgLoaded ? 'opacity-0 pointer-events-none' : 'opacity-100 animate-pulse'}`}
+            } ${bgLoaded && activeBgUrl ? 'opacity-0 pointer-events-none' : 'opacity-100 animate-pulse'}`}
           />
-          <img
-            src={activeBgUrl}
-            onLoad={() => setBgLoaded(true)}
-            onError={(e) => {
-              (e.currentTarget as HTMLImageElement).src = '/assets/images/hero-circle-bg.svg';
-              setBgLoaded(true);
-            }}
-            alt=""
-            loading="eager"
-            decoding="async"
-            className={`h-full w-full object-cover transition-all ${
-              reducedMotion ? 'duration-0' : 'duration-700'
-            } ${bgLoaded ? 'opacity-100' : 'opacity-0'}`}
-            style={{
-              transform: `scale(${isActive && !reducedMotion ? 1.06 : 1})`,
-            }}
-          />
+          {activeBgUrl ? (
+            <img
+              src={activeBgUrl}
+              onLoad={() => setBgLoaded(true)}
+              onError={() => setBgLoaded(false)}
+              alt=""
+              loading="eager"
+              decoding="async"
+              className={`h-full w-full object-cover transition-all ${
+                reducedMotion ? 'duration-0' : 'duration-700'
+              } ${bgLoaded ? 'opacity-100' : 'opacity-0'}`}
+              style={{
+                transform: `scale(${isActive && !reducedMotion ? 1.06 : 1})`,
+              }}
+            />
+          ) : null}
         </div>
 
         {/* Layer 3: Single Cutout Portrait (Anchored to circle bottom, head extends above circle top) */}
@@ -222,45 +240,27 @@ export default function HeroPortrait({
             animation: reducedMotion ? 'none' : 'heroFloat 6s ease-in-out infinite',
           }}
         >
-          <img
-            src={activeMeUrl}
-            srcSet={
-              activeMeUrl === DEFAULT_ME
-                ? '/assets/images/youssef-hero-sm.webp 460w, /assets/images/youssef-hero.webp 800w'
-                : undefined
-            }
-            sizes={
-              activeMeUrl === DEFAULT_ME
-                ? '(max-width: 640px) 320px, (max-width: 1024px) 440px, 530px'
-                : undefined
-            }
-            onLoad={() => setMeLoaded(true)}
-            onError={(e) => {
-              (e.currentTarget as HTMLImageElement).src = DEFAULT_ME;
-              setMeLoaded(true);
-            }}
-            alt="الأستاذ يوسف بركات"
-            loading="eager"
-            fetchPriority="high"
-            decoding="async"
-            className={`h-full w-full object-contain object-bottom drop-shadow-2xl transition-opacity ${
-              reducedMotion ? 'duration-0' : 'duration-500'
-            } ${meLoaded ? 'opacity-100' : 'opacity-0'}`}
-          />
-        </div>
-
-        {/* Subtle Action Pill Indicator */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute left-1/2 z-20 flex items-center gap-1.5 rounded-full bg-theme-surface/90 px-4 py-1.5 text-xs font-bold text-theme-gold shadow-lg backdrop-blur-md transition-all duration-300"
-          style={{
-            bottom: 'calc(50% - var(--hero-size) * 0.44 + 14px)',
-            transform: `translateX(-50%) translateY(${isActive ? '-4px' : '0'}) scale(${isActive ? 1.05 : 1})`,
-            opacity: isActive ? 1 : 0.85,
-          }}
-        >
-          <span>{firebaseUser ? 'لوحتي' : 'اضغط للدخول'}</span>
-          <span className="inline-block transition-transform duration-300 group-hover:-translate-x-0.5">←</span>
+          {!meLoaded && (
+            <div
+              className={`h-full w-full rounded-full bg-theme-gold/10 animate-pulse transition-opacity ${
+                reducedMotion ? 'duration-0' : 'duration-500'
+              }`}
+            />
+          )}
+          {activeMeUrl ? (
+            <img
+              src={activeMeUrl}
+              onLoad={() => setMeLoaded(true)}
+              onError={() => setMeLoaded(false)}
+              alt="الأستاذ يوسف بركات"
+              loading="eager"
+              fetchPriority="high"
+              decoding="async"
+              className={`h-full w-full object-contain object-bottom drop-shadow-2xl transition-opacity ${
+                reducedMotion ? 'duration-0' : 'duration-500'
+              } ${meLoaded ? 'opacity-100' : 'opacity-0'}`}
+            />
+          ) : null}
         </div>
       </button>
 

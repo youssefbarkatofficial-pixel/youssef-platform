@@ -1,46 +1,65 @@
-// Kill-switch Service Worker
-// يمسح كل الكاش القديم (v28_unified_cache وغيرها) من متصفحات الطلاب
-// ثم يلغي تسجيل نفسه ويعيد تحميل الصفحات المفتوحة مرة واحدة لترى المنصة الجديدة فوراً
+/* Youssef Barakat platform — PWA service worker (replaces the kill-switch sw.js).
+ * Rules:
+ *  - Never touch cross-origin requests (Firebase Auth/Firestore, Worker, YouTube...). Student data always goes live.
+ *  - Navigations: network-first, offline.html only when the network is down. No stale HTML.
+ *  - Only hashed build assets under /assets/ are cached (cache-first).
+ *  - First activation after the old platform's SW (or the old kill-switch): delete every foreign cache and reload open tabs ONCE.
+ */
+const CACHE_PREFIX = 'yb-static-';
+const CACHE = CACHE_PREFIX + 'v1';
+const OFFLINE_URL = '/offline.html';
 
-self.addEventListener('install', () => {
-  self.skipWaiting();
-});
-
-self.addEventListener('activate', (event) => {
+self.addEventListener('install', (event) => {
   event.waitUntil(
-    (async () => {
-      // 1) مسح كافة الكاشات المخزنة في المتصفح
-      try {
-        const cacheNames = await caches.keys();
-        await Promise.all(cacheNames.map((name) => caches.delete(name)));
-      } catch (error) {
-        // تجاهل أي خطأ والاستمرار
-      }
-
-      // 2) إلغاء تسجيل هذا الـ Service Worker بالكامل
-      try {
-        await self.registration.unregister();
-      } catch (error) {
-        // تجاهل
-      }
-
-      // 3) إعادة تحميل الصفحات المفتوحة لجلب v2 مباشرة من السيرفر بدون أي كاش قديم
-      try {
-        const clientsList = await self.clients.matchAll({
-          type: 'window',
-          includeUncontrolled: true,
-        });
-        for (const client of clientsList) {
-          if (client.url && 'navigate' in client) {
-            client.navigate(client.url);
-          }
-        }
-      } catch (error) {
-        // تجاهل
-      }
-    })(),
+    caches.open(CACHE)
+      .then((c) => c.addAll([OFFLINE_URL, '/icons/icon-192.png']))
+      .then(() => self.skipWaiting())
   );
 });
 
-// لا نخزن أي ملف ولا نتدخل في أي طلب، كل شيء يذهب للشبكة مباشرة
-self.addEventListener('fetch', () => {});
+self.addEventListener('activate', (event) => {
+  event.waitUntil((async () => {
+    const keys = await caches.keys();
+    const foreign = keys.filter((k) => !k.startsWith(CACHE_PREFIX));
+    const stale = keys.filter((k) => k.startsWith(CACHE_PREFIX) && k !== CACHE);
+    await Promise.all([...foreign, ...stale].map((k) => caches.delete(k)));
+    await self.clients.claim();
+    if (foreign.length > 0) {
+      // migration from the old platform cache: refresh open tabs one time only
+      const tabs = await self.clients.matchAll({ type: 'window' });
+      tabs.forEach((t) => { try { t.navigate(t.url); } catch (e) {} });
+    }
+  })());
+});
+
+self.addEventListener('fetch', (event) => {
+  const req = event.request;
+  if (req.method !== 'GET') return;
+  const url = new URL(req.url);
+  if (url.origin !== self.location.origin) return; // never intercept Firebase / Worker / YouTube / fonts CDN
+
+  if (req.mode === 'navigate') {
+    event.respondWith(
+      fetch(req, { cache: 'no-store' }).catch(() =>
+        caches.match(OFFLINE_URL).then((r) => r || new Response('offline', { status: 503 }))
+      )
+    );
+    return;
+  }
+
+  if (url.pathname.startsWith('/assets/')) {
+    event.respondWith(
+      caches.match(req).then((hit) => {
+        if (hit) return hit;
+        return fetch(req).then((res) => {
+          if (res && res.status === 200) {
+            const copy = res.clone();
+            caches.open(CACHE).then((c) => c.put(req, copy));
+          }
+          return res;
+        });
+      })
+    );
+  }
+  // everything else (api, images from settings, manifest, sw.js): default network behaviour
+});

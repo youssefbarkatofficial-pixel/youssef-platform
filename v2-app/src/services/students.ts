@@ -260,15 +260,24 @@ export async function updateStudentProfile(
 
 export const STUDENTS_LIST_LIMIT = 1500;
 
-// قائمة الطلاب الحقيقيين فقط (بدون التوائم sync_* وحساب الدعم). حد أقصى لحماية حصة القراءة في Spark.
-export async function listStudents(): Promise<{ students: Student[]; truncated: boolean }> {
+let cachedStudentsResult: { students: Student[]; truncated: boolean; timestamp: number } | null = null;
+const STUDENTS_CACHE_TTL_MS = 2 * 60 * 1000; // 2 minutes
+
+// قائمة الطلاب الحقيقيين فقط (بدون التوائم sync_* وحساب الدعم). حد أقصى لحماية حصة القراءة في Spark مع كاش ذاكرة SWR.
+export async function listStudents(options?: { forceRefresh?: boolean }): Promise<{ students: Student[]; truncated: boolean }> {
+  if (!options?.forceRefresh && cachedStudentsResult && Date.now() - cachedStudentsResult.timestamp < STUDENTS_CACHE_TTL_MS) {
+    return { students: cachedStudentsResult.students, truncated: cachedStudentsResult.truncated };
+  }
+
   const snapshot = await getDocs(query(collection(db, 'students'), limit(STUDENTS_LIST_LIMIT)));
 
   const students = snapshot.docs
     .filter((item) => !isIgnoredStudentId(item.id))
     .map((item) => toStudent(item.id, item.data()));
 
-  return { students, truncated: snapshot.size >= STUDENTS_LIST_LIMIT };
+  const result = { students, truncated: snapshot.size >= STUDENTS_LIST_LIMIT };
+  cachedStudentsResult = { ...result, timestamp: Date.now() };
+  return result;
 }
 
 // تجميد الحساب بدل الحذف: الطالب المؤرشف لا يكتب شيئًا (القواعد)، والبيانات كلها تبقى.

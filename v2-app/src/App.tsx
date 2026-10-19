@@ -3,6 +3,7 @@ import { Card, EmptyState, ToastProvider } from './components/ui';
 import { AuthProvider } from './hooks/useAuth';
 import { isFirebaseConfigured } from './lib/firebase';
 import AppRoutes from './routes/AppRoutes';
+import InstallAppButton from './components/pwa/InstallAppButton';
 
 function ConfigMissingScreen() {
   return (
@@ -27,6 +28,7 @@ export default function App() {
     <ToastProvider>
       <AuthProvider>
         <AppRoutes />
+        <InstallAppButton />
       </AuthProvider>
     </ToastProvider>
   );

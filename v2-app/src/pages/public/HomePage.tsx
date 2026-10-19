@@ -377,7 +377,12 @@ export default function HomePage() {
 
           {/* Hero Portrait Right (Vertically Centered to align with text center) */}
           <Reveal direction="fade" delay={150} className="relative flex items-center justify-center my-auto">
-            <HeroPortrait bgUrl={media?.heroBgUrl} meUrl={media?.youssefCutoutUrl} />
+            <HeroPortrait
+              bgUrl={media?.heroBgUrl}
+              meUrl={media?.youssefCutoutUrl}
+              bgVersion={media?.mediaVersions?.heroBg}
+              meVersion={media?.mediaVersions?.youssefCutout}
+            />
           </Reveal>
         </div>
       </section>

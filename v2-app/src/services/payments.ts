@@ -233,13 +233,30 @@ export async function listMyPaymentRequests(uid: string): Promise<PaymentRequest
     .sort((a, b) => (b.createdAtMs ?? 0) - (a.createdAtMs ?? 0));
 }
 
-// للأدمن: أحدث الطلبات أولًا، بعدد محدود لأن الطلبات القديمة قد تحوي صورًا كبيرة داخلها.
-export async function listPaymentRequests(max: number): Promise<PaymentRequest[]> {
+const requestsCache = new Map<number, { data: PaymentRequest[]; timestamp: number }>();
+const REQUESTS_CACHE_TTL_MS = 60 * 1000; // 1 minute
+
+// للأدمن: أحدث الطلبات أولًا، بعدد محدود مع كاش ذاكرة SWR لتسريع لوحة الإدارة.
+export async function listPaymentRequests(
+  max: number,
+  options?: { forceRefresh?: boolean },
+): Promise<PaymentRequest[]> {
+  const cached = requestsCache.get(max);
+  if (
+    !options?.forceRefresh &&
+    cached &&
+    Date.now() - cached.timestamp < REQUESTS_CACHE_TTL_MS
+  ) {
+    return cached.data;
+  }
+
   const snapshot = await getDocs(
     query(collection(db, 'paymentRequests'), orderBy('createdAt', 'desc'), limit(max)),
   );
 
-  return snapshot.docs.map((item) => parseRequest(item.id, item.data()));
+  const data = snapshot.docs.map((item) => parseRequest(item.id, item.data()));
+  requestsCache.set(max, { data, timestamp: Date.now() });
+  return data;
 }
 
 // صورة الإيصال الجديدة: تُحمَّل عند الطلب فقط (زر عرض الإيصال)، ولا تدخل في القوائم.

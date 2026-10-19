@@ -71,8 +71,8 @@ export interface PlatformMediaSettings {
 }
 
 export const DEFAULT_PLATFORM_MEDIA: PlatformMediaSettings = {
-  heroBgUrl: '/assets/images/ownerBgImage-legacy.webp',
-  youssefCutoutUrl: '/assets/images/youssef-hero.webp',
+  heroBgUrl: '',
+  youssefCutoutUrl: '',
   logoUrl: '',
   tickerQuotes: [
     'اعتنوا بأبنائكم فالعلم وُضع لأمثالهم — أ. يوسف بركات',

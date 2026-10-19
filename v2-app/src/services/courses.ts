@@ -619,6 +619,8 @@ export async function saveCourseContent(
         youtubeUrl: lec.youtubeUrl.trim(),
         videoUrl: lec.youtubeUrl.trim(),
         pdfUrl: lec.pdfUrl.trim(),
+        files: lec.files || [],
+        openAt: lec.openAt ?? null,
         order: lec.order ?? idx + 1,
         duration: lec.duration || '',
         trainings: lec.trainings.map((tr, trIdx) => ({
