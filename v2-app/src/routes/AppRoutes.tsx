@@ -25,6 +25,7 @@ const PaymentRequestsPage = lazy(() => import('../pages/student/PaymentRequestsP
 const ExamsPage = lazy(() => import('../pages/student/ExamsPage'));
 const AssessmentPage = lazy(() => import('../pages/student/AssessmentPage'));
 const StatsPage = lazy(() => import('../pages/student/StatsPage'));
+const RevisionPage = lazy(() => import('../pages/student/RevisionPage'));
 const LeaderboardPage = lazy(() => import('../pages/student/LeaderboardPage'));
 const GamePage = lazy(() => import('../pages/student/GamePage'));
 const ProfilePage = lazy(() => import('../pages/student/ProfilePage'));
@@ -72,6 +73,7 @@ export default function AppRoutes() {
             <Route path="exams" element={<ExamsPage />} />
             <Route path="assessment/:courseId/:itemId" element={<AssessmentPage />} />
             <Route path="stats" element={<StatsPage />} />
+            <Route path="revision" element={<RevisionPage />} />
             <Route path="leaderboard" element={<LeaderboardPage />} />
             <Route path="game" element={<GamePage />} />
             <Route path="profile" element={<ProfilePage />} />

@@ -5,6 +5,7 @@ import {
   CreditCard,
   LayoutDashboard,
   LifeBuoy,
+  Sparkles,
   User,
 } from 'lucide-react';
 import { useEffect } from 'react';
@@ -20,6 +21,7 @@ const items: NavItem[] = [
   { to: '/student/my-courses', label: 'كورساتي', icon: BookOpen },
   { to: '/student/payments', label: 'طلبات الدفع', icon: CreditCard },
   { to: '/student/exams', label: 'الامتحانات والواجبات', icon: ClipboardList },
+  { to: '/student/revision', label: 'المراجعة الذكية', icon: Sparkles },
   { to: '/student/stats', label: 'الإحصائيات', icon: BarChart3 },
   { to: '/student/profile', label: 'الملف الشخصي', icon: User },
   { to: '/student/support', label: 'الدعم الفني', icon: LifeBuoy },

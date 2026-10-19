@@ -358,6 +358,12 @@ export function canAccessCourseContent(
   return course.isFree || student.courses.includes(course.id);
 }
 
+// الكورسات المتاحة للطالب (التي اشترك فيها أو الكورسات المجانية).
+export async function listEnrolledCourses(student: Student | null): Promise<Course[]> {
+  const all = await listCourses();
+  return all.filter((course) => canAccessCourseContent(course, student, false));
+}
+
 // الأقسام والعناصر المؤرشفة لا تظهر للطلاب.
 export function getVisibleSections(sections: CourseSection[]): CourseSection[] {
   return sections

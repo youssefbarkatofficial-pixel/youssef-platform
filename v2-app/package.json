@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "test": "node --experimental-strip-types --test tests/normalize.test.mjs tests/grading-golden.test.mjs",
+    "test": "node --experimental-strip-types --test tests/normalize.test.mjs tests/grading-golden.test.mjs tests/revision.test.mjs tests/revision-adapter.test.mjs",
     "preview": "vite preview",
     "test:rules": "firebase emulators:exec --config firebase.emulator.json --only firestore --project yb-rules-test \"node --test tests/rules/firestore.rules.test.js\""
   },
