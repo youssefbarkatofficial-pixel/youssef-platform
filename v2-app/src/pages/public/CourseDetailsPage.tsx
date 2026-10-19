@@ -5,6 +5,7 @@ import {
   Award,
   BookOpen,
   CheckCircle2,
+  ChevronDown,
   ClipboardList,
   EyeOff,
   FileText,
@@ -23,11 +24,146 @@ import { getGradeLabel } from '../../lib/grades';
 import { canAccessCourseContent } from '../../services/courses';
 import type { CourseItem } from '../../services/courses';
 import { markVideoWatched } from '../../services/progress';
+import { getContentRules } from '../../services/contentRules';
+import {
+  checkLectureLock,
+  checkInLectureItemLock,
+  formatCairoDateTime,
+  DEFAULT_CONTENT_RULES,
+} from '../../lib/contentRules';
+import type { ContentRulesSettings } from '../../lib/contentRules';
+import type { LectureFile } from '../../lib/courseNormalize';
 
 function CenteredMessage({ children }: { children: ReactNode }) {
   return (
     <div className="mx-auto w-full max-w-2xl px-4 py-10">
       <Card>{children}</Card>
+    </div>
+  );
+}
+
+function LectureFilesSection({
+  lecture,
+  student,
+  effectiveWatch,
+  contentRules,
+  courseId,
+  isAdmin,
+}: {
+  lecture: any;
+  student: any;
+  effectiveWatch: Record<string, number>;
+  contentRules: ContentRulesSettings;
+  courseId: string;
+  isAdmin: boolean;
+}) {
+  const [open, setOpen] = useState(false);
+  const files: LectureFile[] =
+    lecture.files && lecture.files.length > 0
+      ? lecture.files
+      : lecture.pdfUrl
+        ? [{ id: `f_${lecture.id}`, title: 'تحميل المذكرة (PDF)', url: lecture.pdfUrl }]
+        : [];
+
+  if (files.length === 0) return null;
+
+  if (files.length === 1) {
+    const file = files[0];
+    const lock = checkInLectureItemLock(
+      lecture,
+      file,
+      'file',
+      student,
+      effectiveWatch,
+      contentRules,
+      courseId,
+      Date.now(),
+      isAdmin
+    );
+
+    if (lock.locked) {
+      return (
+        <span
+          className="flex items-center gap-1.5 rounded-lg border border-navy-800 bg-navy-950/70 px-2.5 py-1 text-xs text-amber-300"
+          title={lock.message}
+        >
+          <Lock className="h-3.5 w-3.5 text-amber-400" />
+          <span>{lock.message || 'المذكرة مقفولة'}</span>
+        </span>
+      );
+    }
+
+    return (
+      <a
+        href={file.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={buttonClasses({ variant: 'secondary', size: 'sm' })}
+      >
+        <FileText className="h-4 w-4 text-gold-400" />
+        {file.title || 'تحميل المذكرة'}
+      </a>
+    );
+  }
+
+  return (
+    <div className="relative inline-block text-start">
+      <Button
+        size="sm"
+        variant="secondary"
+        onClick={() => setOpen(!open)}
+        className="flex items-center gap-1.5"
+      >
+        <FileText className="h-4 w-4 text-gold-400" />
+        <span>المرفقات ({files.length})</span>
+        <ChevronDown className={cn('h-3.5 w-3.5 transition-transform', open && 'rotate-180')} />
+      </Button>
+
+      {open && (
+        <div className="absolute end-0 top-full z-20 mt-1 min-w-[220px] space-y-1 rounded-xl border border-navy-700 bg-navy-900 p-2 shadow-xl">
+          {files.map((file) => {
+            const lock = checkInLectureItemLock(
+              lecture,
+              file,
+              'file',
+              student,
+              effectiveWatch,
+              contentRules,
+              courseId,
+              Date.now(),
+              isAdmin
+            );
+
+            if (lock.locked) {
+              return (
+                <div
+                  key={file.id}
+                  className="flex items-center justify-between gap-2 rounded-lg bg-navy-950/60 px-2.5 py-2 text-xs text-slate-400"
+                >
+                  <span className="truncate">{file.title || 'ملف المحاضرة'}</span>
+                  <span className="flex items-center gap-1 text-[11px] text-amber-300 shrink-0">
+                    <Lock className="h-3 w-3 text-amber-400" />
+                    مقفول
+                  </span>
+                </div>
+              );
+            }
+
+            return (
+              <a
+                key={file.id}
+                href={file.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-between gap-2 rounded-lg px-2.5 py-2 text-xs font-medium text-slate-200 transition-colors hover:bg-navy-800 hover:text-gold-300"
+              >
+                <span className="truncate">{file.title || 'تحميل الملف'}</span>
+                <FileText className="h-3.5 w-3.5 shrink-0 text-gold-400" />
+              </a>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
@@ -40,6 +176,17 @@ export default function CourseDetailsPage() {
   const { showToast } = useToast();
   const [marking, setMarking] = useState(false);
   const [activeTab, setActiveTab] = useState<'content' | 'about'>('content');
+
+  const [contentRules, setContentRules] = useState<ContentRulesSettings>(DEFAULT_CONTENT_RULES);
+  const [localWatch, setLocalWatch] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    getContentRules().then(setContentRules).catch((err) => {
+      console.warn('Could not fetch content rules:', err);
+    });
+  }, []);
+
+  const effectiveWatch = { ...(student?.watchProgress || {}), ...localWatch };
 
   const [activeItem, setActiveItem] = useState<CourseItem | null>(null);
   const [imageFailed, setImageFailed] = useState(false);
@@ -188,13 +335,21 @@ export default function CourseDetailsPage() {
                 title={activeItem.title}
                 url={activeItem.videoUrl}
                 watermarkText={watermarkText}
+                itemId={activeItem.id}
+                studentId={student?.id}
+                onProgressChange={(coverage) => {
+                  setLocalWatch((prev) => ({
+                    ...prev,
+                    [activeItem.id]: Math.max(prev[activeItem.id] ?? 0, Math.round(coverage * 100)),
+                  }));
+                }}
               />
               <h2 className="text-lg font-bold text-white">{activeItem.title}</h2>
               {canTrackProgress &&
-                (activeWatched ? (
+                (activeWatched || (effectiveWatch[activeItem.id] ?? 0) >= 95 ? (
                   <Badge variant="success">
                     <CheckCircle2 className="h-4 w-4" />
-                    تمت مشاهدتها
+                    تمت مشاهدتها ({Math.max(student?.watchProgress?.[activeItem.id] ?? 0, effectiveWatch[activeItem.id] ?? 0)}%)
                   </Badge>
                 ) : (
                   <Button size="sm" variant="secondary" onClick={handleMarkWatched} disabled={marking}>
@@ -227,10 +382,20 @@ export default function CourseDetailsPage() {
                     </div>
 
                     <div className="space-y-3">
-                      {course.content.lectures.map((lec) => {
+                      {course.content.lectures.map((lec, idx) => {
                         const isCurrentVideo = activeItem?.id === lec.id;
-                        const isWatched =
-                          student !== null && (student.watchProgress[lec.id] ?? 0) >= 100;
+                        const watchPct = effectiveWatch[lec.id] ?? 0;
+                        const isWatched = watchPct >= 95;
+                        const lectureLock = checkLectureLock(
+                          course,
+                          idx,
+                          student,
+                          effectiveWatch,
+                          student?.examResults || [],
+                          contentRules,
+                          Date.now(),
+                          isAdmin
+                        );
 
                         return (
                           <div
@@ -249,9 +414,14 @@ export default function CourseDetailsPage() {
                                 </span>
                                 <div>
                                   <h4 className="font-bold text-white">{lec.title}</h4>
-                                  {lec.duration && (
-                                    <span className="text-xs text-slate-400">المدة: {lec.duration}</span>
-                                  )}
+                                  <div className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-slate-400">
+                                    {lec.duration && <span>المدة: {lec.duration}</span>}
+                                    {lec.openAt && (
+                                      <span className="text-sky-400">
+                                        يفتح: {formatCairoDateTime(lec.openAt)}
+                                      </span>
+                                    )}
+                                  </div>
                                 </div>
                               </div>
 
@@ -259,13 +429,18 @@ export default function CourseDetailsPage() {
                                 {isWatched && (
                                   <Badge variant="success">
                                     <CheckCircle2 className="h-3.5 w-3.5" />
-                                    تمت المشاهدة
+                                    تمت المشاهدة ({watchPct}%)
                                   </Badge>
                                 )}
 
                                 {canAccess ? (
                                   <>
-                                    {lec.youtubeUrl ? (
+                                    {lectureLock.locked ? (
+                                      <div className="flex items-center gap-1.5 rounded-lg bg-navy-800/80 px-3 py-1.5 text-xs font-semibold text-amber-300">
+                                        <Lock className="h-3.5 w-3.5 text-amber-400" />
+                                        <span>{lectureLock.message}</span>
+                                      </div>
+                                    ) : lec.youtubeUrl ? (
                                       <Button
                                         size="sm"
                                         variant={isCurrentVideo ? 'primary' : 'secondary'}
@@ -293,17 +468,15 @@ export default function CourseDetailsPage() {
                                       <span className="text-xs text-slate-500">الفيديو قيد التجهيز</span>
                                     )}
 
-                                    {lec.pdfUrl && (
-                                      <a
-                                        href={lec.pdfUrl}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className={buttonClasses({ variant: 'secondary', size: 'sm' })}
-                                      >
-                                        <FileText className="h-4 w-4 text-gold-400" />
-                                        تحميل المذكرة
-                                      </a>
-                                    )}
+                                    {/* مرفقات ومذكرات المحاضرة */}
+                                    <LectureFilesSection
+                                      lecture={lec}
+                                      student={student}
+                                      effectiveWatch={effectiveWatch}
+                                      contentRules={contentRules}
+                                      courseId={course.id}
+                                      isAdmin={isAdmin}
+                                    />
                                   </>
                                 ) : (
                                   <div className="flex items-center gap-1.5 text-xs text-slate-500">
@@ -327,6 +500,18 @@ export default function CourseDetailsPage() {
                                       ? `/admin/preview/assessment/${encodeURIComponent(course.id)}/${encodeURIComponent(tr.id)}`
                                       : `/student/assessment/${encodeURIComponent(course.id)}/${encodeURIComponent(tr.id)}`;
 
+                                    const trLock = checkInLectureItemLock(
+                                      lec,
+                                      tr,
+                                      'training',
+                                      student,
+                                      effectiveWatch,
+                                      contentRules,
+                                      course.id,
+                                      Date.now(),
+                                      isAdmin
+                                    );
+
                                     return (
                                       <div
                                         key={tr.id}
@@ -337,12 +522,19 @@ export default function CourseDetailsPage() {
                                           <span className="font-medium text-slate-200">{tr.title}</span>
                                         </div>
                                         {canAccess ? (
-                                          <Link
-                                            to={trLink}
-                                            className={buttonClasses({ variant: 'secondary', size: 'sm' })}
-                                          >
-                                            دخول التدريب
-                                          </Link>
+                                          trLock.locked ? (
+                                            <span className="flex items-center gap-1 text-xs text-amber-300">
+                                              <Lock className="h-3 w-3 text-amber-400" />
+                                              {trLock.message}
+                                            </span>
+                                          ) : (
+                                            <Link
+                                              to={trLink}
+                                              className={buttonClasses({ variant: 'secondary', size: 'sm' })}
+                                            >
+                                              دخول التدريب
+                                            </Link>
+                                          )
                                         ) : (
                                           <span className="flex items-center gap-1 text-slate-500">
                                             <Lock className="h-3 w-3" />
@@ -376,6 +568,7 @@ export default function CourseDetailsPage() {
                         const hwLink = isAdmin
                           ? `/admin/preview/assessment/${encodeURIComponent(course.id)}/${encodeURIComponent(hw.id)}`
                           : `/student/assessment/${encodeURIComponent(course.id)}/${encodeURIComponent(hw.id)}`;
+                        const isLockedOpenAt = !isAdmin && typeof hw.openAt === 'number' && hw.openAt > Date.now();
 
                         return (
                           <div
@@ -391,17 +584,29 @@ export default function CourseDetailsPage() {
                                 <div className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-slate-400">
                                   {hw.duration && <span>المدة: {hw.duration} دقيقة</span>}
                                   {hw.strictMode && <Badge variant="gold">مؤمّن</Badge>}
+                                  {hw.openAt && (
+                                    <span className="text-sky-400">
+                                      يفتح: {formatCairoDateTime(hw.openAt)}
+                                    </span>
+                                  )}
                                 </div>
                               </div>
                             </div>
 
                             {canAccess ? (
-                              <Link
-                                to={hwLink}
-                                className={buttonClasses({ variant: 'primary', size: 'sm' })}
-                              >
-                                دخول الواجب
-                              </Link>
+                              isLockedOpenAt ? (
+                                <span className="flex items-center gap-1.5 text-xs text-amber-300">
+                                  <Lock className="h-3.5 w-3.5 text-amber-400" />
+                                  بيفتح يوم {formatCairoDateTime(hw.openAt!)}
+                                </span>
+                              ) : (
+                                <Link
+                                  to={hwLink}
+                                  className={buttonClasses({ variant: 'primary', size: 'sm' })}
+                                >
+                                  دخول الواجب
+                                </Link>
+                              )
                             ) : (
                               <div className="flex items-center gap-1.5 text-xs text-slate-500">
                                 <Lock className="h-3.5 w-3.5" />
@@ -429,6 +634,7 @@ export default function CourseDetailsPage() {
                         const examLink = isAdmin
                           ? `/admin/preview/assessment/${encodeURIComponent(course.id)}/${encodeURIComponent(exam.id)}`
                           : `/student/assessment/${encodeURIComponent(course.id)}/${encodeURIComponent(exam.id)}`;
+                        const isLockedOpenAt = !isAdmin && typeof exam.openAt === 'number' && exam.openAt > Date.now();
 
                         return (
                           <div
@@ -444,17 +650,29 @@ export default function CourseDetailsPage() {
                                 <div className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-slate-400">
                                   {exam.duration && <span>المدة: {exam.duration} دقيقة</span>}
                                   {exam.strictMode && <Badge variant="gold">مؤمّن</Badge>}
+                                  {exam.openAt && (
+                                    <span className="text-sky-400">
+                                      يفتح: {formatCairoDateTime(exam.openAt)}
+                                    </span>
+                                  )}
                                 </div>
                               </div>
                             </div>
 
                             {canAccess ? (
-                              <Link
-                                to={examLink}
-                                className={buttonClasses({ variant: 'primary', size: 'sm' })}
-                              >
-                                دخول الامتحان
-                              </Link>
+                              isLockedOpenAt ? (
+                                <span className="flex items-center gap-1.5 text-xs text-amber-300">
+                                  <Lock className="h-3.5 w-3.5 text-amber-400" />
+                                  بيفتح يوم {formatCairoDateTime(exam.openAt!)}
+                                </span>
+                              ) : (
+                                <Link
+                                  to={examLink}
+                                  className={buttonClasses({ variant: 'primary', size: 'sm' })}
+                                >
+                                  دخول الامتحان
+                                </Link>
+                              )
                             ) : (
                               <div className="flex items-center gap-1.5 text-xs text-slate-500">
                                 <Lock className="h-3.5 w-3.5" />

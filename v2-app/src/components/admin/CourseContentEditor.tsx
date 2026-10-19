@@ -8,6 +8,7 @@ import {
   ChevronDown,
   ChevronUp,
   ClipboardList,
+  Clock,
   ExternalLink,
   FileText,
   GripVertical,
@@ -22,7 +23,27 @@ import type {
   NormalizedCourseContent,
   NormalizedLecture,
   NormalizedTraining,
+  LectureFile,
 } from '../../lib/courseNormalize';
+
+function toLocalDatetimeString(ms?: number | null): string {
+  if (!ms) return '';
+  const d = new Date(ms);
+  const pad = (n: number) => String(n).padStart(2, '0');
+  const year = d.getFullYear();
+  const month = pad(d.getMonth() + 1);
+  const day = pad(d.getDate());
+  const hours = pad(d.getHours());
+  const minutes = pad(d.getMinutes());
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+}
+
+function fromLocalDatetimeString(val: string): number | null {
+  if (!val.trim()) return null;
+  const d = new Date(val);
+  const t = d.getTime();
+  return isNaN(t) ? null : t;
+}
 
 interface CourseContentEditorProps {
   courseId: string;
@@ -64,6 +85,8 @@ export default function CourseContentEditor({
   const [formTitle, setFormTitle] = useState('');
   const [formVideoUrl, setFormVideoUrl] = useState('');
   const [formPdfUrl, setFormPdfUrl] = useState('');
+  const [formFiles, setFormFiles] = useState<LectureFile[]>([]);
+  const [formOpenAt, setFormOpenAt] = useState('');
   const [formDuration, setFormDuration] = useState('');
   const [formStrictMode, setFormStrictMode] = useState(false);
   const [formError, setFormError] = useState('');
@@ -72,6 +95,8 @@ export default function CourseContentEditor({
     setFormTitle('');
     setFormVideoUrl('');
     setFormPdfUrl('');
+    setFormFiles([]);
+    setFormOpenAt('');
     setFormError('');
     setModal({ kind: 'add_lecture' });
   };
@@ -80,6 +105,14 @@ export default function CourseContentEditor({
     setFormTitle(lecture.title);
     setFormVideoUrl(lecture.youtubeUrl || '');
     setFormPdfUrl(lecture.pdfUrl || '');
+    setFormFiles(
+      lecture.files && lecture.files.length > 0
+        ? [...lecture.files]
+        : lecture.pdfUrl
+          ? [{ id: `f_${Date.now()}`, title: 'ملف المحاضرة (PDF)', url: lecture.pdfUrl }]
+          : []
+    );
+    setFormOpenAt(toLocalDatetimeString(lecture.openAt));
     setFormError('');
     setModal({ kind: 'edit_lecture', lecture, index });
   };
@@ -87,6 +120,7 @@ export default function CourseContentEditor({
   const openAddTraining = (lectureId: string) => {
     setFormTitle('');
     setFormDuration('');
+    setFormOpenAt('');
     setFormError('');
     setModal({ kind: 'add_training', lectureId });
   };
@@ -94,6 +128,7 @@ export default function CourseContentEditor({
   const openEditTraining = (lectureId: string, training: NormalizedTraining, index: number) => {
     setFormTitle(training.title);
     setFormDuration(training.duration || '');
+    setFormOpenAt(toLocalDatetimeString(training.openAt));
     setFormError('');
     setModal({ kind: 'edit_training', lectureId, training, index });
   };
@@ -101,6 +136,7 @@ export default function CourseContentEditor({
   const openAddHomework = () => {
     setFormTitle('');
     setFormDuration('');
+    setFormOpenAt('');
     setFormStrictMode(false);
     setFormError('');
     setModal({ kind: 'add_homework' });
@@ -109,6 +145,7 @@ export default function CourseContentEditor({
   const openEditHomework = (homework: NormalizedAssessment, index: number) => {
     setFormTitle(homework.title);
     setFormDuration(homework.duration || '');
+    setFormOpenAt(toLocalDatetimeString(homework.openAt));
     setFormStrictMode(homework.strictMode ?? false);
     setFormError('');
     setModal({ kind: 'edit_homework', homework, index });
@@ -117,6 +154,7 @@ export default function CourseContentEditor({
   const openAddExam = () => {
     setFormTitle('');
     setFormDuration('');
+    setFormOpenAt('');
     setFormStrictMode(false);
     setFormError('');
     setModal({ kind: 'add_exam' });
@@ -125,6 +163,7 @@ export default function CourseContentEditor({
   const openEditExam = (exam: NormalizedAssessment, index: number) => {
     setFormTitle(exam.title);
     setFormDuration(exam.duration || '');
+    setFormOpenAt(toLocalDatetimeString(exam.openAt));
     setFormStrictMode(exam.strictMode ?? false);
     setFormError('');
     setModal({ kind: 'edit_exam', exam, index });
@@ -254,7 +293,9 @@ export default function CourseContentEditor({
         id: `lec_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
         title: titleTrimmed,
         youtubeUrl: formVideoUrl.trim(),
-        pdfUrl: formPdfUrl.trim(),
+        pdfUrl: formFiles[0]?.url || formPdfUrl.trim(),
+        files: formFiles,
+        openAt: fromLocalDatetimeString(formOpenAt),
         order: content.lectures.length + 1,
         trainings: [],
       };
@@ -267,7 +308,9 @@ export default function CourseContentEditor({
         ...modal.lecture,
         title: titleTrimmed,
         youtubeUrl: formVideoUrl.trim(),
-        pdfUrl: formPdfUrl.trim(),
+        pdfUrl: formFiles[0]?.url || formPdfUrl.trim(),
+        files: formFiles,
+        openAt: fromLocalDatetimeString(formOpenAt),
       };
       setContent({ ...content, lectures: newLectures });
       setDirty(true);
@@ -279,6 +322,7 @@ export default function CourseContentEditor({
         type: 'training',
         order: 1,
         duration: formDuration.trim(),
+        openAt: fromLocalDatetimeString(formOpenAt),
       };
       const newLectures = content.lectures.map((lec) => {
         if (lec.id !== modal.lectureId) return lec;
@@ -296,6 +340,7 @@ export default function CourseContentEditor({
           ...modal.training,
           title: titleTrimmed,
           duration: formDuration.trim(),
+          openAt: fromLocalDatetimeString(formOpenAt),
         };
         return { ...lec, trainings: newTrainings };
       });
@@ -310,6 +355,7 @@ export default function CourseContentEditor({
         order: content.homeworks.length + 1,
         duration: formDuration.trim(),
         strictMode: formStrictMode,
+        openAt: fromLocalDatetimeString(formOpenAt),
       };
       setContent({ ...content, homeworks: [...content.homeworks, newHw] });
       setDirty(true);
@@ -321,6 +367,7 @@ export default function CourseContentEditor({
         title: titleTrimmed,
         duration: formDuration.trim(),
         strictMode: formStrictMode,
+        openAt: fromLocalDatetimeString(formOpenAt),
       };
       setContent({ ...content, homeworks: newHws });
       setDirty(true);
@@ -333,6 +380,7 @@ export default function CourseContentEditor({
         order: content.exams.length + 1,
         duration: formDuration.trim(),
         strictMode: formStrictMode,
+        openAt: fromLocalDatetimeString(formOpenAt),
       };
       setContent({ ...content, exams: [...content.exams, newEx] });
       setDirty(true);
@@ -344,6 +392,7 @@ export default function CourseContentEditor({
         title: titleTrimmed,
         duration: formDuration.trim(),
         strictMode: formStrictMode,
+        openAt: fromLocalDatetimeString(formOpenAt),
       };
       setContent({ ...content, exams: newExs });
       setDirty(true);
@@ -445,10 +494,21 @@ export default function CourseContentEditor({
                         ) : (
                           <span className="text-slate-500">بدون رابط فيديو</span>
                         )}
-                        {lec.pdfUrl && (
+                        {lec.files && lec.files.length > 0 ? (
+                          <span className="flex items-center gap-1 text-gold-400">
+                            <FileText className="h-3.5 w-3.5" />
+                            {lec.files.length === 1 ? 'ملف مرفق (1)' : `${lec.files.length} ملفات مرفقة`}
+                          </span>
+                        ) : lec.pdfUrl ? (
                           <span className="flex items-center gap-1 text-gold-400">
                             <FileText className="h-3.5 w-3.5" />
                             مذكرة مرفقة
+                          </span>
+                        ) : null}
+                        {lec.openAt && (
+                          <span className="flex items-center gap-1 text-sky-400">
+                            <Clock className="h-3.5 w-3.5" />
+                            يفتح: {new Date(lec.openAt).toLocaleString('ar-EG')}
                           </span>
                         )}
                       </div>
@@ -546,6 +606,11 @@ export default function CourseContentEditor({
                             <span className="font-medium text-slate-200">{tr.title}</span>
                             {tr.questions && tr.questions.length > 0 && (
                               <Badge variant="neutral">{tr.questions.length} سؤال</Badge>
+                            )}
+                            {tr.openAt && (
+                              <Badge variant="info">
+                                يفتح: {new Date(tr.openAt).toLocaleDateString('ar-EG')}
+                              </Badge>
                             )}
                           </div>
                           <div className="flex items-center gap-1">
@@ -659,6 +724,11 @@ export default function CourseContentEditor({
                       {hw.questions && hw.questions.length > 0 && (
                         <Badge variant="neutral">{hw.questions.length} سؤال</Badge>
                       )}
+                      {hw.openAt && (
+                        <Badge variant="info">
+                          يفتح: {new Date(hw.openAt).toLocaleDateString('ar-EG')}
+                        </Badge>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -768,6 +838,11 @@ export default function CourseContentEditor({
                       {exam.questions && exam.questions.length > 0 && (
                         <Badge variant="neutral">{exam.questions.length} سؤال</Badge>
                       )}
+                      {exam.openAt && (
+                        <Badge variant="info">
+                          يفتح: {new Date(exam.openAt).toLocaleDateString('ar-EG')}
+                        </Badge>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -852,11 +927,97 @@ export default function CourseContentEditor({
               placeholder="https://www.youtube.com/watch?v=..."
             />
             <Input
-              label="رابط ملف المحاضرة / PDF (اختياري)"
-              value={formPdfUrl}
-              onChange={(e) => setFormPdfUrl(e.target.value)}
-              placeholder="https://drive.google.com/... أو رابط PDF مباشر"
+              type="datetime-local"
+              label="موعد الفتح التلقائي (اختياري - بتوقيت القاهرة)"
+              value={formOpenAt}
+              onChange={(e) => setFormOpenAt(e.target.value)}
             />
+
+            {/* ملفات ومذكرات المحاضرة */}
+            <div className="space-y-3 rounded-xl border border-navy-800 bg-navy-950/60 p-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-300">
+                  ملفات ومذكرات المحاضرة ({formFiles.length})
+                </span>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => {
+                    const newF: LectureFile = {
+                      id: `f_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+                      title: `ملف ${formFiles.length + 1}`,
+                      url: '',
+                    };
+                    setFormFiles([...formFiles, newF]);
+                  }}
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                  إضافة ملف
+                </Button>
+              </div>
+
+              {formFiles.length === 0 ? (
+                <div className="space-y-2">
+                  <p className="text-xs text-slate-500">لا توجد ملفات حاليًا. يمكنك إضافة ملف أو كتابة رابط سريع بالأسفل.</p>
+                  <Input
+                    label="رابط ملف سريع / PDF (اختياري)"
+                    value={formPdfUrl}
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      setFormPdfUrl(v);
+                      if (v.trim()) {
+                        setFormFiles([{ id: `f_${Date.now()}`, title: 'ملف المحاضرة (PDF)', url: v.trim() }]);
+                      } else {
+                        setFormFiles([]);
+                      }
+                    }}
+                    placeholder="https://drive.google.com/... أو رابط PDF مباشر"
+                  />
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {formFiles.map((file, fIdx) => (
+                    <div key={file.id} className="flex flex-wrap items-center gap-2 rounded-lg border border-navy-800 bg-navy-900/60 p-2 sm:flex-nowrap">
+                      <input
+                        className="min-w-0 flex-1 rounded-lg border border-navy-700 bg-navy-950 px-2.5 py-1.5 text-xs text-white placeholder-slate-500 focus:border-gold-400 focus:outline-none"
+                        placeholder="اسم الملف (مثال: ملخص الدرس)"
+                        value={file.title}
+                        onChange={(e) => {
+                          const next = [...formFiles];
+                          next[fIdx] = { ...next[fIdx], title: e.target.value };
+                          setFormFiles(next);
+                        }}
+                      />
+                      <input
+                        className="min-w-0 flex-1 rounded-lg border border-navy-700 bg-navy-950 px-2.5 py-1.5 text-xs text-white placeholder-slate-500 focus:border-gold-400 focus:outline-none"
+                        placeholder="رابط الملف (Google Drive أو مباشر)"
+                        value={file.url}
+                        onChange={(e) => {
+                          const next = [...formFiles];
+                          next[fIdx] = { ...next[fIdx], url: e.target.value };
+                          setFormFiles(next);
+                          if (fIdx === 0) setFormPdfUrl(e.target.value);
+                        }}
+                      />
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => {
+                          const next = formFiles.filter((_, i) => i !== fIdx);
+                          setFormFiles(next);
+                          setFormPdfUrl(next[0]?.url || '');
+                        }}
+                        title="حذف الملف"
+                      >
+                        <Trash2 className="h-3.5 w-3.5 text-red-400" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </Modal>
       )}
@@ -895,6 +1056,12 @@ export default function CourseContentEditor({
               value={formDuration}
               onChange={(e) => setFormDuration(e.target.value)}
               placeholder="مثال: 15 دقيقة"
+            />
+            <Input
+              type="datetime-local"
+              label="موعد الفتح التلقائي (اختياري - بتوقيت القاهرة)"
+              value={formOpenAt}
+              onChange={(e) => setFormOpenAt(e.target.value)}
             />
           </div>
         </Modal>
@@ -945,6 +1112,12 @@ export default function CourseContentEditor({
               value={formDuration}
               onChange={(e) => setFormDuration(e.target.value)}
               placeholder="مثال: 30"
+            />
+            <Input
+              type="datetime-local"
+              label="موعد الفتح التلقائي (اختياري - بتوقيت القاهرة)"
+              value={formOpenAt}
+              onChange={(e) => setFormOpenAt(e.target.value)}
             />
             <label className="flex items-center gap-2 text-sm text-slate-300">
               <input

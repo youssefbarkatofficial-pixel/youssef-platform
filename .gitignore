@@ -54,3 +54,4 @@ server.js
 # Bot export & secrets
 tools/bot-export/
 .dev.vars
+.wrangler/

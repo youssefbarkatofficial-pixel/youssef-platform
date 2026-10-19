@@ -2,6 +2,12 @@ export type CourseItemType = 'video' | 'pdf' | 'header' | 'task' | 'quiz' | 'oth
 
 type RawObject = Record<string, unknown>;
 
+export interface LectureFile {
+  id: string;
+  title: string;
+  url: string;
+}
+
 export interface CourseItem {
   id: string;
   type: CourseItemType;
@@ -9,8 +15,10 @@ export interface CourseItem {
   title: string;
   videoUrl: string;
   pdfUrl: string;
+  files?: LectureFile[];
   duration: string;
   archived: boolean;
+  openAt?: number | null;
   availableFrom: number | null;
   availableUntil: number | null;
   children: CourseItem[];
@@ -33,6 +41,7 @@ export interface NormalizedTraining {
   duration?: string;
   questions?: unknown[];
   strictMode?: boolean;
+  openAt?: number | null;
   availableFrom?: number | null;
   availableUntil?: number | null;
   raw?: RawObject;
@@ -43,12 +52,15 @@ export interface NormalizedLecture {
   title: string;
   youtubeUrl: string;
   pdfUrl: string;
+  files?: LectureFile[];
   order: number;
   duration?: string;
+  openAt?: number | null;
   availableFrom?: number | null;
   availableUntil?: number | null;
   archived?: boolean;
   trainings: NormalizedTraining[];
+  homeworks?: NormalizedTraining[];
   raw?: RawObject;
 }
 
@@ -58,6 +70,7 @@ export interface NormalizedAssessment {
   order: number;
   type?: string;
   duration?: string;
+  openAt?: number | null;
   availableFrom?: number | null;
   availableUntil?: number | null;
   archived?: boolean;
@@ -263,6 +276,19 @@ export function normalizeCourseContent(
       asString(lec.fileUrl) ||
       asString(typeof lec.url === 'string' && lec.url.endsWith('.pdf') ? lec.url : '');
 
+    const files: LectureFile[] = [];
+    if (Array.isArray(lec.files)) {
+      lec.files.forEach((f, fIdx) => {
+        if (isObject(f) && asString(f.url)) {
+          files.push({
+            id: asString(f.id) || `file_${lecId}_${fIdx + 1}`,
+            title: asString(f.title) || asString(f.name) || `ملف ${fIdx + 1}`,
+            url: asString(f.url),
+          });
+        }
+      });
+    }
+
     // Check lecture.trainings
     if (Array.isArray(lec.trainings)) {
       lec.trainings.forEach((tr, trIdx) => {
@@ -275,6 +301,7 @@ export function normalizeCourseContent(
             duration: asString(tr.duration),
             questions: Array.isArray(tr.questions) ? tr.questions : [],
             strictMode: tr.strictMode === true,
+            openAt: parseDateValue(tr.openAt),
             availableFrom: parseDateValue(tr.availableFrom),
             availableUntil: parseDateValue(tr.availableUntil),
             raw: tr,
@@ -289,8 +316,16 @@ export function normalizeCourseContent(
         if (!isObject(child)) return;
         const childType = asString(child.type).toLowerCase();
         if (childType === 'pdf' || child.pdfUrl) {
+          const fileUrl = asString(child.pdfUrl) || asString(child.url);
+          if (fileUrl && !files.some((f) => f.url === fileUrl)) {
+            files.push({
+              id: asString(child.id) || `file_${lecId}_ch_${chIdx + 1}`,
+              title: asString(child.title) || asString(child.name) || 'ملف PDF',
+              url: fileUrl,
+            });
+          }
           if (!pdfUrl) {
-            pdfUrl = asString(child.pdfUrl) || asString(child.url);
+            pdfUrl = fileUrl;
           }
         } else if (childType === 'training' || childType === 'تدريب') {
           const childId = asString(child.id) || `tr_${lecId}_ch_${chIdx + 1}`;
@@ -303,6 +338,7 @@ export function normalizeCourseContent(
               duration: asString(child.duration),
               questions: Array.isArray(child.questions) ? child.questions : [],
               strictMode: child.strictMode === true,
+              openAt: parseDateValue(child.openAt),
               availableFrom: parseDateValue(child.availableFrom),
               availableUntil: parseDateValue(child.availableUntil),
               raw: child,
@@ -310,6 +346,18 @@ export function normalizeCourseContent(
           }
         }
       });
+    }
+
+    if (pdfUrl && !files.some((f) => f.url === pdfUrl)) {
+      files.push({
+        id: `file_${lecId}_1`,
+        title: 'ملف المحاضرة (PDF)',
+        url: pdfUrl,
+      });
+    }
+
+    if (files.length > 0 && !pdfUrl) {
+      pdfUrl = files[0].url;
     }
 
     // Match unattached trainings by attachedToLectureId or lectureId or _parentLecId
@@ -328,6 +376,7 @@ export function normalizeCourseContent(
             duration: asString(tr.duration),
             questions: Array.isArray(tr.questions) ? tr.questions : [],
             strictMode: tr.strictMode === true,
+            openAt: parseDateValue(tr.openAt),
             availableFrom: parseDateValue(tr.availableFrom),
             availableUntil: parseDateValue(tr.availableUntil),
             raw: tr,
@@ -344,8 +393,10 @@ export function normalizeCourseContent(
       title: asString(lec.title) || asString(lec.name) || `محاضرة ${idx + 1}`,
       youtubeUrl: asString(lec.youtubeUrl) || asString(lec.videoUrl),
       pdfUrl,
+      files,
       order: asOptionalNumber(lec.order) ?? (idx + 1),
       duration: asString(lec.duration),
+      openAt: parseDateValue(lec.openAt),
       availableFrom: parseDateValue(lec.availableFrom),
       availableUntil: parseDateValue(lec.availableUntil),
       archived: lec.archived === true,
@@ -429,8 +480,10 @@ export function buildSectionsFromContent(content: NormalizedCourseContent): Cour
       title: lec.title,
       videoUrl: lec.youtubeUrl,
       pdfUrl: lec.pdfUrl,
+      files: (lec.files || []).map((f) => ({ id: f.id, title: f.title, url: f.url })),
       duration: lec.duration || '',
       archived: lec.archived === true,
+      openAt: lec.openAt ?? null,
       availableFrom: lec.availableFrom ?? null,
       availableUntil: lec.availableUntil ?? null,
       children: lec.trainings.map((tr) => ({

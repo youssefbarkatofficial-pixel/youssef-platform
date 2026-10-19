@@ -31,6 +31,7 @@ import type { PlatformMediaSettings, MediaDocType, PlatformStats } from '../../s
 import { processImageUpload, MEDIA_SPECS } from '../../lib/imageUpload';
 import ImageCropModal from '../../components/admin/ImageCropModal';
 import ChangePasswordCard from '../../components/admin/ChangePasswordCard';
+import ContentRulesCard from '../../components/admin/ContentRulesCard';
 
 const textareaClass =
   'w-full rounded-xl border border-navy-700 bg-navy-900 px-3 py-2.5 text-white placeholder:text-slate-500 transition-colors focus:border-gold-500 focus:outline-none focus:ring-2 focus:ring-gold-500/40';
@@ -708,6 +709,7 @@ export default function SettingsPage() {
     <div className="mx-auto w-full max-w-3xl space-y-6">
       <h1 className="text-2xl font-extrabold text-white md:text-3xl">الإعدادات</h1>
       <GeneralSettingsCard />
+      <ContentRulesCard />
       <PlatformMediaSettingsCard />
       <Card>
         <h2 className="text-lg font-bold text-white">إعدادات الدفع</h2>

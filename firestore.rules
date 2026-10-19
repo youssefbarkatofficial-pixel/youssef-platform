@@ -195,6 +195,29 @@ service cloud.firestore {
             && validStudentSelfUpdate());
 
       allow delete: if false;
+
+      // تفاصيل تقدم المشاهدة (حماية متقدمة: لا تناقص في التغطية، حد أقصى للفترات، حقول محددة فقط)
+      match /watchProgress/{itemId} {
+        allow get, list: if isSignedIn() && (request.auth.uid == studentId || isAdmin());
+
+        function validWatchProgressWrite() {
+          let d = request.resource.data;
+          return d.keys().hasOnly(['itemId', 'coveredSeconds', 'totalDuration', 'coverage', 'intervals', 'lastPosition', 'completed', 'updatedAt'])
+            && d.itemId == itemId
+            && d.totalDuration is number && d.totalDuration >= 0
+            && d.coveredSeconds is number && d.coveredSeconds >= 0
+            && d.coverage is number && d.coverage >= 0 && d.coverage <= 1.0
+            && (resource == null || !('coverage' in resource.data) || d.coverage >= resource.data.coverage)
+            && d.intervals is list && d.intervals.size() <= 200
+            && d.completed is bool
+            && d.lastPosition is number
+            && (!('updatedAt' in d) || d.updatedAt is timestamp || d.updatedAt == request.time);
+        }
+
+        allow create, update: if isAdmin()
+          || (isSignedIn() && request.auth.uid == studentId && validWatchProgressWrite());
+        allow delete: if isAdmin();
+      }
     }
 
     // ---------- الأدمن الإضافيون ----------
@@ -547,18 +570,38 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
-    // ---------- منصة يوسف بركات: الصور والهوية البصرية (المهمة S) ----------
+    // ---------- إعدادات المنصة وقواعد المحتوى ----------
+
+    match /settings/{settingId} {
+      allow get: if true;
+      allow list: if isAdmin();
+      allow create, update: if isAdmin()
+        && settingId == 'contentRules'
+        && request.resource.data.keys().hasOnly(['enabled', 'enabledAt', 'watchThreshold', 'updatedAt'])
+        && request.resource.data.enabled is bool
+        && (!('enabledAt' in request.resource.data) || request.resource.data.enabledAt is number || request.resource.data.enabledAt == null)
+        && (!('watchThreshold' in request.resource.data) || (request.resource.data.watchThreshold is number && request.resource.data.watchThreshold >= 0.0 && request.resource.data.watchThreshold <= 1.0));
+      allow delete: if false;
+    }
 
     match /platform_settings/{settingId} {
       allow get: if true;
       allow list: if isAdmin();
       allow create, update: if isAdmin()
-        && settingId == 'generalSettings'
-        && (!('heroBgUrl' in request.resource.data) || (request.resource.data.heroBgUrl is string && request.resource.data.heroBgUrl.size() <= 2000))
-        && (!('youssefCutoutUrl' in request.resource.data) || (request.resource.data.youssefCutoutUrl is string && request.resource.data.youssefCutoutUrl.size() <= 2000))
-        && (!('logoUrl' in request.resource.data) || (request.resource.data.logoUrl is string && request.resource.data.logoUrl.size() <= 2000))
-        && (!('tickerQuotes' in request.resource.data) || (request.resource.data.tickerQuotes is list && request.resource.data.tickerQuotes.size() <= 50))
-        && (!('mediaVersions' in request.resource.data) || request.resource.data.mediaVersions is map);
+        && (
+          (settingId == 'generalSettings'
+            && (!('heroBgUrl' in request.resource.data) || (request.resource.data.heroBgUrl is string && request.resource.data.heroBgUrl.size() <= 2000))
+            && (!('youssefCutoutUrl' in request.resource.data) || (request.resource.data.youssefCutoutUrl is string && request.resource.data.youssefCutoutUrl.size() <= 2000))
+            && (!('logoUrl' in request.resource.data) || (request.resource.data.logoUrl is string && request.resource.data.logoUrl.size() <= 2000))
+            && (!('tickerQuotes' in request.resource.data) || (request.resource.data.tickerQuotes is list && request.resource.data.tickerQuotes.size() <= 50))
+            && (!('mediaVersions' in request.resource.data) || request.resource.data.mediaVersions is map))
+          ||
+          (settingId == 'contentRules'
+            && request.resource.data.keys().hasOnly(['enabled', 'enabledAt', 'watchThreshold', 'updatedAt'])
+            && request.resource.data.enabled is bool
+            && (!('enabledAt' in request.resource.data) || request.resource.data.enabledAt is number || request.resource.data.enabledAt == null)
+            && (!('watchThreshold' in request.resource.data) || (request.resource.data.watchThreshold is number && request.resource.data.watchThreshold >= 0.0 && request.resource.data.watchThreshold <= 1.0)))
+        );
       allow delete: if false;
     }
 

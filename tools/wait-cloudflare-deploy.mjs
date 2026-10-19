@@ -23,6 +23,11 @@ async function main() {
       const res = await fetch(`https://api.cloudflare.com/client/v4/accounts/${accountId}/pages/projects/${project}/deployments`, {
         headers: { Authorization: `Bearer ${token}` }
       });
+      if (res.status === 429) {
+        console.log(`[${new Date().toISOString()}] #${i+1}: Rate limited (429), waiting 20s...`);
+        await new Promise(r => setTimeout(r, 20000));
+        continue;
+      }
       const data = await res.json();
       const d = data.result?.[0];
       const commit = d?.deployment_trigger?.metadata?.commit_hash?.slice(0, 7);
@@ -47,7 +52,7 @@ async function main() {
     } catch (err) {
       console.error('Fetch error:', err.message);
     }
-    await new Promise(r => setTimeout(r, 6000));
+    await new Promise(r => setTimeout(r, 12000));
   }
 }
 
