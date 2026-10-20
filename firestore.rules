@@ -676,6 +676,31 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    // ---------- إشعارات الويب وتوكنات Push (Web Push) ----------
+
+    match /pushTokens/{uid} {
+      allow get: if isSignedIn() && request.auth.uid == uid;
+      allow create, update: if isSignedIn() && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['tokens', 'enabled', 'updatedAt'])
+        && request.resource.data.tokens is list && request.resource.data.tokens.size() <= 5
+        && request.resource.data.enabled is bool;
+      allow list: if false;
+      allow delete: if false;
+    }
+
+    match /pushQueue/{id} {
+      allow create: if isAdmin()
+        && request.resource.data.keys().hasOnly(['uid', 'category', 'title', 'body', 'url', 'status', 'createdAt'])
+        && request.resource.data.status == 'pending'
+        && request.resource.data.category in ['platformUpdates', 'curriculumUpdates', 'laggingWarnings']
+        && request.resource.data.title is string && request.resource.data.title.size() <= 100
+        && request.resource.data.body is string && request.resource.data.body.size() <= 500
+        && !request.resource.data.body.matches('.*01[0-9]{9}.*');
+      allow get, list: if isAdmin();
+      allow update: if isSeniorAdmin();
+      allow delete: if false;
+    }
+
     // ---------- أي مجموعة غير مذكورة ممنوعة ----------
 
     match /{document=**} {

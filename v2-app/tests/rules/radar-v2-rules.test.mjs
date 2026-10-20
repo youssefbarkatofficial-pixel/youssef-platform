@@ -296,4 +296,64 @@ describe('قواعد الأمان الصارمة - رادار الطلاب v2 (L
       }, { merge: true })
     );
   });
+
+  // 6. اختبارات قواعد Web Push (pushTokens و pushQueue)
+  it('6.1 طالب يكتب pushTokens لنفسه بنجاح', async () => {
+    await assertSucceeds(
+      aliceDb().doc('pushTokens/alice').set({
+        tokens: ['token_abc123'],
+        enabled: true,
+        updatedAt: new Date(),
+      })
+    );
+  });
+
+  it('6.2 طالب لا يكتب pushTokens لطالب آخر', async () => {
+    await assertFails(
+      aliceDb().doc('pushTokens/bob').set({
+        tokens: ['token_hacked'],
+        enabled: true,
+        updatedAt: new Date(),
+      })
+    );
+  });
+
+  it('6.3 طالب لا يكتب في pushQueue', async () => {
+    await assertFails(
+      aliceDb().collection('pushQueue').add({
+        uid: 'alice',
+        category: 'platformUpdates',
+        title: 'رسالة غير مصرحة',
+        body: 'نص',
+        status: 'pending',
+        createdAt: new Date(),
+      })
+    );
+  });
+
+  it('6.4 الأدمن ينشئ عنصراً في pushQueue بنجاح', async () => {
+    await assertSucceeds(
+      adminDb().collection('pushQueue').add({
+        uid: 'alice',
+        category: 'curriculumUpdates',
+        title: 'تنبيه درس جديد',
+        body: 'تم رفع درس الجغرافيا الجديد بالتوفيق',
+        status: 'pending',
+        createdAt: new Date(),
+      })
+    );
+  });
+
+  it('6.5 رفض عنصر pushQueue لو احتوى النص على رقم هاتف', async () => {
+    await assertFails(
+      adminDb().collection('pushQueue').add({
+        uid: 'alice',
+        category: 'curriculumUpdates',
+        title: 'تنبيه خاطئ',
+        body: 'تواصل معنا على 01012345678',
+        status: 'pending',
+        createdAt: new Date(),
+      })
+    );
+  });
 });
