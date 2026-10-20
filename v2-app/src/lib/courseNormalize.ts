@@ -60,7 +60,7 @@ export interface NormalizedLecture {
   availableUntil?: number | null;
   archived?: boolean;
   trainings: NormalizedTraining[];
-  homeworks?: NormalizedTraining[];
+  homeworks?: NormalizedAssessment[];
   raw?: RawObject;
 }
 
@@ -310,6 +310,17 @@ export function normalizeCourseContent(
       });
     }
 
+    // Inline lecture.homeworks: promote to the root homeworks map, tied to this lecture
+    if (Array.isArray(lec.homeworks)) {
+      lec.homeworks.forEach((hw, hwIdx) => {
+        if (!isObject(hw)) return;
+        const hwId = asString(hw.id) || `hw_${lecId}_${hwIdx + 1}`;
+        if (!homeworksMap.has(hwId)) {
+          addItemToMap({ ...hw, id: hwId, lectureId: lecId }, homeworksMap, 'hw');
+        }
+      });
+    }
+
     // Check lecture.children (could be pdf files or trainings)
     if (Array.isArray(lec.children)) {
       lec.children.forEach((child, chIdx) => {
@@ -326,6 +337,11 @@ export function normalizeCourseContent(
           }
           if (!pdfUrl) {
             pdfUrl = fileUrl;
+          }
+        } else if (childType === 'homework' || childType === 'task' || childType === 'واجب') {
+          const hwId = asString(child.id) || `hw_${lecId}_ch_${chIdx + 1}`;
+          if (!homeworksMap.has(hwId)) {
+            addItemToMap({ ...child, id: hwId, lectureId: lecId }, homeworksMap, 'hw');
           }
         } else if (childType === 'training' || childType === 'تدريب') {
           const childId = asString(child.id) || `tr_${lecId}_ch_${chIdx + 1}`;
@@ -460,6 +476,16 @@ export function normalizeCourseContent(
   lectures.sort((a, b) => a.order - b.order);
   homeworks.sort((a, b) => a.order - b.order);
   exams.sort((a, b) => a.order - b.order);
+
+  // ربط الواجبات بمحاضراتها (lectureId / attachedToLectureId) ليعمل شرط فتح المحاضرة التالية.
+  lectures.forEach((lec) => {
+    lec.homeworks = homeworks.filter((hw) => {
+      const raw = hw.raw || {};
+      const target =
+        asString(raw.lectureId) || asString(raw.attachedToLectureId) || asString(raw._parentLecId);
+      return target === lec.id;
+    });
+  });
 
   return {
     layoutVersion: 2,

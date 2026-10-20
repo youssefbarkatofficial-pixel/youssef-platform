@@ -10,13 +10,18 @@ const res = await fetch(`https://api.cloudflare.com/client/v4/accounts/${account
   headers: { Authorization: `Bearer ${token}` }
 });
 const data = await res.json();
-console.log(JSON.stringify(data.result?.map((d) => ({
-  id: d.id,
-  branch: d.deployment_trigger?.metadata?.branch,
-  commit: d.deployment_trigger?.metadata?.commit_hash?.slice(0, 7),
-  status: d.latest_stage?.status,
-  url: d.url,
-  aliases: d.aliases,
-  environment: d.environment,
-  created: d.created_on
-})), null, 2));
+console.log('Success:', data.success, 'Errors:', data.errors);
+if (data.result) {
+  console.log(JSON.stringify(data.result.map((d) => ({
+    id: d.id,
+    branch: d.deployment_trigger?.metadata?.branch,
+    commit: d.deployment_trigger?.metadata?.commit_hash?.slice(0, 7),
+    status: d.latest_stage?.status,
+    url: d.url,
+    aliases: d.aliases,
+    environment: d.environment,
+    created: d.created_on
+  })), null, 2));
+} else {
+  console.log('Full response:', data);
+}

@@ -12,6 +12,8 @@ import {
 import type { QuestionDraft } from '../lib/questionDraft';
 import { generateContentId, getCourse, saveCourseSections } from './courses';
 import type { Course, CourseItem, CourseSection } from './courses';
+import { patchAssessmentRaw, placeAssessment } from './contentWriter';
+import type { PlacedKind } from './contentWriter';
 
 // إنشاء وتعديل الامتحانات والتدريبات والواجبات الجديدة (في الكورسات الجديدة فقط).
 // الأسئلة بدون إجابات في examContent/{id}، والإجابات الصحيحة في examKeys/{id} (للأدمن والسيرفر فقط)،
@@ -76,6 +78,9 @@ export function listAssessmentItems(sections: CourseSection[]): AssessmentRef[] 
   sections.forEach((section) => {
     section.items.forEach((item) => {
       if (item.assessmentKind !== null) refs.push({ section, item });
+      item.children.forEach((child) => {
+        if (child.assessmentKind !== null) refs.push({ section, item: child });
+      });
     });
   });
 
@@ -193,10 +198,23 @@ export async function createAssessment(
   sectionId: string,
   meta: AssessmentMeta,
   questions: QuestionDraft[],
+  lectureId = '',
 ): Promise<string> {
   checkInput(meta, questions);
 
   const course = await loadEditableCourse(courseId);
+
+  // كورس بشكل المحاضرات (layoutVersion=2) أو عنصر مربوط بمحاضرة: نكتب في المصفوفات الجذرية المقروءة فعليًا.
+  const layoutV2 = !course.sectionsDerived;
+  if (layoutV2 || lectureId) {
+    const newId = generateContentId('exam');
+    await writeContent(courseId, newId, meta, questions);
+    const rawItem = buildRaw({}, newId, meta, questions.length);
+    const placed: PlacedKind = meta.kind === 'homework' ? 'homework' : meta.kind === 'training' ? 'training' : 'exam';
+    await placeAssessment(courseId, placed, rawItem, lectureId);
+    return newId;
+  }
+
   const section = course.sections.find((candidate) => candidate.id === sectionId && !candidate.archived);
   if (!section) {
     throw new Error('section-not-found');
@@ -227,9 +245,9 @@ export async function loadAssessmentForEdit(
   if (!course) return null;
 
   for (const section of course.sections) {
-    const item = section.items.find(
-      (candidate) => candidate.id === itemId && candidate.assessmentKind !== null,
-    );
+    const item = section.items
+      .flatMap((candidate) => [candidate, ...candidate.children])
+      .find((candidate) => candidate.id === itemId && candidate.assessmentKind !== null);
     if (!item) continue;
 
     const [contentSnapshot, keysSnapshot] = await Promise.all([
@@ -279,6 +297,17 @@ export async function updateAssessment(
   checkInput(meta, questions);
 
   const course = await loadEditableCourse(courseId);
+
+  // أولًا: لو العنصر في المصفوفات الجذرية (تدريب داخل محاضرة، واجب، امتحان) نعدّله هناك.
+  const existing = listAssessmentItems(course.sections).find((ref) => ref.item.id === itemId);
+  if (existing && existing.item.assessmentKind !== null) {
+    const fixed: AssessmentMeta = { ...meta, kind: existing.item.assessmentKind };
+    await writeContent(courseId, itemId, fixed, questions);
+    const patched = await patchAssessmentRaw(courseId, itemId, (current) =>
+      buildRaw(current, itemId, fixed, questions.length),
+    );
+    if (patched) return;
+  }
 
   let found = false;
   const sections = course.sections.map((section) => ({
