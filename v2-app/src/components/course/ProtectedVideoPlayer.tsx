@@ -46,6 +46,7 @@ export default function ProtectedVideoPlayer({
   watchStateRef.current = watchState;
 
   const lastSaveTimeRef = useRef<number>(Date.now());
+  const hasUnlocked95Ref = useRef(false);
 
   // حفظ التقدم في Firestore
   const saveCurrentProgress = useCallback(async () => {
@@ -56,6 +57,14 @@ export default function ProtectedVideoPlayer({
       lastSaveTimeRef.current = Date.now();
     }
   }, [studentId, itemId]);
+
+  // إشعار فوري وتثبيت فوري عند الوصول إلى عتبة 95% لعدم فقدان أي دقة
+  useEffect(() => {
+    if (watchState.coverage >= WATCH_THRESHOLD && !hasUnlocked95Ref.current) {
+      hasUnlocked95Ref.current = true;
+      void saveCurrentProgress();
+    }
+  }, [watchState.coverage, saveCurrentProgress]);
 
   // إشعار الصفحة الخارجية بالتغير
   useEffect(() => {
@@ -186,8 +195,8 @@ export default function ProtectedVideoPlayer({
               return processPlaybackTick(updated, curTime, Date.now());
             });
 
-            // حفظ كل 15 ثانية
-            if (Date.now() - lastSaveTimeRef.current >= 30000) {
+            // حفظ كل 120 ثانية (Spark quota friendly: 60-120s)
+            if (Date.now() - lastSaveTimeRef.current >= 120000) {
               void saveCurrentProgress();
             }
           }
@@ -305,7 +314,8 @@ export default function ProtectedVideoPlayer({
                 return processPlaybackTick(updated, cur, Date.now());
               });
 
-              if (Date.now() - lastSaveTimeRef.current >= 15000) {
+              // حفظ كل 120 ثانية (Spark quota friendly: 60-120s)
+              if (Date.now() - lastSaveTimeRef.current >= 120000) {
                 void saveCurrentProgress();
               }
             }}

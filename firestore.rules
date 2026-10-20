@@ -167,6 +167,17 @@ service cloud.firestore {
         && (!('completedItems' in changed) || (d.completedItems is list && d.completedItems.size() <= 2000))
         && (!('lastActive' in changed)
             || d.lastActive is timestamp || d.lastActive is string || d.lastActive is number)
+        // تدقيق lastActiveMs و updatedAt و downloadedFilesCount
+        && (!('lastActiveMs' in changed)
+            || (d.lastActiveMs is number
+                && d.lastActiveMs <= request.time.toMillis() + 60000
+                && d.lastActiveMs >= request.time.toMillis() - 86400000))
+        && (!('updatedAt' in changed)
+            || (d.updatedAt is timestamp && d.updatedAt == request.time))
+        && (!('downloadedFilesCount' in changed)
+            || (d.downloadedFilesCount is int
+                && d.downloadedFilesCount >= 0
+                && d.downloadedFilesCount <= 2000))
         // الإشعارات: الطالب يعلّم المقروء أو يحذف من إشعاراته هو، ولا يضيف إشعارات جديدة.
         && (!('notifications' in changed)
             || (d.notifications is list
@@ -221,12 +232,17 @@ service cloud.firestore {
         allow delete: if isAdmin();
       }
 
-      // تسجيل نقرات تحميل المذكرات والملفات
+      // تسجيل نقرات تحميل المذكرات والملفات (محدود الحجم وبطالب مشترك بالكورس فقط)
       match /downloadClicks/{fileId} {
         allow get, list: if isSignedIn() && (request.auth.uid == studentId || isAdmin());
         allow create, update: if isSignedIn() && request.auth.uid == studentId
           && request.resource.data.keys().hasOnly(['courseId', 'lectureId', 'fileId', 'clickedAt'])
-          && request.resource.data.fileId == fileId;
+          && request.resource.data.fileId == fileId
+          && request.resource.data.courseId is string && request.resource.data.courseId.size() <= 64
+          && request.resource.data.lectureId is string && request.resource.data.lectureId.size() <= 64
+          && request.resource.data.fileId is string && request.resource.data.fileId.size() <= 64
+          && request.resource.data.clickedAt is timestamp
+          && request.resource.data.courseId in get(/databases/$(database)/documents/students/$(studentId)).data.get('courses', []);
         allow delete: if isAdmin();
       }
     }
@@ -584,13 +600,23 @@ service cloud.firestore {
     // ---------- الإشعارات العامة المجمعة (Broadcast Notifications) ----------
 
     match /broadcast_notifications/{notificationId} {
-      allow get, list: if isSignedIn();
+      // الطالب يقرأ الإشعارات العامة الموجهة للجميع فقط لحماية خصوصية الشرائح؛ والأدمن يقرأ الكل
+      allow get, list: if isSignedIn() && (isAdmin() || resource.data.get('targetType', 'all') == 'all');
       allow create: if isAdmin()
         && request.resource.data.keys().hasOnly(['title', 'message', 'category', 'targetType', 'sentBy', 'createdAt', 'targetCourseId', 'targetSegment'])
-        && request.resource.data.title is string && request.resource.data.title.size() <= 100
-        && request.resource.data.message is string && request.resource.data.message.size() <= 1000
-        && request.resource.data.category in ['platformUpdates', 'curriculumUpdates', 'laggingWarnings'];
-      allow update, delete: if isAdmin();
+        && request.resource.data.title is string && request.resource.data.title.size() >= 3 && request.resource.data.title.size() <= 100
+        && request.resource.data.message is string && request.resource.data.message.size() >= 5 && request.resource.data.message.size() <= 1000
+        && !request.resource.data.message.matches('.*01[0-9]{9}.*')
+        && request.resource.data.category in ['platformUpdates', 'curriculumUpdates', 'laggingWarnings']
+        && (!('targetSegment' in request.resource.data) || request.resource.data.targetSegment in [
+            'stopped', 'at_risk', 'missed_full_week', 'weak', 'lagging',
+            'unwatched_video', 'incomplete_video', 'fast_or_skipped',
+            'training_done_hw_pending', 'hw_done_exam_pending', 'exam_completed',
+            'file_downloaded', 'notified', 'recovered', 'star', 'ok', 'all'
+          ]);
+      // تقييد التعديل والحذف للأدمن الكامل أو المالك فقط (المساعد لا يعدل ولا يحذف)
+      allow update: if isSeniorAdmin();
+      allow delete: if isSeniorAdmin();
     }
 
     // ---------- إعدادات المنصة وقواعد المحتوى ----------

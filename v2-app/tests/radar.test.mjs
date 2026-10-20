@@ -189,3 +189,87 @@ test('15. WhatsApp template generator replaces variables correctly', () => {
   const result = generateWhatsAppTemplate(template, vars);
   assert.equal(result, 'أهلًا يوسف، باقي درس المناخ في مصر متأخر 3 أيام.');
 });
+
+test('16. smart segment: fast_or_skipped when speed exceeded or seek count >= 3', () => {
+  // Speed exceeded
+  const fastStudent = scoreStudent({
+    ...base,
+    latestLectureWatch: { lectureId: 'lec_1', progress: 95, speedExceeded: true }
+  }, now);
+  assert.ok(fastStudent.smartSegments.includes('fast_or_skipped'));
+
+  // Seek count >= 3
+  const skippedStudent = scoreStudent({
+    ...base,
+    latestLectureWatch: { lectureId: 'lec_1', progress: 80, seeks: 4 }
+  }, now);
+  assert.ok(skippedStudent.smartSegments.includes('fast_or_skipped'));
+});
+
+test('17. smart segment: file_downloaded when student has downloaded >= 1 file', () => {
+  const downloaded = scoreStudent({
+    ...base,
+    downloadedFilesCount: 3
+  }, now);
+  assert.ok(downloaded.smartSegments.includes('file_downloaded'));
+
+  const none = scoreStudent({
+    ...base,
+    downloadedFilesCount: 0
+  }, now);
+  assert.ok(!none.smartSegments.includes('file_downloaded'));
+});
+
+test('18. smart segment: notified when student received broadcast within 7 days', () => {
+  const notified = scoreStudent({
+    ...base,
+    lastNotifiedMs: now - 2 * D
+  }, now);
+  assert.ok(notified.smartSegments.includes('notified'));
+
+  // Older than 7 days is not considered recently notified
+  const oldNotified = scoreStudent({
+    ...base,
+    lastNotifiedMs: now - 10 * D
+  }, now);
+  assert.ok(!oldNotified.smartSegments.includes('notified'));
+});
+
+test('19. smart segment: recovered when student is active after baseline reset', () => {
+  const recovered = scoreStudent({
+    ...base,
+    baselineAt: now - 5 * D,
+    lastActiveMs: now - 1 * D
+  }, now);
+  assert.ok(recovered.smartSegments.includes('recovered'));
+
+  // If last active was before baseline, not recovered
+  const unrecovered = scoreStudent({
+    ...base,
+    baselineAt: now - 2 * D,
+    lastActiveMs: now - 6 * D
+  }, now);
+  assert.ok(!unrecovered.smartSegments.includes('recovered'));
+});
+
+test('20. Cairo weekly schedule boundaries and missed_full_week detection', () => {
+  const boundaries = getCairoWeekBoundaries(now);
+  // Verify strict chronologic order of Cairo weekly rhythm
+  assert.ok(boundaries.thursdayMidnightMs <= boundaries.thursday9pmMs);
+  assert.ok(boundaries.thursday9pmMs < boundaries.tuesdayDeadlineMs);
+  assert.ok(boundaries.tuesdayDeadlineMs < boundaries.wednesdayDeadlineMs);
+
+  // Student inactive since before Thursday midnight is tagged as missed_full_week
+  const missed = scoreStudent({
+    ...base,
+    lastActiveMs: boundaries.thursdayMidnightMs - 10_000
+  }, now);
+  assert.ok(missed.smartSegments.includes('missed_full_week'));
+
+  // Active student during the current Cairo week is NOT missed_full_week
+  const activeStudent = scoreStudent({
+    ...base,
+    lastActiveMs: boundaries.thursday9pmMs + 3600_000
+  }, now);
+  assert.ok(!activeStudent.smartSegments.includes('missed_full_week'));
+});
