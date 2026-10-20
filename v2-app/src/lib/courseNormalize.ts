@@ -71,6 +71,7 @@ export interface NormalizedAssessment {
   order: number;
   type?: string;
   duration?: string;
+  passingScore?: number;
   openAt?: number | null;
   availableFrom?: number | null;
   availableUntil?: number | null;
@@ -340,12 +341,12 @@ export function normalizeCourseContent(
           if (!pdfUrl) {
             pdfUrl = fileUrl;
           }
-        } else if (childType === 'homework' || childType === 'task' || childType === 'واجب') {
-          const hwId = asString(child.id) || `hw_${lecId}_ch_${chIdx + 1}`;
-          if (!homeworksMap.has(hwId)) {
-            addItemToMap({ ...child, id: hwId, lectureId: lecId }, homeworksMap, 'hw');
-          }
-        } else if (childType === 'training' || childType === 'تدريب') {
+        } else if (
+          childType === 'training' ||
+          childType === 'تدريب' ||
+          asString(child.assessmentKind).toLowerCase() === 'training' ||
+          asString(child.title || child.name).includes('تدريب')
+        ) {
           const childId = asString(child.id) || `tr_${lecId}_ch_${chIdx + 1}`;
           if (!trainings.some((t) => t.id === childId)) {
             trainings.push({
@@ -354,6 +355,7 @@ export function normalizeCourseContent(
               type: 'training',
               order: asOptionalNumber(child.order) ?? (trainings.length + 1),
               duration: asString(child.duration),
+              passingScore: asOptionalNumber(child.passingScore) ?? 50,
               questions: Array.isArray(child.questions) ? child.questions : [],
               strictMode: child.strictMode === true,
               openAt: parseDateValue(child.openAt),
@@ -361,6 +363,11 @@ export function normalizeCourseContent(
               availableUntil: parseDateValue(child.availableUntil),
               raw: child,
             });
+          }
+        } else if (childType === 'homework' || childType === 'task' || childType === 'واجب') {
+          const hwId = asString(child.id) || `hw_${lecId}_ch_${chIdx + 1}`;
+          if (!homeworksMap.has(hwId)) {
+            addItemToMap({ ...child, id: hwId, lectureId: lecId }, homeworksMap, 'hw');
           }
         }
       });
@@ -392,6 +399,7 @@ export function normalizeCourseContent(
             type: 'training',
             order: asOptionalNumber(tr.order) ?? (trainings.length + 1),
             duration: asString(tr.duration),
+            passingScore: asOptionalNumber(tr.passingScore) ?? 50,
             questions: Array.isArray(tr.questions) ? tr.questions : [],
             strictMode: tr.strictMode === true,
             openAt: parseDateValue(tr.openAt),
@@ -434,6 +442,7 @@ export function normalizeCourseContent(
           type: 'training',
           order: asOptionalNumber(tr.order) ?? (lectures[0].trainings.length + 1),
           duration: asString(tr.duration),
+          passingScore: asOptionalNumber(tr.passingScore) ?? 50,
           questions: Array.isArray(tr.questions) ? tr.questions : [],
           strictMode: tr.strictMode === true,
           availableFrom: parseDateValue(tr.availableFrom),
@@ -451,6 +460,7 @@ export function normalizeCourseContent(
     order: asOptionalNumber(hw.order) ?? (idx + 1),
     type: 'homework',
     duration: asString(hw.duration),
+    passingScore: asOptionalNumber(hw.passingScore) ?? 50,
     availableFrom: parseDateValue(hw.availableFrom),
     availableUntil: parseDateValue(hw.availableUntil),
     archived: hw.archived === true,
@@ -466,6 +476,7 @@ export function normalizeCourseContent(
     order: asOptionalNumber(ex.order) ?? (idx + 1),
     type: 'exam',
     duration: asString(ex.duration),
+    passingScore: asOptionalNumber(ex.passingScore) ?? 50,
     availableFrom: parseDateValue(ex.availableFrom),
     availableUntil: parseDateValue(ex.availableUntil),
     archived: ex.archived === true,
