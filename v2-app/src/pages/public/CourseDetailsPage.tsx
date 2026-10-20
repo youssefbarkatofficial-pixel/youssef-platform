@@ -198,6 +198,28 @@ export default function CourseDetailsPage() {
     }
   }, [activeItem]);
 
+  const canAccess = Boolean(course && canAccessCourseContent(course, student, isAdmin));
+
+  useEffect(() => {
+    if (!canAccess) {
+      const updateBar = () => {
+        if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+          document.documentElement.style.setProperty('--yb-bottom-bar', '84px');
+        } else {
+          document.documentElement.style.removeProperty('--yb-bottom-bar');
+        }
+      };
+      updateBar();
+      window.addEventListener('resize', updateBar);
+      return () => {
+        window.removeEventListener('resize', updateBar);
+        document.documentElement.style.removeProperty('--yb-bottom-bar');
+      };
+    } else {
+      document.documentElement.style.removeProperty('--yb-bottom-bar');
+    }
+  }, [canAccess]);
+
   if (loading || authLoading) {
     return (
       <div className="grid min-h-[50vh] place-items-center text-gold-400">
@@ -236,7 +258,8 @@ export default function CourseDetailsPage() {
     );
   }
 
-  const canAccess = canAccessCourseContent(course, student, isAdmin);
+  // canAccess computed above
+
   const attachedHomeworkIds = new Set(
     course.content.lectures.flatMap((lec) => (lec.homeworks || []).map((hw) => hw.id)),
   );
@@ -318,7 +341,17 @@ export default function CourseDetailsPage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 py-10">
+    <div className="mx-auto w-full max-w-6xl px-4 pb-28 pt-10 lg:pb-10">
+      {!canAccess && (
+        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-navy-800 bg-navy-950/95 p-3 backdrop-blur lg:hidden">
+          <div className="mx-auto flex max-w-6xl items-center justify-between gap-3">
+            <CoursePrice course={course} />
+            <Button onClick={() => navigate(firebaseUser ? `/student/checkout/${course.id}` : '/register')}>
+              {firebaseUser ? 'اشترك الآن' : 'أنشئ حسابك'}
+            </Button>
+          </div>
+        </div>
+      )}
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
           <div>
