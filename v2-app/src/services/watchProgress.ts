@@ -1,4 +1,4 @@
-import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, getDoc, setDoc, serverTimestamp, increment } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { createWatchState, mergeIntervals, calculateCoveredSeconds, WATCH_THRESHOLD } from '../lib/watchTracker.ts';
 import type { WatchState, TimeInterval } from '../lib/watchTracker.ts';
@@ -38,7 +38,11 @@ export async function getStoredWatchProgress(studentId: string, itemId: string):
   }
 }
 
-export async function persistWatchProgress(studentId: string, state: WatchState): Promise<void> {
+export async function persistWatchProgress(
+  studentId: string,
+  state: WatchState,
+  meta?: { maxPlaybackRate?: number; seekCount?: number }
+): Promise<void> {
   if (!studentId || !state.itemId || state.totalDuration <= 0) return;
 
   const merged = mergeIntervals(state.intervals);
@@ -46,27 +50,68 @@ export async function persistWatchProgress(studentId: string, state: WatchState)
   const coverage = Math.min(1.0, covered / state.totalDuration);
   const completed = coverage >= WATCH_THRESHOLD;
 
-  const payload = {
+  const payload: Record<string, unknown> = {
     itemId: state.itemId,
     coveredSeconds: covered,
     totalDuration: state.totalDuration,
     coverage: Math.round(coverage * 1000) / 1000,
-    intervals: merged.map(iv => ({ start: iv.start, end: iv.end })),
+    intervals: merged.map((iv) => ({ start: iv.start, end: iv.end })),
     lastPosition: state.lastPosition,
     completed,
-    updatedAt: serverTimestamp()
+    updatedAt: serverTimestamp(),
   };
+
+  if (meta?.maxPlaybackRate !== undefined) payload.maxPlaybackRate = meta.maxPlaybackRate;
+  if (meta?.seekCount !== undefined) payload.seekCount = meta.seekCount;
 
   try {
     // 1. حفظ المستند التفصيلي في subcollection
     await setDoc(doc(db, 'students', studentId, 'watchProgress', state.itemId), payload, { merge: true });
 
-    // 2. تحديث الحقل المقتضب في مستند الطالب للتوافق مع شاشات الإحصائيات
-    await setDoc(doc(db, 'students', studentId), {
-      [`watchProgress.${state.itemId}`]: Math.round(coverage * 100),
-      updatedAt: serverTimestamp()
-    }, { merge: true });
+    // 2. تحديث الحقل المقتضب في مستند الطالب للتوافق مع شاشات الإحصائيات والرادار
+    await setDoc(
+      doc(db, 'students', studentId),
+      {
+        [`watchProgress.${state.itemId}`]: Math.round(coverage * 100),
+        lastActiveMs: Date.now(),
+        updatedAt: serverTimestamp(),
+      },
+      { merge: true },
+    );
   } catch (err) {
     console.warn('Could not save watch progress to Firestore:', err);
+  }
+}
+
+/**
+ * تسجيل نقرة تحميل ملف المحاضرة
+ */
+export async function recordDownloadClick(
+  studentId: string,
+  courseId: string,
+  lectureId: string,
+  fileId: string
+): Promise<void> {
+  if (!studentId || !fileId) return;
+
+  try {
+    const clickDoc = {
+      courseId,
+      lectureId,
+      fileId,
+      clickedAt: serverTimestamp(),
+    };
+    await setDoc(doc(db, 'students', studentId, 'downloadClicks', fileId), clickDoc, { merge: true });
+    await setDoc(
+      doc(db, 'students', studentId),
+      {
+        downloadedFilesCount: increment(1),
+        lastActiveMs: Date.now(),
+        updatedAt: serverTimestamp(),
+      },
+      { merge: true },
+    );
+  } catch (err) {
+    console.warn('Could not record download click:', err);
   }
 }

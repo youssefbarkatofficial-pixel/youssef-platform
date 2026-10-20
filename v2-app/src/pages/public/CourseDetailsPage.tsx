@@ -1,3 +1,4 @@
+import { recordDownloadClick } from '../../services/watchProgress';
 import { useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
@@ -98,6 +99,9 @@ function LectureFilesSection({
         href={file.url}
         target="_blank"
         rel="noopener noreferrer"
+        onClick={() => {
+          if (student?.id) void recordDownloadClick(student.id, courseId, lecture.id, file.id);
+        }}
         className={buttonClasses({ variant: 'secondary', size: 'sm' })}
       >
         <FileText className="h-4 w-4 text-gold-400" />
@@ -155,6 +159,9 @@ function LectureFilesSection({
                 href={file.url}
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={() => {
+                  if (student?.id) void recordDownloadClick(student.id, courseId, lecture.id, file.id);
+                }}
                 className="flex items-center justify-between gap-2 rounded-lg px-2.5 py-2 text-xs font-medium text-slate-200 transition-colors hover:bg-navy-800 hover:text-gold-300"
               >
                 <span className="truncate">{file.title || 'تحميل الملف'}</span>

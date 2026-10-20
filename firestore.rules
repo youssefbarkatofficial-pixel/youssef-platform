@@ -150,7 +150,7 @@ service cloud.firestore {
       return changed.hasOnly([
           'name', 'parentPhone', 'grade', 'lastUpdatedAcademicYear', 'examResults',
           'watchProgress', 'completedItems', 'progress', 'lastActive', 'notifications',
-          'track'
+          'track', 'lastActiveMs', 'updatedAt', 'downloadedFilesCount'
         ])
         && (!('name' in changed) || isPersonName(d.name))
         && (!('parentPhone' in changed) || isEgyptPhone(d.parentPhone))
@@ -202,7 +202,7 @@ service cloud.firestore {
 
         function validWatchProgressWrite() {
           let d = request.resource.data;
-          return d.keys().hasOnly(['itemId', 'coveredSeconds', 'totalDuration', 'coverage', 'intervals', 'lastPosition', 'completed', 'updatedAt'])
+          return d.keys().hasOnly(['itemId', 'coveredSeconds', 'totalDuration', 'coverage', 'intervals', 'lastPosition', 'completed', 'updatedAt', 'maxPlaybackRate', 'seekCount'])
             && d.itemId == itemId
             && d.totalDuration is number && d.totalDuration >= 0
             && d.coveredSeconds is number && d.coveredSeconds >= 0
@@ -211,11 +211,22 @@ service cloud.firestore {
             && d.intervals is list && d.intervals.size() <= 200
             && d.completed is bool
             && d.lastPosition is number
+            && (!('maxPlaybackRate' in d) || d.maxPlaybackRate is number)
+            && (!('seekCount' in d) || d.seekCount is number)
             && (!('updatedAt' in d) || d.updatedAt is timestamp || d.updatedAt == request.time);
         }
 
         allow create, update: if isAdmin()
           || (isSignedIn() && request.auth.uid == studentId && validWatchProgressWrite());
+        allow delete: if isAdmin();
+      }
+
+      // تسجيل نقرات تحميل المذكرات والملفات
+      match /downloadClicks/{fileId} {
+        allow get, list: if isSignedIn() && (request.auth.uid == studentId || isAdmin());
+        allow create, update: if isSignedIn() && request.auth.uid == studentId
+          && request.resource.data.keys().hasOnly(['courseId', 'lectureId', 'fileId', 'clickedAt'])
+          && request.resource.data.fileId == fileId;
         allow delete: if isAdmin();
       }
     }
@@ -570,17 +581,37 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    // ---------- الإشعارات العامة المجمعة (Broadcast Notifications) ----------
+
+    match /broadcast_notifications/{notificationId} {
+      allow get, list: if isSignedIn();
+      allow create: if isAdmin()
+        && request.resource.data.keys().hasOnly(['title', 'message', 'category', 'targetType', 'sentBy', 'createdAt', 'targetCourseId', 'targetSegment'])
+        && request.resource.data.title is string && request.resource.data.title.size() <= 100
+        && request.resource.data.message is string && request.resource.data.message.size() <= 1000
+        && request.resource.data.category in ['platformUpdates', 'curriculumUpdates', 'laggingWarnings'];
+      allow update, delete: if isAdmin();
+    }
+
     // ---------- إعدادات المنصة وقواعد المحتوى ----------
 
     match /settings/{settingId} {
       allow get: if true;
       allow list: if isAdmin();
       allow create, update: if isAdmin()
-        && settingId == 'contentRules'
-        && request.resource.data.keys().hasOnly(['enabled', 'enabledAt', 'watchThreshold', 'updatedAt'])
-        && request.resource.data.enabled is bool
-        && (!('enabledAt' in request.resource.data) || request.resource.data.enabledAt is number || request.resource.data.enabledAt == null)
-        && (!('watchThreshold' in request.resource.data) || (request.resource.data.watchThreshold is number && request.resource.data.watchThreshold >= 0.0 && request.resource.data.watchThreshold <= 1.0));
+        && (
+          (settingId == 'contentRules'
+            && request.resource.data.keys().hasOnly(['enabled', 'enabledAt', 'watchThreshold', 'updatedAt'])
+            && request.resource.data.enabled is bool
+            && (!('enabledAt' in request.resource.data) || request.resource.data.enabledAt is number || request.resource.data.enabledAt == null)
+            && (!('watchThreshold' in request.resource.data) || (request.resource.data.watchThreshold is number && request.resource.data.watchThreshold >= 0.0 && request.resource.data.watchThreshold <= 1.0)))
+          ||
+          (settingId == 'notificationSwitches'
+            && request.resource.data.keys().hasOnly(['platformUpdates', 'curriculumUpdates', 'laggingWarnings', 'updatedAt'])
+            && request.resource.data.platformUpdates is bool
+            && request.resource.data.curriculumUpdates is bool
+            && request.resource.data.laggingWarnings is bool)
+        );
       allow delete: if false;
     }
 

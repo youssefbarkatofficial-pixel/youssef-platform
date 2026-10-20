@@ -187,7 +187,7 @@ export default function ProtectedVideoPlayer({
             });
 
             // حفظ كل 15 ثانية
-            if (Date.now() - lastSaveTimeRef.current >= 15000) {
+            if (Date.now() - lastSaveTimeRef.current >= 30000) {
               void saveCurrentProgress();
             }
           }

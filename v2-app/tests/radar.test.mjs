@@ -6,15 +6,20 @@ import {
   weakAssessments,
   toWhatsappNumber,
   whatsappLink,
+  applyBaseline,
+  revertBaseline,
+  getCairoWeekBoundaries,
+  calculateWeeklyStatus,
+  generateWhatsAppTemplate,
 } from '../src/lib/radar.ts';
 
-const now = Date.now();
+const now = 1792400000000;
 const D = 86_400_000;
 const base = {
   id: 'a',
   name: 'أحمد علي',
   phone: '01012345678',
-  parentPhone: '',
+  parentPhone: '01123456789',
   courseCount: 1,
   lastActiveMs: now - 1 * D,
   createdAtMs: now - 40 * D,
@@ -78,4 +83,109 @@ test('9. whatsappLink generates correct wa.me link with encoded text', () => {
 
 test('10. whatsappLink returns empty string for empty number', () => {
   assert.equal(whatsappLink('', ''), '');
+});
+
+// ==========================================
+// V2 RADAR TESTS
+// ==========================================
+
+test('11. Baseline Reset: applies baselineAt, note, history and calculates risk from baseline', () => {
+  const student = { ...base, lastActiveMs: now - 20 * D };
+  const resetTime = now - 2 * D;
+  const resetStudent = applyBaseline(student, 'تم الاتفاق مع ولي الأمر', now + 5 * D, 'youssef', resetTime);
+
+  assert.equal(resetStudent.baselineAt, resetTime);
+  assert.equal(resetStudent.baselineNote, 'تم الاتفاق مع ولي الأمر');
+  assert.equal(resetStudent.resetHistory?.length, 1);
+  assert.equal(resetStudent.resetHistory?.[0].setBy, 'youssef');
+
+  // Days inactive should now be counted from baseline (2 days instead of 20 days)
+  const scored = scoreStudent(resetStudent, now);
+  assert.equal(scored.daysInactive, 2);
+
+  // Test Revert baseline
+  const reverted = revertBaseline(resetStudent);
+  assert.equal(reverted.baselineAt, null);
+  assert.equal(reverted.resetHistory?.length, 0);
+});
+
+test('12. Smart Segments: correctly identifies unwatched, incomplete, and pending states', () => {
+  // Unwatched video
+  const unwatched = scoreStudent({
+    ...base,
+    latestLectureWatch: { lectureId: 'lec_1', progress: 0 }
+  }, now);
+  assert.ok(unwatched.smartSegments.includes('unwatched_video'));
+
+  // Incomplete video (watched 45%)
+  const incomplete = scoreStudent({
+    ...base,
+    latestLectureWatch: { lectureId: 'lec_1', progress: 45 }
+  }, now);
+  assert.ok(incomplete.smartSegments.includes('incomplete_video'));
+
+  // Training done, Homework pending
+  const trDone = scoreStudent({
+    ...base,
+    latestTrainingSubmitted: true,
+    latestHomeworkSubmitted: false
+  }, now);
+  assert.ok(trDone.smartSegments.includes('training_done_hw_pending'));
+
+  // Homework done, Exam pending
+  const hwDone = scoreStudent({
+    ...base,
+    latestTrainingSubmitted: true,
+    latestHomeworkSubmitted: true,
+    latestExamSubmitted: false
+  }, now);
+  assert.ok(hwDone.smartSegments.includes('hw_done_exam_pending'));
+
+  // Recovered after baseline
+  const recovered = scoreStudent({
+    ...base,
+    baselineAt: now - 5 * D,
+    lastActiveMs: now - 1 * D
+  }, now);
+  assert.ok(recovered.smartSegments.includes('recovered'));
+});
+
+test('13. Cairo Weekly Schedule: boundaries, missed full week, and homework warning', () => {
+  const boundaries = getCairoWeekBoundaries(now);
+  assert.ok(boundaries.thursdayMidnightMs <= boundaries.thursday9pmMs);
+  assert.ok(boundaries.thursday9pmMs < boundaries.tuesdayDeadlineMs);
+  assert.ok(boundaries.tuesdayDeadlineMs < boundaries.wednesdayDeadlineMs);
+
+  // Missed full week if inactive before Thursday midnight
+  const missedStudent = {
+    ...base,
+    lastActiveMs: boundaries.thursdayMidnightMs - 1000
+  };
+  const status = calculateWeeklyStatus(missedStudent, now);
+  assert.equal(status.isMissedFullWeek, true);
+});
+
+test('14. Sorting: alphabetical, newest, and lastActive sorting', () => {
+  const s1 = { ...base, id: '1', name: 'أحمد زكي', createdAtMs: now - 10 * D, lastActiveMs: now - 5 * D };
+  const s2 = { ...base, id: '2', name: 'محمود حسن', createdAtMs: now - 20 * D, lastActiveMs: now - 1 * D };
+  const s3 = { ...base, id: '3', name: 'إبراهيم سمير', createdAtMs: now - 5 * D, lastActiveMs: now - 10 * D };
+
+  // Alphabetical
+  const alpha = buildRadar([s1, s2, s3], now, 'alphabetical').map(r => r.name);
+  assert.deepEqual(alpha, ['إبراهيم سمير', 'أحمد زكي', 'محمود حسن']);
+
+  // Newest
+  const newest = buildRadar([s1, s2, s3], now, 'newest').map(r => r.id);
+  assert.deepEqual(newest, ['3', '1', '2']);
+
+  // Last Active
+  const lastActive = buildRadar([s1, s2, s3], now, 'lastActive').map(r => r.id);
+  assert.deepEqual(lastActive, ['2', '1', '3']);
+});
+
+test('15. WhatsApp template generator replaces variables correctly', () => {
+  const template = 'أهلًا {studentName}، باقي درس {lectureTitle} متأخر {lateDays} أيام.';
+  const vars = { studentName: 'يوسف', lectureTitle: 'المناخ في مصر', lateDays: '3' };
+  const result = generateWhatsAppTemplate(template, vars);
+  assert.equal(result, 'أهلًا يوسف، باقي درس المناخ في مصر متأخر 3 أيام.');
 });
