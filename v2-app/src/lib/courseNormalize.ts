@@ -39,6 +39,7 @@ export interface NormalizedTraining {
   type: string;
   order: number;
   duration?: string;
+  passingScore?: number;
   questions?: unknown[];
   strictMode?: boolean;
   openAt?: number | null;
@@ -299,6 +300,7 @@ export function normalizeCourseContent(
             type: 'training',
             order: asOptionalNumber(tr.order) ?? (trIdx + 1),
             duration: asString(tr.duration),
+            passingScore: asOptionalNumber(tr.passingScore) ?? 50,
             questions: Array.isArray(tr.questions) ? tr.questions : [],
             strictMode: tr.strictMode === true,
             openAt: parseDateValue(tr.openAt),
