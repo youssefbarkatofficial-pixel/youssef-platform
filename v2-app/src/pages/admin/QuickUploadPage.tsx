@@ -6,6 +6,7 @@ import { useCourses } from '../../hooks/useCourses';
 import {
   parseQuestionsFromDocx,
   parseQuestionsFromJson,
+  parseQuestionsFromPdf,
   parseQuestionsFromTxt,
 } from '../../lib/questionImport';
 import type { QuestionDraft } from '../../lib/questionDraft';
@@ -181,7 +182,9 @@ export default function QuickUploadPage() {
         ? parseQuestionsFromJson(await file.text())
         : name.endsWith('.docx')
           ? await parseQuestionsFromDocx(file)
-          : parseQuestionsFromTxt(await file.text());
+          : name.endsWith('.pdf')
+            ? await parseQuestionsFromPdf(file)
+            : parseQuestionsFromTxt(await file.text());
       setQuestions(result.questions);
       showToast(`تم استخراج ${result.questions.length} سؤال`, result.questions.length > 0 ? 'success' : 'error');
     } catch (err: unknown) {
@@ -440,7 +443,7 @@ export default function QuickUploadPage() {
                 rows={7}
                 className={`${FIELD} text-xs`}
               />
-              <input type="file" accept=".txt,.docx,.json" onChange={onQuestionsFile} className="text-xs text-slate-300" />
+              <input type="file" accept=".txt,.docx,.json,.pdf" onChange={onQuestionsFile} className="text-xs text-slate-300" />
 
               {questions.length > 0 && (
                 <div className="max-h-64 space-y-1.5 overflow-y-auto rounded-xl border border-navy-800 bg-navy-950/60 p-3">
