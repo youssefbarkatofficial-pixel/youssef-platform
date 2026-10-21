@@ -6,3 +6,9 @@ dist
 *.local
 *.log
 .DS_Store
+
+# Capacitor & Android build artifacts
+android/
+*.jks
+*.keystore
+keystore.properties
