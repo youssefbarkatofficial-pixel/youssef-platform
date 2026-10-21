@@ -1,0 +1,20 @@
+# لازم يكون في جذر المستودع (.github/workflows/send-push.yml). بيشتغل من main فقط.
+name: send-push
+on:
+  schedule: [{ cron: '*/10 * * * *' }]
+  workflow_dispatch:
+concurrency: { group: send-push, cancel-in-progress: false }
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    defaults: { run: { working-directory: v2-app } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: npm install --no-save --no-package-lock firebase-admin
+      - run: node scripts/send-push.mjs
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          MAX_PER_RUN: '200'
