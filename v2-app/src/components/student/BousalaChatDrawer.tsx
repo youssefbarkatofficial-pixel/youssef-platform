@@ -13,6 +13,7 @@ import {
   X,
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
+import { auth } from '../../lib/firebase';
 import {
   sendMessageToBot,
   sendFeedback,
@@ -329,7 +330,8 @@ export default function BousalaChatDrawer() {
     setLoading(true);
 
     try {
-      const token = firebaseUser ? await firebaseUser.getIdToken() : null;
+      const currentUser = auth.currentUser || firebaseUser;
+      let token = currentUser ? await currentUser.getIdToken() : null;
 
       // تجهيز سجل المحادثة (بحد أقصى آخر 12 رسالة) بدون رسائل الخطأ
       const history = updatedMessages
@@ -337,10 +339,25 @@ export default function BousalaChatDrawer() {
         .filter((m) => !m.error && (m.role === 'user' || m.role === 'assistant'))
         .map((m) => ({ role: m.role, content: m.content }));
 
-      const data = await sendMessageToBot(token, {
-        message: rawText,
-        history,
-      });
+      let data: any = null;
+      try {
+        data = await sendMessageToBot(token, {
+          message: rawText,
+          history,
+        });
+      } catch (firstErr: any) {
+        const is401 = firstErr?.status === 401 || (firstErr?.message || '').includes('401') || (firstErr?.message || '').includes('صلاحية');
+        if (is401 && currentUser) {
+          // تجديد إجباري للتوكن مرة واحدة فقط وإعادة الطلب
+          const fresh = await currentUser.getIdToken(true);
+          data = await sendMessageToBot(fresh, {
+            message: rawText,
+            history,
+          });
+        } else {
+          throw firstErr;
+        }
+      }
 
       // إذا رد الخادم برسالة انتظار المعلم
       if (data.reply.includes('بنراجع سؤالك ونرد عليك')) {
@@ -360,22 +377,24 @@ export default function BousalaChatDrawer() {
       setMessages((prev) => [...prev, botReplyMsg]);
     } catch (err: any) {
       const rawMessage = (err?.message || '').toLowerCase();
+      const status = err?.status;
+      const is401 = status === 401 || rawMessage.includes('401');
+      const currentUser = auth.currentUser || firebaseUser;
       let categorizedError = '';
 
       if (
+        status === 429 ||
         rawMessage.includes('429') ||
         rawMessage.includes('رصيد') ||
         rawMessage.includes('استراحة') ||
         rawMessage.includes('استنفدت')
       ) {
         categorizedError = 'استراحة قصيرة، ارجع بعد شوية 🧭';
-      } else if (
-        rawMessage.includes('401') ||
-        rawMessage.includes('صلاحية') ||
-        rawMessage.includes('تسجيل الدخول') ||
-        rawMessage.includes('token')
-      ) {
+      } else if (is401) {
         categorizedError = 'انتهت صلاحية تسجيل الدخول، يُرجى تسجيل الدخول مجددًا لمواصلة المحادثة.';
+      } else if (currentUser) {
+        // لو المستخدم مش null والخطأ مش 401 (مثلًا 404/500/اتصال)
+        categorizedError = 'البوصلة مش متاحة حاليًا، جرّب بعد شوية';
       } else if (
         rawMessage.includes('اتصال') ||
         rawMessage.includes('شبكة') ||
@@ -385,19 +404,10 @@ export default function BousalaChatDrawer() {
         rawMessage.includes('typeerror')
       ) {
         categorizedError = 'تعذر الاتصال بالشبكة، يُرجى التحقق من اتصالك بالإنترنت والمحاولة مجددًا.';
-      } else if (
-        rawMessage.includes('500') ||
-        rawMessage.includes('502') ||
-        rawMessage.includes('503') ||
-        rawMessage.includes('صيانة') ||
-        rawMessage.includes('سيرفر') ||
-        rawMessage.includes('خادم')
-      ) {
-        categorizedError = 'خادم البوصلة غير متاح حاليًا أو يخضع للصيانة الدورية، يُرجى المحاولة بعد قليل.';
       } else if (err?.message) {
         categorizedError = err.message;
       } else {
-        categorizedError = 'حدث خطأ أثناء معالجة السؤال، يُرجى المحاولة مجددًا.';
+        categorizedError = 'البوصلة مش متاحة حاليًا، جرّب بعد شوية';
       }
 
       setErrorAlert(categorizedError);

@@ -1,3 +1,5 @@
+import { tzOffsetMs, cairoToUtcMs, cairoInputToUtcMs, formatCairoDateTime } from './cairoTime.ts';
+export { tzOffsetMs, cairoToUtcMs, cairoInputToUtcMs, formatCairoDateTime };
 import { WATCH_THRESHOLD } from './watchTracker.ts';
 import { isFreePreview } from './marketing.ts';
 
@@ -15,34 +17,13 @@ export const DEFAULT_CONTENT_RULES: ContentRulesSettings = {
 
 export interface LockStatus {
   locked: boolean;
-  reason?: 'prerequisite' | 'openAt' | 'watch' | 'notEnrolled';
+  reason?: 'prerequisite' | 'openAt' | 'closeAt' | 'watch' | 'notEnrolled';
+  closeAt?: number;
   message?: string;
   openAt?: number;
 }
 
-/**
- * تنسيق الوقت بتوقيت القاهرة باللغة العربية
- */
-export function formatCairoDateTime(timestampMs: number): string {
-  try {
-    const date = new Date(timestampMs);
-    const dateStr = date.toLocaleDateString('ar-EG', {
-      timeZone: 'Africa/Cairo',
-      weekday: 'long',
-      day: 'numeric',
-      month: 'long'
-    });
-    const timeStr = date.toLocaleTimeString('ar-EG', {
-      timeZone: 'Africa/Cairo',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true
-    });
-    return `${dateStr} الساعة ${timeStr}`;
-  } catch {
-    return new Date(timestampMs).toLocaleString('ar-EG');
-  }
-}
+
 
 /**
  * استخراج وقت التسجيل في كورس أو إنشاء حساب الطالب
@@ -163,6 +144,15 @@ export function checkLectureLock(
     };
   }
 
+  if (typeof currentLecture.closeAt === 'number' && currentLecture.closeAt > 0 && currentLecture.closeAt < serverTime) {
+    return {
+      locked: true,
+      reason: 'closeAt',
+      message: 'انتهى الوقت',
+      closeAt: currentLecture.closeAt
+    };
+  }
+
   // فحص المعاينة المجانية: فتح الفيديو للمحاضرة
   if (isFreePreview(currentLecture)) {
     return { locked: false };
@@ -241,6 +231,15 @@ export function checkInLectureItemLock(
       reason: 'openAt',
       message: `بيفتح يوم ${formatCairoDateTime(item.openAt)}`,
       openAt: item.openAt
+    };
+  }
+
+  if (typeof item?.closeAt === 'number' && item.closeAt > 0 && item.closeAt < serverTime) {
+    return {
+      locked: true,
+      reason: 'closeAt',
+      message: 'انتهى الوقت',
+      closeAt: item.closeAt
     };
   }
 

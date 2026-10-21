@@ -1,3 +1,4 @@
+import { formatCairoDateTime } from '../../lib/cairoTime';
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ArrowRight, ClipboardList, Lock, ServerCrash } from 'lucide-react';
@@ -93,8 +94,19 @@ export default function AssessmentPage() {
   const assessmentId = assessment?.id ?? '';
   const newStyle = assessment ? isNewStyleAssessment(assessment) : false;
 
+  const now = Date.now();
+  const openAtMs = typeof (item as any)?.openAt === 'number' 
+    ? (item as any).openAt 
+    : (typeof (assessment as any)?.raw?.openAt === 'number' ? (assessment as any).raw.openAt : null);
+  const closeAtMs = typeof (item as any)?.closeAt === 'number' 
+    ? (item as any).closeAt 
+    : (typeof (assessment as any)?.raw?.closeAt === 'number' ? (assessment as any).raw.closeAt : null);
+
+  const isLockedOpenAt = !isAdmin && typeof openAtMs === 'number' && openAtMs > now;
+  const isLockedCloseAt = !isAdmin && typeof closeAtMs === 'number' && closeAtMs > 0 && closeAtMs < now;
+
   useEffect(() => {
-    if (!assessment || !canAccess) return;
+    if (!assessment || !canAccess || isLockedOpenAt || isLockedCloseAt) return;
 
     let active = true;
     setQuestionsState({ loading: true, error: false, data: null });
@@ -185,6 +197,44 @@ export default function AssessmentPage() {
             action={
               <Link to={`/courses/${course.id}`} className={buttonClasses({ variant: 'primary' })}>
                 تفاصيل الكورس
+              </Link>
+            }
+          />
+        </Card>
+      </div>
+    );
+  }
+
+  if (isLockedOpenAt) {
+    return (
+      <div className="mx-auto w-full max-w-2xl">
+        <Card>
+          <EmptyState
+            icon={Lock}
+            title="هذا المحتوى مقفول حاليًا"
+            description={`يفتح يوم ${formatCairoDateTime(openAtMs!)}`}
+            action={
+              <Link to={`/courses/${course.id}`} className={buttonClasses({ variant: 'secondary' })}>
+                الرجوع للكورس
+              </Link>
+            }
+          />
+        </Card>
+      </div>
+    );
+  }
+
+  if (isLockedCloseAt) {
+    return (
+      <div className="mx-auto w-full max-w-2xl">
+        <Card>
+          <EmptyState
+            icon={Lock}
+            title="انتهى الوقت"
+            description="انتهت الفترة المحددة للإجابة على هذا التقييم."
+            action={
+              <Link to={`/courses/${course.id}`} className={buttonClasses({ variant: 'secondary' })}>
+                الرجوع للكورس
               </Link>
             }
           />

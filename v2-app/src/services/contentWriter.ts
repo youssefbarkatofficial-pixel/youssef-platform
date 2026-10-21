@@ -71,6 +71,8 @@ function ensureRootLecture(contents: RawObject, data: RawObject, lectureId: stri
 export interface LectureFileDraft {
   title: string;
   url: string;
+  openAt?: number | null;
+  closeAt?: number | null;
 }
 
 export interface LectureDraft {
@@ -78,6 +80,7 @@ export interface LectureDraft {
   videoUrl: string;
   files: LectureFileDraft[];
   openAt?: number | null;
+  closeAt?: number | null;
 }
 
 // يضيف محاضرات جديدة (فيديو + ملفات PDF اختيارية). mode=replace يستبدل المحاضرات الحالية.
@@ -102,6 +105,8 @@ export async function addLectures(
           id: `file_${id}_${fileIndex + 1}`,
           title: file.title.trim() || `ملف ${fileIndex + 1}`,
           url: normalizeDriveUrl(file.url),
+          openAt: file.openAt ?? null,
+          closeAt: file.closeAt ?? null,
         }));
       const video = draft.videoUrl.trim();
       rootLectures.push({
@@ -114,6 +119,7 @@ export async function addLectures(
         order: lastOrder + index + 1,
         duration: '',
         openAt: draft.openAt ?? null,
+        closeAt: draft.closeAt ?? null,
         trainings: [],
         createdAt: Date.now(),
       });
@@ -139,7 +145,7 @@ export async function addFilesToLecture(
     valid.forEach((file) => {
       const url = normalizeDriveUrl(file.url);
       if (next.some((item) => item.url === url)) return;
-      next.push({ id: newId('file'), title: file.title.trim() || 'ملف المحاضرة', url });
+      next.push({ id: newId('file'), title: file.title.trim() || 'ملف المحاضرة', url, openAt: file.openAt ?? null, closeAt: file.closeAt ?? null });
     });
     lecture.files = next;
     if (!lecture.pdfUrl && next[0]) lecture.pdfUrl = next[0].url;

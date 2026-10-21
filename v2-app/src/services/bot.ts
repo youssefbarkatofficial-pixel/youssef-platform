@@ -223,20 +223,18 @@ export async function sendMessageToBot(
       // Ignored
     }
 
+    let defaultMsg = `حدث خطأ أثناء معالجة الطلب (${response.status})`;
     if (response.status === 401) {
-      throw new Error(errorMsg || 'انتهت صلاحية تسجيل الدخول، يُرجى تسجيل الدخول مجددًا.');
+      defaultMsg = 'انتهت صلاحية تسجيل الدخول، يُرجى تسجيل الدخول مجددًا.';
+    } else if (response.status === 429) {
+      defaultMsg = 'استراحة قصيرة، ارجع بعد شوية';
+    } else if (response.status === 503 || response.status >= 500) {
+      defaultMsg = 'نظام البوصلة غير متاح حاليًا أو تحت الصيانة، يُرجى المحاولة بعد قليل.';
     }
-    if (response.status === 429) {
-      throw new Error(
-        errorMsg || 'استراحة قصيرة، ارجع بعد شوية',
-      );
-    }
-    if (response.status === 503 || response.status >= 500) {
-      throw new Error(
-        errorMsg || 'نظام البوصلة غير متاح حاليًا أو تحت الصيانة، يُرجى المحاولة بعد قليل.',
-      );
-    }
-    throw new Error(errorMsg || `حدث خطأ أثناء معالجة الطلب (${response.status})`);
+
+    const err: any = new Error(errorMsg || defaultMsg);
+    err.status = response.status;
+    throw err;
   }
 
   return response.json();

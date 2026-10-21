@@ -103,7 +103,7 @@ export function normalizeDigits(text: string): string {
 export function convertHtmlToStructuredText(html: string): string {
   let text = html.replace(/<ol\b[^>]*>([\s\S]*?)<\/ol>/gi, (_match, content) => {
     let index = 1;
-    return content.replace(/<li\b[^>]*>([\s\S]*?)<\/li>/gi, (_m, liContent) => {
+    return content.replace(/<li\b[^>]*>([\s\S]*?)<\/li>/gi, (_m: string, liContent: string) => {
       return `<p>Q_NUM_${index++}_END ${liContent}</p>`;
     });
   });

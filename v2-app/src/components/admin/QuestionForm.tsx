@@ -31,7 +31,7 @@ interface QuestionFormProps {
   onCancel?: () => void;
 }
 
-const OPTION_LABELS: Record<string, string> = { a: 'أ', b: 'ب', c: 'ج', d: 'د' };
+const OPTION_LABELS: Record<string, string> = { a: 'أ', b: 'ب', c: 'ج', d: 'د', e: 'هـ', f: 'و' };
 
 const TYPE_OPTIONS = QUESTION_TYPES.map((type) => ({
   value: type,
@@ -66,6 +66,11 @@ export default function QuestionForm({
   const [grade, setGrade] = useState<string>(initialMeta?.grade ?? '');
   const [topic, setTopic] = useState(initialMeta?.topic ?? '');
   const [error, setError] = useState('');
+  const [optionCount, setOptionCount] = useState<number>(() => {
+    if (!initial?.options) return 4;
+    const filled = Object.entries(initial.options).filter(([k, v]) => (v ?? '').trim() !== '');
+    return Math.max(2, Math.min(6, filled.length || 4));
+  });
 
   const update = (patch: Partial<QuestionDraft>) => {
     setDraft((previous) => ({ ...previous, ...patch }));
@@ -142,10 +147,40 @@ export default function QuestionForm({
 
       {draft.type === 'choose' && (
         <fieldset className="space-y-3">
-          <legend className="mb-1 text-sm font-medium text-slate-300">
-            الخيارات (اختر الإجابة الصحيحة بالدائرة)
-          </legend>
-          {OPTION_KEYS.map((key) => (
+          <div className="flex items-center justify-between">
+            <legend className="mb-1 text-sm font-medium text-slate-300">
+              الخيارات ({optionCount} خيارات — اختر الإجابة الصحيحة بالدائرة)
+            </legend>
+            <div className="flex items-center gap-2">
+              {optionCount < 6 && (
+                <button
+                  type="button"
+                  onClick={() => setOptionCount((c) => Math.min(6, c + 1))}
+                  className="rounded-lg bg-navy-800 px-2.5 py-1 text-xs font-bold text-gold-400 hover:bg-navy-700"
+                >
+                  + إضافة خيار
+                </button>
+              )}
+              {optionCount > 2 && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    const removeKey = OPTION_KEYS[optionCount - 1];
+                    setOptionCount((c) => Math.max(2, c - 1));
+                    if (draft.options) {
+                      const next = { ...draft.options };
+                      delete next[removeKey];
+                      update({ options: next, answer: draft.answer === removeKey ? 'a' : draft.answer });
+                    }
+                  }}
+                  className="rounded-lg bg-navy-800 px-2.5 py-1 text-xs font-bold text-rose-400 hover:bg-navy-700"
+                >
+                  - حذف خيار
+                </button>
+              )}
+            </div>
+          </div>
+          {OPTION_KEYS.slice(0, optionCount).map((key) => (
             <div key={key} className="flex items-end gap-3">
               <label
                 className={cn(

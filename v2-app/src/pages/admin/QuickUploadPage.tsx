@@ -1,6 +1,7 @@
+import { cairoInputToUtcMs, formatCairoDateTime, tzOffsetMs, cairoToUtcMs } from '../../lib/cairoTime';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { AlertTriangle, CheckCircle2, ChevronDown, ChevronUp, ClipboardList, FileText, PlayCircle, Trash2, UploadCloud, Calendar, Sparkles, PlusCircle, Split, Layers, Bell } from 'lucide-react';
+import { AlertTriangle, Plus, ArrowUp, ArrowDown, CheckCircle2, ChevronDown, ChevronUp, ClipboardList, FileText, PlayCircle, Trash2, UploadCloud, Calendar, Sparkles, PlusCircle, Split, Layers, Bell } from 'lucide-react';
 import { Badge, Button, Card, EmptyState, Input, Spinner, useToast } from '../../components/ui';
 import { useCourses } from '../../hooks/useCourses';
 import {
@@ -107,12 +108,18 @@ export default function QuickUploadPage() {
   const [lectureText, setLectureText] = useState('');
   const [lectureMode, setLectureMode] = useState<'append' | 'replace'>('append');
   const [savingLectures, setSavingLectures] = useState(false);
+  const [lectureOpenAt, setLectureOpenAt] = useState('');
+  const [lectureCloseAt, setLectureCloseAt] = useState('');
+  const [useMultiWeekLectures, setUseMultiWeekLectures] = useState(false);
+  const [lectureStartDateTime, setLectureStartDateTime] = useState('');
   const lectureDrafts = useMemo(() => parseLectureLines(lectureText), [lectureText]);
 
   // ملفات
   const [fileLectureId, setFileLectureId] = useState('');
   const [fileText, setFileText] = useState('');
   const [savingFiles, setSavingFiles] = useState(false);
+  const [fileOpenAt, setFileOpenAt] = useState('');
+  const [fileCloseAt, setFileCloseAt] = useState('');
   const fileDrafts = useMemo(() => parseFileLines(fileText), [fileText]);
 
   // تقييمات
@@ -141,8 +148,10 @@ export default function QuickUploadPage() {
   const [manualType, setManualType] = useState<QuestionType>('choose');
   const [manualText, setManualText] = useState('');
   const [manualPoints, setManualPoints] = useState(1);
+  const [manualOptionKeys, setManualOptionKeys] = useState<string[]>(['a', 'b', 'c', 'd']);
   const [manualOptions, setManualOptions] = useState<Record<string, string>>({ a: '', b: '', c: '', d: '' });
   const [manualAnswer, setManualAnswer] = useState('a');
+  const [weekOffset, setWeekOffset] = useState<number>(0);
 
   // حساب الأعداد حسب النوع لشاشة المراجعة التفاعلية (Part 2d)
   const typeCounts = useMemo(() => {
@@ -167,11 +176,15 @@ export default function QuickUploadPage() {
     );
   }, [rawText, questions.length, parsedExam]);
 
-  const applyWeeklySchedule = () => {
-    const s = getCairoNextSchedule(kind);
+  const applyWeeklySchedule = (offset = weekOffset) => {
+    const baseDate = new Date();
+    if (offset > 0) {
+      baseDate.setDate(baseDate.getDate() + offset * 7);
+    }
+    const s = getCairoNextSchedule(kind, baseDate);
     setAvailableFrom(s.availableFrom);
     setAvailableUntil(s.availableUntil);
-    showToast(`تم تطبيق جدول الأسبوع: ${s.summary}`, 'success');
+    showToast(`تم تطبيق جدول الأسبوع ${offset > 0 ? `(${offset + 1})` : ''}: ${s.summary}`, 'success');
   };
 
   const addManualQuestion = () => {
@@ -232,7 +245,25 @@ export default function QuickUploadPage() {
     if (lectureMode === 'replace' && !window.confirm('هيتم استبدال كل المحاضرات الحالية. متأكد؟')) return;
     setSavingLectures(true);
     try {
-      const count = await addLectures(courseId, lectureDrafts, lectureMode);
+      const baseMs = lectureStartDateTime
+        ? (cairoInputToUtcMs(lectureStartDateTime) ?? Date.now())
+        : (cairoInputToUtcMs(lectureOpenAt) ?? Date.now());
+      const closeBaseMs = lectureCloseAt ? cairoInputToUtcMs(lectureCloseAt) : null;
+
+      const processedDrafts = lectureDrafts.map((d, idx) => {
+        let openAt: number | null = null;
+        let closeAt: number | null = null;
+        if (useMultiWeekLectures) {
+          openAt = baseMs + idx * 7 * 24 * 60 * 60 * 1000;
+          if (closeBaseMs) closeAt = closeBaseMs + idx * 7 * 24 * 60 * 60 * 1000;
+        } else {
+          openAt = cairoInputToUtcMs(lectureOpenAt);
+          closeAt = cairoInputToUtcMs(lectureCloseAt);
+        }
+        return { ...d, openAt, closeAt };
+      });
+
+      const count = await addLectures(courseId, processedDrafts, lectureMode);
       showToast(`تم حفظ ${count} محاضرة`, 'success');
       setLectureText('');
       await reloadCourse(courseId);
@@ -247,7 +278,10 @@ export default function QuickUploadPage() {
     if (!courseId || !fileLectureId) return;
     setSavingFiles(true);
     try {
-      const count = await addFilesToLecture(courseId, fileLectureId, fileDrafts);
+      const fOpen = cairoInputToUtcMs(fileOpenAt);
+      const fClose = cairoInputToUtcMs(fileCloseAt);
+      const processedFiles = fileDrafts.map((f) => ({ ...f, openAt: fOpen, closeAt: fClose }));
+      const count = await addFilesToLecture(courseId, fileLectureId, processedFiles);
       showToast(`تمت إضافة ${count} ملف للمحاضرة`, 'success');
       setFileText('');
       await reloadCourse(courseId);
@@ -367,7 +401,7 @@ export default function QuickUploadPage() {
               targetValue: courseId,
               courseId,
               lectureId: attachLectureId || undefined,
-              openAt: availableFrom || null,
+              openAt: availableFrom ? cairoInputToUtcMs(availableFrom) : null,
               sentBy: 'admin',
             });
           } catch {
@@ -397,6 +431,18 @@ export default function QuickUploadPage() {
     } finally {
       setSavingQuestions(false);
     }
+  };
+
+  const moveQuestionInDraft = (index: number, direction: -1 | 1) => {
+    const target = index + direction;
+    if (target < 0 || target >= questions.length) return;
+    setQuestions((prev) => {
+      const copy = [...prev];
+      const temp = copy[index];
+      copy[index] = copy[target];
+      copy[target] = temp;
+      return copy;
+    });
   };
 
   const updateQuestionInDraft = (idx: number, patch: Partial<QuestionDraft>) => {
@@ -496,6 +542,53 @@ export default function QuickUploadPage() {
                 />
               </div>
 
+              <div className="space-y-3 rounded-xl border border-navy-800 bg-navy-950/70 p-3">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span className="text-xs font-bold text-gold-400">مواعيد الفتح والإغلاق بتوقيت القاهرة</span>
+                  <label className="flex items-center gap-2 text-xs text-slate-300 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={useMultiWeekLectures}
+                      onChange={(e) => setUseMultiWeekLectures(e.target.checked)}
+                      className="h-4 w-4 rounded border-navy-600 bg-navy-900 accent-gold-500"
+                    />
+                    <span>توزيع المحاضرات أسبوعيًا بالتتالي (كل خميس 9:00 م)</span>
+                  </label>
+                </div>
+
+                {useMultiWeekLectures ? (
+                  <div className="space-y-2">
+                    <Input
+                      label="تاريخ بداية أول محاضرة (الخميس 9:00 م بتوقيت القاهرة)"
+                      type="datetime-local"
+                      dir="ltr"
+                      value={lectureStartDateTime}
+                      onChange={(e) => setLectureStartDateTime(e.target.value)}
+                    />
+                    <p className="text-[11px] text-slate-400">
+                      سيتم فتح المحاضرة الأولى في هذا الموعد، والمحاضرة الثانية بعد 7 أيام، والثالثة بعد 14 يومًا تلقائيًا.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <Input
+                      label="موعد فتح المحاضرات (openAt)"
+                      type="datetime-local"
+                      dir="ltr"
+                      value={lectureOpenAt}
+                      onChange={(e) => setLectureOpenAt(e.target.value)}
+                    />
+                    <Input
+                      label="موعد إغلاق اختياري (closeAt)"
+                      type="datetime-local"
+                      dir="ltr"
+                      value={lectureCloseAt}
+                      onChange={(e) => setLectureCloseAt(e.target.value)}
+                    />
+                  </div>
+                )}
+              </div>
+
               <div className="flex flex-wrap items-center justify-between gap-3 text-xs">
                 <div className="flex items-center gap-4">
                   <label className="flex items-center gap-1.5 text-slate-300">
@@ -558,6 +651,26 @@ export default function QuickUploadPage() {
                   placeholder={`مذكرة الشرح | https://drive.google.com/file/d/.../view\nواجب الأسبوع | https://drive.google.com/...`}
                   className={`${FIELD} text-xs`}
                 />
+              </div>
+
+              <div className="space-y-3 rounded-xl border border-navy-800 bg-navy-950/70 p-3">
+                <span className="text-xs font-bold text-gold-400">مواعيد إتاحة الملفات بتوقيت القاهرة</span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <Input
+                    label="موعد فتح الملفات (openAt)"
+                    type="datetime-local"
+                    dir="ltr"
+                    value={fileOpenAt}
+                    onChange={(e) => setFileOpenAt(e.target.value)}
+                  />
+                  <Input
+                    label="موعد إغلاق اختياري (closeAt)"
+                    type="datetime-local"
+                    dir="ltr"
+                    value={fileCloseAt}
+                    onChange={(e) => setFileCloseAt(e.target.value)}
+                  />
+                </div>
               </div>
 
               <Button onClick={saveFiles} loading={savingFiles} disabled={!fileLectureId || fileDrafts.every((f) => !f.url)}>
@@ -633,14 +746,30 @@ export default function QuickUploadPage() {
                   <div className="space-y-2 rounded-xl border border-navy-800 bg-navy-950/70 p-3">
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <span className="text-xs font-bold text-gold-400">مواعيد الفتح والإغلاق (بتوقيت القاهرة)</span>
-                      <button
-                        type="button"
-                        onClick={applyWeeklySchedule}
-                        className="inline-flex items-center gap-1.5 rounded-lg bg-gold-500/20 px-3 py-1 text-xs font-bold text-gold-300 hover:bg-gold-500/30"
-                      >
-                        <Sparkles className="h-3.5 w-3.5 text-gold-400" />
-                        <span>طبّق جدول الأسبوع تلقائيًا</span>
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <select
+                          value={weekOffset}
+                          onChange={(e) => {
+                            const offset = Number(e.target.value) || 0;
+                            setWeekOffset(offset);
+                            applyWeeklySchedule(offset);
+                          }}
+                          className="rounded-lg border border-navy-700 bg-navy-900 px-2 py-1 text-xs text-white"
+                        >
+                          <option value={0}>الأسبوع الحالي</option>
+                          <option value={1}>الأسبوع القادم (+7 أيام)</option>
+                          <option value={2}>الأسبوع الثالث (+14 يوم)</option>
+                          <option value={3}>الأسبوع الرابع (+21 يوم)</option>
+                        </select>
+                        <button
+                          type="button"
+                          onClick={() => applyWeeklySchedule(weekOffset)}
+                          className="inline-flex items-center gap-1.5 rounded-lg bg-gold-500/20 px-3 py-1 text-xs font-bold text-gold-300 hover:bg-gold-500/30"
+                        >
+                          <Sparkles className="h-3.5 w-3.5 text-gold-400" />
+                          <span>طبّق جدول الأسبوع</span>
+                        </button>
+                      </div>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -760,9 +889,41 @@ export default function QuickUploadPage() {
 
                   {manualType === 'choose' && (
                     <div className="space-y-2">
-                      <span className="text-xs font-bold text-slate-400">الخيارات والإجابة الصحيحة:</span>
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-slate-400">
+                          الخيارات ({manualOptionKeys.length} خيارات — اختر الإجابة بالدائرة):
+                        </span>
+                        <div className="flex items-center gap-2">
+                          {manualOptionKeys.length < 6 && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const allKeys = ['a', 'b', 'c', 'd', 'e', 'f'];
+                                const nextKey = allKeys[manualOptionKeys.length];
+                                if (nextKey) setManualOptionKeys([...manualOptionKeys, nextKey]);
+                              }}
+                              className="rounded-lg bg-navy-800 px-2.5 py-1 text-xs font-bold text-gold-400 hover:bg-navy-700"
+                            >
+                              + إضافة خيار
+                            </button>
+                          )}
+                          {manualOptionKeys.length > 2 && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const removed = manualOptionKeys[manualOptionKeys.length - 1];
+                                setManualOptionKeys(manualOptionKeys.slice(0, -1));
+                                if (manualAnswer === removed) setManualAnswer('a');
+                              }}
+                              className="rounded-lg bg-navy-800 px-2.5 py-1 text-xs font-bold text-rose-400 hover:bg-navy-700"
+                            >
+                              - حذف خيار
+                            </button>
+                          )}
+                        </div>
+                      </div>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        {(['a', 'b', 'c', 'd'] as const).map((k) => (
+                        {manualOptionKeys.map((k) => (
                           <div key={k} className="flex items-center gap-2 rounded-lg border border-navy-800 bg-navy-950 p-2">
                             <input
                               type="radio"
@@ -774,7 +935,7 @@ export default function QuickUploadPage() {
                             <input
                               type="text"
                               placeholder={`الخيار ${k}`}
-                              value={manualOptions[k]}
+                              value={manualOptions[k] ?? ''}
                               onChange={(e) => setManualOptions({ ...manualOptions, [k]: e.target.value })}
                               className="flex-1 bg-transparent text-xs text-white focus:outline-none"
                             />
@@ -1167,6 +1328,24 @@ export default function QuickUploadPage() {
                             ادمج مع السابق
                           </button>
                         )}
+                        <button
+                          type="button"
+                          disabled={index === 0}
+                          aria-label="تحريك لأعلى"
+                          onClick={() => moveQuestionInDraft(index, -1)}
+                          className="p-1 hover:bg-navy-800 rounded text-slate-400 hover:text-white disabled:opacity-30"
+                        >
+                          <ArrowUp className="h-3.5 w-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          disabled={index === questions.length - 1}
+                          aria-label="تحريك لأسفل"
+                          onClick={() => moveQuestionInDraft(index, 1)}
+                          className="p-1 hover:bg-navy-800 rounded text-slate-400 hover:text-white disabled:opacity-30"
+                        >
+                          <ArrowDown className="h-3.5 w-3.5" />
+                        </button>
                         <button
                           type="button"
                           aria-label="حذف السؤال"

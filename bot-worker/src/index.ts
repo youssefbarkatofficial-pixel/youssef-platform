@@ -405,6 +405,19 @@ export default {
 
         const isOutOfSyllabus = !learnedAnswer && !intentMatch && ragResult.chunks.length === 0;
 
+        if (isOutOfSyllabus) {
+          const cpuMs = Math.round((performance.now() - startTime) * 100) / 100;
+          const outReply = 'ده مش في شرح الأستاذ، اسأل الأستاذ أو راجع الدرس';
+          const logId = await logChat(env.DB, studentProfile.uid, rawMessage, outReply, 'fallback', cpuMs);
+          return Response.json({
+            reply: outReply,
+            source: 'fallback',
+            remaining: tokenBudget.remainingTokens,
+            logId,
+            cpuMs
+          } satisfies ChatResponse, { headers: corsHeaders });
+        }
+
         // جلب المواعيد من جدول settings
         const prepSchedule = await getSetting(
           env.DB,

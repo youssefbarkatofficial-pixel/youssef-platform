@@ -1,3 +1,4 @@
+import { cairoInputToUtcMs } from '../../lib/cairoTime';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
@@ -337,7 +338,7 @@ export default function AdminAssessmentEditPage() {
               targetType: 'course',
               targetValue: courseId,
               courseId,
-              openAt: finalMeta.availableFrom || null,
+              openAt: finalMeta.availableFrom ? cairoInputToUtcMs(finalMeta.availableFrom) : null,
               sentBy: 'admin',
             });
           } catch {
@@ -357,7 +358,7 @@ export default function AdminAssessmentEditPage() {
               targetType: 'course',
               targetValue: courseId,
               courseId,
-              openAt: finalMeta.availableFrom || null,
+              openAt: finalMeta.availableFrom ? cairoInputToUtcMs(finalMeta.availableFrom) : null,
               sentBy: 'admin',
             });
           } catch {

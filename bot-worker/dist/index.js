@@ -342,6 +342,18 @@ exports.default = {
                     }, { headers: corsHeaders });
                 }
                 const isOutOfSyllabus = !learnedAnswer && !intentMatch && ragResult.chunks.length === 0;
+                if (isOutOfSyllabus) {
+                    const cpuMs = Math.round((performance.now() - startTime) * 100) / 100;
+                    const outReply = 'ده مش في شرح الأستاذ، اسأل الأستاذ أو راجع الدرس';
+                    const logId = await (0, db_1.logChat)(env.DB, studentProfile.uid, rawMessage, outReply, 'fallback', cpuMs);
+                    return Response.json({
+                        reply: outReply,
+                        source: 'fallback',
+                        remaining: tokenBudget.remainingTokens,
+                        logId,
+                        cpuMs
+                    }, { headers: corsHeaders });
+                }
                 // جلب المواعيد من جدول settings
                 const prepSchedule = await (0, db_1.getSetting)(env.DB, 'schedule_prep', 'مواعيد المنصة الثابتة: للمرحلة الإعدادية (شرح وتدريب يوم الخميس، واجب يوم الثلاثاء، امتحان يوم الأربعاء الساعة 9 مساءً).');
                 const secSchedule = await (0, db_1.getSetting)(env.DB, 'schedule_sec', 'للمرحلة الثانوية (شرح وتدريب يوم الجمعة، واجب يوم الثلاثاء، امتحان يوم الأربعاء الساعة 9 مساءً).');

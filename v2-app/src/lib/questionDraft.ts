@@ -40,7 +40,7 @@ export interface KeyEntry {
   rubric: RubricItem[];
 }
 
-export const OPTION_KEYS = ['a', 'b', 'c', 'd'] as const;
+export const OPTION_KEYS = ['a', 'b', 'c', 'd', 'e', 'f'] as const;
 
 export const QUESTION_TYPES: QuestionType[] = [
   'choose',

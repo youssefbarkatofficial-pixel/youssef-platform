@@ -185,7 +185,15 @@ export async function fetchStudentProfile(uid: string, token: string, env: Env):
 
   if (!res.ok) {
     if (res.status === 404) {
-      throw new Error('Student record not found in Firestore');
+      return {
+        uid,
+        name: 'مستخدم المنصة',
+        firstName: 'يا صديقي',
+        grade: 'عام',
+        courses: [],
+        archived: false,
+        email: undefined
+      };
     }
     const errText = await res.text();
     throw new Error(`Firestore read error: ${res.status} ${errText}`);
