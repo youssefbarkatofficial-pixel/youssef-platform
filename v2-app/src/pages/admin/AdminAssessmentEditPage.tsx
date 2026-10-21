@@ -12,12 +12,20 @@ import {
   Trash2,
   UploadCloud,
   FileText,
+  Sparkles,
+  Bell,
+  AlertTriangle,
 } from 'lucide-react';
 import {
   parseQuestionsFromJson,
   parseQuestionsFromTxt,
   parseQuestionsFromDocx,
+  splitQuestionAt,
+  mergeWithPreviousQuestion,
+  getCairoNextSchedule,
+  formatCairoScheduleSummary,
 } from '../../lib/questionImport';
+import { sendBroadcastNotification } from '../../services/notifications';
 import QuestionForm from '../../components/admin/QuestionForm';
 import QuestionPicker from '../../components/admin/QuestionPicker';
 import {
@@ -62,6 +70,8 @@ const DEFAULT_META: AssessmentMeta = {
   availableUntil: '',
   lockedUntilTrainingId: '',
   deadlineDate: '',
+  passingScore: 50,
+  requirePassingToUnlock: true,
 };
 
 const KIND_OPTIONS = [
@@ -145,6 +155,16 @@ export default function AdminAssessmentEditPage() {
   const [pickerOpen, setPickerOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState('');
+  const [notifyStudents, setNotifyStudents] = useState(false);
+
+  const applyWeeklySchedule = () => {
+    const s = getCairoNextSchedule(meta.kind);
+    updateMeta({
+      availableFrom: s.availableFrom,
+      availableUntil: s.availableUntil,
+    });
+    showToast(`تم تطبيق جدول الأسبوع: ${s.summary}`, 'success');
+  };
 
   // استيراد الأسئلة (JSON / TXT / Word)
   const [importModalOpen, setImportModalOpen] = useState(false);
@@ -308,10 +328,42 @@ export default function AdminAssessmentEditPage() {
     try {
       if (isNew) {
         await createAssessment(courseId, sectionId, finalMeta, questions);
+        if (notifyStudents) {
+          try {
+            await sendBroadcastNotification({
+              title: 'تحديث في المنهج',
+              message: `تمت إضافة ${KIND_LABELS[finalMeta.kind]} جديد: «${finalMeta.title.trim()}»`,
+              category: 'curriculumUpdates',
+              targetType: 'course',
+              targetValue: courseId,
+              courseId,
+              openAt: finalMeta.availableFrom || null,
+              sentBy: 'admin',
+            });
+          } catch {
+            // notification error ignored
+          }
+        }
         showToast('تم إنشاء العنصر وإضافته للكورس.', 'success');
         navigate(`/admin/courses/${courseId}`, { replace: true });
       } else {
         await updateAssessment(courseId, itemId, finalMeta, questions);
+        if (notifyStudents) {
+          try {
+            await sendBroadcastNotification({
+              title: 'تحديث في المنهج',
+              message: `تم تعديل ${KIND_LABELS[finalMeta.kind]}: «${finalMeta.title.trim()}»`,
+              category: 'curriculumUpdates',
+              targetType: 'course',
+              targetValue: courseId,
+              courseId,
+              openAt: finalMeta.availableFrom || null,
+              sentBy: 'admin',
+            });
+          } catch {
+            // notification error ignored
+          }
+        }
         showToast('تم حفظ التعديلات.', 'success');
       }
     } catch {
@@ -473,23 +525,77 @@ export default function AdminAssessmentEditPage() {
           </div>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Input
-            label="يبدأ في (اختياري)"
-            type="datetime-local"
-            dir="ltr"
-            value={meta.availableFrom}
-            hint="بتوقيت القاهرة."
-            onChange={(event) => updateMeta({ availableFrom: event.target.value })}
-          />
-          <Input
-            label="آخر موعد (اختياري)"
-            type="datetime-local"
-            dir="ltr"
-            value={meta.availableUntil}
-            hint="التسليم بعده يخصم 20 نقطة مئوية."
-            onChange={(event) => updateMeta({ availableUntil: event.target.value })}
-          />
+        <div className="space-y-3 rounded-xl border border-navy-800 bg-navy-950/70 p-4">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <span className="text-sm font-bold text-gold-400">مواعيد الفتح والإغلاق (بتوقيت القاهرة)</span>
+            <button
+              type="button"
+              onClick={applyWeeklySchedule}
+              className="inline-flex items-center gap-1.5 rounded-lg bg-gold-500/20 px-3 py-1.5 text-xs font-bold text-gold-300 hover:bg-gold-500/30"
+            >
+              <Sparkles className="h-3.5 w-3.5 text-gold-400" />
+              <span>طبّق جدول الأسبوع تلقائيًا</span>
+            </button>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Input
+              label="يبدأ في (availableFrom)"
+              type="datetime-local"
+              dir="ltr"
+              value={meta.availableFrom}
+              hint="بتوقيت القاهرة."
+              onChange={(event) => updateMeta({ availableFrom: event.target.value })}
+            />
+            <Input
+              label="آخر موعد (availableUntil)"
+              type="datetime-local"
+              dir="ltr"
+              value={meta.availableUntil}
+              hint="التسليم بعده يخصم 20 نقطة مئوية."
+              onChange={(event) => updateMeta({ availableUntil: event.target.value })}
+            />
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Input
+              label="نسبة النجاح لفتح ما بعده (%)"
+              type="number"
+              min={0}
+              max={100}
+              value={String(meta.passingScore ?? 50)}
+              hint="افتراضي 50%. اجتيازه يفتح المحاضرة التالية."
+              onChange={(event) => updateMeta({ passingScore: Number(event.target.value) || 0 })}
+            />
+            <div className="flex items-end pb-3">
+              <label className="flex items-center gap-2 text-xs text-slate-200">
+                <input
+                  type="checkbox"
+                  checked={meta.requirePassingToUnlock ?? true}
+                  onChange={(event) => updateMeta({ requirePassingToUnlock: event.target.checked })}
+                  className="h-4 w-4 rounded border-navy-600 bg-navy-900 accent-gold-500"
+                />
+                <span>اجتياز هذا التقييم إلزامي لفتح المحاضرة التالية</span>
+              </label>
+            </div>
+          </div>
+
+          {/* ملخص القواعد قبل الحفظ */}
+          <div className="rounded-lg border border-sky-500/30 bg-sky-500/10 p-3 text-xs text-sky-200">
+            <div className="font-bold text-sky-300 mb-1">ملخص القواعد والمواعيد:</div>
+            <p>{formatCairoScheduleSummary(meta.kind, meta.availableFrom, meta.availableUntil, meta.passingScore ?? 50)}</p>
+          </div>
+
+          <label className="flex items-center gap-2 pt-1 text-xs text-slate-300">
+            <input
+              type="checkbox"
+              checked={notifyStudents}
+              onChange={(e) => setNotifyStudents(e.target.checked)}
+              className="h-4 w-4 rounded border-navy-600 bg-navy-900 accent-gold-500"
+            />
+            <Bell className="h-3.5 w-3.5 text-gold-400" />
+            <span>إشعار الطلاب المشتركين بهذا التقييم عبر الإشعارات العامة فور الحفظ</span>
+          </label>
         </div>
 
         {meta.kind === 'homework' && (
@@ -569,6 +675,29 @@ export default function AdminAssessmentEditPage() {
                     >
                       <ArrowDown className="h-4 w-4" />
                     </Button>
+                    <button
+                      type="button"
+                      title="قسّم هذا السؤال"
+                      onClick={() => {
+                        const splitText = window.prompt('اكتب الكلمة أو العبارة التي تريد التقسيم عندها:');
+                        if (splitText !== null) {
+                          setQuestions(splitQuestionAt(questions, index, splitText));
+                        }
+                      }}
+                      className="rounded bg-navy-800 px-2 py-1 text-[11px] font-bold text-gold-400 hover:bg-navy-700"
+                    >
+                      قسّم هنا
+                    </button>
+                    {index > 0 && (
+                      <button
+                        type="button"
+                        title="ادمج مع السؤال السابق"
+                        onClick={() => setQuestions(mergeWithPreviousQuestion(questions, index))}
+                        className="rounded bg-navy-800 px-2 py-1 text-[11px] font-bold text-sky-400 hover:bg-navy-700"
+                      >
+                        ادمج مع السابق
+                      </button>
+                    )}
                     <Button
                       size="sm"
                       variant="ghost"

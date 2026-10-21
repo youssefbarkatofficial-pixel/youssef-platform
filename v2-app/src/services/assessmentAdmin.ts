@@ -30,6 +30,8 @@ export interface AssessmentMeta {
   availableUntil: string;
   lockedUntilTrainingId: string;
   deadlineDate: string; // للعرض فقط
+  passingScore?: number; // نسبة النجاح لفتح ما بعده % (افتراضي 50)
+  requirePassingToUnlock?: boolean; // ربط بالمحاضرة كمتطلب
 }
 
 export interface AssessmentRef {
@@ -99,6 +101,8 @@ function metaFromItem(item: CourseItem): AssessmentMeta {
     availableUntil: asString(raw.availableUntil),
     lockedUntilTrainingId: asString(raw.lockedUntilTrainingId),
     deadlineDate: asString(raw.deadlineDate),
+    passingScore: typeof raw.passingScore === 'number' ? raw.passingScore : 50,
+    requirePassingToUnlock: raw.requirePassingToUnlock === true,
   };
 }
 
@@ -109,6 +113,8 @@ function buildRaw(
   questionCount: number,
   options?: { isDraft?: boolean; hidden?: boolean },
 ): RawObject {
+  const openAt = meta.availableFrom ? new Date(meta.availableFrom).getTime() : (base.openAt ?? null);
+  const closeAt = meta.availableUntil ? new Date(meta.availableUntil).getTime() : (base.closeAt ?? null);
   return {
     ...base,
     id,
@@ -118,6 +124,10 @@ function buildRaw(
     strictMode: meta.strictMode,
     availableFrom: meta.availableFrom,
     availableUntil: meta.availableUntil,
+    openAt,
+    closeAt,
+    passingScore: typeof meta.passingScore === 'number' ? meta.passingScore : (typeof base.passingScore === 'number' ? base.passingScore : 50),
+    requirePassingToUnlock: meta.requirePassingToUnlock ?? (base.requirePassingToUnlock === true),
     lockedUntilTrainingId: meta.lockedUntilTrainingId,
     deadlineDate: meta.deadlineDate.trim(),
     questionCount,

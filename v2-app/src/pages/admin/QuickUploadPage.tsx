@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { AlertTriangle, CheckCircle2, ChevronDown, ChevronUp, ClipboardList, FileText, PlayCircle, Trash2, UploadCloud } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, ChevronDown, ChevronUp, ClipboardList, FileText, PlayCircle, Trash2, UploadCloud, Calendar, Sparkles, PlusCircle, Split, Layers, Bell } from 'lucide-react';
 import { Badge, Button, Card, EmptyState, Input, Spinner, useToast } from '../../components/ui';
 import { useCourses } from '../../hooks/useCourses';
 import {
@@ -11,7 +11,17 @@ import {
   parseExamText,
   parseExamFromDocx,
   parsedExamToQuestionDrafts,
+  splitQuestionAt,
+  mergeWithPreviousQuestion,
+  deleteQuestion,
+  changeQuestionType,
+  setQuestionCorrectAnswer,
+  getCairoNextSchedule,
+  formatCairoScheduleSummary,
 } from '../../lib/questionImport';
+import { sendBroadcastNotification } from '../../services/notifications';
+import { newQuestionId, createEmptyDraft, isEssayType } from '../../lib/questionDraft';
+import type { QuestionType } from '../../lib/grading';
 import type { ParsedExam, ImportResult } from '../../lib/questionImport';
 import type { QuestionDraft } from '../../lib/questionDraft';
 import { QUESTION_TYPE_LABELS } from '../../lib/questionDraft';
@@ -118,6 +128,73 @@ export default function QuickUploadPage() {
   const [parsedExam, setParsedExam] = useState<ParsedExam | null>(null);
   const [expandedSection, setExpandedSection] = useState<number | null>(null);
   const [savingQuestions, setSavingQuestions] = useState(false);
+
+  // التوقيت والقواعد الأسبوعية (Part 4)
+  const [availableFrom, setAvailableFrom] = useState('');
+  const [availableUntil, setAvailableUntil] = useState('');
+  const [passingScore, setPassingScore] = useState(50);
+  const [requirePassingToUnlock, setRequirePassingToUnlock] = useState(true);
+  const [notifyStudents, setNotifyStudents] = useState(false);
+
+  // وضع الإضافة اليدوية سؤال بسؤال (Part 3)
+  const [assessmentMode, setAssessmentMode] = useState<'import' | 'manual'>('import');
+  const [manualType, setManualType] = useState<QuestionType>('choose');
+  const [manualText, setManualText] = useState('');
+  const [manualPoints, setManualPoints] = useState(1);
+  const [manualOptions, setManualOptions] = useState<Record<string, string>>({ a: '', b: '', c: '', d: '' });
+  const [manualAnswer, setManualAnswer] = useState('a');
+
+  // حساب الأعداد حسب النوع لشاشة المراجعة التفاعلية (Part 2d)
+  const typeCounts = useMemo(() => {
+    let choose = 0;
+    let tf = 0;
+    let fill = 0;
+    let essay = 0;
+    questions.forEach((q) => {
+      if (q.type === 'choose') choose++;
+      else if (q.type === 'tf') tf++;
+      else if (q.type === 'fill' || q.type === 'short') fill++;
+      else essay++;
+    });
+    return { choose, tf, fill, essay };
+  }, [questions]);
+
+  // حماية الفشل الصامت
+  const hasSilentFailure = useMemo(() => {
+    return (
+      (rawText.trim().length > 300 && questions.length <= 1) ||
+      (parsedExam?.warnings.some((w) => w.includes('تنبيه: يبدو أن تنسيق الملف منع التقسيم التلقائي')) ?? false)
+    );
+  }, [rawText, questions.length, parsedExam]);
+
+  const applyWeeklySchedule = () => {
+    const s = getCairoNextSchedule(kind);
+    setAvailableFrom(s.availableFrom);
+    setAvailableUntil(s.availableUntil);
+    showToast(`تم تطبيق جدول الأسبوع: ${s.summary}`, 'success');
+  };
+
+  const addManualQuestion = () => {
+    if (!manualText.trim()) {
+      showToast('اكتب نص السؤال أولاً', 'error');
+      return;
+    }
+    const newDraft: QuestionDraft = {
+      id: newQuestionId(),
+      type: manualType,
+      text: manualText.trim(),
+      points: Number(manualPoints) || 1,
+      options: manualType === 'choose' ? { ...manualOptions } : null,
+      answer: manualAnswer,
+      altAnswers: [],
+      rubric: [],
+      needsReview: !manualAnswer,
+    };
+    setQuestions((prev) => [...prev, newDraft]);
+    setManualText('');
+    setManualAnswer(manualType === 'tf' ? 'صح' : 'a');
+    showToast('تمت إضافة السؤال للقائمة', 'success');
+  };
 
   const missingCount = useMemo(() => {
     return questions.filter((q) => q.needsReview || !q.answer).length;
@@ -269,14 +346,34 @@ export default function QuickUploadPage() {
             kind,
             duration: parseInt(duration, 10) || 0,
             strictMode: strict,
-            availableFrom: '',
-            availableUntil: '',
+            availableFrom,
+            availableUntil,
+            passingScore: Number(passingScore) || 50,
+            requirePassingToUnlock,
             lockedUntilTrainingId: '',
             deadlineDate: '',
           },
           questions,
           kind === 'exam' ? '' : attachLectureId,
         );
+
+        if (notifyStudents) {
+          try {
+            await sendBroadcastNotification({
+              title: 'تحديث في المنهج',
+              message: `تمت إضافة ${KIND_LABELS[kind]} جديد: «${title.trim()}»`,
+              category: 'curriculumUpdates',
+              targetType: 'course',
+              targetValue: courseId,
+              courseId,
+              lectureId: attachLectureId || undefined,
+              openAt: availableFrom || null,
+              sentBy: 'admin',
+            });
+          } catch {
+            // notification error ignored
+          }
+        }
         showToast(
           publish
             ? `تم إنشاء ونشر «${title.trim()}» بـ ${questions.length} سؤال`
@@ -511,10 +608,73 @@ export default function QuickUploadPage() {
                       {lectureSelect(attachLectureId, setAttachLectureId, kind === 'training' ? '— اختر المحاضرة —' : '— بدون ربط —')}
                     </div>
                   )}
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <Input label="المدة بالدقائق (0 = مفتوح)" type="number" min={0} value={duration} onChange={(e) => setDuration(e.target.value)} />
-                    <label className="flex items-end gap-2 pb-2 text-sm text-slate-200">
-                      <input type="checkbox" checked={strict} onChange={(e) => setStrict(e.target.checked)} /> وضع صارم
+                    <Input
+                      label="نسبة النجاح لفتح ما بعده (%)"
+                      type="number"
+                      min={0}
+                      max={100}
+                      value={String(passingScore)}
+                      hint="افتراضي 50%"
+                      onChange={(e) => setPassingScore(Number(e.target.value) || 0)}
+                    />
+                    <div className="flex flex-col justify-end gap-2 pb-2">
+                      <label className="flex items-center gap-2 text-xs text-slate-200">
+                        <input type="checkbox" checked={strict} onChange={(e) => setStrict(e.target.checked)} /> وضع صارم لمنع الخروج
+                      </label>
+                      <label className="flex items-center gap-2 text-xs text-slate-200">
+                        <input type="checkbox" checked={requirePassingToUnlock} onChange={(e) => setRequirePassingToUnlock(e.target.checked)} /> اجتيازه متطلب لفتح التالي
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* التوقيتات وجدول الأسبوع الذكي بتوقيت القاهرة */}
+                  <div className="space-y-2 rounded-xl border border-navy-800 bg-navy-950/70 p-3">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <span className="text-xs font-bold text-gold-400">مواعيد الفتح والإغلاق (بتوقيت القاهرة)</span>
+                      <button
+                        type="button"
+                        onClick={applyWeeklySchedule}
+                        className="inline-flex items-center gap-1.5 rounded-lg bg-gold-500/20 px-3 py-1 text-xs font-bold text-gold-300 hover:bg-gold-500/30"
+                      >
+                        <Sparkles className="h-3.5 w-3.5 text-gold-400" />
+                        <span>طبّق جدول الأسبوع تلقائيًا</span>
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <Input
+                        label="موعد الفتح (availableFrom)"
+                        type="datetime-local"
+                        dir="ltr"
+                        value={availableFrom}
+                        onChange={(e) => setAvailableFrom(e.target.value)}
+                      />
+                      <Input
+                        label="موعد الإغلاق (availableUntil)"
+                        type="datetime-local"
+                        dir="ltr"
+                        value={availableUntil}
+                        onChange={(e) => setAvailableUntil(e.target.value)}
+                      />
+                    </div>
+
+                    {/* ملخص القواعد قبل الحفظ */}
+                    <div className="rounded-lg border border-sky-500/30 bg-sky-500/10 p-2.5 text-xs text-sky-200">
+                      <div className="font-bold text-sky-300 mb-0.5">ملخص القواعد والمواعيد:</div>
+                      <p>{formatCairoScheduleSummary(kind, availableFrom, availableUntil, passingScore)}</p>
+                    </div>
+
+                    <label className="flex items-center gap-2 pt-1 text-xs text-slate-300">
+                      <input
+                        type="checkbox"
+                        checked={notifyStudents}
+                        onChange={(e) => setNotifyStudents(e.target.checked)}
+                        className="h-4 w-4 rounded border-navy-600 bg-navy-900 accent-gold-500"
+                      />
+                      <Bell className="h-3.5 w-3.5 text-gold-400" />
+                      <span>أشعر الطلاب المشتركين بهذا التقييم الجديد فور الحفظ</span>
                     </label>
                   </div>
                 </div>
@@ -529,16 +689,157 @@ export default function QuickUploadPage() {
                 </select>
               )}
 
-              <div>
-                <label className="text-xs font-bold text-slate-300">الأسئلة: الصقها هنا أو ارفع ملف TXT / Word / JSON</label>
-                <textarea
-                  value={rawText}
-                  onChange={(e) => onTextareaChange(e.target.value)}
-                  rows={7}
-                  placeholder="الصق نص الامتحان أو اختر ملفًا من الأسفل..."
-                  className={`${FIELD} text-xs`}
-                />
+              {/* أزرار اختيار طريقة الإضافة */}
+              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-navy-800 pb-3">
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setAssessmentMode('import')}
+                    className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-colors ${
+                      assessmentMode === 'import' ? 'bg-gold-400 text-navy-950' : 'bg-navy-900 text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    <UploadCloud className="h-3.5 w-3.5" />
+                    رفع أو لصق ملف
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setAssessmentMode('manual')}
+                    className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-colors ${
+                      assessmentMode === 'manual' ? 'bg-gold-400 text-navy-950' : 'bg-navy-900 text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    <PlusCircle className="h-3.5 w-3.5" />
+                    إضافة تدريب/واجب/امتحان يدويًا (سؤال بسؤال)
+                  </button>
+                </div>
               </div>
+
+              {assessmentMode === 'manual' ? (
+                <div className="space-y-3 rounded-xl border border-navy-800 bg-navy-950/60 p-4">
+                  <div className="font-bold text-sm text-gold-400">نموذج إنشاء سؤال جديد يدويًا:</div>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                      <label className="mb-1 block text-xs font-bold text-slate-300">نوع السؤال</label>
+                      <select
+                        value={manualType}
+                        onChange={(e) => setManualType(e.target.value as QuestionType)}
+                        className={FIELD}
+                      >
+                        <option value="choose">اختيار من متعدد</option>
+                        <option value="tf">صح أو خطأ</option>
+                        <option value="fill">أكمل الفراغ</option>
+                        <option value="short">إجابة قصيرة</option>
+                        <option value="explain">اشرح / بم تفسر</option>
+                        <option value="result">ما النتائج المترتبة</option>
+                        <option value="prove">دلل / أثبت</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="mb-1 block text-xs font-bold text-slate-300">الدرجة</label>
+                      <input
+                        type="number"
+                        min={1}
+                        value={manualPoints}
+                        onChange={(e) => setManualPoints(Number(e.target.value) || 1)}
+                        className={FIELD}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="mb-1 block text-xs font-bold text-slate-300">نص السؤال</label>
+                    <textarea
+                      value={manualText}
+                      onChange={(e) => setManualText(e.target.value)}
+                      rows={3}
+                      placeholder="اكتب نص السؤال هنا..."
+                      className={`${FIELD} text-xs`}
+                    />
+                  </div>
+
+                  {manualType === 'choose' && (
+                    <div className="space-y-2">
+                      <span className="text-xs font-bold text-slate-400">الخيارات والإجابة الصحيحة:</span>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        {(['a', 'b', 'c', 'd'] as const).map((k) => (
+                          <div key={k} className="flex items-center gap-2 rounded-lg border border-navy-800 bg-navy-950 p-2">
+                            <input
+                              type="radio"
+                              name="manual_opt_ans"
+                              checked={manualAnswer === k}
+                              onChange={() => setManualAnswer(k)}
+                            />
+                            <span className="font-bold text-gold-400 uppercase">{k})</span>
+                            <input
+                              type="text"
+                              placeholder={`الخيار ${k}`}
+                              value={manualOptions[k]}
+                              onChange={(e) => setManualOptions({ ...manualOptions, [k]: e.target.value })}
+                              className="flex-1 bg-transparent text-xs text-white focus:outline-none"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {manualType === 'tf' && (
+                    <div className="flex items-center gap-3">
+                      <span className="text-xs font-bold text-slate-400">الإجابة الصحيحة:</span>
+                      <button
+                        type="button"
+                        onClick={() => setManualAnswer('صح')}
+                        className={`rounded-lg px-4 py-1.5 text-xs font-bold ${
+                          manualAnswer === 'صح' ? 'bg-emerald-500 text-white' : 'bg-navy-800 text-slate-300'
+                        }`}
+                      >
+                        صح
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setManualAnswer('خطأ')}
+                        className={`rounded-lg px-4 py-1.5 text-xs font-bold ${
+                          manualAnswer === 'خطأ' ? 'bg-rose-500 text-white' : 'bg-navy-800 text-slate-300'
+                        }`}
+                      >
+                        خطأ
+                      </button>
+                    </div>
+                  )}
+
+                  {manualType !== 'choose' && manualType !== 'tf' && (
+                    <div>
+                      <label className="mb-1 block text-xs font-bold text-slate-300">الإجابة النموذجية المعتمدة</label>
+                      <input
+                        type="text"
+                        placeholder="اكتب الإجابة النموذجية..."
+                        value={manualAnswer}
+                        onChange={(e) => setManualAnswer(e.target.value)}
+                        className={FIELD}
+                      />
+                    </div>
+                  )}
+
+                  <Button type="button" onClick={addManualQuestion} size="sm">
+                    <Plus className="h-4 w-4" />
+                    إضافة السؤال إلى التقييم
+                  </Button>
+                </div>
+              ) : (
+                <>
+                  <div>
+                    <label className="text-xs font-bold text-slate-300">الأسئلة: الصقها هنا أو ارفع ملف TXT / Word / JSON</label>
+                    <textarea
+                      value={rawText}
+                      onChange={(e) => onTextareaChange(e.target.value)}
+                      rows={7}
+                      placeholder="الصق نص الامتحان أو اختر ملفًا من الأسفل..."
+                      className={`${FIELD} text-xs`}
+                    />
+                  </div>
+                </>
+              )}
 
               <div className="flex items-center gap-3">
                 <input
@@ -548,6 +849,42 @@ export default function QuickUploadPage() {
                   className="text-xs text-slate-300 file:mr-2 file:rounded-lg file:border-0 file:bg-navy-800 file:px-3 file:py-1.5 file:text-xs file:font-bold file:text-gold-400 hover:file:bg-navy-700"
                 />
               </div>
+
+              {/* حماية الفشل الصامت (Silent Failure Protection) */}
+              {hasSilentFailure && (
+                <div className="space-y-2 rounded-xl border border-rose-500/50 bg-rose-500/15 p-4 text-xs text-rose-200">
+                  <div className="flex items-center gap-2 font-bold text-rose-300 text-sm">
+                    <AlertTriangle className="h-5 w-5 shrink-0 text-rose-400" />
+                    <span>تنبيه: يبدو أن تنسيق الملف منع التقسيم التلقائي. هل تريد المحاولة بمحلل بديل أو المراجعة اليدوية؟</span>
+                  </div>
+                  <p className="text-slate-300">
+                    تم رصد نص يحتوي على أكثر من 300 حرف لكن لم يتم استخراج سوى سؤال واحد أو أقل. يمكنك استخدام أداة التقسيم اليدوي أدناه أو التبديل للبناء اليدوي.
+                  </p>
+                  <div className="flex gap-2 pt-1">
+                    <button
+                      type="button"
+                      onClick={() => setAssessmentMode('manual')}
+                      className="rounded-lg bg-gold-400 px-3 py-1.5 font-bold text-navy-950 hover:bg-gold-300"
+                    >
+                      التحويل للبناء اليدوي
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* عداد ومراجعة الأسئلة التفاعلية (Part 2d) */}
+              {questions.length > 0 && (
+                <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-navy-800 bg-navy-950/80 p-3 text-xs">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="font-bold text-white">إجمالي الأسئلة: {questions.length}</span>
+                    <span className="text-slate-500">•</span>
+                    <Badge variant="gold">اختر: {typeCounts.choose}</Badge>
+                    <Badge variant="neutral">صح/خطأ: {typeCounts.tf}</Badge>
+                    <Badge variant="neutral">إكمال: {typeCounts.fill}</Badge>
+                    <Badge variant="neutral">مقالي: {typeCounts.essay}</Badge>
+                  </div>
+                </div>
+              )}
 
               {/* تقرير التحذيرات والأخطاء البنيوية */}
               {parsedExam && parsedExam.errors.length > 0 && (
@@ -805,14 +1142,40 @@ export default function QuickUploadPage() {
                           ناقص إجابة
                         </span>
                       )}
-                      <span className="flex-1">{q.text}</span>
-                      <button
-                        type="button"
-                        aria-label="حذف السؤال"
-                        onClick={() => setQuestions(questions.filter((_, i) => i !== index))}
-                      >
-                        <Trash2 className="h-3.5 w-3.5 text-rose-400" />
-                      </button>
+                      <span className="flex-1 font-medium">{q.text}</span>
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          type="button"
+                          title="قسّم هذا السؤال عند فاصل"
+                          onClick={() => {
+                            const splitAt = window.prompt('اكتب الكلمة أو العبارة التي تريد التقسيم عندها (أو اترك فارغًا للتقسيم بالمنتصف):');
+                            if (splitAt !== null) {
+                              setQuestions(splitQuestionAt(questions, index, splitAt));
+                            }
+                          }}
+                          className="rounded bg-navy-800 px-2 py-0.5 text-[11px] font-bold text-gold-400 hover:bg-navy-700"
+                        >
+                          قسّم هنا
+                        </button>
+                        {index > 0 && (
+                          <button
+                            type="button"
+                            title="ادمج هذا السؤال مع السؤال السابق"
+                            onClick={() => setQuestions(mergeWithPreviousQuestion(questions, index))}
+                            className="rounded bg-navy-800 px-2 py-0.5 text-[11px] font-bold text-sky-400 hover:bg-navy-700"
+                          >
+                            ادمج مع السابق
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          aria-label="حذف السؤال"
+                          onClick={() => setQuestions(deleteQuestion(questions, index))}
+                          className="p-1 hover:bg-rose-500/20 rounded"
+                        >
+                          <Trash2 className="h-3.5 w-3.5 text-rose-400" />
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>

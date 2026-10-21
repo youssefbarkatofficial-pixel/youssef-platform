@@ -23,8 +23,8 @@ const LEGACY_ARABIC_MAP: Record<string, string> = {
 
 const SECTION_KEYWORDS = [
   { regex: /اختر/i, type: 'choose' },
-  { regex: /صح\s*\/\s*خطأ|صح\s*أو\s*خطأ|ضع علامة/i, type: 'truefalse' },
-  { regex: /أكمل/i, type: 'fill' },
+  { regex: /صح\s*\/\s*خطأ|صح\s*أو\s*خطأ|ضع علامة|صواب\s*\)\s*أمام|اكتب\s*كلمة\s*\(\s*صواب\s*\)/i, type: 'truefalse' },
+  { regex: /أكمل|اكمل/i, type: 'fill' },
   { regex: /صوب/i, type: 'correct' },
   { regex: /اكتب ما تشير/i, type: 'term' },
   { regex: /من هو/i, type: 'who' },
@@ -37,6 +37,7 @@ const SECTION_KEYWORDS = [
   { regex: /ماذا يحدث/i, type: 'whatif' },
   { regex: /المقصود/i, type: 'define' },
   { regex: /رأيك/i, type: 'opinion' },
+  { regex: /أسئلة متنوعة|اسئلة متنوعة/i, type: 'general' },
 ];
 
 export interface ParsedQuestion {
@@ -96,6 +97,34 @@ export function normalizeDigits(text: string): string {
 }
 
 /**
+ * تحويل HTML الناتج عن mammoth.convertToHtml إلى نص منظَّم يدعم الترقيم التلقائي
+ * للقوائم المرقمة <ol><li> مع الحفاظ على عناوين الأقسام.
+ */
+export function convertHtmlToStructuredText(html: string): string {
+  let text = html.replace(/<ol\b[^>]*>([\s\S]*?)<\/ol>/gi, (_match, content) => {
+    let index = 1;
+    return content.replace(/<li\b[^>]*>([\s\S]*?)<\/li>/gi, (_m, liContent) => {
+      return `<p>Q_NUM_${index++}_END ${liContent}</p>`;
+    });
+  });
+  text = text.replace(/<ul\b[^>]*>([\s\S]*?)<\/ul>/gi, (_match, content) => {
+    return content.replace(/<li\b[^>]*>([\s\S]*?)<\/li>/gi, '<p>- $1</p>');
+  });
+  text = text.replace(/<h[1-6]\b[^>]*>([\s\S]*?)<\/h[1-6]>/gi, '\n###SECTION### $1\n');
+  text = text.replace(/<\/p>/gi, '\n');
+  text = text.replace(/<br\s*\/?>/gi, '\n');
+  text = text.replace(/<tr\b[^>]*>/gi, '\n');
+  text = text.replace(/<\/td>/gi, ' | ');
+  text = text.replace(/<[^>]+>/g, '');
+  text = text
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>');
+  return text;
+}
+
+/**
  * المحلل الشامل للامتحانات بحسب مواصفات Antigravity v44
  */
 export function parseExamText(rawText: string): ParsedExam {
@@ -110,11 +139,15 @@ export function parseExamText(rawText: string): ParsedExam {
   const sections: ParsedSection[] = [];
 
   const headerRegex = /^(.+?):\s*(.+?)\s*\((\d+)\s*(?:سؤال|أسئلة)[^)]*\)\s*:?\s*$/;
-  const qStartRegex = /^(\d+)\s*[.\-)]\s*(.*)$/;
+  const flexibleHeaderRegex =
+    /^(?:###SECTION###\s*)?(?:(?:\d+|[٠-٩]+|[أ-يA-Za-z])[\s\.\-\):]\s*)?(?:السؤال\s*(?:الأول|الثاني|الثالث|الرابع|الخامس|السادس|السابع|الثامن|التاسع|العاشر)[\s\:\.\-]*\s*)?(?:اختر\s*(?:الاجابة|الإجابة)|أكمل\s*العبارات|اكمل\s*العبارات|اكتب\s*كلمة\s*\(\s*صواب\s*\)|صح\s*و\s*(?:خطأ|غلط)|ضع\s*علامة\s*\(\s*صح\s*\)|بم\s*تفسر|ما\s*النتائج\s*المترتبة|دلل\s*على\s*صحة|قارن\s*بين|ما\s*تشير\s*إليه|أسئلة\s*متنوعة|اسئلة\s*متنوعة)(.*)$/i;
+  const qStartRegex =
+    /^(?:Q_NUM_(\d+)_END\s*|\((\d+)\)\s*|(\d+)\s*[.\-):]\s*|(?:س|السؤال)\s*\(?(\d+)\)?\s*[.\-):]?\s*)(.*)$/;
   const ansRegex = /^(?:الإجابة|الاجابة|إجابة|اجابة|الجواب|الحل)\s*[:\-]\s*(.*)$/i;
   const pointsRegex = /^(?:الدرجة|الدرجه)\s*[:\-]\s*(\d+)\s*$/i;
   const pointsParenRegex = /^\((\d+)\s*(?:درجة|درجات|درجه)\)\s*$/i;
-  const formatBOptRegex = /^([أ-يA-Za-z])\s*[\)\.\-]\s*(.*)$/;
+  const formatBOptRegex = /^([أ-يA-Za-z])\s*[\)\.\-:]\s*(.*)$/;
+  const inlineOptionsRegex = /^[\(\[]([^\)\]]+[-–—/][^\)\]]+)[\)\]]$/;
 
   let currentSection: ParsedSection | null = null;
   let currentQuestion: {
@@ -236,13 +269,13 @@ export function parseExamText(rawText: string): ParsedExam {
     // عنوان الامتحان (السطر الأول قبل أي قسم)
     if (!currentSection && !title && !line.startsWith('إعداد:')) {
       const match = line.match(headerRegex);
-      if (!match) {
+      if (!match && !flexibleHeaderRegex.test(line)) {
         title = line;
         continue;
       }
     }
 
-    // سطر رأس القسم
+    // سطر رأس القسم الصارم
     const headerMatch = line.match(headerRegex);
     if (headerMatch && !/^\d+\s*[.\-)]/.test(line)) {
       finishCurrentQuestion();
@@ -268,15 +301,51 @@ export function parseExamText(rawText: string): ParsedExam {
       continue;
     }
 
-    if (!currentSection) continue;
+    // سطر رأس القسم المرن
+    const isSectionHeader =
+      (line.startsWith('###SECTION###') && line.replace(/^###SECTION###\s*/, '').trim().length > 0) ||
+      (!headerRegex.test(line) &&
+        flexibleHeaderRegex.test(line) &&
+        !line.includes('................') &&
+        !/^\d+\s*[.\-)]\s*(?:قارن\s*بين\s*|ما\s*تشير\s*إليه\s*[^\n]{10,})/.test(line));
+
+    if (isSectionHeader) {
+      finishCurrentQuestion();
+
+      let detectedType = 'general';
+      for (const kw of SECTION_KEYWORDS) {
+        if (kw.regex.test(line)) {
+          detectedType = kw.type;
+          break;
+        }
+      }
+
+      currentSection = {
+        header: line.replace(/^###SECTION###\s*/, '').trim(),
+        type: detectedType,
+        declaredCount: 0,
+        questions: [],
+      };
+      sections.push(currentSection);
+      continue;
+    }
 
     // بداية سؤال جديد
     const qStart = line.match(qStartRegex);
     if (qStart) {
+      if (!currentSection) {
+        currentSection = {
+          header: 'الأسئلة العامة',
+          type: 'general',
+          declaredCount: 0,
+          questions: [],
+        };
+        sections.push(currentSection);
+      }
       finishCurrentQuestion();
       currentQuestion = {
-        number: parseInt(qStart[1], 10),
-        stem: qStart[2] || '',
+        number: parseInt(qStart[1] || qStart[2] || qStart[3] || qStart[4] || '1', 10),
+        stem: qStart[5] || '',
         points: undefined,
         options: null,
         correctIndex: undefined,
@@ -302,14 +371,14 @@ export function parseExamText(rawText: string): ParsedExam {
     }
 
     // خيارات الصيغة أ: (خيار1 - خيار2 - خيار3 - خيار4)
-    if (line.startsWith('(') && line.endsWith(')') && /[-–—]/.test(line)) {
-      const inner = line.slice(1, -1).trim();
-      const parts = inner.split(/\s*[-–—]\s*/).map((p) => p.trim()).filter(Boolean);
+    const inlineMatch = line.match(inlineOptionsRegex);
+    if (inlineMatch) {
+      const parts = inlineMatch[1].split(/\s*[-–—/]\s*/).map((p) => p.trim()).filter(Boolean);
       if (parts.length >= 2) {
         currentQuestion.options = parts.map((part, idx) => {
-          if (part.startsWith('*')) {
+          if (part.startsWith('*') || part.startsWith('✓') || part.startsWith('✔')) {
             if (currentQuestion) currentQuestion.correctIndex = idx;
-            return part.slice(1).trim();
+            return part.replace(/^[*✓✔]\s*/, '').trim();
           }
           return part;
         });
@@ -336,13 +405,19 @@ export function parseExamText(rawText: string): ParsedExam {
 
   finishCurrentQuestion();
 
-  // التحقق من مطابقة عدد الأسئلة المقسمة للعدد المعلن
+  // التحقق من مطابقة عدد الأسئلة المقسمة للعدد المعلن (فقط إن كان معلنًا)
   for (const s of sections) {
-    if (s.declaredCount !== s.questions.length) {
+    if (s.declaredCount > 0 && s.declaredCount !== s.questions.length) {
       warnings.push(
         `القسم "${s.header}": عدد الأسئلة المقسّمة (${s.questions.length}) لا يطابق العدد المعلن في العنوان (${s.declaredCount}).`,
       );
     }
+  }
+
+  // حماية الفشل الصامت (Silent Failure Protection)
+  const totalQuestions = sections.reduce((sum, s) => sum + s.questions.length, 0);
+  if (text.length > 300 && totalQuestions <= 1) {
+    warnings.push('تنبيه: يبدو أن تنسيق الملف منع التقسيم التلقائي. هل تريد المحاولة بمحلل بديل أو المراجعة اليدوية؟');
   }
 
   return { title, sections, warnings, errors };
@@ -543,18 +618,47 @@ export function parseExamFromJson(jsonStr: string): ParsedExam {
 /**
  * استخراج الأسئلة من ملف Word docx
  */
-export async function parseExamFromDocx(input: ArrayBuffer | Blob | File): Promise<ParsedExam> {
-  const buffer = input instanceof ArrayBuffer ? input : await (input as Blob).arrayBuffer();
+export async function parseExamFromDocx(input: ArrayBuffer | Blob | File | Uint8Array): Promise<ParsedExam> {
+  const isNodeBuf = typeof Buffer !== 'undefined' && Buffer.isBuffer(input);
+  const buffer: ArrayBuffer =
+    input instanceof ArrayBuffer
+      ? input
+      : isNodeBuf
+        ? (input as any).buffer.slice(
+            (input as any).byteOffset,
+            (input as any).byteOffset + (input as any).byteLength,
+          )
+        : typeof (input as any).arrayBuffer === 'function'
+          ? await (input as Blob).arrayBuffer()
+          : (input as any);
   let text = '';
   try {
     const mammoth = await import('mammoth');
-    const extractFn = (mammoth as any).extractRawText || (mammoth as any).default?.extractRawText;
-    if (extractFn) {
-      const res = await extractFn({ arrayBuffer: buffer });
-      text = res.value;
+    const convertFn = (mammoth as any).convertToHtml || (mammoth as any).default?.convertToHtml;
+    if (convertFn) {
+      const isNode = typeof process !== 'undefined' && process.versions != null && process.versions.node != null;
+      const mammothInput = isNode
+        ? { buffer: Buffer.isBuffer(buffer) ? buffer : Buffer.from(buffer) }
+        : { arrayBuffer: buffer };
+      const res = await convertFn(mammothInput);
+      if (res && res.value) {
+        text = convertHtmlToStructuredText(res.value);
+      }
     }
   } catch {
-    // fallback to internal zip extractor
+    // fallback to extractRawText or internal zip
+  }
+  if (!text) {
+    try {
+      const mammoth = await import('mammoth');
+      const extractFn = (mammoth as any).extractRawText || (mammoth as any).default?.extractRawText;
+      if (extractFn) {
+        const res = await extractFn({ arrayBuffer: buffer });
+        text = res.value;
+      }
+    } catch {
+      // fallback
+    }
   }
   if (!text) {
     text = await extractTextFromDocx(buffer);
@@ -1035,4 +1139,233 @@ export async function parseQuestionsFromPdf(input: ArrayBuffer | Blob | File): P
   const { extractTextFromPdf } = await import('./pdfExtract.ts');
   const text = await extractTextFromPdf(buffer);
   return parseQuestionsFromTxt(text);
+}
+
+// ---------- مساعدات المراجعة التفاعلية (Review Helpers) ----------
+
+export function splitQuestionAt(
+  questions: QuestionDraft[],
+  index: number,
+  splitTextOrPosition: number | string,
+): QuestionDraft[] {
+  if (index < 0 || index >= questions.length) return questions;
+  const target = questions[index];
+  let firstPart = target.text;
+  let secondPart = '';
+
+  if (typeof splitTextOrPosition === 'number') {
+    const pos = Math.max(0, Math.min(splitTextOrPosition, target.text.length));
+    firstPart = target.text.slice(0, pos).trim();
+    secondPart = target.text.slice(pos).trim();
+  } else {
+    const str = String(splitTextOrPosition).trim();
+    const idx = target.text.indexOf(str);
+    if (idx !== -1) {
+      firstPart = target.text.slice(0, idx).trim();
+      secondPart = target.text.slice(idx).trim();
+    } else {
+      const nl = target.text.indexOf('\n');
+      if (nl !== -1) {
+        firstPart = target.text.slice(0, nl).trim();
+        secondPart = target.text.slice(nl + 1).trim();
+      } else {
+        const mid = Math.floor(target.text.length / 2);
+        firstPart = target.text.slice(0, mid).trim();
+        secondPart = target.text.slice(mid).trim();
+      }
+    }
+  }
+
+  const updatedTarget: QuestionDraft = { ...target, text: firstPart };
+  const newQuestion: QuestionDraft = {
+    id: newQuestionId(),
+    type: target.type,
+    text: secondPart,
+    points: target.points,
+    options: target.options ? { ...target.options } : null,
+    answer: '',
+    altAnswers: [],
+    rubric: [],
+    needsReview: true,
+  };
+
+  const next = [...questions];
+  next.splice(index, 1, updatedTarget, newQuestion);
+  return next;
+}
+
+export function mergeWithPreviousQuestion(questions: QuestionDraft[], index: number): QuestionDraft[] {
+  if (index <= 0 || index >= questions.length) return questions;
+  const prev = questions[index - 1];
+  const curr = questions[index];
+  const mergedText = `${prev.text.trim()}\n${curr.text.trim()}`;
+  const mergedQuestion: QuestionDraft = {
+    ...prev,
+    text: mergedText,
+  };
+  const next = [...questions];
+  next.splice(index - 1, 2, mergedQuestion);
+  return next;
+}
+
+export function deleteQuestion(questions: QuestionDraft[], index: number): QuestionDraft[] {
+  if (index < 0 || index >= questions.length) return questions;
+  return questions.filter((_, i) => i !== index);
+}
+
+export function changeQuestionType(
+  questions: QuestionDraft[],
+  index: number,
+  newType: QuestionType,
+): QuestionDraft[] {
+  if (index < 0 || index >= questions.length) return questions;
+  const next = [...questions];
+  const current = next[index];
+  next[index] = {
+    ...current,
+    type: newType,
+    options: newType === 'choose' ? (current.options ?? { a: '', b: '', c: '', d: '' }) : null,
+    answer: newType === 'tf' ? 'صح' : current.answer,
+  };
+  return next;
+}
+
+export function setQuestionCorrectAnswer(
+  questions: QuestionDraft[],
+  index: number,
+  answer: string,
+): QuestionDraft[] {
+  if (index < 0 || index >= questions.length) return questions;
+  const next = [...questions];
+  next[index] = {
+    ...next[index],
+    answer,
+    needsReview: false,
+  };
+  return next;
+}
+
+// ---------- مساعدات جدول القاهرة الأسبوعي الذكي (Cairo Weekly Schedule) ----------
+
+export function getNextCairoDateTime(
+  targetDay: number,
+  hour: number = 21,
+  minute: number = 0,
+  fromDate: Date = new Date(),
+): { isoLocal: string; timestampMs: number } {
+  const formatter = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'Africa/Cairo',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+  });
+  const parts = formatter.formatToParts(fromDate);
+  const map: Record<string, string> = {};
+  parts.forEach((p) => {
+    map[p.type] = p.value;
+  });
+
+  const cairoYear = parseInt(map.year, 10);
+  const cairoMonth = parseInt(map.month, 10) - 1;
+  const cairoDay = parseInt(map.day, 10);
+  const cairoHour = parseInt(map.hour, 10);
+
+  const d = new Date(Date.UTC(cairoYear, cairoMonth, cairoDay, hour, minute));
+  const currentDay = d.getUTCDay();
+  let daysToAdd = (targetDay - currentDay + 7) % 7;
+  if (daysToAdd === 0 && cairoHour >= hour) {
+    daysToAdd = 7;
+  }
+  d.setUTCDate(d.getUTCDate() + daysToAdd);
+
+  const yyyy = d.getUTCFullYear();
+  const mm = String(d.getUTCMonth() + 1).padStart(2, '0');
+  const dd = String(d.getUTCDate()).padStart(2, '0');
+  const hh = String(hour).padStart(2, '0');
+  const min = String(minute).padStart(2, '0');
+
+  const isoLocal = `${yyyy}-${mm}-${dd}T${hh}:${min}`;
+  const timestampMs = new Date(`${isoLocal}:00+02:00`).getTime();
+  return { isoLocal, timestampMs };
+}
+
+export function getCairoNextSchedule(
+  kind: 'training' | 'homework' | 'exam',
+  fromDate: Date = new Date(),
+): {
+  availableFrom: string;
+  availableUntil: string;
+  summary: string;
+} {
+  if (kind === 'homework') {
+    // الواجب: يفتح الثلاثاء 9:00 مساءً ويغلق الخميس 9:00 مساءً
+    const open = getNextCairoDateTime(2, 21, 0, fromDate);
+    const close = getNextCairoDateTime(4, 21, 0, new Date(open.timestampMs));
+    return {
+      availableFrom: open.isoLocal,
+      availableUntil: close.isoLocal,
+      summary: 'هذا الواجب سيفتح للطلاب يوم الثلاثاء 9:00 م ويغلق الخميس 9:00 م، ويتطلب 50% لفتح المحاضرة التالية.',
+    };
+  }
+
+  if (kind === 'exam') {
+    // الامتحان: يفتح الأربعاء 9:00 مساءً ويغلق الخميس 9:00 مساءً
+    const open = getNextCairoDateTime(3, 21, 0, fromDate);
+    const close = getNextCairoDateTime(4, 21, 0, new Date(open.timestampMs));
+    return {
+      availableFrom: open.isoLocal,
+      availableUntil: close.isoLocal,
+      summary: 'هذا الامتحان سيفتح للطلاب يوم الأربعاء 9:00 م ويغلق الخميس 9:00 م، ويتطلب 50% لفتح المحاضرة التالية.',
+    };
+  }
+
+  // التدريب: يفتح الخميس 9:00 مساءً ومفتوح بعدها
+  const open = getNextCairoDateTime(4, 21, 0, fromDate);
+  return {
+    availableFrom: open.isoLocal,
+    availableUntil: '',
+    summary: 'هذا التدريب سيفتح للطلاب يوم الخميس 9:00 م، ويتطلب 50% لفتح المحاضرة التالية.',
+  };
+}
+
+export function formatCairoScheduleSummary(
+  kind: 'training' | 'homework' | 'exam',
+  availableFrom?: string | null,
+  availableUntil?: string | null,
+  passingScore: number = 50,
+): string {
+  const kindLabel = kind === 'homework' ? 'الواجب' : kind === 'training' ? 'التدريب' : 'الامتحان';
+  if (!availableFrom) {
+    return `هذا ${kindLabel} متاح فوراً بدون قيود زمنية، ويتطلب ${passingScore}% لفتح المحاضرة التالية.`;
+  }
+  const fromMs = new Date(availableFrom).getTime();
+  const fromStr = isNaN(fromMs)
+    ? availableFrom
+    : new Date(fromMs).toLocaleDateString('ar-EG', {
+        timeZone: 'Africa/Cairo',
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+  if (!availableUntil) {
+    return `هذا ${kindLabel} سيفتح للطلاب يوم ${fromStr}، ويتطلب ${passingScore}% لفتح المحاضرة التالية.`;
+  }
+  const untilMs = new Date(availableUntil).getTime();
+  const untilStr = isNaN(untilMs)
+    ? availableUntil
+    : new Date(untilMs).toLocaleDateString('ar-EG', {
+        timeZone: 'Africa/Cairo',
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+  return `هذا ${kindLabel} سيفتح للطلاب يوم ${fromStr} ويغلق يوم ${untilStr}، ويتطلب ${passingScore}% لفتح المحاضرة التالية.`;
 }

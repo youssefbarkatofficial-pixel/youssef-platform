@@ -1,15 +1,16 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
+import { Capacitor } from '@capacitor/core';
 import type { BeforeInstallPromptEvent } from '../../pwa/captureInstallPrompt';
 
 /**
  * Floating "install the app" button — bottom-RIGHT, mirror of the compass button (bottom-LEFT).
  * Mount ONCE in the root layout (next to the compass), so it appears on every page.
  *
- * - Android/Chrome/Edge: uses the real install prompt (beforeinstallprompt).
- * - iPhone/iPad (Safari): no prompt exists → shows a short how-to sheet (Share → Add to Home Screen).
- * - Hidden when already running as an installed app, after the user dismisses it (3 days),
- *   and on pages where it could cover content (exam taking, fullscreen video). Adjust HIDE_ON to the real routes.
+ * - Android (browser, not standalone): downloads /downloads/ybplatform.apk directly and shows 3-step guide.
+ * - iPhone/iPad (Safari): shows how-to sheet (Share → Add to Home Screen).
+ * - Native app (Capacitor.isNativePlatform): hidden completely.
+ * - Hidden when already running as standalone or dismissed.
  */
 const HIDE_ON: RegExp[] = [
   /\/assessment\//i,
@@ -30,8 +31,13 @@ function isStandalone(): boolean {
   );
 }
 function isIOS(): boolean {
+  if (typeof navigator === 'undefined') return false;
   const ua = navigator.userAgent;
   return /iphone|ipad|ipod/i.test(ua) || (ua.includes('Mac') && 'ontouchend' in document);
+}
+function isAndroid(): boolean {
+  if (typeof navigator === 'undefined') return false;
+  return /android/i.test(navigator.userAgent);
 }
 function dismissedRecently(): boolean {
   try {
@@ -47,6 +53,7 @@ export default function InstallAppButton() {
   const [hidden, setHidden] = useState<boolean>(() => dismissedRecently());
   const [sheet, setSheet] = useState(false);
   const ios = useMemo(() => isIOS(), []);
+  const android = useMemo(() => isAndroid(), []);
 
   useEffect(() => {
     const onAvail = () => setAvailable(true);
@@ -60,6 +67,18 @@ export default function InstallAppButton() {
   }, []);
 
   const onClick = useCallback(async () => {
+    // Android in browser (not standalone): direct APK download + 3-step Egyptian guide
+    if (android && !isStandalone()) {
+      const a = document.createElement('a');
+      a.href = '/downloads/ybplatform.apk';
+      a.download = 'ybplatform.apk';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setSheet(true);
+      return;
+    }
+
     const evt = window.__ybInstallPrompt as BeforeInstallPromptEvent | null | undefined;
     if (evt) {
       await evt.prompt();
@@ -70,17 +89,20 @@ export default function InstallAppButton() {
       return;
     }
     setSheet(true); // iOS and browsers without a native prompt
-  }, []);
+  }, [android]);
 
   const dismiss = useCallback(() => {
     try { localStorage.setItem(DISMISS_KEY, String(Date.now() + DISMISS_MS)); } catch { /* ignore */ }
     setHidden(true);
   }, []);
 
+  // Hidden inside native app (Capacitor)
+  if (Capacitor.isNativePlatform()) return null;
+
   const hideHere = HIDE_ON.some((re) => re.test(pathname));
-  // show when: not installed, not dismissed, not on a hidden route, and (native prompt ready OR iOS OR generic fallback)
+  // show when: not installed, not dismissed, not on a hidden route
   if (installed || hidden || hideHere) return null;
-  if (!available && !ios && !('serviceWorker' in navigator)) return null;
+  if (!available && !ios && !android && !('serviceWorker' in navigator)) return null;
 
   return (
     <>
@@ -140,8 +162,16 @@ export default function InstallAppButton() {
               border: '1px solid rgba(212,166,79,.35)',
             }}
           >
-            <h3 style={{ margin: '0 0 12px', fontSize: 18 }}>تحميل التطبيق</h3>
-            {ios ? (
+            <h3 style={{ margin: '0 0 12px', fontSize: 18 }}>
+              {android ? 'تثبيت تطبيق يوسف بركات' : 'تحميل التطبيق'}
+            </h3>
+            {android ? (
+              <ol style={{ margin: 0, paddingInlineStart: 20, lineHeight: 2.2, color: '#d6dbe7', fontSize: 15 }}>
+                <li><b>افتح الملف من التنزيلات:</b> بعد ما ينزل الملف، اضغط عليه من إشعارات الموبايل أو فولدر Downloads.</li>
+                <li><b>اسمح بالتثبيت من المصدر ده:</b> لو ظهرلك تنبيه أمان، ادخل الإعدادات وفعّل السماح للمتصفح بتثبيت التطبيقات.</li>
+                <li><b>ثبّت وافتح "يوسف بركات":</b> اضغط تثبيت، وبكده التطبيق جاهز وتقدر تفتحه مباشرة من الشاشة الرئيسية!</li>
+              </ol>
+            ) : ios ? (
               <ol style={{ margin: 0, paddingInlineStart: 20, lineHeight: 2, color: '#d6dbe7' }}>
                 <li>افتح الموقع من <b>Safari</b>.</li>
                 <li>اضغط زر <b>المشاركة</b> (المربع والسهم لفوق).</li>
@@ -159,7 +189,7 @@ export default function InstallAppButton() {
               type="button" onClick={() => setSheet(false)}
               style={{ marginTop: 16, width: '100%', height: 46, border: 0, borderRadius: 12, fontWeight: 800, fontSize: 15, cursor: 'pointer', color: '#071226', background: 'linear-gradient(135deg,#d4a64f,#f3d082,#b88a3a)' }}
             >
-              تمام
+              فهمت، شكراً
             </button>
           </div>
         </div>
