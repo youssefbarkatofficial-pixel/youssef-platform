@@ -737,6 +737,15 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // ---------- Content Guard (حماية المحتوى بالبديل المجاني) ----------
+
+    match /courseFiles/{courseId} {
+      allow get: if canReadExamContent(courseId);
+      allow list: if isAdmin();
+      allow create, update: if isAdmin();
+      allow delete: if false;
+    }
+
     match /{document=**} {
       allow read, write: if false;
     }
