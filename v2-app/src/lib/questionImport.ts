@@ -479,3 +479,14 @@ export function proposeLectureOrderingFromFiles(files: (File | string)[]): Propo
 
   return drafts.sort((a, b) => a.order - b.order);
 }
+
+
+/**
+ * استخراج الأسئلة من ملف PDF عبر pdfjs-dist وتحويلها لهيكل التقييم
+ */
+export async function parseQuestionsFromPdf(input: ArrayBuffer | Blob | File): Promise<ImportResult> {
+  const buffer = input instanceof ArrayBuffer ? input : await (input as Blob).arrayBuffer();
+  const { extractTextFromPdf } = await import('./pdfExtract.ts');
+  const text = await extractTextFromPdf(buffer);
+  return parseQuestionsFromTxt(text);
+}
