@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   AlertTriangle,
+  Clock,
   Bell,
   Check,
   ChevronLeft,
@@ -23,6 +24,14 @@ import {
 import { Badge, Card, EmptyState, Spinner, StatCard, Button } from '../../components/ui';
 import { useCourses } from '../../hooks/useCourses';
 import { calcWatchPercent, getOfficialScores, videoIdsForStudent } from '../../lib/stats';
+import {
+  commitmentLevel,
+  dailyAtRiskSummary,
+  dueFollowUps,
+  canMessageThisWeek,
+  encouragementFor,
+  stuckLessons,
+} from '../../lib/radarExtras';
 import {
   SEGMENT_LABELS,
   buildRadar,
@@ -213,6 +222,10 @@ export default function RadarPage() {
     };
   }, [students, courses, sort, filter, search]);
 
+  const atRiskSummary = useMemo(() => dailyAtRiskSummary(rows), [rows]);
+  const dueFollowUpIds = useMemo(() => dueFollowUps(rows, Date.now()), [rows]);
+  const topStuckLessons = useMemo(() => stuckLessons(rows, 3), [rows]);
+
   // Compute segment counts across all students
   const counts = useMemo(() => {
     const rawAll = students.map((s) => ({
@@ -360,6 +373,35 @@ export default function RadarPage() {
           >
             <RefreshCw className="h-3.5 w-3.5" /> تحديث
           </button>
+        </div>
+      </div>
+
+      {/* Daily Risk & Follow-up Summary Banner (radarExtras) */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div className="rounded-xl border border-red-500/30 bg-red-950/20 p-3 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="h-2.5 w-2.5 rounded-full bg-red-500 animate-pulse" />
+            <span className="text-xs font-bold text-slate-300">طلاب في خطر:</span>
+          </div>
+          <span className="text-sm font-extrabold text-red-400">{atRiskSummary.count} <span className="text-xs text-slate-500 font-normal">/ {atRiskSummary.total}</span></span>
+        </div>
+
+        <div className="rounded-xl border border-amber-500/30 bg-amber-950/20 p-3 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Clock className="h-4 w-4 text-amber-400" />
+            <span className="text-xs font-bold text-slate-300">متابعات مستحقة اليوم:</span>
+          </div>
+          <span className="text-sm font-extrabold text-amber-400">{dueFollowUpIds.length}</span>
+        </div>
+
+        <div className="rounded-xl border border-blue-500/30 bg-blue-950/20 p-3 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Flame className="h-4 w-4 text-blue-400" />
+            <span className="text-xs font-bold text-slate-300">أكثر المحاضرات توقفًا:</span>
+          </div>
+          <span className="text-xs font-bold text-blue-300 truncate max-w-[120px]">
+            {topStuckLessons.length > 0 ? topStuckLessons.map(l => l.lectureId).join(', ') : 'لا يوجد'}
+          </span>
         </div>
       </div>
 
@@ -569,20 +611,42 @@ export default function RadarPage() {
                     </td>
 
                     <td className="p-2.5">
-                      <span
-                        className={`font-black ${
-                          row.risk >= 70 ? 'text-red-400' : row.risk >= 40 ? 'text-amber-400' : 'text-emerald-400'
-                        }`}
-                      >
-                        {row.risk}
-                      </span>
+                      <div className="flex items-center gap-1.5">
+                        <span
+                          className={`font-black ${
+                            row.risk >= 70 ? 'text-red-400' : row.risk >= 40 ? 'text-amber-400' : 'text-emerald-400'
+                          }`}
+                        >
+                          {row.risk}
+                        </span>
+                        {(() => {
+                          const color = commitmentLevel(row);
+                          const bg =
+                            color === 'green'
+                              ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
+                              : color === 'amber'
+                              ? 'bg-amber-500/15 text-amber-400 border-amber-500/30'
+                              : 'bg-red-500/15 text-red-400 border-red-500/30';
+                          const label =
+                            color === 'green'
+                              ? 'ملتزم'
+                              : color === 'amber'
+                              ? 'متوسط'
+                              : 'منخفض';
+                          return (
+                            <span className={`rounded px-1.5 py-0.5 text-[10px] font-bold border ${bg}`}>
+                              {label}
+                            </span>
+                          );
+                        })()}
+                      </div>
                     </td>
 
                     <td className="p-2.5">
                       <div className="flex items-center gap-1.5">
                         {row.phone && (
                           <a
-                            href={whatsappLink(row.phone, messageFor(row.segment, row.name, false))}
+                            href={whatsappLink(row.phone, encouragementFor(row) || messageFor(row.segment, row.name, false))}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex items-center gap-1 rounded-lg bg-emerald-600/20 px-2 py-1 text-[11px] font-bold text-emerald-300 hover:bg-emerald-600/30"
@@ -692,29 +756,37 @@ export default function RadarPage() {
               <div className="mt-4 space-y-4">
                 {currentQueueStudent ? (
                   <>
-                    <div className="flex items-center justify-between rounded-xl bg-navy-950/80 p-3 text-xs border border-navy-800">
-                      <div>
-                        <p className="font-bold text-white text-sm">{currentQueueStudent.name}</p>
-                        <p className="text-slate-400 mt-0.5">
-                          هاتف: {useParentPhone ? currentQueueStudent.parentPhone || 'غير متوفر' : currentQueueStudent.phone}
-                        </p>
-                      </div>
-                      <div className="text-end">
-                        <span className="text-[11px] text-gold-400 font-bold">
-                          طالب {queueIndex + 1} من {queueStudents.length}
-                        </span>
-                        <div className="mt-1">
-                          <label className="flex items-center gap-1.5 cursor-pointer text-[11px] text-slate-300">
-                            <input
-                              type="checkbox"
-                              checked={useParentPhone}
-                              onChange={(e) => setUseParentPhone(e.target.checked)}
-                              className="rounded border-navy-600 bg-navy-800 text-gold-500 focus:ring-0"
-                            />
-                            <span>رقم ولي الأمر</span>
-                          </label>
+                    <div className="rounded-xl bg-navy-950/80 p-3 text-xs border border-navy-800">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-bold text-white text-sm">{currentQueueStudent.name}</p>
+                          <p className="text-slate-400 mt-0.5">
+                            هاتف: {useParentPhone ? currentQueueStudent.parentPhone || 'غير متوفر' : currentQueueStudent.phone}
+                          </p>
+                        </div>
+                        <div className="text-end">
+                          <span className="text-[11px] text-gold-400 font-bold">
+                            طالب {queueIndex + 1} من {queueStudents.length}
+                          </span>
+                          <div className="mt-1">
+                            <label className="flex items-center gap-1.5 cursor-pointer text-[11px] text-slate-300">
+                              <input
+                                type="checkbox"
+                                checked={useParentPhone}
+                                onChange={(e) => setUseParentPhone(e.target.checked)}
+                                className="rounded border-navy-600 bg-navy-800 text-gold-500 focus:ring-0"
+                              />
+                              <span>رقم ولي الأمر</span>
+                            </label>
+                          </div>
                         </div>
                       </div>
+                      {!canMessageThisWeek(currentQueueStudent, Date.now()) && (
+                        <div className="mt-2 flex items-center gap-1.5 rounded-lg border border-amber-500/30 bg-amber-500/15 p-2 text-[11px] text-amber-300">
+                          <AlertTriangle className="h-3.5 w-3.5 text-amber-400 shrink-0" />
+                          <span>تنبيه: أُرسل لهذا الطالب رسالة خلال آخر 7 أيام بالفعل.</span>
+                        </div>
+                      )}
                     </div>
 
                     <div>
