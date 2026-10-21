@@ -1,0 +1,755 @@
+// قواعد الأمان الجديدة (النسخة السادسة: خطة Spark المجانية).
+// ملف فقط، غير منشور. تُنشر يوم التحويل النهائي بطلب من المالك.
+// المشروع على Spark: لا Cloud Functions ولا Cloud Storage. كل الحماية هنا في القواعد.
+// أي مجموعة غير مذكورة هنا ممنوعة.
+// المرحلة 5 أضافت: support_tickets وsent_notifications وأدوار الأدمن وتصفير الدخل.
+// مجموعات المراحل القادمة (bot_chats/bot_settings، اللعبة users، platform_settings)
+// ممنوعة حاليًا عمدًا، وتُضاف قواعدها مع كود ميزاتها في المرحلة 6 وما بعدها.
+//
+// ملاحظات:
+// 1) الأدمن هو المالك الأساسي أو من له مستند في platformAdmins (المعرّف = الإيميل بحروف صغيرة)
+//    ما لم يكن active = false. الدور role: admin (أو بلا دور = admin للتوافق) أو assistant.
+//    المساعد (assistant) محجوب عنه: تصفير الدخل، والدعم الفني (support_tickets)، ولاحقًا البوصلة.
+// 2) حقل plainPassword القديم في بعض مستندات الطلاب يبقى مقروءًا لصاحب المستند وللأدمن
+//    ما دام موجودًا في البيانات. حذفه من البيانات قرار يخص المالك، ويتم يدويًا يوم التحويل.
+// 3) أقسام الكورس وروابط الفيديو وأسئلة الامتحانات القديمة (بإجاباتها) داخل مستند الكورس نفسه،
+//    فالقاعدة لا تستطيع إخفاءها عن غير المشترك (خطة الحماية في المرحلة 8، لم تُنفَّذ بعد).
+// 4) هذه القواعد تفترض أن مستند الطالب معرّفه uid. يجب دمج المستندات القديمة (sync_<phone>)
+//    داخل students/{uid} قبل يوم الاستبدال.
+// 5) درجات الامتحانات الجديدة تُحسب على جهاز الطالب، والقواعد تضمن فقط:
+//    - لا أكثر من 3 محاولات، ولا محاولة n بدون n-1، ومعرّف التسليم = uid_examId_n.
+//    - التسليم لا يتغير بعد إنشائه، وتُكتب النتيجة فيه مرة واحدة فقط.
+//    - المفاتيح (examKeys) لا يقرؤها الطالب إلا بعد أن يسلّم.
+//    - نسخة النتيجة في examResults تطابق نتيجة التسليم حرفيًا.
+//    وصحة الدرجة نفسها تُراجَع من شاشة نتائج الأدمن (إعادة الحساب من الإجابات المحفوظة).
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---------- دوال مساعدة ----------
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function hasEmail() {
+      return isSignedIn() && request.auth.token.email != null;
+    }
+
+    function emailLower() {
+      return request.auth.token.email.lower();
+    }
+
+    function isOwner() {
+      return hasEmail() && emailLower() == 'youssefbarkatofficial@gmail.com';
+    }
+
+    function isExtraAdmin() {
+      return hasEmail()
+        && exists(/databases/$(database)/documents/platformAdmins/$(emailLower()))
+        && get(/databases/$(database)/documents/platformAdmins/$(emailLower())).data.get('active', true) != false;
+    }
+
+    function isAdmin() {
+      return isOwner() || isExtraAdmin();
+    }
+
+    // المالك أو الأدمن الكامل (ليس المساعد). الدور الناقص يعني admin، وأي قيمة غير admin لا تُعد كاملة.
+    function isSeniorAdmin() {
+      return isOwner()
+        || (isExtraAdmin()
+            && get(/databases/$(database)/documents/platformAdmins/$(emailLower())).data.get('role', 'admin') == 'admin');
+    }
+
+    function isGradeCode(grade) {
+      return grade in ['primary4', 'primary5', 'primary6', 'prep1', 'prep2', 'prep3', 'sec1', 'sec2', 'sec3'];
+    }
+
+    function isEgyptPhone(phone) {
+      return phone is string && phone.matches('^01[0-9]{9}$');
+    }
+
+    function isPersonName(name) {
+      return name is string && name.size() >= 3 && name.size() <= 100;
+    }
+
+    // ---------- الطلاب ----------
+
+    // مستند طالب جديد: القيم الحساسة (النقاط والكورسات والدور) لا يحددها الطالب.
+    function validNewStudent() {
+      let d = request.resource.data;
+      return d.keys().hasOnly([
+          'name', 'phone', 'parentPhone', 'grade', 'gov', 'studentCode', 'email',
+          'role', 'courses', 'notifications', 'xp', 'points', 'badges',
+          'lastUpdatedAcademicYear', 'createdAt', 'track'
+        ])
+        && d.keys().hasAll([
+          'name', 'phone', 'parentPhone', 'grade', 'gov', 'studentCode', 'email',
+          'role', 'courses', 'notifications', 'xp', 'points', 'badges',
+          'lastUpdatedAcademicYear', 'createdAt'
+        ])
+        && (!('track' in d) || (d.track in ['general', 'bacc']))
+        && d.role == 'student'
+        && d.courses == []
+        && d.notifications == []
+        && d.badges == []
+        && d.xp == 0
+        && d.points == 0
+        && isPersonName(d.name)
+        && isEgyptPhone(d.phone)
+        && isEgyptPhone(d.parentPhone)
+        && isGradeCode(d.grade)
+        && d.gov is string && d.gov.size() > 0 && d.gov.size() <= 60
+        && d.studentCode is string && d.studentCode.matches('^YB-[A-Z2-9]{8}$')
+        && d.email == d.phone + '@student.youssefbarakat.com'
+        && d.email == request.auth.token.email
+        && d.lastUpdatedAcademicYear is int
+        && d.lastUpdatedAcademicYear >= 2020
+        && d.lastUpdatedAcademicYear <= 2100
+        && d.createdAt == request.time
+        // قفل التسجيل من الإعدادات يُطبَّق هنا أيضًا (لو المستند غير موجود فالتسجيل مفتوح).
+        && (!exists(/databases/$(database)/documents/settings/generalSettings)
+            || get(/databases/$(database)/documents/settings/generalSettings).data.get('allowRegistration', true) != false);
+    }
+
+    // إدخال نتيجة امتحان في مصفوفة examResults عند الطالب.
+    // - الامتحان الجديد (له examContent): لازم تطابق النتيجة المكتوبة في مستند التسليم حرفيًا
+    //   (تُكتب الاثنتان في معاملة واحدة، لذلك نقرأ حالة ما بعد الكتابة بـ getAfter).
+    // - الامتحان القديم (بلا examContent): يُصحَّح في المتصفح كما كان، مع فحوص بسيطة للشكل.
+    function validResultEntry(entry) {
+      return entry is map
+        && entry.keys().hasOnly([
+          'courseId', 'examId', 'examTitle', 'percent', 'earnedPoints', 'totalPoints',
+          'effectivePercent', 'penalized', 'attemptNumber', 'isOfficial', 'autoSubmit',
+          'ts', 'details', 'isTraining', 'isHomework', 'needsReview', 'reviewReason'
+        ])
+        && entry.examId is string && entry.examId.size() > 0
+        && entry.attemptNumber is int && entry.attemptNumber >= 1 && entry.attemptNumber <= 3
+        && entry.percent is number && entry.percent >= 0 && entry.percent <= 100
+        && (!exists(/databases/$(database)/documents/examContent/$(entry.examId))
+            || getAfter(/databases/$(database)/documents/examSubmissions/$(request.auth.uid + '_' + entry.examId + '_' + string(entry.attemptNumber)))
+                .data.get('result', null) == entry);
+    }
+
+    // مصفوفة examResults الجديدة = القديمة + عنصر واحد فقط، والقديم لا يتغير.
+    function validExamResultsAppend() {
+      let oldList = resource.data.get('examResults', []);
+      let newList = request.resource.data.examResults;
+      return newList is list
+        && newList.size() == oldList.size() + 1
+        && (oldList.size() == 0 || newList[0:oldList.size()] == oldList)
+        && validResultEntry(newList[oldList.size()]);
+    }
+
+    // الحقول التي يعدّلها الطالب بنفسه فقط: الاسم ورقم ولي الأمر والصف والسنة الدراسية،
+    // وإضافة نتيجة امتحان. أما الكورسات والنقاط والشارات والدور فلا يمسّها أبدًا.
+    function validStudentSelfUpdate() {
+      let changed = request.resource.data.diff(resource.data).affectedKeys();
+      let d = request.resource.data;
+      return changed.hasOnly([
+          'name', 'parentPhone', 'grade', 'lastUpdatedAcademicYear', 'examResults',
+          'watchProgress', 'completedItems', 'progress', 'lastActive', 'notifications',
+          'track', 'lastActiveMs', 'updatedAt', 'downloadedFilesCount'
+        ])
+        && (!('name' in changed) || isPersonName(d.name))
+        && (!('parentPhone' in changed) || isEgyptPhone(d.parentPhone))
+        && (!('grade' in changed) || isGradeCode(d.grade))
+        && (!('track' in changed) || (d.track in ['general', 'bacc']))
+        && (!('lastUpdatedAcademicYear' in changed)
+            || (d.lastUpdatedAcademicYear is int
+                && d.lastUpdatedAcademicYear >= 2020
+                && d.lastUpdatedAcademicYear <= 2100))
+        && (!('examResults' in changed) || validExamResultsAppend())
+        // تقدم الطالب (إحصائيات): حقول بسيطة بحدود حجم. لا تمس الكورسات ولا النقاط.
+        && (!('watchProgress' in changed) || (d.watchProgress is map && d.watchProgress.size() <= 500))
+        && (!('progress' in changed) || (d.progress is map && d.progress.size() <= 500))
+        && (!('completedItems' in changed) || (d.completedItems is list && d.completedItems.size() <= 2000))
+        && (!('lastActive' in changed)
+            || d.lastActive is timestamp || d.lastActive is string || d.lastActive is number)
+        // تدقيق lastActiveMs و updatedAt و downloadedFilesCount
+        && (!('lastActiveMs' in changed)
+            || (d.lastActiveMs is number
+                && d.lastActiveMs <= request.time.toMillis() + 60000
+                && d.lastActiveMs >= request.time.toMillis() - 86400000))
+        && (!('updatedAt' in changed)
+            || (d.updatedAt is timestamp && d.updatedAt == request.time))
+        && (!('downloadedFilesCount' in changed)
+            || (d.downloadedFilesCount is int
+                && d.downloadedFilesCount >= 0
+                && d.downloadedFilesCount <= 2000))
+        // الإشعارات: الطالب يعلّم المقروء أو يحذف من إشعاراته هو، ولا يضيف إشعارات جديدة.
+        && (!('notifications' in changed)
+            || (d.notifications is list
+                && d.notifications.size() <= resource.data.get('notifications', []).size()));
+    }
+
+    // الأدمن لا يغيّر كود الطالب ولا يكتب حقل كلمة المرور القديم.
+    function adminUpdateAllowed() {
+      return isAdmin()
+        && !request.resource.data.diff(resource.data).affectedKeys()
+            .hasAny(['studentCode', 'plainPassword']);
+    }
+
+    match /students/{studentId} {
+      allow get: if isSignedIn() && (request.auth.uid == studentId || isAdmin());
+      allow list: if isAdmin();
+
+      allow create: if isSignedIn()
+        && request.auth.uid == studentId
+        && validNewStudent();
+
+      allow update: if adminUpdateAllowed()
+        || (isSignedIn()
+            && request.auth.uid == studentId
+            && resource.data.get('archived', false) != true
+            && validStudentSelfUpdate());
+
+      allow delete: if false;
+
+      // تفاصيل تقدم المشاهدة (حماية متقدمة: لا تناقص في التغطية، حد أقصى للفترات، حقول محددة فقط)
+      match /watchProgress/{itemId} {
+        allow get, list: if isSignedIn() && (request.auth.uid == studentId || isAdmin());
+
+        function validWatchProgressWrite() {
+          let d = request.resource.data;
+          return d.keys().hasOnly(['itemId', 'coveredSeconds', 'totalDuration', 'coverage', 'intervals', 'lastPosition', 'completed', 'updatedAt', 'maxPlaybackRate', 'seekCount'])
+            && d.itemId == itemId
+            && d.totalDuration is number && d.totalDuration >= 0
+            && d.coveredSeconds is number && d.coveredSeconds >= 0
+            && d.coverage is number && d.coverage >= 0 && d.coverage <= 1.0
+            && (resource == null || !('coverage' in resource.data) || d.coverage >= resource.data.coverage)
+            && d.intervals is list && d.intervals.size() <= 200
+            && d.completed is bool
+            && d.lastPosition is number
+            && (!('maxPlaybackRate' in d) || d.maxPlaybackRate is number)
+            && (!('seekCount' in d) || d.seekCount is number)
+            && (!('updatedAt' in d) || d.updatedAt is timestamp || d.updatedAt == request.time);
+        }
+
+        allow create, update: if isAdmin()
+          || (isSignedIn() && request.auth.uid == studentId && validWatchProgressWrite());
+        allow delete: if isAdmin();
+      }
+
+      // تسجيل نقرات تحميل المذكرات والملفات (محدود الحجم وبطالب مشترك بالكورس فقط)
+      match /downloadClicks/{fileId} {
+        allow get, list: if isSignedIn() && (request.auth.uid == studentId || isAdmin());
+        allow create, update: if isSignedIn() && request.auth.uid == studentId
+          && request.resource.data.keys().hasOnly(['courseId', 'lectureId', 'fileId', 'clickedAt'])
+          && request.resource.data.fileId == fileId
+          && request.resource.data.courseId is string && request.resource.data.courseId.size() <= 64
+          && request.resource.data.lectureId is string && request.resource.data.lectureId.size() <= 64
+          && request.resource.data.fileId is string && request.resource.data.fileId.size() <= 64
+          && request.resource.data.clickedAt is timestamp
+          && request.resource.data.courseId in get(/databases/$(database)/documents/students/$(studentId)).data.get('courses', []);
+        allow delete: if isAdmin();
+      }
+    }
+
+    // ---------- الأدمن الإضافيون ----------
+
+    match /platformAdmins/{adminEmail} {
+      // كل مستخدم يقرأ مستنده هو فقط ليعرف هل هو أدمن، والأدمن يقرأ الكل.
+      allow get: if hasEmail() && (emailLower() == adminEmail || isAdmin());
+      allow list: if isAdmin();
+
+      // إضافة الأدمن وتعديلهم للمالك الأساسي فقط.
+      allow create, update: if isOwner();
+      allow delete: if false;
+    }
+
+    // ---------- الكورسات ----------
+
+    // صورة الغلاف نص مضغوط داخل المستند (≤ 60 كيلوبايت، أي حوالي 80 ألف حرف). الحد 100 ألف حرف.
+    function validCourseImages() {
+      let d = request.resource.data;
+      return d.get('image', '') is string
+        && d.get('image', '').size() <= 100000
+        && d.get('thumbnail', '') is string
+        && d.get('thumbnail', '').size() <= 100000;
+    }
+
+    // الكورسات القديمة: الأدمن يغيّر hidden وorder فقط.
+    function legacyCourseUpdateOk() {
+      let changed = request.resource.data.diff(resource.data).affectedKeys();
+      let d = request.resource.data;
+      return changed.hasOnly(['hidden', 'order'])
+        && (!('hidden' in changed) || d.hidden is bool)
+        && (!('order' in changed) || (d.order is number && d.order >= 0));
+    }
+
+    // الكورسات التي أُنشئت من المنصة الجديدة: الأدمن يعدّلها كاملة بدون تغيير علامتها.
+    function v2CourseUpdateOk() {
+      return resource.data.get('source', '') == 'v2'
+        && request.resource.data.source == 'v2'
+        && validCourseImages();
+    }
+
+    // تبنّي الكورس القديم: المالك فقط، ويغيّر حقل source فقط (إضافته 'v2' أو حذفه للتراجع).
+    function ownerAdoptionOk() {
+      let changed = request.resource.data.diff(resource.data).affectedKeys();
+      return isOwner()
+        && changed.hasOnly(['source'])
+        && ((resource.data.get('source', '') != 'v2' && request.resource.data.get('source', '') == 'v2')
+            || (resource.data.get('source', '') == 'v2' && !('source' in request.resource.data)));
+    }
+
+    match /courses/{courseId} {
+      // قراءة عامة لبيانات العرض (راجع الملاحظة 3 أعلى الملف).
+      allow read: if true;
+
+      // كورس جديد: من الأدمن فقط، ويُنشأ مخفيًا دائمًا.
+      allow create: if isAdmin()
+        && request.resource.data.source == 'v2'
+        && request.resource.data.hidden == true
+        && request.resource.data.id == courseId
+        && validCourseImages();
+
+      allow update: if (isAdmin() && (legacyCourseUpdateOk() || v2CourseUpdateOk()))
+        || ownerAdoptionOk();
+
+      // لا حذف أبدًا: الإخفاء يتم بحقل hidden.
+      allow delete: if false;
+    }
+
+    // ---------- الدفع ----------
+
+    // طلب دفع جديد من الطالب: userId = uid، والحالة pending، وبدون صورة داخل الطلب.
+    // الإيصال في مستند منفصل paymentProofs/{requestId} يُكتب في نفس الدفعة (batch).
+    function validPaymentRequestCreate(requestId) {
+      let d = request.resource.data;
+      let student = get(/databases/$(database)/documents/students/$(request.auth.uid)).data;
+      return d.keys().hasOnly([
+          'courseId', 'courseName', 'userId', 'userName', 'userPhone', 'userEmail',
+          'proofImageKey', 'proofImageUrl', 'proofImage', 'hasProofDoc', 'status',
+          'createdAt', 'method', 'amount'
+        ])
+        && d.keys().hasAll([
+          'courseId', 'courseName', 'userId', 'userName', 'userPhone', 'userEmail',
+          'proofImageKey', 'proofImageUrl', 'proofImage', 'hasProofDoc', 'status',
+          'createdAt', 'method', 'amount'
+        ])
+        && d.userId == request.auth.uid
+        && d.status == 'pending'
+        && d.proofImage == null
+        && d.proofImageUrl == ''
+        && d.hasProofDoc == true
+        && d.proofImageKey == requestId
+        && existsAfter(/databases/$(database)/documents/paymentProofs/$(requestId))
+        && student.get('archived', false) != true
+        && d.userPhone == student.phone
+        && d.userEmail == request.auth.token.email
+        && d.courseId is string && d.courseId.size() > 0 && d.courseId.size() <= 100
+        && exists(/databases/$(database)/documents/courses/$(d.courseId))
+        && !(d.courseId in student.get('courses', []))
+        && d.courseName is string && d.courseName.size() <= 200
+        && d.userName is string && d.userName.size() <= 100
+        && d.createdAt is string && d.createdAt.size() <= 40
+        && d.method in ['vodafone', 'fawry']
+        && d.amount is number && d.amount >= 0 && d.amount <= 100000;
+    }
+
+    // الأدمن يغيّر الحالة وبيانات المراجعة فقط، ومن pending فقط.
+    function validPaymentReview() {
+      let changed = request.resource.data.diff(resource.data).affectedKeys();
+      return isAdmin()
+        && resource.data.get('status', '') == 'pending'
+        && changed.hasOnly(['status', 'rejectReason', 'reviewedAt', 'reviewedBy'])
+        && request.resource.data.status in ['approved', 'rejected'];
+    }
+
+    // تصفير الدخل: علامة archived_revenue = true على طلب موافق عليه، بدون أي تغيير آخر. للمالك والأدمن الكامل.
+    function validRevenueArchive() {
+      let changed = request.resource.data.diff(resource.data).affectedKeys();
+      return isSeniorAdmin()
+        && resource.data.get('status', '') in ['approved', 'active']
+        && resource.data.get('archived_revenue', false) != true
+        && changed.hasOnly(['archived_revenue'])
+        && request.resource.data.archived_revenue == true;
+    }
+
+    match /paymentRequests/{requestId} {
+      // الطالب يقرأ طلباته هو فقط (userId = uid)، والأدمن يقرأ الكل.
+      allow get: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow list: if isAdmin() || (isSignedIn() && resource.data.userId == request.auth.uid);
+
+      allow create: if isSignedIn() && validPaymentRequestCreate(requestId);
+
+      allow update: if validPaymentReview() || validRevenueArchive();
+
+      allow delete: if false;
+    }
+
+    // إيصال الدفع: نص مضغوط (JPEG أو WebP) أقل من 160 ألف حرف، لصاحب الطلب فقط، ولا تعديل بعد الإنشاء.
+    function validPaymentProofCreate(requestId) {
+      let d = request.resource.data;
+      return d.keys().hasOnly(['userId', 'dataUrl', 'mime', 'bytes', 'createdAt'])
+        && d.keys().hasAll(['userId', 'dataUrl', 'mime', 'bytes', 'createdAt'])
+        && d.userId == request.auth.uid
+        && getAfter(/databases/$(database)/documents/paymentRequests/$(requestId)).data.userId == request.auth.uid
+        && d.mime in ['image/jpeg', 'image/webp']
+        && d.dataUrl is string
+        && d.dataUrl.size() < 160000
+        && d.dataUrl.split(';base64,').size() == 2
+        && d.dataUrl.split(';base64,')[0] == 'data:' + d.mime
+        && d.bytes is number && d.bytes > 0 && d.bytes <= 120000
+        && d.createdAt is string && d.createdAt.size() <= 40;
+    }
+
+    match /paymentProofs/{requestId} {
+      // قراءة لصاحب الطلب والأدمن (مستند بمستند، بدون قوائم).
+      allow get: if isSignedIn()
+        && (isAdmin()
+            || get(/databases/$(database)/documents/paymentRequests/$(requestId)).data.userId == request.auth.uid);
+
+      allow create: if isSignedIn() && validPaymentProofCreate(requestId);
+
+      allow list, update, delete: if false;
+    }
+
+    // إعدادات الدفع: يقرأها أي مستخدم مسجّل، ويعدّلها الأدمن فقط.
+    match /settings/paymentSettings {
+      allow read: if isSignedIn();
+      allow create, update: if isAdmin();
+      allow delete: if false;
+    }
+
+    // إعدادات عامة (مثل قفل التسجيل): تُقرأ قبل تسجيل الدخول، ويعدّلها الأدمن فقط.
+    match /settings/generalSettings {
+      allow read: if true;
+      allow create, update: if isAdmin();
+      allow delete: if false;
+    }
+
+    // ---------- الامتحانات والتدريبات والواجبات ----------
+
+    // هل يملك المستخدم هذا الكورس (اشتراه) أو الكورس مجاني؟ (الأدمن يقرأ دائمًا)
+    function canReadExamContent(courseId) {
+      return isAdmin()
+        || (isSignedIn()
+            && (courseId in get(/databases/$(database)/documents/students/$(request.auth.uid)).data.get('courses', [])
+                || get(/databases/$(database)/documents/courses/$(courseId)).data.get('isFree', false) == true));
+    }
+
+    // تسليم الطالب: المعرّف = uid_examId_n، والمحاولة n بين 1 و3، ولا n>1 بدون n-1،
+    // ووقت التسليم من السيرفر (request.time)، والامتحان جديد (له examContent لنفس الكورس).
+    function validExamSubmissionCreate(submissionId) {
+      let d = request.resource.data;
+      let student = get(/databases/$(database)/documents/students/$(request.auth.uid)).data;
+      return d.keys().hasOnly([
+          'courseId', 'examId', 'examTitle', 'kind', 'userId', 'userName', 'attempt',
+          'answers', 'autoSubmit', 'submittedAt'
+        ])
+        && d.keys().hasAll([
+          'courseId', 'examId', 'examTitle', 'kind', 'userId', 'userName', 'attempt',
+          'answers', 'autoSubmit', 'submittedAt'
+        ])
+        && d.userId == request.auth.uid
+        && d.attempt is int && d.attempt >= 1 && d.attempt <= 3
+        && submissionId == request.auth.uid + '_' + d.examId + '_' + string(d.attempt)
+        && (d.attempt == 1
+            || exists(/databases/$(database)/documents/examSubmissions/$(request.auth.uid + '_' + d.examId + '_' + string(d.attempt - 1))))
+        && d.kind in ['exam', 'training', 'homework']
+        && d.courseId is string && d.courseId.size() > 0 && d.courseId.size() <= 100
+        && d.examId is string && d.examId.size() > 0 && d.examId.size() <= 200
+        && d.examTitle is string && d.examTitle.size() <= 300
+        && d.userName is string && d.userName.size() <= 100
+        && d.answers is map && d.answers.size() <= 200
+        && d.autoSubmit is bool
+        && d.submittedAt == request.time
+        && student.get('archived', false) != true
+        && (d.courseId in student.get('courses', [])
+            || get(/databases/$(database)/documents/courses/$(d.courseId)).data.get('isFree', false) == true)
+        && exists(/databases/$(database)/documents/examContent/$(d.examId))
+        && get(/databases/$(database)/documents/examContent/$(d.examId)).data.courseId == d.courseId;
+    }
+
+    // كتابة النتيجة مرة واحدة فقط في مستند التسليم نفسه (حقل result وحقل gradedAt فقط).
+    function validResultWrite() {
+      let changed = request.resource.data.diff(resource.data).affectedKeys();
+      let r = request.resource.data.result;
+      return resource.data.userId == request.auth.uid
+        && !('result' in resource.data)
+        && 'result' in changed
+        && changed.hasOnly(['result', 'gradedAt'])
+        && r is map
+        && r.examId == resource.data.examId
+        && r.courseId == resource.data.courseId
+        && r.attemptNumber == resource.data.attempt
+        && r.percent is number && r.percent >= 0 && r.percent <= 100
+        && (!('gradedAt' in changed) || request.resource.data.gradedAt is string);
+    }
+
+    match /examSubmissions/{submissionId} {
+      // الطالب يقرأ تسليماته هو فقط بمعرّفها (uid_...)، والأدمن يقرأ ويعرض القوائم.
+      allow get: if isAdmin()
+        || (isSignedIn()
+            && submissionId.matches(request.auth.uid + '_.*')
+            && (resource == null || resource.data.userId == request.auth.uid));
+      allow list: if isAdmin();
+
+      allow create: if isSignedIn() && validExamSubmissionCreate(submissionId);
+
+      // التسليم لا يتغير أبدًا، عدا كتابة النتيجة مرة واحدة من صاحبه.
+      allow update: if isSignedIn() && validResultWrite();
+
+      allow delete: if false;
+    }
+
+    // أسئلة الامتحانات الجديدة (بدون إجابات): للمشتركين والأدمن.
+    match /examContent/{examId} {
+      allow get: if canReadExamContent(resource.data.courseId);
+      allow list: if isAdmin();
+      allow create, update: if isAdmin();
+      allow delete: if false;
+    }
+
+    // الإجابات الصحيحة للامتحانات الجديدة: للأدمن، وللطالب بعد أن يسلّم المحاولة الأولى فقط.
+    match /examKeys/{examId} {
+      allow get: if isAdmin()
+        || (isSignedIn()
+            && exists(/databases/$(database)/documents/examSubmissions/$(request.auth.uid + '_' + examId + '_1')));
+      allow list: if isAdmin();
+      allow create, update: if isAdmin();
+      allow delete: if false;
+    }
+
+    // بنك الأسئلة (بإجاباته): للأدمن فقط. لا حذف، والسؤال يُؤرشف بحقل archived.
+    match /questionBank/{questionId} {
+      allow read, create, update: if isAdmin();
+      allow delete: if false;
+    }
+
+    // ---------- الدعم الفني (المرحلة 5) ----------
+
+    function validTicketCreate() {
+      let d = request.resource.data;
+      return d.keys().hasOnly(['userId', 'user', 'userPhone', 'message', 'ts', 'status', 'replies', 'category'])
+        && d.keys().hasAll(['userId', 'user', 'userPhone', 'message', 'ts', 'status', 'replies', 'category'])
+        && d.userId == request.auth.uid
+        && get(/databases/$(database)/documents/students/$(request.auth.uid)).data.get('archived', false) != true
+        && d.user is string && d.user.size() <= 100
+        && d.userPhone is string && d.userPhone.size() <= 20
+        && d.message is string && d.message.size() >= 3 && d.message.size() <= 2000
+        && d.ts is number
+        && d.status == 'open'
+        && d.replies == []
+        && d.category in ['question', 'complaint'];
+    }
+
+    function validTicketReplyEntry(entry, sender) {
+      return entry is map
+        && entry.keys().hasOnly(['from', 'text', 'ts'])
+        && entry.from == sender
+        && entry.text is string && entry.text.size() >= 1 && entry.text.size() <= 2000
+        && entry.ts is number;
+    }
+
+    // رد جديد واحد فقط يُضاف في آخر المصفوفة، والقديم لا يتغير.
+    function ticketRepliesAppend(sender) {
+      let oldList = resource.data.get('replies', []);
+      let newList = request.resource.data.replies;
+      return newList is list
+        && newList.size() == oldList.size() + 1
+        && (oldList.size() == 0 || newList[0:oldList.size()] == oldList)
+        && validTicketReplyEntry(newList[oldList.size()], sender);
+    }
+
+    function validTicketStudentFollowup() {
+      let changed = request.resource.data.diff(resource.data).affectedKeys();
+      return isSignedIn()
+        && resource.data.userId == request.auth.uid
+        && resource.data.get('status', 'open') != 'closed'
+        && changed.hasOnly(['replies', 'status', 'updatedAt'])
+        && request.resource.data.status == 'open'
+        && ticketRepliesAppend('student');
+    }
+
+    function validTicketAdminUpdate() {
+      let changed = request.resource.data.diff(resource.data).affectedKeys();
+      return isSeniorAdmin()
+        && changed.hasOnly(['replies', 'status', 'updatedAt'])
+        && request.resource.data.status in ['open', 'answered', 'closed']
+        && (!('replies' in changed) || ticketRepliesAppend('admin'));
+    }
+
+    // الطالب يقرأ تذاكره هو فقط، والأدمن الكامل يقرأ الكل (المساعد محجوب عن الدعم).
+    match /support_tickets/{ticketId} {
+      allow get: if isSignedIn() && (resource.data.userId == request.auth.uid || isSeniorAdmin());
+      allow list: if isSeniorAdmin() || (isSignedIn() && resource.data.userId == request.auth.uid);
+      allow create: if isSignedIn() && validTicketCreate();
+      allow update: if validTicketStudentFollowup() || validTicketAdminUpdate();
+      allow delete: if false;
+    }
+
+    // ---------- سجل الإشعارات المرسلة (للأدمن) ----------
+
+    match /sent_notifications/{notificationId} {
+      allow read: if isAdmin();
+      allow create: if isAdmin()
+        && request.resource.data.keys().hasOnly(['title', 'message', 'target', 'recipients', 'sentBy', 'sentAt'])
+        && request.resource.data.title is string && request.resource.data.title.size() <= 100
+        && request.resource.data.message is string && request.resource.data.message.size() <= 500
+        && request.resource.data.target is string && request.resource.data.target.size() <= 120
+        && request.resource.data.recipients is int
+        && request.resource.data.sentAt == request.time;
+      allow update, delete: if false;
+    }
+
+    // ---------- الإشعارات العامة المجمعة (Broadcast Notifications) ----------
+
+    match /broadcast_notifications/{notificationId} {
+      // الطالب يقرأ الإشعارات العامة الموجهة للجميع فقط لحماية خصوصية الشرائح؛ والأدمن يقرأ الكل
+      allow get, list: if isSignedIn() && (isAdmin() || resource.data.get('targetType', 'all') == 'all');
+      allow create: if isAdmin()
+        && request.resource.data.keys().hasOnly(['title', 'message', 'category', 'targetType', 'sentBy', 'createdAt', 'targetCourseId', 'targetSegment'])
+        && request.resource.data.title is string && request.resource.data.title.size() >= 3 && request.resource.data.title.size() <= 100
+        && !request.resource.data.title.matches('.*01[0-9]{9}.*')
+        && request.resource.data.message is string && request.resource.data.message.size() >= 5 && request.resource.data.message.size() <= 1000
+        && !request.resource.data.message.matches('.*01[0-9]{9}.*')
+        && request.resource.data.category in ['platformUpdates', 'curriculumUpdates', 'laggingWarnings']
+        && (!('targetSegment' in request.resource.data) || request.resource.data.targetSegment in [
+            'stopped', 'at_risk', 'missed_full_week', 'weak', 'lagging',
+            'unwatched_video', 'incomplete_video', 'fast_or_skipped',
+            'training_done_hw_pending', 'hw_done_exam_pending', 'exam_completed',
+            'file_downloaded', 'notified', 'recovered', 'star', 'ok', 'all'
+          ]);
+      // الأدمن يعدّل (تحديث حالة الإشعار) — المساعد لا يحذف
+      allow update: if isSeniorAdmin()
+        && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['message', 'title'])
+            || (!request.resource.data.message.matches('.*01[0-9]{9}.*')
+                && !request.resource.data.title.matches('.*01[0-9]{9}.*')));
+      allow delete: if isSeniorAdmin();
+    }
+
+    // ---------- إعدادات المنصة وقواعد المحتوى ----------
+
+    match /settings/{settingId} {
+      allow get: if true;
+      allow list: if isAdmin();
+      allow create, update: if isAdmin()
+        && (
+          (settingId == 'contentRules'
+            && request.resource.data.keys().hasOnly(['enabled', 'enabledAt', 'watchThreshold', 'updatedAt'])
+            && request.resource.data.enabled is bool
+            && (!('enabledAt' in request.resource.data) || request.resource.data.enabledAt is number || request.resource.data.enabledAt == null)
+            && (!('watchThreshold' in request.resource.data) || (request.resource.data.watchThreshold is number && request.resource.data.watchThreshold >= 0.0 && request.resource.data.watchThreshold <= 1.0)))
+          ||
+          (settingId == 'notificationSwitches'
+            && request.resource.data.keys().hasOnly(['platformUpdates', 'curriculumUpdates', 'laggingWarnings', 'updatedAt'])
+            && request.resource.data.platformUpdates is bool
+            && request.resource.data.curriculumUpdates is bool
+            && request.resource.data.laggingWarnings is bool)
+        );
+      allow delete: if false;
+    }
+
+    match /platform_settings/{settingId} {
+      allow get: if true;
+      allow list: if isAdmin();
+      allow create, update: if isAdmin()
+        && (
+          (settingId == 'generalSettings'
+            && (!('heroBgUrl' in request.resource.data) || (request.resource.data.heroBgUrl is string && request.resource.data.heroBgUrl.size() <= 2000))
+            && (!('youssefCutoutUrl' in request.resource.data) || (request.resource.data.youssefCutoutUrl is string && request.resource.data.youssefCutoutUrl.size() <= 2000))
+            && (!('logoUrl' in request.resource.data) || (request.resource.data.logoUrl is string && request.resource.data.logoUrl.size() <= 2000))
+            && (!('tickerQuotes' in request.resource.data) || (request.resource.data.tickerQuotes is list && request.resource.data.tickerQuotes.size() <= 50))
+            && (!('mediaVersions' in request.resource.data) || request.resource.data.mediaVersions is map))
+          ||
+          (settingId == 'contentRules'
+            && request.resource.data.keys().hasOnly(['enabled', 'enabledAt', 'watchThreshold', 'updatedAt'])
+            && request.resource.data.enabled is bool
+            && (!('enabledAt' in request.resource.data) || request.resource.data.enabledAt is number || request.resource.data.enabledAt == null)
+            && (!('watchThreshold' in request.resource.data) || (request.resource.data.watchThreshold is number && request.resource.data.watchThreshold >= 0.0 && request.resource.data.watchThreshold <= 1.0)))
+        );
+      allow delete: if false;
+    }
+
+    match /platform_media/{imageId} {
+      allow get: if true;
+      allow list: if isAdmin();
+      allow create, update: if isAdmin()
+        && request.resource.data.dataUrl is string
+        && request.resource.data.version is number
+        && (
+          (imageId == 'logo' && request.resource.data.dataUrl.size() <= 45000) ||
+          (imageId == 'heroBg' && request.resource.data.dataUrl.size() <= 280000) ||
+          (imageId == 'youssefCutout' && request.resource.data.dataUrl.size() <= 490000)
+        );
+      allow delete: if isAdmin();
+    }
+
+
+    // ---------- Web Push (إشعارات الويب وتوكنات Push) ----------
+
+    match /pushTokens/{uid} {
+      allow get: if isSignedIn() && request.auth.uid == uid;
+      allow create, update: if isSignedIn() && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['tokens', 'enabled', 'updatedAt'])
+        && request.resource.data.tokens is list && request.resource.data.tokens.size() <= 5
+        && request.resource.data.enabled is bool;
+      allow list: if false;
+      allow delete: if false;
+    }
+
+    match /pushQueue/{id} {
+      // create للأدمن فقط — لا يمكن للطالب إنشاء رسائل push
+      allow create: if isAdmin()
+        && request.resource.data.keys().hasOnly(['uid', 'category', 'title', 'body', 'url', 'status', 'createdAt'])
+        && request.resource.data.status == 'pending'
+        && request.resource.data.category in ['platformUpdates', 'curriculumUpdates', 'laggingWarnings']
+        && request.resource.data.title is string && request.resource.data.title.size() <= 100
+        && !request.resource.data.title.matches('.*01[0-9]{9}.*')
+        && request.resource.data.body is string && request.resource.data.body.size() <= 500
+        && !request.resource.data.body.matches('.*01[0-9]{9}.*');
+      allow get, list: if isAdmin();
+      allow update: if isSeniorAdmin();
+      allow delete: if false;
+    }
+
+    // ---------- أي مجموعة غير مذكورة ممنوعة ----------
+
+    // ---------- Referral System (تسويق صادق) ----------
+
+    match /referralCodes/{code} {
+      allow get: if isSignedIn();
+      allow list: if isAdmin();
+      allow create: if isSignedIn()
+        && request.resource.data.keys().hasOnly(['ownerUid', 'createdAt'])
+        && request.resource.data.ownerUid == request.auth.uid
+        && request.resource.data.createdAt == request.time
+        && code.matches('^[A-Z0-9]{8}$');
+      allow update, delete: if false;
+    }
+
+    match /referralClaims/{uid} {
+      allow create: if isSignedIn() && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['code', 'ownerUid', 'status', 'createdAt'])
+        && request.resource.data.status == 'pending'
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.ownerUid != uid
+        && get(/databases/$(database)/documents/referralCodes/$(request.resource.data.code)).data.ownerUid == request.resource.data.ownerUid;
+      allow get: if isSignedIn() && (request.auth.uid == uid || isAdmin());
+      allow list: if isAdmin();
+      // الأدمن الكامل يغيّر الحالة فقط (موافقة/رفض)
+      allow update: if isSeniorAdmin()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
+        && request.resource.data.status in ['approved', 'rejected'];
+      allow delete: if false;
+    }
+
+    // ---------- Content Guard (حماية المحتوى بالبديل المجاني) ----------
+
+    match /courseFiles/{courseId} {
+      allow get: if canReadExamContent(courseId);
+      allow list: if isAdmin();
+      allow create, update: if isAdmin();
+      allow delete: if false;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -142,7 +142,7 @@ async function fetchStudentProfile(uid, token, env) {
             return {
                 uid,
                 name: 'مستخدم المنصة',
-                firstName: 'يا صديقي',
+                firstName: 'صديقي',
                 grade: 'عام',
                 courses: [],
                 archived: false,

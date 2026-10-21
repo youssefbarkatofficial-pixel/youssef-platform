@@ -27,19 +27,57 @@ function getCorsHeaders(request, env) {
     return headers;
 }
 function isGreeting(msg) {
-    const clean = msg.trim().replace(/[؟?!.،,]/g, '').trim();
+    const clean = (0, rag_1.norm)(msg);
     if (!clean)
-        return true;
+        return { matched: true, reply: 'أهلاً بك يا بطل! 🧭 أنا البوصلة، المساعد الذكي للأستاذ يوسف بركات. تحب تسأل عن إيه؟' };
     const words = clean.split(/\s+/).filter(Boolean);
-    if (words.length > 5)
+    if (words.length > 7)
+        return { matched: false };
+    // 1. سؤال من أنت / الهوية
+    const isWho = clean.includes('مين انت') || clean.includes('انت مين') || clean.includes('من انت') ||
+        clean.includes('عرف نفسك') || clean.includes('ما هي البوصله') || clean.includes('ما هي البوصلة') ||
+        clean.includes('ايه البوصله') || clean.includes('ايه البوصلة');
+    if (isWho) {
+        return {
+            matched: true,
+            reply: 'أهلاً بك يا بطل! 🧭 أنا البوصلة، المساعد الذكي للأستاذ يوسف بركات في مادة الدراسات الاجتماعية. معاك لأي استفسار أو مراجعة في المنهج خطوة بخطوة. تحب نبدأ بإيه؟'
+        };
+    }
+    // 2. كلمات الشكر والثناء
+    const isThanks = words.some(w => ['شكر', 'شكرا', 'مشكور', 'مشكوره', 'تسلم', 'تسلمي', 'عفوا'].includes(w)) ||
+        clean.includes('جزاك الله') || clean.includes('ربنا يخليك') || clean.includes('الله يكرمك');
+    if (isThanks) {
+        return {
+            matched: true,
+            reply: 'العفو يا بطل! في خدمتك دايماً، وبالتوفيق والدرجات النهائية بإذن الله! 🧭'
+        };
+    }
+    // 3. التحيات والترحيب والألفاظ الاجتماعية
+    const greetingDict = new Set([
+        'سلام', 'السلام', 'عليكم', 'وعليكم', 'ورحمه', 'وبركاته',
+        'مرحبا', 'اهلا', 'اهلين', 'هلا', 'هاي', 'هلو', 'hello', 'hi',
+        'صباح', 'الخير', 'مساء', 'النور',
+        'ازيك', 'ازايك', 'ازيكم', 'عامل', 'عامله', 'عاملين', 'ايه',
+        'كيفك', 'كيف', 'حالك', 'احوالك',
+        'تمام', 'حلو', 'جميل', 'ماشي', 'اوك', 'ok', 'اوكي', 'باي',
+        'يا', 'مستر', 'استاذ', 'بوصله', 'مع', 'السلامه', 'شكرا'
+    ]);
+    const allWordsMatch = words.every(w => {
+        if (greetingDict.has(w))
+            return true;
+        for (const g of greetingDict) {
+            if (w.includes(g) || g.includes(w))
+                return true;
+        }
         return false;
-    const greetings = [
-        'سلام', 'السلام', 'عليكم', 'وعليكم', 'ورحمة', 'ورحمه', 'وبركاته', 'مرحبا', 'مرحباً', 'اهلا', 'أهلا', 'أهلاً',
-        'صباح', 'الخير', 'مساء', 'النور', 'ازيك', 'إزيك', 'عامل', 'ايه', 'إيه',
-        'شكرا', 'شكراً', 'تمام', 'تسلم', 'جزاك', 'الله', 'خيرا', 'خيراً',
-        'هلا', 'يا', 'مستر', 'استاذ', 'أستاذ', 'بوصلة', 'البوصلة', 'باي', 'مع', 'السلامة', 'عفوا', 'عفواً'
-    ];
-    return words.every(w => greetings.some(g => w === g || w.includes(g)));
+    });
+    if (allWordsMatch) {
+        return {
+            matched: true,
+            reply: 'أهلاً بك يا بطل في منصة الأستاذ يوسف بركات! 🧭 أنا البوصلة، معاك لأي سؤال في منهج الدراسات الاجتماعية. تحب نراجع إيه النهاردة؟'
+        };
+    }
+    return { matched: false };
 }
 exports.default = {
     async fetch(request, env, ctx) {
@@ -329,9 +367,10 @@ exports.default = {
                 // (هـ) استرجاع مقاطع الدروس من RAG (مع كاش isolate فائق السرعة)
                 const ragResult = await (0, rag_1.findLessonContext)(env.DB, rawMessage, 3, studentProfile.grade);
                 // (و) الردود التلقائية المجانية بصفر توكنز
-                if (isGreeting(rawMessage)) {
+                const greetingCheck = isGreeting(rawMessage);
+                if (greetingCheck.matched) {
                     const cpuMs = Math.round((performance.now() - startTime) * 100) / 100;
-                    const helloReply = 'أهلاً بك يا بطل في منصة الأستاذ يوسف بركات! 🧭 أنا البوصلة، معاك لأي سؤال في منهج الدراسات الاجتماعية. تحب نراجع إيه النهاردة؟';
+                    const helloReply = greetingCheck.reply || 'أهلاً بك يا بطل في منصة الأستاذ يوسف بركات! 🧭 أنا البوصلة، معاك لأي سؤال في منهج الدراسات الاجتماعية. تحب نراجع إيه النهاردة؟';
                     const logId = await (0, db_1.logChat)(env.DB, studentProfile.uid, rawMessage, helloReply, 'intent', cpuMs);
                     return Response.json({
                         reply: helloReply,
@@ -349,6 +388,7 @@ exports.default = {
                     return Response.json({
                         reply: outReply,
                         source: 'fallback',
+                        fallbackReason: 'no_context_found',
                         remaining: tokenBudget.remainingTokens,
                         logId,
                         cpuMs
@@ -392,6 +432,7 @@ exports.default = {
                 return Response.json({
                     reply: finalReply,
                     source: llmResult.source,
+                    fallbackReason: llmResult.source === 'fallback' ? (llmResult.fallbackReason || 'llm_error') : undefined,
                     remaining: remainingTokens,
                     lessonTitles: ragResult.lessonTitles.length ? ragResult.lessonTitles : undefined,
                     logId,

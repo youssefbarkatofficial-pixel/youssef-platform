@@ -3,6 +3,7 @@ import { Env, ChatMessage } from './types';
 export interface LlmResult {
   reply: string;
   source: 'llm_groq' | 'llm_gemini' | 'fallback';
+  fallbackReason?: string;
   modelUsed: string;
   finishReason?: string;
   completionTokens?: number;
@@ -25,6 +26,7 @@ export async function callLlm(
     return {
       reply: 'مفتاح الذكاء الاصطناعي غير مضبوط حالياً. يُرجى مراجعة إدارة المنصة.',
       source: 'fallback',
+      fallbackReason: 'llm_missing_key',
       modelUsed: 'none',
       totalTokens: 0
     };
@@ -137,6 +139,7 @@ export async function callLlm(
         return {
           reply: FRIENDLY_BUSY_MESSAGE,
           source: 'fallback',
+          fallbackReason: res.status === 429 ? 'llm_rate_limit' : 'llm_server_error',
           modelUsed: targetModel
         };
       }
@@ -146,6 +149,7 @@ export async function callLlm(
       return {
         reply: 'تعذر الحصول على إجابة في الوقت الحالي، يُرجى المحاولة لاحقاً أو مراجعة إدارة المنصة.',
         source: 'fallback',
+        fallbackReason: `llm_error:${res.status}`,
         modelUsed: targetModel
       };
     } catch (e: any) {
@@ -203,6 +207,7 @@ export async function callLlm(
   return {
     reply: FRIENDLY_BUSY_MESSAGE,
     source: 'fallback',
+    fallbackReason: 'llm_all_failed',
     modelUsed: 'none'
   };
 }

@@ -72,7 +72,7 @@ const DEFAULT_META: AssessmentMeta = {
   lockedUntilTrainingId: '',
   deadlineDate: '',
   passingScore: 50,
-  requirePassingToUnlock: true,
+  requirePassingToUnlock: false,
 };
 
 const KIND_OPTIONS = [
@@ -572,7 +572,7 @@ export default function AdminAssessmentEditPage() {
               <label className="flex items-center gap-2 text-xs text-slate-200">
                 <input
                   type="checkbox"
-                  checked={meta.requirePassingToUnlock ?? true}
+                  checked={meta.requirePassingToUnlock ?? false}
                   onChange={(event) => updateMeta({ requirePassingToUnlock: event.target.checked })}
                   className="h-4 w-4 rounded border-navy-600 bg-navy-900 accent-gold-500"
                 />

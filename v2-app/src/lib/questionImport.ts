@@ -270,7 +270,7 @@ export function parseExamText(rawText: string): ParsedExam {
     if (!currentSection && !title && !line.startsWith('إعداد:')) {
       const match = line.match(headerRegex);
       if (!match && !flexibleHeaderRegex.test(line)) {
-        title = line;
+        title = line.replace(/^###SECTION###\s*/, '').trim();
         continue;
       }
     }
@@ -420,7 +420,7 @@ export function parseExamText(rawText: string): ParsedExam {
     warnings.push('تنبيه: يبدو أن تنسيق الملف منع التقسيم التلقائي. هل تريد المحاولة بمحلل بديل أو المراجعة اليدوية؟');
   }
 
-  return { title, sections, warnings, errors };
+  return { title: (title || '').replace(/^###SECTION###\s*/, '').trim(), sections, warnings, errors };
 }
 
 function mapOrigTypeToDraftType(origType: string): QuestionType {
@@ -596,7 +596,7 @@ export function parseExamFromJson(jsonStr: string): ParsedExam {
         });
       }
 
-      return { title, sections, warnings, errors };
+      return { title: (title || '').replace(/^###SECTION###\s*/, '').trim(), sections, warnings, errors };
     }
   } catch (err: any) {
     return {

@@ -9,6 +9,7 @@ async function callLlm(systemPrompt, userMessage, history = [], env, maxTokens =
         return {
             reply: 'مفتاح الذكاء الاصطناعي غير مضبوط حالياً. يُرجى مراجعة إدارة المنصة.',
             source: 'fallback',
+            fallbackReason: 'llm_missing_key',
             modelUsed: 'none',
             totalTokens: 0
         };
@@ -107,6 +108,7 @@ async function callLlm(systemPrompt, userMessage, history = [], env, maxTokens =
                 return {
                     reply: FRIENDLY_BUSY_MESSAGE,
                     source: 'fallback',
+                    fallbackReason: res.status === 429 ? 'llm_rate_limit' : 'llm_server_error',
                     modelUsed: targetModel
                 };
             }
@@ -115,6 +117,7 @@ async function callLlm(systemPrompt, userMessage, history = [], env, maxTokens =
             return {
                 reply: 'تعذر الحصول على إجابة في الوقت الحالي، يُرجى المحاولة لاحقاً أو مراجعة إدارة المنصة.',
                 source: 'fallback',
+                fallbackReason: `llm_error:${res.status}`,
                 modelUsed: targetModel
             };
         }
@@ -170,6 +173,7 @@ async function callLlm(systemPrompt, userMessage, history = [], env, maxTokens =
     return {
         reply: FRIENDLY_BUSY_MESSAGE,
         source: 'fallback',
+        fallbackReason: 'llm_all_failed',
         modelUsed: 'none'
     };
 }

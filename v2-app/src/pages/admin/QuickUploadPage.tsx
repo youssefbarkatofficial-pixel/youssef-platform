@@ -140,7 +140,7 @@ export default function QuickUploadPage() {
   const [availableFrom, setAvailableFrom] = useState('');
   const [availableUntil, setAvailableUntil] = useState('');
   const [passingScore, setPassingScore] = useState(50);
-  const [requirePassingToUnlock, setRequirePassingToUnlock] = useState(true);
+  const [requirePassingToUnlock, setRequirePassingToUnlock] = useState(false);
   const [notifyStudents, setNotifyStudents] = useState(false);
 
   // وضع الإضافة اليدوية سؤال بسؤال (Part 3)

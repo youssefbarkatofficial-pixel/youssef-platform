@@ -188,7 +188,7 @@ export async function fetchStudentProfile(uid: string, token: string, env: Env):
       return {
         uid,
         name: 'مستخدم المنصة',
-        firstName: 'يا صديقي',
+        firstName: 'صديقي',
         grade: 'عام',
         courses: [],
         archived: false,

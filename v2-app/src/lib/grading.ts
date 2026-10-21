@@ -99,7 +99,8 @@ export interface AnswerDetail {
     awarded: boolean;
     evidence?: string;
     agreed: boolean;
-  }[];
+    correct?: boolean;
+}[];
   dualJudge?: DualJudgeResult;
   injectionDetected?: boolean;
 }
@@ -621,7 +622,8 @@ export function buildAttemptResult(input: BuildResultInput): AttemptResult {
   const details = input.questions.map((question) => {
     const rawAnswer = input.answers[question.id] ?? '';
     const judgeInput = input.dualJudgesMap ? input.dualJudgesMap[question.id] : undefined;
-    return gradeQuestion(question, rawAnswer, judgeInput);
+    const graded = gradeQuestion(question, rawAnswer, judgeInput);
+    return { ...graded, correct: graded.score >= 1 && !graded.needsReview };
   });
 
   const totalPoints = round2(details.reduce((sum, item) => sum + item.totalPoints, 0));

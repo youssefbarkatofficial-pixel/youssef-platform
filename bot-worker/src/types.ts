@@ -46,6 +46,7 @@ export interface ChatResponse {
   logId?: string;
   cpuMs?: number;
   paused?: boolean;
+  fallbackReason?: string;
 }
 
 export type TeachingStage = 'prep1' | 'prep2' | 'prep3' | 'sec1' | 'sec2' | 'sec3' | 'general';

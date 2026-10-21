@@ -63,6 +63,7 @@ async function runTests() {
 
     const data = await res.json();
     console.log(`source: ${data.source}`);
+    console.log(`fallbackReason: ${data.fallbackReason || 'none'}`);
     console.log(`reply: ${data.reply}`);
   }
 }
