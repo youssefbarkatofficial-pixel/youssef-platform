@@ -1,3 +1,4 @@
+import NotificationCenter from '../notifications/NotificationCenter';
 import { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { Menu, X, Sun, Moon } from 'lucide-react';
@@ -59,6 +60,7 @@ export default function PublicHeader({ logoUrl }: PublicHeaderProps) {
 
         {/* Right Controls: Theme + Auth */}
         <div className="flex items-center gap-2">
+          {firebaseUser && <NotificationCenter />}
           {/* Day / Night Toggle - Always visible on desktop & mobile */}
           <button
             type="button"

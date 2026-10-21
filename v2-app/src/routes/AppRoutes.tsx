@@ -40,6 +40,7 @@ const AssessmentResultsPage = lazy(() => import('../pages/admin/AssessmentResult
 const AdoptCoursesPage = lazy(() => import('../pages/admin/AdoptCoursesPage'));
 const QuestionBankPage = lazy(() => import('../pages/admin/QuestionBankPage'));
 const QuickUploadPage = lazy(() => import('../pages/admin/QuickUploadPage'));
+const RadarPage = lazy(() => import('../pages/admin/RadarPage'));
 const AdminStudentsPage = lazy(() => import('../pages/admin/AdminStudentsPage'));
 const StudentAnalyticsPage = lazy(() => import('../pages/admin/StudentAnalyticsPage'));
 const PaymentsPage = lazy(() => import('../pages/admin/PaymentsPage'));
@@ -104,6 +105,7 @@ export default function AppRoutes() {
             <Route path="adopt-courses" element={<AdoptCoursesPage />} />
             <Route path="question-bank" element={<QuestionBankPage />} />
             <Route path="quick-upload" element={<QuickUploadPage />} />
+            <Route path="radar" element={<RadarPage />} />
             <Route path="students" element={<AdminStudentsPage />} />
             <Route path="students/:studentId" element={<StudentAnalyticsPage />} />
             <Route path="payments" element={<PaymentsPage />} />

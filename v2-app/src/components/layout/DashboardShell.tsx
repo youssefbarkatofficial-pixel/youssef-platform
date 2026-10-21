@@ -1,3 +1,4 @@
+import NotificationCenter from '../notifications/NotificationCenter';
 import { useState } from 'react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { Home, LogOut, Menu, X } from 'lucide-react';
@@ -55,6 +56,7 @@ export default function DashboardShell({ items, areaLabel }: DashboardShellProps
         <div className="flex h-16 items-center justify-between border-b border-theme-border/15 px-4">
           <Brand />
           <div className="flex items-center gap-2">
+            <NotificationCenter />
             <ThemeSwitcher compact />
             <button
               type="button"
@@ -123,6 +125,7 @@ export default function DashboardShell({ items, areaLabel }: DashboardShellProps
         <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-theme-border/15 bg-[var(--sidebar-bg)]/90 px-4 backdrop-blur-md md:hidden">
           <Brand />
           <div className="flex items-center gap-2">
+            <NotificationCenter />
             <ThemeSwitcher compact />
             <button
               type="button"

@@ -1,3 +1,4 @@
+import { recordDownloadClick } from '../../services/watchProgress';
 import { useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
@@ -98,6 +99,9 @@ function LectureFilesSection({
         href={file.url}
         target="_blank"
         rel="noopener noreferrer"
+        onClick={() => {
+          if (student?.id) void recordDownloadClick(student.id, courseId, lecture.id, file.id);
+        }}
         className={buttonClasses({ variant: 'secondary', size: 'sm' })}
       >
         <FileText className="h-4 w-4 text-gold-400" />
@@ -155,6 +159,9 @@ function LectureFilesSection({
                 href={file.url}
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={() => {
+                  if (student?.id) void recordDownloadClick(student.id, courseId, lecture.id, file.id);
+                }}
                 className="flex items-center justify-between gap-2 rounded-lg px-2.5 py-2 text-xs font-medium text-slate-200 transition-colors hover:bg-navy-800 hover:text-gold-300"
               >
                 <span className="truncate">{file.title || 'تحميل الملف'}</span>
@@ -198,6 +205,28 @@ export default function CourseDetailsPage() {
     }
   }, [activeItem]);
 
+  const canAccess = Boolean(course && canAccessCourseContent(course, student, isAdmin));
+
+  useEffect(() => {
+    if (!canAccess) {
+      const updateBar = () => {
+        if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+          document.documentElement.style.setProperty('--yb-bottom-bar', '84px');
+        } else {
+          document.documentElement.style.removeProperty('--yb-bottom-bar');
+        }
+      };
+      updateBar();
+      window.addEventListener('resize', updateBar);
+      return () => {
+        window.removeEventListener('resize', updateBar);
+        document.documentElement.style.removeProperty('--yb-bottom-bar');
+      };
+    } else {
+      document.documentElement.style.removeProperty('--yb-bottom-bar');
+    }
+  }, [canAccess]);
+
   if (loading || authLoading) {
     return (
       <div className="grid min-h-[50vh] place-items-center text-gold-400">
@@ -236,7 +265,12 @@ export default function CourseDetailsPage() {
     );
   }
 
-  const canAccess = canAccessCourseContent(course, student, isAdmin);
+  // canAccess computed above
+
+  const attachedHomeworkIds = new Set(
+    course.content.lectures.flatMap((lec) => (lec.homeworks || []).map((hw) => hw.id)),
+  );
+  const looseHomeworks = course.content.homeworks.filter((hw) => !attachedHomeworkIds.has(hw.id));
 
   if (course.hidden && !canAccess) {
     return (
@@ -314,7 +348,17 @@ export default function CourseDetailsPage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 py-10">
+    <div className="mx-auto w-full max-w-6xl px-4 pb-28 pt-10 lg:pb-10">
+      {!canAccess && (
+        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-navy-800 bg-navy-950/95 p-3 backdrop-blur lg:hidden">
+          <div className="mx-auto flex max-w-6xl items-center justify-between gap-3">
+            <CoursePrice course={course} />
+            <Button onClick={() => navigate(firebaseUser ? `/student/checkout/${course.id}` : '/register')}>
+              {firebaseUser ? 'اشترك الآن' : 'أنشئ حسابك'}
+            </Button>
+          </div>
+        </div>
+      )}
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
           <div>
@@ -547,6 +591,62 @@ export default function CourseDetailsPage() {
                                 </div>
                               </div>
                             )}
+
+                            {/* الواجبات الخاصة بهذه المحاضرة */}
+                            {lec.homeworks && lec.homeworks.length > 0 && (
+                              <div className="ms-2 rounded-xl border border-navy-800/80 bg-navy-950/60 p-3 sm:ms-6">
+                                <div className="mb-2 flex items-center gap-1.5 text-xs font-bold text-slate-300">
+                                  <ClipboardList className="h-3.5 w-3.5 text-gold-400" />
+                                  واجب المحاضرة ({lec.homeworks.length})
+                                </div>
+                                <div className="space-y-2">
+                                  {lec.homeworks.map((hw) => {
+                                    const hwLink = isAdmin
+                                      ? `/admin/preview/assessment/${encodeURIComponent(course.id)}/${encodeURIComponent(hw.id)}`
+                                      : `/student/assessment/${encodeURIComponent(course.id)}/${encodeURIComponent(hw.id)}`;
+                                    const hwLock = checkInLectureItemLock(
+                                      lec,
+                                      hw,
+                                      'homework',
+                                      student,
+                                      effectiveWatch,
+                                      contentRules,
+                                      course.id,
+                                      Date.now(),
+                                      isAdmin
+                                    );
+                                    return (
+                                      <div
+                                        key={hw.id}
+                                        className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-navy-900/80 px-3 py-2 text-xs"
+                                      >
+                                        <span className="font-medium text-slate-200">{hw.title}</span>
+                                        {canAccess ? (
+                                          hwLock.locked ? (
+                                            <span className="flex items-center gap-1 text-xs text-amber-300">
+                                              <Lock className="h-3 w-3 text-amber-400" />
+                                              {hwLock.message}
+                                            </span>
+                                          ) : (
+                                            <Link
+                                              to={hwLink}
+                                              className={buttonClasses({ variant: 'secondary', size: 'sm' })}
+                                            >
+                                              دخول الواجب
+                                            </Link>
+                                          )
+                                        ) : (
+                                          <span className="flex items-center gap-1 text-slate-500">
+                                            <Lock className="h-3 w-3" />
+                                            مقفول
+                                          </span>
+                                        )}
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            )}
                           </div>
                         );
                       })}
@@ -555,16 +655,16 @@ export default function CourseDetailsPage() {
                 )}
 
                 {/* 2. صندوق الواجبات - يُخفى إن كان فارغًا */}
-                {course.content.homeworks.length > 0 && (
+                {looseHomeworks.length > 0 && (
                   <Card className="space-y-4">
                     <div className="flex items-center gap-2 border-b border-navy-800 pb-3">
                       <ClipboardList className="h-5 w-5 text-gold-400" />
                       <h3 className="text-lg font-bold text-white">الواجبات</h3>
-                      <Badge variant="neutral">{course.content.homeworks.length}</Badge>
+                      <Badge variant="neutral">{looseHomeworks.length}</Badge>
                     </div>
 
                     <div className="space-y-2.5">
-                      {course.content.homeworks.map((hw) => {
+                      {looseHomeworks.map((hw) => {
                         const hwLink = isAdmin
                           ? `/admin/preview/assessment/${encodeURIComponent(course.id)}/${encodeURIComponent(hw.id)}`
                           : `/student/assessment/${encodeURIComponent(course.id)}/${encodeURIComponent(hw.id)}`;

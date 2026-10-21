@@ -150,7 +150,7 @@ service cloud.firestore {
       return changed.hasOnly([
           'name', 'parentPhone', 'grade', 'lastUpdatedAcademicYear', 'examResults',
           'watchProgress', 'completedItems', 'progress', 'lastActive', 'notifications',
-          'track'
+          'track', 'lastActiveMs', 'updatedAt', 'downloadedFilesCount'
         ])
         && (!('name' in changed) || isPersonName(d.name))
         && (!('parentPhone' in changed) || isEgyptPhone(d.parentPhone))
@@ -167,6 +167,17 @@ service cloud.firestore {
         && (!('completedItems' in changed) || (d.completedItems is list && d.completedItems.size() <= 2000))
         && (!('lastActive' in changed)
             || d.lastActive is timestamp || d.lastActive is string || d.lastActive is number)
+        // تدقيق lastActiveMs و updatedAt و downloadedFilesCount
+        && (!('lastActiveMs' in changed)
+            || (d.lastActiveMs is number
+                && d.lastActiveMs <= request.time.toMillis() + 60000
+                && d.lastActiveMs >= request.time.toMillis() - 86400000))
+        && (!('updatedAt' in changed)
+            || (d.updatedAt is timestamp && d.updatedAt == request.time))
+        && (!('downloadedFilesCount' in changed)
+            || (d.downloadedFilesCount is int
+                && d.downloadedFilesCount >= 0
+                && d.downloadedFilesCount <= 2000))
         // الإشعارات: الطالب يعلّم المقروء أو يحذف من إشعاراته هو، ولا يضيف إشعارات جديدة.
         && (!('notifications' in changed)
             || (d.notifications is list
@@ -202,7 +213,7 @@ service cloud.firestore {
 
         function validWatchProgressWrite() {
           let d = request.resource.data;
-          return d.keys().hasOnly(['itemId', 'coveredSeconds', 'totalDuration', 'coverage', 'intervals', 'lastPosition', 'completed', 'updatedAt'])
+          return d.keys().hasOnly(['itemId', 'coveredSeconds', 'totalDuration', 'coverage', 'intervals', 'lastPosition', 'completed', 'updatedAt', 'maxPlaybackRate', 'seekCount'])
             && d.itemId == itemId
             && d.totalDuration is number && d.totalDuration >= 0
             && d.coveredSeconds is number && d.coveredSeconds >= 0
@@ -211,11 +222,27 @@ service cloud.firestore {
             && d.intervals is list && d.intervals.size() <= 200
             && d.completed is bool
             && d.lastPosition is number
+            && (!('maxPlaybackRate' in d) || d.maxPlaybackRate is number)
+            && (!('seekCount' in d) || d.seekCount is number)
             && (!('updatedAt' in d) || d.updatedAt is timestamp || d.updatedAt == request.time);
         }
 
         allow create, update: if isAdmin()
           || (isSignedIn() && request.auth.uid == studentId && validWatchProgressWrite());
+        allow delete: if isAdmin();
+      }
+
+      // تسجيل نقرات تحميل المذكرات والملفات (محدود الحجم وبطالب مشترك بالكورس فقط)
+      match /downloadClicks/{fileId} {
+        allow get, list: if isSignedIn() && (request.auth.uid == studentId || isAdmin());
+        allow create, update: if isSignedIn() && request.auth.uid == studentId
+          && request.resource.data.keys().hasOnly(['courseId', 'lectureId', 'fileId', 'clickedAt'])
+          && request.resource.data.fileId == fileId
+          && request.resource.data.courseId is string && request.resource.data.courseId.size() <= 64
+          && request.resource.data.lectureId is string && request.resource.data.lectureId.size() <= 64
+          && request.resource.data.fileId is string && request.resource.data.fileId.size() <= 64
+          && request.resource.data.clickedAt is timestamp
+          && request.resource.data.courseId in get(/databases/$(database)/documents/students/$(studentId)).data.get('courses', []);
         allow delete: if isAdmin();
       }
     }
@@ -570,17 +597,51 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    // ---------- الإشعارات العامة المجمعة (Broadcast Notifications) ----------
+
+    match /broadcast_notifications/{notificationId} {
+      // الطالب يقرأ الإشعارات العامة الموجهة للجميع فقط لحماية خصوصية الشرائح؛ والأدمن يقرأ الكل
+      allow get, list: if isSignedIn() && (isAdmin() || resource.data.get('targetType', 'all') == 'all');
+      allow create: if isAdmin()
+        && request.resource.data.keys().hasOnly(['title', 'message', 'category', 'targetType', 'sentBy', 'createdAt', 'targetCourseId', 'targetSegment'])
+        && request.resource.data.title is string && request.resource.data.title.size() >= 3 && request.resource.data.title.size() <= 100
+        && !request.resource.data.title.matches('.*01[0-9]{9}.*')
+        && request.resource.data.message is string && request.resource.data.message.size() >= 5 && request.resource.data.message.size() <= 1000
+        && !request.resource.data.message.matches('.*01[0-9]{9}.*')
+        && request.resource.data.category in ['platformUpdates', 'curriculumUpdates', 'laggingWarnings']
+        && (!('targetSegment' in request.resource.data) || request.resource.data.targetSegment in [
+            'stopped', 'at_risk', 'missed_full_week', 'weak', 'lagging',
+            'unwatched_video', 'incomplete_video', 'fast_or_skipped',
+            'training_done_hw_pending', 'hw_done_exam_pending', 'exam_completed',
+            'file_downloaded', 'notified', 'recovered', 'star', 'ok', 'all'
+          ]);
+      // الأدمن يعدّل (تحديث حالة الإشعار) — المساعد لا يحذف
+      allow update: if isSeniorAdmin()
+        && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['message', 'title'])
+            || (!request.resource.data.message.matches('.*01[0-9]{9}.*')
+                && !request.resource.data.title.matches('.*01[0-9]{9}.*')));
+      allow delete: if isSeniorAdmin();
+    }
+
     // ---------- إعدادات المنصة وقواعد المحتوى ----------
 
     match /settings/{settingId} {
       allow get: if true;
       allow list: if isAdmin();
       allow create, update: if isAdmin()
-        && settingId == 'contentRules'
-        && request.resource.data.keys().hasOnly(['enabled', 'enabledAt', 'watchThreshold', 'updatedAt'])
-        && request.resource.data.enabled is bool
-        && (!('enabledAt' in request.resource.data) || request.resource.data.enabledAt is number || request.resource.data.enabledAt == null)
-        && (!('watchThreshold' in request.resource.data) || (request.resource.data.watchThreshold is number && request.resource.data.watchThreshold >= 0.0 && request.resource.data.watchThreshold <= 1.0));
+        && (
+          (settingId == 'contentRules'
+            && request.resource.data.keys().hasOnly(['enabled', 'enabledAt', 'watchThreshold', 'updatedAt'])
+            && request.resource.data.enabled is bool
+            && (!('enabledAt' in request.resource.data) || request.resource.data.enabledAt is number || request.resource.data.enabledAt == null)
+            && (!('watchThreshold' in request.resource.data) || (request.resource.data.watchThreshold is number && request.resource.data.watchThreshold >= 0.0 && request.resource.data.watchThreshold <= 1.0)))
+          ||
+          (settingId == 'notificationSwitches'
+            && request.resource.data.keys().hasOnly(['platformUpdates', 'curriculumUpdates', 'laggingWarnings', 'updatedAt'])
+            && request.resource.data.platformUpdates is bool
+            && request.resource.data.curriculumUpdates is bool
+            && request.resource.data.laggingWarnings is bool)
+        );
       allow delete: if false;
     }
 
@@ -619,7 +680,73 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+
+    // ---------- Web Push (إشعارات الويب وتوكنات Push) ----------
+
+    match /pushTokens/{uid} {
+      allow get: if isSignedIn() && request.auth.uid == uid;
+      allow create, update: if isSignedIn() && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['tokens', 'enabled', 'updatedAt'])
+        && request.resource.data.tokens is list && request.resource.data.tokens.size() <= 5
+        && request.resource.data.enabled is bool;
+      allow list: if false;
+      allow delete: if false;
+    }
+
+    match /pushQueue/{id} {
+      // create للأدمن فقط — لا يمكن للطالب إنشاء رسائل push
+      allow create: if isAdmin()
+        && request.resource.data.keys().hasOnly(['uid', 'category', 'title', 'body', 'url', 'status', 'createdAt'])
+        && request.resource.data.status == 'pending'
+        && request.resource.data.category in ['platformUpdates', 'curriculumUpdates', 'laggingWarnings']
+        && request.resource.data.title is string && request.resource.data.title.size() <= 100
+        && !request.resource.data.title.matches('.*01[0-9]{9}.*')
+        && request.resource.data.body is string && request.resource.data.body.size() <= 500
+        && !request.resource.data.body.matches('.*01[0-9]{9}.*');
+      allow get, list: if isAdmin();
+      allow update: if isSeniorAdmin();
+      allow delete: if false;
+    }
+
     // ---------- أي مجموعة غير مذكورة ممنوعة ----------
+
+    // ---------- Referral System (تسويق صادق) ----------
+
+    match /referralCodes/{code} {
+      allow get: if isSignedIn();
+      allow list: if isAdmin();
+      allow create: if isSignedIn()
+        && request.resource.data.keys().hasOnly(['ownerUid', 'createdAt'])
+        && request.resource.data.ownerUid == request.auth.uid
+        && request.resource.data.createdAt == request.time
+        && code.matches('^[A-Z0-9]{8}$');
+      allow update, delete: if false;
+    }
+
+    match /referralClaims/{uid} {
+      allow create: if isSignedIn() && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['code', 'ownerUid', 'status', 'createdAt'])
+        && request.resource.data.status == 'pending'
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.ownerUid != uid
+        && get(/databases/$(database)/documents/referralCodes/$(request.resource.data.code)).data.ownerUid == request.resource.data.ownerUid;
+      allow get: if isSignedIn() && (request.auth.uid == uid || isAdmin());
+      allow list: if isAdmin();
+      // الأدمن الكامل يغيّر الحالة فقط (موافقة/رفض)
+      allow update: if isSeniorAdmin()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
+        && request.resource.data.status in ['approved', 'rejected'];
+      allow delete: if false;
+    }
+
+    // ---------- Content Guard (حماية المحتوى بالبديل المجاني) ----------
+
+    match /courseFiles/{courseId} {
+      allow get: if canReadExamContent(courseId);
+      allow list: if isAdmin();
+      allow create, update: if isAdmin();
+      allow delete: if false;
+    }
 
     match /{document=**} {
       allow read, write: if false;

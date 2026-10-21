@@ -23,3 +23,6 @@
 /icons/*
   Cache-Control: public, max-age=604800
 
+
+/firebase-messaging-sw.js
+  Cache-Control: no-cache, no-store, must-revalidate

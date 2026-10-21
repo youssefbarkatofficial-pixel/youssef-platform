@@ -6,11 +6,13 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "test": "node --experimental-strip-types --test tests/normalize.test.mjs tests/grading-golden.test.mjs tests/revision.test.mjs tests/revision-adapter.test.mjs tests/watchTracker.test.mjs tests/contentRules.test.mjs tests/pwa-kit.test.mjs tests/questionImport.test.mjs",
+    "test": "node --experimental-strip-types --test tests/normalize.test.mjs tests/grading-golden.test.mjs tests/revision.test.mjs tests/revision-adapter.test.mjs tests/watchTracker.test.mjs tests/contentRules.test.mjs tests/pwa-kit.test.mjs tests/questionImport.test.mjs tests/radar.test.mjs tests/radarExtras.test.mjs tests/marketing.test.mjs tests/pdfExtract.test.mjs tests/file-links.test.mjs tests/push-lib.test.mjs",
     "preview": "vite preview",
     "test:rules": "firebase emulators:exec --config firebase.emulator.json --only firestore --project yb-rules-test \"node --test tests/rules/firestore.rules.test.js\""
   },
   "dependencies": {
+    "@capacitor/android": "^8.5.3",
+    "@capacitor/core": "^8.5.3",
     "firebase": "^10.13.0",
     "lucide-react": "^0.441.0",
     "pdfjs-dist": "^6.4.299",
@@ -19,6 +21,7 @@
     "react-router-dom": "^6.26.2"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.5.3",
     "@firebase/rules-unit-testing": "^3.0.4",
     "@types/react": "^18.3.5",
     "@types/react-dom": "^18.3.0",

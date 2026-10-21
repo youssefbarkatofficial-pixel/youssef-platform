@@ -55,3 +55,12 @@ server.js
 tools/bot-export/
 .dev.vars
 .wrangler/
+
+# Content guard backups
+backup-links-*.json
+
+# Capacitor & Android build artifacts
+android/
+*.jks
+*.keystore
+keystore.properties

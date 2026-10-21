@@ -457,7 +457,8 @@ export default function BousalaChatDrawer() {
           type="button"
           onClick={() => setIsOpen(true)}
           aria-label="فتح شات البوصلة"
-          className="fixed bottom-6 end-6 z-40 flex items-center gap-3 rounded-full bg-gradient-to-r from-gold-500 via-amber-500 to-gold-600 px-5 py-3.5 text-navy-950 font-black shadow-xl shadow-gold-500/30 transition-all duration-300 hover:scale-105 hover:shadow-gold-500/50 active:scale-95 group focus:outline-none focus:ring-4 focus:ring-gold-500/40"
+          style={{ bottom: "calc(1.5rem + var(--yb-bottom-bar, 0px))" }}
+          className="fixed end-6 z-40 flex items-center gap-3 rounded-full bg-gradient-to-r from-gold-500 via-amber-500 to-gold-600 px-5 py-3.5 text-navy-950 font-black shadow-xl shadow-gold-500/30 transition-all duration-300 hover:scale-105 hover:shadow-gold-500/50 active:scale-95 group focus:outline-none focus:ring-4 focus:ring-gold-500/40"
         >
           <div className="relative flex items-center justify-center">
             <Compass className="h-6 w-6 transition-transform duration-700 group-hover:rotate-180" />
