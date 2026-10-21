@@ -708,6 +708,35 @@ service cloud.firestore {
 
     // ---------- أي مجموعة غير مذكورة ممنوعة ----------
 
+    // ---------- Referral System (تسويق صادق) ----------
+
+    match /referralCodes/{code} {
+      allow get: if isSignedIn();
+      allow list: if isAdmin();
+      allow create: if isSignedIn()
+        && request.resource.data.keys().hasOnly(['ownerUid', 'createdAt'])
+        && request.resource.data.ownerUid == request.auth.uid
+        && request.resource.data.createdAt == request.time
+        && code.matches('^[A-Z0-9]{8}$');
+      allow update, delete: if false;
+    }
+
+    match /referralClaims/{uid} {
+      allow create: if isSignedIn() && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['code', 'ownerUid', 'status', 'createdAt'])
+        && request.resource.data.status == 'pending'
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.ownerUid != uid
+        && get(/databases/$(database)/documents/referralCodes/$(request.resource.data.code)).data.ownerUid == request.resource.data.ownerUid;
+      allow get: if isSignedIn() && (request.auth.uid == uid || isAdmin());
+      allow list: if isAdmin();
+      // الأدمن الكامل يغيّر الحالة فقط (موافقة/رفض)
+      allow update: if isSeniorAdmin()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
+        && request.resource.data.status in ['approved', 'rejected'];
+      allow delete: if false;
+    }
+
     match /{document=**} {
       allow read, write: if false;
     }

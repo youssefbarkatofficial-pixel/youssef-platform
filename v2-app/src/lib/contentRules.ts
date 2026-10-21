@@ -1,4 +1,5 @@
 import { WATCH_THRESHOLD } from './watchTracker.ts';
+import { isFreePreview } from './marketing.ts';
 
 export interface ContentRulesSettings {
   enabled: boolean;
@@ -160,6 +161,11 @@ export function checkLectureLock(
       message: `بيفتح يوم ${formatCairoDateTime(currentLecture.openAt)}`,
       openAt: currentLecture.openAt
     };
+  }
+
+  // فحص المعاينة المجانية: فتح الفيديو للمحاضرة
+  if (isFreePreview(currentLecture)) {
+    return { locked: false };
   }
 
   // إذا كان الطالب معفيًا، تفتح المحاضرة مباشرة
