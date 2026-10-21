@@ -616,8 +616,10 @@ service cloud.firestore {
             'file_downloaded', 'notified', 'recovered', 'star', 'ok', 'all'
           ]);
       // الأدمن يعدّل (تحديث حالة الإشعار) — المساعد لا يحذف
-      allow update: if isAdmin()
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'readBy']);
+      allow update: if isSeniorAdmin()
+        && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['message', 'title'])
+            || (!request.resource.data.message.matches('.*01[0-9]{9}.*')
+                && !request.resource.data.title.matches('.*01[0-9]{9}.*')));
       allow delete: if isSeniorAdmin();
     }
 
