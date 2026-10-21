@@ -5,10 +5,12 @@ import {
   createWatchState,
   processPlaybackTick,
   updatePlayerStatus,
-  WATCH_THRESHOLD
+  shouldFlush,
+  WATCH_THRESHOLD,
+  WATCH_MILESTONES,
 } from '../../lib/watchTracker.ts';
-import type { WatchState } from '../../lib/watchTracker.ts';
-import { getStoredWatchProgress, persistWatchProgress } from '../../services/watchProgress';
+import type { WatchState, FlushTrigger } from '../../lib/watchTracker.ts';
+import { getStoredWatchProgress, persistWatchProgress, flushPendingWatchQueue } from '../../services/watchProgress';
 
 declare global {
   interface Window {
@@ -32,7 +34,7 @@ export default function ProtectedVideoPlayer({
   watermarkText,
   itemId,
   studentId,
-  onProgressChange
+  onProgressChange,
 }: ProtectedVideoPlayerProps) {
   const source = useMemo(() => getVideoSource(url), [url]);
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -45,42 +47,79 @@ export default function ProtectedVideoPlayer({
   const watchStateRef = useRef<WatchState>(watchState);
   watchStateRef.current = watchState;
 
-  const lastSaveTimeRef = useRef<number>(Date.now());
+  const lastFlushTimeRef = useRef<number>(Date.now());
+  const lastFlushedCoverageRef = useRef<number>(0);
+  const passedMilestonesRef = useRef<number[]>([]);
   const hasUnlocked95Ref = useRef(false);
 
-  // حفظ التقدم في Firestore
-  const saveCurrentProgress = useCallback(async () => {
-    if (!studentId || !itemId) return;
-    const current = watchStateRef.current;
-    if (current.totalDuration > 0) {
-      await persistWatchProgress(studentId, current);
-      lastSaveTimeRef.current = Date.now();
-    }
-  }, [studentId, itemId]);
-
-  // إشعار فوري وتثبيت فوري عند الوصول إلى عتبة 95% لعدم فقدان أي دقة
-  useEffect(() => {
-    if (watchState.coverage >= WATCH_THRESHOLD && !hasUnlocked95Ref.current) {
-      hasUnlocked95Ref.current = true;
-      void saveCurrentProgress();
-    }
-  }, [watchState.coverage, saveCurrentProgress]);
-
-  // إشعار الصفحة الخارجية بالتغير
+  // إشعار الصفحة الخارجية بالتغير لحظياً
   useEffect(() => {
     if (onProgressChange) {
       onProgressChange(watchState.coverage, watchState.completed);
     }
   }, [watchState.coverage, watchState.completed, onProgressChange]);
 
-  // تحميل التقدم السابق من Firestore
+  // كتابة التقدم إلى Firestore بالأحداث المحددة فقط
+  const triggerFlush = useCallback(
+    async (trigger: FlushTrigger) => {
+      if (!studentId || !itemId) return;
+      const current = watchStateRef.current;
+      if (current.totalDuration <= 0) return;
+
+      const decision = shouldFlush({
+        trigger,
+        currentCoverage: current.coverage,
+        lastFlushedCoverage: lastFlushedCoverageRef.current,
+        lastFlushTimeMs: lastFlushTimeRef.current,
+        nowMs: Date.now(),
+        passedMilestones: passedMilestonesRef.current,
+        isCompleted: current.completed,
+      });
+
+      if (decision.shouldFlush) {
+        if (decision.milestoneCrossed && !passedMilestonesRef.current.includes(decision.milestoneCrossed)) {
+          passedMilestonesRef.current.push(decision.milestoneCrossed);
+        }
+        lastFlushedCoverageRef.current = current.coverage;
+        lastFlushTimeRef.current = Date.now();
+        await persistWatchProgress(studentId, current);
+      }
+    },
+    [studentId, itemId],
+  );
+
+  // إشعار فوري وتثبيت فوري عند الوصول إلى عتبة 95% لعدم فقدان أي دقة
+  useEffect(() => {
+    if (watchState.coverage >= WATCH_THRESHOLD && !hasUnlocked95Ref.current) {
+      hasUnlocked95Ref.current = true;
+      void triggerFlush('milestone');
+    }
+  }, [watchState.coverage, triggerFlush]);
+
+  // تحميل التقدم المدمج (محلي + سحابي) ومزامنة أي معلقات
   useEffect(() => {
     if (!studentId || !itemId) return;
     let active = true;
 
+    // مزامنة أي مهام معلقة في الخلفية
+    void flushPendingWatchQueue(studentId);
+
     void getStoredWatchProgress(studentId, itemId).then((saved) => {
       if (!active || !saved) return;
       setWatchState(saved);
+      lastFlushedCoverageRef.current = saved.coverage;
+
+      // تسجيل الفواصل التي سبق تجاوزها بالفعل حتى لا تتكرر
+      WATCH_MILESTONES.forEach((m) => {
+        if (saved.coverage >= m && !passedMilestonesRef.current.includes(m)) {
+          passedMilestonesRef.current.push(m);
+        }
+      });
+
+      if (saved.coverage >= WATCH_THRESHOLD) {
+        hasUnlocked95Ref.current = true;
+      }
+
       if (onProgressChange) {
         onProgressChange(saved.coverage, saved.completed);
       }
@@ -115,7 +154,7 @@ export default function ProtectedVideoPlayer({
             enablejsapi: 1,
             origin: window.location.origin,
             rel: 0,
-            modestbranding: 1
+            modestbranding: 1,
           },
           events: {
             onReady: (event: any) => {
@@ -141,15 +180,18 @@ export default function ProtectedVideoPlayer({
                     totalDuration: dur,
                     currentTime: cur,
                     playbackRate: rate,
-                    isTabVisible: !document.hidden
-                  })
+                    isTabVisible: !document.hidden,
+                  }),
                 );
-              } else if (isPaused || isEnded) {
+              } else if (isPaused) {
                 setWatchState((prev) => updatePlayerStatus(prev, { isPlaying: false }));
-                void saveCurrentProgress();
+                void triggerFlush('pause');
+              } else if (isEnded) {
+                setWatchState((prev) => updatePlayerStatus(prev, { isPlaying: false }));
+                void triggerFlush('ended');
               }
-            }
-          }
+            },
+          },
         });
       } catch (err) {
         console.warn('YouTube IFrame API init error:', err);
@@ -174,31 +216,58 @@ export default function ProtectedVideoPlayer({
       initPlayer();
     }
 
-    // نبضة زمنية كل ثانية أثناء التشغيل
+    // نبضة زمنية محلية كل ثانية أثناء التشغيل (لحظية في الذاكرة + localStorage فقط بلا Firestore)
     pollTimer = window.setInterval(() => {
       if (destroyed || !ytPlayerRef.current) return;
       try {
         if (typeof ytPlayerRef.current.getPlayerState === 'function') {
           const state = ytPlayerRef.current.getPlayerState();
-          if (state === 1) { // PLAYING
+          if (state === 1) {
+            // PLAYING
             const curTime = ytPlayerRef.current.getCurrentTime();
             const rate = ytPlayerRef.current.getPlaybackRate();
             const dur = ytPlayerRef.current.getDuration();
 
             setWatchState((prev) => {
-              let updated = updatePlayerStatus(prev, {
+              const updated = updatePlayerStatus(prev, {
                 isPlaying: true,
                 playbackRate: rate,
                 totalDuration: dur,
-                isTabVisible: !document.hidden
+                isTabVisible: !document.hidden,
               });
-              return processPlaybackTick(updated, curTime, Date.now());
-            });
+              const tickState = processPlaybackTick(updated, curTime, Date.now());
 
-            // حفظ كل 120 ثانية (Spark quota friendly: 60-120s)
-            if (Date.now() - lastSaveTimeRef.current >= 90000) {
-              void saveCurrentProgress();
-            }
+              // فحص عبور فواصل النسب المئوية 25% و50% و75% و95%
+              const decision = shouldFlush({
+                trigger: 'milestone',
+                currentCoverage: tickState.coverage,
+                lastFlushedCoverage: lastFlushedCoverageRef.current,
+                lastFlushTimeMs: lastFlushTimeRef.current,
+                nowMs: Date.now(),
+                passedMilestones: passedMilestonesRef.current,
+                isCompleted: tickState.completed,
+              });
+
+              if (decision.shouldFlush) {
+                void triggerFlush('milestone');
+              } else {
+                // فحص النبضة الاحتياطية كل 5 دقائق لو شغال متواصل
+                const hb = shouldFlush({
+                  trigger: 'fallback_heartbeat',
+                  currentCoverage: tickState.coverage,
+                  lastFlushedCoverage: lastFlushedCoverageRef.current,
+                  lastFlushTimeMs: lastFlushTimeRef.current,
+                  nowMs: Date.now(),
+                  passedMilestones: passedMilestonesRef.current,
+                  isCompleted: tickState.completed,
+                });
+                if (hb.shouldFlush) {
+                  void triggerFlush('fallback_heartbeat');
+                }
+              }
+
+              return tickState;
+            });
           }
         }
       } catch {}
@@ -207,14 +276,14 @@ export default function ProtectedVideoPlayer({
     return () => {
       destroyed = true;
       if (pollTimer) window.clearInterval(pollTimer);
-      void saveCurrentProgress();
+      void triggerFlush('pagehide');
       try {
         ytPlayerRef.current?.destroy();
       } catch {}
     };
-  }, [source.kind, ytVideoId, containerId, saveCurrentProgress]);
+  }, [source.kind, ytVideoId, containerId, triggerFlush]);
 
-  // إدارة التبويب المخفي والصفحة المغلقة
+  // إدارة التبويب المخفي والصفحة المغلقة (الأحداث الصريحة)
   useEffect(() => {
     const handleVisibility = () => {
       if (document.hidden) {
@@ -224,7 +293,7 @@ export default function ProtectedVideoPlayer({
           ytPlayerRef.current.pauseVideo();
         }
         setWatchState((prev) => updatePlayerStatus(prev, { isTabVisible: false, isPlaying: false }));
-        void saveCurrentProgress();
+        void triggerFlush('visibility_hidden');
       } else {
         setAway(false);
         setWatchState((prev) => updatePlayerStatus(prev, { isTabVisible: true }));
@@ -232,7 +301,7 @@ export default function ProtectedVideoPlayer({
     };
 
     const handlePageHide = () => {
-      void saveCurrentProgress();
+      void triggerFlush('pagehide');
     };
 
     document.addEventListener('visibilitychange', handleVisibility);
@@ -243,11 +312,11 @@ export default function ProtectedVideoPlayer({
       document.removeEventListener('visibilitychange', handleVisibility);
       window.removeEventListener('pagehide', handlePageHide);
       window.removeEventListener('beforeunload', handlePageHide);
-      void saveCurrentProgress();
+      void triggerFlush('pagehide');
     };
-  }, [saveCurrentProgress]);
+  }, [triggerFlush]);
 
-  // تحريك العلامة المائية
+  // تحريك العلامة المائية عشوائياً لمكافحة التسجيل
   useEffect(() => {
     const timer = window.setInterval(() => {
       setPosition({ top: 8 + Math.random() * 70, left: 5 + Math.random() * 55 });
@@ -288,16 +357,16 @@ export default function ProtectedVideoPlayer({
               const dur = videoRef.current?.duration || 0;
               const rate = videoRef.current?.playbackRate || 1.0;
               setWatchState((prev) =>
-                updatePlayerStatus(prev, { isPlaying: true, totalDuration: dur, playbackRate: rate })
+                updatePlayerStatus(prev, { isPlaying: true, totalDuration: dur, playbackRate: rate }),
               );
             }}
             onPause={() => {
               setWatchState((prev) => updatePlayerStatus(prev, { isPlaying: false }));
-              void saveCurrentProgress();
+              void triggerFlush('pause');
             }}
             onEnded={() => {
               setWatchState((prev) => updatePlayerStatus(prev, { isPlaying: false }));
-              void saveCurrentProgress();
+              void triggerFlush('ended');
             }}
             onTimeUpdate={() => {
               if (!videoRef.current) return;
@@ -305,19 +374,45 @@ export default function ProtectedVideoPlayer({
               const rate = videoRef.current.playbackRate;
               const dur = videoRef.current.duration;
               setWatchState((prev) => {
-                let updated = updatePlayerStatus(prev, {
+                const updated = updatePlayerStatus(prev, {
                   isPlaying: !videoRef.current?.paused,
                   playbackRate: rate,
                   totalDuration: dur,
-                  isTabVisible: !document.hidden
+                  isTabVisible: !document.hidden,
                 });
-                return processPlaybackTick(updated, cur, Date.now());
-              });
+                const tickState = processPlaybackTick(updated, cur, Date.now());
 
-              // حفظ كل 120 ثانية (Spark quota friendly: 60-120s)
-              if (Date.now() - lastSaveTimeRef.current >= 90000) {
-                void saveCurrentProgress();
-              }
+                // فحص عبور فواصل النسب المئوية
+                const decision = shouldFlush({
+                  trigger: 'milestone',
+                  currentCoverage: tickState.coverage,
+                  lastFlushedCoverage: lastFlushedCoverageRef.current,
+                  lastFlushTimeMs: lastFlushTimeRef.current,
+                  nowMs: Date.now(),
+                  passedMilestones: passedMilestonesRef.current,
+                  isCompleted: tickState.completed,
+                });
+
+                if (decision.shouldFlush) {
+                  void triggerFlush('milestone');
+                } else {
+                  // فحص النبضة الاحتياطية (5 دقائق)
+                  const hb = shouldFlush({
+                    trigger: 'fallback_heartbeat',
+                    currentCoverage: tickState.coverage,
+                    lastFlushedCoverage: lastFlushedCoverageRef.current,
+                    lastFlushTimeMs: lastFlushTimeRef.current,
+                    nowMs: Date.now(),
+                    passedMilestones: passedMilestonesRef.current,
+                    isCompleted: tickState.completed,
+                  });
+                  if (hb.shouldFlush) {
+                    void triggerFlush('fallback_heartbeat');
+                  }
+                }
+
+                return tickState;
+              });
             }}
             onContextMenu={(event) => event.preventDefault()}
             className="absolute inset-0 h-full w-full"

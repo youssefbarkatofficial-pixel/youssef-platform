@@ -126,23 +126,29 @@ export function cleanRubric(rubric: RubricItem[]): RubricItem[] {
 }
 
 // يرجع نص الخطأ، أو نصًا فارغًا لو المسودة سليمة.
-export function validateDraft(draft: QuestionDraft): string {
+export function validateDraft(draft: QuestionDraft, isDraftMode: boolean = false): string {
   if (draft.text.trim() === '') return 'اكتب نص السؤال.';
   if (!Number.isFinite(draft.points) || draft.points <= 0) return 'اكتب درجة صحيحة للسؤال.';
 
   if (draft.type === 'choose') {
     const keys = getFilledOptionKeys(draft);
     if (keys.length < 2) return 'اكتب خيارين على الأقل.';
-    if (!keys.includes(draft.answer)) return 'اختر الإجابة الصحيحة من الخيارات المكتوبة.';
+    if (!isDraftMode && !draft.needsReview && !keys.includes(draft.answer)) {
+      return 'اختر الإجابة الصحيحة من الخيارات المكتوبة.';
+    }
     return '';
   }
 
   if (draft.type === 'tf') {
-    if (draft.answer !== 'صح' && draft.answer !== 'خطأ') return 'اختر الإجابة الصحيحة (صح أو خطأ).';
+    if (!isDraftMode && !draft.needsReview && draft.answer !== 'صح' && draft.answer !== 'خطأ') {
+      return 'اختر الإجابة الصحيحة (صح أو خطأ).';
+    }
     return '';
   }
 
-  if (draft.answer.trim() === '') return 'اكتب الإجابة النموذجية.';
+  if (!isDraftMode && !draft.needsReview && draft.answer.trim() === '') {
+    return 'اكتب الإجابة النموذجية.';
+  }
   return '';
 }
 

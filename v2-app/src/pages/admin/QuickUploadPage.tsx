@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ClipboardList, FileText, PlayCircle, Trash2, UploadCloud } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, ChevronDown, ChevronUp, ClipboardList, FileText, PlayCircle, Trash2, UploadCloud } from 'lucide-react';
 import { Badge, Button, Card, EmptyState, Input, Spinner, useToast } from '../../components/ui';
 import { useCourses } from '../../hooks/useCourses';
 import {
@@ -8,7 +8,11 @@ import {
   parseQuestionsFromJson,
   parseQuestionsFromPdf,
   parseQuestionsFromTxt,
+  parseExamText,
+  parseExamFromDocx,
+  parsedExamToQuestionDrafts,
 } from '../../lib/questionImport';
+import type { ParsedExam, ImportResult } from '../../lib/questionImport';
 import type { QuestionDraft } from '../../lib/questionDraft';
 import { QUESTION_TYPE_LABELS } from '../../lib/questionDraft';
 import type { AssessmentKind } from '../../lib/grading';
@@ -31,7 +35,6 @@ function toLatinDigits(text: string): string {
 }
 
 // سطر لكل محاضرة: العنوان | رابط الفيديو | رابط PDF أو Drive | رابط ملف آخر ...
-// الترتيب بين الأجزاء حر: الرابط الذي يبدو ملفًا (PDF/Drive/Docs) يعتبر ملفًا، وأي رابط آخر فيديو.
 export function parseLectureLines(raw: string): LectureDraft[] {
   const drafts: LectureDraft[] = [];
   raw
@@ -112,7 +115,13 @@ export default function QuickUploadPage() {
   const [strict, setStrict] = useState(false);
   const [rawText, setRawText] = useState('');
   const [questions, setQuestions] = useState<QuestionDraft[]>([]);
+  const [parsedExam, setParsedExam] = useState<ParsedExam | null>(null);
+  const [expandedSection, setExpandedSection] = useState<number | null>(null);
   const [savingQuestions, setSavingQuestions] = useState(false);
+
+  const missingCount = useMemo(() => {
+    return questions.filter((q) => q.needsReview || !q.answer).length;
+  }, [questions]);
 
   const reloadCourse = useCallback(async (id: string) => {
     if (!id) {
@@ -178,13 +187,45 @@ export default function QuickUploadPage() {
     if (!file) return;
     try {
       const name = file.name.toLowerCase();
-      const result = name.endsWith('.json')
-        ? parseQuestionsFromJson(await file.text())
-        : name.endsWith('.docx')
-          ? await parseQuestionsFromDocx(file)
-          : name.endsWith('.pdf')
-            ? await parseQuestionsFromPdf(file)
-            : parseQuestionsFromTxt(await file.text());
+      let result: ImportResult;
+      if (name.endsWith('.docx')) {
+        const parsed = await parseExamFromDocx(file);
+        setParsedExam(parsed);
+        if (!title.trim() && parsed.title) setTitle(parsed.title);
+        result = {
+          questions: parsedExamToQuestionDrafts(parsed),
+          warnings: parsed.warnings,
+          errors: parsed.errors,
+          parsedExam: parsed,
+        };
+      } else if (name.endsWith('.json')) {
+        result = parseQuestionsFromJson(await file.text());
+        if (result.parsedExam) {
+          setParsedExam(result.parsedExam);
+          if (!title.trim() && result.parsedExam.title) setTitle(result.parsedExam.title);
+        }
+      } else if (name.endsWith('.pdf')) {
+        result = await parseQuestionsFromPdf(file);
+        if (result.parsedExam) {
+          setParsedExam(result.parsedExam);
+          if (!title.trim() && result.parsedExam.title) setTitle(result.parsedExam.title);
+        }
+      } else {
+        const raw = await file.text();
+        const parsed = parseExamText(raw);
+        if (parsed.sections.length > 0) {
+          setParsedExam(parsed);
+          if (!title.trim() && parsed.title) setTitle(parsed.title);
+          result = {
+            questions: parsedExamToQuestionDrafts(parsed),
+            warnings: parsed.warnings,
+            errors: parsed.errors,
+            parsedExam: parsed,
+          };
+        } else {
+          result = parseQuestionsFromTxt(raw);
+        }
+      }
       setQuestions(result.questions);
       showToast(`تم استخراج ${result.questions.length} سؤال`, result.questions.length > 0 ? 'success' : 'error');
     } catch (err: unknown) {
@@ -193,12 +234,30 @@ export default function QuickUploadPage() {
     event.target.value = '';
   };
 
-  const saveQuestions = async () => {
+  const onTextareaChange = (val: string) => {
+    setRawText(val);
+    const parsed = parseExamText(val);
+    if (parsed.sections.length > 0) {
+      setParsedExam(parsed);
+      if (!title.trim() && parsed.title) setTitle(parsed.title);
+      setQuestions(parsedExamToQuestionDrafts(parsed));
+    } else {
+      setParsedExam(null);
+      setQuestions(parseQuestionsFromTxt(val).questions);
+    }
+  };
+
+  const saveQuestions = async (publish: boolean = false) => {
     if (!courseId || questions.length === 0) return;
+    if (publish && missingCount > 0) {
+      showToast(`لا يمكن النشر للطلاب لوجود ${missingCount} سؤال ناقص إجابة. يمكنك الحفظ كمسودة مخفية.`, 'error');
+      return;
+    }
+
     setSavingQuestions(true);
     try {
       if (target === 'new') {
-        if (!title.trim()) throw new Error('اكتب عنوان');
+        if (!title.trim()) throw new Error('اكتب عنوان التقييم.');
         if (kind === 'training' && !attachLectureId) throw new Error('التدريب لازم يتربط بمحاضرة');
         const course = await getCourse(courseId);
         const section = course?.sections[0];
@@ -218,7 +277,12 @@ export default function QuickUploadPage() {
           questions,
           kind === 'exam' ? '' : attachLectureId,
         );
-        showToast(`تم إنشاء «${title.trim()}» بـ ${questions.length} سؤال`, 'success');
+        showToast(
+          publish
+            ? `تم إنشاء ونشر «${title.trim()}» بـ ${questions.length} سؤال`
+            : `تم حفظ «${title.trim()}» كمسودة مخفية بـ ${questions.length} سؤال (${missingCount} ناقص إجابة)`,
+          'success',
+        );
         setTitle('');
       } else {
         if (!existingId) throw new Error('اختر التقييم');
@@ -228,6 +292,7 @@ export default function QuickUploadPage() {
         showToast(`تمت إضافة ${questions.length} سؤال إلى «${loaded.meta.title}»`, 'success');
       }
       setQuestions([]);
+      setParsedExam(null);
       setRawText('');
       await reloadCourse(courseId);
     } catch (err: unknown) {
@@ -235,6 +300,17 @@ export default function QuickUploadPage() {
     } finally {
       setSavingQuestions(false);
     }
+  };
+
+  const updateQuestionInDraft = (idx: number, patch: Partial<QuestionDraft>) => {
+    setQuestions((prev) => {
+      const next = [...prev];
+      next[idx] = { ...next[idx], ...patch };
+      if (patch.answer && next[idx].answer) {
+        next[idx].needsReview = false;
+      }
+      return next;
+    });
   };
 
   const tabs: { key: TabKey; label: string; icon: typeof PlayCircle }[] = [
@@ -255,118 +331,138 @@ export default function QuickUploadPage() {
   );
 
   return (
-    <div className="space-y-5" dir="rtl">
-      <div>
-        <h1 className="flex items-center gap-2 text-2xl font-extrabold text-white">
-          <UploadCloud className="h-6 w-6 text-gold-400" /> الرفع السريع
-        </h1>
-        <p className="mt-1 text-sm text-slate-400">
-          ارفع محاضرات وفيديوهات وملفات PDF (روابط Drive) وتدريبات وواجبات وامتحانات في دقيقة، وكلها بتتربط بالمحاضرة الصح.
-        </p>
+    <div className="space-y-6">
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h1 className="text-xl font-bold text-white">الرفع السريع للمحتوى</h1>
+          <p className="text-xs text-slate-400">
+            أضف محاضرات، ملفات، أو امتحانات كاملة من ملفات Word أو نصية دفعة واحدة.
+          </p>
+        </div>
+        {courseId && (
+          <Link to={`/admin/courses/${courseId}`} className="text-xs font-bold text-gold-400 hover:text-gold-300">
+            فتح محرر الكورس ←
+          </Link>
+        )}
       </div>
 
-      <Card className="space-y-3 p-4">
-        <label className="text-xs font-bold text-slate-300">الكورس</label>
+      <Card className="p-4">
+        <label className="mb-1 block text-xs font-bold text-slate-300">اختر الكورس المستهدف</label>
         {loadingCourses ? (
-          <Spinner />
+          <Spinner size="sm" />
         ) : (
           <select value={courseId} onChange={(e) => setCourseId(e.target.value)} className={FIELD}>
-            <option value="">— اختر الكورس —</option>
-            {courses.map((course) => (
-              <option key={course.id} value={course.id}>
-                {course.title}
+            <option value="">— اختر كورس —</option>
+            {courses.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.title} ({c.grade ? c.grade : 'عام'})
               </option>
             ))}
           </select>
         )}
-        {courseId && (
-          <div className="flex flex-wrap items-center gap-2 text-xs text-slate-400">
-            {loadingCourse ? <Spinner size="sm" /> : <Badge variant="neutral">{lectures.length} محاضرة</Badge>}
-            <Link to={`/admin/courses/${encodeURIComponent(courseId)}`} className="text-gold-400 underline">
-              فتح محرر الكورس
-            </Link>
-          </div>
-        )}
       </Card>
 
-      {!courseId ? (
-        <EmptyState title="اختر كورس الأول" description="بعدها هتظهر لك أدوات الرفع." />
-      ) : (
+      {courseId && (
         <>
-          <div className="flex flex-wrap gap-2">
-            {tabs.map(({ key, label, icon: Icon }) => (
-              <button
-                key={key}
-                type="button"
-                onClick={() => setTab(key)}
-                className={`flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-bold transition ${
-                  tab === key ? 'bg-gold-400 text-navy-950' : 'bg-navy-900 text-slate-300 hover:bg-navy-800'
-                }`}
-              >
-                <Icon className="h-4 w-4" /> {label}
-              </button>
-            ))}
+          <div className="flex border-b border-navy-800">
+            {tabs.map((t) => {
+              const Icon = t.icon;
+              const active = tab === t.key;
+              return (
+                <button
+                  key={t.key}
+                  type="button"
+                  onClick={() => setTab(t.key)}
+                  className={`flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-bold transition-colors ${
+                    active ? 'border-gold-400 text-gold-400' : 'border-transparent text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  <Icon className="h-4 w-4" />
+                  {t.label}
+                </button>
+              );
+            })}
           </div>
 
           {tab === 'lectures' && (
-            <Card className="space-y-3 p-4">
-              <label className="text-xs font-bold text-slate-300">سطر لكل محاضرة: العنوان | رابط الفيديو | رابط PDF أو Drive</label>
-              <textarea
-                value={lectureText}
-                onChange={(e) => setLectureText(e.target.value)}
-                rows={8}
-                dir="ltr"
-                placeholder={'1. الدرس الأول | https://youtu.be/xxxx | https://drive.google.com/file/d/ID/view\n2. الدرس الثاني | https://youtu.be/yyyy\n3. الدرس الثالث | https://drive.google.com/file/d/ID2/view'}
-                className={`${FIELD} font-mono text-xs`}
-              />
-              <p className="text-[11px] text-slate-400">
-                الترتيب بين الأجزاء حر. روابط Drive و PDF بتتحسب ملفات تلقائيًا وبتتحول لرابط عرض ثابت. ممكن تحط أكتر من ملف في نفس السطر.
-              </p>
-              <div className="flex flex-wrap gap-2 text-xs">
-                {(['append', 'replace'] as const).map((mode) => (
-                  <button
-                    key={mode}
-                    type="button"
-                    onClick={() => setLectureMode(mode)}
-                    className={`rounded-lg px-3 py-1.5 font-bold ${lectureMode === mode ? 'bg-gold-400 text-navy-950' : 'bg-navy-900 text-slate-300'}`}
-                  >
-                    {mode === 'append' ? 'إضافة بعد الموجود' : 'استبدال كل المحاضرات'}
-                  </button>
-                ))}
+            <Card className="space-y-4 p-4">
+              <div>
+                <label className="mb-1 block text-xs font-bold text-slate-300">
+                  الصق قائمة المحاضرات (سطر لكل محاضرة: العنوان | رابط الفيديو | رابط PDF)
+                </label>
+                <textarea
+                  value={lectureText}
+                  onChange={(e) => setLectureText(e.target.value)}
+                  rows={8}
+                  placeholder={`1. الدرس الأول: الموقع والمساحة | https://youtube.com/watch?v=... | https://drive.google.com/...\n2. الدرس الثاني: تضاريس مصر | https://youtube.com/watch?v=...`}
+                  className={`${FIELD} text-xs`}
+                />
               </div>
+
+              <div className="flex flex-wrap items-center justify-between gap-3 text-xs">
+                <div className="flex items-center gap-4">
+                  <label className="flex items-center gap-1.5 text-slate-300">
+                    <input
+                      type="radio"
+                      name="lecMode"
+                      checked={lectureMode === 'append'}
+                      onChange={() => setLectureMode('append')}
+                    />
+                    إضافة للمحاضرات الحالية ({lectures.length})
+                  </label>
+                  <label className="flex items-center gap-1.5 text-rose-300">
+                    <input
+                      type="radio"
+                      name="lecMode"
+                      checked={lectureMode === 'replace'}
+                      onChange={() => setLectureMode('replace')}
+                    />
+                    استبدال الكل
+                  </label>
+                </div>
+                <Button onClick={saveLectures} loading={savingLectures} disabled={lectureDrafts.length === 0}>
+                  حفظ {lectureDrafts.length || ''} محاضرة
+                </Button>
+              </div>
+
               {lectureDrafts.length > 0 && (
-                <div className="space-y-1.5 rounded-xl border border-navy-800 bg-navy-950/60 p-3">
-                  <div className="text-xs font-bold text-slate-300">معاينة ({lectureDrafts.length})</div>
-                  {lectureDrafts.map((draft, index) => (
-                    <div key={index} className="flex flex-wrap items-center gap-2 text-xs text-slate-200">
-                      <span className="text-slate-500">#{index + 1}</span>
-                      <span className="font-bold">{draft.title || `محاضرة ${index + 1}`}</span>
-                      {draft.videoUrl ? <Badge variant="success">فيديو</Badge> : <Badge variant="danger">بدون فيديو</Badge>}
-                      {draft.files.length > 0 && <Badge variant="gold">{draft.files.length} ملف</Badge>}
+                <div className="space-y-1.5 rounded-xl border border-navy-800 bg-navy-950/60 p-3 text-xs">
+                  <div className="font-bold text-slate-300">معاينة ({lectureDrafts.length} محاضرة)</div>
+                  {lectureDrafts.map((lec, i) => (
+                    <div key={i} className="flex items-center justify-between text-slate-300">
+                      <span>
+                        {i + 1}. {lec.title || '(بدون عنوان)'}
+                      </span>
+                      <span className="text-[11px] text-slate-500">
+                        {lec.videoUrl ? 'فيديو ✓' : 'بدون فيديو'} • {lec.files.length} ملف
+                      </span>
                     </div>
                   ))}
                 </div>
               )}
-              <Button onClick={saveLectures} loading={savingLectures} disabled={lectureDrafts.length === 0}>
-                حفظ {lectureDrafts.length || ''} محاضرة
-              </Button>
             </Card>
           )}
 
           {tab === 'files' && (
-            <Card className="space-y-3 p-4">
-              <label className="text-xs font-bold text-slate-300">المحاضرة</label>
-              {lectureSelect(fileLectureId, setFileLectureId, '— اختر المحاضرة —')}
-              <label className="text-xs font-bold text-slate-300">سطر لكل ملف: الاسم | الرابط</label>
-              <textarea
-                value={fileText}
-                onChange={(e) => setFileText(e.target.value)}
-                rows={5}
-                dir="ltr"
-                placeholder={'مذكرة الدرس | https://drive.google.com/file/d/ID/view\nملخص | https://drive.google.com/open?id=ID2'}
-                className={`${FIELD} font-mono text-xs`}
-              />
-              <p className="text-[11px] text-slate-400">لازم الملف يكون على Drive بصلاحية «أي شخص معه الرابط». الطالب لازم يشاهد المحاضرة الأول لو قواعد المحتوى مفعّلة.</p>
+            <Card className="space-y-4 p-4">
+              <div>
+                <label className="mb-1 block text-xs font-bold text-slate-300">اختر المحاضرة لإضافة الملفات إليها</label>
+                {lectureSelect(fileLectureId, setFileLectureId, '— اختر المحاضرة —')}
+              </div>
+
+              <div>
+                <label className="mb-1 block text-xs font-bold text-slate-300">
+                  الصق روابط الملفات (سطر لكل ملف: العنوان | الرابط)
+                </label>
+                <textarea
+                  value={fileText}
+                  onChange={(e) => setFileText(e.target.value)}
+                  rows={6}
+                  placeholder={`مذكرة الشرح | https://drive.google.com/file/d/.../view\nواجب الأسبوع | https://drive.google.com/...`}
+                  className={`${FIELD} text-xs`}
+                />
+              </div>
+
               <Button onClick={saveFiles} loading={savingFiles} disabled={!fileLectureId || fileDrafts.every((f) => !f.url)}>
                 إضافة الملفات
               </Button>
@@ -379,7 +475,7 @@ export default function QuickUploadPage() {
           )}
 
           {tab === 'assessments' && (
-            <Card className="space-y-3 p-4">
+            <Card className="space-y-4 p-4">
               <div className="flex flex-wrap gap-2 text-xs">
                 {(['training', 'homework', 'exam'] as const).map((k) => (
                   <button
@@ -433,36 +529,339 @@ export default function QuickUploadPage() {
                 </select>
               )}
 
-              <label className="text-xs font-bold text-slate-300">الأسئلة: الصقها هنا أو ارفع ملف TXT / Word / JSON</label>
-              <textarea
-                value={rawText}
-                onChange={(e) => {
-                  setRawText(e.target.value);
-                  setQuestions(parseQuestionsFromTxt(e.target.value).questions);
-                }}
-                rows={7}
-                className={`${FIELD} text-xs`}
-              />
-              <input type="file" accept=".txt,.docx,.json,.pdf" onChange={onQuestionsFile} className="text-xs text-slate-300" />
+              <div>
+                <label className="text-xs font-bold text-slate-300">الأسئلة: الصقها هنا أو ارفع ملف TXT / Word / JSON</label>
+                <textarea
+                  value={rawText}
+                  onChange={(e) => onTextareaChange(e.target.value)}
+                  rows={7}
+                  placeholder="الصق نص الامتحان أو اختر ملفًا من الأسفل..."
+                  className={`${FIELD} text-xs`}
+                />
+              </div>
 
-              {questions.length > 0 && (
+              <div className="flex items-center gap-3">
+                <input
+                  type="file"
+                  accept=".txt,.docx,.json,.pdf"
+                  onChange={onQuestionsFile}
+                  className="text-xs text-slate-300 file:mr-2 file:rounded-lg file:border-0 file:bg-navy-800 file:px-3 file:py-1.5 file:text-xs file:font-bold file:text-gold-400 hover:file:bg-navy-700"
+                />
+              </div>
+
+              {/* تقرير التحذيرات والأخطاء البنيوية */}
+              {parsedExam && parsedExam.errors.length > 0 && (
+                <div className="space-y-1 rounded-xl border border-rose-500/40 bg-rose-500/10 p-3 text-xs text-rose-300">
+                  <div className="flex items-center gap-1.5 font-bold">
+                    <AlertTriangle className="h-4 w-4 shrink-0 text-rose-400" />
+                    <span>توجد أخطاء بنيوية في الملف:</span>
+                  </div>
+                  <ul className="list-inside list-disc space-y-0.5 pr-2">
+                    {parsedExam.errors.map((err, idx) => (
+                      <li key={idx}>{err}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {parsedExam && parsedExam.warnings.length > 0 && (
+                <div className="space-y-1 rounded-xl border border-amber-500/40 bg-amber-500/10 p-3 text-xs text-amber-300">
+                  <div className="flex items-center gap-1.5 font-bold">
+                    <AlertTriangle className="h-4 w-4 shrink-0 text-amber-400" />
+                    <span>تنبيهات تنسيق:</span>
+                  </div>
+                  <ul className="list-inside list-disc space-y-0.5 pr-2">
+                    {parsedExam.warnings.map((warn, idx) => (
+                      <li key={idx}>{warn}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* جدول الأقسام المستخرجة (معاينة الأقسام) */}
+              {parsedExam && parsedExam.sections.length > 0 && (
+                <div className="space-y-3">
+                  <div className="text-xs font-bold text-slate-200">
+                    أقسام الامتحان المكتشفة ({parsedExam.sections.length} أقسام — إجمالي {questions.length} سؤال):
+                  </div>
+
+                  <div className="overflow-x-auto rounded-xl border border-navy-800 bg-navy-950">
+                    <table className="w-full text-right text-xs text-slate-300">
+                      <thead className="border-b border-navy-800 bg-navy-900/60 text-[11px] font-bold text-slate-400">
+                        <tr>
+                          <th className="p-2.5">القسم</th>
+                          <th className="p-2.5">النوع</th>
+                          <th className="p-2.5 text-center">المعلن</th>
+                          <th className="p-2.5 text-center">المستخرج</th>
+                          <th className="p-2.5 text-center">ناقص إجابة</th>
+                          <th className="p-2.5 text-center">المعاينة</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-navy-800/60">
+                        {parsedExam.sections.map((sec, sIdx) => {
+                          const secMissing = sec.questions.filter((q) => q.needsAnswer).length;
+                          const isOpen = expandedSection === sIdx;
+                          return (
+                            <tr key={sIdx} className="hover:bg-navy-900/40">
+                              <td className="p-2.5 font-medium text-white">{sec.header}</td>
+                              <td className="p-2.5">
+                                <Badge variant="neutral">{sec.type}</Badge>
+                              </td>
+                              <td className="p-2.5 text-center">{sec.declaredCount}</td>
+                              <td className="p-2.5 text-center font-bold text-white">{sec.questions.length}</td>
+                              <td className="p-2.5 text-center">
+                                {secMissing > 0 ? (
+                                  <span className="inline-flex items-center rounded-md bg-rose-500/20 px-2 py-0.5 text-[11px] font-bold text-rose-300">
+                                    {secMissing} ناقص
+                                  </span>
+                                ) : (
+                                  <span className="text-emerald-400 font-bold">مكتمل ✓</span>
+                                )}
+                              </td>
+                              <td className="p-2.5 text-center">
+                                <button
+                                  type="button"
+                                  onClick={() => setExpandedSection(isOpen ? null : sIdx)}
+                                  className="inline-flex items-center gap-1 rounded-lg bg-navy-800 px-2.5 py-1 text-[11px] font-bold text-gold-400 hover:bg-navy-700"
+                                >
+                                  {isOpen ? (
+                                    <>
+                                      إخفاء <ChevronUp className="h-3 w-3" />
+                                    </>
+                                  ) : (
+                                    <>
+                                      تعديل <ChevronDown className="h-3 w-3" />
+                                    </>
+                                  )}
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* تعديل أسئلة القسم المفتوح */}
+                  {expandedSection !== null && parsedExam.sections[expandedSection] && (
+                    <div className="space-y-3 rounded-xl border border-gold-500/30 bg-navy-950/80 p-4">
+                      <div className="flex items-center justify-between border-b border-navy-800 pb-2">
+                        <span className="text-xs font-bold text-gold-400">
+                          تعديل أسئلة: {parsedExam.sections[expandedSection].header}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setExpandedSection(null)}
+                          className="text-xs text-slate-400 hover:text-white"
+                        >
+                          إغلاق
+                        </button>
+                      </div>
+
+                      <div className="space-y-4">
+                        {parsedExam.sections[expandedSection].questions.map((q, qLocalIdx) => {
+                          // تحديد المؤشر العام في مصفوفة questions
+                          let globalIdx = 0;
+                          for (let i = 0; i < expandedSection; i++) {
+                            globalIdx += parsedExam.sections[i].questions.length;
+                          }
+                          globalIdx += qLocalIdx;
+
+                          const draft = questions[globalIdx];
+                          if (!draft) return null;
+
+                          return (
+                            <div
+                              key={globalIdx}
+                              className="space-y-2 rounded-lg border border-navy-800 bg-navy-900/50 p-3 text-xs"
+                            >
+                              <div className="flex items-center justify-between gap-2">
+                                <div className="flex items-center gap-2">
+                                  <span className="font-bold text-slate-400">#{q.number}</span>
+                                  <Badge variant="neutral">{draft.type}</Badge>
+                                  {(draft.needsReview || !draft.answer) && (
+                                    <span className="rounded bg-rose-500/20 px-1.5 py-0.5 text-[10px] font-bold text-rose-300">
+                                      ناقص إجابة
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <label className="text-[11px] text-slate-400">الدرجة:</label>
+                                  <input
+                                    type="number"
+                                    min={1}
+                                    value={draft.points}
+                                    onChange={(e) =>
+                                      updateQuestionInDraft(globalIdx, { points: Number(e.target.value) || 1 })
+                                    }
+                                    className="w-14 rounded border border-navy-700 bg-navy-950 px-2 py-0.5 text-center text-xs text-white"
+                                  />
+                                </div>
+                              </div>
+
+                              <div>
+                                <textarea
+                                  value={draft.text}
+                                  onChange={(e) => updateQuestionInDraft(globalIdx, { text: e.target.value })}
+                                  rows={2}
+                                  className={`${FIELD} text-xs`}
+                                />
+                              </div>
+
+                              {draft.type === 'choose' && draft.options && (
+                                <div className="space-y-1.5 pt-1">
+                                  <span className="text-[11px] font-bold text-slate-400">الخيارات والإجابة:</span>
+                                  <div className="grid gap-1.5 sm:grid-cols-2">
+                                    {Object.entries(draft.options).map(([optKey, optVal]) => (
+                                      <div
+                                        key={optKey}
+                                        className={`flex items-center gap-2 rounded-lg border p-1.5 ${
+                                          draft.answer === optKey
+                                            ? 'border-emerald-500 bg-emerald-500/10'
+                                            : 'border-navy-800 bg-navy-950'
+                                        }`}
+                                      >
+                                        <input
+                                          type="radio"
+                                          name={`q_${globalIdx}_opt`}
+                                          checked={draft.answer === optKey}
+                                          onChange={() => updateQuestionInDraft(globalIdx, { answer: optKey })}
+                                        />
+                                        <span className="font-bold uppercase text-slate-400">{optKey})</span>
+                                        <input
+                                          type="text"
+                                          value={optVal}
+                                          onChange={(e) => {
+                                            const updated = { ...draft.options, [optKey]: e.target.value };
+                                            updateQuestionInDraft(globalIdx, { options: updated });
+                                          }}
+                                          className="flex-1 bg-transparent text-xs text-white focus:outline-none"
+                                        />
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+
+                              {draft.type === 'tf' && (
+                                <div className="flex items-center gap-3 pt-1">
+                                  <span className="text-[11px] font-bold text-slate-400">الإجابة:</span>
+                                  <button
+                                    type="button"
+                                    onClick={() => updateQuestionInDraft(globalIdx, { answer: 'صح' })}
+                                    className={`rounded-lg px-3 py-1 font-bold ${
+                                      draft.answer === 'صح'
+                                        ? 'bg-emerald-500 text-white'
+                                        : 'bg-navy-800 text-slate-300 hover:bg-navy-700'
+                                    }`}
+                                  >
+                                    صح
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => updateQuestionInDraft(globalIdx, { answer: 'خطأ' })}
+                                    className={`rounded-lg px-3 py-1 font-bold ${
+                                      draft.answer === 'خطأ'
+                                        ? 'bg-rose-500 text-white'
+                                        : 'bg-navy-800 text-slate-300 hover:bg-navy-700'
+                                    }`}
+                                  >
+                                    خطأ
+                                  </button>
+                                </div>
+                              )}
+
+                              {draft.type !== 'choose' && draft.type !== 'tf' && (
+                                <div className="pt-1">
+                                  <label className="text-[11px] font-bold text-slate-400">الإجابة النموذجية:</label>
+                                  <input
+                                    type="text"
+                                    value={draft.answer}
+                                    placeholder="اكتب الإجابة النموذجية..."
+                                    onChange={(e) => updateQuestionInDraft(globalIdx, { answer: e.target.value })}
+                                    className={`${FIELD} mt-1 text-xs`}
+                                  />
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* قائمة الأسئلة العادية عند عدم وجود أقسام منسقة */}
+              {(!parsedExam || parsedExam.sections.length === 0) && questions.length > 0 && (
                 <div className="max-h-64 space-y-1.5 overflow-y-auto rounded-xl border border-navy-800 bg-navy-950/60 p-3">
                   <div className="text-xs font-bold text-slate-300">معاينة ({questions.length} سؤال)</div>
                   {questions.map((q, index) => (
                     <div key={index} className="flex items-start gap-2 text-xs text-slate-200">
                       <span className="text-slate-500">{index + 1}</span>
                       <Badge variant="neutral">{QUESTION_TYPE_LABELS[q.type]}</Badge>
+                      {(q.needsReview || !q.answer) && (
+                        <span className="rounded bg-rose-500/20 px-1.5 py-0.5 text-[10px] font-bold text-rose-300">
+                          ناقص إجابة
+                        </span>
+                      )}
                       <span className="flex-1">{q.text}</span>
-                      <button type="button" aria-label="حذف السؤال" onClick={() => setQuestions(questions.filter((_, i) => i !== index))}>
+                      <button
+                        type="button"
+                        aria-label="حذف السؤال"
+                        onClick={() => setQuestions(questions.filter((_, i) => i !== index))}
+                      >
                         <Trash2 className="h-3.5 w-3.5 text-rose-400" />
                       </button>
                     </div>
                   ))}
                 </div>
               )}
-              <Button onClick={saveQuestions} loading={savingQuestions} disabled={questions.length === 0}>
-                حفظ {questions.length || ''} سؤال
-              </Button>
+
+              {/* شريط الإجراءات وأزرار الحفظ والنشر */}
+              {questions.length > 0 && (
+                <div className="space-y-2 border-t border-navy-800 pt-3">
+                  {missingCount > 0 ? (
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-amber-300">
+                        <AlertTriangle className="h-4 w-4 shrink-0 text-amber-400" />
+                        <span>
+                          يوجد <strong>{missingCount}</strong> سؤالاً ناقص إجابة. سيتم حفظ الامتحان كمسودة مخفية للطلاب
+                          تلقائيًا.
+                        </span>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-3">
+                        <Button onClick={() => saveQuestions(false)} loading={savingQuestions}>
+                          حفظ كمسودة مخفية ({questions.length} سؤال)
+                        </Button>
+                        <Button
+                          variant="secondary"
+                          disabled={true}
+                          title={`يوجد ${missingCount} سؤال ناقص إجابة. يجب إكمال الإجابات للنشر للطلاب.`}
+                          className="cursor-not-allowed opacity-50"
+                        >
+                          نشر للطلاب ({missingCount} سؤال ناقص)
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-xs text-emerald-300">
+                        <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-400" />
+                        <span>جميع الأسئلة مكتملة الإجابات وجاهزة للنشر للطلاب فورًا!</span>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-3">
+                        <Button onClick={() => saveQuestions(true)} loading={savingQuestions}>
+                          نشر التقييم للطلاب ({questions.length} سؤال)
+                        </Button>
+                        <Button variant="secondary" onClick={() => saveQuestions(false)} loading={savingQuestions}>
+                          حفظ كمسودة
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </Card>
           )}
         </>

@@ -107,6 +107,7 @@ function buildRaw(
   id: string,
   meta: AssessmentMeta,
   questionCount: number,
+  options?: { isDraft?: boolean; hidden?: boolean },
 ): RawObject {
   return {
     ...base,
@@ -124,6 +125,7 @@ function buildRaw(
     createdAt: typeof base.createdAt === 'number' ? base.createdAt : Date.now(),
     archived: base.archived === true,
     source: 'v2',
+    ...(options?.isDraft ? { isDraft: true, hidden: true } : {}),
   };
 }
 
@@ -145,10 +147,21 @@ function makeItem(raw: RawObject, kind: AssessmentKind): CourseItem {
 }
 
 function checkInput(meta: AssessmentMeta, questions: QuestionDraft[]): void {
-  if (meta.title.trim() === '') throw new Error('invalid-assessment');
-  if (questions.length === 0) throw new Error('invalid-assessment');
-  if (questions.some((question) => validateDraft(question) !== '')) {
-    throw new Error('invalid-assessment');
+  if (meta.title.trim() === '') {
+    throw new Error('عنوان التقييم مطلوب ولا يمكن أن يكون فارغًا.');
+  }
+  if (questions.length === 0) {
+    throw new Error('يجب إضافة سؤال واحد على الأقل في التقييم.');
+  }
+
+  const hasIncompleteAnswers = questions.some((q) => q.needsReview || !q.answer);
+
+  for (let idx = 0; idx < questions.length; idx++) {
+    const q = questions[idx];
+    const err = validateDraft(q, hasIncompleteAnswers);
+    if (err) {
+      throw new Error(`خطأ في السؤال رقم ${idx + 1}: ${err}`);
+    }
   }
 }
 
@@ -204,12 +217,18 @@ export async function createAssessment(
 
   const course = await loadEditableCourse(courseId);
 
+  const hasIncompleteAnswers = questions.some((q) => q.needsReview || !q.answer);
+  const draftMeta: AssessmentMeta = hasIncompleteAnswers ? { ...meta, strictMode: false } : meta;
+
   // كورس بشكل المحاضرات (layoutVersion=2) أو عنصر مربوط بمحاضرة: نكتب في المصفوفات الجذرية المقروءة فعليًا.
   const layoutV2 = !course.sectionsDerived;
   if (layoutV2 || lectureId) {
     const newId = generateContentId('exam');
-    await writeContent(courseId, newId, meta, questions);
-    const rawItem = buildRaw({}, newId, meta, questions.length);
+    await writeContent(courseId, newId, draftMeta, questions);
+    const rawItem = buildRaw({}, newId, draftMeta, questions.length, {
+      isDraft: hasIncompleteAnswers,
+      hidden: hasIncompleteAnswers,
+    });
     const placed: PlacedKind = meta.kind === 'homework' ? 'homework' : meta.kind === 'training' ? 'training' : 'exam';
     await placeAssessment(courseId, placed, rawItem, lectureId);
     return newId;
@@ -223,9 +242,12 @@ export async function createAssessment(
   const examId = generateContentId('exam');
 
   // الأسئلة والإجابات أولًا، فلو فشل أي شيء لا يظهر عنصر ناقص في الكورس.
-  await writeContent(courseId, examId, meta, questions);
+  await writeContent(courseId, examId, draftMeta, questions);
 
-  const raw = buildRaw({}, examId, meta, questions.length);
+  const raw = buildRaw({}, examId, draftMeta, questions.length, {
+    isDraft: hasIncompleteAnswers,
+    hidden: hasIncompleteAnswers,
+  });
   const item = makeItem(raw, meta.kind);
 
   const sections = course.sections.map((candidate) =>

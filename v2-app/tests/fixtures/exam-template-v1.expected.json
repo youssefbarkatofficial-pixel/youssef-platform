@@ -1,0 +1,708 @@
+{
+ "title": "امتحان نموذجي - تدريب استخراج الأسئلة والإجابات (3 أسئلة لكل صيغة)",
+ "sections": [
+  {
+   "header": "أولاً: اختر الإجابة الصحيحة مما بين الأقواس (3 أسئلة):",
+   "type": "choose",
+   "declaredCount": 3,
+   "questions": [
+    {
+     "number": 1,
+     "origType": "choose",
+     "stem": "تولى ........ حكم مصر عام 1805م بعد ثورة الشعب.",
+     "points": 1,
+     "type": "choose",
+     "options": [
+      "خورشيد باشا",
+      "محمد علي",
+      "عمر مكرم",
+      "إبراهيم باشا"
+     ],
+     "correctIndex": 1,
+     "convertedToChoose": false
+    },
+    {
+     "number": 2,
+     "origType": "choose",
+     "stem": "المعاهدة التي فرضت على محمد علي عام 1840م هي معاهدة ........",
+     "points": null,
+     "type": "choose",
+     "options": [
+      "لندن",
+      "باريس",
+      "أميان",
+      "العريش"
+     ],
+     "correctIndex": 0,
+     "convertedToChoose": false
+    },
+    {
+     "number": 3,
+     "origType": "choose",
+     "stem": "منح ........ المهندس ديليسبس عقد امتياز حفر قناة السويس عام 1854م.",
+     "points": null,
+     "type": "choose",
+     "options": [
+      "عباس الأول",
+      "محمد سعيد باشا",
+      "إسماعيل",
+      "توفيق"
+     ],
+     "correctIndex": 1,
+     "convertedToChoose": false
+    }
+   ]
+  },
+  {
+   "header": "ثانياً: ضع علامة (صح) أو (خطأ) أمام العبارات الآتية (3 أسئلة):",
+   "type": "truefalse",
+   "declaredCount": 3,
+   "questions": [
+    {
+     "number": 1,
+     "origType": "truefalse",
+     "stem": "( ) وضع محمد علي نظام الاحتكار بدلاً من نظام الالتزام.",
+     "points": null,
+     "type": "truefalse",
+     "correct": true
+    },
+    {
+     "number": 2,
+     "origType": "truefalse",
+     "stem": "( ) تم نفي عمر مكرم إلى الإسكندرية عام 1809م.",
+     "points": null,
+     "type": "truefalse",
+     "correct": false
+    },
+    {
+     "number": 3,
+     "origType": "truefalse",
+     "stem": "( ) أنشأ الخديو إسماعيل مجلس شورى النواب عام 1866م.",
+     "points": null,
+     "type": "truefalse",
+     "correct": true
+    }
+   ]
+  },
+  {
+   "header": "ثالثاً: أكمل العبارات الآتية (3 أسئلة):",
+   "type": "fill",
+   "declaredCount": 3,
+   "questions": [
+    {
+     "number": 1,
+     "origType": "fill",
+     "stem": "تحطم الأسطول المصري في معركة ........ عام 1827م خلال حرب المورة.",
+     "points": null,
+     "type": "text",
+     "answerText": "نافارين"
+    },
+    {
+     "number": 2,
+     "origType": "fill",
+     "stem": "أنشأ محمد علي المطبعة ........ في بولاق.",
+     "points": null,
+     "type": "text",
+     "answerText": "الأميرية"
+    },
+    {
+     "number": 3,
+     "origType": "fill",
+     "stem": "شكلت لجنة التحقيق العليا عام ........ لدراسة أسباب العجز المالي.",
+     "points": null,
+     "type": "choose",
+     "options": [
+      "1876م",
+      "1878م",
+      "1879م",
+      "1882م"
+     ],
+     "correctIndex": 1,
+     "convertedToChoose": true
+    }
+   ]
+  },
+  {
+   "header": "رابعاً: صوب ما تحته خط (3 أسئلة):",
+   "type": "correct",
+   "declaredCount": 3,
+   "questions": [
+    {
+     "number": 1,
+     "origType": "correct",
+     "stem": "تم نفي عمر مكرم إلى مدينة (الإسكندرية).",
+     "points": null,
+     "type": "text",
+     "answerText": "دمياط"
+    },
+    {
+     "number": 2,
+     "origType": "correct",
+     "stem": "الوزارة المختلطة ضمت وزيراً (ألمانياً) للمالية.",
+     "points": null,
+     "type": "text",
+     "answerText": "إنجليزياً"
+    },
+    {
+     "number": 3,
+     "origType": "correct",
+     "stem": "أنشأ محمد علي ترسانة للسفن في (أسوان) ثم الإسكندرية.",
+     "points": null,
+     "type": "choose",
+     "options": [
+      "بولاق",
+      "السويس",
+      "دمياط",
+      "رشيد"
+     ],
+     "correctIndex": 0,
+     "convertedToChoose": true
+    }
+   ]
+  },
+  {
+   "header": "خامساً: اكتب ما تشير إليه العبارة (3 أسئلة):",
+   "type": "term",
+   "declaredCount": 3,
+   "questions": [
+    {
+     "number": 1,
+     "origType": "term",
+     "stem": "(........) نظام اقتصادي جعل فيه محمد علي الدولة هي المالك الوحيد للإنتاج والتجارة.",
+     "points": null,
+     "type": "text",
+     "answerText": "الاحتكار"
+    },
+    {
+     "number": 2,
+     "origType": "term",
+     "stem": "(........) معاهدة فرضت على محمد علي عام 1840م بعد توسعاته في الشام.",
+     "points": null,
+     "type": "text",
+     "answerText": "معاهدة لندن"
+    },
+    {
+     "number": 3,
+     "origType": "term",
+     "stem": "(........) حكومة مصرية ضمت وزيرين أجنبيين لإصلاح الأحوال المالية والإدارية.",
+     "points": null,
+     "type": "choose",
+     "options": [
+      "الوزارة المختلطة",
+      "المراقبة الثنائية",
+      "صندوق الدين",
+      "لجنة التحقيق"
+     ],
+     "correctIndex": 0,
+     "convertedToChoose": true
+    }
+   ]
+  },
+  {
+   "header": "سادساً: من هو؟ (3 أسئلة):",
+   "type": "who",
+   "declaredCount": 3,
+   "questions": [
+    {
+     "number": 1,
+     "origType": "who",
+     "stem": "ابن محمد علي الذي ساعد والده في أعماله العسكرية.",
+     "points": null,
+     "type": "text",
+     "answerText": "إبراهيم باشا"
+    },
+    {
+     "number": 2,
+     "origType": "who",
+     "stem": "أنشأ مجلس شورى النواب عام 1866م وعزل عام 1879م.",
+     "points": null,
+     "type": "text",
+     "answerText": "الخديو إسماعيل"
+    },
+    {
+     "number": 3,
+     "origType": "who",
+     "stem": "منح ديليسبس عقد امتياز حفر قناة السويس.",
+     "points": null,
+     "type": "choose",
+     "options": [
+      "عباس الأول",
+      "محمد سعيد باشا",
+      "إسماعيل",
+      "توفيق"
+     ],
+     "correctIndex": 1,
+     "convertedToChoose": true
+    }
+   ]
+  },
+  {
+   "header": "سابعاً: بم تفسر (3 أسئلة):",
+   "type": "explain",
+   "declaredCount": 3,
+   "questions": [
+    {
+     "number": 1,
+     "origType": "explain",
+     "stem": "قيام ثورة الشعب المصري 1804؟",
+     "points": 2,
+     "type": "choose",
+     "options": [
+      "رغبة الشعب في عودة الحملة الفرنسية",
+      "ظلم الولاة العثمانيين والمماليك وفرض الضرائب الباهظة على الشعب",
+      "رغبة الشعب في تولي الإنجليز حكم مصر",
+      "رفض الشعب إنشاء المدارس الحديثة"
+     ],
+     "correctIndex": 1,
+     "convertedToChoose": true
+    },
+    {
+     "number": 2,
+     "origType": "explain",
+     "stem": "تمسك الشعب بمحمد علي والياً عام 1805م؟",
+     "points": null,
+     "type": "choose",
+     "options": [
+      "لأنه كان من زعماء المماليك",
+      "لأنه فرض ضرائب جديدة على الشعب",
+      "لأنه وقف بجانب الشعب في الثورة ووعد بإلغاء الضرائب",
+      "لأن السلطان العثماني أمر الشعب بذلك"
+     ],
+     "correctIndex": 2,
+     "convertedToChoose": true
+    },
+    {
+     "number": 3,
+     "origType": "explain",
+     "stem": "رغبة محمد علي في التخلص من المماليك؟",
+     "points": null,
+     "type": "choose",
+     "options": [
+      "لإرضاء الإنجليز",
+      "لأنهم طلبوا الرحيل عن مصر",
+      "لأنهم كانوا يؤيدونه في الحكم",
+      "للانفراد بالحكم والقضاء على أقوى منافسيه"
+     ],
+     "correctIndex": 3,
+     "convertedToChoose": true
+    }
+   ]
+  },
+  {
+   "header": "ثامناً: ما النتائج المترتبة على (3 أسئلة):",
+   "type": "results",
+   "declaredCount": 3,
+   "questions": [
+    {
+     "number": 1,
+     "origType": "results",
+     "stem": "إنشاء مجلس شورى النواب 1866؟",
+     "points": null,
+     "type": "choose",
+     "options": [
+      "بداية الحياة النيابية في مصر",
+      "إلغاء الحكم الخديوي",
+      "إغلاق المدارس",
+      "احتلال مصر"
+     ],
+     "correctIndex": 0,
+     "convertedToChoose": true
+    },
+    {
+     "number": 2,
+     "origType": "results",
+     "stem": "موافقة محمد علي على معاهدة لندن 1840؟",
+     "points": null,
+     "type": "choose",
+     "options": [
+      "خسر حكم مصر نهائياً",
+      "ضم الشام إلى مصر للأبد",
+      "احتفظ بحكم مصر وراثياً في أسرته وتخلى عن الشام وقلص الجيش",
+      "أصبحت مصر ولاية عثمانية عادية"
+     ],
+     "correctIndex": 2,
+     "convertedToChoose": true
+    },
+    {
+     "number": 3,
+     "origType": "results",
+     "stem": "الأزمة المالية في عهد الخديو إسماعيل؟",
+     "points": null,
+     "type": "choose",
+     "options": [
+      "تخلصت مصر من الديون",
+      "زادت قوة الجيش المصري",
+      "انتهى نفوذ الدول الدائنة",
+      "تدخلت الدول الأوروبية في شئون مصر المالية وفُرضت المراقبة الثنائية"
+     ],
+     "correctIndex": 3,
+     "convertedToChoose": true
+    }
+   ]
+  },
+  {
+   "header": "تاسعاً: دلل تاريخياً (3 أسئلة):",
+   "type": "prove",
+   "declaredCount": 3,
+   "questions": [
+    {
+     "number": 1,
+     "origType": "prove",
+     "stem": "اهتم محمد علي بالجيش.",
+     "points": null,
+     "type": "choose",
+     "options": [
+      "إنشاء المدارس الحربية وتجنيد المصريين وبناء ترسانة السفن ومصانع الأسلحة",
+      "إغلاق المدارس الحربية",
+      "تسريح معظم الجنود",
+      "إلغاء الخدمة العسكرية"
+     ],
+     "correctIndex": 0,
+     "convertedToChoose": true
+    },
+    {
+     "number": 2,
+     "origType": "prove",
+     "stem": "اهتم الخديو إسماعيل بالسكك الحديدية والبريد.",
+     "points": null,
+     "type": "choose",
+     "options": [
+      "إلغاء خطوط السكك الحديدية",
+      "الاعتماد على الجمال فقط في نقل البريد",
+      "مد خطوط السكك الحديدية وتطوير مصلحة البريد",
+      "إغلاق مكاتب البريد"
+     ],
+     "correctIndex": 2,
+     "convertedToChoose": true
+    },
+    {
+     "number": 3,
+     "origType": "prove",
+     "stem": "أقام محمد علي نهضة صناعية بمصر.",
+     "points": null,
+     "type": "choose",
+     "options": [
+      "إغلاق المصانع",
+      "الاعتماد على الاستيراد فقط",
+      "منع الصناعة في مصر",
+      "إنشاء مصانع الغزل والنسيج والأسلحة والسكر"
+     ],
+     "correctIndex": 3,
+     "convertedToChoose": true
+    }
+   ]
+  },
+  {
+   "header": "عاشراً: قارن بين (3 أسئلة):",
+   "type": "compare",
+   "declaredCount": 3,
+   "questions": [
+    {
+     "number": 1,
+     "origType": "compare",
+     "stem": "قارن بين محمد علي وعباس الأول من حيث التعليم.",
+     "points": null,
+     "type": "choose",
+     "options": [
+      "كلاهما أغلق المدارس",
+      "محمد علي أنشأ المدارس والبعثات، وعباس الأول أغلق معظم المدارس وأهمل التعليم",
+      "عباس الأول أنشأ المدارس ومحمد علي أغلقها",
+      "كلاهما أنشأ البعثات التعليمية"
+     ],
+     "correctIndex": 1,
+     "convertedToChoose": true
+    },
+    {
+     "number": 2,
+     "origType": "compare",
+     "stem": "قارن بين تعامل محمد علي مع المماليك وتعامله مع الزعامة الشعبية.",
+     "points": null,
+     "type": "choose",
+     "options": [
+      "تحالف مع المماليك ونفى الزعامة الشعبية",
+      "تخلص من الاثنين بالحرب مع الإنجليز",
+      "تخلص من المماليك بمذبحة القلعة 1811 ومن الزعامة الشعبية بنفي عمر مكرم 1809",
+      "لم يتعامل مع أي منهما"
+     ],
+     "correctIndex": 2,
+     "convertedToChoose": true
+    },
+    {
+     "number": 3,
+     "origType": "compare",
+     "stem": "قارن بين نظام الالتزام ونظام الاحتكار.",
+     "points": null,
+     "type": "choose",
+     "options": [
+      "الالتزام تملك فيه الدولة كل الإنتاج، والاحتكار يجمع فيه الملتزم الضرائب",
+      "في الالتزام يجمع الملتزم الضرائب ويستغل الفلاح، وفي الاحتكار تصبح الدولة المالك الوحيد للإنتاج والتجارة",
+      "كلاهما نظام لا علاقة له بالضرائب",
+      "لا فرق بينهما"
+     ],
+     "correctIndex": 1,
+     "convertedToChoose": true
+    }
+   ]
+  },
+  {
+   "header": "حادي عشر: أوجه الشبه والاختلاف (3 أسئلة):",
+   "type": "similarities",
+   "declaredCount": 3,
+   "questions": [
+    {
+     "number": 1,
+     "origType": "similarities",
+     "stem": "ما أوجه الشبه بين: مذبحة القلعة ونفي عمر مكرم من حيث الهدف؟",
+     "points": null,
+     "type": "choose",
+     "options": [
+      "التخلص من منافسي محمد علي للانفراد بالحكم",
+      "إرضاء السلطان العثماني",
+      "محاربة الإنجليز",
+      "نشر التعليم"
+     ],
+     "correctIndex": 0,
+     "convertedToChoose": true
+    },
+    {
+     "number": 2,
+     "origType": "similarities",
+     "stem": "ما أوجه الاختلاف بين: حالة الجيش في عهد محمد علي وعهد عباس الأول؟",
+     "points": null,
+     "type": "choose",
+     "options": [
+      "الجيش في العهدين متطابق",
+      "الجيش كان قوياً ومنظماً في عهد محمد علي وأُهمل وتراجع في عهد عباس الأول",
+      "الجيش كان ضعيفاً في عهد محمد علي وقوياً في عهد عباس الأول",
+      "لم يكن لمصر جيش في العهدين"
+     ],
+     "correctIndex": 1,
+     "convertedToChoose": true
+    },
+    {
+     "number": 3,
+     "origType": "similarities",
+     "stem": "ما أوجه الشبه بين: إنجازات عباس الأول وسعيد باشا في مجال النقل والمواصلات؟",
+     "points": null,
+     "type": "choose",
+     "options": [
+      "كلاهما ألغى السكك الحديدية",
+      "كلاهما أغلق الطرق",
+      "اهتم كل منهما بتطوير وسائل النقل كالطرق والسكك الحديدية",
+      "كلاهما اعتمد على الجمال فقط"
+     ],
+     "correctIndex": 2,
+     "convertedToChoose": true
+    }
+   ]
+  },
+  {
+   "header": "ثاني عشر: ما العلاقة بين (3 أسئلة):",
+   "type": "relation",
+   "declaredCount": 3,
+   "questions": [
+    {
+     "number": 1,
+     "origType": "relation",
+     "stem": "التدخل الأجنبي وثورة المورة (حرب اليونان).",
+     "points": null,
+     "type": "choose",
+     "options": [
+      "لا علاقة بينهما",
+      "انتهى التدخل بنصر مصري كامل",
+      "أدى تدخل الدول الأوروبية في معركة نافارين 1827 إلى تحطم الأسطول المصري وانتهاء الحرب",
+      "أدى التدخل الأجنبي إلى قيام الثورة في مصر"
+     ],
+     "correctIndex": 2,
+     "convertedToChoose": true
+    },
+    {
+     "number": 2,
+     "origType": "relation",
+     "stem": "الاقتراض من أوروبا والتدخل الأجنبي في مصر.",
+     "points": null,
+     "type": "choose",
+     "options": [
+      "أدى تراكم الديون إلى فرض المراقبة الثنائية وتدخل الدول الدائنة في شئون مصر",
+      "أدى الاقتراض إلى طرد الأجانب",
+      "أدى الاقتراض إلى سداد كل الديون",
+      "لا علاقة بينهما"
+     ],
+     "correctIndex": 0,
+     "convertedToChoose": true
+    },
+    {
+     "number": 3,
+     "origType": "relation",
+     "stem": "نظام الاحتكار والنهضة الاقتصادية في عهد محمد علي.",
+     "points": null,
+     "type": "choose",
+     "options": [
+      "أدى الاحتكار إلى إغلاق المصانع",
+      "لا علاقة بينهما",
+      "أدى الاحتكار إلى عودة الالتزام",
+      "وفر الاحتكار إيرادات ضخمة للدولة مولت الجيش والمصانع والمدارس"
+     ],
+     "correctIndex": 3,
+     "convertedToChoose": true
+    }
+   ]
+  },
+  {
+   "header": "ثالث عشر: ماذا يحدث إذا (3 أسئلة):",
+   "type": "whatif",
+   "declaredCount": 3,
+   "questions": [
+    {
+     "number": 1,
+     "origType": "whatif",
+     "stem": "أبقى محمد علي على نظام الالتزام؟",
+     "points": null,
+     "type": "choose",
+     "options": [
+      "زادت إيرادات الدولة بشكل كبير",
+      "استمر نفوذ الملتزمين واستغلالهم للفلاحين وضاعت إيرادات الدولة",
+      "انتهى الفقر في مصر",
+      "اختفى المماليك"
+     ],
+     "correctIndex": 1,
+     "convertedToChoose": true
+    },
+    {
+     "number": 2,
+     "origType": "whatif",
+     "stem": "لم يتم إنشاء مجلس شورى النواب؟",
+     "points": null,
+     "type": "choose",
+     "options": [
+      "أصبحت مصر دولة ديمقراطية كاملة",
+      "انتهت الديون",
+      "تأخرت بدايات الحياة النيابية في مصر",
+      "زادت سلطات المماليك"
+     ],
+     "correctIndex": 2,
+     "convertedToChoose": true
+    },
+    {
+     "number": 3,
+     "origType": "whatif",
+     "stem": "تم احتواء الأزمة المالية في عهد إسماعيل في بدايتها؟",
+     "points": null,
+     "type": "choose",
+     "options": [
+      "كان من الممكن تجنب التدخل الأجنبي وعزل إسماعيل",
+      "كان سيزداد الدين",
+      "كانت ستسقط الدولة العثمانية",
+      "لن يتغير شيء"
+     ],
+     "correctIndex": 0,
+     "convertedToChoose": true
+    }
+   ]
+  },
+  {
+   "header": "رابع عشر: ما المقصود (3 أسئلة):",
+   "type": "define",
+   "declaredCount": 3,
+   "questions": [
+    {
+     "number": 1,
+     "origType": "define",
+     "stem": "نظام الاحتكار.",
+     "points": null,
+     "type": "choose",
+     "options": [
+      "نظام تجمع فيه الدولة الضرائب فقط",
+      "نظام اقتصادي تصبح فيه الدولة المالك الوحيد للإنتاج والتجارة",
+      "نظام للتعليم المجاني",
+      "نظام للجيش"
+     ],
+     "correctIndex": 1,
+     "convertedToChoose": true
+    },
+    {
+     "number": 2,
+     "origType": "define",
+     "stem": "المراقبة الثنائية.",
+     "points": null,
+     "type": "choose",
+     "options": [
+      "رقابة مصرية سودانية على النيل",
+      "رقابة عثمانية على مصر",
+      "رقابة إنجليزية فرنسية على إيرادات مصر ومصروفاتها لسداد الديون",
+      "رقابة روسية على الجيش"
+     ],
+     "correctIndex": 2,
+     "convertedToChoose": true
+    },
+    {
+     "number": 3,
+     "origType": "define",
+     "stem": "الوزارة المختلطة.",
+     "points": null,
+     "type": "choose",
+     "options": [
+      "وزارة من المصريين فقط",
+      "وزارة من العثمانيين فقط",
+      "وزارة للتعليم",
+      "وزارة تشكلت عام 1878م وضمت وزيرين أجنبيين، فرنسي للأشغال وإنجليزي للمالية"
+     ],
+     "correctIndex": 3,
+     "convertedToChoose": true
+    }
+   ]
+  },
+  {
+   "header": "خامس عشر: ما رأيك في (3 أسئلة):",
+   "type": "opinion",
+   "declaredCount": 3,
+   "questions": [
+    {
+     "number": 1,
+     "origType": "opinion",
+     "stem": "ما رأيك في: قيام محمد علي بمذبحة القلعة للتخلص من المماليك؟",
+     "points": null,
+     "type": "choose",
+     "options": [
+      "عمل مثالي لا عيب فيه",
+      "عمل قاسٍ أنهى خطر المماليك على الحكم، لكن أسلوبه مرفوض إنسانياً",
+      "لا علاقة له بتوحيد الحكم",
+      "كان بسبب الحملة الفرنسية"
+     ],
+     "correctIndex": 1,
+     "convertedToChoose": true
+    },
+    {
+     "number": 2,
+     "origType": "opinion",
+     "stem": "ما رأيك في: سياسة الخديو إسماعيل في الاقتراض للإنفاق على حفلات افتتاح قناة السويس؟",
+     "points": null,
+     "type": "choose",
+     "options": [
+      "سياسة صحيحة أنهت الديون",
+      "سياسة لا تؤثر على الميزانية",
+      "سياسة خاطئة أرهقت ميزانية مصر وفتحت باب التدخل الأجنبي",
+      "سياسة ساعدت على إلغاء الضرائب"
+     ],
+     "correctIndex": 2,
+     "convertedToChoose": true
+    },
+    {
+     "number": 3,
+     "origType": "opinion",
+     "stem": "ما رأيك في: إغلاق عباس الأول لمعظم المدارس؟",
+     "points": null,
+     "type": "choose",
+     "options": [
+      "قرار صحيح لأن التعليم لا فائدة منه",
+      "قرار لا علاقة له بالنهضة",
+      "قرار أفاد الاقتصاد",
+      "قرار خاطئ أضر بالنهضة التعليمية التي بدأها محمد علي"
+     ],
+     "correctIndex": 3,
+     "convertedToChoose": true
+    }
+   ]
+  }
+ ]
+}
