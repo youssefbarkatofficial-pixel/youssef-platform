@@ -1,4 +1,4 @@
-import { recordDownloadClick } from '../../services/watchProgress';
+import { recordDownloadClick, getAllLocalWatchProgress } from '../../services/watchProgress';
 import { useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
@@ -185,7 +185,15 @@ export default function CourseDetailsPage() {
   const [activeTab, setActiveTab] = useState<'content' | 'about'>('content');
 
   const [contentRules, setContentRules] = useState<ContentRulesSettings>(DEFAULT_CONTENT_RULES);
-  const [localWatch, setLocalWatch] = useState<Record<string, number>>({});
+  const [localWatch, setLocalWatch] = useState<Record<string, number>>(() => {
+    return student?.id ? getAllLocalWatchProgress(student.id) : {};
+  });
+
+  useEffect(() => {
+    if (student?.id) {
+      setLocalWatch((prev) => ({ ...getAllLocalWatchProgress(student.id), ...prev }));
+    }
+  }, [student?.id]);
 
   useEffect(() => {
     getContentRules().then(setContentRules).catch((err) => {

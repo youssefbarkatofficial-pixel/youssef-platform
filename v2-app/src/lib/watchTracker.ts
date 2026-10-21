@@ -21,6 +21,123 @@ export const WATCH_THRESHOLD = 0.95;
 export const MAX_PLAYBACK_RATE = 2.0;
 export const MAX_STORED_INTERVALS = 200;
 
+// فواصل وثوابت كتابة تقدم المشاهدة (مغلقة في هذا الملف)
+export const WATCH_MILESTONES = [0.25, 0.50, 0.75, 0.95] as const;
+export const FALLBACK_HEARTBEAT_MS = 5 * 60 * 1000; // كتابة احتياطية واحدة كل 5 دقائق لو شغال بلا أي حدث
+export const LAST_ACTIVE_THROTTLE_MS = 10 * 60 * 1000; // كتابة lastActiveMs مرة واحدة كل 10 دقائق على الأكثر
+
+export type FlushTrigger =
+  | 'pause'
+  | 'ended'
+  | 'visibility_hidden'
+  | 'pagehide'
+  | 'milestone'
+  | 'fallback_heartbeat'
+  | 'manual';
+
+export interface FlushDecisionContext {
+  trigger: FlushTrigger;
+  currentCoverage: number;
+  lastFlushedCoverage: number;
+  lastFlushTimeMs: number;
+  nowMs: number;
+  passedMilestones: number[];
+  isCompleted?: boolean;
+}
+
+export interface FlushDecisionResult {
+  shouldFlush: boolean;
+  milestoneCrossed?: number;
+  reason: string;
+}
+
+/**
+ * دالة قرار الكتابة إلى Firestore (shouldFlush).
+ * تلغي الحفظ الدوري وتقتصر فقط على الأحداث:
+ * - إيقاف الفيديو
+ * - نهاية الفيديو
+ * - الخروج أو إخفاء التبويب
+ * - عبور 25% و 50% و 75%
+ * - عبور 95% فورًا
+ * - نبضة احتياطية واحدة كل 5 دقائق لو الفيديو مستمر بلا أحداث
+ */
+export function shouldFlush(context: FlushDecisionContext): FlushDecisionResult {
+  const { trigger, currentCoverage, lastFlushTimeMs, nowMs, passedMilestones } = context;
+
+  // 1. فحص عبور فواصل النسب المئوية (25%, 50%, 75%, 95%)
+  for (const m of WATCH_MILESTONES) {
+    if (currentCoverage >= m && !passedMilestones.includes(m)) {
+      return {
+        shouldFlush: true,
+        milestoneCrossed: m,
+        reason: `milestone_${Math.round(m * 100)}%`,
+      };
+    }
+  }
+
+  // 2. أحداث دورة الحياة المحددة صراحة
+  if (
+    trigger === 'pause' ||
+    trigger === 'ended' ||
+    trigger === 'visibility_hidden' ||
+    trigger === 'pagehide' ||
+    trigger === 'manual'
+  ) {
+    // نكتب لو فيه تقدم فعلي منذ آخر حفظ أو انتهى الفيديو
+    const diff = Math.abs(currentCoverage - context.lastFlushedCoverage);
+    if (trigger === 'ended' || diff >= 0.005 || (currentCoverage >= WATCH_THRESHOLD && !context.isCompleted)) {
+      return { shouldFlush: true, reason: trigger };
+    }
+  }
+
+  // 3. النبضة الاحتياطية (كل 5 دقائق بدون أي حدث)
+  if (trigger === 'fallback_heartbeat') {
+    if (nowMs - lastFlushTimeMs >= FALLBACK_HEARTBEAT_MS) {
+      return { shouldFlush: true, reason: 'fallback_heartbeat_5min' };
+    }
+  }
+
+  return { shouldFlush: false, reason: 'no_condition_met' };
+}
+
+/**
+ * دمج حالتي مشاهدة (محلي + سحابي، أو جهازين مختلفين)
+ * بأخذ الاتحاد الرياضي للفترات المشاهدة والأكبر في المدة والنسبة والموضع.
+ */
+export function mergeWatchStates(
+  local: WatchState | null | undefined,
+  remote: WatchState | null | undefined
+): WatchState | null {
+  if (!local && !remote) return null;
+  if (!local) return remote!;
+  if (!remote) return local!;
+
+  const itemId = local.itemId || remote.itemId;
+  const totalDuration = Math.max(local.totalDuration, remote.totalDuration);
+  const mergedIntervals = mergeIntervals([...(local.intervals || []), ...(remote.intervals || [])]);
+  const covered = calculateCoveredSeconds(mergedIntervals, totalDuration);
+  const coverage =
+    totalDuration > 0
+      ? Math.min(1.0, covered / totalDuration)
+      : Math.max(local.coverage || 0, remote.coverage || 0);
+  const completed = coverage >= WATCH_THRESHOLD || local.completed || remote.completed;
+  const lastPosition = Math.max(local.lastPosition || 0, remote.lastPosition || 0);
+
+  return {
+    itemId,
+    totalDuration,
+    intervals: mergedIntervals,
+    coveredSeconds: covered,
+    coverage,
+    lastPosition,
+    completed,
+    lastTickTime: null,
+    isPlaying: local.isPlaying || remote.isPlaying,
+    playbackRate: local.playbackRate || remote.playbackRate || 1.0,
+    isTabVisible: local.isTabVisible && remote.isTabVisible,
+  };
+}
+
 /**
  * دمج الفترات الزمنية المتداخلة أو المتلاصقة بدقة ثانية واحدة.
  */
@@ -29,11 +146,11 @@ export function mergeIntervals(intervals: TimeInterval[]): TimeInterval[] {
 
   // ترتيب حسب البداية
   const sorted = intervals
-    .map(iv => ({
+    .map((iv) => ({
       start: Math.max(0, Math.floor(iv.start)),
-      end: Math.max(0, Math.floor(iv.end))
+      end: Math.max(0, Math.floor(iv.end)),
     }))
-    .filter(iv => iv.end > iv.start)
+    .filter((iv) => iv.end > iv.start)
     .sort((a, b) => a.start - b.start);
 
   if (sorted.length === 0) return [];
@@ -69,7 +186,7 @@ export function calculateCoveredSeconds(intervals: TimeInterval[], maxDuration?:
   for (const iv of merged) {
     const s = iv.start;
     const e = typeof maxDuration === 'number' && maxDuration > 0 ? Math.min(iv.end, maxDuration) : iv.end;
-    if (e > s) total += (e - s);
+    if (e > s) total += e - s;
   }
   return total;
 }
@@ -98,7 +215,7 @@ export function createWatchState(
     lastTickTime: null,
     isPlaying: false,
     playbackRate: 1.0,
-    isTabVisible: true
+    isTabVisible: true,
   };
 }
 
@@ -125,7 +242,12 @@ export function processPlaybackTick(
   }
 
   // لو المشغّل ليس في وضع التشغيل أو التبويب مخفي أو السرعة تزيد عن 2x
-  if (!newState.isPlaying || !newState.isTabVisible || newState.playbackRate > MAX_PLAYBACK_RATE || newState.playbackRate <= 0) {
+  if (
+    !newState.isPlaying ||
+    !newState.isTabVisible ||
+    newState.playbackRate > MAX_PLAYBACK_RATE ||
+    newState.playbackRate <= 0
+  ) {
     newState.lastTickTime = systemTimestamp;
     return newState;
   }
@@ -187,9 +309,13 @@ export function updatePlayerStatus(
   },
   threshold: number = WATCH_THRESHOLD
 ): WatchState {
-  let next = { ...state };
+  const next = { ...state };
 
-  if (typeof updates.totalDuration === 'number' && updates.totalDuration > 0 && updates.totalDuration !== next.totalDuration) {
+  if (
+    typeof updates.totalDuration === 'number' &&
+    updates.totalDuration > 0 &&
+    updates.totalDuration !== next.totalDuration
+  ) {
     next.totalDuration = Math.max(0, Math.floor(updates.totalDuration));
     next.coveredSeconds = calculateCoveredSeconds(next.intervals, next.totalDuration);
     next.coverage = next.totalDuration > 0 ? Math.min(1.0, next.coveredSeconds / next.totalDuration) : 0;
