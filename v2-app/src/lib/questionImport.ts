@@ -36,6 +36,7 @@ const SECTION_KEYWORDS = [
   { regex: /العلاقة/i, type: 'relation' },
   { regex: /ماذا يحدث/i, type: 'whatif' },
   { regex: /المقصود/i, type: 'define' },
+  { regex: /خريطة|الخريطة/i, type: 'map' },
   { regex: /رأيك/i, type: 'opinion' },
   { regex: /أسئلة متنوعة|اسئلة متنوعة/i, type: 'general' },
 ];
@@ -138,12 +139,22 @@ export function parseExamText(rawText: string): ParsedExam {
   let title = '';
   const sections: ParsedSection[] = [];
 
+  const unitRegex = /^(?:###SECTION###\s*)?(?:الوحدة|الدرس|الفصل|المحور|المفهوم|الجغرافيا|التاريخ|التربية\s*الوطنية)\b/i;
+  let activeUnitTitle = '';
+
+  function cleanSectionTitle(raw: string): string {
+    let clean = raw.replace(/^###SECTION###\s*/, '').trim();
+    clean = clean.replace(/^(?:\d+|[٠-٩]+|[أ-يA-Za-z])[\s\.\-\):]+\s*/, '').trim();
+    clean = clean.replace(/[\s\.\-_—–…]+$/, '').trim();
+    return clean;
+  }
+
   const headerRegex = /^(.+?):\s*(.+?)\s*\((\d+)\s*(?:سؤال|أسئلة)[^)]*\)\s*:?\s*$/;
   const flexibleHeaderRegex =
-    /^(?:###SECTION###\s*)?(?:(?:\d+|[٠-٩]+|[أ-يA-Za-z])[\s\.\-\):]\s*)?(?:السؤال\s*(?:الأول|الثاني|الثالث|الرابع|الخامس|السادس|السابع|الثامن|التاسع|العاشر)[\s\:\.\-]*\s*)?(?:اختر\s*(?:الاجابة|الإجابة)|أكمل\s*العبارات|اكمل\s*العبارات|اكتب\s*كلمة\s*\(\s*صواب\s*\)|صح\s*و\s*(?:خطأ|غلط)|ضع\s*علامة\s*\(\s*صح\s*\)|بم\s*تفسر|ما\s*النتائج\s*المترتبة|دلل\s*على\s*صحة|قارن\s*بين|ما\s*تشير\s*إليه|أسئلة\s*متنوعة|اسئلة\s*متنوعة)(.*)$/i;
+    /^(?:###SECTION###\s*)?(?:(?:\d+|[٠-٩]+|[أ-يA-Za-z])[\s\.\-\):]\s*)?(?:السؤال\s*(?:الأول|الثاني|الثالث|الرابع|الخامس|السادس|السابع|الثامن|التاسع|العاشر)[\s\:\.\-]*\s*)?(?:اختر\s*(?:الاجابة|الإجابة)|أكمل\s*العبارات|اكمل\s*العبارات|اكتب\s*كلمة\s*\(\s*صواب\s*\)|صح\s*و\s*(?:خطأ|غلط)|ضع\s*علامة\s*\(\s*صح\s*\)|بم\s*تفسر|ما\s*النتائج\s*المترتبة|دلل\s*على\s*صحة|قارن\s*بين|ما\s*تشير\s*إليه|ما\s*المقصود|ما\s*العلاقة|ماذا\s*يحدث|أمامك\s*خريطة|اكتب\s*عناصر\s*الخريطة|أسئلة\s*متنوعة|اسئلة\s*متنوعة)(.*)$/i;
   const qStartRegex =
     /^(?:Q_NUM_(\d+)_END\s*|\((\d+)\)\s*|(\d+)\s*[.\-):]\s*|(?:س|السؤال)\s*\(?(\d+)\)?\s*[.\-):]?\s*)(.*)$/;
-  const ansRegex = /^(?:الإجابة|الاجابة|إجابة|اجابة|الجواب|الحل)\s*[:\-]\s*(.*)$/i;
+  const ansRegex = /^(?:الإجابة|الاجابة|إجابة|اجابة|الجواب|الحل|ج)\s*[:\-]\s*(.*)$/i;
   const pointsRegex = /^(?:الدرجة|الدرجه)\s*[:\-]\s*(\d+)\s*$/i;
   const pointsParenRegex = /^\((\d+)\s*(?:درجة|درجات|درجه)\)\s*$/i;
   const formatBOptRegex = /^([أ-يA-Za-z])\s*[\)\.\-:]\s*(.*)$/;
@@ -161,6 +172,12 @@ export function parseExamText(rawText: string): ParsedExam {
 
   function finishCurrentQuestion() {
     if (!currentQuestion || !currentSection) return;
+
+    const cleanStem = currentQuestion.stem.replace(/[\s\.\-_—–…\(\)\[\]]/g, '');
+    if (cleanStem.length === 0) {
+      currentQuestion = null;
+      return;
+    }
 
     const q = currentQuestion;
     const origType = currentSection.type;
@@ -320,8 +337,11 @@ export function parseExamText(rawText: string): ParsedExam {
         }
       }
 
+      const cleanedName = cleanSectionTitle(line);
+      const headerTitle = activeUnitTitle ? `${activeUnitTitle} - ${cleanedName}` : cleanedName;
+
       currentSection = {
-        header: line.replace(/^###SECTION###\s*/, '').trim(),
+        header: headerTitle,
         type: detectedType,
         declaredCount: 0,
         questions: [],
@@ -333,6 +353,14 @@ export function parseExamText(rawText: string): ParsedExam {
     // بداية سؤال جديد
     const qStart = line.match(qStartRegex);
     if (qStart) {
+      const candidateStem = (qStart[5] || '').trim();
+      const isPureFiller = candidateStem.replace(/[\s\.\-_—–…\(\)\[\]]/g, '').length === 0;
+      if (isPureFiller) {
+        if (currentQuestion) {
+          currentQuestion.stem += '\n' + line;
+        }
+        continue;
+      }
       if (!currentSection) {
         currentSection = {
           header: 'الأسئلة العامة',
@@ -439,6 +467,8 @@ function mapOrigTypeToDraftType(origType: string): QuestionType {
       return 'whatif';
     case 'define':
       return 'meaning';
+    case 'map':
+      return 'short';
     case 'correct':
     case 'term':
     case 'who':
