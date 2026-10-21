@@ -605,6 +605,7 @@ service cloud.firestore {
       allow create: if isAdmin()
         && request.resource.data.keys().hasOnly(['title', 'message', 'category', 'targetType', 'sentBy', 'createdAt', 'targetCourseId', 'targetSegment'])
         && request.resource.data.title is string && request.resource.data.title.size() >= 3 && request.resource.data.title.size() <= 100
+        && !request.resource.data.title.matches('.*01[0-9]{9}.*')
         && request.resource.data.message is string && request.resource.data.message.size() >= 5 && request.resource.data.message.size() <= 1000
         && !request.resource.data.message.matches('.*01[0-9]{9}.*')
         && request.resource.data.category in ['platformUpdates', 'curriculumUpdates', 'laggingWarnings']
@@ -614,8 +615,9 @@ service cloud.firestore {
             'training_done_hw_pending', 'hw_done_exam_pending', 'exam_completed',
             'file_downloaded', 'notified', 'recovered', 'star', 'ok', 'all'
           ]);
-      // تقييد التعديل والحذف للأدمن الكامل أو المالك فقط (المساعد لا يعدل ولا يحذف)
-      allow update: if isSeniorAdmin();
+      // الأدمن يعدّل (تحديث حالة الإشعار) — المساعد لا يحذف
+      allow update: if isAdmin()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'readBy']);
       allow delete: if isSeniorAdmin();
     }
 
@@ -674,6 +676,34 @@ service cloud.firestore {
           (imageId == 'youssefCutout' && request.resource.data.dataUrl.size() <= 490000)
         );
       allow delete: if isAdmin();
+    }
+
+
+    // ---------- Web Push (إشعارات الويب وتوكنات Push) ----------
+
+    match /pushTokens/{uid} {
+      allow get: if isSignedIn() && request.auth.uid == uid;
+      allow create, update: if isSignedIn() && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['tokens', 'enabled', 'updatedAt'])
+        && request.resource.data.tokens is list && request.resource.data.tokens.size() <= 5
+        && request.resource.data.enabled is bool;
+      allow list: if false;
+      allow delete: if false;
+    }
+
+    match /pushQueue/{id} {
+      // create للأدمن فقط — لا يمكن للطالب إنشاء رسائل push
+      allow create: if isAdmin()
+        && request.resource.data.keys().hasOnly(['uid', 'category', 'title', 'body', 'url', 'status', 'createdAt'])
+        && request.resource.data.status == 'pending'
+        && request.resource.data.category in ['platformUpdates', 'curriculumUpdates', 'laggingWarnings']
+        && request.resource.data.title is string && request.resource.data.title.size() <= 100
+        && !request.resource.data.title.matches('.*01[0-9]{9}.*')
+        && request.resource.data.body is string && request.resource.data.body.size() <= 500
+        && !request.resource.data.body.matches('.*01[0-9]{9}.*');
+      allow get, list: if isAdmin();
+      allow update: if isSeniorAdmin();
+      allow delete: if false;
     }
 
     // ---------- أي مجموعة غير مذكورة ممنوعة ----------

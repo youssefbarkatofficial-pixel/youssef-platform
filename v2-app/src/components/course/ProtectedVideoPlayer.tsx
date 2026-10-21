@@ -196,7 +196,7 @@ export default function ProtectedVideoPlayer({
             });
 
             // حفظ كل 120 ثانية (Spark quota friendly: 60-120s)
-            if (Date.now() - lastSaveTimeRef.current >= 120000) {
+            if (Date.now() - lastSaveTimeRef.current >= 90000) {
               void saveCurrentProgress();
             }
           }
@@ -315,7 +315,7 @@ export default function ProtectedVideoPlayer({
               });
 
               // حفظ كل 120 ثانية (Spark quota friendly: 60-120s)
-              if (Date.now() - lastSaveTimeRef.current >= 120000) {
+              if (Date.now() - lastSaveTimeRef.current >= 90000) {
                 void saveCurrentProgress();
               }
             }}
