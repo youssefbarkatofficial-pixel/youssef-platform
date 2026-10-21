@@ -58,3 +58,9 @@ tools/bot-export/
 
 # Content guard backups
 backup-links-*.json
+
+# Capacitor & Android build artifacts
+android/
+*.jks
+*.keystore
+keystore.properties
