@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Badge, Button, Input, Modal, Select, Spinner } from '../ui';
 import { cn } from '../ui/cn';
 import { getGradeLabel } from '../../lib/grades';
-import { QUESTION_TYPES, QUESTION_TYPE_LABELS, cloneDraft } from '../../lib/questionDraft';
+import { QUESTION_FORMATS, QUESTION_TYPE_LABELS, cloneDraft } from '../../lib/questionDraft';
 import type { QuestionDraft } from '../../lib/questionDraft';
 import { listBankQuestions } from '../../services/questionBank';
 import type { BankQuestion } from '../../services/questionBank';
@@ -14,9 +14,10 @@ interface QuestionPickerProps {
   onAdd: (drafts: QuestionDraft[]) => void;
 }
 
+// فلاتر صيغ الأسئلة = نفس الصيغ المعتمدة في المنصة (15 صيغة)
 const TYPE_FILTER_OPTIONS = [
   { value: 'all', label: 'كل الأنواع' },
-  ...QUESTION_TYPES.map((type) => ({ value: type, label: QUESTION_TYPE_LABELS[type] })),
+  ...QUESTION_FORMATS.map((type) => ({ value: type, label: QUESTION_TYPE_LABELS[type] })),
 ];
 
 export default function QuestionPicker({ open, onClose, onAdd }: QuestionPickerProps) {

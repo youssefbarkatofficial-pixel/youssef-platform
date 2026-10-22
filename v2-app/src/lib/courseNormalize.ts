@@ -218,12 +218,31 @@ export function normalizeCourseContent(
         if (!isObject(item)) return;
         const type = asString(item.type).toLowerCase();
 
+        // نوع العنصر الصريح مقدَّم على اسم القسم:
+        // امتحان مكتوب داخل قسم "المحاضرات" يبقى امتحانًا ولا يتحول لمحاضرة فيديو.
+        if (type === 'exam' || type === 'quiz' || type === 'امتحان' || asString(item.assessmentKind).toLowerCase() === 'exam') {
+          addItemToMap(item, examsMap);
+          return;
+        }
         if (
-          type === 'video' ||
-          type === 'lecture' ||
-          secId.includes('lecture') ||
-          secTitle.includes('محاضر')
+          type === 'homework' ||
+          type === 'task' ||
+          type === 'واجب' ||
+          asString(item.assessmentKind).toLowerCase() === 'homework'
         ) {
+          addItemToMap(item, homeworksMap);
+          return;
+        }
+        if (type === 'training' || type === 'تدريب' || asString(item.assessmentKind).toLowerCase() === 'training') {
+          addItemToMap(item, trainingsMap);
+          return;
+        }
+        if (type === 'video' || type === 'lecture' || type === 'pdf' || type === 'header') {
+          addItemToMap(item, lecturesMap);
+          return;
+        }
+
+        if (secId.includes('lecture') || secTitle.includes('محاضر')) {
           addItemToMap(item, lecturesMap);
         } else if (
           type === 'homework' ||

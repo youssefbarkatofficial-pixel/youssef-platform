@@ -18,9 +18,9 @@ import {
   AlertTriangle,
 } from 'lucide-react';
 import {
+  parseExamFile,
   parseQuestionsFromJson,
   parseQuestionsFromTxt,
-  parseQuestionsFromDocx,
   splitQuestionAt,
   mergeWithPreviousQuestion,
   getCairoNextSchedule,
@@ -46,6 +46,9 @@ import type { AssessmentKind } from '../../lib/grading';
 import { toEnglishDigits } from '../../lib/phone';
 import {
   QUESTION_TYPE_LABELS,
+  applyMcqToDraft,
+  applyMcqToQuestions,
+  isChoiceQuestion,
   isEssayType,
   validateDraft,
 } from '../../lib/questionDraft';
@@ -93,12 +96,12 @@ function findKind(value: string): AssessmentKind | null {
 }
 
 function summarizeAnswer(question: QuestionDraft): string {
-  if (question.type === 'choose') {
+  if (isChoiceQuestion(question)) {
     const text = question.options?.[question.answer];
     return text ? `${OPTION_LABELS[question.answer] ?? question.answer}) ${text}` : '-';
   }
   if (question.type === 'tf') return question.answer || '-';
-  return isEssayType(question.type) ? 'إجابة نموذجية مكتوبة' : '-';
+  return isEssayType(question.type) ? 'إجابة نموذجية مكتوبة' : question.answer || '-';
 }
 
 function validateAll(
@@ -169,11 +172,24 @@ export default function AdminAssessmentEditPage() {
 
   // استيراد الأسئلة (JSON / TXT / Word)
   const [importModalOpen, setImportModalOpen] = useState(false);
-  const [importSourceType, setImportSourceType] = useState<'json' | 'txt' | 'docx'>('json');
+  const [importSourceType, setImportSourceType] = useState<'json' | 'txt' | 'docx' | 'pdf'>('json');
   const [importText, setImportText] = useState('');
   const [importPreviewQuestions, setImportPreviewQuestions] = useState<QuestionDraft[]>([]);
   const [importWarnings, setImportWarnings] = useState<string[]>([]);
   const [importProcessing, setImportProcessing] = useState(false);
+  // وضع الاختيار من متعدد لكل أسئلة التقييم
+  const [mcqMode, setMcqMode] = useState(false);
+
+  const toggleMcqMode = (next: boolean) => {
+    setMcqMode(next);
+    setQuestions((previous) => applyMcqToQuestions(previous, next));
+    showToast(
+      next
+        ? 'تم تحويل أسئلة التقييم إلى اختيار من متعدد — اكتب الخيارات لكل سؤال قبل النشر.'
+        : 'تم إلغاء وضع الاختيار من متعدد — الطالب سيكتب الإجابة بنفسه.',
+      'success',
+    );
+  };
 
   const handleImportFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -183,26 +199,27 @@ export default function AdminAssessmentEditPage() {
     setImportWarnings([]);
     try {
       const fileName = file.name.toLowerCase();
+
       if (fileName.endsWith('.json')) {
         setImportSourceType('json');
         const text = await file.text();
         setImportText(text);
         const res = parseQuestionsFromJson(text);
-        setImportPreviewQuestions(res.questions);
+        setImportPreviewQuestions(mcqMode ? applyMcqToQuestions(res.questions, true) : res.questions);
         setImportWarnings(res.warnings);
-      } else if (fileName.endsWith('.docx')) {
-        setImportSourceType('docx');
-        const buffer = await file.arrayBuffer();
-        const res = await parseQuestionsFromDocx(buffer);
-        setImportPreviewQuestions(res.questions);
-        setImportWarnings(res.warnings);
+      } else if (fileName.endsWith('.docx') || fileName.endsWith('.pdf')) {
+        setImportSourceType(fileName.endsWith('.pdf') ? 'pdf' : 'docx');
+        const res = await parseExamFile(file);
+        if (res.parsedExam) setImportText('');
+        setImportPreviewQuestions(mcqMode ? applyMcqToQuestions(res.questions, true) : res.questions);
+        setImportWarnings([...res.warnings, ...(res.errors ?? [])]);
       } else {
         setImportSourceType('txt');
         const text = await file.text();
         setImportText(text);
         const res = parseQuestionsFromTxt(text);
-        setImportPreviewQuestions(res.questions);
-        setImportWarnings(res.warnings);
+        setImportPreviewQuestions(mcqMode ? applyMcqToQuestions(res.questions, true) : res.questions);
+        setImportWarnings([...res.warnings, ...(res.errors ?? [])]);
       }
     } catch (err: any) {
       setImportWarnings([`حدث خطأ أثناء قراءة الملف: ${err.message}`]);
@@ -215,12 +232,12 @@ export default function AdminAssessmentEditPage() {
     if (!importText.trim()) return;
     if (importSourceType === 'json') {
       const res = parseQuestionsFromJson(importText);
-      setImportPreviewQuestions(res.questions);
+      setImportPreviewQuestions(mcqMode ? applyMcqToQuestions(res.questions, true) : res.questions);
       setImportWarnings(res.warnings);
     } else {
       const res = parseQuestionsFromTxt(importText);
-      setImportPreviewQuestions(res.questions);
-      setImportWarnings(res.warnings);
+      setImportPreviewQuestions(mcqMode ? applyMcqToQuestions(res.questions, true) : res.questions);
+      setImportWarnings([...res.warnings, ...(res.errors ?? [])]);
     }
   };
 
@@ -627,7 +644,7 @@ export default function AdminAssessmentEditPage() {
           <div className="flex flex-wrap gap-2">
             <Button variant="secondary" size="sm" onClick={() => setImportModalOpen(true)}>
               <UploadCloud className="h-4 w-4" />
-              استيراد سريع (JSON / TXT / Word)
+              استيراد سريع (JSON / TXT / Word / PDF)
             </Button>
             <Button variant="secondary" size="sm" onClick={() => setPickerOpen(true)}>
               <Library className="h-4 w-4" />
@@ -638,6 +655,28 @@ export default function AdminAssessmentEditPage() {
               سؤال جديد
             </Button>
           </div>
+        </div>
+
+        {/* زر واحد: كل الأسئلة اختيار من متعدد (صح/خطأ تبقى اختيارين) */}
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-navy-800 bg-navy-950/70 px-3.5 py-3">
+          <div className="flex items-start gap-2 text-xs text-slate-300">
+            <Sparkles className={`mt-0.5 h-4 w-4 shrink-0 ${mcqMode ? 'text-emerald-400' : 'text-slate-500'}`} />
+            <div>
+              <p className="font-bold text-slate-200">كل الأسئلة اختيار من متعدد</p>
+              <p className="text-[11px] text-slate-400">
+                عند التفعيل يختار الطالب من الخيارات التي تكتبها (وصح/خطأ تبقى اختيارين فقط). عند الإلغاء يكتب الطالب الإجابة بنفسه.
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => toggleMcqMode(!mcqMode)}
+            className={`shrink-0 rounded-lg px-3.5 py-1.5 text-xs font-bold transition-colors ${
+              mcqMode ? 'bg-emerald-500 text-white hover:bg-emerald-400' : 'bg-navy-800 text-gold-400 hover:bg-navy-700'
+            }`}
+          >
+            {mcqMode ? 'مفعّل — إلغاء' : 'تفعيل'}
+          </button>
         </div>
 
         {questions.length === 0 ? (
@@ -656,8 +695,29 @@ export default function AdminAssessmentEditPage() {
                     <Badge variant="neutral">{index + 1}</Badge>
                     <Badge variant="gold">{QUESTION_TYPE_LABELS[question.type]}</Badge>
                     <Badge variant="neutral">{question.points} درجة</Badge>
+                    {isChoiceQuestion(question) && question.type !== 'choose' && (
+                      <Badge variant="success">اختيار من متعدد</Badge>
+                    )}
                   </div>
                   <div className="flex gap-1">
+                    {question.type !== 'choose' && question.type !== 'tf' && (
+                      <button
+                        type="button"
+                        title="تحويل هذا السؤال إلى اختيار من متعدد"
+                        onClick={() =>
+                          setQuestions((previous) => {
+                            const next = [...previous];
+                            next[index] = applyMcqToDraft(next[index], !next[index].asMcq);
+                            return next;
+                          })
+                        }
+                        className={`rounded px-2 py-1 text-[11px] font-bold ${
+                          question.asMcq ? 'bg-emerald-500/20 text-emerald-300' : 'bg-navy-800 text-slate-300 hover:bg-navy-700'
+                        }`}
+                      >
+                        {question.asMcq ? 'اختيار ✓' : 'اختيار'}
+                      </button>
+                    )}
                     <Button
                       size="sm"
                       variant="ghost"
@@ -720,6 +780,11 @@ export default function AdminAssessmentEditPage() {
                   </div>
                 </div>
                 <p className="whitespace-pre-line text-sm font-bold leading-relaxed text-white">
+                  {question.type !== 'choose' && question.type !== 'tf' && (
+                    <span className="text-gold-400 font-extrabold">
+                      {QUESTION_TYPE_LABELS[question.type] || question.type}:{' '}
+                    </span>
+                  )}
                   {question.text}
                 </p>
                 <p className="text-sm text-slate-400">
@@ -781,23 +846,23 @@ export default function AdminAssessmentEditPage() {
       <Modal
         open={importModalOpen}
         onClose={() => setImportModalOpen(false)}
-        title="الاستيراد السريع للأسئلة (JSON / TXT / Word docx)"
+        title="الاستيراد السريع للأسئلة (JSON / TXT / Word / PDF)"
       >
         <div className="space-y-4">
           <div className="rounded-xl border border-navy-700 bg-navy-950/60 p-3 text-xs text-slate-300 space-y-1">
             <p className="font-bold text-gold-400">الصيغ المدعومة:</p>
             <p>• <b>ملف JSON:</b> يدعم مصفوفة الأسئلة المباشرة أو ملفات الفيكستشر (مثل fixture-draft_3prep_unit2_mcq.json).</p>
-            <p>• <b>ملف TXT أو نص ملصوق:</b> ترقيم الأسئلة (1. س:)، الاختيارات (أ، ب، ج، د)، والإجابة (ج: أو الإجابة:).</p>
-            <p>• <b>مستند Word (.docx):</b> استخراج مباشر للنص والأسئلة كمسودة تحتاج مراجعة المعلم.</p>
+            <p>• <b>ملف TXT أو نص ملصوق:</b> نفس صيغة النموذج الرسمي (أقسام مثل: «أولاً: اختر الإجابة الصحيحة…» ثم الأسئلة والخيارات وسطر «الإجابة:»).</p>
+            <p>• <b>مستند Word (.docx) أو PDF:</b> يُستخرج بنفس المحلل ونفس النتيجة تمامًا (نوع القسم والإجابة الصحيحة).</p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
             <label className="flex items-center gap-2 cursor-pointer rounded-xl border border-gold-500/30 bg-gold-500/10 px-4 py-2 text-xs font-bold text-gold-400 hover:bg-gold-500/20">
               <UploadCloud className="h-4 w-4" />
-              <span>اختر ملف من جهازك (JSON, TXT, DOCX)</span>
+              <span>اختر ملف من جهازك (JSON, TXT, DOCX, PDF)</span>
               <input
                 type="file"
-                accept=".json,.txt,.docx"
+                accept=".json,.txt,.docx,.pdf"
                 className="hidden"
                 onChange={(e) => void handleImportFile(e)}
               />

@@ -4,6 +4,8 @@ import { Badge, Button, Card } from '../ui';
 import { cn } from '../ui/cn';
 import { getAnswerMode } from '../../lib/grading';
 import type { Question } from '../../lib/grading';
+import { QUESTION_TYPE_LABELS, formatQuestionPrompt } from '../../lib/questionDraft';
+import type { QuestionType } from '../../lib/grading';
 
 interface ExamTakerProps {
   examId?: string;
@@ -325,6 +327,11 @@ export default function ExamTaker({
           <span className="font-bold text-white">
             السؤال {index + 1} من {questions.length}
           </span>
+          {question.type && question.type !== 'choose' && question.type !== 'tf' && (
+            <Badge variant="gold">
+              {QUESTION_TYPE_LABELS[question.type as keyof typeof QUESTION_TYPE_LABELS] || question.type}
+            </Badge>
+          )}
           {question.sectionTitle && (
             <Badge variant="neutral">{question.sectionTitle}</Badge>
           )}
@@ -366,9 +373,21 @@ export default function ExamTaker({
 
       <Card className="space-y-5">
         <div className="flex items-start justify-between gap-3">
-          <h2 className="whitespace-pre-line text-lg font-bold leading-relaxed text-white">
-            {question.text || 'سؤال بدون نص'}
-          </h2>
+          {(() => {
+            const prompt = formatQuestionPrompt(question.text, question.type);
+            return (
+              <h2 className="whitespace-pre-line text-lg font-bold leading-relaxed text-white">
+                {prompt.prefix ? (
+                  <>
+                    <span className="text-gold-400 font-extrabold">{prompt.prefix}: </span>
+                    <span>{prompt.body}</span>
+                  </>
+                ) : (
+                  prompt.body || 'بدون نص'
+                )}
+              </h2>
+            );
+          })()}
           <Badge variant="neutral">{question.points} درجة</Badge>
         </div>
 

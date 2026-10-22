@@ -216,6 +216,8 @@ async function loadEditableCourse(courseId: string): Promise<Course> {
 }
 
 // ينشئ امتحانًا أو تدريبًا أو واجبًا جديدًا داخل قسم من كورس جديد، ويرجع رقمه.
+// الكتابة دائمًا في المصفوفات الجذرية (contents.exams/homeworks/lectures[].trainings)
+// لأنها المكان الذي يقرأه محرّك تطبيع المحتوى في كل أشكال الكورسات، فلا ينزل الامتحان كمحاضرة فيديو.
 export async function createAssessment(
   courseId: string,
   sectionId: string,
@@ -230,42 +232,19 @@ export async function createAssessment(
   const hasIncompleteAnswers = questions.some((q) => q.needsReview || !q.answer);
   const draftMeta: AssessmentMeta = hasIncompleteAnswers ? { ...meta, strictMode: false } : meta;
 
-  // كورس بشكل المحاضرات (layoutVersion=2) أو عنصر مربوط بمحاضرة: نكتب في المصفوفات الجذرية المقروءة فعليًا.
-  const layoutV2 = !course.sectionsDerived;
-  if (layoutV2 || lectureId) {
-    const newId = generateContentId('exam');
-    await writeContent(courseId, newId, draftMeta, questions);
-    const rawItem = buildRaw({}, newId, draftMeta, questions.length, {
-      isDraft: hasIncompleteAnswers,
-      hidden: hasIncompleteAnswers,
-    });
-    const placed: PlacedKind = meta.kind === 'homework' ? 'homework' : meta.kind === 'training' ? 'training' : 'exam';
-    await placeAssessment(courseId, placed, rawItem, lectureId);
-    return newId;
-  }
-
-  const section = course.sections.find((candidate) => candidate.id === sectionId && !candidate.archived);
-  if (!section) {
-    throw new Error('section-not-found');
-  }
-
-  const examId = generateContentId('exam');
+  const newId = generateContentId('exam');
 
   // الأسئلة والإجابات أولًا، فلو فشل أي شيء لا يظهر عنصر ناقص في الكورس.
-  await writeContent(courseId, examId, draftMeta, questions);
+  await writeContent(courseId, newId, draftMeta, questions);
 
-  const raw = buildRaw({}, examId, draftMeta, questions.length, {
+  const rawItem = buildRaw({}, newId, draftMeta, questions.length, {
     isDraft: hasIncompleteAnswers,
     hidden: hasIncompleteAnswers,
   });
-  const item = makeItem(raw, meta.kind);
+  const placed: PlacedKind = meta.kind === 'homework' ? 'homework' : meta.kind === 'training' ? 'training' : 'exam';
 
-  const sections = course.sections.map((candidate) =>
-    candidate.id === sectionId ? { ...candidate, items: [...candidate.items, item] } : candidate,
-  );
-
-  await saveCourseSections(courseId, sections);
-  return examId;
+  await placeAssessment(courseId, placed, rawItem, lectureId);
+  return newId;
 }
 
 // يحمّل امتحانًا جديدًا للتعديل (الأسئلة مع إجاباتها، وهذا متاح للأدمن فقط).

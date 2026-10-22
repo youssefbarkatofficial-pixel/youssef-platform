@@ -43,30 +43,10 @@ export type CourseItemType = 'video' | 'pdf' | 'header' | 'task' | 'quiz' | 'oth
 
 type RawObject = Record<string, unknown>;
 
-export interface CourseItem {
-  id: string;
-  type: CourseItemType;
-  // للامتحان والتدريب والواجب فقط (type يكون quiz أو task)، وإلا null.
-  assessmentKind: AssessmentKind | null;
-  title: string;
-  videoUrl: string; // youtubeUrl أو videoUrl
-  pdfUrl: string;
-  duration: string;
-  archived: boolean;
-  availableFrom: number | null;
-  availableUntil: number | null;
-  children: CourseItem[];
-  // الشكل الأصلي للعنصر كما هو في قاعدة البيانات، حتى لا نفقد أي حقل لا نعرفه.
-  raw: RawObject;
-}
-
-export interface CourseSection {
-  id: string;
-  title: string;
-  archived: boolean;
-  items: CourseItem[];
-  raw: RawObject;
-}
+// أنواع العنصر والقسم موحّدة مع محرّك التطبيع (مصدر واحد للحقيقة).
+export type { CourseItem, CourseSection } from '../lib/courseNormalize';
+import type { CourseItem, CourseSection } from '../lib/courseNormalize';
+export { getVisibleSections, isHiddenItem } from '../lib/courseVisibility';
 
 export interface Course {
   id: string;
@@ -364,17 +344,8 @@ export async function listEnrolledCourses(student: Student | null): Promise<Cour
   return all.filter((course) => canAccessCourseContent(course, student, false));
 }
 
-// الأقسام والعناصر المؤرشفة لا تظهر للطلاب.
-export function getVisibleSections(sections: CourseSection[]): CourseSection[] {
-  return sections
-    .filter((section) => !section.archived)
-    .map((section) => ({
-      ...section,
-      items: section.items
-        .filter((item) => !item.archived)
-        .map((item) => ({ ...item, children: item.children.filter((child) => !child.archived) })),
-    }));
-}
+// الأقسام والعناصر المؤرشفة لا تظهر للطلاب، والمسودات تظهر للأدمن فقط.
+// (التنفيذ في src/lib/courseVisibility.ts وهو مُعاد تصديره من هنا)
 
 function stripItem(item: CourseItem): CourseItem {
   return {

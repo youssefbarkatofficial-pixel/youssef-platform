@@ -87,7 +87,7 @@ export default function AssessmentPage() {
   const [submitting, setSubmitting] = useState(false);
 
   const uid = firebaseUser?.uid ?? '';
-  const sections = course ? getVisibleSections(course.sections) : [];
+  const sections = course ? getVisibleSections(course.sections, { includeHidden: isAdmin }) : [];
   const item = course && itemId ? findItem(sections, itemId) : null;
   const assessment = course && item ? toAssessment(course.id, item) : null;
   const canAccess = course ? canAccessCourseContent(course, student, isAdmin) : false;

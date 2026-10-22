@@ -1,6 +1,7 @@
 import type { QuestionDraft } from './questionDraft.ts';
 import type { QuestionType } from './grading.ts';
 import { newQuestionId, isEssayType } from './questionDraft.ts';
+import { repairPdfLigatures } from './arabicNormalize.ts';
 
 const OPTION_KEYS = ['a', 'b', 'c', 'd', 'e', 'f'] as const;
 
@@ -21,9 +22,35 @@ const LEGACY_ARABIC_MAP: Record<string, string> = {
   '1': 'a', '2': 'b', '3': 'c', '4': 'd',
 };
 
+// ترتيب صيغ الأسئلة كما هي في النموذج الرسمي (نفس الصيغ المتاحة في المنصة بلا زيادة أو نقص)
+export const SECTION_TYPE_LABELS: Record<string, string> = {
+  choose: 'اختر الإجابة الصحيحة',
+  truefalse: 'صح أو خطأ',
+  fill: 'أكمل العبارات',
+  correct: 'صوب ما تحته خط',
+  term: 'اكتب ما تشير إليه العبارة',
+  who: 'من هو؟',
+  explain: 'بم تفسر',
+  results: 'ما النتائج المترتبة على',
+  prove: 'دلل تاريخياً',
+  compare: 'قارن بين',
+  similarities: 'أوجه الشبه والاختلاف',
+  relation: 'ما العلاقة بين',
+  whatif: 'ماذا يحدث إذا',
+  define: 'ما المقصود',
+  opinion: 'ما رأيك في',
+  map: 'الخريطة',
+  general: 'أسئلة عامة',
+  unknown: 'صيغة غير معروفة',
+};
+
+export function sectionTypeLabel(type: string): string {
+  return SECTION_TYPE_LABELS[type] || SECTION_TYPE_LABELS.unknown;
+}
+
 const SECTION_KEYWORDS = [
   { regex: /اختر/i, type: 'choose' },
-  { regex: /صح\s*\/\s*خطأ|صح\s*أو\s*خطأ|ضع علامة|صواب\s*\)\s*أمام|اكتب\s*كلمة\s*\(\s*صواب\s*\)/i, type: 'truefalse' },
+  { regex: /صح\s*[\)\]]?\s*(?:أو|\/|و)\s*[\(\[]?\s*(?:خطأ|غلط)|ضع\s*(?:ع?لا?م[ةه])|صواب\s*[\)\]]?\s*أمام|اكتب\s*كلمة\s*\(\s*صواب/i, type: 'truefalse' },
   { regex: /أكمل|اكمل/i, type: 'fill' },
   { regex: /صوب/i, type: 'correct' },
   { regex: /اكتب ما تشير/i, type: 'term' },
@@ -125,6 +152,78 @@ export function convertHtmlToStructuredText(html: string): string {
   return text;
 }
 
+// نوع القسم من كلمات العنوان المفتاحية (نفس ترتيب صيغ النموذج الرسمي)
+function detectSectionKeyword(line: string): string | null {
+  for (const kw of SECTION_KEYWORDS) {
+    if (kw.regex.test(line)) return kw.type;
+  }
+  return null;
+}
+
+// تجهيز نص للمقارنة: حذف المسافات والتشكيل وإصلاح تشوهات اللام-ألف في الـ PDF
+function probeHead(text: string): string {
+  return normalizeForMatching(repairPdfLigatures(text.replace(/\s+/g, '')));
+}
+
+/**
+ * سطر الإجابة بكل صيغه ("الإجابة:"، "الإ جابة:"، "اجابة :" كما يخرج من الـ PDF).
+ * يرجع نص الإجابة أو null لو لم يكن سطر إجابة.
+ */
+export function probeAnswerLine(line: string): string | null {
+  const idx = line.indexOf(':');
+  if (idx <= 0 || idx > 16) return null;
+  const head = probeHead(line.slice(0, idx));
+  if (!/^(الاجابه|الاجابة|اجابه|اجابة|الجواب|جواب|الحل|حل|ج|answer|ans)$/.test(head)) return null;
+  return line.slice(idx + 1).trim();
+}
+
+/** سطر الدرجة بكل صيغه: "الدرجة: 2" أو "(2 درجة)". */
+export function probePointsLine(line: string): number | null {
+  const paren = line.match(/^\(\s*(\d+)\s*(?:درجة|درجات|درجه)\s*\)\s*$/i);
+  if (paren) return parseInt(paren[1], 10);
+  const idx = line.indexOf(':');
+  if (idx <= 0 || idx > 12) return null;
+  const head = probeHead(line.slice(0, idx));
+  if (!/^(الدرجه|الدرجة|درجه|درجة|النقطه|النقاط|points|score)$/.test(head)) return null;
+  const value = parseInt(normalizeDigits(line.slice(idx + 1)).replace(/[^\d]/g, ''), 10);
+  return Number.isFinite(value) ? value : null;
+}
+
+/**
+ * هل هذا السطر عنوان قسم؟
+ * strict: عنوان مكتوب بصيغة "(3 أسئلة)" الصارمة.
+ * countless: عنوان بصيغة النموذج الرسمي بدون عدد مثل "أولاً: اختر الإجابة الصحيحة مما بين الأقواس:".
+ */
+export function readSectionHeader(
+  line: string,
+): { kind: 'strict' | 'countless'; declaredCount: number; type: string } | null {
+  const trimmed = line.trim();
+  if (!trimmed) return null;
+
+  // أي سطر يبدأ بترقيم سؤال (1. / (1) / أ) ) ليس عنوان قسم
+  if (/^\(?\d+\)?\s*[.\-)]/.test(trimmed)) return null;
+  if (/^[أ-يA-Za-z]\s*[\)\].]\s+/.test(trimmed)) return null;
+  if (/^[\d٠-٩]+\s*[.\-)]/.test(trimmed)) return null;
+
+  const strict = trimmed.match(/^(.+?):\s*(.+?)\s*\((\d+)\s*(?:سؤال|أسئلة)[^)]*\)\s*:?\s*$/);
+  if (strict) {
+    return {
+      kind: 'strict',
+      declaredCount: parseInt(normalizeDigits(strict[3]), 10),
+      type: detectSectionKeyword(trimmed) || 'unknown',
+    };
+  }
+
+  // عنوان صيغة النموذج الرسمي: ينتهي بنقطتين وبه كلمة مفتاحية معروفة (بدون عدد معلن)
+  const endsWithColon = /[:：]\s*$/.test(trimmed);
+  if (endsWithColon && trimmed.length <= 120) {
+    const type = detectSectionKeyword(trimmed);
+    if (type) return { kind: 'countless', declaredCount: 0, type };
+  }
+
+  return null;
+}
+
 /**
  * المحلل الشامل للامتحانات بحسب مواصفات Antigravity v44
  */
@@ -159,6 +258,8 @@ export function parseExamText(rawText: string): ParsedExam {
   const pointsParenRegex = /^\((\d+)\s*(?:درجة|درجات|درجه)\)\s*$/i;
   const formatBOptRegex = /^([أ-يA-Za-z])\s*[\)\.\-:]\s*(.*)$/;
   const inlineOptionsRegex = /^[\(\[]([^\)\]]+[-–—/][^\)\]]+)[\)\]]$/;
+  // نفس صيغة الخيارات لكن مع مسافات داخل الأقواس أو نقطة في نهاية السطر (شائع في ملفات الـ PDF)
+  const looseInlineOptionsRegex = /^[\(\[]\s*([^\)\]]+[-–—/][^\)\]]+?)\s*[\)\]]\s*[\.،,؛;]?\s*$/;
 
   let currentSection: ParsedSection | null = null;
   let isInMapComposite = false;
@@ -284,6 +385,53 @@ export function parseExamText(rawText: string): ParsedExam {
     const line = lines[i];
     if (!line) continue;
 
+    // سطر رأس القسم: صارم (بعدد معلن) أو صيغة النموذج الرسمي (بنقطتين وبدون عدد)
+    const detectedHeader = readSectionHeader(line);
+    if (detectedHeader && detectedHeader.kind === 'strict') {
+      isInMapComposite = false;
+      finishCurrentQuestion();
+
+      if (detectedHeader.type === 'unknown') {
+        warnings.push(`عنوان قسم غير معروف في السطر ${i + 1}: "${line}".`);
+      }
+
+      currentSection = {
+        header: line,
+        type: detectedHeader.type,
+        declaredCount: detectedHeader.declaredCount,
+        questions: [],
+      };
+      sections.push(currentSection);
+      continue;
+    }
+
+    if (detectedHeader && detectedHeader.kind === 'countless') {
+      isInMapComposite = false;
+      finishCurrentQuestion();
+
+      const isMapIntro = /أمامك\s*خريطة/i.test(line);
+      currentSection = {
+        header: line,
+        type: detectedHeader.type,
+        declaredCount: 0,
+        questions: [],
+      };
+      sections.push(currentSection);
+
+      if (isMapIntro) {
+        currentQuestion = {
+          number: 1,
+          stem: cleanSectionTitle(line),
+          points: undefined,
+          options: null,
+          correctIndex: undefined,
+          rawAnswer: null,
+        };
+        isInMapComposite = true;
+      }
+      continue;
+    }
+
     // عنوان الامتحان (السطر الأول قبل أي قسم)
     if (!currentSection && !title && !line.startsWith('إعداد:')) {
       const match = line.match(headerRegex);
@@ -291,33 +439,6 @@ export function parseExamText(rawText: string): ParsedExam {
         title = line.replace(/^###SECTION###\s*/, '').trim();
         continue;
       }
-    }
-
-    // سطر رأس القسم الصارم
-    const headerMatch = line.match(headerRegex);
-    if (headerMatch && !/^\d+\s*[.\-)]/.test(line)) {
-      isInMapComposite = false;
-      finishCurrentQuestion();
-
-      let detectedType = 'unknown';
-      for (const kw of SECTION_KEYWORDS) {
-        if (kw.regex.test(line)) {
-          detectedType = kw.type;
-          break;
-        }
-      }
-      if (detectedType === 'unknown') {
-        warnings.push(`عنوان قسم غير معروف في السطر ${i + 1}: "${line}".`);
-      }
-
-      currentSection = {
-        header: line,
-        type: detectedType,
-        declaredCount: parseInt(headerMatch[3], 10),
-        questions: [],
-      };
-      sections.push(currentSection);
-      continue;
     }
 
     // سطر رأس القسم المرن
@@ -371,7 +492,9 @@ export function parseExamText(rawText: string): ParsedExam {
     // بداية سؤال جديد
     const qStart = line.match(qStartRegex);
     if (qStart) {
-      const candidateStem = (qStart[5] || '').trim();
+      // تنظيف بقايا أقواس/نقاط في بداية نص السؤال كما تخرج من بعض ملفات الـ PDF: ")........( . "
+      const rawStem = (qStart[5] || '').trim().replace(/^[\)\]]\s*\.{3,}\s*[\(\[]?\s*[\.\-–—]?\s*/, '').trim();
+      const candidateStem = rawStem;
       const isPureFiller = candidateStem.replace(/[\s\.\-_—–…\(\)\[\]]/g, '').length === 0;
       if (isPureFiller) {
         if (currentQuestion) {
@@ -397,7 +520,7 @@ export function parseExamText(rawText: string): ParsedExam {
       finishCurrentQuestion();
       currentQuestion = {
         number: parseInt(qStart[1] || qStart[2] || qStart[3] || qStart[4] || '1', 10),
-        stem: qStart[5] || '',
+        stem: candidateStem,
         points: undefined,
         options: null,
         correctIndex: undefined,
@@ -409,6 +532,11 @@ export function parseExamText(rawText: string): ParsedExam {
     if (!currentQuestion) continue;
 
     // سطر الدرجة
+    const probedPoints = probePointsLine(line);
+    if (probedPoints !== null) {
+      currentQuestion.points = probedPoints;
+      continue;
+    }
     const pMatch = line.match(pointsRegex) || line.match(pointsParenRegex);
     if (pMatch) {
       currentQuestion.points = parseInt(pMatch[1], 10);
@@ -416,6 +544,11 @@ export function parseExamText(rawText: string): ParsedExam {
     }
 
     // سطر الإجابة
+    const probedAnswer = probeAnswerLine(line);
+    if (probedAnswer !== null) {
+      currentQuestion.rawAnswer = probedAnswer;
+      continue;
+    }
     const aMatch = line.match(ansRegex);
     if (aMatch) {
       currentQuestion.rawAnswer = aMatch[1].trim();
@@ -423,7 +556,7 @@ export function parseExamText(rawText: string): ParsedExam {
     }
 
     // خيارات الصيغة أ: (خيار1 - خيار2 - خيار3 - خيار4)
-    const inlineMatch = line.match(inlineOptionsRegex);
+    const inlineMatch = line.match(inlineOptionsRegex) || line.match(looseInlineOptionsRegex);
     if (inlineMatch) {
       const parts = inlineMatch[1].split(/\s*[-–—/]\s*/).map((p) => p.trim()).filter(Boolean);
       if (parts.length >= 2) {
@@ -479,26 +612,32 @@ function mapOrigTypeToDraftType(origType: string): QuestionType {
   switch (origType) {
     case 'fill':
       return 'fill';
+    case 'correct':
+      return 'correct';
+    case 'term':
+      return 'term';
+    case 'who':
+      return 'who';
     case 'explain':
       return 'explain';
     case 'results':
       return 'result';
     case 'prove':
       return 'prove';
+    case 'compare':
+      return 'compare';
+    case 'similarities':
+      return 'similarities';
     case 'relation':
       return 'relation';
     case 'whatif':
       return 'whatif';
     case 'define':
       return 'meaning';
+    case 'opinion':
+      return 'opinion';
     case 'map':
       return 'short';
-    case 'correct':
-    case 'term':
-    case 'who':
-    case 'compare':
-    case 'similarities':
-    case 'opinion':
     default:
       return 'short';
   }
@@ -548,6 +687,17 @@ export function parsedExamToQuestionDrafts(parsed: ParsedExam): QuestionDraft[] 
             optsMap[OPTION_KEYS[idx]] = opt;
           }
         });
+
+        // سؤال من صيغة أخرى (بم تفسر / من هو؟ / صوب...) جاء بخيارات:
+        // نحتفظ بصيغته الأصلية ليظهر عنوانها الصحيح للطالب، ويُجاب عنه بالاختيار من متعدد.
+        if (q.convertedToChoose) {
+          const originalType = mapOrigTypeToDraftType(q.origType);
+          if (originalType !== 'short') {
+            draft.type = originalType;
+            draft.asMcq = true;
+          }
+        }
+
         draft.options = optsMap;
         if (
           q.correctIndex !== null &&
@@ -837,20 +987,28 @@ export function parseQuestionsFromJson(jsonStr: string): ImportResult {
 
 /**
  * 2. استيراد الأسئلة من نص منظم (TXT أو مستخرج من Word/PDF)
+ * يعتمد أولًا على المحلل الرسمي parseExamText (نفس أسلوب نموذج exam-template-v1)،
+ * ويرجع للمحلل القديم فقط لو لم يستخرج المحلل الرسمي أسئلة أكثر.
  */
 export function parseQuestionsFromTxt(text: string): ImportResult {
-  // إذا كان النص يحتوي على أقسام منسقة بالنمط الجديد
-  const headerRegex = /^(.+?):\s*(.+?)\s*\((\d+)\s*(?:سؤال|أسئلة)[^)]*\)\s*:?\s*$/m;
-  if (headerRegex.test(text)) {
-    const parsed = parseExamText(text);
+  const parsed = parseExamText(text);
+  const examQuestions = parsedExamToQuestionDrafts(parsed);
+  const legacy = parseQuestionsFromTxtLegacy(text);
+
+  if (examQuestions.length > 0 && examQuestions.length >= legacy.questions.length) {
     return {
-      questions: parsedExamToQuestionDrafts(parsed),
+      questions: examQuestions,
       warnings: parsed.warnings,
       errors: parsed.errors,
       parsedExam: parsed,
     };
   }
 
+  return legacy;
+}
+
+// المحلل القديم للنصوص البسيطة بدون أقسام (توافق للخلف)
+function parseQuestionsFromTxtLegacy(text: string): ImportResult {
   // التوافق القديم للنصوص البسيطة بدون أقسام
   const warnings: string[] = [];
   const questions: QuestionDraft[] = [];
@@ -1193,6 +1351,24 @@ export async function parseQuestionsFromPdf(input: ArrayBuffer | Blob | File): P
   const { extractTextFromPdf } = await import('./pdfExtract.ts');
   const text = await extractTextFromPdf(buffer);
   return parseQuestionsFromTxt(text);
+}
+
+/**
+ * نقطة دخول موحّدة: نفس نتيجة الاستخراج من TXT وWord وPDF (كلها تمر على المحلل الرسمي).
+ */
+export async function parseExamFile(file: File): Promise<ImportResult> {
+  const name = (file.name || '').toLowerCase();
+
+  if (name.endsWith('.docx')) {
+    return parseQuestionsFromDocx(file);
+  }
+  if (name.endsWith('.pdf')) {
+    return parseQuestionsFromPdf(file);
+  }
+  if (name.endsWith('.json')) {
+    return parseQuestionsFromJson(await file.text());
+  }
+  return parseQuestionsFromTxt(await file.text());
 }
 
 // ---------- مساعدات المراجعة التفاعلية (Review Helpers) ----------

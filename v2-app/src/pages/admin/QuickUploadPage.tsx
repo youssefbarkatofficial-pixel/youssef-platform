@@ -1,17 +1,15 @@
 import { cairoInputToUtcMs, formatCairoDateTime, tzOffsetMs, cairoToUtcMs } from '../../lib/cairoTime';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { AlertTriangle, Plus, ArrowUp, ArrowDown, CheckCircle2, ChevronDown, ChevronUp, ClipboardList, FileText, PlayCircle, Trash2, UploadCloud, Calendar, Sparkles, PlusCircle, Split, Layers, Bell } from 'lucide-react';
+import { AlertTriangle, Plus, ArrowUp, ArrowDown, CheckCircle2, ChevronDown, ChevronUp, ClipboardList, FileText, PlayCircle, Trash2, UploadCloud, Calendar, Sparkles, PlusCircle, Split, Layers, Bell, ListChecks, FileUp } from 'lucide-react';
 import { Badge, Button, Card, EmptyState, Input, Spinner, useToast } from '../../components/ui';
 import { useCourses } from '../../hooks/useCourses';
 import {
-  parseQuestionsFromDocx,
-  parseQuestionsFromJson,
-  parseQuestionsFromPdf,
-  parseQuestionsFromTxt,
+  parseExamFile,
   parseExamText,
-  parseExamFromDocx,
+  parseQuestionsFromTxt,
   parsedExamToQuestionDrafts,
+  sectionTypeLabel,
   splitQuestionAt,
   mergeWithPreviousQuestion,
   deleteQuestion,
@@ -21,7 +19,8 @@ import {
   formatCairoScheduleSummary,
 } from '../../lib/questionImport';
 import { sendBroadcastNotification } from '../../services/notifications';
-import { newQuestionId, createEmptyDraft, isEssayType } from '../../lib/questionDraft';
+import { newQuestionId, createEmptyDraft, isEssayType, applyMcqToDraft, applyMcqToQuestions, isChoiceQuestion } from '../../lib/questionDraft';
+import { QUESTION_FORMATS, OPTION_KEYS } from '../../lib/questionDraft';
 import type { QuestionType } from '../../lib/grading';
 import type { ParsedExam, ImportResult } from '../../lib/questionImport';
 import type { QuestionDraft } from '../../lib/questionDraft';
@@ -152,6 +151,19 @@ export default function QuickUploadPage() {
   const [manualOptions, setManualOptions] = useState<Record<string, string>>({ a: '', b: '', c: '', d: '' });
   const [manualAnswer, setManualAnswer] = useState('a');
   const [weekOffset, setWeekOffset] = useState<number>(0);
+  // زر واحد: يجعل كل أسئلة التقييم اختيار من متعدد (صح/خطأ تبقى اختيارين فقط)
+  const [mcqMode, setMcqMode] = useState(false);
+
+  const toggleMcqMode = (next: boolean) => {
+    setMcqMode(next);
+    setQuestions((previous) => applyMcqToQuestions(previous, next));
+    showToast(
+      next
+        ? 'تم تحويل الأسئلة إلى اختيار من متعدد — اكتب الخيارات لكل سؤال قبل النشر.'
+        : 'تم إلغاء وضع الاختيار من متعدد — الطالب سيكتب الإجابة بنفسه.',
+      'success',
+    );
+  };
 
   // حساب الأعداد حسب النوع لشاشة المراجعة التفاعلية (Part 2d)
   const typeCounts = useMemo(() => {
@@ -160,9 +172,9 @@ export default function QuickUploadPage() {
     let fill = 0;
     let essay = 0;
     questions.forEach((q) => {
-      if (q.type === 'choose') choose++;
+      if (q.type === 'choose' || isChoiceQuestion(q)) choose++;
       else if (q.type === 'tf') tf++;
-      else if (q.type === 'fill' || q.type === 'short') fill++;
+      else if (['fill', 'correct', 'term', 'who', 'short'].includes(q.type)) fill++;
       else essay++;
     });
     return { choose, tf, fill, essay };
@@ -192,18 +204,26 @@ export default function QuickUploadPage() {
       showToast('اكتب نص السؤال أولاً', 'error');
       return;
     }
-    const newDraft: QuestionDraft = {
+
+    const asChoice = manualType !== 'tf' && (manualType === 'choose' || mcqMode);
+    let draft: QuestionDraft = {
       id: newQuestionId(),
       type: manualType,
       text: manualText.trim(),
       points: Number(manualPoints) || 1,
-      options: manualType === 'choose' ? { ...manualOptions } : null,
+      options: asChoice ? { ...manualOptions } : null,
       answer: manualAnswer,
       altAnswers: [],
       rubric: [],
       needsReview: !manualAnswer,
+      asMcq: asChoice && manualType !== 'choose' ? true : undefined,
     };
-    setQuestions((prev) => [...prev, newDraft]);
+
+    if (manualType === 'tf') {
+      draft = { ...draft, options: null, answer: manualAnswer === 'خطأ' ? 'خطأ' : 'صح', asMcq: undefined };
+    }
+
+    setQuestions((prev) => [...prev, draft]);
     setManualText('');
     setManualAnswer(manualType === 'tf' ? 'صح' : 'a');
     showToast('تمت إضافة السؤال للقائمة', 'success');
@@ -211,12 +231,17 @@ export default function QuickUploadPage() {
 
   const missingCount = useMemo(() => {
     return questions.filter((q) => {
-      if (q.type === 'choose' || q.type === 'tf' || q.type === 'fill') {
-        return !q.answer || !q.answer.trim();
+      if (isChoiceQuestion(q)) {
+        const keys: string[] = OPTION_KEYS.filter((key) => (q.options?.[key] ?? '').trim() !== '');
+        return keys.length < 2 || !keys.includes(q.answer);
       }
-      return q.needsReview || !q.answer || !q.answer.trim();
+      if (q.type === 'tf') return q.answer !== 'صح' && q.answer !== 'خطأ';
+      return !q.answer || !q.answer.trim() || q.needsReview === true;
     }).length;
   }, [questions]);
+
+  // هل نموذج الإضافة اليدوية يعرض خيارات للطالب؟ (صح/خطأ تبقى اختيارين جاهزين)
+  const manualChoice = manualType === 'choose' || (mcqMode && manualType !== 'tf');
 
   const reloadCourse = useCallback(async (id: string) => {
     if (!id) {
@@ -298,52 +323,27 @@ export default function QuickUploadPage() {
     }
   };
 
+  // تطبيق نتيجة الاستخراج (نفس المسار لملفات TXT وWord وPDF)
+  const applyImportResult = (result: ImportResult) => {
+    const parsed = result.parsedExam ?? null;
+    setParsedExam(parsed);
+    if (!title.trim() && parsed?.title) setTitle(parsed.title);
+    if (!title.trim() && !parsed?.title && result.questions.length > 0) setTitle('امتحان جديد');
+    setQuestions(mcqMode ? applyMcqToQuestions(result.questions, true) : result.questions);
+    if (result.errors && result.errors.length > 0) {
+      showToast(`تم الاستخراج مع ${result.errors.length} ملاحظة تحتاج مراجعة`, 'error');
+    } else {
+      showToast(`تم استخراج ${result.questions.length} سؤال`, result.questions.length > 0 ? 'success' : 'error');
+    }
+  };
+
   const onQuestionsFile = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
     try {
-      const name = file.name.toLowerCase();
-      let result: ImportResult;
-      if (name.endsWith('.docx')) {
-        const parsed = await parseExamFromDocx(file);
-        setParsedExam(parsed);
-        if (!title.trim() && parsed.title) setTitle(parsed.title);
-        result = {
-          questions: parsedExamToQuestionDrafts(parsed),
-          warnings: parsed.warnings,
-          errors: parsed.errors,
-          parsedExam: parsed,
-        };
-      } else if (name.endsWith('.json')) {
-        result = parseQuestionsFromJson(await file.text());
-        if (result.parsedExam) {
-          setParsedExam(result.parsedExam);
-          if (!title.trim() && result.parsedExam.title) setTitle(result.parsedExam.title);
-        }
-      } else if (name.endsWith('.pdf')) {
-        result = await parseQuestionsFromPdf(file);
-        if (result.parsedExam) {
-          setParsedExam(result.parsedExam);
-          if (!title.trim() && result.parsedExam.title) setTitle(result.parsedExam.title);
-        }
-      } else {
-        const raw = await file.text();
-        const parsed = parseExamText(raw);
-        if (parsed.sections.length > 0) {
-          setParsedExam(parsed);
-          if (!title.trim() && parsed.title) setTitle(parsed.title);
-          result = {
-            questions: parsedExamToQuestionDrafts(parsed),
-            warnings: parsed.warnings,
-            errors: parsed.errors,
-            parsedExam: parsed,
-          };
-        } else {
-          result = parseQuestionsFromTxt(raw);
-        }
-      }
-      setQuestions(result.questions);
-      showToast(`تم استخراج ${result.questions.length} سؤال`, result.questions.length > 0 ? 'success' : 'error');
+      // parseExamFile: نفس المحلل الرسمي لكل الصيغ (TXT / DOCX / PDF / JSON)
+      const result = await parseExamFile(file);
+      applyImportResult(result);
     } catch (err: unknown) {
       showToast(`تعذر قراءة الملف: ${err instanceof Error ? err.message : ''}`, 'error');
     }
@@ -356,10 +356,12 @@ export default function QuickUploadPage() {
     if (parsed.sections.length > 0) {
       setParsedExam(parsed);
       if (!title.trim() && parsed.title) setTitle(parsed.title);
-      setQuestions(parsedExamToQuestionDrafts(parsed));
+      const drafts = parsedExamToQuestionDrafts(parsed);
+      setQuestions(mcqMode ? applyMcqToQuestions(drafts, true) : drafts);
     } else {
       setParsedExam(null);
-      setQuestions(parseQuestionsFromTxt(val).questions);
+      const drafts = parseQuestionsFromTxt(val).questions;
+      setQuestions(mcqMode ? applyMcqToQuestions(drafts, true) : drafts);
     }
   };
 
@@ -715,6 +717,28 @@ export default function QuickUploadPage() {
                 ))}
               </div>
 
+              {/* زر واحد: تحويل كل أسئلة التقييم إلى اختيار من متعدد */}
+              <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-navy-800 bg-navy-950/70 px-3.5 py-3">
+                <div className="flex items-start gap-2 text-xs text-slate-300">
+                  <ListChecks className={`mt-0.5 h-4 w-4 shrink-0 ${mcqMode ? 'text-emerald-400' : 'text-slate-500'}`} />
+                  <div>
+                    <p className="font-bold text-slate-200">كل الأسئلة اختيار من متعدد</p>
+                    <p className="text-[11px] text-slate-400">
+                      عند التفعيل تكتب أنت الخيارات التي يختار الطالب بينها، وصح/خطأ تبقى اختيارين فقط (صح / خطأ). عند الإلغاء يكتب الطالب الإجابة بنفسه.
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => toggleMcqMode(!mcqMode)}
+                  className={`shrink-0 rounded-lg px-3.5 py-1.5 text-xs font-bold transition-colors ${
+                    mcqMode ? 'bg-emerald-500 text-white hover:bg-emerald-400' : 'bg-navy-800 text-gold-400 hover:bg-navy-700'
+                  }`}
+                >
+                  {mcqMode ? 'مفعّل — إلغاء' : 'تفعيل'}
+                </button>
+              </div>
+
               {target === 'new' ? (
                 <div className="space-y-3">
                   <Input label="العنوان" value={title} onChange={(e) => setTitle(e.target.value)} />
@@ -857,16 +881,17 @@ export default function QuickUploadPage() {
                       <label className="mb-1 block text-xs font-bold text-slate-300">نوع السؤال</label>
                       <select
                         value={manualType}
-                        onChange={(e) => setManualType(e.target.value as QuestionType)}
+                        onChange={(e) => {
+                          setManualType(e.target.value as QuestionType);
+                          setManualAnswer(e.target.value === 'tf' ? 'صح' : 'a');
+                        }}
                         className={FIELD}
                       >
-                        <option value="choose">اختيار من متعدد</option>
-                        <option value="tf">صح أو خطأ</option>
-                        <option value="fill">أكمل الفراغ</option>
-                        <option value="short">إجابة قصيرة</option>
-                        <option value="explain">اشرح / بم تفسر</option>
-                        <option value="result">ما النتائج المترتبة</option>
-                        <option value="prove">دلل / أثبت</option>
+                        {QUESTION_FORMATS.map((type) => (
+                          <option key={type} value={type}>
+                            {QUESTION_TYPE_LABELS[type]}
+                          </option>
+                        ))}
                       </select>
                     </div>
                     <div>
@@ -892,7 +917,7 @@ export default function QuickUploadPage() {
                     />
                   </div>
 
-                  {manualType === 'choose' && (
+                  {manualChoice && (
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
                         <span className="text-xs font-bold text-slate-400">
@@ -974,9 +999,11 @@ export default function QuickUploadPage() {
                     </div>
                   )}
 
-                  {manualType !== 'choose' && manualType !== 'tf' && (
+                  {!manualChoice && manualType !== 'tf' && (
                     <div>
-                      <label className="mb-1 block text-xs font-bold text-slate-300">الإجابة النموذجية المعتمدة</label>
+                      <label className="mb-1 block text-xs font-bold text-slate-300">
+                        الإجابة النموذجية المعتمدة {mcqMode ? '' : '(الطالب سيكتبها بنفسه)'}
+                      </label>
                       <input
                         type="text"
                         placeholder="اكتب الإجابة النموذجية..."
@@ -995,7 +1022,9 @@ export default function QuickUploadPage() {
               ) : (
                 <>
                   <div>
-                    <label className="text-xs font-bold text-slate-300">الأسئلة: الصقها هنا أو ارفع ملف TXT / Word / JSON</label>
+                    <label className="text-xs font-bold text-slate-300">
+                      الأسئلة: الصقها هنا أو ارفع ملف TXT / Word / PDF — نفس الأسلوب ونفس النتيجة
+                    </label>
                     <textarea
                       value={rawText}
                       onChange={(e) => onTextareaChange(e.target.value)}
@@ -1007,13 +1036,18 @@ export default function QuickUploadPage() {
                 </>
               )}
 
-              <div className="flex items-center gap-3">
-                <input
-                  type="file"
-                  accept=".txt,.docx,.json,.pdf"
-                  onChange={onQuestionsFile}
-                  className="text-xs text-slate-300 file:mr-2 file:rounded-lg file:border-0 file:bg-navy-800 file:px-3 file:py-1.5 file:text-xs file:font-bold file:text-gold-400 hover:file:bg-navy-700"
-                />
+              <div className="flex flex-wrap items-center gap-3">
+                <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-navy-700 bg-navy-900 px-3 py-2 text-xs font-bold text-gold-400 transition-colors hover:border-gold-500/50 hover:bg-navy-800">
+                  <FileUp className="h-4 w-4" />
+                  <span>اختر ملف الأسئلة (TXT / Word / PDF)</span>
+                  <input
+                    type="file"
+                    accept=".txt,.docx,.pdf,.json"
+                    onChange={onQuestionsFile}
+                    className="sr-only"
+                  />
+                </label>
+                <span className="text-[11px] text-slate-500">الملف المختار يتم استخراجه بنفس المحلل الرسمي.</span>
               </div>
 
               {/* حماية الفشل الصامت (Silent Failure Protection) */}
@@ -1108,7 +1142,7 @@ export default function QuickUploadPage() {
                             <tr key={sIdx} className="hover:bg-navy-900/40">
                               <td className="p-2.5 font-medium text-white">{sec.header}</td>
                               <td className="p-2.5">
-                                <Badge variant="neutral">{sec.type}</Badge>
+                                <Badge variant="neutral">{sectionTypeLabel(sec.type)}</Badge>
                               </td>
                               <td className="p-2.5 text-center">{sec.declaredCount}</td>
                               <td className="p-2.5 text-center font-bold text-white">{sec.questions.length}</td>
@@ -1181,7 +1215,8 @@ export default function QuickUploadPage() {
                               <div className="flex items-center justify-between gap-2">
                                 <div className="flex items-center gap-2">
                                   <span className="font-bold text-slate-400">#{q.number}</span>
-                                  <Badge variant="neutral">{draft.type}</Badge>
+                                  <Badge variant="neutral">{QUESTION_TYPE_LABELS[draft.type]}</Badge>
+                                  {isChoiceQuestion(draft) && <Badge variant="gold">اختيار من متعدد</Badge>}
                                   {(draft.needsReview || !draft.answer) && (
                                     <span className="rounded bg-rose-500/20 px-1.5 py-0.5 text-[10px] font-bold text-rose-300">
                                       ناقص إجابة
@@ -1189,6 +1224,25 @@ export default function QuickUploadPage() {
                                   )}
                                 </div>
                                 <div className="flex items-center gap-2">
+                                  {draft.type !== 'choose' && draft.type !== 'tf' && (
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        setQuestions((prev) => {
+                                          const next = [...prev];
+                                          next[globalIdx] = applyMcqToDraft(next[globalIdx], !next[globalIdx].asMcq);
+                                          return next;
+                                        })
+                                      }
+                                      className={`rounded px-2 py-0.5 text-[11px] font-bold ${
+                                        draft.asMcq
+                                          ? 'bg-emerald-500/20 text-emerald-300'
+                                          : 'bg-navy-800 text-slate-300 hover:bg-navy-700'
+                                      }`}
+                                    >
+                                      {draft.asMcq ? 'اختيار ✓' : 'اختيار'}
+                                    </button>
+                                  )}
                                   <label className="text-[11px] text-slate-400">الدرجة:</label>
                                   <input
                                     type="number"
@@ -1211,11 +1265,13 @@ export default function QuickUploadPage() {
                                 />
                               </div>
 
-                              {draft.type === 'choose' && draft.options && (
+                              {isChoiceQuestion(draft) && draft.options && (
                                 <div className="space-y-1.5 pt-1">
-                                  <span className="text-[11px] font-bold text-slate-400">الخيارات والإجابة:</span>
+                                  <span className="text-[11px] font-bold text-slate-400">
+                                    الخيارات والإجابة (اختر الصحيحة بالدائرة):
+                                  </span>
                                   <div className="grid gap-1.5 sm:grid-cols-2">
-                                    {Object.entries(draft.options).map(([optKey, optVal]) => (
+                                    {OPTION_KEYS.map((optKey) => (
                                       <div
                                         key={optKey}
                                         className={`flex items-center gap-2 rounded-lg border p-1.5 ${
@@ -1233,9 +1289,10 @@ export default function QuickUploadPage() {
                                         <span className="font-bold uppercase text-slate-400">{optKey})</span>
                                         <input
                                           type="text"
-                                          value={optVal}
+                                          value={draft.options?.[optKey] ?? ''}
+                                          placeholder={optKey === 'a' ? 'الخيار الأول' : ''}
                                           onChange={(e) => {
-                                            const updated = { ...draft.options, [optKey]: e.target.value };
+                                            const updated = { ...(draft.options ?? {}), [optKey]: e.target.value };
                                             updateQuestionInDraft(globalIdx, { options: updated });
                                           }}
                                           className="flex-1 bg-transparent text-xs text-white focus:outline-none"
@@ -1274,7 +1331,7 @@ export default function QuickUploadPage() {
                                 </div>
                               )}
 
-                              {draft.type !== 'choose' && draft.type !== 'tf' && (
+                              {!isChoiceQuestion(draft) && draft.type !== 'tf' && (
                                 <div className="pt-1">
                                   <label className="text-[11px] font-bold text-slate-400">الإجابة النموذجية:</label>
                                   <input

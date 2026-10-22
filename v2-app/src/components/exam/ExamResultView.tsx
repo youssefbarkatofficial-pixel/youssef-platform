@@ -1,3 +1,4 @@
+import { formatQuestionPrompt } from '../../lib/questionDraft';
 import { AlertTriangle, Clock } from 'lucide-react';
 import { Badge, Card, ProgressBar } from '../ui';
 import { cn } from '../ui/cn';
@@ -135,9 +136,21 @@ export default function ExamResultView({ result, preview = false }: ExamResultVi
           return (
             <Card key={index} className={cn('space-y-3 border', state.border)}>
               <div className="flex flex-wrap items-start justify-between gap-3">
-                <h3 className="whitespace-pre-line font-bold leading-relaxed text-white">
-                  {index + 1}. {detail.question || 'سؤال بدون نص'}
-                </h3>
+                {(() => {
+            const prompt = formatQuestionPrompt(detail.question, detail.sectionTitle);
+            return (
+              <h3 className="whitespace-pre-line font-bold leading-relaxed text-white">
+                {index + 1}. {prompt.prefix ? (
+                  <>
+                    <span className="text-gold-400 font-extrabold">{prompt.prefix}: </span>
+                    <span>{prompt.body}</span>
+                  </>
+                ) : (
+                  prompt.body || 'بدون نص'
+                )}
+              </h3>
+            );
+          })()}
                 <div className="flex items-center gap-2">
                   <Badge variant={state.variant}>{state.label}</Badge>
                   <Badge variant="neutral">

@@ -13,7 +13,7 @@ import {
   useToast,
 } from '../../components/ui';
 import { GRADE_OPTIONS, getGradeLabel } from '../../lib/grades';
-import { QUESTION_TYPES, QUESTION_TYPE_LABELS } from '../../lib/questionDraft';
+import { QUESTION_FORMATS, QUESTION_TYPE_LABELS } from '../../lib/questionDraft';
 import type { QuestionDraft } from '../../lib/questionDraft';
 import {
   createBankQuestion,
@@ -27,7 +27,7 @@ const OPTION_LABELS: Record<string, string> = { a: 'أ', b: 'ب', c: 'ج', d: '�
 
 const TYPE_FILTER_OPTIONS = [
   { value: 'all', label: 'كل الأنواع' },
-  ...QUESTION_TYPES.map((type) => ({ value: type, label: QUESTION_TYPE_LABELS[type] })),
+  ...QUESTION_FORMATS.map((type) => ({ value: type, label: QUESTION_TYPE_LABELS[type] })),
 ];
 
 const GRADE_FILTER_OPTIONS = [{ value: 'all', label: 'كل الصفوف' }, ...GRADE_OPTIONS];

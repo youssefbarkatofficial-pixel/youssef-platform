@@ -275,10 +275,16 @@ export default function CourseDetailsPage() {
 
   // canAccess computed above
 
+  // المسودات المحفوظة من الإدارة لا تظهر للطلاب (تظهر للأدمن بشارة "مسودة")
+  const isDraftAssessment = (item: { raw?: Record<string, unknown> }) =>
+    item.raw?.isDraft === true || item.raw?.hidden === true;
+  const visibleHomeworks = course.content.homeworks.filter((hw) => isAdmin || !isDraftAssessment(hw));
+  const visibleExams = course.content.exams.filter((ex) => isAdmin || !isDraftAssessment(ex));
+
   const attachedHomeworkIds = new Set(
     course.content.lectures.flatMap((lec) => (lec.homeworks || []).map((hw) => hw.id)),
   );
-  const looseHomeworks = course.content.homeworks.filter((hw) => !attachedHomeworkIds.has(hw.id));
+  const looseHomeworks = visibleHomeworks.filter((hw) => !attachedHomeworkIds.has(hw.id));
 
   if (course.hidden && !canAccess) {
     return (
@@ -690,8 +696,9 @@ export default function CourseDetailsPage() {
                               <div>
                                 <h4 className="font-bold text-white">{hw.title}</h4>
                                 <div className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-slate-400">
-                                  {hw.duration && <span>المدة: {hw.duration} دقيقة</span>}
+                                  {Number(hw.duration) > 0 && <span>المدة: {hw.duration} دقيقة</span>}
                                   {hw.strictMode && <Badge variant="gold">مؤمّن</Badge>}
+                                  {isDraftAssessment(hw) && <Badge variant="danger">مسودة</Badge>}
                                   {hw.openAt && (
                                     <span className="text-sky-400">
                                       يفتح: {formatCairoDateTime(hw.openAt)}
@@ -729,16 +736,16 @@ export default function CourseDetailsPage() {
                 )}
 
                 {/* 3. صندوق الامتحانات - يُخفى إن كان فارغًا */}
-                {course.content.exams.length > 0 && (
+                {visibleExams.length > 0 && (
                   <Card className="space-y-4">
                     <div className="flex items-center gap-2 border-b border-navy-800 pb-3">
                       <Award className="h-5 w-5 text-gold-400" />
                       <h3 className="text-lg font-bold text-white">الامتحانات</h3>
-                      <Badge variant="neutral">{course.content.exams.length}</Badge>
+                      <Badge variant="neutral">{visibleExams.length}</Badge>
                     </div>
 
                     <div className="space-y-2.5">
-                      {course.content.exams.map((exam) => {
+                      {visibleExams.map((exam) => {
                         const examLink = isAdmin
                           ? `/admin/preview/assessment/${encodeURIComponent(course.id)}/${encodeURIComponent(exam.id)}`
                           : `/student/assessment/${encodeURIComponent(course.id)}/${encodeURIComponent(exam.id)}`;
@@ -756,8 +763,9 @@ export default function CourseDetailsPage() {
                               <div>
                                 <h4 className="font-bold text-white">{exam.title}</h4>
                                 <div className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-slate-400">
-                                  {exam.duration && <span>المدة: {exam.duration} دقيقة</span>}
+                                  {Number(exam.duration) > 0 && <span>المدة: {exam.duration} دقيقة</span>}
                                   {exam.strictMode && <Badge variant="gold">مؤمّن</Badge>}
+                                  {isDraftAssessment(exam) && <Badge variant="danger">مسودة</Badge>}
                                   {exam.openAt && (
                                     <span className="text-sky-400">
                                       يفتح: {formatCairoDateTime(exam.openAt)}

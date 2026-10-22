@@ -20,12 +20,18 @@ export type QuestionType =
   | 'multi_select'
   | 'fill'
   | 'short'
+  | 'correct'
+  | 'term'
+  | 'who'
   | 'explain'
   | 'result'
   | 'prove'
+  | 'compare'
+  | 'similarities'
   | 'relation'
   | 'whatif'
-  | 'meaning';
+  | 'meaning'
+  | 'opinion';
 
 export type AnswerMode = 'choice' | 'multi_choice' | 'tf' | 'fill' | 'text';
 
@@ -158,12 +164,18 @@ const QUESTION_TYPES: QuestionType[] = [
   'multi_select',
   'fill',
   'short',
+  'correct',
+  'term',
+  'who',
   'explain',
   'result',
   'prove',
+  'compare',
+  'similarities',
   'relation',
   'whatif',
   'meaning',
+  'opinion',
 ];
 
 function isQuestionType(value: string): value is QuestionType {
@@ -255,8 +267,10 @@ export function getAnswerMode(question: Question): AnswerMode {
   if (question.type === 'choose') return 'choice';
   if (question.type === 'multi_select') return 'multi_choice';
   if (question.type === 'tf') return 'tf';
+  // سؤال محوّل إلى اختيار من متعدد (بقى نوعه الأصلي كما هو حتى يظهر عنوانه الصحيح)
+  if (question.asMcq && question.options && Object.keys(question.options).length > 0) return 'choice';
   if (question.type === 'fill' || question.type === 'short') return 'fill';
-  if (question.asMcq && question.options) return 'choice';
+  if (question.type === 'correct' || question.type === 'term' || question.type === 'who') return 'fill';
   return 'text';
 }
 
@@ -695,6 +709,16 @@ export function buildAttemptResult(input: BuildResultInput): AttemptResult {
 /**
  * تنقية النتيجة قبل تخزينها في Firestore لتطابق قواعد الأمان (hasOnly) بدقة 100%.
  */
+function sanitizeDetailForStorage(detail: AnswerDetail): Record<string, unknown> {
+  const clean: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(detail)) {
+    if (v !== undefined) {
+      clean[k] = v;
+    }
+  }
+  return clean;
+}
+
 export function sanitizeAttemptForStorage(result: AttemptResult): Record<string, unknown> {
   return {
     courseId: result.courseId,
@@ -709,7 +733,7 @@ export function sanitizeAttemptForStorage(result: AttemptResult): Record<string,
     isOfficial: result.isOfficial,
     autoSubmit: result.autoSubmit,
     ts: result.ts,
-    details: result.details,
+    details: result.details.map(sanitizeDetailForStorage),
     isTraining: result.isTraining,
     isHomework: result.isHomework,
     needsReview: result.needsReview,
