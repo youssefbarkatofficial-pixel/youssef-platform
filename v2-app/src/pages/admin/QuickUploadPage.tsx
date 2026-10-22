@@ -210,7 +210,12 @@ export default function QuickUploadPage() {
   };
 
   const missingCount = useMemo(() => {
-    return questions.filter((q) => q.needsReview || !q.answer).length;
+    return questions.filter((q) => {
+      if (q.type === 'choose' || q.type === 'tf' || q.type === 'fill') {
+        return !q.answer || !q.answer.trim();
+      }
+      return q.needsReview || !q.answer || !q.answer.trim();
+    }).length;
   }, [questions]);
 
   const reloadCourse = useCallback(async (id: string) => {
@@ -361,7 +366,7 @@ export default function QuickUploadPage() {
   const saveQuestions = async (publish: boolean = false) => {
     if (!courseId || questions.length === 0) return;
     if (publish && missingCount > 0) {
-      showToast(`لا يمكن النشر للطلاب لوجود ${missingCount} سؤال ناقص إجابة. يمكنك الحفظ كمسودة مخفية.`, 'error');
+      showToast(`لا يمكن النشر للطلاب: يوجد ${missingCount} سؤال بلا إجابة صحيحة. يجب تحديد الإجابات قبل النشر للطلاب (الحفظ كمسودة مسموح).`, 'error');
       return;
     }
 
@@ -1368,8 +1373,7 @@ export default function QuickUploadPage() {
                       <div className="flex items-center gap-2 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-amber-300">
                         <AlertTriangle className="h-4 w-4 shrink-0 text-amber-400" />
                         <span>
-                          يوجد <strong>{missingCount}</strong> سؤالاً ناقص إجابة. سيتم حفظ الامتحان كمسودة مخفية للطلاب
-                          تلقائيًا.
+                          تنبيه: يوجد <strong>{missingCount} سؤال بلا إجابة صحيحة</strong> (اختر / صح وخطأ / أكمل). يمنع النشر للطلاب قبل تحديدها (الحفظ كمسودة مسموح).
                         </span>
                       </div>
                       <div className="flex flex-wrap items-center gap-3">
@@ -1379,10 +1383,10 @@ export default function QuickUploadPage() {
                         <Button
                           variant="secondary"
                           disabled={true}
-                          title={`يوجد ${missingCount} سؤال ناقص إجابة. يجب إكمال الإجابات للنشر للطلاب.`}
+                          title={`يوجد ${missingCount} سؤال بلا إجابة صحيحة. يجب تحديد الإجابات قبل النشر للطلاب.`}
                           className="cursor-not-allowed opacity-50"
                         >
-                          نشر للطلاب ({missingCount} سؤال ناقص)
+                          نشر للطلاب ({missingCount} سؤال بلا إجابة صحيحة)
                         </Button>
                       </div>
                     </div>

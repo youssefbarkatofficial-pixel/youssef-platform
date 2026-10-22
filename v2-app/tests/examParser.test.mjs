@@ -179,7 +179,7 @@ test('3. اختبارات الحالات الحدية (Edge Cases)', () => {
   assert.ok(oneParsed.errors.some((e) => e.includes('يتطلب خيارين على الأقل')));
 });
 
-test('4. الاختبار الذهبي: ملف يوسف الفعلي (youssef_curriculum_exam.docx) يستخرج 156 سؤالاً مقسمة عبر 11 قسماً', async () => {
+test('4. الاختبار الذهبي: ملف يوسف الفعلي (youssef_curriculum_exam.docx) يستخرج 152 سؤالاً مقسمة عبر 11 قسماً', async () => {
   const docxPath = path.join(FIXTURES_DIR, 'youssef_curriculum_exam.docx');
   assert.ok(fs.existsSync(docxPath), 'ملف youssef_curriculum_exam.docx يجب أن يكون موجوداً');
 
@@ -188,12 +188,20 @@ test('4. الاختبار الذهبي: ملف يوسف الفعلي (youssef_cu
 
   assert.equal(parsed.sections.length, 11, 'يجب استخراج 11 قسماً رئيسياً');
   const totalQuestions = parsed.sections.reduce((sum, s) => sum + s.questions.length, 0);
-  assert.equal(totalQuestions, 156, 'إجمالي الأسئلة المستخرجة يجب أن يكون 156 سؤالاً بالضبط');
+  assert.equal(totalQuestions, 152, 'إجمالي الأسئلة المستخرجة يجب أن يكون 152 سؤالاً بالضبط بعد دمج عناصر الخريطة');
 
   // التأكد من توزيع الأقسام بدقة
-  const expectedSectionCounts = [2, 5, 19, 25, 34, 30, 4, 14, 12, 8, 3];
+  const expectedSectionCounts = [2, 1, 19, 25, 34, 30, 4, 14, 12, 8, 3];
   const actualSectionCounts = parsed.sections.map((s) => s.questions.length);
   assert.deepEqual(actualSectionCounts, expectedSectionCounts, 'أعداد الأسئلة في الأقسام الـ 11 يجب أن تطابق بدقة');
+
+  // قسم الخريطة: سؤال مركب واحد يحتوي على نص السؤال والعناصر الخمسة مرقمة
+  const mapSec = parsed.sections[1];
+  assert.equal(mapSec.type, 'map');
+  assert.equal(mapSec.questions.length, 1);
+  assert.match(mapSec.questions[0].stem, /أمامك خريطة لمصر/);
+  assert.match(mapSec.questions[0].stem, /1-\s*البحر/);
+  assert.match(mapSec.questions[0].stem, /5-\s*مدينة/);
 
   // قسم الاختيار من متعدد: 19 سؤالاً بنوع choose وكل سؤال به خيارات
   const chooseSec = parsed.sections[2];
@@ -209,7 +217,7 @@ test('4. الاختبار الذهبي: ملف يوسف الفعلي (youssef_cu
 
   // تحويل إلى مسودات QuestionDraft
   const drafts = parsedExamToQuestionDrafts(parsed);
-  assert.equal(drafts.length, 156);
+  assert.equal(drafts.length, 152);
 });
 
 test('5. اختبار دوال المراجعة التفاعلية (split, merge, delete, changeType, setAnswer)', () => {

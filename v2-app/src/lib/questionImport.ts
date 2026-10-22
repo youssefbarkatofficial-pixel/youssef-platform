@@ -161,6 +161,7 @@ export function parseExamText(rawText: string): ParsedExam {
   const inlineOptionsRegex = /^[\(\[]([^\)\]]+[-–—/][^\)\]]+)[\)\]]$/;
 
   let currentSection: ParsedSection | null = null;
+  let isInMapComposite = false;
   let currentQuestion: {
     number: number;
     stem: string;
@@ -295,6 +296,7 @@ export function parseExamText(rawText: string): ParsedExam {
     // سطر رأس القسم الصارم
     const headerMatch = line.match(headerRegex);
     if (headerMatch && !/^\d+\s*[.\-)]/.test(line)) {
+      isInMapComposite = false;
       finishCurrentQuestion();
 
       let detectedType = 'unknown';
@@ -337,7 +339,11 @@ export function parseExamText(rawText: string): ParsedExam {
         }
       }
 
-      const cleanedName = cleanSectionTitle(line);
+      isInMapComposite = false;
+      finishCurrentQuestion();
+
+      const isMapIntro = /أمامك\s*خريطة/i.test(line);
+      const cleanedName = isMapIntro ? 'الخريطة' : cleanSectionTitle(line);
       const headerTitle = activeUnitTitle ? `${activeUnitTitle} - ${cleanedName}` : cleanedName;
 
       currentSection = {
@@ -347,6 +353,18 @@ export function parseExamText(rawText: string): ParsedExam {
         questions: [],
       };
       sections.push(currentSection);
+
+      if (isMapIntro) {
+        currentQuestion = {
+          number: 1,
+          stem: cleanSectionTitle(line),
+          points: undefined,
+          options: null,
+          correctIndex: undefined,
+          rawAnswer: null,
+        };
+        isInMapComposite = true;
+      }
       continue;
     }
 
@@ -359,6 +377,12 @@ export function parseExamText(rawText: string): ParsedExam {
         if (currentQuestion) {
           currentQuestion.stem += '\n' + line;
         }
+        continue;
+      }
+
+      if (isInMapComposite && currentQuestion) {
+        const itemNum = qStart[1] || qStart[2] || qStart[3] || qStart[4] || '';
+        currentQuestion.stem += `\n${itemNum ? itemNum + '- ' : ''}${candidateStem}`;
         continue;
       }
       if (!currentSection) {
