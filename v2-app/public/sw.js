@@ -6,13 +6,18 @@
  *  - First activation after the old platform's SW (or the old kill-switch): delete every foreign cache and reload open tabs ONCE.
  */
 const CACHE_PREFIX = 'yb-static-';
-const CACHE = CACHE_PREFIX + 'v1';
+const CACHE = CACHE_PREFIX + 'v2';
 const OFFLINE_URL = '/offline.html';
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE)
-      .then((c) => c.addAll([OFFLINE_URL, '/icons/icon-192.png']))
+      .then((c) => c.addAll([
+        OFFLINE_URL,
+        '/icons/icon-192.png',
+        '/icons/icon-512.png',
+        '/icons/icon-maskable-512.png'
+      ]))
       .then(() => self.skipWaiting())
   );
 });
