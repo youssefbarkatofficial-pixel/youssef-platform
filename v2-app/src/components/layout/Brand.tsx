@@ -10,12 +10,13 @@ interface BrandProps {
 
 export default function Brand({ to = '/', logoUrl, className }: BrandProps) {
   const [imageError, setImageError] = useState(false);
+  const src = logoUrl || '/icons/logo.svg';
 
   return (
     <Link to={to} className={`flex items-center gap-2.5 transition-transform active:scale-95 ${className || ''}`}>
-      {logoUrl && !imageError ? (
+      {!imageError ? (
         <img
-          src={logoUrl}
+          src={src}
           alt="منصة يوسف بركات"
           onError={() => setImageError(true)}
           className="h-10 w-10 rounded-xl object-contain shadow-soft"

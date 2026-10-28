@@ -1,0 +1,696 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <!-- Primary 135-Degree Brass-to-Gold Metallic Linear Gradient -->
+    <linearGradient id="brass-gold-135" x1="14.6%" y1="14.6%" x2="85.4%" y2="85.4%">
+      <stop offset="0%" stop-color="#6B4A12"/>
+      <stop offset="22%" stop-color="#C9962B"/>
+      <stop offset="45%" stop-color="#F5DC8A"/>
+      <stop offset="55%" stop-color="#FFF3C4"/>
+      <stop offset="78%" stop-color="#B8861B"/>
+      <stop offset="100%" stop-color="#6B4A12"/>
+    </linearGradient>
+
+    <!-- Counter-Bevel 315-Degree Metallic Gradient for Recessed Rim Depth -->
+    <linearGradient id="brass-gold-315" x1="85.4%" y1="85.4%" x2="14.6%" y2="14.6%">
+      <stop offset="0%" stop-color="#4A3208"/>
+      <stop offset="25%" stop-color="#B8861B"/>
+      <stop offset="50%" stop-color="#FFF3C4"/>
+      <stop offset="75%" stop-color="#C9962B"/>
+      <stop offset="100%" stop-color="#52370B"/>
+    </linearGradient>
+
+    <!-- High-Contrast Specular Gold Gradient for Raised Filigree, Numerals & Highlights -->
+    <linearGradient id="gold-bright" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#D4A238"/>
+      <stop offset="35%" stop-color="#FFF3C4"/>
+      <stop offset="55%" stop-color="#F5DC8A"/>
+      <stop offset="85%" stop-color="#C9962B"/>
+      <stop offset="100%" stop-color="#8A6118"/>
+    </linearGradient>
+
+    <linearGradient id="gold-specular" x1="20%" y1="0%" x2="80%" y2="100%">
+      <stop offset="0%" stop-color="#FFFDF5"/>
+      <stop offset="30%" stop-color="#F5DC8A"/>
+      <stop offset="70%" stop-color="#C9962B"/>
+      <stop offset="100%" stop-color="#7A5414"/>
+    </linearGradient>
+
+    <!-- Aged Bronze Recessed Channel Gradient -->
+    <radialGradient id="bronze-channel" cx="50%" cy="50%" r="50%">
+      <stop offset="72%" stop-color="#1A1206"/>
+      <stop offset="86%" stop-color="#3E2A0B"/>
+      <stop offset="94%" stop-color="#291B06"/>
+      <stop offset="100%" stop-color="#120C03"/>
+    </radialGradient>
+
+    <!-- Deep Astrolabe Interior Dial Plate Gradient -->
+    <radialGradient id="dial-plate-grad" cx="45%" cy="45%" r="55%">
+      <stop offset="0%" stop-color="#132642"/>
+      <stop offset="55%" stop-color="#0D1B30"/>
+      <stop offset="85%" stop-color="#081221"/>
+      <stop offset="100%" stop-color="#050B14"/>
+    </radialGradient>
+
+    <!-- Dark Navy Infill for Geometric Islamic Ring -->
+    <radialGradient id="khatam-navy-infill" cx="50%" cy="50%" r="50%">
+      <stop offset="75%" stop-color="#091526"/>
+      <stop offset="90%" stop-color="#10233E"/>
+      <stop offset="100%" stop-color="#07101E"/>
+    </radialGradient>
+
+    <!-- 16-Point Compass Rose 3D Facet Gradients -->
+    <linearGradient id="facet-gold-specular" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFDF7"/>
+      <stop offset="45%" stop-color="#F5DC8A"/>
+      <stop offset="100%" stop-color="#C9962B"/>
+    </linearGradient>
+    <linearGradient id="facet-gold-deep" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#B8861B"/>
+      <stop offset="60%" stop-color="#7D5713"/>
+      <stop offset="100%" stop-color="#473008"/>
+    </linearGradient>
+    <linearGradient id="facet-gold-bright" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFF3C4"/>
+      <stop offset="55%" stop-color="#E5C158"/>
+      <stop offset="100%" stop-color="#A87918"/>
+    </linearGradient>
+    <linearGradient id="facet-gold-shadow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#9E7116"/>
+      <stop offset="65%" stop-color="#6B4A12"/>
+      <stop offset="100%" stop-color="#3B2707"/>
+    </linearGradient>
+    <linearGradient id="facet-gold-light" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F5DC8A"/>
+      <stop offset="100%" stop-color="#B8861B"/>
+    </linearGradient>
+    <linearGradient id="facet-gold-dark" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8A6114"/>
+      <stop offset="100%" stop-color="#4A3208"/>
+    </linearGradient>
+
+    <!-- Ruby Red #B3202A Gradients for North Star Point, Cartouche & Needle -->
+    <linearGradient id="ruby-facet-light" x1="20%" y1="0%" x2="80%" y2="100%">
+      <stop offset="0%" stop-color="#FF6B75"/>
+      <stop offset="35%" stop-color="#D92B38"/>
+      <stop offset="75%" stop-color="#B3202A"/>
+      <stop offset="100%" stop-color="#7A1118"/>
+    </linearGradient>
+    <linearGradient id="ruby-facet-dark" x1="20%" y1="0%" x2="80%" y2="100%">
+      <stop offset="0%" stop-color="#B3202A"/>
+      <stop offset="55%" stop-color="#80131B"/>
+      <stop offset="100%" stop-color="#4A080D"/>
+    </linearGradient>
+    <radialGradient id="ruby-rich" cx="40%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#E0323E"/>
+      <stop offset="55%" stop-color="#B3202A"/>
+      <stop offset="100%" stop-color="#590B10"/>
+    </radialGradient>
+
+    <!-- Center Cabochon Jewel Dome Radial Gradient -->
+    <radialGradient id="jewel-dome-grad" cx="38%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#FF9EA5"/>
+      <stop offset="22%" stop-color="#E33440"/>
+      <stop offset="55%" stop-color="#B3202A"/>
+      <stop offset="82%" stop-color="#6E0E15"/>
+      <stop offset="100%" stop-color="#2E0407"/>
+    </radialGradient>
+
+    <!-- Curved Glass Reflection Arc Gradient -->
+    <linearGradient id="glass-arc-grad" x1="15%" y1="10%" x2="65%" y2="65%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.34"/>
+      <stop offset="35%" stop-color="#FFF8E7" stop-opacity="0.14"/>
+      <stop offset="70%" stop-color="#FFFFFF" stop-opacity="0.03"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- Soft Drop Shadow Filter (Contained Inside Compass Group for True Transparency) -->
+    <filter id="compass-drop-shadow" x="-12%" y="-10%" width="124%" height="124%">
+      <feDropShadow dx="0" dy="14" stdDeviation="16" flood-color="#02060D" flood-opacity="0.68"/>
+      <feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="#000000" flood-opacity="0.45"/>
+    </filter>
+
+    <!-- Emboss & Inner Relief Filter for Cardinal Cartouches, Rose & Needle -->
+    <filter id="emboss-shadow" x="-15%" y="-15%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#02050A" flood-opacity="0.65"/>
+    </filter>
+
+    <!-- Soft Specular Glow Filter for Highlights & Metallic Polish -->
+    <filter id="soft-specular-glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="3.5" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Subtle Metallic Specular Lighting Filter for Bezel Trim -->
+    <filter id="bezel-specular" x="-5%" y="-5%" width="110%" height="110%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="2" result="blur"/>
+      <feSpecularLighting in="blur" surfaceScale="3" specularConstant="0.85" specularExponent="28" lighting-color="#FFF5D6" result="specOut">
+        <fePointLight x="220" y="180" z="260"/>
+      </feSpecularLighting>
+      <feComposite in="specOut" in2="SourceAlpha" operator="in" result="specMask"/>
+      <feMerge>
+        <feMergeNode in="SourceGraphic"/>
+        <feMergeNode in="specMask"/>
+      </feMerge>
+    </filter>
+
+    <!-- REUSABLE GEOMETRY DEFINITIONS -->
+    <!-- 1) Arabesque Islimi Vine Scroll Motif for the Outer Bezel (centered at top x=512, y=135 -> r=405, spans 15 deg) -->
+    <g id="bezel-islimi-unit">
+      <!-- S-curve main vine stem -->
+      <path d="M 484,136 C 497,124 504,146 512,135 C 520,124 527,146 540,136" fill="none" stroke="url(#gold-bright)" stroke-width="2.1" stroke-linecap="round"/>
+      <path d="M 484,134 C 497,146 504,124 512,135 C 520,146 527,124 540,134" fill="none" stroke="url(#brass-gold-135)" stroke-width="1.3" stroke-linecap="round" opacity="0.9"/>
+      <!-- Central split rumi palmette trefoil -->
+      <path d="M 512,125 C 507,130 506,136 512,141 C 518,136 517,130 512,125 Z" fill="url(#gold-bright)"/>
+      <!-- Left and right curled leaf tendrils -->
+      <path d="M 498,131 C 493,126 489,129 492,134 C 494,137 498,135 498,131 Z" fill="url(#gold-specular)"/>
+      <path d="M 526,131 C 531,126 535,129 532,134 C 530,137 526,135 526,131 Z" fill="url(#gold-specular)"/>
+      <!-- Finial gold beads -->
+      <circle cx="512" cy="123" r="1.9" fill="#FFF3C4"/>
+      <circle cx="512" cy="146" r="1.9" fill="#FFF3C4"/>
+      <circle cx="485" cy="135" r="1.7" fill="#F5DC8A"/>
+      <circle cx="539" cy="135" r="1.7" fill="#F5DC8A"/>
+    </g>
+
+    <g id="bezel-islimi-pair">
+      <use href="#bezel-islimi-unit"/>
+      <use href="#bezel-islimi-unit" transform="rotate(15, 512, 540)"/>
+    </g>
+    <g id="bezel-islimi-quad">
+      <use href="#bezel-islimi-pair"/>
+      <use href="#bezel-islimi-pair" transform="rotate(30, 512, 540)"/>
+    </g>
+    <g id="bezel-islimi-oct">
+      <use href="#bezel-islimi-quad"/>
+      <use href="#bezel-islimi-quad" transform="rotate(60, 512, 540)"/>
+    </g>
+
+    <!-- 2) Bezel Decorative Rivet Boss (at r=428) -->
+    <g id="bezel-boss">
+      <circle cx="512" cy="112" r="4.2" fill="#2A1B05"/>
+      <circle cx="512" cy="112" r="3.2" fill="url(#gold-specular)" stroke="#5A3C0B" stroke-width="0.7"/>
+      <circle cx="510.8" cy="110.8" r="1.1" fill="#FFFFFF" opacity="0.85"/>
+    </g>
+
+    <!-- 3) Degree Ring Hierarchical Tick Definitions (360 exact ticks around center 512,540) -->
+    <!-- 1-degree fine tick (r=380 to r=373, length 7px) -->
+    <line id="tick-1deg" x1="512" y1="160" x2="512" y2="167" stroke="#D9A83E" stroke-width="0.95" stroke-linecap="round" opacity="0.88"/>
+    <!-- 5-degree medium tick (r=380 to r=368, length 12px) -->
+    <line id="tick-5deg" x1="512" y1="160" x2="512" y2="172" stroke="#F5DC8A" stroke-width="1.5" stroke-linecap="round"/>
+    <!-- 10-degree long tick (r=380 to r=363, length 17px) -->
+    <g id="tick-10deg">
+      <line x1="512" y1="160" x2="512" y2="177" stroke="#FFF3C4" stroke-width="2.1" stroke-linecap="round"/>
+      <circle cx="512" cy="180.5" r="1.3" fill="#F5DC8A"/>
+    </g>
+    <!-- 90-degree cardinal longest tick (r=380 to r=357, length 23px, diamond tip) -->
+    <g id="tick-90deg">
+      <line x1="512" y1="160" x2="512" y2="183" stroke="#FFFDF5" stroke-width="3.0" stroke-linecap="round"/>
+      <polygon points="512,157 516,165 512,173 508,165" fill="url(#gold-specular)" stroke="#4A3008" stroke-width="0.7"/>
+    </g>
+
+    <!-- 10-degree wedge of ticks: 0 deg is 10-deg long, 1..4 are 1-deg, 5 is 5-deg, 6..9 are 1-deg -->
+    <g id="tick-wedge-10">
+      <use href="#tick-10deg"/>
+      <use href="#tick-1deg" transform="rotate(1, 512, 540)"/>
+      <use href="#tick-1deg" transform="rotate(2, 512, 540)"/>
+      <use href="#tick-1deg" transform="rotate(3, 512, 540)"/>
+      <use href="#tick-1deg" transform="rotate(4, 512, 540)"/>
+      <use href="#tick-5deg" transform="rotate(5, 512, 540)"/>
+      <use href="#tick-1deg" transform="rotate(6, 512, 540)"/>
+      <use href="#tick-1deg" transform="rotate(7, 512, 540)"/>
+      <use href="#tick-1deg" transform="rotate(8, 512, 540)"/>
+      <use href="#tick-1deg" transform="rotate(9, 512, 540)"/>
+    </g>
+    <!-- 30-degree wedge (30 ticks) -->
+    <g id="tick-wedge-30">
+      <use href="#tick-wedge-10"/>
+      <use href="#tick-wedge-10" transform="rotate(10, 512, 540)"/>
+      <use href="#tick-wedge-10" transform="rotate(20, 512, 540)"/>
+    </g>
+    <!-- 90-degree quadrant (90 ticks + cardinal marker at 0 deg) -->
+    <g id="tick-quadrant-90">
+      <use href="#tick-wedge-30"/>
+      <use href="#tick-wedge-30" transform="rotate(30, 512, 540)"/>
+      <use href="#tick-wedge-30" transform="rotate(60, 512, 540)"/>
+      <use href="#tick-90deg"/>
+    </g>
+
+    <!-- 4) Geometric Islamic Ring (Khatam / Girih 8-Point Star Lattice Unit at r=297, 15-deg repeat) -->
+    <g id="khatam-star-unit">
+      <!-- Outer 8-pointed star frame centered at (512, 243) -->
+      <rect x="498.5" y="229.5" width="27" height="27" fill="#0B192E" stroke="url(#gold-bright)" stroke-width="1.8" stroke-linejoin="round"/>
+      <rect x="498.5" y="229.5" width="27" height="27" transform="rotate(45, 512, 243)" fill="#0D1F38" stroke="url(#gold-specular)" stroke-width="1.8" stroke-linejoin="round"/>
+      <!-- Inner interlaced diamond and gold rosette core -->
+      <polygon points="512,233 522,243 512,253 502,243" fill="url(#brass-gold-135)" stroke="#2A1B05" stroke-width="0.8"/>
+      <circle cx="512" cy="243" r="4.2" fill="#091526" stroke="#FFF3C4" stroke-width="1.1"/>
+      <circle cx="512" cy="243" r="1.8" fill="#FFF3C4"/>
+      <!-- Interlaced Girih strapwork bridges connecting adjacent stars -->
+      <path d="M 525.5,235 L 551,241 M 525.5,251 L 551,245" stroke="url(#gold-bright)" stroke-width="1.6" stroke-linecap="round"/>
+    </g>
+    <g id="khatam-pair">
+      <use href="#khatam-star-unit"/>
+      <use href="#khatam-star-unit" transform="rotate(15, 512, 540)"/>
+    </g>
+    <g id="khatam-quad">
+      <use href="#khatam-pair"/>
+      <use href="#khatam-pair" transform="rotate(30, 512, 540)"/>
+    </g>
+    <g id="khatam-oct">
+      <use href="#khatam-quad"/>
+      <use href="#khatam-quad" transform="rotate(60, 512, 540)"/>
+    </g>
+
+    <!-- 5) Ornamental Lobed Islamic Cartouche Frame for Cardinal Letters (centered at 0,0) -->
+    <g id="cartouche-frame">
+      <!-- Octagonal lobed medallion with ogee finials -->
+      <path d="M 0,-34 C 9,-34 14,-29 21,-21 C 29,-14 34,-9 34,0 C 34,9 29,14 21,21 C 14,29 9,34 0,34 C -9,34 -14,29 -21,21 C -29,14 -34,9 -34,0 C -34,-9 -29,-14 -21,-21 C -14,-29 -9,-34 0,-34 Z"/>
+      <!-- 4 Cardinal Pearl Studs on Cartouche Rim -->
+      <circle cx="0" cy="-34" r="2.5" fill="#FFF3C4" stroke="#4A3008" stroke-width="0.7"/>
+      <circle cx="34" cy="0" r="2.5" fill="#FFF3C4" stroke="#4A3008" stroke-width="0.7"/>
+      <circle cx="0" cy="34" r="2.5" fill="#FFF3C4" stroke="#4A3008" stroke-width="0.7"/>
+      <circle cx="-34" cy="0" r="2.5" fill="#FFF3C4" stroke="#4A3008" stroke-width="0.7"/>
+    </g>
+    <path id="cartouche-inner" d="M 0,-27 C 7,-27 11,-23 17,-17 C 23,-11 27,-7 27,0 C 27,7 23,11 17,17 C 11,23 7,27 0,27 C -7,27 -11,23 -17,17 C -23,11 -27,7 -27,0 C -27,-7 -23,-11 -17,-17 C -11,-23 -7,-27 0,-27 Z"/>
+
+    <!-- 6) Reusable 4-Ray Specular Sparkle Starburst -->
+    <g id="specular-sparkle" filter="url(#soft-specular-glow)">
+      <path d="M 0,-18 C 1.2,-4.5 4.5,-1.2 18,0 C 4.5,1.2 1.2,4.5 0,18 C -1.2,4.5 -4.5,1.2 -18,0 C -4.5,-1.2 -1.2,-4.5 0,-18 Z" fill="#FFFFFF"/>
+      <path d="M -8,-8 C -1.5,-2 -2,-1.5 0,0 C 2,1.5 1.5,2 8,8 C 1.5,2 2,1.5 0,0 C -2,-1.5 -1.5,-2 -8,-8 Z" fill="#FFF8DC" opacity="0.9"/>
+      <circle cx="0" cy="0" r="3.2" fill="#FFFFFF"/>
+    </g>
+  </defs>
+
+  <!-- Master Compass Wrapper with Contained Soft Drop Shadow -->
+  <g id="compass-assembly" filter="url(#compass-drop-shadow)">
+
+    <!-- 1. TOP SUSPENSION ORNAMENT (Astrolabe Throne / Kursi, Lotus Joint, Mini Crescent & Hanging Loop) -->
+    <g id="ornament">
+      <!-- Astrolabe Kursi (Pierced Arabesque Throne Bracket anchoring into top bezel) -->
+      <path d="M 412,118 C 436,112 454,96 468,78 C 478,65 492,62 512,62 C 532,62 546,65 556,78 C 570,96 588,112 612,118 L 592,130 L 432,130 Z" fill="url(#brass-gold-135)" stroke="#3D2706" stroke-width="2.2" stroke-linejoin="round"/>
+      <!-- Inner beveled kursi plate -->
+      <path d="M 434,116 C 452,109 466,95 478,82 C 487,72 497,69 512,69 C 527,69 537,72 546,82 C 558,95 572,109 590,116 Z" fill="url(#brass-gold-315)" stroke="url(#gold-bright)" stroke-width="1.4"/>
+      <!-- Engraved symmetric vine scrolls inside the kursi throne -->
+      <path d="M 512,75 C 498,75 490,88 476,96 C 464,103 452,103 446,110" fill="none" stroke="url(#gold-specular)" stroke-width="2.2" stroke-linecap="round"/>
+      <path d="M 512,75 C 526,75 534,88 548,96 C 560,103 572,103 578,110" fill="none" stroke="url(#gold-specular)" stroke-width="2.2" stroke-linecap="round"/>
+      <circle cx="486" cy="94" r="4.5" fill="#0A1628" stroke="url(#gold-bright)" stroke-width="1.5"/>
+      <circle cx="538" cy="94" r="4.5" fill="#0A1628" stroke="url(#gold-bright)" stroke-width="1.5"/>
+      <circle cx="464" cy="105" r="3.2" fill="#0A1628" stroke="url(#gold-bright)" stroke-width="1.2"/>
+      <circle cx="560" cy="105" r="3.2" fill="#0A1628" stroke="url(#gold-bright)" stroke-width="1.2"/>
+
+      <!-- Outer Hanging Suspension Ring (Habis / Halqa) -->
+      <circle cx="512" cy="40" r="24" fill="none" stroke="#3B2606" stroke-width="10"/>
+      <circle cx="512" cy="40" r="24" fill="none" stroke="url(#brass-gold-135)" stroke-width="7.5"/>
+      <circle cx="512" cy="40" r="24" fill="none" stroke="url(#gold-specular)" stroke-width="2" opacity="0.8"/>
+      <!-- Small inner swivel ring -->
+      <circle cx="512" cy="60" r="8.5" fill="none" stroke="url(#brass-gold-135)" stroke-width="4" stroke-linecap="round"/>
+
+      <!-- Mini Islamic Crescent Finial (Hilal) cradling the ring -->
+      <path d="M 512,48 C 497,48 486,36 489,22 C 492,31 501,37 512,37 C 523,37 532,31 535,22 C 538,36 527,48 512,48 Z" fill="url(#gold-specular)" stroke="#4A3008" stroke-width="1.2"/>
+      <polygon points="512,24 514,29 519,29 515,32 516.5,37 512,34 507.5,37 509,32 505,29 510,29" fill="#FFFDF5"/>
+
+      <!-- Sculpted Lotus / Fleur-de-Lis Joint (3-Petal Caliphate Palmette) -->
+      <!-- Left lotus petal -->
+      <path d="M 512,86 C 498,86 484,78 482,66 C 480,58 489,54 496,61 C 501,66 505,74 512,78 Z" fill="url(#brass-gold-135)" stroke="#3D2606" stroke-width="1.4"/>
+      <!-- Right lotus petal -->
+      <path d="M 512,86 C 526,86 540,78 542,66 C 544,58 535,54 528,61 C 523,66 519,74 512,78 Z" fill="url(#brass-gold-315)" stroke="#3D2606" stroke-width="1.4"/>
+      <!-- Center upright lotus spear -->
+      <path d="M 512,48 C 521,57 523,71 512,88 C 501,71 503,57 512,48 Z" fill="url(#gold-specular)" stroke="#3D2606" stroke-width="1.5"/>
+      <!-- Collar band & central pearl boss -->
+      <rect x="495" y="83" width="34" height="7" rx="3.5" fill="url(#gold-bright)" stroke="#3D2606" stroke-width="1.2"/>
+      <circle cx="512" cy="70" r="3.5" fill="#FFFDF5" stroke="#6B4A12" stroke-width="0.9"/>
+    </g>
+
+    <!-- 2. OUTER CASE (Thick Beveled Brass-to-Gold Circular Bezel with Double Border & Islimi Scroll Band) -->
+    <g id="bezel">
+      <!-- Outer Dark Bronze Casing Shadow Lip (R=440) -->
+      <circle cx="512" cy="540" r="440" fill="#2B1C06" stroke="#1A1003" stroke-width="2"/>
+
+      <!-- Outer Highlight Bevel Slope (R=437, 135-deg metallic gradient) -->
+      <circle cx="512" cy="540" r="437" fill="url(#brass-gold-135)" filter="url(#bezel-specular)"/>
+      <!-- Crisp outer specular rim highlight -->
+      <circle cx="512" cy="540" r="435.5" fill="none" stroke="#FFF3C4" stroke-width="1.5" opacity="0.8"/>
+
+      <!-- Second Stepped Double-Border Ring (R=422, counter-bevel gradient) -->
+      <circle cx="512" cy="540" r="422" fill="url(#brass-gold-315)" stroke="#4A3008" stroke-width="2.2"/>
+      <circle cx="512" cy="540" r="419" fill="none" stroke="#FFF3C4" stroke-width="1.1" opacity="0.7"/>
+
+      <!-- 12 Ornamental Rivet Bosses along the outer double-border (every 30 degrees) -->
+      <g id="bezel-rivets">
+        <use href="#bezel-boss"/>
+        <use href="#bezel-boss" transform="rotate(30, 512, 540)"/>
+        <use href="#bezel-boss" transform="rotate(60, 512, 540)"/>
+        <use href="#bezel-boss" transform="rotate(90, 512, 540)"/>
+        <use href="#bezel-boss" transform="rotate(120, 512, 540)"/>
+        <use href="#bezel-boss" transform="rotate(150, 512, 540)"/>
+        <use href="#bezel-boss" transform="rotate(180, 512, 540)"/>
+        <use href="#bezel-boss" transform="rotate(210, 512, 540)"/>
+        <use href="#bezel-boss" transform="rotate(240, 512, 540)"/>
+        <use href="#bezel-boss" transform="rotate(270, 512, 540)"/>
+        <use href="#bezel-boss" transform="rotate(300, 512, 540)"/>
+        <use href="#bezel-boss" transform="rotate(330, 512, 540)"/>
+      </g>
+
+      <!-- Recessed Antique Bronze Channel for Engraved Arabesque Scrollwork (R=416 to R=394) -->
+      <circle cx="512" cy="540" r="416" fill="url(#bronze-channel)" stroke="#241604" stroke-width="2"/>
+
+      <!-- 24 Repeating Islimi / Vine Arabesque Scrolls around the Bezel (r=405) -->
+      <g id="bezel-arabesque-scrolls">
+        <use href="#bezel-islimi-oct"/>
+        <use href="#bezel-islimi-oct" transform="rotate(120, 512, 540)"/>
+        <use href="#bezel-islimi-oct" transform="rotate(240, 512, 540)"/>
+      </g>
+
+      <!-- Inner Bezel Shadow Lip & Beveled Step (R=393 to R=382) -->
+      <circle cx="512" cy="540" r="393" fill="url(#brass-gold-135)" stroke="#3B2606" stroke-width="2"/>
+      <circle cx="512" cy="540" r="387" fill="url(#brass-gold-315)" stroke="#FFF3C4" stroke-width="1"/>
+      <!-- Deep Interior Astrolabe Dial Plate (R=382) -->
+      <circle cx="512" cy="540" r="382" fill="url(#dial-plate-grad)" stroke="#1F1303" stroke-width="3"/>
+    </g>
+
+    <!-- 3. DEGREE RING (360 Exact Tick Marks: 1-deg thin, 5-deg medium, 10-deg long, 90-deg longest) -->
+    <g id="ticks">
+      <!-- Outer & inner gold graduation tracks -->
+      <circle cx="512" cy="540" r="380" fill="none" stroke="url(#brass-gold-135)" stroke-width="1.8"/>
+      <circle cx="512" cy="540" r="373" fill="none" stroke="#C9962B" stroke-width="0.6" opacity="0.5"/>
+      <circle cx="512" cy="540" r="362" fill="none" stroke="url(#gold-bright)" stroke-width="1.2" opacity="0.85"/>
+
+      <!-- 4 Quadrants x 90 Ticks = 360 Exact Mathematical Tick Marks -->
+      <use href="#tick-quadrant-90"/>
+      <use href="#tick-quadrant-90" transform="rotate(90, 512, 540)"/>
+      <use href="#tick-quadrant-90" transform="rotate(180, 512, 540)"/>
+      <use href="#tick-quadrant-90" transform="rotate(270, 512, 540)"/>
+
+      <!-- Inner border ring separating numerals from the geometric Khatam lattice (R=320) -->
+      <circle cx="512" cy="540" r="322" fill="none" stroke="url(#brass-gold-135)" stroke-width="2.5"/>
+      <circle cx="512" cy="540" r="319" fill="none" stroke="#FFF3C4" stroke-width="0.8" opacity="0.7"/>
+    </g>
+
+    <!-- 3b. ARABIC-INDIC NUMERALS (٠ ٣٠ ٦٠ ٩٠ ... ٣٣٠ Every 30 Degrees, Upright to Center) -->
+    <g id="numerals">
+      <!-- 0 deg (٠) upright numeral: vector path fallback + <text> -->
+      <g id="numeral-0">
+        <path d="M513.2 204.2Q512.1 203.4 511.3 202.8Q510.4 202.2 509.7 201.8Q509 201.3 508.1 200.8Q508.5 200.2 508.8 199.5Q509.2 198.9 509.5 198.3Q509.8 197.6 510.2 197Q510.6 196.4 511 195.8Q513.2 196.9 514.5 198Q515.9 199.2 515.9 199.7Q515.9 200.4 513.2 204.2Z" fill="url(#gold-bright)" stroke="#2A1A04" stroke-width="0.6"/>
+        <text x="512.0" y="207.5" text-anchor="middle" font-family="Amiri, Noto Naskh Arabic, serif" font-size="23" font-weight="bold" fill="url(#gold-bright)" opacity="0.01">٠</text>
+      </g>
+      <!-- 30 deg (٣٠) upright numeral: vector path fallback + <text> -->
+      <g id="numeral-30">
+        <path d="M677.3 253 675.9 252.8Q675.9 251.1 675.8 249.8Q675.6 248.6 675.3 247.2Q675.1 246.2 675 245.5Q674.8 244.8 674.4 244Q674 243.1 673.4 241.8Q673.1 241.2 673.1 240.6Q673.1 239.7 673.6 239.1Q674.2 238.5 675.1 238.1Q675.5 238.9 675.9 239.7Q676.3 240.6 676.6 241.5Q677 241.6 677.4 241.6Q678.8 241.6 678.8 239.8Q678.8 239.7 678.7 239.4Q678.7 239 678.6 238.5L679.6 238.2Q679.9 238.9 680.1 239.7Q680.3 240.4 680.3 241Q680.5 241.1 680.6 241.1Q680.7 241.1 680.8 241.1Q681.8 241.1 681.8 239.3Q681.8 238.7 681.8 238.1L683 238.3Q683.1 238.8 683.2 239.4Q683.2 240 683.2 240.6Q683.2 242.2 682.6 243.2Q682 244.1 681 244.1Q680.6 244.1 679.8 243.7Q679.4 244.3 678.9 244.5Q678.4 244.8 677.8 244.8Q677.7 244.8 677.6 244.8Q677.5 244.8 677.5 244.8Q677.7 245.7 677.8 246.6Q677.9 247.4 677.9 248.1Q677.9 249.5 677.8 250.6Q677.6 251.6 677.3 253ZM689.1 250.1Q688.4 249.5 687.9 249.1Q687.3 248.8 686.8 248.5Q686.3 248.2 685.8 247.8Q686 247.4 686.2 247Q686.5 246.6 686.7 246.2Q686.9 245.7 687.2 245.3Q687.4 244.9 687.7 244.5Q689.1 245.3 690 246Q690.9 246.8 690.9 247.1Q690.9 247.6 689.1 250.1Z" fill="url(#gold-bright)" stroke="#2A1A04" stroke-width="0.6"/>
+        <text x="682.0" y="253.1" text-anchor="middle" font-family="Amiri, Noto Naskh Arabic, serif" font-size="23" font-weight="bold" fill="url(#gold-bright)" opacity="0.01">٣٠</text>
+      </g>
+      <!-- 60 deg (٦٠) upright numeral: vector path fallback + <text> -->
+      <g id="numeral-60">
+        <path d="M804.8 377.5Q804.2 376 803.8 374.8Q803.5 373.4 803.3 372.1Q803.1 370.8 803.1 369.3Q803.1 368.5 803.2 367.6Q803.4 366.6 803.5 365.9Q802.9 366.1 802.3 366.2Q801.6 366.3 801 366.3Q799.9 366.3 798.9 366Q797.9 365.8 797.3 365.4L798.1 362.5Q798.7 362.7 799.6 362.9Q800.6 363.1 801.4 363.1Q802.1 363.1 802.9 363Q803.7 363 804.7 362.8L805.3 363.7Q804.9 365.3 804.9 367.1Q804.9 368.6 805.1 369.8Q805.3 371.1 805.7 372.4Q806.2 373.6 807 375.2ZM813.8 374.6Q813.1 374 812.6 373.6Q812 373.2 811.5 372.9Q811 372.6 810.5 372.3Q810.7 371.9 811 371.5Q811.2 371 811.4 370.6Q811.6 370.2 811.9 369.8Q812.1 369.4 812.4 369Q813.8 369.8 814.7 370.5Q815.6 371.2 815.6 371.6Q815.6 372 813.8 374.6Z" fill="url(#gold-bright)" stroke="#2A1A04" stroke-width="0.6"/>
+        <text x="806.4" y="377.5" text-anchor="middle" font-family="Amiri, Noto Naskh Arabic, serif" font-size="23" font-weight="bold" fill="url(#gold-bright)" opacity="0.01">٦٠</text>
+      </g>
+      <!-- 90 deg (٩٠) upright numeral: vector path fallback + <text> -->
+      <g id="numeral-90">
+        <path d="M849.9 547.6Q849.1 545.7 848.7 544.1Q848.3 542.5 848.2 540.6Q847.9 540.7 847.6 540.8Q847.3 540.8 847 540.8Q845.2 540.8 844.3 539.8Q843.3 538.9 843.3 537Q843.3 536.4 843.6 535.7Q843.9 534.9 844.3 534.2Q844.8 533.5 845.3 533Q846 532.4 846.7 532.4Q848.4 532.4 849.2 533.8Q850 535.2 850 537.8Q850 539.2 850.2 540.4Q850.4 541.5 850.8 542.6Q851.2 543.8 852 545.4ZM847.4 537.8Q847.7 537.8 848 537.7Q847.7 535.3 846 535.3Q845.5 535.3 845.1 535.7Q844.8 536 844.8 536.4Q844.8 537 845.5 537.4Q846.3 537.8 847.4 537.8ZM858.9 544.7Q858.2 544.1 857.6 543.7Q857.1 543.4 856.6 543Q856.1 542.8 855.5 542.4Q855.8 542 856 541.6Q856.3 541.1 856.5 540.8Q856.7 540.3 857 539.9Q857.2 539.5 857.5 539.1Q858.9 539.9 859.8 540.6Q860.7 541.4 860.7 541.7Q860.7 542.1 858.9 544.7Z" fill="url(#gold-bright)" stroke="#2A1A04" stroke-width="0.6"/>
+        <text x="852.0" y="547.5" text-anchor="middle" font-family="Amiri, Noto Naskh Arabic, serif" font-size="23" font-weight="bold" fill="url(#gold-bright)" opacity="0.01">٩٠</text>
+      </g>
+      <!-- 120 deg (١٢٠) upright numeral: vector path fallback + <text> -->
+      <g id="numeral-120">
+        <path d="M798.2 717.5 796.7 717.2Q796.7 715.1 796.5 713.4Q796.3 711.6 795.8 710.2Q795.4 708.7 794.2 706.2Q793.9 705.6 793.9 705Q793.9 704.2 794.5 703.5Q795 702.9 795.9 702.5Q796.8 704 797.4 705.8Q798 707.6 798.3 709.4Q798.7 711.1 798.7 712.6Q798.7 714 798.6 715.1Q798.4 716.2 798.2 717.5ZM806.7 717.5 805.3 717.2Q805.3 713.8 804.6 710.9Q804.4 710.1 804.2 709.5Q804 708.8 803.7 708.1Q803.4 707.3 802.8 706.2Q802.5 705.6 802.5 705Q802.5 704.2 803 703.5Q803.6 702.9 804.5 702.5Q805.3 703.9 805.9 705.7Q806.2 705.9 806.5 706Q806.8 706.1 807.4 706.1Q808.5 706.1 809.2 705.1Q809.9 704.2 810.1 702.6L811.3 702.8Q811.1 706.2 810.1 707.7Q809.2 709.2 807.4 709.2Q807.2 709.2 806.9 709.1Q807.1 710.1 807.2 711Q807.3 711.8 807.3 712.6Q807.3 714 807.1 715.1Q807 716.2 806.7 717.5ZM817.2 714.5Q816.5 714 815.9 713.6Q815.4 713.2 814.9 712.9Q814.4 712.6 813.8 712.3Q814.1 711.9 814.3 711.4Q814.5 711 814.8 710.6Q815 710.2 815.2 709.8Q815.5 709.4 815.7 709Q817.2 709.7 818.1 710.5Q819 711.2 819 711.5Q819 712 817.2 714.5Z" fill="url(#gold-bright)" stroke="#2A1A04" stroke-width="0.6"/>
+        <text x="806.4" y="717.5" text-anchor="middle" font-family="Amiri, Noto Naskh Arabic, serif" font-size="23" font-weight="bold" fill="url(#gold-bright)" opacity="0.01">١٢٠</text>
+      </g>
+      <!-- 150 deg (١٥٠) upright numeral: vector path fallback + <text> -->
+      <g id="numeral-150">
+        <path d="M674.4 841.9 672.9 841.7Q672.9 839.6 672.7 837.8Q672.5 836 672 834.6Q671.6 833.2 670.4 830.7Q670.1 830 670.1 829.4Q670.1 828.6 670.7 828Q671.2 827.3 672.1 827Q673 828.5 673.6 830.3Q674.2 832 674.5 833.8Q674.9 835.6 674.9 837Q674.9 838.4 674.8 839.5Q674.6 840.6 674.4 841.9ZM681.4 840.9Q679.6 840.9 678.8 839.9Q677.9 838.9 677.9 836.8Q677.9 835.6 678.3 834.2Q678.6 832.9 679.1 831.6Q679.7 830.4 680.4 829.5Q681.4 828.2 682.3 828.2Q684.3 828.2 685.2 831.3Q685.4 832.1 685.5 832.9Q685.6 833.8 685.6 834.7Q685.6 835.7 685.5 836.7Q685.4 837.6 685.1 838.1Q684.4 839.4 683.5 840.2Q682.5 840.9 681.4 840.9ZM681.7 837.6Q682.5 837.6 683 837.2Q683.6 836.9 683.9 836.4Q684.2 835.9 684.2 835.6Q684.2 833.9 683.5 832.8Q682.8 831.7 681.7 831.7Q681.2 831.7 680.7 832.4Q680.2 833 679.8 834Q679.4 835 679.4 835.8Q679.4 837.6 681.7 837.6ZM692.1 839Q691.4 838.4 690.8 838Q690.3 837.6 689.8 837.3Q689.3 837 688.7 836.7Q689 836.3 689.2 835.9Q689.5 835.4 689.7 835Q689.9 834.6 690.1 834.2Q690.4 833.8 690.7 833.4Q692.1 834.2 693 834.9Q693.9 835.6 693.9 836Q693.9 836.4 692.1 839Z" fill="url(#gold-bright)" stroke="#2A1A04" stroke-width="0.6"/>
+        <text x="682.0" y="841.9" text-anchor="middle" font-family="Amiri, Noto Naskh Arabic, serif" font-size="23" font-weight="bold" fill="url(#gold-bright)" opacity="0.01">١٥٠</text>
+      </g>
+      <!-- 180 deg (١٨٠) upright numeral: vector path fallback + <text> -->
+      <g id="numeral-180">
+        <path d="M503.3 887.5 501.9 887.2Q501.9 885.1 501.6 883.4Q501.4 881.6 501 880.2Q500.6 878.7 499.4 876.2Q499.1 875.6 499.1 875Q499.1 874.2 499.6 873.5Q500.1 872.9 501.1 872.5Q501.9 874 502.5 875.8Q503.1 877.6 503.5 879.4Q503.8 881.1 503.8 882.6Q503.8 884 503.7 885.1Q503.6 886.2 503.3 887.5ZM507.9 887.4 505.9 885.1Q506.8 883.4 507.5 882Q508.2 880.7 508.7 879.5Q509.2 878.2 509.6 876.9Q510.1 875.5 510.6 873.8L512.3 872.6Q512.8 874 513.2 875Q513.5 876 513.9 876.9Q514.3 877.8 514.7 878.7Q515.2 879.7 515.8 880.9Q516.5 882.1 517.4 883.8Q517.6 884.3 517.6 884.9Q517.6 885.6 517.1 886.4Q516.6 887.1 515.7 887.5Q515.1 886.4 514.2 884.4Q513.4 882.5 512.5 880Q512.1 878.8 511.8 877.8Q511.5 876.9 511.3 876.2Q511.1 877.8 510.7 879.5Q510.3 881.1 509.8 882.6Q509.3 884.1 508.8 885.4Q508.3 886.6 507.9 887.4ZM523.1 884.5Q522.4 884 521.9 883.6Q521.3 883.2 520.8 882.9Q520.3 882.6 519.8 882.3Q520 881.9 520.3 881.4Q520.5 881 520.7 880.6Q520.9 880.2 521.2 879.8Q521.4 879.4 521.7 879Q523.1 879.7 524 880.5Q524.9 881.2 524.9 881.5Q524.9 882 523.1 884.5Z" fill="url(#gold-bright)" stroke="#2A1A04" stroke-width="0.6"/>
+        <text x="512.0" y="887.5" text-anchor="middle" font-family="Amiri, Noto Naskh Arabic, serif" font-size="23" font-weight="bold" fill="url(#gold-bright)" opacity="0.01">١٨٠</text>
+      </g>
+      <!-- 210 deg (٢١٠) upright numeral: vector path fallback + <text> -->
+      <g id="numeral-210">
+        <path d="M333.7 841.9 332.3 841.7Q332.2 838.3 331.6 835.3Q331.4 834.5 331.2 833.9Q331 833.3 330.7 832.5Q330.3 831.8 329.8 830.7Q329.5 830.1 329.5 829.4Q329.5 828.6 330 828Q330.6 827.3 331.5 827Q332.3 828.4 332.9 830.2Q333.2 830.4 333.5 830.4Q333.8 830.5 334.4 830.5Q335.5 830.5 336.2 829.6Q336.9 828.6 337 827L338.2 827.3Q338.1 830.7 337.1 832.2Q336.2 833.7 334.4 833.7Q334.1 833.7 333.8 833.6Q334 834.5 334.2 835.4Q334.3 836.2 334.3 837Q334.3 838.5 334.1 839.6Q334 840.7 333.7 841.9ZM345 841.9 343.6 841.7Q343.6 839.6 343.4 837.8Q343.1 836 342.7 834.6Q342.3 833.2 341.1 830.7Q340.8 830 340.8 829.4Q340.8 828.6 341.3 828Q341.9 827.3 342.8 827Q343.6 828.5 344.3 830.3Q344.9 832 345.2 833.8Q345.6 835.6 345.6 837Q345.6 838.4 345.4 839.5Q345.3 840.6 345 841.9ZM352.7 839Q352 838.4 351.5 838Q350.9 837.6 350.4 837.3Q349.9 837 349.4 836.7Q349.6 836.3 349.9 835.9Q350.1 835.4 350.3 835Q350.5 834.6 350.8 834.2Q351 833.8 351.3 833.4Q352.7 834.2 353.6 834.9Q354.5 835.6 354.5 836Q354.5 836.4 352.7 839Z" fill="url(#gold-bright)" stroke="#2A1A04" stroke-width="0.6"/>
+        <text x="342.0" y="841.9" text-anchor="middle" font-family="Amiri, Noto Naskh Arabic, serif" font-size="23" font-weight="bold" fill="url(#gold-bright)" opacity="0.01">٢١٠</text>
+      </g>
+      <!-- 240 deg (٢٤٠) upright numeral: vector path fallback + <text> -->
+      <g id="numeral-240">
+        <path d="M207.9 718 206.5 717.7Q206.5 714.3 205.8 711.4Q205.6 710.6 205.4 710Q205.2 709.3 204.9 708.6Q204.6 707.8 204 706.8Q203.7 706.1 203.7 705.5Q203.7 704.7 204.2 704Q204.8 703.4 205.7 703Q206.5 704.4 207.1 706.2Q207.4 706.4 207.7 706.5Q208 706.6 208.6 706.6Q209.7 706.6 210.4 705.6Q211.1 704.7 211.3 703.1L212.5 703.3Q212.3 706.7 211.3 708.2Q210.4 709.7 208.6 709.7Q208.4 709.7 208.1 709.6Q208.3 710.6 208.4 711.5Q208.5 712.3 208.5 713.1Q208.5 714.5 208.3 715.6Q208.2 716.7 207.9 718ZM220.4 718Q218.4 718 217.3 717.2Q216.2 716.4 216.2 714.8Q216.2 713.5 217.6 711.3Q217.1 711.1 216.4 710.8Q215.7 710.4 215.3 710Q214.8 709.6 214.8 709.2Q214.8 708.6 215 707.7Q215.2 706.9 215.5 706.1Q215.8 705.3 216.1 705Q216.4 704.6 217.1 704Q217.7 703.4 218.5 702.9Q219.2 702.4 220 702Q220.3 702.5 220.3 703.2Q220.3 703.9 220 704.6Q219.8 705.2 219.4 705.5Q219 705.9 218.5 706.2Q218 706.6 217.4 706.9Q217.2 707 217 707.1Q216.8 707.2 216.6 707.4Q217.3 707.8 217.9 708.1Q218.6 708.4 219.7 708.6L220.5 710.3Q219.9 710.9 219.4 711.5Q218.9 712 218.5 712.6Q217.7 713.6 217.7 714Q217.7 714.4 218.1 714.6Q218.5 714.8 219.1 714.9Q219.8 715 220.4 715Q221.2 715 221.9 714.9Q222.6 714.9 223 714.7L223.4 715.4Q222.9 716.1 222.6 716.5Q222.3 716.9 222 717.2Q221.2 718 220.4 718ZM229.6 715Q228.9 714.5 228.4 714.1Q227.8 713.7 227.3 713.4Q226.8 713.1 226.3 712.8Q226.5 712.4 226.8 711.9Q227 711.5 227.2 711.1Q227.4 710.7 227.7 710.3Q227.9 709.9 228.2 709.5Q229.6 710.2 230.5 711Q231.4 711.7 231.4 712Q231.4 712.5 229.6 715Z" fill="url(#gold-bright)" stroke="#2A1A04" stroke-width="0.6"/>
+        <text x="217.6" y="717.5" text-anchor="middle" font-family="Amiri, Noto Naskh Arabic, serif" font-size="23" font-weight="bold" fill="url(#gold-bright)" opacity="0.01">٢٤٠</text>
+      </g>
+      <!-- 270 deg (٢٧٠) upright numeral: vector path fallback + <text> -->
+      <g id="numeral-270">
+        <path d="M161.9 547.5 160.5 547.2Q160.5 543.8 159.8 540.9Q159.6 540.1 159.4 539.5Q159.2 538.8 158.9 538.1Q158.6 537.3 158 536.2Q157.7 535.6 157.7 535Q157.7 534.2 158.2 533.5Q158.8 532.9 159.7 532.5Q160.5 533.9 161.1 535.7Q161.4 535.9 161.7 536Q162 536.1 162.6 536.1Q163.7 536.1 164.4 535.1Q165.1 534.2 165.3 532.6L166.5 532.8Q166.3 536.2 165.3 537.7Q164.4 539.2 162.6 539.2Q162.4 539.2 162.1 539.1Q162.3 540.1 162.4 541Q162.5 541.8 162.5 542.6Q162.5 544 162.3 545.1Q162.2 546.2 161.9 547.5ZM172.7 547.5Q172.2 546.1 171.8 545.1Q171.5 544.1 171.1 543.2Q170.7 542.3 170.3 541.4Q169.8 540.4 169.2 539.2Q168.5 538 167.6 536.2Q167.3 535.8 167.3 535.2Q167.3 534.4 167.9 533.7Q168.4 533 169.2 532.6Q169.7 533.3 170.3 534.6Q170.9 535.9 171.5 537.4Q172.1 539 172.7 540.7Q173.2 542.3 173.6 543.9Q173.9 542.4 174.2 540.9Q174.6 539.3 175.1 537.7Q175.5 536.2 176.1 534.9Q176.6 533.6 177.1 532.6L179 535Q177.9 537.1 177 538.9Q176.2 540.6 175.6 542.4Q175 544.2 174.3 546.2Q173.9 546.6 173.5 546.9Q173.1 547.1 172.7 547.5ZM184.5 544.5Q183.8 544 183.2 543.6Q182.7 543.2 182.2 542.9Q181.7 542.6 181.1 542.3Q181.4 541.9 181.6 541.4Q181.9 541 182.1 540.6Q182.3 540.2 182.6 539.8Q182.8 539.4 183.1 539Q184.5 539.7 185.4 540.5Q186.3 541.2 186.3 541.5Q186.3 542 184.5 544.5Z" fill="url(#gold-bright)" stroke="#2A1A04" stroke-width="0.6"/>
+        <text x="172.0" y="547.5" text-anchor="middle" font-family="Amiri, Noto Naskh Arabic, serif" font-size="23" font-weight="bold" fill="url(#gold-bright)" opacity="0.01">٢٧٠</text>
+      </g>
+      <!-- 300 deg (٣٠٠) upright numeral: vector path fallback + <text> -->
+      <g id="numeral-300">
+        <path d="M208.4 377.5 207 377.2Q207 375.6 206.9 374.3Q206.7 373 206.4 371.6Q206.2 370.7 206 370Q205.8 369.2 205.5 368.4Q205.1 367.6 204.5 366.2Q204.2 365.6 204.2 365Q204.2 364.2 204.7 363.5Q205.3 362.9 206.2 362.5Q206.6 363.3 207 364.1Q207.4 365 207.7 365.9Q208.1 366.1 208.5 366.1Q209.8 366.1 209.8 364.2Q209.8 364.1 209.8 363.8Q209.8 363.5 209.7 362.9L210.7 362.6Q211 363.4 211.2 364.1Q211.4 364.8 211.4 365.5Q211.6 365.5 211.7 365.5Q211.8 365.5 211.9 365.5Q212.9 365.5 212.9 363.7Q212.9 363.2 212.9 362.6L214.1 362.7Q214.2 363.3 214.2 363.9Q214.3 364.5 214.3 365.1Q214.3 366.6 213.7 367.6Q213.1 368.6 212.1 368.6Q211.7 368.6 210.9 368.1Q210.5 368.7 210 369Q209.5 369.2 208.9 369.2Q208.8 369.2 208.7 369.2Q208.6 369.2 208.6 369.2Q208.8 370.2 208.9 371Q209 371.9 209 372.6Q209 373.9 208.8 375Q208.7 376.1 208.4 377.5ZM220.2 374.5Q219.5 374 218.9 373.6Q218.4 373.2 217.9 372.9Q217.4 372.6 216.8 372.3Q217.1 371.9 217.3 371.4Q217.6 371 217.8 370.6Q218 370.2 218.2 369.8Q218.5 369.4 218.8 369Q220.2 369.7 221.1 370.5Q222 371.2 222 371.5Q222 372 220.2 374.5ZM229.2 374.5Q228.4 374 227.9 373.6Q227.3 373.2 226.8 372.9Q226.4 372.6 225.8 372.3Q226.1 371.9 226.3 371.4Q226.5 371 226.7 370.6Q226.9 370.2 227.2 369.8Q227.5 369.4 227.7 369Q229.1 369.7 230 370.5Q230.9 371.2 230.9 371.5Q230.9 372 229.2 374.5Z" fill="url(#gold-bright)" stroke="#2A1A04" stroke-width="0.6"/>
+        <text x="217.6" y="377.5" text-anchor="middle" font-family="Amiri, Noto Naskh Arabic, serif" font-size="23" font-weight="bold" fill="url(#gold-bright)" opacity="0.01">٣٠٠</text>
+      </g>
+      <!-- 330 deg (٣٣٠) upright numeral: vector path fallback + <text> -->
+      <g id="numeral-330">
+        <path d="M331 253 329.6 252.8Q329.6 251.1 329.4 249.8Q329.3 248.6 329 247.2Q328.8 246.2 328.6 245.5Q328.4 244.8 328.1 244Q327.7 243.1 327.1 241.8Q326.8 241.2 326.8 240.6Q326.8 239.7 327.3 239.1Q327.8 238.5 328.8 238.1Q329.2 238.9 329.6 239.7Q329.9 240.6 330.2 241.5Q330.7 241.6 331.1 241.6Q332.4 241.6 332.4 239.8Q332.4 239.7 332.4 239.4Q332.4 239 332.3 238.5L333.2 238.2Q333.6 238.9 333.7 239.7Q333.9 240.4 334 241Q334.1 241.1 334.2 241.1Q334.4 241.1 334.5 241.1Q335.5 241.1 335.5 239.3Q335.5 238.7 335.4 238.1L336.7 238.3Q336.8 238.8 336.8 239.4Q336.9 240 336.9 240.6Q336.9 242.2 336.2 243.2Q335.6 244.1 334.7 244.1Q334.3 244.1 333.5 243.7Q333 244.3 332.5 244.5Q332 244.8 331.5 244.8Q331.4 244.8 331.3 244.8Q331.2 244.8 331.1 244.8Q331.3 245.7 331.4 246.6Q331.5 247.4 331.5 248.1Q331.5 249.5 331.4 250.6Q331.3 251.6 331 253ZM343.7 253 342.3 252.8Q342.2 251.1 342.1 249.8Q342 248.6 341.7 247.2Q341.5 246.2 341.3 245.5Q341.1 244.8 340.7 244Q340.4 243.1 339.8 241.8Q339.4 241.2 339.4 240.6Q339.4 239.7 340 239.1Q340.5 238.5 341.4 238.1Q341.9 238.9 342.2 239.7Q342.6 240.6 342.9 241.5Q343.3 241.6 343.7 241.6Q345.1 241.6 345.1 239.8Q345.1 239.7 345.1 239.4Q345 239 345 238.5L345.9 238.2Q346.2 238.9 346.4 239.7Q346.6 240.4 346.7 241Q346.8 241.1 346.9 241.1Q347 241.1 347.1 241.1Q348.2 241.1 348.2 239.3Q348.2 238.7 348.1 238.1L349.4 238.3Q349.5 238.8 349.5 239.4Q349.5 240 349.5 240.6Q349.5 242.2 348.9 243.2Q348.3 244.1 347.4 244.1Q346.9 244.1 346.1 243.7Q345.7 244.3 345.2 244.5Q344.7 244.8 344.1 244.8Q344.1 244.8 344 244.8Q343.9 244.8 343.8 244.8Q344 245.7 344.1 246.6Q344.2 247.4 344.2 248.1Q344.2 249.5 344.1 250.6Q344 251.6 343.7 253ZM355.5 250.1Q354.7 249.5 354.2 249.1Q353.6 248.8 353.1 248.5Q352.7 248.2 352.1 247.8Q352.4 247.4 352.6 247Q352.8 246.6 353 246.2Q353.2 245.7 353.5 245.3Q353.8 244.9 354 244.5Q355.4 245.3 356.3 246Q357.2 246.8 357.2 247.1Q357.2 247.6 355.5 250.1Z" fill="url(#gold-bright)" stroke="#2A1A04" stroke-width="0.6"/>
+        <text x="342.0" y="253.1" text-anchor="middle" font-family="Amiri, Noto Naskh Arabic, serif" font-size="23" font-weight="bold" fill="url(#gold-bright)" opacity="0.01">٣٣٠</text>
+      </g>
+    </g>
+
+    <!-- 4. GEOMETRIC ISLAMIC RING (24-Fold Eight-Point Star Khatam / Girih Interlaced Band, R=316 to R=278) -->
+    <g id="geometric-ring">
+      <!-- Dark Navy Infill Band with Double Gold Framing Rings -->
+      <circle cx="512" cy="540" r="316" fill="url(#khatam-navy-infill)" stroke="#3B2606" stroke-width="1.5"/>
+      <circle cx="512" cy="540" r="278" fill="url(#dial-plate-grad)" stroke="url(#brass-gold-135)" stroke-width="3"/>
+
+      <!-- Continuous Interlaced Girih Strapwork Wave Underlay -->
+      <path d="M 512.0,232.0 L 586.0,263.7 L 666.0,273.3 L 714.2,337.8 L 778.7,386.0 L 788.3,466.0 L 820.0,540.0 L 788.3,614.0 L 778.7,694.0 L 714.2,742.2 L 666.0,806.7 L 586.0,816.3 L 512.0,848.0 L 438.0,816.3 L 358.0,806.7 L 309.8,742.2 L 245.3,694.0 L 235.7,614.0 L 204.0,540.0 L 235.7,466.0 L 245.3,386.0 L 309.8,337.8 L 358.0,273.3 L 438.0,263.7 Z" fill="none" stroke="#B8861B" stroke-width="1.5" stroke-linejoin="round" opacity="0.75"/>
+      <path d="M 512.0,232.0 L 586.0,263.7 L 666.0,273.3 L 714.2,337.8 L 778.7,386.0 L 788.3,466.0 L 820.0,540.0 L 788.3,614.0 L 778.7,694.0 L 714.2,742.2 L 666.0,806.7 L 586.0,816.3 L 512.0,848.0 L 438.0,816.3 L 358.0,806.7 L 309.8,742.2 L 245.3,694.0 L 235.7,614.0 L 204.0,540.0 L 235.7,466.0 L 245.3,386.0 L 309.8,337.8 L 358.0,273.3 L 438.0,263.7 Z" transform="rotate(7.5, 512, 540)" fill="none" stroke="#F5DC8A" stroke-width="1.3" stroke-linejoin="round" opacity="0.75"/>
+
+      <!-- 24 Interlaced Khatam 8-Point Stars around the band -->
+      <use href="#khatam-oct"/>
+      <use href="#khatam-oct" transform="rotate(120, 512, 540)"/>
+      <use href="#khatam-oct" transform="rotate(240, 512, 540)"/>
+
+      <!-- Inner Filigree Beaded Ring framing the Rose Chamber (R=274) -->
+      <circle cx="512" cy="540" r="274" fill="none" stroke="#FFF3C4" stroke-width="1.2" stroke-dasharray="2 4" opacity="0.8"/>
+    </g>
+
+    <!-- 6. COMPASS ROSE (16-Point Faceted 3D Diamond Star + Guilloche Center Rings) -->
+    <g id="rose" filter="url(#emboss-shadow)">
+      <!-- Subtle Recessed Astrolabe Equator & Tropic Rete Rings behind the Rose -->
+      <circle cx="512" cy="540" r="232" fill="none" stroke="#C9962B" stroke-width="1.2" opacity="0.45"/>
+      <circle cx="512" cy="540" r="228" fill="none" stroke="#F5DC8A" stroke-width="0.7" stroke-dasharray="4 4" opacity="0.4"/>
+      <circle cx="512" cy="540" r="190" fill="none" stroke="#C9962B" stroke-width="1.0" opacity="0.4"/>
+      <circle cx="512" cy="540" r="152" fill="none" stroke="#C9962B" stroke-width="0.9" opacity="0.4"/>
+
+      <!-- 8 Short Points (22.5, 67.5, 112.5, 157.5, 202.5, 247.5, 292.5, 337.5 deg) -->
+      <g id="rose-short-points">
+        <g id="rose-short-225">
+          <path d="M 512.0,540.0 L 570.2,399.6 L 523.3,483.1 Z" fill="url(#facet-gold-light)" stroke="#4A3008" stroke-width="0.9" stroke-linejoin="round"/>
+          <path d="M 512.0,540.0 L 544.2,491.8 L 570.2,399.6 Z" fill="url(#facet-gold-dark)" stroke="#4A3008" stroke-width="0.9" stroke-linejoin="round"/>
+          <path d="M 525.5,489.8 L 561.0,421.7 L 538.0,495.0" fill="none" stroke="#FFF3C4" stroke-width="0.7" opacity="0.65"/>
+          <line x1="512.0" y1="540.0" x2="570.2" y2="399.6" stroke="#FFF8DC" stroke-width="0.8" opacity="0.8"/>
+        </g>
+        <g id="rose-short-675">
+          <path d="M 512.0,540.0 L 652.4,481.8 L 560.2,507.8 Z" fill="url(#facet-gold-light)" stroke="#4A3008" stroke-width="0.9" stroke-linejoin="round"/>
+          <path d="M 512.0,540.0 L 568.9,528.7 L 652.4,481.8 Z" fill="url(#facet-gold-dark)" stroke="#4A3008" stroke-width="0.9" stroke-linejoin="round"/>
+          <path d="M 557.0,514.0 L 630.3,491.0 L 562.2,526.5" fill="none" stroke="#FFF3C4" stroke-width="0.7" opacity="0.65"/>
+          <line x1="512.0" y1="540.0" x2="652.4" y2="481.8" stroke="#FFF8DC" stroke-width="0.8" opacity="0.8"/>
+        </g>
+        <g id="rose-short-1125">
+          <path d="M 512.0,540.0 L 652.4,598.2 L 568.9,551.3 Z" fill="url(#facet-gold-light)" stroke="#4A3008" stroke-width="0.9" stroke-linejoin="round"/>
+          <path d="M 512.0,540.0 L 560.2,572.2 L 652.4,598.2 Z" fill="url(#facet-gold-dark)" stroke="#4A3008" stroke-width="0.9" stroke-linejoin="round"/>
+          <path d="M 562.2,553.5 L 630.3,589.0 L 557.0,566.0" fill="none" stroke="#FFF3C4" stroke-width="0.7" opacity="0.65"/>
+          <line x1="512.0" y1="540.0" x2="652.4" y2="598.2" stroke="#FFF8DC" stroke-width="0.8" opacity="0.8"/>
+        </g>
+        <g id="rose-short-1575">
+          <path d="M 512.0,540.0 L 570.2,680.4 L 544.2,588.2 Z" fill="url(#facet-gold-light)" stroke="#4A3008" stroke-width="0.9" stroke-linejoin="round"/>
+          <path d="M 512.0,540.0 L 523.3,596.9 L 570.2,680.4 Z" fill="url(#facet-gold-dark)" stroke="#4A3008" stroke-width="0.9" stroke-linejoin="round"/>
+          <path d="M 538.0,585.0 L 561.0,658.3 L 525.5,590.2" fill="none" stroke="#FFF3C4" stroke-width="0.7" opacity="0.65"/>
+          <line x1="512.0" y1="540.0" x2="570.2" y2="680.4" stroke="#FFF8DC" stroke-width="0.8" opacity="0.8"/>
+        </g>
+        <g id="rose-short-2025">
+          <path d="M 512.0,540.0 L 453.8,680.4 L 500.7,596.9 Z" fill="url(#facet-gold-light)" stroke="#4A3008" stroke-width="0.9" stroke-linejoin="round"/>
+          <path d="M 512.0,540.0 L 479.8,588.2 L 453.8,680.4 Z" fill="url(#facet-gold-dark)" stroke="#4A3008" stroke-width="0.9" stroke-linejoin="round"/>
+          <path d="M 498.5,590.2 L 463.0,658.3 L 486.0,585.0" fill="none" stroke="#FFF3C4" stroke-width="0.7" opacity="0.65"/>
+          <line x1="512.0" y1="540.0" x2="453.8" y2="680.4" stroke="#FFF8DC" stroke-width="0.8" opacity="0.8"/>
+        </g>
+        <g id="rose-short-2475">
+          <path d="M 512.0,540.0 L 371.6,598.2 L 463.8,572.2 Z" fill="url(#facet-gold-light)" stroke="#4A3008" stroke-width="0.9" stroke-linejoin="round"/>
+          <path d="M 512.0,540.0 L 455.1,551.3 L 371.6,598.2 Z" fill="url(#facet-gold-dark)" stroke="#4A3008" stroke-width="0.9" stroke-linejoin="round"/>
+          <path d="M 467.0,566.0 L 393.7,589.0 L 461.8,553.5" fill="none" stroke="#FFF3C4" stroke-width="0.7" opacity="0.65"/>
+          <line x1="512.0" y1="540.0" x2="371.6" y2="598.2" stroke="#FFF8DC" stroke-width="0.8" opacity="0.8"/>
+        </g>
+        <g id="rose-short-2925">
+          <path d="M 512.0,540.0 L 371.6,481.8 L 455.1,528.7 Z" fill="url(#facet-gold-light)" stroke="#4A3008" stroke-width="0.9" stroke-linejoin="round"/>
+          <path d="M 512.0,540.0 L 463.8,507.8 L 371.6,481.8 Z" fill="url(#facet-gold-dark)" stroke="#4A3008" stroke-width="0.9" stroke-linejoin="round"/>
+          <path d="M 461.8,526.5 L 393.7,491.0 L 467.0,514.0" fill="none" stroke="#FFF3C4" stroke-width="0.7" opacity="0.65"/>
+          <line x1="512.0" y1="540.0" x2="371.6" y2="481.8" stroke="#FFF8DC" stroke-width="0.8" opacity="0.8"/>
+        </g>
+        <g id="rose-short-3375">
+          <path d="M 512.0,540.0 L 453.8,399.6 L 479.8,491.8 Z" fill="url(#facet-gold-light)" stroke="#4A3008" stroke-width="0.9" stroke-linejoin="round"/>
+          <path d="M 512.0,540.0 L 500.7,483.1 L 453.8,399.6 Z" fill="url(#facet-gold-dark)" stroke="#4A3008" stroke-width="0.9" stroke-linejoin="round"/>
+          <path d="M 486.0,495.0 L 463.0,421.7 L 498.5,489.8" fill="none" stroke="#FFF3C4" stroke-width="0.7" opacity="0.65"/>
+          <line x1="512.0" y1="540.0" x2="453.8" y2="399.6" stroke="#FFF8DC" stroke-width="0.8" opacity="0.8"/>
+        </g>
+      </g>
+
+      <!-- 4 Medium Intercardinal Points (NE 45, SE 135, SW 225, NW 315 deg) -->
+      <g id="rose-medium-points">
+        <g id="rose-med-45">
+          <path d="M 512.0,540.0 L 646.4,405.6 L 547.0,481.7 Z" fill="url(#facet-gold-bright)" stroke="#3D2606" stroke-width="1.1" stroke-linejoin="round"/>
+          <path d="M 512.0,540.0 L 570.3,505.0 L 646.4,405.6 Z" fill="url(#facet-gold-shadow)" stroke="#3D2606" stroke-width="1.1" stroke-linejoin="round"/>
+          <path d="M 547.3,491.5 L 625.1,426.9 L 560.5,504.7" fill="none" stroke="#FFF3C4" stroke-width="0.9" opacity="0.75"/>
+          <line x1="512.0" y1="540.0" x2="646.4" y2="405.6" stroke="#FFFDF2" stroke-width="1.1" opacity="0.85"/>
+        </g>
+        <g id="rose-med-135">
+          <path d="M 512.0,540.0 L 646.4,674.4 L 570.3,575.0 Z" fill="url(#facet-gold-bright)" stroke="#3D2606" stroke-width="1.1" stroke-linejoin="round"/>
+          <path d="M 512.0,540.0 L 547.0,598.3 L 646.4,674.4 Z" fill="url(#facet-gold-shadow)" stroke="#3D2606" stroke-width="1.1" stroke-linejoin="round"/>
+          <path d="M 560.5,575.3 L 625.1,653.1 L 547.3,588.5" fill="none" stroke="#FFF3C4" stroke-width="0.9" opacity="0.75"/>
+          <line x1="512.0" y1="540.0" x2="646.4" y2="674.4" stroke="#FFFDF2" stroke-width="1.1" opacity="0.85"/>
+        </g>
+        <g id="rose-med-225">
+          <path d="M 512.0,540.0 L 377.6,674.4 L 477.0,598.3 Z" fill="url(#facet-gold-bright)" stroke="#3D2606" stroke-width="1.1" stroke-linejoin="round"/>
+          <path d="M 512.0,540.0 L 453.7,575.0 L 377.6,674.4 Z" fill="url(#facet-gold-shadow)" stroke="#3D2606" stroke-width="1.1" stroke-linejoin="round"/>
+          <path d="M 476.7,588.5 L 398.9,653.1 L 463.5,575.3" fill="none" stroke="#FFF3C4" stroke-width="0.9" opacity="0.75"/>
+          <line x1="512.0" y1="540.0" x2="377.6" y2="674.4" stroke="#FFFDF2" stroke-width="1.1" opacity="0.85"/>
+        </g>
+        <g id="rose-med-315">
+          <path d="M 512.0,540.0 L 377.6,405.6 L 453.7,505.0 Z" fill="url(#facet-gold-bright)" stroke="#3D2606" stroke-width="1.1" stroke-linejoin="round"/>
+          <path d="M 512.0,540.0 L 477.0,481.7 L 377.6,405.6 Z" fill="url(#facet-gold-shadow)" stroke="#3D2606" stroke-width="1.1" stroke-linejoin="round"/>
+          <path d="M 463.5,504.7 L 398.9,426.9 L 476.7,491.5" fill="none" stroke="#FFF3C4" stroke-width="0.9" opacity="0.75"/>
+          <line x1="512.0" y1="540.0" x2="377.6" y2="405.6" stroke="#FFFDF2" stroke-width="1.1" opacity="0.85"/>
+        </g>
+      </g>
+
+      <!-- 4 Main Cardinal Points (N 0 in Deep Ruby #B3202A with Gold Edge, E 90, S 180, W 270) -->
+      <g id="rose-main-points">
+        <g id="rose-main-90">
+          <path d="M 512.0,540.0 L 728.0,540.0 L 585.1,519.1 Z" fill="url(#facet-gold-specular)" stroke="#331F04" stroke-width="1.3" stroke-linejoin="round"/>
+          <path d="M 512.0,540.0 L 585.1,560.9 L 728.0,540.0 Z" fill="url(#facet-gold-deep)" stroke="#331F04" stroke-width="1.3" stroke-linejoin="round"/>
+          <path d="M 576.9,528.0 L 696.0,540.0 L 576.9,552.0" fill="none" stroke="#FFF3C4" stroke-width="1.1" opacity="0.88"/>
+          <line x1="512.0" y1="540.0" x2="728.0" y2="540.0" stroke="#FFFDF5" stroke-width="1.3" opacity="0.92"/>
+        </g>
+        <g id="rose-main-180">
+          <path d="M 512.0,540.0 L 512.0,756.0 L 532.9,613.1 Z" fill="url(#facet-gold-specular)" stroke="#331F04" stroke-width="1.3" stroke-linejoin="round"/>
+          <path d="M 512.0,540.0 L 491.1,613.1 L 512.0,756.0 Z" fill="url(#facet-gold-deep)" stroke="#331F04" stroke-width="1.3" stroke-linejoin="round"/>
+          <path d="M 524.0,604.9 L 512.0,724.0 L 500.0,604.9" fill="none" stroke="#FFF3C4" stroke-width="1.1" opacity="0.88"/>
+          <line x1="512.0" y1="540.0" x2="512.0" y2="756.0" stroke="#FFFDF5" stroke-width="1.3" opacity="0.92"/>
+        </g>
+        <g id="rose-main-270">
+          <path d="M 512.0,540.0 L 296.0,540.0 L 438.9,560.9 Z" fill="url(#facet-gold-specular)" stroke="#331F04" stroke-width="1.3" stroke-linejoin="round"/>
+          <path d="M 512.0,540.0 L 438.9,519.1 L 296.0,540.0 Z" fill="url(#facet-gold-deep)" stroke="#331F04" stroke-width="1.3" stroke-linejoin="round"/>
+          <path d="M 447.1,552.0 L 328.0,540.0 L 447.1,528.0" fill="none" stroke="#FFF3C4" stroke-width="1.1" opacity="0.88"/>
+          <line x1="512.0" y1="540.0" x2="296.0" y2="540.0" stroke="#FFFDF5" stroke-width="1.3" opacity="0.92"/>
+        </g>
+        <g id="rose-main-0">
+          <path d="M 512.0,540.0 L 512.0,324.0 L 491.1,466.9 Z" fill="url(#ruby-facet-light)" stroke="url(#gold-bright)" stroke-width="1.6" stroke-linejoin="round"/>
+          <path d="M 512.0,540.0 L 532.9,466.9 L 512.0,324.0 Z" fill="url(#ruby-facet-dark)" stroke="url(#gold-bright)" stroke-width="1.6" stroke-linejoin="round"/>
+          <path d="M 500.0,475.1 L 512.0,356.0 L 524.0,475.1" fill="none" stroke="#FFD98E" stroke-width="1.1" opacity="0.88"/>
+          <line x1="512.0" y1="540.0" x2="512.0" y2="324.0" stroke="#FFFDF5" stroke-width="1.3" opacity="0.92"/>
+        </g>
+      </g>
+
+      <!-- 7. LAYERED CONCENTRIC GUILLOCHE RINGS at the Center of the Rose (R=72 down to R=28) -->
+      <g id="center-guilloche-rings">
+        <circle cx="512" cy="540" r="72" fill="#0B182B" stroke="url(#brass-gold-135)" stroke-width="3.2"/>
+        <circle cx="512" cy="540" r="67" fill="none" stroke="#FFF3C4" stroke-width="1.1" stroke-dasharray="3 2" opacity="0.85"/>
+        <circle cx="512" cy="540" r="61" fill="#161004" stroke="url(#brass-gold-315)" stroke-width="2.4"/>
+        <!-- Fine Guilloche Rosette Engraving -->
+        <circle cx="512" cy="540" r="54" fill="none" stroke="url(#gold-bright)" stroke-width="4.5" stroke-dasharray="1.5 3.2" opacity="0.75"/>
+        <circle cx="512" cy="540" r="47" fill="#0D1D33" stroke="url(#gold-specular)" stroke-width="2"/>
+        <circle cx="512" cy="540" r="41" fill="none" stroke="#F5DC8A" stroke-width="1" stroke-dasharray="6 3" opacity="0.8"/>
+        <circle cx="512" cy="540" r="35" fill="url(#brass-gold-135)" stroke="#3D2606" stroke-width="1.8"/>
+      </g>
+    </g>
+
+    <!-- 5. CARDINAL LETTERS IN ARABIC CALLIGRAPHY STYLE (ش ق ج غ in Embossed Ornamental Cartouches) -->
+    <g id="cardinals">
+      <!-- North - Shamal (ش) at (512, 290) -->
+      <g id="cardinal-north" filter="url(#emboss-shadow)">
+        <use href="#cartouche-frame" x="512.0" y="290.0" fill="url(#ruby-rich)" stroke="url(#gold-bright)" stroke-width="2.5"/>
+        <use href="#cartouche-inner" x="512.0" y="290.0" fill="none" stroke="url(#gold-specular)" stroke-width="1" stroke-dasharray="3 2" opacity="0.85"/>
+        <path d="M499.3 308.3Q495.4 308.3 493.3 306Q491.3 303.7 491.3 299.3Q491.3 297 492.4 292.9L494.3 293.4Q493.7 295.5 493.7 296.9Q493.7 303.1 499.5 303.1Q502.9 303.1 505.4 302.2Q507.8 301.3 510.2 299.2Q508.7 296.3 507.5 294.2Q506.4 292 506.4 291.2Q506.4 287.6 510.9 285.4Q510.9 286.2 511.2 287.8Q511.5 289.4 511.9 291.8Q512.7 291.9 513.3 291.9Q514 292 514.6 292Q515.4 292 516 291.9Q516.5 291.9 517.7 291.5Q518 290.9 518.9 288.8Q519.2 288 519.5 287.2Q519.8 286.4 520.1 285.6Q520.6 284.3 522.2 284.3Q523.1 284.3 523.8 284.8Q523.5 285.5 523 287Q522.6 288.5 521.9 290.4Q523.6 291.3 525.6 291.7Q527.6 292.1 530.2 292.4Q529.7 291.4 529.2 290.5Q528.7 289.5 528.2 288.6Q527.7 287.6 527.3 286.7Q526.9 285.8 526.9 284.9Q526.9 283.8 528.1 282.5Q529.2 281.2 530.9 280.4Q531.2 281.9 531.5 283.4Q531.8 284.9 532.1 286.3Q532.7 289.8 532.7 291Q532.7 291.7 532.4 292.8Q532.2 294 531.7 295.2Q531.3 296.4 530.9 297.2Q528.2 297.2 525.4 296.6Q522.6 296 520.4 295L519.9 296Q519.6 296.5 517.9 296.9Q517.1 297.1 516.1 297.1Q515.2 297.2 514 297.2Q513.7 297.2 513.3 297.2Q512.9 297.2 512.6 297.1V297.5Q512.6 300.5 510.8 303Q509.1 305.5 506 306.9Q504.5 307.6 502.8 308Q501.1 308.3 499.3 308.3ZM520.6 276.6Q519.7 275.9 519 275.3Q518.3 274.6 517.9 274.1Q518.8 273.3 519.5 272.7Q520.1 272.1 520.4 271.7Q520.9 272.2 521.6 272.9Q522.2 273.5 523 274.1Q522.1 275.1 521.5 275.8Q520.8 276.4 520.6 276.6ZM523.7 280.4Q522.8 279.7 522.1 279Q521.3 278.3 520.7 277.7Q521.4 277 522.1 276.3Q522.9 275.5 523.7 274.6Q523.9 274.9 524.6 275.6Q525.3 276.2 526.4 277.3Q525.9 278.1 525.2 278.9Q524.5 279.7 523.7 280.4ZM517.6 281Q515.7 279.6 514.6 278.3Q515.4 277.5 516.1 276.8Q516.9 276 517.6 275.2Q518 275.7 518.7 276.4Q519.3 277.1 520.3 278Q519.7 278.8 519 279.6Q518.3 280.4 517.6 281Z" fill="url(#gold-specular)" stroke="#3A2205" stroke-width="1.1"/>
+        <text x="512.0" y="302.0" text-anchor="middle" font-family="Amiri, Noto Naskh Arabic, serif" font-size="38" font-weight="bold" fill="url(#gold-specular)" opacity="0.01">ش</text>
+      </g>
+      <!-- East - Sharq (ق) at (762, 540) -->
+      <g id="cardinal-east" filter="url(#emboss-shadow)">
+        <use href="#cartouche-frame" x="762.0" y="540.0" fill="url(#dial-plate-grad)" stroke="url(#brass-gold-135)" stroke-width="2.5"/>
+        <use href="#cartouche-inner" x="762.0" y="540.0" fill="none" stroke="url(#gold-specular)" stroke-width="1" stroke-dasharray="3 2" opacity="0.85"/>
+        <path d="M758.3 558.3Q754.4 558.3 752.3 556Q750.3 553.7 750.3 549.3Q750.3 547 751.4 542.9L753.3 543.4Q752.7 545.4 752.7 546.9Q752.7 553.1 758.9 553.1Q763.2 553.1 767.7 550.6Q768.5 550.1 769.3 549.6Q770.1 549.1 770.8 548.6Q770.7 547.5 770.6 546.5Q770.4 545.5 770.2 544.5Q767.5 547.2 764.6 547.2Q761.9 547.2 760.4 545.6Q758.9 544 758.9 541.1Q758.9 538.7 759.8 536.3Q760.7 533.9 762.2 532.5Q763.8 531.1 765.4 531.1Q767.6 531.1 769.5 532.9Q771.5 534.7 772.6 537.9Q773.7 541.1 773.7 545Q773.7 547.8 772.6 550.2Q771.4 552.5 769.2 554.3Q767.8 555.5 766 556.4Q764.1 557.3 762.1 557.8Q760.2 558.3 758.3 558.3ZM765.5 542.4Q767.4 542.4 769.4 541.7Q768.1 538 766.3 536.9Q765.5 536.4 764.6 536.4Q763.6 536.4 762.8 536.9Q762 537.4 761.6 538.1Q761.3 538.9 761.3 539.7Q761.3 541 762.4 541.7Q763.5 542.4 765.5 542.4ZM768.3 527.5Q767.4 526.8 766.6 526.1Q765.9 525.5 765.3 524.8Q766.9 523.3 768.2 521.7Q768.6 522.2 769.3 522.8Q770 523.5 771 524.4Q769.8 526.1 768.3 527.5ZM762.4 528.2Q760.5 526.6 759.4 525.4Q760.1 524.7 760.9 523.9Q761.6 523.1 762.4 522.4Q763.2 523.3 765.1 525.1Q764 526.7 762.4 528.2Z" fill="url(#gold-specular)" stroke="#3A2205" stroke-width="1.1"/>
+        <text x="762.0" y="552.0" text-anchor="middle" font-family="Amiri, Noto Naskh Arabic, serif" font-size="38" font-weight="bold" fill="url(#gold-specular)" opacity="0.01">ق</text>
+      </g>
+      <!-- South - Janub (ج) at (512, 790) -->
+      <g id="cardinal-south" filter="url(#emboss-shadow)">
+        <use href="#cartouche-frame" x="512.0" y="790.0" fill="url(#dial-plate-grad)" stroke="url(#brass-gold-135)" stroke-width="2.5"/>
+        <use href="#cartouche-inner" x="512.0" y="790.0" fill="none" stroke="url(#gold-specular)" stroke-width="1" stroke-dasharray="3 2" opacity="0.85"/>
+        <path d="M513.1 805.4Q507.5 805.4 504.4 802.5Q501.3 799.7 501.3 794.6Q501.3 791.8 502.5 789.1Q503.7 786.5 506 784.5Q507 783.5 508.1 782.7Q509.3 781.9 510.6 781.2Q509.1 780.7 507.9 780.3Q506.6 779.9 505.4 779.9Q504.1 779.9 503.2 780.3Q502.2 780.6 500.6 781.6Q500.3 781.2 499.9 780.4Q499.6 779.7 499.6 779Q499.6 777 501.2 775.8Q502.8 774.6 505.5 774.6Q506.9 774.6 508.5 775Q510.1 775.3 512.5 776.2Q514.9 777.1 516.7 777.5Q518.5 777.9 520.2 777.9L524.2 777.8L522.4 782.7Q521.8 782.8 520.8 782.9Q519.8 782.9 518.8 782.9Q517.8 782.9 517.1 782.8Q515.6 783 513.9 783.7Q512.2 784.3 510.5 785.1Q508.9 786 507.6 787.1Q505.7 788.6 504.6 790.4Q503.5 792.1 503.5 794Q503.5 795.9 504.7 797.3Q506 798.8 508.1 799.5Q510.3 800.3 513.1 800.3Q517.7 800.3 523.7 798.9L524.4 800.8Q521.9 802.1 519.7 803.2Q517.5 804.2 515.7 804.8Q514 805.4 513.1 805.4ZM513.6 795.8Q512.4 794.8 511.6 794Q510.8 793.3 510.2 792.6Q511.1 791.8 511.9 790.9Q512.7 790 513.5 789.1Q514.7 790.4 516.7 792.3Q516.2 793 515.4 793.9Q514.6 794.8 513.6 795.8Z" fill="url(#gold-specular)" stroke="#3A2205" stroke-width="1.1"/>
+        <text x="512.0" y="802.0" text-anchor="middle" font-family="Amiri, Noto Naskh Arabic, serif" font-size="38" font-weight="bold" fill="url(#gold-specular)" opacity="0.01">ج</text>
+      </g>
+      <!-- West - Gharb (غ) at (262, 540) -->
+      <g id="cardinal-west" filter="url(#emboss-shadow)">
+        <use href="#cartouche-frame" x="262.0" y="540.0" fill="url(#dial-plate-grad)" stroke="url(#brass-gold-135)" stroke-width="2.5"/>
+        <use href="#cartouche-inner" x="262.0" y="540.0" fill="none" stroke="url(#gold-specular)" stroke-width="1" stroke-dasharray="3 2" opacity="0.85"/>
+        <path d="M262.8 561.8Q257.6 561.8 254.7 559.1Q251.7 556.4 251.7 551.7Q251.7 547 255 543.4Q253.6 542.7 252.5 541.7Q251.4 540.6 250.9 539.4Q250.3 538.2 250.3 537.1Q250.3 535.8 250.8 534.3Q251.4 532.7 252.3 531.4Q253.2 530 254.3 529Q255.9 527.7 257.7 527.7Q260.8 527.7 264.4 531.8L263.5 533.5Q262.1 533 261 532.8Q259.8 532.5 258.8 532.5Q257.3 532.5 256.1 532.9Q254.9 533.2 253.5 533.9Q253.6 536.3 255.1 537.9Q256.5 539.5 259.1 540.1Q261 538.9 263.1 538Q265.2 537.1 267.6 536.3Q268.1 537 268.1 538.5Q268.1 540.4 266.5 541.5Q266.1 541.7 265.3 542.1Q264.6 542.5 263.4 542.9Q259.5 544.4 257.6 545.7Q255.8 546.9 254.8 548.4Q253.9 549.8 253.9 551.4Q253.9 553.9 256.2 555.4Q258.5 556.8 262.9 556.8Q264.7 556.8 266.6 556.5Q268.5 556.2 273.1 555.2L273.7 557Q269.9 559.4 267 560.6Q264.2 561.8 262.8 561.8ZM257.1 524.9Q254.9 523 253.7 521.7Q254.7 520.7 255.6 519.8Q256.4 519 257 518.2Q257.5 518.7 258.3 519.5Q259.1 520.3 260.2 521.3Q259.7 522.1 258.9 523Q258.1 523.9 257.1 524.9Z" fill="url(#gold-specular)" stroke="#3A2205" stroke-width="1.1"/>
+        <text x="262.0" y="552.0" text-anchor="middle" font-family="Amiri, Noto Naskh Arabic, serif" font-size="38" font-weight="bold" fill="url(#gold-specular)" opacity="0.01">غ</text>
+      </g>
+    </g>
+
+    <!-- 7b. ROTATING COMPASS NEEDLE (Slender Diamond-Shaped, Ruby Red North Half & Gold South Half) -->
+    <!-- Rotated at -28 degrees (NNW dynamic bearing) so both the Ruby North Star Point and Needle shine clearly -->
+    <g id="needle" transform="rotate(-28, 512, 540)" filter="url(#emboss-shadow)">
+      <!-- North Half of Needle (Deep Ruby Red #B3202A with Light/Dark 3D Facets & Gold Filigree Collar) -->
+      <path d="M 512,540 L 499,510 L 505,368 L 512,282 Z" fill="url(#ruby-facet-light)" stroke="url(#gold-specular)" stroke-width="1.1" stroke-linejoin="round"/>
+      <path d="M 512,540 L 512,282 L 519,368 L 525,510 Z" fill="url(#ruby-facet-dark)" stroke="url(#gold-bright)" stroke-width="1.1" stroke-linejoin="round"/>
+      <!-- Ornate Astrolabe Openwork Pointer Ring on North Needle -->
+      <circle cx="512" cy="392" r="7.5" fill="#0A1628" stroke="url(#gold-specular)" stroke-width="2.2"/>
+      <circle cx="512" cy="392" r="3.2" fill="#B3202A"/>
+
+      <!-- South Half of Needle (Polished Faceted Brass & Gold Counterweight) -->
+      <path d="M 512,540 L 499,570 L 505,705 L 512,786 Z" fill="url(#facet-gold-specular)" stroke="#3B2606" stroke-width="1.1" stroke-linejoin="round"/>
+      <path d="M 512,540 L 512,786 L 519,705 L 525,570 Z" fill="url(#facet-gold-deep)" stroke="#3B2606" stroke-width="1.1" stroke-linejoin="round"/>
+      <!-- South Counterweight Crescent & Tail Finial -->
+      <circle cx="512" cy="688" r="7.5" fill="#0A1628" stroke="url(#gold-bright)" stroke-width="2.2"/>
+      <polygon points="512,796 518,772 512,778 506,772" fill="url(#gold-specular)" stroke="#3B2606" stroke-width="0.9"/>
+
+      <!-- Central Spine Line along the Needle -->
+      <line x1="512" y1="286" x2="512" y2="782" stroke="#FFFDF5" stroke-width="1.0" opacity="0.85"/>
+    </g>
+
+    <!-- 7c. CENTER PIVOT JEWEL (Radial Gradient Cabochon Dome, Gold Bezel Setting & Specular Highlight) -->
+    <g id="center-jewel" filter="url(#emboss-shadow)">
+      <!-- 8-Petal Gold Rosette Collet Setting -->
+      <circle cx="512" cy="540" r="26" fill="url(#brass-gold-135)" stroke="#2E1D04" stroke-width="2"/>
+      <circle cx="512" cy="540" r="22" fill="url(#brass-gold-315)" stroke="#FFF3C4" stroke-width="1.2" stroke-dasharray="4 2.9"/>
+      <!-- Ruby Cabochon Dome -->
+      <circle cx="512" cy="540" r="17.5" fill="url(#jewel-dome-grad)" stroke="url(#gold-specular)" stroke-width="1.8"/>
+      <!-- Inner Warm Glow Crescent (bottom-right internal refraction) -->
+      <path d="M 503,549 A 13,13 0 0,0 524,534 A 11,12 0 0,1 503,549 Z" fill="#FF7582" opacity="0.45"/>
+      <!-- Crisp White Specular Highlight on Upper-Left of Jewel Dome -->
+      <ellipse cx="506.5" cy="534.5" rx="5.2" ry="3.2" transform="rotate(-35, 506.5, 534.5)" fill="#FFFFFF" opacity="0.92"/>
+      <circle cx="504.5" cy="532.5" r="1.6" fill="#FFFFFF"/>
+      <circle cx="517.5" cy="545.5" r="1.4" fill="#FFD1D6" opacity="0.75"/>
+    </g>
+
+    <!-- 8. SHINE & REALISM (Glass-Like Curved Reflection Arc on Upper-Left + 6 Crisp Specular Highlights) -->
+    <g id="highlights" pointer-events="none">
+      <!-- Curved Crystal Glass Lens Reflection Arc across Upper-Left Dial -->
+      <path d="M 168,465 A 362,362 0 0,1 672,216 C 515,205 352,272 252,395 C 216,438 190,468 168,465 Z" fill="url(#glass-arc-grad)"/>
+      <!-- Secondary Fine Rim Glint along Upper-Left Bevel -->
+      <path d="M 146,435 A 382,382 0 0,1 620,174" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" opacity="0.42" filter="url(#soft-specular-glow)"/>
+      <!-- Lower-Right Counter-Glint on Outer Brass Bezel -->
+      <path d="M 760,828 A 382,382 0 0,1 835,740" fill="none" stroke="#FFF3C4" stroke-width="1.8" stroke-linecap="round" opacity="0.38" filter="url(#soft-specular-glow)"/>
+
+      <!-- 6 Crisp White Specular Starburst Highlights on High-Polish Gold Edges -->
+      <!-- Highlight 1: Upper-left outer bezel bevel (315 deg, r=434) -->
+      <use href="#specular-sparkle" transform="translate(205, 233) scale(1.15)"/>
+      <!-- Highlight 2: Top suspension lotus & crescent finial -->
+      <use href="#specular-sparkle" transform="translate(502, 54) scale(0.75)"/>
+      <!-- Highlight 3: Tip of North ruby-and-gold star point -->
+      <use href="#specular-sparkle" transform="translate(512, 324) scale(0.8)"/>
+      <!-- Highlight 4: North cardinal cartouche top-left gold rim -->
+      <use href="#specular-sparkle" transform="translate(490, 266) scale(0.65)"/>
+      <!-- Highlight 5: NW medium rose point facet ridge -->
+      <use href="#specular-sparkle" transform="translate(378, 406) scale(0.7)"/>
+      <!-- Highlight 6: Lower-right inner bezel rim counter-reflection -->
+      <use href="#specular-sparkle" transform="translate(788, 816) scale(0.9)"/>
+    </g>
+
+  </g>
+</svg>

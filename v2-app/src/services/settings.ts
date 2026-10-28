@@ -73,7 +73,7 @@ export interface PlatformMediaSettings {
 export const DEFAULT_PLATFORM_MEDIA: PlatformMediaSettings = {
   heroBgUrl: '',
   youssefCutoutUrl: '',
-  logoUrl: '',
+  logoUrl: '/icons/logo.svg',
   tickerQuotes: [
     'اعتنوا بأبنائكم فالعلم وُضع لأمثالهم — أ. يوسف بركات',
     'هدفنا ليس الوصول إلى المجد.. بل أن نصنع المجد بأنفسنا ونضع بصمة عريقة فى أبنائنا — أ. يوسف بركات',
@@ -157,7 +157,9 @@ export async function getPlatformMediaSettings(forceRefresh = false): Promise<Pl
         : DEFAULT_PLATFORM_MEDIA.youssefCutoutUrl;
 
     const rawLogo =
-      typeof data.logoUrl === 'string' ? data.logoUrl.trim() : DEFAULT_PLATFORM_MEDIA.logoUrl;
+      typeof data.logoUrl === 'string' && data.logoUrl.trim().length > 0
+        ? data.logoUrl.trim()
+        : DEFAULT_PLATFORM_MEDIA.logoUrl;
 
     // استرجاع الصورة من المستند إن وجدت نسخة مرفوعة أو استخدام الرابط/الافتراضي
     const [heroBgUrl, youssefCutoutUrl, logoUrl] = await Promise.all([
@@ -300,4 +302,3 @@ export async function resetUploadedMediaDoc(type: MediaDocType): Promise<void> {
 
   cachedMedia = null;
 }
-

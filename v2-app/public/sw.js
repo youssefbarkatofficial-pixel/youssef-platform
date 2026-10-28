@@ -14,6 +14,8 @@ self.addEventListener('install', (event) => {
     caches.open(CACHE)
       .then((c) => c.addAll([
         OFFLINE_URL,
+        '/icons/logo.svg',
+        '/favicon.svg',
         '/icons/icon-192.png',
         '/icons/icon-512.png',
         '/icons/icon-maskable-512.png'
@@ -58,13 +60,13 @@ self.addEventListener('fetch', (event) => {
         if (hit) return hit;
         return fetch(req).then((res) => {
           if (res && res.status === 200) {
-            const copy = res.clone();
-            caches.open(CACHE).then((c) => c.put(req, copy));
+            const clone = res.clone();
+            caches.open(CACHE).then((c) => c.put(req, clone));
           }
           return res;
         });
       })
     );
+    return;
   }
-  // everything else (api, images from settings, manifest, sw.js): default network behaviour
 });
