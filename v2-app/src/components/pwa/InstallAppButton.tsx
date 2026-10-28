@@ -332,37 +332,17 @@ export default function InstallAppButton() {
 
             {/* Modal Icon & Branding */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-              <div
+              <img
+                src="/icons/logo.svg"
+                alt="منصة يوسف بركات"
                 style={{
-                  width: 48,
-                  height: 48,
-                  borderRadius: 14,
-                  background: 'linear-gradient(135deg,#d4a64f,#f3d082,#b88a3a)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: '#071226',
+                  width: 52,
+                  height: 52,
+                  objectFit: 'contain',
                   flexShrink: 0,
-                  boxShadow: '0 4px 14px rgba(212,166,79,0.3)',
+                  filter: 'drop-shadow(0 4px 12px rgba(212,166,79,0.35))',
                 }}
-              >
-                <svg
-                  width="26"
-                  height="26"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
-                >
-                  <rect width="14" height="20" x="5" y="2" rx="2" ry="2" />
-                  <path d="M12 18h.01" />
-                  <path d="M12 6v6" />
-                  <path d="m9 9 3 3 3-3" />
-                </svg>
-              </div>
+              />
               <div>
                 <h3
                   id="yb-install-title"
