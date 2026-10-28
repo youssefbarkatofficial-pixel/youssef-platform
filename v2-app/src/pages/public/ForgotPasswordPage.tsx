@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import FormAlert from '../../components/auth/FormAlert';
+import StudentPasswordRecovery from '../../components/auth/StudentPasswordRecovery';
 import { Button, Card, Input } from '../../components/ui';
 import { isStudentEmail, toEnglishDigits } from '../../lib/phone';
 import { getAuthErrorMessage, sendResetEmail } from '../../services/auth';
@@ -11,30 +12,32 @@ interface Message {
   text: string;
 }
 
-const STUDENT_NOTICE =
-  'حسابات الطلاب مرتبطة برقم الموبايل، ولا يمكن إرسال رسالة استعادة لها. تواصل مع إدارة المنصة ليعيدوا تعيين كلمة المرور لك.';
-
 export default function ForgotPasswordPage() {
   const [identifier, setIdentifier] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState<Message | null>(null);
+  const [showStudentRecovery, setShowStudentRecovery] = useState(false);
+
+  const cleanIdentifier = identifier.trim();
+  const isStudent = !cleanIdentifier.includes('@') || isStudentEmail(cleanIdentifier);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setMessage(null);
 
-    const value = identifier.trim();
+    const value = cleanIdentifier;
     if (!value) {
       setMessage({ type: 'error', text: 'اكتب رقم الموبايل أو البريد الإلكتروني.' });
       return;
     }
 
-    // الطلاب: الإيميل وهمي (رقم@student...) فلا يصله أي بريد.
-    if (!value.includes('@') || isStudentEmail(value)) {
-      setMessage({ type: 'info', text: STUDENT_NOTICE });
+    // الطلاب: فتح مودال تجديد كلمة المرور برقم ولي الأمر أو كلمة المرور القديمة
+    if (isStudent) {
+      setShowStudentRecovery(true);
       return;
     }
 
+    // حسابات الإدارة والمدرسين: إرسال رابط إعادة تعيين بالبريد الإلكتروني
     setSubmitting(true);
     try {
       await sendResetEmail(value);
@@ -60,36 +63,44 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="mx-auto w-full max-w-md px-4 py-10">
-      <Card>
-        <h1 className="text-2xl font-extrabold text-white">استعادة كلمة المرور</h1>
-        <p className="mt-1.5 text-sm text-slate-400">
-          اكتب رقم الموبايل (للطلاب) أو البريد الإلكتروني (للإدارة).
-        </p>
+    <>
+      <div className="mx-auto w-full max-w-md px-4 py-10">
+        <Card>
+          <h1 className="text-2xl font-extrabold text-white">استعادة كلمة المرور</h1>
+          <p className="mt-1.5 text-sm text-slate-400">
+            اكتب رقم الموبايل (للطلاب) أو البريد الإلكتروني (للإدارة).
+          </p>
 
-        <form onSubmit={handleSubmit} noValidate className="mt-6 space-y-4">
-          {message && <FormAlert type={message.type}>{message.text}</FormAlert>}
+          <form onSubmit={handleSubmit} noValidate className="mt-6 space-y-4">
+            {message && <FormAlert type={message.type}>{message.text}</FormAlert>}
 
-          <Input
-            label="رقم الموبايل أو البريد الإلكتروني"
-            dir="ltr"
-            autoComplete="username"
-            value={identifier}
-            onChange={(event) => setIdentifier(toEnglishDigits(event.target.value))}
-          />
+            <Input
+              label="رقم الموبايل أو البريد الإلكتروني"
+              dir="ltr"
+              autoComplete="username"
+              value={identifier}
+              onChange={(event) => setIdentifier(toEnglishDigits(event.target.value))}
+            />
 
-          <Button type="submit" size="lg" fullWidth loading={submitting}>
-            متابعة
-          </Button>
-        </form>
+            <Button type="submit" size="lg" fullWidth loading={submitting}>
+              {isStudent && cleanIdentifier ? 'استعادة كلمة المرور للطالب' : 'متابعة'}
+            </Button>
+          </form>
 
-        <p className="mt-5 text-center text-sm text-slate-400">
-          تذكرت كلمة المرور؟{' '}
-          <Link to="/login" className="font-bold text-gold-400 hover:text-gold-300">
-            تسجيل الدخول
-          </Link>
-        </p>
-      </Card>
-    </div>
+          <p className="mt-5 text-center text-sm text-slate-400">
+            تذكرت كلمة المرور؟{' '}
+            <Link to="/login" className="font-bold text-gold-400 hover:text-gold-300">
+              تسجيل الدخول
+            </Link>
+          </p>
+        </Card>
+      </div>
+
+      <StudentPasswordRecovery
+        open={showStudentRecovery}
+        onClose={() => setShowStudentRecovery(false)}
+        studentIdentifier={cleanIdentifier}
+      />
+    </>
   );
 }
