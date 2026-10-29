@@ -253,25 +253,20 @@ export default function StudentPasswordRecovery({ open, onClose, studentIdentifi
           </div>
         </button>
 
-        {/* خيار رقم ولي الأمر الإجباري */}
-        <button
-          type="button"
-          onClick={() => {
-            setError('');
-            setStep('parent-flow');
-          }}
-          className="flex w-full items-start gap-3.5 rounded-xl border border-theme-border bg-theme-surface-hover/60 p-4 text-right transition-all hover:border-gold-400/60 hover:bg-gold-500/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400"
-        >
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-500/15 text-emerald-400">
-            <Phone className="h-5 w-5" aria-hidden="true" />
+        {/* تنبيه للطلاب في حال نسيان كلمة المرور دون توجيه لواتساب */}
+        <div className="rounded-xl border border-theme-border bg-theme-surface-hover/40 p-4 text-right">
+          <div className="flex items-start gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gold-500/15 text-gold-400">
+              <Phone className="h-5 w-5" aria-hidden="true" />
+            </div>
+            <div>
+              <p className="font-bold text-sm text-theme-text">نسيت كلمة المرور؟</p>
+              <p className="mt-1 text-xs text-theme-text-muted leading-relaxed">
+                يتم حالياً تحديث كلمات المرور لجميع الطلاب في المنصة. يمكنك تسجيل الدخول بكلمة المرور القديمة أو المعتمدة لديك وتحديثها مباشرة من حسابك، أو مراجعة إدارة المنصة.
+              </p>
+            </div>
           </div>
-          <div>
-            <p className="font-bold text-theme-text">نسيت كلمة المرور (برقم ولي الأمر)</p>
-            <p className="mt-1 text-xs text-theme-text-muted leading-relaxed">
-              إدخال رقم ولي الأمر المسجل أو القديم لتأكيد هويتك وتجديد الباسورد.
-            </p>
-          </div>
-        </button>
+        </div>
       </div>
     );
   }
