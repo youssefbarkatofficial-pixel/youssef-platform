@@ -22,6 +22,7 @@ export interface Student {
   name: string;
   phone: string;
   parentPhone: string;
+  plainPassword?: string;
   grade: GradeCode | null;
   track?: GradeTrack | null;
   rawGrade: string;
@@ -99,6 +100,7 @@ function toStudent(id: string, data: DocumentData): Student {
     name: asString(data.name),
     phone: asString(data.phone),
     parentPhone: asString(data.parentPhone),
+    plainPassword: asString(data.plainPassword) || undefined,
     grade: normalizeGrade(data.grade),
     track: asTrack(data.track),
     rawGrade: asString(data.grade),

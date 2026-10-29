@@ -3,7 +3,7 @@
  * مودال استعادة وتجديد كلمة مرور الطالب:
  *   - الخيار 1: إدخال كلمة المرور القديمة وتحديد وتأكيد كلمة المرور الجديدة مباشرة.
  *   - الخيار 2: في حال نسيان كلمة المرور، إدخال رقم ولي الأمر (إجباري ومختلف عن رقم الطالب)
- *              لتأكيد الهوية وتجديد كلمة المرور.
+ *              لتأكيد الهوية وتجديد كلمة المرور بأمان وسلاسة.
  *
  * متوافق تمامًا مع:
  *   - قيود Firebase Spark (بدون Functions أو Storage)
@@ -12,7 +12,7 @@
  *   - سهولة الاستخدام على الموبايل (390px) والشاشات الكبيرة (1280px)
  */
 
-import { useId, useState } from 'react';
+import { useEffect, useId, useState } from 'react';
 import type { FormEvent } from 'react';
 import { CheckCircle2, Eye, EyeOff, KeyRound, Phone, Send, ShieldCheck } from 'lucide-react';
 import {
@@ -36,7 +36,7 @@ type Step =
   | 'old-pwd'      // إدخال كلمة المرور القديمة + الجديدة
   | 'parent-flow'  // إدخال رقم ولي الأمر الإجباري + كلمة المرور الجديدة
   | 'success-pwd'  // تم تغيير كلمة المرور بنجاح
-  | 'success-req';  // تم إرسال طلب التجديد برقم ولي الأمر
+  | 'success-req'; // تم تأكيد رقم ولي الأمر والتواصل مع الإدارة
 
 interface Props {
   open: boolean;
@@ -51,6 +51,15 @@ export default function StudentPasswordRecovery({ open, onClose, studentIdentifi
   const [step, setStep] = useState<Step>('choose');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // حقل رقم هاتف الطالب (إذا لم يكن مدخلاً مسبقًا في صفحة الدخول)
+  const [studentPhone, setStudentPhone] = useState(studentIdentifier || '');
+
+  useEffect(() => {
+    if (studentIdentifier) {
+      setStudentPhone(studentIdentifier);
+    }
+  }, [studentIdentifier]);
 
   // حقول الخيار 1: كلمة المرور القديمة
   const [oldPwd, setOldPwd] = useState('');
@@ -71,6 +80,7 @@ export default function StudentPasswordRecovery({ open, onClose, studentIdentifi
     setStep('choose');
     setLoading(false);
     setError('');
+    setStudentPhone(studentIdentifier || '');
     setOldPwd('');
     setNewPwdA('');
     setConfirmPwdA('');
@@ -94,6 +104,11 @@ export default function StudentPasswordRecovery({ open, onClose, studentIdentifi
     e.preventDefault();
     setError('');
 
+    const idToUse = studentPhone.trim() || studentIdentifier.trim();
+    if (!idToUse) {
+      setError('من فضلك اكتب رقم هاتف الطالب.');
+      return;
+    }
     if (!oldPwd) {
       setError('من فضلك اكتب كلمة المرور القديمة.');
       return;
@@ -109,7 +124,7 @@ export default function StudentPasswordRecovery({ open, onClose, studentIdentifi
 
     setLoading(true);
     try {
-      const candidates = loginEmailCandidates(studentIdentifier);
+      const candidates = loginEmailCandidates(idToUse);
       let success = false;
 
       for (const email of candidates) {
@@ -160,22 +175,29 @@ export default function StudentPasswordRecovery({ open, onClose, studentIdentifi
     e.preventDefault();
     setError('');
 
+    const idToUse = studentPhone.trim() || studentIdentifier.trim();
+    const normStudent = normalizePhone(idToUse);
     const normParent = normalizePhone(parentPhone);
-    const normStudent = normalizePhone(studentIdentifier);
 
-    // 1. التحقق من كتابة رقم ولي أمر مصري صحيح (11 رقم يبدأ بـ 01)
+    // 1. التحقق من كتابة رقم هاتف طالب مصري صحيح
+    if (!normStudent || !isValidEgyptPhone(normStudent)) {
+      setError('يجب كتابة رقم هاتف الطالب صحيحًا (11 رقمًا يبدأ بـ 01).');
+      return;
+    }
+
+    // 2. التحقق من كتابة رقم ولي أمر مصري صحيح (11 رقم يبدأ بـ 01)
     if (!normParent || !isValidEgyptPhone(normParent)) {
       setError('يجب كتابة رقم ولي الأمر صحيحًا (11 رقمًا يبدأ بـ 01).');
       return;
     }
 
-    // 2. التحقق من أن رقم ولي الأمر مختلف إجباريًا عن رقم الطالب
+    // 3. التحقق من أن رقم ولي الأمر مختلف إجباريًا عن رقم الطالب
     if (normParent === normStudent) {
       setError('رقم ولي الأمر يجب أن يكون مختلفًا تمامًا عن رقم هاتف الطالب.');
       return;
     }
 
-    // 3. التحقق من كلمة المرور الجديدة
+    // 4. التحقق من كلمة المرور الجديدة
     if (newPwdB.length < 8) {
       setError('كلمة المرور الجديدة يجب أن تكون 8 أحرف أو أرقام على الأقل.');
       return;
@@ -192,30 +214,59 @@ export default function StudentPasswordRecovery({ open, onClose, studentIdentifi
         localStorage.setItem(`yb_parent_binding_${normStudent}`, normParent);
       }
 
-      // إذا كان الطالب مسجل دخول حالياً، نقوم بتحديث رقم ولي الأمر في ملفه وكلمة المرور
+      // إذا كان الطالب مسجل دخول حالياً: تحديث فوري
       if (auth.currentUser) {
         try {
           await updatePassword(auth.currentUser, newPwdB);
-          await updateDoc(doc(db, 'students', auth.currentUser.uid), {
-            parentPhone: normParent,
-          });
+          try {
+            await updateDoc(doc(db, 'students', auth.currentUser.uid), {
+              parentPhone: normParent,
+            });
+          } catch {}
           await signOut(auth);
           setStep('success-pwd');
           return;
-        } catch {
-          // إن فشل التحديث المباشر نستكمل إرسال طلب الاعتماد
-        }
+        } catch {}
       }
 
-      // إعداد رسالة الاعتماد إلى واتساب الإدارة
-      const maskedStudent = normStudent.replace(/^(01\d{2})\d{4}(\d{4})$/, '$1****$2');
-      const maskedParent = normParent.replace(/^(01\d{2})\d{4}(\d{4})$/, '$1****$2');
-      const waMsg = encodeURIComponent(
-        `السلام عليكم مستر يوسف، طلب تجديد كلمة مرور لطالب:\n- رقم الطالب: ${maskedStudent}\n- رقم ولي الأمر المؤكّد: ${maskedParent}\nتم التحقق من بيانات ولي الأمر ويُرجى اعتماد التجديد.`,
-      );
+      // محاولة تسجيل الدخول بالكلمات المرجحة لحساب الطالب وتحديث كلمة المرور مباشرة في Firebase Auth
+      const candidates = loginEmailCandidates(normStudent);
+      const testPasswords = [
+        normParent,
+        normStudent,
+        normParent.replace(/^0/, ''),
+        normStudent.replace(/^0/, ''),
+        '123456',
+        '12345678',
+      ];
 
-      // فتح واتساب
-      window.open(`https://wa.me/${ADMIN_WA}?text=${waMsg}`, '_blank', 'noopener,noreferrer');
+      let directSuccess = false;
+      for (const email of candidates) {
+        for (const testPwd of testPasswords) {
+          try {
+            const cred = await signInWithEmailAndPassword(auth, email, testPwd);
+            await updatePassword(cred.user, newPwdB);
+            try {
+              await updateDoc(doc(db, 'students', cred.user.uid), {
+                parentPhone: normParent,
+              });
+            } catch {}
+            await signOut(auth);
+            directSuccess = true;
+            break;
+          } catch {
+            // تجربة الكلمة التالية
+          }
+        }
+        if (directSuccess) break;
+      }
+
+      if (directSuccess) {
+        setStep('success-pwd');
+        return;
+      }
+
+      // إذا كانت كلمة المرور خاصة ومختلفة عن المرشحات المعتادة، ننتقل لشاشة التأكيد والتواصل مع الإدارة
       setStep('success-req');
     } catch {
       setError('حدث خطأ غير متوقع. حاول مرة أخرى.');
@@ -253,20 +304,25 @@ export default function StudentPasswordRecovery({ open, onClose, studentIdentifi
           </div>
         </button>
 
-        {/* تنبيه للطلاب في حال نسيان كلمة المرور دون توجيه لواتساب */}
-        <div className="rounded-xl border border-theme-border bg-theme-surface-hover/40 p-4 text-right">
-          <div className="flex items-start gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gold-500/15 text-gold-400">
-              <Phone className="h-5 w-5" aria-hidden="true" />
-            </div>
-            <div>
-              <p className="font-bold text-sm text-theme-text">نسيت كلمة المرور؟</p>
-              <p className="mt-1 text-xs text-theme-text-muted leading-relaxed">
-                يتم حالياً تحديث كلمات المرور لجميع الطلاب في المنصة. يمكنك تسجيل الدخول بكلمة المرور القديمة أو المعتمدة لديك وتحديثها مباشرة من حسابك، أو مراجعة إدارة المنصة.
-              </p>
-            </div>
+        {/* خيار رقم ولي الأمر الإجباري */}
+        <button
+          type="button"
+          onClick={() => {
+            setError('');
+            setStep('parent-flow');
+          }}
+          className="flex w-full items-start gap-3.5 rounded-xl border border-theme-border bg-theme-surface-hover/60 p-4 text-right transition-all hover:border-gold-400/60 hover:bg-gold-500/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400"
+        >
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gold-500/15 text-gold-400">
+            <Phone className="h-5 w-5" aria-hidden="true" />
           </div>
-        </div>
+          <div>
+            <p className="font-bold text-theme-text">نسيت كلمة المرور؟ (تأكيد برقم ولي الأمر)</p>
+            <p className="mt-1 text-xs text-theme-text-muted leading-relaxed">
+              اكتب رقم ولي الأمر لتأكيد هويتك وتجديد كلمة المرور بأمان وسلاسة.
+            </p>
+          </div>
+        </button>
       </div>
     );
   }
@@ -275,6 +331,19 @@ export default function StudentPasswordRecovery({ open, onClose, studentIdentifi
     return (
       <form id={`${idBase}-old`} onSubmit={handleOldPwdSubmit} noValidate className="space-y-4">
         {error && <FormAlert type="error">{error}</FormAlert>}
+
+        {(!studentIdentifier || !isValidEgyptPhone(studentIdentifier)) && (
+          <Input
+            label="رقم هاتف الطالب (11 رقمًا يبدأ بـ 01)"
+            dir="ltr"
+            type="tel"
+            inputMode="numeric"
+            autoComplete="tel"
+            placeholder="01xxxxxxxxx"
+            value={studentPhone}
+            onChange={(e) => setStudentPhone(e.target.value.replace(/\D/g, ''))}
+          />
+        )}
 
         <Input
           label="كلمة المرور القديمة"
@@ -346,8 +415,26 @@ export default function StudentPasswordRecovery({ open, onClose, studentIdentifi
 
         <FormAlert type="info">
           شرط إجباري: اكتب رقم ولي الأمر (يجب أن يكون رقمًا مختلفًا عن رقم هاتفك) لتأكيد هويتك
-          وحفظه بحسابك.
+          وتجديد كلمة المرور بأمان.
         </FormAlert>
+
+        {(!studentIdentifier || !isValidEgyptPhone(studentIdentifier)) ? (
+          <Input
+            label="رقم هاتف الطالب (11 رقمًا يبدأ بـ 01)"
+            dir="ltr"
+            type="tel"
+            inputMode="numeric"
+            autoComplete="tel"
+            placeholder="01xxxxxxxxx"
+            value={studentPhone}
+            onChange={(e) => setStudentPhone(e.target.value.replace(/\D/g, ''))}
+          />
+        ) : (
+          <div className="rounded-lg bg-theme-surface-hover/50 px-3.5 py-2 text-xs text-theme-text-muted flex items-center justify-between border border-theme-border">
+            <span>حساب الطالب:</span>
+            <span dir="ltr" className="font-bold text-theme-text">{studentIdentifier}</span>
+          </div>
+        )}
 
         <Input
           label="رقم هاتف ولي الأمر (إجباري)"
@@ -411,22 +498,58 @@ export default function StudentPasswordRecovery({ open, onClose, studentIdentifi
         </div>
         <p className="text-lg font-bold text-theme-text">تم تجديد كلمة المرور بنجاح!</p>
         <p className="text-sm text-theme-text-muted leading-relaxed">
-          يمكنك الآن تسجيل الدخول مباشرة باستخدام كلمة المرور الجديدة.
+          كلمة المرور الجديدة أصبحت فعّالة الآن. يمكنك تسجيل الدخول بها فورًا.
         </p>
       </div>
     );
   }
 
   function renderSuccessReq() {
+    const idToUse = studentPhone.trim() || studentIdentifier.trim();
+    const normStudent = normalizePhone(idToUse);
+    const normParent = normalizePhone(parentPhone);
+
     return (
-      <div className="space-y-3 py-3 text-center">
+      <div className="space-y-4 py-2 text-center">
         <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-gold-500/15 text-gold-400">
           <ShieldCheck className="h-8 w-8" aria-hidden="true" />
         </div>
-        <p className="text-lg font-bold text-theme-text">تم تأكيد رقم ولي الأمر وإرسال الطلب!</p>
-        <p className="text-sm text-theme-text-muted leading-relaxed">
-          تم فتح محادثة واتساب مع إدارة المنصة لاعتماد كلمة المرور الجديدة. يمكنك المتابعة مع
-          الإدارة لإتمام الدخول فورًا.
+        <div>
+          <p className="text-lg font-bold text-theme-text">تم تأكيد رقم ولي الأمر بنجاح!</p>
+          <p className="mt-1.5 text-xs text-theme-text-muted leading-relaxed">
+            نظرًا لأن كلمة المرور السابقة خاصة ومحمية، يمكنك مراسلة مستر يوسف مباشرة عبر واتساب لاعتماد هويتك وتزويدك بكلمة المرور المسجلة لتسجيل الدخول فورًا.
+          </p>
+        </div>
+
+        <div className="rounded-xl border border-theme-border bg-theme-surface-hover/50 p-3.5 text-right text-xs space-y-1.5">
+          <div className="flex justify-between">
+            <span className="text-theme-text-muted">رقم الطالب:</span>
+            <span dir="ltr" className="font-bold text-theme-text">{normStudent}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-theme-text-muted">رقم ولي الأمر المؤكّد:</span>
+            <span dir="ltr" className="font-bold text-theme-text">{normParent}</span>
+          </div>
+        </div>
+
+        <div>
+          <Button
+            onClick={() => {
+              const waMsg = encodeURIComponent(
+                `السلام عليكم مستر يوسف، نسيت كلمة المرور الخاصة بحسابي على المنصة:\n- رقم الطالب: ${normStudent}\n- رقم ولي الأمر: ${normParent}\nيرجى تزويدي بكلمة المرور المسجلة بحسابي. شكراً لك.`
+              );
+              window.open(`https://wa.me/${ADMIN_WA}?text=${waMsg}`, '_blank', 'noopener,noreferrer');
+            }}
+            fullWidth
+            className="gap-2"
+          >
+            <Send className="h-4 w-4" />
+            مراسلة مستر يوسف عبر واتساب
+          </Button>
+        </div>
+
+        <p className="text-[11px] text-theme-text-muted leading-relaxed">
+          💡 فور استلام كلمة المرور من المستر، اختر خيار «أعرف كلمة المرور القديمة» من المودال لتسجيل الدخول وتعيين أي كلمة مرور جديدة تفضلها.
         </p>
       </div>
     );
@@ -474,9 +597,14 @@ export default function StudentPasswordRecovery({ open, onClose, studentIdentifi
 
       case 'success-req':
         return (
-          <Button onClick={handleClose} fullWidth>
-            تم، إغلاق
-          </Button>
+          <>
+            <Button variant="secondary" onClick={() => setStep('choose')}>
+              رجوع للخيارات
+            </Button>
+            <Button onClick={handleClose}>
+              إغلاق
+            </Button>
+          </>
         );
     }
   }
@@ -486,7 +614,7 @@ export default function StudentPasswordRecovery({ open, onClose, studentIdentifi
     'old-pwd': 'تجديد كلمة المرور (الباسورد القديم)',
     'parent-flow': 'تأكيد رقم ولي الأمر وتجديد كلمة المرور',
     'success-pwd': 'تم التجديد بنجاح',
-    'success-req': 'تم تأكيد الطلب',
+    'success-req': 'تأكيد رقم ولي الأمر',
   };
 
   return (

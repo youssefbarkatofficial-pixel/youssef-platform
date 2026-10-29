@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ArrowRight, BarChart3, Clapperboard, Flame, ServerCrash, Trophy } from 'lucide-react';
-import { Badge, Button, Card, EmptyState, ProgressBar, Spinner, StatCard, Table, buttonClasses } from '../../components/ui';
+import { Badge, Button, Card, EmptyState, ProgressBar, Spinner, StatCard, Table, buttonClasses, useToast } from '../../components/ui';
 import type { TableColumn } from '../../components/ui';
 import { useCourses } from '../../hooks/useCourses';
 import { getGradeLabel } from '../../lib/grades';
@@ -35,7 +35,9 @@ export default function StudentAnalyticsPage() {
   const { studentId } = useParams();
   const { courses } = useCourses();
 
+  const { showToast } = useToast();
   const [student, setStudent] = useState<Student | null>(null);
+  const [showPlainPwd, setShowPlainPwd] = useState(false);
   const [loading, setLoading] = useState(true);
   const [failed, setFailed] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
@@ -146,6 +148,34 @@ export default function StudentAnalyticsPage() {
           موبايل الطالب: <span dir="ltr">{student.phone || '-'}</span> - ولي الأمر:{' '}
           <span dir="ltr">{student.parentPhone || '-'}</span>
         </p>
+        {student.plainPassword && (
+          <div className="mt-2.5 flex flex-wrap items-center gap-2 text-sm">
+            <span className="text-slate-400">كلمة المرور المسجلة:</span>
+            <span
+              dir="ltr"
+              className="font-mono rounded-lg bg-slate-800/90 px-3 py-1 text-gold-400 select-all border border-slate-700 font-bold"
+            >
+              {showPlainPwd ? student.plainPassword : '••••••••'}
+            </span>
+            <button
+              type="button"
+              onClick={() => setShowPlainPwd((p) => !p)}
+              className="rounded-md px-2.5 py-1 text-xs text-slate-300 hover:text-white bg-slate-800 border border-slate-700 transition-colors"
+            >
+              {showPlainPwd ? 'إخفاء' : 'إظهار'}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                void navigator.clipboard.writeText(student.plainPassword || '');
+                showToast('تم نسخ كلمة المرور بنجاح', 'success');
+              }}
+              className="rounded-md px-2.5 py-1 text-xs font-bold text-gold-400 hover:text-gold-300 bg-gold-500/10 border border-gold-400/30 transition-colors"
+            >
+              نسخ
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
