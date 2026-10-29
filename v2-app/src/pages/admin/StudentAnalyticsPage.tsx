@@ -152,6 +152,32 @@ export default function StudentAnalyticsPage() {
         </p>
         {(() => {
           const effectivePwd = pwdOverride || resolveStudentPassword(student);
+          if (!effectivePwd) {
+            return (
+              <div className="mt-2.5 flex flex-wrap items-center gap-2 text-sm">
+                <span className="text-slate-400">كلمة المرور المسجلة:</span>
+                <span className="rounded-md bg-amber-500/10 px-2.5 py-1 text-xs text-amber-400 border border-amber-500/20 font-medium">
+                  بانتظار التجديد الإجباري من الطالب
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const promptLabel = student.name ? `تحديد كلمة المرور للطالب (${student.name}):` : 'تحديد كلمة المرور:';
+                    const newPwd = window.prompt(promptLabel, '');
+                    if (newPwd !== null && newPwd.trim().length > 0) {
+                      const trimmed = newPwd.trim();
+                      setStoredAdminPassword(student.id, trimmed, student.phone);
+                      setPwdOverride(trimmed);
+                      showToast('تم حفظ كلمة المرور بنجاح', 'success');
+                    }
+                  }}
+                  className="rounded-md px-2.5 py-1 text-xs font-bold text-sky-400 hover:text-sky-300 bg-sky-500/10 border border-sky-400/30 transition-colors"
+                >
+                  تحديد كلمة المرور
+                </button>
+              </div>
+            );
+          }
           return (
             <div className="mt-2.5 flex flex-wrap items-center gap-2 text-sm">
               <span className="text-slate-400">كلمة المرور المسجلة:</span>

@@ -27,6 +27,8 @@ const {
   getStoredAdminPassword,
   setStoredAdminPassword,
   resolveStudentPassword,
+  isPasswordResetDone,
+  markPasswordResetDone,
 } = await import('../src/lib/studentPasswords.ts');
 
 test('resolveStudentPassword returns plainPassword if present and valid', () => {
@@ -38,21 +40,21 @@ test('resolveStudentPassword returns plainPassword if present and valid', () => 
   assert.equal(resolveStudentPassword(student), 'my_secret_pass');
 });
 
-test('resolveStudentPassword falls back to phone if plainPassword is undefined', () => {
+test('resolveStudentPassword returns null (not phone!) if plainPassword is undefined', () => {
   const student = {
     id: 'uid_2',
     phone: '01098765432',
   };
-  assert.equal(resolveStudentPassword(student), '01098765432');
+  assert.equal(resolveStudentPassword(student), null);
 });
 
-test('resolveStudentPassword falls back to phone if plainPassword is "مخفية"', () => {
+test('resolveStudentPassword returns null (not phone!) if plainPassword is "مخفية"', () => {
   const student = {
     id: 'uid_3',
     phone: '01234567890',
     plainPassword: 'مخفية',
   };
-  assert.equal(resolveStudentPassword(student), '01234567890');
+  assert.equal(resolveStudentPassword(student), null);
 });
 
 test('admin override takes precedence over plainPassword and phone', () => {
@@ -75,4 +77,10 @@ test('reading from legacy strictUsers in localStorage', () => {
     phone: '01555555555',
   };
   assert.equal(resolveStudentPassword(student), 'legacy_strict_pass');
+});
+
+test('isPasswordResetDone and markPasswordResetDone behave correctly', () => {
+  assert.equal(isPasswordResetDone('student_xyz'), false);
+  markPasswordResetDone('student_xyz');
+  assert.equal(isPasswordResetDone('student_xyz'), true);
 });

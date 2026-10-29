@@ -25,6 +25,7 @@ import {
 import { doc, updateDoc } from 'firebase/firestore';
 import { auth, db } from '../../lib/firebase';
 import { isValidEgyptPhone, loginEmailCandidates, normalizePhone } from '../../lib/phone';
+import { markPasswordResetDone, setStoredAdminPassword } from '../../lib/studentPasswords';
 import FormAlert from './FormAlert';
 import { Button, Input, Modal } from '../ui';
 
@@ -152,6 +153,10 @@ export default function StudentPasswordRecovery({ open, onClose, studentIdentifi
         return;
       }
 
+      const normStudent = normalizePhone(idToUse);
+      setStoredAdminPassword(idToUse, newPwdA, normStudent);
+      markPasswordResetDone(idToUse);
+      if (normStudent) markPasswordResetDone(normStudent);
       setStep('success-pwd');
     } catch (err) {
       const code =

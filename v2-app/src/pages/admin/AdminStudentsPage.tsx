@@ -27,7 +27,7 @@ export default function AdminStudentsPage() {
   const [revealedIds, setRevealedIds] = useState<Set<string>>(new Set());
   const [pwdOverrides, setPwdOverrides] = useState<Record<string, string>>({});
 
-  const getEffectivePwd = (student: Student): string => {
+  const getEffectivePwd = (student: Student): string | null => {
     if (pwdOverrides[student.id]) return pwdOverrides[student.id];
     if (student.phone && pwdOverrides[student.phone]) return pwdOverrides[student.phone];
     return resolveStudentPassword(student);
@@ -132,6 +132,29 @@ export default function AdminStudentsPage() {
       render: (student) => {
         const pwd = getEffectivePwd(student);
         const isRevealed = revealedIds.has(student.id);
+
+        if (!pwd) {
+          return (
+            <div className="flex items-center gap-1.5" dir="ltr">
+              <span
+                className="text-[11px] text-amber-400/90 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20 font-medium"
+                title="الحساب بانتظار التجديد الإجباري من الطالب، أو يمكنك تحديد كلمة مرور له يدويًا"
+              >
+                بانتظار التجديد
+              </span>
+              <button
+                type="button"
+                onClick={() => handleEditPassword(student, '')}
+                className="p-1 text-sky-400 hover:text-sky-300 rounded hover:bg-sky-500/10 transition-colors"
+                title="تحديد كلمة المرور يدويًا"
+                aria-label="تحديد كلمة المرور يدويًا"
+              >
+                <Pencil className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          );
+        }
+
         return (
           <div className="flex items-center gap-1.5" dir="ltr">
             <span className="font-mono text-xs text-gold-400 bg-slate-800/90 px-2 py-0.5 rounded border border-slate-700 font-bold select-all min-w-[5.5rem] text-center">

@@ -16,6 +16,7 @@ import { extractPracticeQuestionsFromCourses } from '../lib/revision/adapter';
 import DashboardShell from '../components/layout/DashboardShell';
 import type { NavItem } from '../components/layout/DashboardShell';
 import AnnualGradeModal from '../components/student/AnnualGradeModal';
+import MandatoryPasswordResetModal from '../components/student/MandatoryPasswordResetModal';
 import BousalaChatDrawer from '../components/student/BousalaChatDrawer';
 
 const baseItems: NavItem[] = [
@@ -88,6 +89,7 @@ export default function StudentLayout() {
     <>
       <DashboardShell items={navItems} areaLabel="منطقة الطالب" />
       <AnnualGradeModal />
+      <MandatoryPasswordResetModal />
       <BousalaChatDrawer />
     </>
   );

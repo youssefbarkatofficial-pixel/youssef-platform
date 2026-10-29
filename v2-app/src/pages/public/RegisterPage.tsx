@@ -11,6 +11,8 @@ import type { GradeTrack } from '../../lib/grades';
 import { isValidEgyptPhone, toEnglishDigits } from '../../lib/phone';
 import { isPasswordValid, isValidPersonName } from '../../lib/validation';
 import { getAuthErrorMessage, registerStudent } from '../../services/auth';
+import { markPasswordResetDone, setStoredAdminPassword } from '../../lib/studentPasswords';
+import { auth } from '../../lib/firebase';
 import { getGeneralSettings } from '../../services/settings';
 
 interface FormState {
@@ -153,6 +155,12 @@ export default function RegisterPage() {
         gov: form.gov === OUTSIDE_EGYPT ? form.country.trim() : form.gov,
         password: form.password,
       });
+      if (auth.currentUser) {
+        markPasswordResetDone(auth.currentUser.uid);
+        setStoredAdminPassword(auth.currentUser.uid, form.password, form.phone);
+      }
+      markPasswordResetDone(form.phone);
+      setStoredAdminPassword(form.phone, form.password, form.phone);
       await refresh();
       showToast('تم إنشاء حسابك بنجاح. أهلًا بك!', 'success');
       navigate('/student', { replace: true });

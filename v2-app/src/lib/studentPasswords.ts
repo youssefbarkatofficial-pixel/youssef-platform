@@ -91,12 +91,37 @@ export function setStoredAdminPassword(phoneOrId: string, newPassword: string, s
   }
 }
 
+/** فحص هل قام الطالب بإعادة تعيين كلمة المرور الإلزامية */
+export function isPasswordResetDone(studentIdOrPhone?: string): boolean {
+  if (!studentIdOrPhone || typeof window === 'undefined') return false;
+  try {
+    return localStorage.getItem(`yb_pwd_reset_done_${studentIdOrPhone.trim()}`) === 'true';
+  } catch {
+    return false;
+  }
+}
+
+/** تسجيل إتمام الطالب لإعادة تعيين كلمة المرور */
+export function markPasswordResetDone(studentIdOrPhone: string): void {
+  if (!studentIdOrPhone || typeof window === 'undefined') return;
+  try {
+    localStorage.setItem(`yb_pwd_reset_done_${studentIdOrPhone.trim()}`, 'true');
+  } catch {
+    // ignore
+  }
+}
+
+/**
+ * استخراج كلمة المرور الحقيقية للطالب.
+ * لا نعيد رقم هاتف الطالب أبداً كبديل لكلمة المرور.
+ * إن لم تكن معروفة بعد، نعيد null ليظهر في الجدول أنها بانتظار التجديد الإجباري.
+ */
 export function resolveStudentPassword(student: {
   id?: string;
   phone?: string;
   plainPassword?: string;
-}): string {
-  // 1. فحص أي تعديل يدوي للأدمن في المتصفح
+}): string | null {
+  // 1. فحص أي كلمة مرور مسجلة محلياً أو معدلة من الأدمن أو المستعادة
   const adminOverride =
     getStoredAdminPassword(student.id) || (student.phone ? getStoredAdminPassword(student.phone) : null);
   if (adminOverride) return adminOverride;
@@ -106,10 +131,6 @@ export function resolveStudentPassword(student: {
     return student.plainPassword;
   }
 
-  // 3. كلمة المرور الافتراضية للطلاب الجدد (رقم الهاتف كما في المنصة الأصلية)
-  if (student.phone && student.phone.trim().length > 0) {
-    return student.phone.trim();
-  }
-
-  return '123456';
+  // إذا لم تكن كلمة المرور مسجلة بعد، لا نضع رقم الهاتف! نعيد null ليعرض النظام أنها بانتظار التجديد
+  return null;
 }
