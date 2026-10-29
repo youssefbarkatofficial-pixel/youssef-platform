@@ -15,8 +15,8 @@ import type { BeforeInstallPromptEvent } from '../../pwa/captureInstallPrompt';
  * - Hidden on exam/assessment/attempt/watch pages (HIDE_ON).
  * - Hidden when temporarily dismissed by student.
  * - Shows confirmation modal with Escape, focus trap, dark/light theme support.
- * - iOS: opens guided steps (Share → Add to Home Screen).
- * - Android/Desktop: confirms then calls native prompt() for real WebAPK install.
+ * - iOS: opens guided steps (Share → Add to Home Screen) - iOS Safari Guide.
+ * - Android/Desktop: confirms, reassures safety & security scan, then triggers direct download of ybplatform.apk without navigation.
  */
 const HIDE_ON: RegExp[] = [
   /\/assessment\//i,
@@ -53,11 +53,11 @@ function dismissedRecently(): boolean {
 
 export default function InstallAppButton() {
   const { pathname } = useLocation();
-  const [available, setAvailable] = useState<boolean>(() => !!window.__ybInstallPrompt);
   const [installed, setInstalled] = useState<boolean>(() => isStandalone());
   const [hidden, setHidden] = useState<boolean>(() => dismissedRecently());
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<'confirm' | 'ios' | 'fallback'>('confirm');
+  const [downloadStarted, setDownloadStarted] = useState(false);
 
   const ios = useMemo(() => isIOS(), []);
 
@@ -66,16 +66,12 @@ export default function InstallAppButton() {
   const primaryButtonRef = useRef<HTMLButtonElement | null>(null);
 
   useEffect(() => {
-    const onAvail = () => setAvailable(true);
     const onInstalled = () => {
       setInstalled(true);
-      setAvailable(false);
       setIsModalOpen(false);
     };
-    window.addEventListener('yb-install-available', onAvail);
     window.addEventListener('yb-installed', onInstalled);
     return () => {
-      window.removeEventListener('yb-install-available', onAvail);
       window.removeEventListener('yb-installed', onInstalled);
     };
   }, []);
@@ -136,39 +132,29 @@ export default function InstallAppButton() {
     } else {
       setModalMode('confirm');
     }
+    setDownloadStarted(false);
     setIsModalOpen(true);
   }, [ios]);
 
   const closeModal = useCallback(() => {
     setIsModalOpen(false);
+    setDownloadStarted(false);
     setTimeout(() => {
       triggerButtonRef.current?.focus();
     }, 50);
   }, []);
 
-  const handleInstallClick = useCallback(async () => {
-    const evt = window.__ybInstallPrompt as BeforeInstallPromptEvent | null | undefined;
-    if (evt) {
-      try {
-        await evt.prompt();
-        const choice = await evt.userChoice;
-        if (choice?.outcome === 'accepted') {
-          setInstalled(true);
-          setAvailable(false);
-          window.__ybInstallPrompt = null;
-          closeModal();
-        } else {
-          closeModal();
-        }
-      } catch {
-        setModalMode('fallback');
-      }
-      return;
-    }
+  // Direct APK file download without navigating to another page
+  const handleInstallClick = useCallback(() => {
+    const a = document.createElement('a');
+    a.href = '/downloads/ybplatform.apk';
+    a.download = 'ybplatform.apk';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
 
-    // Fallback if beforeinstallprompt is not currently held
-    setModalMode('fallback');
-  }, [closeModal]);
+    setDownloadStarted(true);
+  }, []);
 
   const dismiss = useCallback(() => {
     try {
@@ -184,7 +170,6 @@ export default function InstallAppButton() {
 
   const hideHere = HIDE_ON.some((re) => re.test(pathname));
   if (installed || hidden || hideHere) return null;
-  if (!available && !ios && !('serviceWorker' in navigator)) return null;
 
   return (
     <>
@@ -357,13 +342,13 @@ export default function InstallAppButton() {
                   تثبيت تطبيق منصة يوسف بركات
                 </h3>
                 <span style={{ fontSize: 13, color: 'var(--brand-gold, #d4a64f)', fontWeight: 600 }}>
-                  تطبيق الويب الرسمي المعتمد
+                  تطبيق رسمي معتمد للأندرويد
                 </span>
               </div>
             </div>
 
             {/* Modal Body: Case 1 - Confirm Prompt */}
-            {modalMode === 'confirm' && (
+            {modalMode === 'confirm' && !downloadStarted && (
               <>
                 <p
                   id="yb-install-desc"
@@ -381,24 +366,31 @@ export default function InstallAppButton() {
                   style={{
                     background: 'var(--brand-gold-subtle, rgba(212,166,79,0.08))',
                     border: '1px solid var(--border-subtle, rgba(212,166,79,0.2))',
-                    borderRadius: 12,
-                    padding: '12px 14px',
+                    borderRadius: 14,
+                    padding: '14px 16px',
                     marginBottom: 20,
                   }}
                 >
-                  <ul
-                    style={{
-                      margin: 0,
-                      paddingInlineStart: 18,
-                      fontSize: 13.5,
-                      lineHeight: 1.8,
-                      color: 'var(--text-secondary, #cbd5e1)',
-                    }}
-                  >
-                    <li>أيقونة مستقلة على شاشتك الرئيسية للوصول السريع.</li>
-                    <li>تجربة شاشة كاملة وسرعة أعلى بدون شريط المتصفح.</li>
-                    <li>متابعة دروسك وامتحاناتك بسهولة في أي وقت.</li>
-                  </ul>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+                      <span style={{ fontSize: 16, lineHeight: '20px' }}>🛡️</span>
+                      <span style={{ fontSize: 13.5, lineHeight: 1.6, color: 'var(--text-secondary, #cbd5e1)' }}>
+                        <strong style={{ color: 'var(--brand-gold, #d4a64f)' }}>التطبيق آمن 100%:</strong> تطبيق المنصة سليم وموثوق تماماً وبلا أي مشاكل برمجية أو أمنية.
+                      </span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+                      <span style={{ fontSize: 16, lineHeight: '20px' }}>🔍</span>
+                      <span style={{ fontSize: 13.5, lineHeight: 1.6, color: 'var(--text-secondary, #cbd5e1)' }}>
+                        <strong style={{ color: 'var(--brand-gold, #d4a64f)' }}>فحص الأمان (Scan):</strong> إذا طلب هاتفك فحص أمان للملف قبل التثبيت، وافق عليه عادي جداً وهيتثبت معاك بكل أمان.
+                      </span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+                      <span style={{ fontSize: 16, lineHeight: '20px' }}>⚡</span>
+                      <span style={{ fontSize: 13.5, lineHeight: 1.6, color: 'var(--text-secondary, #cbd5e1)' }}>
+                        <strong style={{ color: 'var(--brand-gold, #d4a64f)' }}>تحميل مباشر:</strong> يبدأ تنزيل التطبيق فوراً على جهازك دون الانتقال إلى أي صفحة أخرى.
+                      </span>
+                    </div>
+                  </div>
                 </div>
 
                 <div style={{ display: 'flex', gap: 10 }}>
@@ -442,6 +434,65 @@ export default function InstallAppButton() {
                     لاحقًا
                   </button>
                 </div>
+              </>
+            )}
+
+            {/* Modal Body: Case 1b - Download in Progress / Direct Installation Instructions */}
+            {modalMode === 'confirm' && downloadStarted && (
+              <>
+                <div
+                  style={{
+                    background: 'var(--brand-gold-subtle, rgba(212,166,79,0.08))',
+                    border: '1px solid var(--border-subtle, rgba(212,166,79,0.25))',
+                    borderRadius: 14,
+                    padding: '16px',
+                    marginBottom: 20,
+                  }}
+                >
+                  <p
+                    style={{
+                      margin: '0 0 10px',
+                      fontSize: 15,
+                      fontWeight: 700,
+                      color: 'var(--brand-gold, #d4a64f)',
+                    }}
+                  >
+                    🎉 بدأ تحميل ملف التطبيق الآن...
+                  </p>
+                  <ol
+                    style={{
+                      margin: 0,
+                      paddingInlineStart: 20,
+                      fontSize: 13.5,
+                      lineHeight: 1.9,
+                      color: 'var(--text-secondary, #cbd5e1)',
+                    }}
+                  >
+                    <li>تابع شريط إشعارات الهاتف أو مجلد التنزيلات (Downloads).</li>
+                    <li>اضغط على الملف <b>ybplatform.apk</b> بعد اكتمال التحميل.</li>
+                    <li>لو ظهر لك تنبيه فحص أمان (Scan)، اعمله بصورة طبيعية واضغط <b>تثبيت</b>. التطبيق آمن تماماً!</li>
+                  </ol>
+                </div>
+
+                <button
+                  ref={primaryButtonRef}
+                  type="button"
+                  onClick={closeModal}
+                  style={{
+                    width: '100%',
+                    height: 46,
+                    border: 0,
+                    borderRadius: 12,
+                    fontWeight: 800,
+                    fontSize: 15,
+                    cursor: 'pointer',
+                    color: '#071226',
+                    background: 'linear-gradient(135deg,#d4a64f,#f3d082,#b88a3a)',
+                    boxShadow: '0 4px 14px rgba(212,166,79,0.3)',
+                  }}
+                >
+                  فهمت، شكراً
+                </button>
               </>
             )}
 
