@@ -148,34 +148,40 @@ export default function StudentAnalyticsPage() {
           موبايل الطالب: <span dir="ltr">{student.phone || '-'}</span> - ولي الأمر:{' '}
           <span dir="ltr">{student.parentPhone || '-'}</span>
         </p>
-        {student.plainPassword && (
-          <div className="mt-2.5 flex flex-wrap items-center gap-2 text-sm">
-            <span className="text-slate-400">كلمة المرور المسجلة:</span>
-            <span
-              dir="ltr"
-              className="font-mono rounded-lg bg-slate-800/90 px-3 py-1 text-gold-400 select-all border border-slate-700 font-bold"
-            >
-              {showPlainPwd ? student.plainPassword : '••••••••'}
+        <div className="mt-2.5 flex flex-wrap items-center gap-2 text-sm">
+          <span className="text-slate-400">كلمة المرور المسجلة:</span>
+          {student.plainPassword ? (
+            <>
+              <span
+                dir="ltr"
+                className="font-mono rounded-lg bg-slate-800/90 px-3 py-1 text-gold-400 select-all border border-slate-700 font-bold"
+              >
+                {showPlainPwd ? student.plainPassword : '••••••••'}
+              </span>
+              <button
+                type="button"
+                onClick={() => setShowPlainPwd((p) => !p)}
+                className="rounded-md px-2.5 py-1 text-xs text-slate-300 hover:text-white bg-slate-800 border border-slate-700 transition-colors"
+              >
+                {showPlainPwd ? 'إخفاء' : 'إظهار'}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  void navigator.clipboard.writeText(student.plainPassword || '');
+                  showToast('تم نسخ كلمة المرور بنجاح', 'success');
+                }}
+                className="rounded-md px-2.5 py-1 text-xs font-bold text-gold-400 hover:text-gold-300 bg-gold-500/10 border border-gold-400/30 transition-colors"
+              >
+                نسخ
+              </button>
+            </>
+          ) : (
+            <span className="rounded-md bg-slate-800/80 px-2.5 py-1 text-xs text-slate-400 border border-slate-700">
+              مشفرة بحساب الطالب في Firebase Auth (يتم تجديدها برقم ولي الأمر من صفحة الدخول)
             </span>
-            <button
-              type="button"
-              onClick={() => setShowPlainPwd((p) => !p)}
-              className="rounded-md px-2.5 py-1 text-xs text-slate-300 hover:text-white bg-slate-800 border border-slate-700 transition-colors"
-            >
-              {showPlainPwd ? 'إخفاء' : 'إظهار'}
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                void navigator.clipboard.writeText(student.plainPassword || '');
-                showToast('تم نسخ كلمة المرور بنجاح', 'success');
-              }}
-              className="rounded-md px-2.5 py-1 text-xs font-bold text-gold-400 hover:text-gold-300 bg-gold-500/10 border border-gold-400/30 transition-colors"
-            >
-              نسخ
-            </button>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">

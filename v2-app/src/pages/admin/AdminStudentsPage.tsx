@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Archive, ArchiveRestore, Search, ServerCrash } from 'lucide-react';
+import { Archive, ArchiveRestore, Copy, Eye, EyeOff, Search, ServerCrash } from 'lucide-react';
 import { Badge, Button, Card, EmptyState, Input, Select, Table, useToast } from '../../components/ui';
 import type { TableColumn } from '../../components/ui';
 import { GRADE_OPTIONS, getGradeLabel } from '../../lib/grades';
@@ -23,6 +23,16 @@ export default function AdminStudentsPage() {
   const [search, setSearch] = useState('');
   const [grade, setGrade] = useState('');
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [revealedIds, setRevealedIds] = useState<Set<string>>(new Set());
+
+  const toggleReveal = (id: string) => {
+    setRevealedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -93,6 +103,46 @@ export default function AdminStudentsPage() {
       ),
     },
     { key: 'phone', header: 'الموبايل', render: (student) => <span dir="ltr">{student.phone || '-'}</span> },
+    {
+      key: 'password',
+      header: 'كلمة المرور',
+      render: (student) =>
+        student.plainPassword ? (
+          <div className="flex items-center gap-1.5" dir="ltr">
+            <span className="font-mono text-xs text-gold-400 bg-slate-800/90 px-2 py-0.5 rounded border border-slate-700 font-bold select-all">
+              {revealedIds.has(student.id) ? student.plainPassword : '••••••••'}
+            </span>
+            <button
+              type="button"
+              onClick={() => toggleReveal(student.id)}
+              className="p-1 text-slate-400 hover:text-white rounded hover:bg-slate-800 transition-colors"
+              title={revealedIds.has(student.id) ? 'إخفاء' : 'إظهار'}
+              aria-label={revealedIds.has(student.id) ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'}
+            >
+              {revealedIds.has(student.id) ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                void navigator.clipboard.writeText(student.plainPassword || '');
+                showToast('تم نسخ كلمة المرور', 'success');
+              }}
+              className="p-1 text-gold-400 hover:text-gold-300 rounded hover:bg-gold-500/10 transition-colors"
+              title="نسخ كلمة المرور"
+              aria-label="نسخ كلمة المرور"
+            >
+              <Copy className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        ) : (
+          <span
+            className="text-[11px] text-slate-400 bg-slate-800/60 px-2 py-0.5 rounded border border-slate-800"
+            title="مشفرة بحساب الطالب في Firebase Auth (يتم تجديدها برقم ولي الأمر)"
+          >
+            مشفرة بالحساب
+          </span>
+        ),
+    },
     { key: 'grade', header: 'الصف', render: (student) => getGradeLabel(student.grade, student.track) },
     { key: 'courses', header: 'الكورسات', render: (student) => student.courses.length },
     { key: 'createdAt', header: 'التسجيل', render: (student) => formatDate(student.createdAtMs) },
