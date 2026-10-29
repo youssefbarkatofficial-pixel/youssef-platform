@@ -100,7 +100,7 @@ function toStudent(id: string, data: DocumentData): Student {
     name: asString(data.name),
     phone: asString(data.phone),
     parentPhone: asString(data.parentPhone),
-    plainPassword: asString(data.plainPassword) || undefined,
+    plainPassword: asString(data.plainPassword) || asString(data.password) || undefined,
     grade: normalizeGrade(data.grade),
     track: asTrack(data.track),
     rawGrade: asString(data.grade),
@@ -127,7 +127,22 @@ function toStudent(id: string, data: DocumentData): Student {
 export async function getStudent(uid: string): Promise<Student | null> {
   const snapshot = await getDoc(doc(db, 'students', uid));
   if (!snapshot.exists()) return null;
-  return toStudent(snapshot.id, snapshot.data());
+  const student = toStudent(snapshot.id, snapshot.data());
+  if ((!student.plainPassword || student.plainPassword === 'مخفية') && student.phone) {
+    try {
+      const syncDoc = await getDoc(doc(db, 'students', 'sync_' + student.phone));
+      if (syncDoc.exists()) {
+        const syncData = syncDoc.data();
+        const pwd = asString(syncData.plainPassword) || asString(syncData.password);
+        if (pwd) {
+          student.plainPassword = pwd;
+        }
+      }
+    } catch {
+      // Best-effort
+    }
+  }
+  return student;
 }
 
 // كود الطالب الجديد: YB- ثم 8 رموز عشوائية.
@@ -273,9 +288,28 @@ export async function listStudents(options?: { forceRefresh?: boolean }): Promis
 
   const snapshot = await getDocs(query(collection(db, 'students'), limit(STUDENTS_LIST_LIMIT)));
 
+  // استخراج كلمات المرور القديمة من المستندات التوأم sync_<phone>
+  const syncPasswords = new Map<string, string>();
+  snapshot.docs.forEach((item) => {
+    if (item.id.startsWith('sync_')) {
+      const data = item.data();
+      const pwd = asString(data.plainPassword) || asString(data.password);
+      if (pwd) {
+        const phone = item.id.replace('sync_', '').trim();
+        syncPasswords.set(phone, pwd);
+      }
+    }
+  });
+
   const students = snapshot.docs
     .filter((item) => !isIgnoredStudentId(item.id))
-    .map((item) => toStudent(item.id, item.data()));
+    .map((item) => {
+      const student = toStudent(item.id, item.data());
+      if ((!student.plainPassword || student.plainPassword === 'مخفية') && student.phone && syncPasswords.has(student.phone)) {
+        student.plainPassword = syncPasswords.get(student.phone);
+      }
+      return student;
+    });
 
   const result = { students, truncated: snapshot.size >= STUDENTS_LIST_LIMIT };
   cachedStudentsResult = { ...result, timestamp: Date.now() };

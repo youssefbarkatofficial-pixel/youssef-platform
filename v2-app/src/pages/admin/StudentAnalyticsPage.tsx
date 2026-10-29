@@ -19,6 +19,7 @@ import type { AssessmentGroup } from '../../lib/stats';
 import { parseExamResults } from '../../services/assessments';
 import type { AttemptSummary } from '../../services/assessments';
 import { getStudent } from '../../services/students';
+import { resolveStudentPassword, setStoredAdminPassword } from '../../lib/studentPasswords';
 import type { Student } from '../../services/students';
 
 const GROUPS: AssessmentGroup[] = ['exam', 'homework', 'training'];
@@ -38,6 +39,7 @@ export default function StudentAnalyticsPage() {
   const { showToast } = useToast();
   const [student, setStudent] = useState<Student | null>(null);
   const [showPlainPwd, setShowPlainPwd] = useState(false);
+  const [pwdOverride, setPwdOverride] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [failed, setFailed] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
@@ -148,15 +150,16 @@ export default function StudentAnalyticsPage() {
           موبايل الطالب: <span dir="ltr">{student.phone || '-'}</span> - ولي الأمر:{' '}
           <span dir="ltr">{student.parentPhone || '-'}</span>
         </p>
-        <div className="mt-2.5 flex flex-wrap items-center gap-2 text-sm">
-          <span className="text-slate-400">كلمة المرور المسجلة:</span>
-          {student.plainPassword ? (
-            <>
+        {(() => {
+          const effectivePwd = pwdOverride || resolveStudentPassword(student);
+          return (
+            <div className="mt-2.5 flex flex-wrap items-center gap-2 text-sm">
+              <span className="text-slate-400">كلمة المرور المسجلة:</span>
               <span
                 dir="ltr"
-                className="font-mono rounded-lg bg-slate-800/90 px-3 py-1 text-gold-400 select-all border border-slate-700 font-bold"
+                className="font-mono rounded-lg bg-slate-800/90 px-3 py-1 text-gold-400 select-all border border-slate-700 font-bold min-w-[5.5rem] text-center"
               >
-                {showPlainPwd ? student.plainPassword : '••••••••'}
+                {showPlainPwd ? effectivePwd : '••••••••'}
               </span>
               <button
                 type="button"
@@ -168,20 +171,32 @@ export default function StudentAnalyticsPage() {
               <button
                 type="button"
                 onClick={() => {
-                  void navigator.clipboard.writeText(student.plainPassword || '');
+                  void navigator.clipboard.writeText(effectivePwd);
                   showToast('تم نسخ كلمة المرور بنجاح', 'success');
                 }}
                 className="rounded-md px-2.5 py-1 text-xs font-bold text-gold-400 hover:text-gold-300 bg-gold-500/10 border border-gold-400/30 transition-colors"
               >
                 نسخ
               </button>
-            </>
-          ) : (
-            <span className="rounded-md bg-slate-800/80 px-2.5 py-1 text-xs text-slate-400 border border-slate-700">
-              مشفرة بحساب الطالب في Firebase Auth (يتم تجديدها برقم ولي الأمر من صفحة الدخول)
-            </span>
-          )}
-        </div>
+              <button
+                type="button"
+                onClick={() => {
+                  const promptLabel = student.name ? `تعديل كلمة المرور للطالب (${student.name}):` : 'تعديل كلمة المرور:';
+                  const newPwd = window.prompt(promptLabel, effectivePwd);
+                  if (newPwd !== null && newPwd.trim().length > 0) {
+                    const trimmed = newPwd.trim();
+                    setStoredAdminPassword(student.id, trimmed, student.phone);
+                    setPwdOverride(trimmed);
+                    showToast('تم حفظ كلمة المرور بنجاح', 'success');
+                  }
+                }}
+                className="rounded-md px-2.5 py-1 text-xs font-bold text-sky-400 hover:text-sky-300 bg-sky-500/10 border border-sky-400/30 transition-colors"
+              >
+                تعديل
+              </button>
+            </div>
+          );
+        })()}
       </div>
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
