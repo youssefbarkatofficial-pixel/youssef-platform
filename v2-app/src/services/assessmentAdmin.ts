@@ -10,7 +10,7 @@ import {
   validateDraft,
 } from '../lib/questionDraft';
 import type { QuestionDraft } from '../lib/questionDraft';
-import { generateContentId, getCourse, saveCourseSections } from './courses';
+import { adoptLegacyCourse, generateContentId, getCourse, saveCourseSections } from './courses';
 import type { Course, CourseItem, CourseSection } from './courses';
 import { patchAssessmentRaw, placeAssessment } from './contentWriter';
 import type { PlacedKind } from './contentWriter';
@@ -209,8 +209,21 @@ async function writeContent(
 
 async function loadEditableCourse(courseId: string): Promise<Course> {
   const course = await getCourse(courseId);
-  if (!course || !course.isV2) {
-    throw new Error('course-not-editable');
+  if (!course) {
+    throw new Error('الكورس غير موجود.');
+  }
+  if (!course.isV2) {
+    try {
+      await adoptLegacyCourse(courseId);
+      return { ...course, isV2: true };
+    } catch (err) {
+      if (err instanceof Error && err.message === 'already-adopted') {
+        return { ...course, isV2: true };
+      }
+      throw new Error(
+        'هذا الكورس قديم ولم يتم اعتماده بعد في المنصة الجديدة. يرجى اعتماده أولاً من صفحة «تبنّي الكورسات» (/admin/adopt-courses) بحساب المالك.',
+      );
+    }
   }
   return course;
 }

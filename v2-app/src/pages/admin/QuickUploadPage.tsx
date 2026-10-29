@@ -27,7 +27,7 @@ import type { QuestionDraft } from '../../lib/questionDraft';
 import { QUESTION_TYPE_LABELS } from '../../lib/questionDraft';
 import type { AssessmentKind } from '../../lib/grading';
 import { KIND_LABELS } from '../../lib/grading';
-import { getCourse } from '../../services/courses';
+import { adoptLegacyCourse, getCourse } from '../../services/courses';
 import type { NormalizedLecture } from '../../services/courses';
 import { createAssessment, listAssessmentItems, loadAssessmentForEdit, updateAssessment } from '../../services/assessmentAdmin';
 import { addFilesToLecture, addLectures, isHttpUrl, normalizeDriveUrl } from '../../services/contentWriter';
@@ -275,6 +275,10 @@ export default function QuickUploadPage() {
     if (lectureMode === 'replace' && !window.confirm('هيتم استبدال كل المحاضرات الحالية. متأكد؟')) return;
     setSavingLectures(true);
     try {
+      const course = await getCourse(courseId);
+      if (course && !course.isV2) {
+        await adoptLegacyCourse(courseId).catch(() => {});
+      }
       const baseMs = lectureStartDateTime
         ? (cairoInputToUtcMs(lectureStartDateTime) ?? Date.now())
         : (cairoInputToUtcMs(lectureOpenAt) ?? Date.now());
@@ -308,6 +312,10 @@ export default function QuickUploadPage() {
     if (!courseId || !fileLectureId) return;
     setSavingFiles(true);
     try {
+      const course = await getCourse(courseId);
+      if (course && !course.isV2) {
+        await adoptLegacyCourse(courseId).catch(() => {});
+      }
       const fOpen = cairoInputToUtcMs(fileOpenAt);
       const fClose = cairoInputToUtcMs(fileCloseAt);
       const processedFiles = fileDrafts.map((f) => ({ ...f, openAt: fOpen, closeAt: fClose }));
@@ -374,6 +382,16 @@ export default function QuickUploadPage() {
 
     setSavingQuestions(true);
     try {
+      const course = await getCourse(courseId);
+      if (course && !course.isV2) {
+        try {
+          await adoptLegacyCourse(courseId);
+        } catch (adoptErr) {
+          if (!(adoptErr instanceof Error && adoptErr.message === 'already-adopted')) {
+            // will be caught by loadEditableCourse
+          }
+        }
+      }
       if (target === 'new') {
         if (!title.trim()) throw new Error('اكتب عنوان التقييم.');
         if (kind === 'training' && !attachLectureId) throw new Error('التدريب لازم يتربط بمحاضرة');
@@ -509,6 +527,11 @@ export default function QuickUploadPage() {
               </option>
             ))}
           </select>
+        )}
+        {courseId && courses.find((c) => c.id === courseId && !c.isV2) && (
+          <p className="mt-2 text-xs font-semibold text-gold-400/90">
+            ✨ كورس قديم: سيتم اعتماده وتفعيله في المنصة الجديدة تلقائياً بمجرد الحفظ أو النشر.
+          </p>
         )}
       </Card>
 

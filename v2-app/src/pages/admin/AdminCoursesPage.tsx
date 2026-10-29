@@ -15,12 +15,15 @@ import type { TableColumn } from '../../components/ui';
 import { useCourses } from '../../hooks/useCourses';
 import { getGradeLabel } from '../../lib/grades';
 import { toEnglishDigits } from '../../lib/phone';
-import { setCourseHidden, setCourseOrder } from '../../services/courses';
+import { useAuth } from '../../hooks/useAuth';
+import { adoptLegacyCourse, setCourseHidden, setCourseOrder } from '../../services/courses';
 import type { Course } from '../../services/courses';
 
 export default function AdminCoursesPage() {
   const { courses, loading, error, reload } = useCourses();
   const { showToast } = useToast();
+  const { firebaseUser } = useAuth();
+  const isOwner = (firebaseUser?.email ?? '').toLowerCase() === 'youssefbarkatofficial@gmail.com';
 
   const [hiddenOverrides, setHiddenOverrides] = useState<Record<string, boolean>>({});
   const [orderOverrides, setOrderOverrides] = useState<Record<string, number>>({});
@@ -32,6 +35,25 @@ export default function AdminCoursesPage() {
     hidden: hiddenOverrides[course.id] ?? course.hidden,
     order: orderOverrides[course.id] ?? course.order,
   }));
+
+  const handleAdopt = async (course: Course) => {
+    if (
+      !window.confirm(
+        `هل تريد اعتماد كورس «${course.title}» في المنصة الجديدة ليصبح قابلاً للتعديل وإضافة الامتحانات والمحاضرات؟`,
+      )
+    )
+      return;
+    setBusyId(course.id);
+    try {
+      await adoptLegacyCourse(course.id);
+      showToast('تم اعتماد الكورس بنجاح في المنصة الجديدة.', 'success');
+      await reload();
+    } catch {
+      showToast('تعذر اعتماد الكورس. تأكد أنك مسجل بحساب المالك.', 'error');
+    } finally {
+      setBusyId(null);
+    }
+  };
 
   const toggleHidden = async (course: Course) => {
     const nextHidden = !course.hidden;
@@ -149,13 +171,24 @@ export default function AdminCoursesPage() {
           <Link to={`/courses/${course.id}`} className={buttonClasses({ variant: 'ghost', size: 'sm' })}>
             عرض
           </Link>
-          {course.isV2 && (
+          {course.isV2 ? (
             <Link
               to={`/admin/courses/${course.id}`}
               className={buttonClasses({ variant: 'secondary', size: 'sm' })}
             >
               تعديل
             </Link>
+          ) : (
+            isOwner && (
+              <Button
+                size="sm"
+                variant="primary"
+                loading={busyId === course.id}
+                onClick={() => void handleAdopt(course)}
+              >
+                اعتماد الكورس
+              </Button>
+            )
           )}
           <Button
             size="sm"
@@ -179,10 +212,17 @@ export default function AdminCoursesPage() {
             الكورسات القديمة: عرض وإخفاء وترتيب فقط. التعديل الكامل للكورسات التي تُنشأ من المنصة الجديدة.
           </p>
         </div>
-        <Link to="/admin/courses/new" className={buttonClasses({ variant: 'primary' })}>
-          <Plus className="h-5 w-5" />
-          إضافة كورس
-        </Link>
+        <div className="flex flex-wrap items-center gap-2">
+          {isOwner && (
+            <Link to="/admin/adopt-courses" className={buttonClasses({ variant: 'secondary' })}>
+              تبنّي الكورسات القديمة
+            </Link>
+          )}
+          <Link to="/admin/courses/new" className={buttonClasses({ variant: 'primary' })}>
+            <Plus className="h-5 w-5" />
+            إضافة كورس
+          </Link>
+        </div>
       </div>
 
       <div className="mt-6">

@@ -60,7 +60,8 @@ import {
   updateAssessment,
 } from '../../services/assessmentAdmin';
 import type { AssessmentMeta } from '../../services/assessmentAdmin';
-import { getCourse } from '../../services/courses';
+import { useAuth } from '../../hooks/useAuth';
+import { adoptLegacyCourse, getCourse } from '../../services/courses';
 import type { Course } from '../../services/courses';
 import { createBankQuestion } from '../../services/questionBank';
 import type { BankMeta } from '../../services/questionBank';
@@ -140,6 +141,9 @@ export default function AdminAssessmentEditPage() {
   const { courseId = '', itemId = '' } = useParams();
   const navigate = useNavigate();
   const { showToast } = useToast();
+  const { firebaseUser } = useAuth();
+  const isOwner = (firebaseUser?.email ?? '').toLowerCase() === 'youssefbarkatofficial@gmail.com';
+  const [adoptingCourse, setAdoptingCourse] = useState(false);
 
   const isNew = itemId === 'new';
 
@@ -433,8 +437,29 @@ export default function AdminAssessmentEditPage() {
         <Card>
           <EmptyState
             icon={BookOpen}
-            title="هذا كورس قديم"
-            description="الامتحانات والواجبات تُنشأ وتُعدَّل في الكورسات الجديدة فقط."
+            title="كورس يحتاج اعتماد في المنصة الجديدة"
+            description="هذا الكورس قديم. يمكنك اعتماده بضغطة زر ليصبح قابلاً لإضافة وتعديل الامتحانات والمحاضرات بشكل كامل."
+            action={
+              isOwner ? (
+                <Button
+                  loading={adoptingCourse}
+                  onClick={async () => {
+                    setAdoptingCourse(true);
+                    try {
+                      await adoptLegacyCourse(courseId);
+                      showToast('تم اعتماد الكورس بنجاح في المنصة الجديدة.', 'success');
+                      setCourse(await getCourse(courseId));
+                    } catch {
+                      showToast('تعذر اعتماد الكورس.', 'error');
+                    } finally {
+                      setAdoptingCourse(false);
+                    }
+                  }}
+                >
+                  اعتماد الكورس في المنصة الجديدة الآن
+                </Button>
+              ) : undefined
+            }
           />
         </Card>
       </div>
