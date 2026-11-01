@@ -78,7 +78,7 @@ export default function AccountProblemScreen({ reason }: AccountProblemScreenPro
         <p className="mt-2 text-sm leading-relaxed text-slate-400">{content.description}</p>
 
         <div className="mt-6 flex flex-wrap justify-center gap-3">
-          {reason === 'load-error' && (
+          {(reason === 'load-error' || reason === 'incomplete') && (
             <Button loading={retrying} onClick={handleRetry}>
               إعادة المحاولة
             </Button>

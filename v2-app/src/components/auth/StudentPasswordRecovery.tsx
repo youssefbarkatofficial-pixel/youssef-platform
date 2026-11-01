@@ -25,7 +25,7 @@ import {
 } from 'firebase/auth';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { auth, db } from '../../lib/firebase';
-import { isValidEgyptPhone, loginEmailCandidates, normalizePhone } from '../../lib/phone';
+import { isValidEgyptPhone, loginEmailCandidates, normalizePhone, phoneToEmail } from '../../lib/phone';
 import {
   getStoredAdminPassword,
   markPasswordResetDone,
@@ -268,9 +268,21 @@ export default function StudentPasswordRecovery({ open, onClose, studentIdentifi
             const cred = await signInWithEmailAndPassword(auth, email, testPwd);
             await updatePassword(cred.user, newPwdB);
             try {
-              await updateDoc(doc(db, 'students', cred.user.uid), {
-                parentPhone: normParent,
-              });
+              const studentRef = doc(db, 'students', cred.user.uid);
+              const studentSnap = await getDoc(studentRef);
+              if (!studentSnap.exists()) {
+                await createStudentProfile({
+                  uid: cred.user.uid,
+                  name: 'طالب',
+                  phone: normStudent,
+                  parentPhone: normParent,
+                  grade: 'prep3',
+                  gov: 'القاهرة',
+                  email: phoneToEmail(normStudent),
+                });
+              } else {
+                await updateDoc(studentRef, { parentPhone: normParent });
+              }
             } catch {}
             setStoredAdminPassword(cred.user.uid, newPwdB, normStudent);
             markPasswordResetDone(cred.user.uid);
@@ -292,43 +304,35 @@ export default function StudentPasswordRecovery({ open, onClose, studentIdentifi
       }
 
       // ج) إذا لم يكن الحساب مسجلاً في Firebase Auth بعد، نقوم بإنشائه بكلمة المرور الجديدة مباشرة!
-      for (const email of candidates) {
+      const primaryEmail = phoneToEmail(normStudent);
+      try {
+        const cred = await createUserWithEmailAndPassword(auth, primaryEmail, newPwdB);
         try {
-          const cred = await createUserWithEmailAndPassword(auth, email, newPwdB);
-          try {
-            const studentRef = doc(db, 'students', cred.user.uid);
-            const studentSnap = await getDoc(studentRef);
-            if (!studentSnap.exists()) {
-              await createStudentProfile({
-                uid: cred.user.uid,
-                name: 'طالب',
-                phone: normStudent,
-                parentPhone: normParent,
-                grade: 'prep3',
-                gov: 'القاهرة',
-                email,
-              });
-            } else {
-              await updateDoc(studentRef, { parentPhone: normParent });
-            }
-          } catch {}
+          await createStudentProfile({
+            uid: cred.user.uid,
+            name: 'طالب',
+            phone: normStudent,
+            parentPhone: normParent,
+            grade: 'prep3',
+            gov: 'القاهرة',
+            email: primaryEmail,
+          });
+        } catch {}
 
-          setStoredAdminPassword(cred.user.uid, newPwdB, normStudent);
-          markPasswordResetDone(cred.user.uid);
-          markPasswordResetDone(normStudent);
-          showToast('تم تفعيل حسابك وتجديد كلمة المرور بنجاح!', 'success');
-          handleClose();
-          navigate('/student', { replace: true });
-          return;
-        } catch (err: unknown) {
-          const code =
-            typeof err === 'object' && err !== null && 'code' in err
-              ? String((err as { code: unknown }).code)
-              : '';
-          if (code === 'auth/email-already-in-use') {
-            // الحساب موجود بالفعل في Auth ومحمي
-            continue;
-          }
+        setStoredAdminPassword(cred.user.uid, newPwdB, normStudent);
+        markPasswordResetDone(cred.user.uid);
+        markPasswordResetDone(normStudent);
+        showToast('تم تفعيل حسابك وتجديد كلمة المرور بنجاح!', 'success');
+        handleClose();
+        navigate('/student', { replace: true });
+        return;
+      } catch (err: unknown) {
+        const code =
+          typeof err === 'object' && err !== null && 'code' in err
+            ? String((err as { code: unknown }).code)
+            : '';
+        if (code !== 'auth/email-already-in-use') {
+          // خطأ غير متوقع
         }
       }
 
