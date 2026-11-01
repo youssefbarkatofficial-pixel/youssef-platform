@@ -14,13 +14,15 @@
 
 import { useEffect, useId, useState } from 'react';
 import type { FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { CheckCircle2, Eye, EyeOff, KeyRound, Phone } from 'lucide-react';
 import {
   EmailAuthProvider,
   createUserWithEmailAndPassword,
+  deleteUser,
   reauthenticateWithCredential,
   signInWithEmailAndPassword,
+  signOut,
   updatePassword,
 } from 'firebase/auth';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
@@ -190,7 +192,7 @@ export default function StudentPasswordRecovery({ open, onClose, studentIdentifi
     const normStudent = normalizePhone(idToUse);
     const normParent = normalizePhone(parentPhone);
 
-    // 1. التحقق من كتابة رقم هاتف طالب مصري صحيح
+    // 1. التحقق من كتابة رقم هاتف طالب مصري صحيح (11 رقم يبدأ بـ 01)
     if (!normStudent || !isValidEgyptPhone(normStudent)) {
       setError('يجب كتابة رقم هاتف الطالب صحيحًا (11 رقمًا يبدأ بـ 01).');
       return;
@@ -220,33 +222,41 @@ export default function StudentPasswordRecovery({ open, onClose, studentIdentifi
 
     setLoading(true);
     try {
-      // حفظ رقم ولي الأمر محليًا
+      const primaryEmail = phoneToEmail(normStudent);
+
+      // أولاً: فحص حاسم - هل رقم الطالب مسجل بالمنصة أصلاً؟
+      let isRegistered = false;
+      try {
+        const checkCred = await createUserWithEmailAndPassword(auth, primaryEmail, 'TempCheckPass123!');
+        // نجاح الإنشاء يعني أن هذا الرقم لم يكن له أي حساب مسجل بالمنصة
+        await deleteUser(checkCred.user);
+        await signOut(auth);
+        isRegistered = false;
+      } catch (checkErr: unknown) {
+        const code =
+          typeof checkErr === 'object' && checkErr !== null && 'code' in checkErr
+            ? String((checkErr as { code: unknown }).code)
+            : '';
+        if (code === 'auth/email-already-in-use') {
+          isRegistered = true;
+        } else {
+          throw checkErr;
+        }
+      }
+
+      // إذا لم يكن رقم الطالب مسجلاً، نوقف العملية فوراً وندله على إنشاء حساب جديد
+      if (!isRegistered) {
+        setError('not-registered');
+        return;
+      }
+
+      // حفظ رقم ولي الأمر محليًا للطالب
       if (typeof window !== 'undefined' && window.localStorage) {
         localStorage.setItem(`yb_parent_binding_${normStudent}`, normParent);
       }
 
-      // أ) إذا كان الطالب مسجل دخول حالياً: تحديث فوري مباشر
-      if (auth.currentUser) {
-        try {
-          await updatePassword(auth.currentUser, newPwdB);
-          try {
-            await updateDoc(doc(db, 'students', auth.currentUser.uid), {
-              parentPhone: normParent,
-            });
-          } catch {}
-          setStoredAdminPassword(auth.currentUser.uid, newPwdB, normStudent);
-          markPasswordResetDone(auth.currentUser.uid);
-          markPasswordResetDone(normStudent);
-          showToast('تم تجديد كلمة المرور وتأكيد رقم ولي الأمر بنجاح!', 'success');
-          handleClose();
-          navigate('/student', { replace: true });
-          return;
-        } catch {}
-      }
-
+      // ثانياً: محاولة تسجيل الدخول بالكلمات المرجحة وتأكيد مطابقة رقم ولي الأمر
       const candidates = loginEmailCandidates(normStudent);
-
-      // ب) محاولة تسجيل الدخول بالكلمات المرجحة وتحديث كلمة المرور
       const testPasswords = [
         getStoredAdminPassword(normStudent),
         normParent,
@@ -261,87 +271,84 @@ export default function StudentPasswordRecovery({ open, onClose, studentIdentifi
         'StudentTestPass123!',
       ].filter(Boolean) as string[];
 
-      let directSuccess = false;
-      for (const email of candidates) {
-        for (const testPwd of testPasswords) {
-          try {
-            const cred = await signInWithEmailAndPassword(auth, email, testPwd);
-            await updatePassword(cred.user, newPwdB);
+      let authenticatedUser = auth.currentUser;
+      if (!authenticatedUser) {
+        for (const email of candidates) {
+          for (const testPwd of testPasswords) {
             try {
-              const studentRef = doc(db, 'students', cred.user.uid);
-              const studentSnap = await getDoc(studentRef);
-              if (!studentSnap.exists()) {
-                await createStudentProfile({
-                  uid: cred.user.uid,
-                  name: 'طالب',
-                  phone: normStudent,
-                  parentPhone: normParent,
-                  grade: 'prep3',
-                  gov: 'القاهرة',
-                  email: phoneToEmail(normStudent),
-                });
-              } else {
-                await updateDoc(studentRef, { parentPhone: normParent });
-              }
+              const cred = await signInWithEmailAndPassword(auth, email, testPwd);
+              authenticatedUser = cred.user;
+              break;
             } catch {}
-            setStoredAdminPassword(cred.user.uid, newPwdB, normStudent);
-            markPasswordResetDone(cred.user.uid);
-            markPasswordResetDone(normStudent);
-            directSuccess = true;
-            break;
-          } catch {
-            // تجربة الكلمة التالية
           }
+          if (authenticatedUser) break;
         }
-        if (directSuccess) break;
       }
 
-      if (directSuccess) {
-        showToast('تم تجديد كلمة المرور وتأكيد رقم ولي الأمر بنجاح!', 'success');
-        handleClose();
-        navigate('/student', { replace: true });
-        return;
-      }
+      if (authenticatedUser) {
+        // فحص مستند الطالب في Firestore ومطابقة رقم ولي الأمر
+        const studentRef = doc(db, 'students', authenticatedUser.uid);
+        const studentSnap = await getDoc(studentRef);
 
-      // ج) إذا لم يكن الحساب مسجلاً في Firebase Auth بعد، نقوم بإنشائه بكلمة المرور الجديدة مباشرة!
-      const primaryEmail = phoneToEmail(normStudent);
-      try {
-        const cred = await createUserWithEmailAndPassword(auth, primaryEmail, newPwdB);
-        try {
-          await createStudentProfile({
-            uid: cred.user.uid,
-            name: 'طالب',
-            phone: normStudent,
-            parentPhone: normParent,
-            grade: 'prep3',
-            gov: 'القاهرة',
-            email: primaryEmail,
-          });
-        } catch {}
+        if (studentSnap.exists()) {
+          const sData = studentSnap.data();
+          const registeredParent = normalizePhone(String(sData.parentPhone || ''));
+          const hasRegisteredParent = registeredParent && isValidEgyptPhone(registeredParent);
 
-        setStoredAdminPassword(cred.user.uid, newPwdB, normStudent);
-        markPasswordResetDone(cred.user.uid);
+          // لو رقم ولي الأمر مسجل في الحساب وغير مطابق للرقم المدخل:
+          if (hasRegisteredParent && registeredParent !== normParent) {
+            await signOut(auth);
+            setError('رقم ولي الأمر غير مطابق للرقم المسجل في حسابك. تأكد من الرقم وحاول مجدداً.');
+            return;
+          }
+
+          // لو رقم ولي الأمر غير مسجل أصلاً (تائه من المنصة القديمة) أو كان مطابقاً:
+          if (!hasRegisteredParent) {
+            try {
+              await updateDoc(studentRef, { parentPhone: normParent });
+            } catch {}
+          }
+        } else {
+          // الحساب موجود في Auth ولكن مستنده غير موجود في Firestore: ننشئه فوراً برقم ولي الأمر
+          try {
+            await createStudentProfile({
+              uid: authenticatedUser.uid,
+              name: 'طالب',
+              phone: normStudent,
+              parentPhone: normParent,
+              grade: 'prep3',
+              gov: 'القاهرة',
+              email: primaryEmail,
+            });
+          } catch {}
+        }
+
+        // تحديث كلمة المرور في Auth وحفظها
+        await updatePassword(authenticatedUser, newPwdB);
+        setStoredAdminPassword(authenticatedUser.uid, newPwdB, normStudent);
+        markPasswordResetDone(authenticatedUser.uid);
         markPasswordResetDone(normStudent);
-        showToast('تم تفعيل حسابك وتجديد كلمة المرور بنجاح!', 'success');
+
+        showToast('تم تأكيد بيانات ولي الأمر وتحديث كلمة المرور بنجاح!', 'success');
         handleClose();
         navigate('/student', { replace: true });
         return;
-      } catch (err: unknown) {
-        const code =
-          typeof err === 'object' && err !== null && 'code' in err
-            ? String((err as { code: unknown }).code)
-            : '';
-        if (code !== 'auth/email-already-in-use') {
-          // خطأ غير متوقع
-        }
       }
 
-      // د) إذا وصلنا هنا، فالحساب مسجل في Firebase Auth بكلمة مرور خاصة سابقة
-      setError(
-        'هذا الحساب مسجل بكلمة مرور خاصة سابقة. إذا كنت تتذكر كلمة المرور السابقة، اختر (أعرف كلمة المرور القديمة) لتحديثها فوراً، أو سجل الدخول بها.',
-      );
-    } catch {
-      setError('حدث خطأ أثناء معالجة الطلب. تأكد من اتصالك بالإنترنت وحاول مجدداً.');
+      // ثالثاً: إذا كان الحساب مسجلاً بكلمة سر سابقة خاصة لم تطابق المرجحات
+      setError('custom-pwd-account');
+    } catch (err: unknown) {
+      const code =
+        typeof err === 'object' && err !== null && 'code' in err
+          ? String((err as { code: unknown }).code)
+          : '';
+      if (code === 'auth/too-many-requests') {
+        setError('محاولات كثيرة مؤقتًا. انتظر قليلًا ثم حاول مرة أخرى.');
+      } else if (code === 'auth/network-request-failed') {
+        setError('تعذّر الاتصال بالإنترنت. تأكد من اتصالك.');
+      } else {
+        setError('حدث خطأ أثناء معالجة الطلب. تأكد من اتصالك بالإنترنت وحاول مجدداً.');
+      }
     } finally {
       setLoading(false);
     }
@@ -486,7 +493,42 @@ export default function StudentPasswordRecovery({ open, onClose, studentIdentifi
   function renderParentFlow() {
     return (
       <form id={`${idBase}-parent`} onSubmit={handleParentSubmit} className="space-y-4 pt-1">
-        {error && <FormAlert type="error">{error}</FormAlert>}
+        {error === 'not-registered' ? (
+          <div className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-4 text-xs text-amber-200 space-y-2.5">
+            <p className="font-bold text-sm text-amber-300">⚠️ رقم الطالب غير مسجل بالمنصة</p>
+            <p className="leading-relaxed">
+              لم نجد أي حساب مسجل برقم الطالب هذا ({studentPhone || 'المكتوب'}). يمكنك إنشاء حساب جديد والانضمام للمنصة فوراً:
+            </p>
+            <Link
+              to="/register"
+              onClick={handleClose}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-gold-400 py-2.5 font-bold text-slate-950 transition hover:bg-gold-300 shadow-md"
+            >
+              إنشاء حساب جديد الآن
+            </Link>
+          </div>
+        ) : error === 'custom-pwd-account' ? (
+          <div className="rounded-xl border border-gold-500/30 bg-gold-500/10 p-3.5 text-xs text-gold-200 space-y-2.5">
+            <p className="font-bold text-gold-300">🔐 هذا الحساب محمي بكلمة مرور خاصة سابقة</p>
+            <p className="leading-relaxed">
+              حسابك مسجل بالفعل وله كلمة مرور سابقة خاصة. إذا كنت تتذكر كلمة مرورك السابقة، يمكنك تغييرها فوراً من خيار «أعرف كلمة المرور القديمة» أو تسجيل الدخول بها مباشرة.
+            </p>
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              fullWidth
+              onClick={() => {
+                setError('');
+                setStep('old-pwd');
+              }}
+            >
+              الانتقال إلى خيار كلمة المرور القديمة
+            </Button>
+          </div>
+        ) : error ? (
+          <FormAlert type="error">{error}</FormAlert>
+        ) : null}
 
         <p className="text-xs text-theme-text-muted leading-relaxed">
           أدخل رقم هاتف الطالب المسجل، ورقم ولي أمره لتأكيد الهوية وتعيين كلمة مرور جديدة فوراً.

@@ -59,7 +59,8 @@ export default function LoginPage() {
   if (isAdmin) return <Navigate to="/admin" replace />;
 
   if (firebaseUser) {
-    return <AccountProblemScreen reason={profileError ? 'load-error' : 'incomplete'} />;
+    if (profileError) return <AccountProblemScreen reason='load-error' />;
+    return <Navigate to={from} replace />;
   }
 
   const cleanIdentifier = () => {

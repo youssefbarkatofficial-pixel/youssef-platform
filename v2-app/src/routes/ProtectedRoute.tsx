@@ -1,11 +1,12 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import AccountProblemScreen from '../components/auth/AccountProblemScreen';
+import StudentProfileInitializer from '../components/student/StudentProfileInitializer';
 import FullScreenLoader from '../components/layout/FullScreenLoader';
 import { useAuth } from '../hooks/useAuth';
 
 // حراسة صفحات الطالب: لازم يكون مسجّلًا وله مستند طالب غير موقوف.
 export default function ProtectedRoute() {
-  const { firebaseUser, student, isAdmin, loading, profileError } = useAuth();
+  const { firebaseUser, student, isAdmin, loading, profileError, refresh } = useAuth();
   const location = useLocation();
 
   if (loading) return <FullScreenLoader />;
@@ -22,5 +23,5 @@ export default function ProtectedRoute() {
 
   if (isAdmin) return <Navigate to="/admin" replace />;
 
-  return <AccountProblemScreen reason="incomplete" />;
+  return <StudentProfileInitializer user={firebaseUser} onComplete={refresh} />;
 }
