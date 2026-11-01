@@ -153,7 +153,7 @@ export default function StudentPasswordRecovery({ open, onClose, studentIdentifi
       }
 
       if (!success) {
-        setError('كلمة المرور القديمة غير صحيحة. إن كنت لا تتذكرها، اختر الاستعادة برقم ولي الأمر.');
+        setError('كلمة المرور القديمة غير صحيحة. تأكد من كتابتها بشكل سليم وحاول مجدداً.');
         return;
       }
 
@@ -258,6 +258,8 @@ export default function StudentPasswordRecovery({ open, onClose, studentIdentifi
       // ثانياً: محاولة تسجيل الدخول بالكلمات المرجحة وتأكيد مطابقة رقم ولي الأمر
       const candidates = loginEmailCandidates(normStudent);
       const testPasswords = [
+        newPwdB,
+        confirmPwdB,
         getStoredAdminPassword(normStudent),
         normParent,
         normStudent,
@@ -335,8 +337,8 @@ export default function StudentPasswordRecovery({ open, onClose, studentIdentifi
         return;
       }
 
-      // ثالثاً: إذا كان الحساب مسجلاً بكلمة سر سابقة خاصة لم تطابق المرجحات
-      setError('custom-pwd-account');
+      // ثالثاً: إذا تعذر الدخول بالمرجحات التلقائية
+      setError('credentials-not-verified');
     } catch (err: unknown) {
       const code =
         typeof err === 'object' && err !== null && 'code' in err
@@ -507,23 +509,20 @@ export default function StudentPasswordRecovery({ open, onClose, studentIdentifi
               إنشاء حساب جديد الآن
             </Link>
           </div>
-        ) : error === 'custom-pwd-account' ? (
-          <div className="rounded-xl border border-gold-500/30 bg-gold-500/10 p-3.5 text-xs text-gold-200 space-y-2.5">
-            <p className="font-bold text-gold-300">🔐 هذا الحساب محمي بكلمة مرور خاصة سابقة</p>
+        ) : error === 'credentials-not-verified' ? (
+          <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3.5 text-xs text-amber-200 space-y-2.5">
+            <p className="font-bold text-amber-300">⚠️ تعذر تأكيد الحساب تلقائياً</p>
             <p className="leading-relaxed">
-              حسابك مسجل بالفعل وله كلمة مرور سابقة خاصة. إذا كنت تتذكر كلمة مرورك السابقة، يمكنك تغييرها فوراً من خيار «أعرف كلمة المرور القديمة» أو تسجيل الدخول بها مباشرة.
+              هذا الحساب مسجل بالفعل، لكن كلمة المرور الحالية مختلفة عن البيانات الافتراضية. يمكنك تسجيل الدخول بكلمة المرور الخاصة بك أو مراجعة إدارة المنصة لتعيينها لك فوراً.
             </p>
             <Button
               type="button"
               variant="secondary"
               size="sm"
               fullWidth
-              onClick={() => {
-                setError('');
-                setStep('old-pwd');
-              }}
+              onClick={handleClose}
             >
-              الانتقال إلى خيار كلمة المرور القديمة
+              العودة لتسجيل الدخول
             </Button>
           </div>
         ) : error ? (

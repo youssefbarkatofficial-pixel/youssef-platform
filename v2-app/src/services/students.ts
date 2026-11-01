@@ -240,7 +240,7 @@ export async function updateStudentGrade(
     grade,
     lastUpdatedAcademicYear: academicYear,
   };
-  if (track !== undefined) {
+  if (track !== undefined && track !== null && track !== '') {
     updates.track = track;
   }
   await updateDoc(doc(db, 'students', uid), updates);

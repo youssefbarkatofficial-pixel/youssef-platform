@@ -37,7 +37,7 @@ export default function AnnualGradeModal() {
       return;
     }
 
-    let trackToSave: GradeTrack | null = null;
+    let trackToSave: GradeTrack | undefined = undefined;
     if (isSec) {
       if (value === 'sec2' || value === 'sec3') {
         trackToSave = 'bacc';
