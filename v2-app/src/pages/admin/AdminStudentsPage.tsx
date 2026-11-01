@@ -4,7 +4,7 @@ import { Archive, ArchiveRestore, Copy, Eye, EyeOff, Pencil, Search, ServerCrash
 import { Badge, Button, Card, EmptyState, Input, Select, Table, useToast } from '../../components/ui';
 import type { TableColumn } from '../../components/ui';
 import { GRADE_OPTIONS, getGradeLabel } from '../../lib/grades';
-import { listStudents, setStudentArchived } from '../../services/students';
+import { listStudents, setStudentArchived, updateStudentProfile } from '../../services/students';
 import type { Student } from '../../services/students';
 import { resolveStudentPassword, setStoredAdminPassword } from '../../lib/studentPasswords';
 
@@ -45,6 +45,27 @@ export default function AdminStudentsPage() {
         ...(student.phone ? { [student.phone]: trimmed } : {}),
       }));
       showToast('تم حفظ كلمة المرور بنجاح', 'success');
+    }
+  };
+
+  const handleEditStudentName = async (student: Student) => {
+    const promptLabel = student.studentCode ? `تعديل اسم الطالب (${student.studentCode}):` : 'تعديل اسم الطالب:';
+    const newName = window.prompt(promptLabel, student.name || '');
+    if (newName !== null && newName.trim().length > 0) {
+      const clean = newName.trim().replace(/\s+/g, ' ');
+      if (clean.length < 3 || clean.length > 80) {
+        showToast('يجب أن يتراوح الاسم بين 3 و80 حرفاً', 'error');
+        return;
+      }
+      try {
+        await updateStudentProfile(student.id, { name: clean });
+        setStudents((prev) =>
+          prev.map((s) => (s.id === student.id ? { ...s, name: clean } : s)),
+        );
+        showToast('تم تحديث اسم الطالب بنجاح', 'success');
+      } catch {
+        showToast('تعذر تحديث اسم الطالب', 'error');
+      }
     }
   };
 
@@ -117,11 +138,22 @@ export default function AdminStudentsPage() {
       key: 'name',
       header: 'الطالب',
       render: (student) => (
-        <div className="min-w-[10rem]">
-          <Link to={`/admin/students/${student.id}`} className="font-bold text-white hover:text-gold-400">
-            {student.name || 'بدون اسم'}
-          </Link>
-          <p className="text-xs text-slate-500">{student.studentCode}</p>
+        <div className="min-w-[10rem] flex items-center justify-between gap-2">
+          <div>
+            <Link to={`/admin/students/${student.id}`} className="font-bold text-white hover:text-gold-400">
+              {student.name || 'بدون اسم'}
+            </Link>
+            <p className="text-xs text-slate-500">{student.studentCode}</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => void handleEditStudentName(student)}
+            className="p-1 text-slate-400 hover:text-gold-400 rounded hover:bg-slate-800 transition-colors"
+            title="تعديل اسم الطالب"
+            aria-label="تعديل اسم الطالب"
+          >
+            <Pencil className="h-3.5 w-3.5" />
+          </button>
         </div>
       ),
     },

@@ -6,16 +6,18 @@ import {
   CheckCircle2,
   GraduationCap,
   MapPin,
+  Pencil,
   Phone,
   ShieldCheck,
   User,
 } from 'lucide-react';
-import { Badge, Button, Card, Spinner, useToast } from '../../components/ui';
+import { Badge, Button, Card, Input, Modal, Spinner, useToast } from '../../components/ui';
 import { cn } from '../../components/ui/cn';
 import { useAuth } from '../../hooks/useAuth';
 import { getGradeLabel, getTrackLabel, isSecondaryGrade } from '../../lib/grades';
 import type { GradeTrack } from '../../lib/grades';
-import { updateStudentTrack } from '../../services/students';
+import { updateStudentProfile, updateStudentTrack } from '../../services/students';
+import FormAlert from '../../components/auth/FormAlert';
 
 export default function ProfilePage() {
   const { student, loading, refresh } = useAuth();
@@ -23,6 +25,10 @@ export default function ProfilePage() {
 
   const [selectedTrack, setSelectedTrack] = useState<GradeTrack | ''>('');
   const [savingTrack, setSavingTrack] = useState(false);
+  const [editingName, setEditingName] = useState(false);
+  const [nameInput, setNameInput] = useState('');
+  const [savingName, setSavingName] = useState(false);
+  const [nameError, setNameError] = useState('');
 
   if (loading || !student) {
     return (
@@ -57,6 +63,52 @@ export default function ProfilePage() {
       showToast('تعذر حفظ المسار. حاول مرة أخرى.', 'error');
     } finally {
       setSavingTrack(false);
+    }
+  };
+
+  const openEditName = () => {
+    setNameInput(student.name || '');
+    setNameError('');
+    setEditingName(true);
+  };
+
+  const handleSaveName = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setNameError('');
+
+    const clean = nameInput.trim().replace(/\s+/g, ' ');
+    const parts = clean.split(' ').filter(Boolean);
+
+    if (parts.length < 4) {
+      setNameError('يرجى كتابة الاسم رباعياً بالكامل (أربعة أسماء).');
+      return;
+    }
+
+    if (parts.some((w) => w.length < 2)) {
+      setNameError('يرجى التأكد من كتابة كل اسم من الأسماء الأربعة بشكل صحيح.');
+      return;
+    }
+
+    if (clean.length < 8 || clean.length > 80) {
+      setNameError('يرجى كتابة اسم صحيح يتراوح بين 8 و80 حرفاً.');
+      return;
+    }
+
+    if (!/^[\u0600-\u06FF\s]+$/.test(clean)) {
+      setNameError('يرجى كتابة الاسم بالحروف العربية فقط دون أرقام أو رموز.');
+      return;
+    }
+
+    setSavingName(true);
+    try {
+      await updateStudentProfile(student.id, { name: clean });
+      await refresh();
+      showToast('تم حفظ وتحديث الاسم بنجاح!', 'success');
+      setEditingName(false);
+    } catch {
+      setNameError('تعذر تحديث الاسم. تأكد من اتصالك بالإنترنت وحاول مجدداً.');
+    } finally {
+      setSavingName(false);
     }
   };
 
@@ -159,7 +211,18 @@ export default function ProfilePage() {
               <User className="h-6 w-6" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-white">{student.name}</h2>
+              <div className="flex items-center gap-2">
+                <h2 className="text-lg font-bold text-white">{student.name}</h2>
+                <button
+                  type="button"
+                  onClick={openEditName}
+                  className="inline-flex items-center gap-1 rounded-lg px-2 py-0.5 text-xs text-gold-400 hover:text-gold-300 hover:bg-gold-500/10 transition-colors border border-gold-500/20"
+                  title="تعديل الاسم"
+                >
+                  <Pencil className="h-3 w-3" />
+                  <span>تعديل الاسم</span>
+                </button>
+              </div>
               <p className="text-xs text-slate-400">كود الطالب: <span className="font-mono text-gold-400">{student.studentCode}</span></p>
             </div>
           </div>
@@ -228,6 +291,48 @@ export default function ProfilePage() {
           </div>
         </div>
       </Card>
+
+      {/* نافذة تعديل الاسم */}
+      <Modal
+        open={editingName}
+        onClose={() => setEditingName(false)}
+        title="تعديل الاسم"
+      >
+        <form onSubmit={handleSaveName} className="space-y-4 pt-1">
+          <p className="text-xs text-slate-400 leading-relaxed">
+            يرجى كتابة اسمك رباعياً باللغة العربية لتوثيق الشهادات والتقارير الدراسية.
+          </p>
+
+          {nameError && <FormAlert type="error">{nameError}</FormAlert>}
+
+          <Input
+            label="الاسم رباعي بالكامل"
+            type="text"
+            placeholder="مثال: يوسف أحمد محمد علي"
+            value={nameInput}
+            onChange={(e) => setNameInput(e.target.value)}
+            autoFocus
+          />
+
+          <div className="flex items-center justify-end gap-3 pt-2">
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => setEditingName(false)}
+              disabled={savingName}
+            >
+              إلغاء
+            </Button>
+            <Button
+              type="submit"
+              variant="primary"
+              loading={savingName}
+            >
+              حفظ التعديل
+            </Button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 }

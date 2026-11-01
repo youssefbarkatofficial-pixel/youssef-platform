@@ -18,6 +18,7 @@ import type { NavItem } from '../components/layout/DashboardShell';
 import AnnualGradeModal from '../components/student/AnnualGradeModal';
 import MandatoryPasswordResetModal from '../components/student/MandatoryPasswordResetModal';
 import ParentPhoneBindingModal from '../components/student/ParentPhoneBindingModal';
+import StudentNameConfirmationModal from '../components/student/StudentNameConfirmationModal';
 import BousalaChatDrawer from '../components/student/BousalaChatDrawer';
 
 const baseItems: NavItem[] = [
@@ -92,6 +93,7 @@ export default function StudentLayout() {
       <AnnualGradeModal />
       <MandatoryPasswordResetModal />
       <ParentPhoneBindingModal />
+      <StudentNameConfirmationModal />
       <BousalaChatDrawer />
     </>
   );

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { ArrowRight, BarChart3, Clapperboard, Flame, ServerCrash, Trophy } from 'lucide-react';
+import { ArrowRight, BarChart3, Clapperboard, Flame, Pencil, ServerCrash, Trophy } from 'lucide-react';
 import { Badge, Button, Card, EmptyState, ProgressBar, Spinner, StatCard, Table, buttonClasses, useToast } from '../../components/ui';
 import type { TableColumn } from '../../components/ui';
 import { useCourses } from '../../hooks/useCourses';
@@ -18,7 +18,7 @@ import {
 import type { AssessmentGroup } from '../../lib/stats';
 import { parseExamResults } from '../../services/assessments';
 import type { AttemptSummary } from '../../services/assessments';
-import { getStudent } from '../../services/students';
+import { getStudent, updateStudentProfile } from '../../services/students';
 import { resolveStudentPassword, setStoredAdminPassword } from '../../lib/studentPasswords';
 import type { Student } from '../../services/students';
 
@@ -75,6 +75,24 @@ export default function StudentAnalyticsPage() {
   }, [student, courses]);
 
   const titleOf = (courseId: string) => courses.find((course) => course.id === courseId)?.title ?? courseId;
+
+  const handleEditStudentName = async () => {
+    if (!student) return;
+    const input = window.prompt('تعديل اسم الطالب:', student.name || '');
+    if (input === null) return;
+    const clean = input.trim().replace(/\s+/g, ' ');
+    if (clean.length < 3 || clean.length > 80) {
+      showToast('يجب أن يتراوح الاسم بين 3 و80 حرفاً', 'error');
+      return;
+    }
+    try {
+      await updateStudentProfile(student.id, { name: clean });
+      setStudent((prev) => (prev ? { ...prev, name: clean } : null));
+      showToast('تم تحديث اسم الطالب بنجاح', 'success');
+    } catch {
+      showToast('تعذر تحديث اسم الطالب', 'error');
+    }
+  };
 
   if (loading) {
     return (
@@ -140,7 +158,18 @@ export default function StudentAnalyticsPage() {
       </Link>
 
       <div>
-        <h1 className="text-2xl font-extrabold text-white md:text-3xl">{student.name || 'بدون اسم'}</h1>
+        <div className="flex items-center gap-3">
+          <h1 className="text-2xl font-extrabold text-white md:text-3xl">{student.name || 'بدون اسم'}</h1>
+          <button
+            type="button"
+            onClick={handleEditStudentName}
+            className="p-1.5 text-slate-400 hover:text-gold-400 rounded-lg hover:bg-slate-800 transition-colors"
+            title="تعديل اسم الطالب"
+            aria-label="تعديل اسم الطالب"
+          >
+            <Pencil className="h-4 w-4" />
+          </button>
+        </div>
         <div className="mt-2 flex flex-wrap items-center gap-2">
           <Badge variant="info">{getGradeLabel(student.grade, student.track)}</Badge>
           {student.studentCode && <Badge variant="neutral">{student.studentCode}</Badge>}
