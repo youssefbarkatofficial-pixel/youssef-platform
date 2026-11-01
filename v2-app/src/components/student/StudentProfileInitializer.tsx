@@ -3,8 +3,8 @@ import type { FormEvent } from 'react';
 import type { User } from 'firebase/auth';
 import { LogOut, ShieldCheck } from 'lucide-react';
 import { Button, Card, Input, Spinner } from '../ui';
-import { isValidEgyptPhone, normalizePhone, phoneToEmail } from '../../lib/phone';
-import { createStudentProfile } from '../../services/students';
+import { isValidEgyptPhone, normalizeLoginPhone, normalizePhone, phoneToEmail } from '../../lib/phone';
+import { createStudentProfile, updateStudentProfile } from '../../services/students';
 import { logout } from '../../services/auth';
 import FormAlert from '../auth/FormAlert';
 
@@ -27,7 +27,7 @@ export default function StudentProfileInitializer({ user, onComplete }: Props) {
   const [error, setError] = useState('');
 
   const rawPhone = user.email ? user.email.replace(/@.*$/, '') : '';
-  const normStudent = normalizePhone(rawPhone);
+  const normStudent = normalizeLoginPhone(rawPhone);
 
   useEffect(() => {
     let active = true;
@@ -47,15 +47,20 @@ export default function StudentProfileInitializer({ user, onComplete }: Props) {
 
       if (normCached && isValidEgyptPhone(normCached) && normCached !== normStudent) {
         try {
-          await createStudentProfile({
-            uid: user.uid,
-            name: 'طالب',
-            phone: normStudent,
-            parentPhone: normCached,
-            grade: 'prep3',
-            gov: 'القاهرة',
-            email: phoneToEmail(normStudent),
-          });
+          try {
+            await createStudentProfile({
+              uid: user.uid,
+              name: 'طالب',
+              phone: normStudent,
+              parentPhone: normCached,
+              grade: 'prep3',
+              gov: 'القاهرة',
+              email: phoneToEmail(normStudent),
+            });
+          } catch {
+            await updateStudentProfile(user.uid, { parentPhone: normCached });
+          }
+
           if (active) {
             await onComplete();
             return;
@@ -105,15 +110,19 @@ export default function StudentProfileInitializer({ user, onComplete }: Props) {
         ? phoneToEmail(normStudent)
         : user.email || `${normStudent}@student.youssefbarakat.com`;
 
-      await createStudentProfile({
-        uid: user.uid,
-        name: 'طالب',
-        phone: isValidEgyptPhone(normStudent) ? normStudent : '01000000000',
-        parentPhone: normParent,
-        grade: 'prep3',
-        gov: 'القاهرة',
-        email: emailToUse,
-      });
+      try {
+        await createStudentProfile({
+          uid: user.uid,
+          name: 'طالب',
+          phone: isValidEgyptPhone(normStudent) ? normStudent : '01000000000',
+          parentPhone: normParent,
+          grade: 'prep3',
+          gov: 'القاهرة',
+          email: emailToUse,
+        });
+      } catch {
+        await updateStudentProfile(user.uid, { parentPhone: normParent });
+      }
 
       if (typeof window !== 'undefined') {
         localStorage.setItem(`yb_parent_binding_${normStudent}`, normParent);
@@ -158,7 +167,6 @@ export default function StudentProfileInitializer({ user, onComplete }: Props) {
             type="tel"
             dir="ltr"
             placeholder="01xxxxxxxxx"
-            autoComplete="tel"
             value={parentPhone}
             onChange={(e) => setParentPhone(e.target.value)}
           />
@@ -168,26 +176,27 @@ export default function StudentProfileInitializer({ user, onComplete }: Props) {
             type="tel"
             dir="ltr"
             placeholder="01xxxxxxxxx"
-            autoComplete="tel"
             value={confirmPhone}
             onChange={(e) => setConfirmPhone(e.target.value)}
           />
 
-          <Button type="submit" variant="primary" loading={loading} fullWidth>
-            حفظ ودخول المنصة فوراً
-          </Button>
-
-          <Button
-            type="button"
-            variant="ghost"
-            onClick={() => void logout()}
-            fullWidth
-            className="gap-2 text-xs text-theme-text-muted hover:text-rose-400"
-          >
-            <LogOut className="h-4 w-4" />
-            تسجيل الخروج
-          </Button>
+          <div className="pt-2">
+            <Button type="submit" variant="primary" loading={loading} fullWidth>
+              حفظ ودخول المنصة فوراً
+            </Button>
+          </div>
         </form>
+
+        <div className="mt-6 border-t border-theme-border pt-4 text-center">
+          <button
+            type="button"
+            onClick={() => void logout()}
+            className="inline-flex items-center gap-1.5 text-xs text-theme-text-muted transition-colors hover:text-red-400"
+          >
+            <LogOut className="h-3.5 w-3.5" />
+            <span>تسجيل الخروج</span>
+          </button>
+        </div>
       </Card>
     </div>
   );

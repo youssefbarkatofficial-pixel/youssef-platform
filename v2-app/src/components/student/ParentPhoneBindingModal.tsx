@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
-import { Phone, ShieldCheck } from 'lucide-react';
+import { ShieldCheck } from 'lucide-react';
 import { Button, Input, Modal, useToast } from '../ui';
 import { useAuth } from '../../hooks/useAuth';
 import { isValidEgyptPhone, normalizePhone } from '../../lib/phone';
@@ -10,7 +10,7 @@ import FormAlert from '../auth/FormAlert';
 /**
  * نافذة تأكيد وتسجيل رقم ولي الأمر الإلزامية:
  * تظهر فور دخول الطالب إذا لم يكن رقم ولي أمره مسجلاً في قاعدة البيانات
- * ويُطلب منه كتابة الرقم وتأكيده (مرتين) للتأكد من صحته وحفظه فوراً في حسابه.
+ * أو كان مطابقاً لرقم الطالب نفسه، ويُطلب منه كتابة رقم ولي أمره الحقيقي وتأكيده.
  */
 export default function ParentPhoneBindingModal() {
   const { student, refresh } = useAuth();
@@ -24,13 +24,17 @@ export default function ParentPhoneBindingModal() {
   // لا تظهر النافذة إذا لم يكن هناك طالب مسجل أو حسابه مجمّد
   if (!student || student.archived) return null;
 
-  // إذا كان رقم ولي الأمر مسجلاً ومطابقاً للشروط المصرية فلا حاجة للنافذة
+  // إذا كان رقم ولي الأمر مسجلاً ومطابقاً للشروط المصرية ومختلفاً عن رقم الطالب فلا حاجة للنافذة
   const existingParent = (student.parentPhone || '').trim();
+  const normParent = normalizePhone(existingParent);
+  const normStudent = normalizePhone(student.phone || '');
+
   const hasValidParent =
     existingParent !== '' &&
     existingParent !== 'غير مسجل' &&
     existingParent !== '-' &&
-    isValidEgyptPhone(normalizePhone(existingParent));
+    isValidEgyptPhone(normParent) &&
+    normParent !== normStudent;
 
   if (hasValidParent) return null;
 
@@ -38,28 +42,27 @@ export default function ParentPhoneBindingModal() {
     e.preventDefault();
     setError('');
 
-    const normParent = normalizePhone(parentPhone);
-    const normConfirm = normalizePhone(confirmPhone);
-    const normStudent = normalizePhone(student.phone);
+    const inputParent = normalizePhone(parentPhone);
+    const inputConfirm = normalizePhone(confirmPhone);
 
-    if (!normParent || !isValidEgyptPhone(normParent)) {
+    if (!inputParent || !isValidEgyptPhone(inputParent)) {
       setError('يجب كتابة رقم هاتف ولي الأمر صحيحاً (11 رقماً يبدأ بـ 01).');
       return;
     }
 
-    if (normParent !== normConfirm) {
+    if (inputParent !== inputConfirm) {
       setError('الأرقام غير متطابقة، حاول تاني.');
       return;
     }
 
-    if (normStudent && normParent === normStudent) {
-      setError('رقم ولي الأمر يجب أن يكون مختلفاً عن رقم هاتف الطالب.');
+    if (normStudent && inputParent === normStudent) {
+      setError('رقم ولي الأمر يجب أن يكون مختلفاً تماماً عن رقم هاتف الطالب.');
       return;
     }
 
     setLoading(true);
     try {
-      await updateStudentProfile(student.id, { parentPhone: normParent });
+      await updateStudentProfile(student.id, { parentPhone: inputParent });
       await refresh();
       showToast('تم تسجيل وتأكيد رقم ولي الأمر بنجاح!', 'success');
     } catch {

@@ -7,6 +7,8 @@ import { GRADE_OPTIONS, getGradeLabel } from '../../lib/grades';
 import { listStudents, setStudentArchived, updateStudentProfile } from '../../services/students';
 import type { Student } from '../../services/students';
 import { resolveStudentPassword, setStoredAdminPassword } from '../../lib/studentPasswords';
+import { isValidEgyptPhone, normalizePhone } from '../../lib/phone';
+import { cn } from '../../components/ui/cn';
 
 function formatDate(ms: number | null): string {
   if (ms === null) return '-';
@@ -23,6 +25,7 @@ export default function AdminStudentsPage() {
   const [failed, setFailed] = useState(false);
   const [search, setSearch] = useState('');
   const [grade, setGrade] = useState('');
+  const [parentStatus, setParentStatus] = useState<'all' | 'valid' | 'missing'>('all');
   const [busyId, setBusyId] = useState<string | null>(null);
   const [revealedIds, setRevealedIds] = useState<Set<string>>(new Set());
   const [pwdOverrides, setPwdOverrides] = useState<Record<string, string>>({});
@@ -45,6 +48,27 @@ export default function AdminStudentsPage() {
         ...(student.phone ? { [student.phone]: trimmed } : {}),
       }));
       showToast('تم حفظ كلمة المرور بنجاح', 'success');
+    }
+  };
+
+    const handleEditParentPhone = async (student: Student) => {
+    const promptLabel = student.name ? `تعديل رقم ولي الأمر للطالب (${student.name}):` : 'تعديل رقم ولي الأمر:';
+    const newPhone = window.prompt(promptLabel, student.parentPhone || '');
+    if (newPhone !== null) {
+      const clean = normalizePhone(newPhone);
+      if (clean && !isValidEgyptPhone(clean)) {
+        showToast('يجب كتابة رقم هاتف مصري صحيح (11 رقماً يبدأ بـ 01)', 'error');
+        return;
+      }
+      try {
+        await updateStudentProfile(student.id, { parentPhone: clean });
+        setStudents((prev) =>
+          prev.map((s) => (s.id === student.id ? { ...s, parentPhone: clean } : s)),
+        );
+        showToast('تم تحديث رقم ولي الأمر بنجاح', 'success');
+      } catch {
+        showToast('تعذر تحديث رقم ولي الأمر', 'error');
+      }
     }
   };
 
@@ -96,10 +120,45 @@ export default function AdminStudentsPage() {
     void load();
   }, [load]);
 
+    const parentStats = useMemo(() => {
+    let validCount = 0;
+    for (const s of students) {
+      const normP = normalizePhone(s.parentPhone || '');
+      const normS = normalizePhone(s.phone || '');
+      if (
+        s.parentPhone &&
+        s.parentPhone !== 'غير مسجل' &&
+        s.parentPhone !== '-' &&
+        isValidEgyptPhone(normP) &&
+        normP !== normS
+      ) {
+        validCount++;
+      }
+    }
+    return {
+      valid: validCount,
+      missing: students.length - validCount,
+      total: students.length,
+    };
+  }, [students]);
+
   const visible = useMemo(() => {
     const term = search.trim().toLowerCase();
     return students
       .filter((student) => (grade === '' ? true : student.grade === grade))
+      .filter((student) => {
+        if (parentStatus === 'all') return true;
+        const normP = normalizePhone(student.parentPhone || '');
+        const normS = normalizePhone(student.phone || '');
+        const hasValid = Boolean(
+          student.parentPhone &&
+          student.parentPhone !== 'غير مسجل' &&
+          student.parentPhone !== '-' &&
+          isValidEgyptPhone(normP) &&
+          normP !== normS
+        );
+        return parentStatus === 'valid' ? hasValid : !hasValid;
+      })
       .filter((student) => {
         if (term === '') return true;
         return (
@@ -110,7 +169,7 @@ export default function AdminStudentsPage() {
         );
       })
       .sort((a, b) => (b.createdAtMs ?? 0) - (a.createdAtMs ?? 0));
-  }, [students, search, grade]);
+  }, [students, search, grade, parentStatus]);
 
   const toggleArchive = async (student: Student) => {
     const next = !student.archived;
@@ -219,6 +278,41 @@ export default function AdminStudentsPage() {
               className="p-1 text-sky-400 hover:text-sky-300 rounded hover:bg-sky-500/10 transition-colors"
               title="تعديل كلمة المرور"
               aria-label="تعديل كلمة المرور"
+            >
+              <Pencil className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        );
+      },
+    },
+    {
+      key: 'parentPhone',
+      header: 'ولي الأمر',
+      render: (student) => {
+        const normP = normalizePhone(student.parentPhone || '');
+        const normS = normalizePhone(student.phone || '');
+        const isValid =
+          Boolean(student.parentPhone) &&
+          student.parentPhone !== 'غير مسجل' &&
+          student.parentPhone !== '-' &&
+          isValidEgyptPhone(normP) &&
+          normP !== normS;
+
+        return (
+          <div className="flex items-center gap-1.5 min-w-[8.5rem]">
+            {isValid ? (
+              <span dir="ltr" className="font-mono text-xs text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                {normP}
+              </span>
+            ) : (
+              <Badge variant="danger">غير مسجل</Badge>
+            )}
+            <button
+              type="button"
+              onClick={() => void handleEditParentPhone(student)}
+              className="p-1 text-slate-400 hover:text-gold-400 rounded hover:bg-slate-800 transition-colors"
+              title="تعديل رقم ولي الأمر"
+              aria-label="تعديل رقم ولي الأمر"
             >
               <Pencil className="h-3.5 w-3.5" />
             </button>
