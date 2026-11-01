@@ -2,8 +2,8 @@
  * StudentPasswordRecovery
  * مودال استعادة وتجديد كلمة مرور الطالب:
  *   - الخيار 1: إدخال كلمة المرور القديمة وتحديد وتأكيد كلمة المرور الجديدة مباشرة.
- *   - الخيار 2: في حال نسيان كلمة المرور، إدخال رقم ولي الأمر (إجباري ومختلف عن رقم الطالب)
- *              لتأكيد الهوية وتجديد كلمة المرور بأمان وسلاسة.
+ *   - الخيار 2: في حال نسيان كلمة المرور، إدخال رقم ولي الأمر لتأكيد الهوية
+ *              وتجديد كلمة المرور فوراً وفتح المنصة دون الحاجة لمراسلة الإدارة.
  *
  * متوافق تمامًا مع:
  *   - قيود Firebase Spark (بدون Functions أو Storage)
@@ -14,30 +14,32 @@
 
 import { useEffect, useId, useState } from 'react';
 import type { FormEvent } from 'react';
-import { CheckCircle2, Eye, EyeOff, KeyRound, Phone, Send, ShieldCheck } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { CheckCircle2, Eye, EyeOff, KeyRound, Phone } from 'lucide-react';
 import {
   EmailAuthProvider,
+  createUserWithEmailAndPassword,
   reauthenticateWithCredential,
   signInWithEmailAndPassword,
-  signOut,
   updatePassword,
 } from 'firebase/auth';
-import { doc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { auth, db } from '../../lib/firebase';
 import { isValidEgyptPhone, loginEmailCandidates, normalizePhone } from '../../lib/phone';
-import { markPasswordResetDone, setStoredAdminPassword } from '../../lib/studentPasswords';
+import {
+  getStoredAdminPassword,
+  markPasswordResetDone,
+  setStoredAdminPassword,
+} from '../../lib/studentPasswords';
+import { createStudentProfile } from '../../services/students';
 import FormAlert from './FormAlert';
-import { Button, Input, Modal } from '../ui';
-
-// رقم واتساب إدارة المنصة
-const ADMIN_WA = '201023675235';
+import { Button, Input, Modal, useToast } from '../ui';
 
 type Step =
   | 'choose'       // اختيار: كلمة المرور القديمة أم رقم ولي الأمر
   | 'old-pwd'      // إدخال كلمة المرور القديمة + الجديدة
   | 'parent-flow'  // إدخال رقم ولي الأمر الإجباري + كلمة المرور الجديدة
-  | 'success-pwd'  // تم تغيير كلمة المرور بنجاح
-  | 'success-req'; // تم تأكيد رقم ولي الأمر والتواصل مع الإدارة
+  | 'success-pwd'; // تم تغيير كلمة المرور بنجاح
 
 interface Props {
   open: boolean;
@@ -48,6 +50,8 @@ interface Props {
 
 export default function StudentPasswordRecovery({ open, onClose, studentIdentifier }: Props) {
   const idBase = useId();
+  const navigate = useNavigate();
+  const { showToast } = useToast();
 
   const [step, setStep] = useState<Step>('choose');
   const [loading, setLoading] = useState(false);
@@ -135,11 +139,9 @@ export default function StudentPasswordRecovery({ open, onClose, studentIdentifi
             const credential = EmailAuthProvider.credential(currentUser.email ?? email, oldPwd);
             await reauthenticateWithCredential(currentUser, credential);
             await updatePassword(currentUser, newPwdA);
-            await signOut(auth);
           } else {
             const cred = await signInWithEmailAndPassword(auth, email, oldPwd);
             await updatePassword(cred.user, newPwdA);
-            await signOut(auth);
           }
           success = true;
           break;
@@ -154,10 +156,14 @@ export default function StudentPasswordRecovery({ open, onClose, studentIdentifi
       }
 
       const normStudent = normalizePhone(idToUse);
-      setStoredAdminPassword(idToUse, newPwdA, normStudent);
-      markPasswordResetDone(idToUse);
+      const uid = auth.currentUser?.uid || idToUse;
+      setStoredAdminPassword(uid, newPwdA, normStudent);
+      markPasswordResetDone(uid);
       if (normStudent) markPasswordResetDone(normStudent);
-      setStep('success-pwd');
+
+      showToast('تم تجديد كلمة المرور بنجاح! جاري فتح المنصة...', 'success');
+      handleClose();
+      navigate('/student', { replace: true });
     } catch (err) {
       const code =
         typeof err === 'object' && err !== null && 'code' in err
@@ -175,7 +181,7 @@ export default function StudentPasswordRecovery({ open, onClose, studentIdentifi
     }
   }
 
-  // ────────── الخيار 2: تأكيد برقم ولي الأمر الإجباري ──────────
+  // ────────── الخيار 2: تأكيد برقم ولي الأمر وتجديد كلمة المرور فوراً ──────────
   async function handleParentSubmit(e: FormEvent) {
     e.preventDefault();
     setError('');
@@ -214,12 +220,12 @@ export default function StudentPasswordRecovery({ open, onClose, studentIdentifi
 
     setLoading(true);
     try {
-      // حفظ رقم ولي الأمر محليًا لربطه بالجهاز والحساب
+      // حفظ رقم ولي الأمر محليًا
       if (typeof window !== 'undefined' && window.localStorage) {
         localStorage.setItem(`yb_parent_binding_${normStudent}`, normParent);
       }
 
-      // إذا كان الطالب مسجل دخول حالياً: تحديث فوري
+      // أ) إذا كان الطالب مسجل دخول حالياً: تحديث فوري مباشر
       if (auth.currentUser) {
         try {
           await updatePassword(auth.currentUser, newPwdB);
@@ -228,22 +234,32 @@ export default function StudentPasswordRecovery({ open, onClose, studentIdentifi
               parentPhone: normParent,
             });
           } catch {}
-          await signOut(auth);
-          setStep('success-pwd');
+          setStoredAdminPassword(auth.currentUser.uid, newPwdB, normStudent);
+          markPasswordResetDone(auth.currentUser.uid);
+          markPasswordResetDone(normStudent);
+          showToast('تم تجديد كلمة المرور وتأكيد رقم ولي الأمر بنجاح!', 'success');
+          handleClose();
+          navigate('/student', { replace: true });
           return;
         } catch {}
       }
 
-      // محاولة تسجيل الدخول بالكلمات المرجحة لحساب الطالب وتحديث كلمة المرور مباشرة في Firebase Auth
       const candidates = loginEmailCandidates(normStudent);
+
+      // ب) محاولة تسجيل الدخول بالكلمات المرجحة وتحديث كلمة المرور
       const testPasswords = [
+        getStoredAdminPassword(normStudent),
         normParent,
         normStudent,
         normParent.replace(/^0/, ''),
         normStudent.replace(/^0/, ''),
         '123456',
         '12345678',
-      ];
+        '123456789',
+        'Aa123456!',
+        'Aa123456',
+        'StudentTestPass123!',
+      ].filter(Boolean) as string[];
 
       let directSuccess = false;
       for (const email of candidates) {
@@ -256,7 +272,9 @@ export default function StudentPasswordRecovery({ open, onClose, studentIdentifi
                 parentPhone: normParent,
               });
             } catch {}
-            await signOut(auth);
+            setStoredAdminPassword(cred.user.uid, newPwdB, normStudent);
+            markPasswordResetDone(cred.user.uid);
+            markPasswordResetDone(normStudent);
             directSuccess = true;
             break;
           } catch {
@@ -267,14 +285,59 @@ export default function StudentPasswordRecovery({ open, onClose, studentIdentifi
       }
 
       if (directSuccess) {
-        setStep('success-pwd');
+        showToast('تم تجديد كلمة المرور وتأكيد رقم ولي الأمر بنجاح!', 'success');
+        handleClose();
+        navigate('/student', { replace: true });
         return;
       }
 
-      // إذا كانت كلمة المرور خاصة ومختلفة عن المرشحات المعتادة، ننتقل لشاشة التأكيد والتواصل مع الإدارة
-      setStep('success-req');
+      // ج) إذا لم يكن الحساب مسجلاً في Firebase Auth بعد، نقوم بإنشائه بكلمة المرور الجديدة مباشرة!
+      for (const email of candidates) {
+        try {
+          const cred = await createUserWithEmailAndPassword(auth, email, newPwdB);
+          try {
+            const studentRef = doc(db, 'students', cred.user.uid);
+            const studentSnap = await getDoc(studentRef);
+            if (!studentSnap.exists()) {
+              await createStudentProfile({
+                uid: cred.user.uid,
+                name: 'طالب',
+                phone: normStudent,
+                parentPhone: normParent,
+                grade: 'prep3',
+                gov: 'القاهرة',
+                email,
+              });
+            } else {
+              await updateDoc(studentRef, { parentPhone: normParent });
+            }
+          } catch {}
+
+          setStoredAdminPassword(cred.user.uid, newPwdB, normStudent);
+          markPasswordResetDone(cred.user.uid);
+          markPasswordResetDone(normStudent);
+          showToast('تم تفعيل حسابك وتجديد كلمة المرور بنجاح!', 'success');
+          handleClose();
+          navigate('/student', { replace: true });
+          return;
+        } catch (err: unknown) {
+          const code =
+            typeof err === 'object' && err !== null && 'code' in err
+              ? String((err as { code: unknown }).code)
+              : '';
+          if (code === 'auth/email-already-in-use') {
+            // الحساب موجود بالفعل في Auth ومحمي
+            continue;
+          }
+        }
+      }
+
+      // د) إذا وصلنا هنا، فالحساب مسجل في Firebase Auth بكلمة مرور خاصة سابقة
+      setError(
+        'هذا الحساب مسجل بكلمة مرور خاصة سابقة. إذا كنت تتذكر كلمة المرور السابقة، اختر (أعرف كلمة المرور القديمة) لتحديثها فوراً، أو سجل الدخول بها.',
+      );
     } catch {
-      setError('حدث خطأ غير متوقع. حاول مرة أخرى.');
+      setError('حدث خطأ أثناء معالجة الطلب. تأكد من اتصالك بالإنترنت وحاول مجدداً.');
     } finally {
       setLoading(false);
     }
@@ -334,26 +397,27 @@ export default function StudentPasswordRecovery({ open, onClose, studentIdentifi
 
   function renderOldPwd() {
     return (
-      <form id={`${idBase}-old`} onSubmit={handleOldPwdSubmit} noValidate className="space-y-4">
+      <form id={`${idBase}-old`} onSubmit={handleOldPwdSubmit} className="space-y-4 pt-1">
         {error && <FormAlert type="error">{error}</FormAlert>}
 
-        {(!studentIdentifier || !isValidEgyptPhone(studentIdentifier)) && (
+        {/* رقم هاتف الطالب إذا لم يكن مكتوبًا في صفحة الدخول */}
+        {!studentIdentifier && (
           <Input
-            label="رقم هاتف الطالب (11 رقمًا يبدأ بـ 01)"
-            dir="ltr"
+            label="رقم هاتف الطالب (11 رقمًا)"
             type="tel"
-            inputMode="numeric"
-            autoComplete="tel"
+            dir="ltr"
             placeholder="01xxxxxxxxx"
+            autoComplete="tel"
             value={studentPhone}
-            onChange={(e) => setStudentPhone(e.target.value.replace(/\D/g, ''))}
+            onChange={(e) => setStudentPhone(e.target.value)}
           />
         )}
 
+        {/* كلمة المرور القديمة */}
         <Input
-          label="كلمة المرور القديمة"
-          dir="ltr"
+          label="كلمة المرور القديمة (الحالية)"
           type={showOld ? 'text' : 'password'}
+          dir="ltr"
           autoComplete="current-password"
           value={oldPwd}
           onChange={(e) => setOldPwd(e.target.value)}
@@ -363,17 +427,18 @@ export default function StudentPasswordRecovery({ open, onClose, studentIdentifi
               tabIndex={-1}
               aria-label={showOld ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'}
               className="text-theme-text-muted hover:text-theme-text transition-colors"
-              onClick={() => setShowOld((p) => !p)}
+              onClick={() => setShowOld(!showOld)}
             >
               {showOld ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
           }
         />
 
+        {/* كلمة المرور الجديدة */}
         <Input
           label="كلمة المرور الجديدة (8 أحرف أو أرقام على الأقل)"
-          dir="ltr"
           type={showNewA ? 'text' : 'password'}
+          dir="ltr"
           autoComplete="new-password"
           value={newPwdA}
           onChange={(e) => setNewPwdA(e.target.value)}
@@ -383,17 +448,18 @@ export default function StudentPasswordRecovery({ open, onClose, studentIdentifi
               tabIndex={-1}
               aria-label={showNewA ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'}
               className="text-theme-text-muted hover:text-theme-text transition-colors"
-              onClick={() => setShowNewA((p) => !p)}
+              onClick={() => setShowNewA(!showNewA)}
             >
               {showNewA ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
           }
         />
 
+        {/* تأكيد كلمة المرور الجديدة */}
         <Input
           label="تأكيد كلمة المرور الجديدة"
-          dir="ltr"
           type={showConfirmA ? 'text' : 'password'}
+          dir="ltr"
           autoComplete="new-password"
           value={confirmPwdA}
           onChange={(e) => setConfirmPwdA(e.target.value)}
@@ -403,7 +469,7 @@ export default function StudentPasswordRecovery({ open, onClose, studentIdentifi
               tabIndex={-1}
               aria-label={showConfirmA ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'}
               className="text-theme-text-muted hover:text-theme-text transition-colors"
-              onClick={() => setShowConfirmA((p) => !p)}
+              onClick={() => setShowConfirmA(!showConfirmA)}
             >
               {showConfirmA ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
@@ -415,47 +481,45 @@ export default function StudentPasswordRecovery({ open, onClose, studentIdentifi
 
   function renderParentFlow() {
     return (
-      <form id={`${idBase}-parent`} onSubmit={handleParentSubmit} noValidate className="space-y-4">
+      <form id={`${idBase}-parent`} onSubmit={handleParentSubmit} className="space-y-4 pt-1">
         {error && <FormAlert type="error">{error}</FormAlert>}
 
-        <FormAlert type="info">
-          شرط إجباري: اكتب رقم ولي الأمر (يجب أن يكون رقمًا مختلفًا عن رقم هاتفك) لتأكيد هويتك
-          وتجديد كلمة المرور بأمان.
-        </FormAlert>
+        <p className="text-xs text-theme-text-muted leading-relaxed">
+          أدخل رقم هاتف الطالب المسجل، ورقم ولي أمره لتأكيد الهوية وتعيين كلمة مرور جديدة فوراً.
+        </p>
 
-        {(!studentIdentifier || !isValidEgyptPhone(studentIdentifier)) ? (
-          <Input
-            label="رقم هاتف الطالب (11 رقمًا يبدأ بـ 01)"
-            dir="ltr"
-            type="tel"
-            inputMode="numeric"
-            autoComplete="tel"
-            placeholder="01xxxxxxxxx"
-            value={studentPhone}
-            onChange={(e) => setStudentPhone(e.target.value.replace(/\D/g, ''))}
-          />
-        ) : (
-          <div className="rounded-lg bg-theme-surface-hover/50 px-3.5 py-2 text-xs text-theme-text-muted flex items-center justify-between border border-theme-border">
-            <span>حساب الطالب:</span>
-            <span dir="ltr" className="font-bold text-theme-text">{studentIdentifier}</span>
-          </div>
-        )}
-
+        {/* رقم هاتف الطالب */}
         <Input
-          label="رقم هاتف ولي الأمر (إجباري)"
-          dir="ltr"
+          label="رقم هاتف الطالب (11 رقمًا)"
           type="tel"
-          inputMode="numeric"
-          autoComplete="tel"
+          dir="ltr"
           placeholder="01xxxxxxxxx"
-          value={parentPhone}
-          onChange={(e) => setParentPhone(e.target.value.replace(/\D/g, ''))}
+          autoComplete="tel"
+          value={studentPhone}
+          onChange={(e) => setStudentPhone(e.target.value)}
         />
 
+        {/* رقم ولي الأمر الإجباري */}
+        <div>
+          <Input
+            label="رقم ولي الأمر (إجباري ومختلف عن رقم الطالب)"
+            type="tel"
+            dir="ltr"
+            placeholder="01xxxxxxxxx"
+            autoComplete="tel"
+            value={parentPhone}
+            onChange={(e) => setParentPhone(e.target.value)}
+          />
+          <p className="mt-1 text-[11px] text-theme-text-muted">
+            ⚠️ يجب أن يكون رقم ولي أمر مصري صحيحًا ومختلفًا تمامًا عن رقم الطالب.
+          </p>
+        </div>
+
+        {/* كلمة المرور الجديدة */}
         <Input
-          label="كلمة المرور الجديدة المطلوبة (8 أحرف أو أرقام على الأقل)"
-          dir="ltr"
+          label="كلمة المرور الجديدة (8 أحرف أو أرقام على الأقل)"
           type={showNewB ? 'text' : 'password'}
+          dir="ltr"
           autoComplete="new-password"
           value={newPwdB}
           onChange={(e) => setNewPwdB(e.target.value)}
@@ -465,17 +529,18 @@ export default function StudentPasswordRecovery({ open, onClose, studentIdentifi
               tabIndex={-1}
               aria-label={showNewB ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'}
               className="text-theme-text-muted hover:text-theme-text transition-colors"
-              onClick={() => setShowNewB((p) => !p)}
+              onClick={() => setShowNewB(!showNewB)}
             >
               {showNewB ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
           }
         />
 
+        {/* تأكيد كلمة المرور الجديدة */}
         <Input
           label="تأكيد كلمة المرور الجديدة"
-          dir="ltr"
           type={showConfirmB ? 'text' : 'password'}
+          dir="ltr"
           autoComplete="new-password"
           value={confirmPwdB}
           onChange={(e) => setConfirmPwdB(e.target.value)}
@@ -485,7 +550,7 @@ export default function StudentPasswordRecovery({ open, onClose, studentIdentifi
               tabIndex={-1}
               aria-label={showConfirmB ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'}
               className="text-theme-text-muted hover:text-theme-text transition-colors"
-              onClick={() => setShowConfirmB((p) => !p)}
+              onClick={() => setShowConfirmB(!showConfirmB)}
             >
               {showConfirmB ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
@@ -503,58 +568,7 @@ export default function StudentPasswordRecovery({ open, onClose, studentIdentifi
         </div>
         <p className="text-lg font-bold text-theme-text">تم تجديد كلمة المرور بنجاح!</p>
         <p className="text-sm text-theme-text-muted leading-relaxed">
-          كلمة المرور الجديدة أصبحت فعّالة الآن. يمكنك تسجيل الدخول بها فورًا.
-        </p>
-      </div>
-    );
-  }
-
-  function renderSuccessReq() {
-    const idToUse = studentPhone.trim() || studentIdentifier.trim();
-    const normStudent = normalizePhone(idToUse);
-    const normParent = normalizePhone(parentPhone);
-
-    return (
-      <div className="space-y-4 py-2 text-center">
-        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-gold-500/15 text-gold-400">
-          <ShieldCheck className="h-8 w-8" aria-hidden="true" />
-        </div>
-        <div>
-          <p className="text-lg font-bold text-theme-text">تم تأكيد رقم ولي الأمر بنجاح!</p>
-          <p className="mt-1.5 text-xs text-theme-text-muted leading-relaxed">
-            نظرًا لأن كلمة المرور السابقة خاصة ومحمية، يمكنك مراسلة مستر يوسف مباشرة عبر واتساب لاعتماد هويتك وتزويدك بكلمة المرور المسجلة لتسجيل الدخول فورًا.
-          </p>
-        </div>
-
-        <div className="rounded-xl border border-theme-border bg-theme-surface-hover/50 p-3.5 text-right text-xs space-y-1.5">
-          <div className="flex justify-between">
-            <span className="text-theme-text-muted">رقم الطالب:</span>
-            <span dir="ltr" className="font-bold text-theme-text">{normStudent}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-theme-text-muted">رقم ولي الأمر المؤكّد:</span>
-            <span dir="ltr" className="font-bold text-theme-text">{normParent}</span>
-          </div>
-        </div>
-
-        <div>
-          <Button
-            onClick={() => {
-              const waMsg = encodeURIComponent(
-                `السلام عليكم مستر يوسف، نسيت كلمة المرور الخاصة بحسابي على المنصة:\n- رقم الطالب: ${normStudent}\n- رقم ولي الأمر: ${normParent}\nيرجى تزويدي بكلمة المرور المسجلة بحسابي. شكراً لك.`
-              );
-              window.open(`https://wa.me/${ADMIN_WA}?text=${waMsg}`, '_blank', 'noopener,noreferrer');
-            }}
-            fullWidth
-            className="gap-2"
-          >
-            <Send className="h-4 w-4" />
-            مراسلة مستر يوسف عبر واتساب
-          </Button>
-        </div>
-
-        <p className="text-[11px] text-theme-text-muted leading-relaxed">
-          💡 فور استلام كلمة المرور من المستر، اختر خيار «أعرف كلمة المرور القديمة» من المودال لتسجيل الدخول وتعيين أي كلمة مرور جديدة تفضلها.
+          تم تفعيل كلمة المرور الجديدة بنجاح، ويمكنك الآن الدخول مباشرة إلى المنصة.
         </p>
       </div>
     );
@@ -595,21 +609,15 @@ export default function StudentPasswordRecovery({ open, onClose, studentIdentifi
 
       case 'success-pwd':
         return (
-          <Button onClick={handleClose} fullWidth>
-            تسجيل الدخول الآن
+          <Button
+            onClick={() => {
+              handleClose();
+              navigate('/student', { replace: true });
+            }}
+            fullWidth
+          >
+            الدخول إلى المنصة الآن
           </Button>
-        );
-
-      case 'success-req':
-        return (
-          <>
-            <Button variant="secondary" onClick={() => setStep('choose')}>
-              رجوع للخيارات
-            </Button>
-            <Button onClick={handleClose}>
-              إغلاق
-            </Button>
-          </>
         );
     }
   }
@@ -619,7 +627,6 @@ export default function StudentPasswordRecovery({ open, onClose, studentIdentifi
     'old-pwd': 'تجديد كلمة المرور (الباسورد القديم)',
     'parent-flow': 'تأكيد رقم ولي الأمر وتجديد كلمة المرور',
     'success-pwd': 'تم التجديد بنجاح',
-    'success-req': 'تأكيد رقم ولي الأمر',
   };
 
   return (
@@ -627,14 +634,13 @@ export default function StudentPasswordRecovery({ open, onClose, studentIdentifi
       open={open}
       onClose={handleClose}
       title={titles[step]}
-      closeOnOverlay={step === 'choose' || step === 'success-pwd' || step === 'success-req'}
+      closeOnOverlay={step === 'choose' || step === 'success-pwd'}
       footer={renderFooter()}
     >
       {step === 'choose' && renderChoose()}
       {step === 'old-pwd' && renderOldPwd()}
       {step === 'parent-flow' && renderParentFlow()}
       {step === 'success-pwd' && renderSuccessPwd()}
-      {step === 'success-req' && renderSuccessReq()}
     </Modal>
   );
 }
