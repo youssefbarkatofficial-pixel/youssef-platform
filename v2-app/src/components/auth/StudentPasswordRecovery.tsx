@@ -256,34 +256,58 @@ export default function StudentPasswordRecovery({ open, onClose, studentIdentifi
       }
 
       // ثانياً: محاولة تسجيل الدخول بالكلمات المرجحة وتأكيد مطابقة رقم ولي الأمر
-      const candidates = loginEmailCandidates(normStudent);
-      const testPasswords = [
-        newPwdB,
-        confirmPwdB,
-        getStoredAdminPassword(normStudent),
-        normParent,
-        normStudent,
-        normParent.replace(/^0/, ''),
-        normStudent.replace(/^0/, ''),
-        '123456',
-        '12345678',
-        '123456789',
-        'Aa123456!',
-        'Aa123456',
-        'StudentTestPass123!',
-      ].filter(Boolean) as string[];
+      // نضع الكلمات الافتراضية الأكثر شيوعاً أولاً لتفادي حظر فايربيز بعد محاولات خاطئة (Rate Limiting)
+      const testPasswords = Array.from(
+        new Set(
+          [
+            '12345678',
+            '123456',
+            normStudent,
+            normParent,
+            newPwdB,
+            getStoredAdminPassword(normStudent),
+            normStudent.replace(/^0/, ''),
+            normParent.replace(/^0/, ''),
+            '123456789',
+            'Aa123456!',
+          ].filter(Boolean) as string[],
+        ),
+      );
 
       let authenticatedUser = auth.currentUser;
       if (!authenticatedUser) {
-        for (const email of candidates) {
-          for (const testPwd of testPasswords) {
-            try {
-              const cred = await signInWithEmailAndPassword(auth, email, testPwd);
-              authenticatedUser = cred.user;
-              break;
-            } catch {}
+        // نجرب أولاً الإيميل الأساسي الرسمي للطالب
+        for (const testPwd of testPasswords) {
+          try {
+            const cred = await signInWithEmailAndPassword(auth, primaryEmail, testPwd);
+            authenticatedUser = cred.user;
+            break;
+          } catch (err: unknown) {
+            const code =
+              typeof err === 'object' && err !== null && 'code' in err
+                ? String((err as { code: unknown }).code)
+                : '';
+            if (code === 'auth/too-many-requests') {
+              setError('محاولات كثيرة مؤقتًا لحماية الحساب. من فضلك انتظر دقيقة ثم حاول مجددًا.');
+              return;
+            }
           }
-          if (authenticatedUser) break;
+        }
+
+        // إذا لم ينجح، نجرب صيغ الإيميلات القديمة (إن وجدت ومختلفة) بالكلمات الأساسية فقط
+        if (!authenticatedUser) {
+          const altCandidates = loginEmailCandidates(normStudent).filter((e) => e !== primaryEmail);
+          const topPasswords = ['12345678', '123456', normStudent];
+          for (const email of altCandidates) {
+            for (const testPwd of topPasswords) {
+              try {
+                const cred = await signInWithEmailAndPassword(auth, email, testPwd);
+                authenticatedUser = cred.user;
+                break;
+              } catch {}
+            }
+            if (authenticatedUser) break;
+          }
         }
       }
 
