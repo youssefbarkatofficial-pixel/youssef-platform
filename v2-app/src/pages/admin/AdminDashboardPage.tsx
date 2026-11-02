@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { BookOpen, Clock, Coins, ServerCrash, Users } from 'lucide-react';
-import { Badge, Button, Card, EmptyState, StatCard, buttonClasses } from '../../components/ui';
+import { BookOpen, Clock, Coins, KeyRound, ServerCrash, Users } from 'lucide-react';
+import { Badge, Button, Card, Input, EmptyState, StatCard, buttonClasses, useToast } from '../../components/ui';
 import { useAuth } from '../../hooks/useAuth';
 import { useCourses } from '../../hooks/useCourses';
 import {
@@ -21,6 +21,12 @@ import { formatRequestDate, getStatusInfo, listPaymentRequests } from '../../ser
 import type { PaymentRequest } from '../../services/payments';
 import type { Course } from '../../services/courses';
 import { listStudents } from '../../services/students';
+import {
+  getPendingPasswordResets,
+  setStoredAdminPassword,
+  updatePasswordResetStatus,
+} from '../../lib/studentPasswords';
+import type { PasswordResetRequest } from '../../lib/studentPasswords';
 import type { Student } from '../../services/students';
 
 // الإيرادات تُحسب من أحدث هذه الأعداد من الطلبات (قراءة واحدة). لو وصلنا للحد نعرض تنبيهًا.
@@ -57,6 +63,45 @@ export default function AdminDashboardPage() {
 
   const [failed, setFailed] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
+  const { showToast } = useToast();
+  const [pwdRequests, setPwdRequests] = useState<PasswordResetRequest[]>([]);
+
+  useEffect(() => {
+    setPwdRequests(getPendingPasswordResets());
+  }, [reloadKey]);
+
+  const pendingPwdRequests = useMemo(
+    () => pwdRequests.filter((r) => r.status === 'pending'),
+    [pwdRequests]
+  );
+
+  const handleApprovePwd = (req: PasswordResetRequest) => {
+    updatePasswordResetStatus(req.id, 'approved');
+    setPwdRequests(getPendingPasswordResets());
+    showToast(`تم اعتماد وتفعيل كلمة المرور للطالب (${req.studentPhone}) بنجاح`, 'success');
+  };
+
+  const handleRejectPwd = (req: PasswordResetRequest) => {
+    updatePasswordResetStatus(req.id, 'rejected');
+    setPwdRequests(getPendingPasswordResets());
+    showToast(`تم رفض طلب التجديد للطالب (${req.studentPhone})`, 'info');
+  };
+
+  const [quickPhone, setQuickPhone] = useState('');
+
+  const handleQuickApprove = () => {
+    const clean = quickPhone.trim();
+    if (!clean) return;
+    const req = pwdRequests.find((r) => r.studentPhone === clean && r.status === 'pending');
+    if (req) {
+      handleApprovePwd(req);
+    } else {
+      setStoredAdminPassword(clean, '12345678');
+      showToast(`تم اعتماد وتفعيل كلمة المرور للطالب (${clean}) بنجاح`, 'success');
+    }
+    setQuickPhone('');
+  };
+
 
   // تحميل متدرج سريع: جلب الطلبات أولاً للرسم الفوري، والطلاب في الخلفية
   useEffect(() => {
@@ -218,6 +263,92 @@ export default function AdminDashboardPage() {
           )}
         </Card>
       </div>
+
+      {/* بطاقة طلبات تجديد كلمة المرور المعلقة */}
+      <Card className="min-w-0 border-gold-500/30">
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <KeyRound className="h-5 w-5 text-gold-400" />
+            <h2 className="text-lg font-bold text-white">طلبات تجديد كلمة المرور</h2>
+            {pendingPwdRequests.length > 0 && (
+              <Badge variant="gold">{pendingPwdRequests.length} بانتظار الاعتماد</Badge>
+            )}
+          </div>
+        </div>
+        {pendingPwdRequests.length === 0 ? (
+          <p className="text-sm text-slate-400">لا توجد طلبات تجديد معلقة حالياً في الانتظار.</p>
+        ) : (
+          <div className="space-y-3">
+            {pendingPwdRequests.map((req) => {
+              const studentObj = students.find((s) => s.phone === req.studentPhone);
+              const waReply = encodeURIComponent('أهلاً يا بطل، تم اعتماد وتفعيل كلمة المرور لحسابك بنجاح من مستر يوسف بركات! يمكنك الآن تسجيل الدخول والمتابعة.');
+              return (
+                <div
+                  key={req.id}
+                  className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-navy-800 bg-navy-950/60 p-3.5"
+                >
+                  <div className="space-y-1 text-sm">
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-white">{studentObj?.name || 'طالب'}</span>
+                      <span className="font-mono text-gold-400 font-bold" dir="ltr">({req.studentPhone})</span>
+                      <span className="text-xs text-slate-400 font-mono" dir="ltr">
+                        {new Date(req.createdAt).toLocaleTimeString('ar-EG')}
+                      </span>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-3 text-xs text-slate-300">
+                      <span>كود الطالب: <strong className="font-mono text-gold-300">{studentObj?.studentCode || '—'}</strong></span>
+                      <span>رقم ولي الأمر: <strong className="font-mono text-emerald-400" dir="ltr">{req.parentPhone}</strong></span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <a
+                      href={`https://wa.me/20${req.studentPhone.replace(/^0/, '')}?text=${waReply}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="rounded-lg bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30 px-3 py-1.5 text-xs font-bold border border-emerald-500/30 transition inline-flex items-center gap-1"
+                    >
+                      واتساب الطالب
+                    </a>
+                    <Button
+                      size="sm"
+                      variant="primary"
+                      onClick={() => handleApprovePwd(req)}
+                    >
+                      موافقة واعتماد
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => handleRejectPwd(req)}
+                    >
+                      رفض
+                    </Button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        <div className="mt-4 pt-4 border-t border-navy-800/80 flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+          <Input
+            placeholder="اعتماد فوري لطالب راسلك على واتساب (أدخل رقم هاتفه 01xxxxxxxxx)"
+            value={quickPhone}
+            onChange={(e) => setQuickPhone(e.target.value)}
+            dir="ltr"
+            className="flex-1 text-sm"
+          />
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={handleQuickApprove}
+            disabled={!quickPhone.trim()}
+          >
+            اعتماد فوري
+          </Button>
+        </div>
+      </Card>
 
       <Card className="min-w-0">
         <div className="mb-4 flex items-center justify-between gap-3">

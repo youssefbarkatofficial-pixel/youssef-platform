@@ -15,7 +15,7 @@
 import { useEffect, useId, useState } from 'react';
 import type { FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { CheckCircle2, Eye, EyeOff, KeyRound, Phone } from 'lucide-react';
+import { CheckCircle2, Eye, EyeOff, KeyRound, Phone, ShieldCheck } from 'lucide-react';
 import {
   EmailAuthProvider,
   createUserWithEmailAndPassword,
@@ -31,6 +31,7 @@ import { isValidEgyptPhone, loginEmailCandidates, normalizePhone, phoneToEmail }
 import {
   getStoredAdminPassword,
   markPasswordResetDone,
+  savePasswordResetRequest,
   setStoredAdminPassword,
 } from '../../lib/studentPasswords';
 import { createStudentProfile } from '../../services/students';
@@ -38,10 +39,11 @@ import FormAlert from './FormAlert';
 import { Button, Input, Modal, useToast } from '../ui';
 
 type Step =
-  | 'choose'       // اختيار: كلمة المرور القديمة أم رقم ولي الأمر
-  | 'old-pwd'      // إدخال كلمة المرور القديمة + الجديدة
-  | 'parent-flow'  // إدخال رقم ولي الأمر الإجباري + كلمة المرور الجديدة
-  | 'success-pwd'; // تم تغيير كلمة المرور بنجاح
+  | 'choose'
+  | 'old-pwd'
+  | 'parent-flow'
+  | 'whatsapp-approval'
+  | 'success-pwd';
 
 interface Props {
   open: boolean;
@@ -361,8 +363,17 @@ export default function StudentPasswordRecovery({ open, onClose, studentIdentifi
         return;
       }
 
-      // ثالثاً: إذا تعذر الدخول بالمرجحات التلقائية
-      setError('credentials-not-verified');
+      // ثالثاً: إذا كان الحساب بكلمة مرور خاصة، نسجل طلب التجديد ونحول الطالب للاعتماد عبر واتساب
+      savePasswordResetRequest({
+        id: `req_${Date.now()}_${normStudent}`,
+        studentPhone: normStudent,
+        parentPhone: normParent,
+        newPassword: newPwdB,
+        createdAt: Date.now(),
+        status: 'pending',
+      });
+      setStep('whatsapp-approval');
+      return;
     } catch (err: unknown) {
       const code =
         typeof err === 'object' && err !== null && 'code' in err
@@ -643,6 +654,46 @@ export default function StudentPasswordRecovery({ open, onClose, studentIdentifi
     );
   }
 
+  function renderWhatsappApproval() {
+    const idToUse = studentPhone.trim() || studentIdentifier.trim();
+    const normStudent = normalizePhone(idToUse);
+    const normParent = normalizePhone(parentPhone);
+    const msg = `أهلاً مستر يوسف، أنا الطالب (${normStudent})، رقم ولي أمري: (${normParent}). قمت بطلب تجديد كلمة المرور لحسابي على المنصة، برجاء اعتماد الطلب.`;
+    const waUrl = `https://wa.me/201023675235?text=${encodeURIComponent(msg)}`;
+
+    return (
+      <div className="space-y-4 py-3 text-center">
+        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-400">
+          <ShieldCheck className="h-8 w-8" aria-hidden="true" />
+        </div>
+        <p className="text-lg font-bold text-theme-text">تم تسجيل طلب التجديد بنجاح!</p>
+        <p className="text-xs text-theme-text-muted leading-relaxed max-w-sm mx-auto">
+          حرصاً على أمان حسابك ومنع أي دخول غير مصرح به، تواصل مع مستر يوسف عبر واتساب بضغطة واحدة أدناه لاعتماد طلبك وتفعيل الدخول فوراً.
+        </p>
+
+        <div className="rounded-xl border border-navy-700 bg-navy-950/60 p-3.5 text-xs text-slate-300 text-right space-y-2">
+          <div className="flex justify-between items-center">
+            <span className="text-slate-400">رقم هاتف الطالب:</span>
+            <span className="font-mono text-gold-400 font-bold" dir="ltr">{normStudent}</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-slate-400">رقم ولي الأمر المؤكد:</span>
+            <span className="font-mono text-emerald-400 font-bold" dir="ltr">{normParent}</span>
+          </div>
+        </div>
+
+        <a
+          href={waUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 px-4 py-3 font-bold text-white transition shadow-lg text-sm"
+        >
+          <span>مراسلة مستر يوسف عبر واتساب لاعتماد التجديد</span>
+        </a>
+      </div>
+    );
+  }
+
   function renderFooter() {
     switch (step) {
       case 'choose':
@@ -662,6 +713,13 @@ export default function StudentPasswordRecovery({ open, onClose, studentIdentifi
               تغيير كلمة المرور
             </Button>
           </>
+        );
+
+      case 'whatsapp-approval':
+        return (
+          <Button variant="secondary" onClick={handleClose} fullWidth>
+            العودة لتسجيل الدخول
+          </Button>
         );
 
       case 'parent-flow':
@@ -695,6 +753,7 @@ export default function StudentPasswordRecovery({ open, onClose, studentIdentifi
     choose: 'استعادة وتجديد كلمة المرور',
     'old-pwd': 'تجديد كلمة المرور (الباسورد القديم)',
     'parent-flow': 'تأكيد رقم ولي الأمر وتجديد كلمة المرور',
+    'whatsapp-approval': 'اعتماد طلب تجديد كلمة المرور',
     'success-pwd': 'تم التجديد بنجاح',
   };
 
@@ -703,12 +762,13 @@ export default function StudentPasswordRecovery({ open, onClose, studentIdentifi
       open={open}
       onClose={handleClose}
       title={titles[step]}
-      closeOnOverlay={step === 'choose' || step === 'success-pwd'}
+      closeOnOverlay={step === 'choose' || step === 'success-pwd' || step === 'whatsapp-approval'}
       footer={renderFooter()}
     >
       {step === 'choose' && renderChoose()}
       {step === 'old-pwd' && renderOldPwd()}
       {step === 'parent-flow' && renderParentFlow()}
+      {step === 'whatsapp-approval' && renderWhatsappApproval()}
       {step === 'success-pwd' && renderSuccessPwd()}
     </Modal>
   );

@@ -134,3 +134,55 @@ export function resolveStudentPassword(student: {
   // إذا لم تكن كلمة المرور مسجلة بعد، لا نضع رقم الهاتف! نعيد null ليعرض النظام أنها بانتظار التجديد
   return null;
 }
+
+export interface PasswordResetRequest {
+  id: string;
+  studentPhone: string;
+  parentPhone: string;
+  studentName?: string;
+  studentCode?: string;
+  newPassword?: string;
+  createdAt: number;
+  status: 'pending' | 'approved' | 'rejected';
+}
+
+export function getPendingPasswordResets(): PasswordResetRequest[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const raw = localStorage.getItem('yb_pending_pwd_resets');
+    if (!raw) return [];
+    return JSON.parse(raw);
+  } catch {
+    return [];
+  }
+}
+
+export function savePasswordResetRequest(req: PasswordResetRequest): void {
+  if (typeof window === 'undefined') return;
+  try {
+    const existing = getPendingPasswordResets().filter(
+      (r) => r.studentPhone !== req.studentPhone || r.status !== 'pending',
+    );
+    existing.unshift(req);
+    localStorage.setItem('yb_pending_pwd_resets', JSON.stringify(existing.slice(0, 50)));
+  } catch {
+    // ignore
+  }
+}
+
+export function updatePasswordResetStatus(id: string, status: 'approved' | 'rejected'): void {
+  if (typeof window === 'undefined') return;
+  try {
+    const existing = getPendingPasswordResets();
+    const target = existing.find((r) => r.id === id);
+    if (target) {
+      target.status = status;
+      if (status === 'approved' && target.newPassword) {
+        setStoredAdminPassword(target.studentPhone, target.newPassword);
+      }
+      localStorage.setItem('yb_pending_pwd_resets', JSON.stringify(existing));
+    }
+  } catch {
+    // ignore
+  }
+}
