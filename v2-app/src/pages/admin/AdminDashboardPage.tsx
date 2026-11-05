@@ -21,9 +21,7 @@ import { formatRequestDate, getStatusInfo, listPaymentRequests } from '../../ser
 import type { PaymentRequest } from '../../services/payments';
 import type { Course } from '../../services/courses';
 import { listStudents } from '../../services/students';
-import { sendPasswordResetEmail } from 'firebase/auth';
-import { auth } from '../../lib/firebase';
-import { phoneToEmail } from '../../lib/phone';
+
 import {
   getPendingPasswordResets,
   setStoredAdminPassword,
@@ -78,27 +76,13 @@ export default function AdminDashboardPage() {
     [pwdRequests]
   );
 
-  const handleApprovePwd = async (req: PasswordResetRequest) => {
+  const handleApprovePwd = (req: PasswordResetRequest) => {
     updatePasswordResetStatus(req.id, 'approved');
     setPwdRequests(getPendingPasswordResets());
-
-    // إرسال رابط Firebase لإعادة تعيين كلمة المرور للطالب
-    // الأدمن سيرسل هذا الرابط للطالب عبر واتساب
-    try {
-      const studentEmail = phoneToEmail(req.studentPhone);
-      const actionCodeSettings = {
-        url: `${window.location.origin}/login`,
-        handleCodeInApp: false,
-      };
-      await sendPasswordResetEmail(auth, studentEmail, actionCodeSettings);
-      showToast(
-        'تم الموافقة وإرسال رابط Firebase للطالب — ابحث في التبويب التالي عن رسالة الواتساب لإرساله',
-        'success'
-      );
-    } catch {
-      // sendPasswordResetEmail قد تفشل لو الحساب مش موجود — مش مشكلة، الموافقة اتسجلت
-      showToast('تمت الموافقة على طلب الطالب (' + req.studentPhone + ')', 'success');
+    if (req.newPassword) {
+      setStoredAdminPassword(req.studentPhone, req.newPassword);
     }
+    showToast(`تم اعتماد وتفعيل كلمة المرور للطالب (${req.studentPhone}) بنجاح`, 'success');
   };
 
   const handleRejectPwd = (req: PasswordResetRequest) => {
@@ -318,6 +302,9 @@ export default function AdminDashboardPage() {
                     <div className="flex flex-wrap items-center gap-3 text-xs text-slate-300">
                       <span>كود الطالب: <strong className="font-mono text-gold-300">{studentObj?.studentCode || '—'}</strong></span>
                       <span>رقم ولي الأمر: <strong className="font-mono text-emerald-400" dir="ltr">{req.parentPhone}</strong></span>
+                      {req.newPassword && (
+                        <span>الباسورد الجديد: <strong className="font-mono text-gold-300">{req.newPassword}</strong></span>
+                      )}
                     </div>
                   </div>
 

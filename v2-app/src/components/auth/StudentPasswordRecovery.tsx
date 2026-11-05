@@ -256,16 +256,25 @@ export default function StudentPasswordRecovery({ open, onClose, studentIdentifi
         localStorage.setItem(`yb_parent_binding_${normStudent}`, normParent);
       }
 
-      // ثانياً: محاولة واحدة فقط بالباسورد الافتراضي لتفادي حظر فايربيز (Rate Limiting) نهائياً
-      // لو الحساب بكلمة سر خاصة، المحاولة الوحيدة ستفشل وننتقل فوراً لطلب الواتساب
+      // ثانياً: فحص مرن بالكلمات الأكثر ترجيحاً (4 كلمات فقط لتفادي حظر فايربيز نهائياً)
+      const candidatePasswords = Array.from(
+        new Set(['12345678', '123456', normStudent, normParent].filter(Boolean)),
+      );
+
       let authenticatedUser = auth.currentUser;
       if (!authenticatedUser) {
-        try {
-          const cred = await signInWithEmailAndPassword(auth, primaryEmail, '12345678');
-          authenticatedUser = cred.user;
-        } catch {
-          // فشلت المحاولة الوحيدة — الحساب بكلمة سر خاصة
-          // ننتقل فوراً لطلب الواتساب بدون أي محاولات إضافية لتجنب الحظر نهائياً
+        for (const testPwd of candidatePasswords) {
+          try {
+            const cred = await signInWithEmailAndPassword(auth, primaryEmail, testPwd);
+            authenticatedUser = cred.user;
+            break;
+          } catch (err: unknown) {
+            const code =
+              typeof err === 'object' && err !== null && 'code' in err
+                ? String((err as { code: unknown }).code)
+                : '';
+            if (code === 'auth/too-many-requests') break;
+          }
         }
       }
 
