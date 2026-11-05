@@ -29,7 +29,6 @@ import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { auth, db } from '../../lib/firebase';
 import { isValidEgyptPhone, loginEmailCandidates, normalizePhone, phoneToEmail } from '../../lib/phone';
 import {
-  getStoredAdminPassword,
   markPasswordResetDone,
   savePasswordResetRequest,
   setStoredAdminPassword,
@@ -257,59 +256,16 @@ export default function StudentPasswordRecovery({ open, onClose, studentIdentifi
         localStorage.setItem(`yb_parent_binding_${normStudent}`, normParent);
       }
 
-      // ثانياً: محاولة تسجيل الدخول بالكلمات المرجحة وتأكيد مطابقة رقم ولي الأمر
-      // نضع الكلمات الافتراضية الأكثر شيوعاً أولاً لتفادي حظر فايربيز بعد محاولات خاطئة (Rate Limiting)
-      const testPasswords = Array.from(
-        new Set(
-          [
-            '12345678',
-            '123456',
-            normStudent,
-            normParent,
-            newPwdB,
-            getStoredAdminPassword(normStudent),
-            normStudent.replace(/^0/, ''),
-            normParent.replace(/^0/, ''),
-            '123456789',
-            'Aa123456!',
-          ].filter(Boolean) as string[],
-        ),
-      );
-
+      // ثانياً: محاولة واحدة فقط بالباسورد الافتراضي لتفادي حظر فايربيز (Rate Limiting) نهائياً
+      // لو الحساب بكلمة سر خاصة، المحاولة الوحيدة ستفشل وننتقل فوراً لطلب الواتساب
       let authenticatedUser = auth.currentUser;
       if (!authenticatedUser) {
-        // نجرب أولاً الإيميل الأساسي الرسمي للطالب
-        for (const testPwd of testPasswords) {
-          try {
-            const cred = await signInWithEmailAndPassword(auth, primaryEmail, testPwd);
-            authenticatedUser = cred.user;
-            break;
-          } catch (err: unknown) {
-            const code =
-              typeof err === 'object' && err !== null && 'code' in err
-                ? String((err as { code: unknown }).code)
-                : '';
-            if (code === 'auth/too-many-requests') {
-              setError('محاولات كثيرة مؤقتًا لحماية الحساب. من فضلك انتظر دقيقة ثم حاول مجددًا.');
-              return;
-            }
-          }
-        }
-
-        // إذا لم ينجح، نجرب صيغ الإيميلات القديمة (إن وجدت ومختلفة) بالكلمات الأساسية فقط
-        if (!authenticatedUser) {
-          const altCandidates = loginEmailCandidates(normStudent).filter((e) => e !== primaryEmail);
-          const topPasswords = ['12345678', '123456', normStudent];
-          for (const email of altCandidates) {
-            for (const testPwd of topPasswords) {
-              try {
-                const cred = await signInWithEmailAndPassword(auth, email, testPwd);
-                authenticatedUser = cred.user;
-                break;
-              } catch {}
-            }
-            if (authenticatedUser) break;
-          }
+        try {
+          const cred = await signInWithEmailAndPassword(auth, primaryEmail, '12345678');
+          authenticatedUser = cred.user;
+        } catch {
+          // فشلت المحاولة الوحيدة — الحساب بكلمة سر خاصة
+          // ننتقل فوراً لطلب الواتساب بدون أي محاولات إضافية لتجنب الحظر نهائياً
         }
       }
 
