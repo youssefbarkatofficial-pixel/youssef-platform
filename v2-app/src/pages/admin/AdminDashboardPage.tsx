@@ -21,6 +21,9 @@ import { formatRequestDate, getStatusInfo, listPaymentRequests } from '../../ser
 import type { PaymentRequest } from '../../services/payments';
 import type { Course } from '../../services/courses';
 import { listStudents } from '../../services/students';
+import { sendPasswordResetEmail } from 'firebase/auth';
+import { auth } from '../../lib/firebase';
+import { phoneToEmail } from '../../lib/phone';
 import {
   getPendingPasswordResets,
   setStoredAdminPassword,
@@ -75,10 +78,27 @@ export default function AdminDashboardPage() {
     [pwdRequests]
   );
 
-  const handleApprovePwd = (req: PasswordResetRequest) => {
+  const handleApprovePwd = async (req: PasswordResetRequest) => {
     updatePasswordResetStatus(req.id, 'approved');
     setPwdRequests(getPendingPasswordResets());
-    showToast(`تم اعتماد وتفعيل كلمة المرور للطالب (${req.studentPhone}) بنجاح`, 'success');
+
+    // إرسال رابط Firebase لإعادة تعيين كلمة المرور للطالب
+    // الأدمن سيرسل هذا الرابط للطالب عبر واتساب
+    try {
+      const studentEmail = phoneToEmail(req.studentPhone);
+      const actionCodeSettings = {
+        url: `${window.location.origin}/login`,
+        handleCodeInApp: false,
+      };
+      await sendPasswordResetEmail(auth, studentEmail, actionCodeSettings);
+      showToast(
+        'تم الموافقة وإرسال رابط Firebase للطالب — ابحث في التبويب التالي عن رسالة الواتساب لإرساله',
+        'success'
+      );
+    } catch {
+      // sendPasswordResetEmail قد تفشل لو الحساب مش موجود — مش مشكلة، الموافقة اتسجلت
+      showToast('تمت الموافقة على طلب الطالب (' + req.studentPhone + ')', 'success');
+    }
   };
 
   const handleRejectPwd = (req: PasswordResetRequest) => {
