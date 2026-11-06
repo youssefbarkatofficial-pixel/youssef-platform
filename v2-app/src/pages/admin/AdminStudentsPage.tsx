@@ -7,7 +7,7 @@ import { GRADE_OPTIONS, getGradeLabel } from '../../lib/grades';
 import { listStudents, setStudentArchived, updateStudentProfile } from '../../services/students';
 import type { Student } from '../../services/students';
 import { resolveStudentPassword, setStoredAdminPassword } from '../../lib/studentPasswords';
-import { isValidEgyptPhone, normalizePhone } from '../../lib/phone';
+import { isValidEgyptPhone, normalizePhone, phoneToEmail } from '../../lib/phone';
 import { cn } from '../../components/ui/cn';
 
 function formatDate(ms: number | null): string {
@@ -36,7 +36,7 @@ export default function AdminStudentsPage() {
     return resolveStudentPassword(student);
   };
 
-  const handleEditPassword = (student: Student, currentPwd: string) => {
+  const handleEditPassword = async (student: Student, currentPwd: string) => {
     const promptLabel = student.name ? `تعديل كلمة المرور للطالب (${student.name}):` : 'تعديل كلمة المرور:';
     const newPwd = window.prompt(promptLabel, currentPwd);
     if (newPwd !== null && newPwd.trim().length > 0) {
@@ -47,7 +47,53 @@ export default function AdminStudentsPage() {
         [student.id]: trimmed,
         ...(student.phone ? { [student.phone]: trimmed } : {}),
       }));
-      showToast('تم حفظ كلمة المرور بنجاح', 'success');
+
+      const studentEmail = student.phone ? phoneToEmail(student.phone) : (student.email || '');
+      const candidateOldPwds = Array.from(
+        new Set([student.plainPassword, currentPwd, '12345678', '123456', student.phone, student.parentPhone].filter(Boolean))
+      ) as string[];
+
+      let updatedInFirebase = false;
+      const apiKey = import.meta.env.VITE_FIREBASE_API_KEY;
+
+      if (apiKey && trimmed && studentEmail) {
+        for (const testOld of candidateOldPwds) {
+          try {
+            const loginRes = await fetch(
+              `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${apiKey}`,
+              {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: studentEmail, password: testOld, returnSecureToken: true }),
+              }
+            );
+            const loginData = await loginRes.json();
+            if (loginData.idToken) {
+              const updateRes = await fetch(
+                `https://identitytoolkit.googleapis.com/v1/accounts:update?key=${apiKey}`,
+                {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ idToken: loginData.idToken, password: trimmed, returnSecureToken: true }),
+                }
+              );
+              const updateData = await updateRes.json();
+              if (updateData.idToken || updateRes.ok) {
+                updatedInFirebase = true;
+                break;
+              }
+            }
+          } catch {
+            // ignore
+          }
+        }
+      }
+
+      if (updatedInFirebase) {
+        showToast('تم تحديث كلمة المرور في فايربيز وسجلات المنصة بنجاح!', 'success');
+      } else {
+        showToast('تم حفظ كلمة المرور في سجلات المنصة بنجاح', 'success');
+      }
     }
   };
 

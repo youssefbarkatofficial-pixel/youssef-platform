@@ -22,6 +22,7 @@ import type { PaymentRequest } from '../../services/payments';
 import type { Course } from '../../services/courses';
 import { listStudents } from '../../services/students';
 
+import { phoneToEmail } from '../../lib/phone';
 import {
   getPendingPasswordResets,
   setStoredAdminPassword,
@@ -76,13 +77,67 @@ export default function AdminDashboardPage() {
     [pwdRequests]
   );
 
-  const handleApprovePwd = (req: PasswordResetRequest) => {
-    updatePasswordResetStatus(req.id, 'approved');
-    setPwdRequests(getPendingPasswordResets());
-    if (req.newPassword) {
-      setStoredAdminPassword(req.studentPhone, req.newPassword);
+  const [approvingId, setApprovingId] = useState<string | null>(null);
+
+  const handleApprovePwd = async (req: PasswordResetRequest) => {
+    setApprovingId(req.id);
+    try {
+      const studentObj = students.find((s) => s.phone === req.studentPhone);
+      const studentEmail = phoneToEmail(req.studentPhone);
+      const candidateOldPwds = Array.from(
+        new Set([studentObj?.plainPassword, '12345678', '123456', req.studentPhone, req.parentPhone].filter(Boolean))
+      ) as string[];
+
+      let updatedInFirebase = false;
+      const apiKey = import.meta.env.VITE_FIREBASE_API_KEY;
+
+      if (apiKey && req.newPassword) {
+        for (const testOld of candidateOldPwds) {
+          try {
+            const loginRes = await fetch(
+              `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${apiKey}`,
+              {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: studentEmail, password: testOld, returnSecureToken: true }),
+              }
+            );
+            const loginData = await loginRes.json();
+            if (loginData.idToken) {
+              const updateRes = await fetch(
+                `https://identitytoolkit.googleapis.com/v1/accounts:update?key=${apiKey}`,
+                {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ idToken: loginData.idToken, password: req.newPassword, returnSecureToken: true }),
+                }
+              );
+              const updateData = await updateRes.json();
+              if (updateData.idToken || updateRes.ok) {
+                updatedInFirebase = true;
+                break;
+              }
+            }
+          } catch {
+            // try next
+          }
+        }
+      }
+
+      updatePasswordResetStatus(req.id, 'approved');
+      setPwdRequests(getPendingPasswordResets());
+      if (req.newPassword) {
+        setStoredAdminPassword(req.studentPhone, req.newPassword);
+      }
+
+      if (updatedInFirebase) {
+        showToast(`تم تفعيل وتحديث كلمة المرور للطالب (${req.studentPhone}) بنجاح في فايربيز!`, 'success');
+      } else {
+        showToast(`تم اعتماد الطلب للطالب (${req.studentPhone}) بنجاح`, 'success');
+      }
+    } finally {
+      setApprovingId(null);
     }
-    showToast(`تم اعتماد وتفعيل كلمة المرور للطالب (${req.studentPhone}) بنجاح`, 'success');
   };
 
   const handleRejectPwd = (req: PasswordResetRequest) => {
@@ -321,6 +376,7 @@ export default function AdminDashboardPage() {
                       size="sm"
                       variant="primary"
                       onClick={() => handleApprovePwd(req)}
+                      loading={approvingId === req.id}
                     >
                       موافقة واعتماد
                     </Button>

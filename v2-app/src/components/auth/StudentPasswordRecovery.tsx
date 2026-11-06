@@ -18,9 +18,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { CheckCircle2, Eye, EyeOff, KeyRound, Phone, ShieldCheck } from 'lucide-react';
 import {
   EmailAuthProvider,
-  createUserWithEmailAndPassword,
-  deleteUser,
-  reauthenticateWithCredential,
+    reauthenticateWithCredential,
   signInWithEmailAndPassword,
   signOut,
   updatePassword,
@@ -31,6 +29,7 @@ import { isValidEgyptPhone, loginEmailCandidates, normalizePhone, phoneToEmail }
 import {
   markPasswordResetDone,
   savePasswordResetRequest,
+  getStoredAdminPassword,
   setStoredAdminPassword,
 } from '../../lib/studentPasswords';
 import { createStudentProfile } from '../../services/students';
@@ -225,41 +224,21 @@ export default function StudentPasswordRecovery({ open, onClose, studentIdentifi
     try {
       const primaryEmail = phoneToEmail(normStudent);
 
-      // أولاً: فحص حاسم - هل رقم الطالب مسجل بالمنصة أصلاً؟
-      let isRegistered = false;
-      try {
-        const checkCred = await createUserWithEmailAndPassword(auth, primaryEmail, 'TempCheckPass123!');
-        // نجاح الإنشاء يعني أن هذا الرقم لم يكن له أي حساب مسجل بالمنصة
-        await deleteUser(checkCred.user);
-        await signOut(auth);
-        isRegistered = false;
-      } catch (checkErr: unknown) {
-        const code =
-          typeof checkErr === 'object' && checkErr !== null && 'code' in checkErr
-            ? String((checkErr as { code: unknown }).code)
-            : '';
-        if (code === 'auth/email-already-in-use') {
-          isRegistered = true;
-        } else {
-          throw checkErr;
-        }
-      }
-
-      // إذا لم يكن رقم الطالب مسجلاً، نوقف العملية فوراً وندله على إنشاء حساب جديد
-      if (!isRegistered) {
-        setError('not-registered');
-        return;
-      }
-
       // حفظ رقم ولي الأمر محليًا للطالب
       if (typeof window !== 'undefined' && window.localStorage) {
         localStorage.setItem(`yb_parent_binding_${normStudent}`, normParent);
       }
 
-      // ثانياً: فحص مرن بالكلمات الأكثر ترجيحاً (4 كلمات فقط لتفادي حظر فايربيز نهائياً)
+      // فحص مرن بالكلمات الأكثر ترجيحاً (الباسورد المسجل محلياً، والباسوردات الافتراضية، ورقم الطالب، ورقم ولي الأمر)
       const candidatePasswords = Array.from(
-        new Set(['12345678', '123456', normStudent, normParent].filter(Boolean)),
-      );
+        new Set([
+          getStoredAdminPassword(normStudent),
+          '12345678',
+          '123456',
+          normStudent,
+          normParent,
+        ].filter(Boolean)),
+      ) as string[];
 
       let authenticatedUser = auth.currentUser;
       if (!authenticatedUser) {
@@ -273,8 +252,13 @@ export default function StudentPasswordRecovery({ open, onClose, studentIdentifi
               typeof err === 'object' && err !== null && 'code' in err
                 ? String((err as { code: unknown }).code)
                 : '';
-            if (code === 'auth/too-many-requests') break;
+            if (code === 'auth/too-many-requests') {
+              setError('محاولات متتالية لحماية الحساب. من فضلك انتظر دقيقة واحدة ثم حاول مجدداً.');
+              return;
+            }
           }
+          // تأخير 150 مللي ثانية بين كل محاولة لتفادي حظر فايربيز نهائياً
+          await new Promise((r) => setTimeout(r, 150));
         }
       }
 
@@ -623,7 +607,7 @@ export default function StudentPasswordRecovery({ open, onClose, studentIdentifi
     const idToUse = studentPhone.trim() || studentIdentifier.trim();
     const normStudent = normalizePhone(idToUse);
     const normParent = normalizePhone(parentPhone);
-    const msg = `أهلاً مستر يوسف، أنا الطالب (${normStudent})، رقم ولي أمري: (${normParent}). قمت بطلب تجديد كلمة المرور لحسابي على المنصة، برجاء اعتماد الطلب.`;
+    const msg = `أهلاً مستر يوسف، أنا الطالب (${normStudent})، رقم ولي أمري: (${normParent}). قمت بطلب تجديد كلمة المرور لحسابي على المنصة، كلمة المرور الجديدة المطلوبة: (${newPwdB})، برجاء اعتماد الطلب.`;
     const waUrl = `https://wa.me/201023675235?text=${encodeURIComponent(msg)}`;
 
     return (
@@ -645,6 +629,12 @@ export default function StudentPasswordRecovery({ open, onClose, studentIdentifi
             <span className="text-slate-400">رقم ولي الأمر المؤكد:</span>
             <span className="font-mono text-emerald-400 font-bold" dir="ltr">{normParent}</span>
           </div>
+          {newPwdB && (
+            <div className="flex justify-between items-center border-t border-navy-800/80 pt-2">
+              <span className="text-slate-400">كلمة المرور الجديدة المطلوبة:</span>
+              <span className="font-mono text-gold-400 font-bold" dir="ltr">{newPwdB}</span>
+            </div>
+          )}
         </div>
 
         <a

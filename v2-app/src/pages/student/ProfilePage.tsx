@@ -10,6 +10,9 @@ import {
   Phone,
   ShieldCheck,
   User,
+  KeyRound,
+  Eye,
+  EyeOff,
 } from 'lucide-react';
 import { Badge, Button, Card, Input, Modal, Spinner, useToast } from '../../components/ui';
 import { cn } from '../../components/ui/cn';
@@ -17,6 +20,8 @@ import { useAuth } from '../../hooks/useAuth';
 import { getGradeLabel, getTrackLabel, isSecondaryGrade } from '../../lib/grades';
 import type { GradeTrack } from '../../lib/grades';
 import { updateStudentProfile, updateStudentTrack } from '../../services/students';
+import { EmailAuthProvider, reauthenticateWithCredential, updatePassword } from 'firebase/auth';
+import { markPasswordResetDone, setStoredAdminPassword } from '../../lib/studentPasswords';
 import FormAlert from '../../components/auth/FormAlert';
 
 export default function ProfilePage() {
@@ -29,6 +34,15 @@ export default function ProfilePage() {
   const [nameInput, setNameInput] = useState('');
   const [savingName, setSavingName] = useState(false);
   const [nameError, setNameError] = useState('');
+
+  const [editingPwd, setEditingPwd] = useState(false);
+  const [currentPwd, setCurrentPwd] = useState('');
+  const [newPwd, setNewPwd] = useState('');
+  const [confirmPwd, setConfirmPwd] = useState('');
+  const [showCurrentPwd, setShowCurrentPwd] = useState(false);
+  const [showNewPwd, setShowNewPwd] = useState(false);
+  const [pwdLoading, setPwdLoading] = useState(false);
+  const [pwdError, setPwdError] = useState('');
 
   if (loading || !student) {
     return (
@@ -70,6 +84,60 @@ export default function ProfilePage() {
     setNameInput(student.name || '');
     setNameError('');
     setEditingName(true);
+  };
+
+  const handleSavePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPwdError('');
+
+    if (!currentPwd) {
+      setPwdError('من فضلك اكتب كلمة المرور الحالية.');
+      return;
+    }
+    if (newPwd.length < 8) {
+      setPwdError('كلمة المرور الجديدة يجب أن تكون 8 أحرف أو أرقام على الأقل.');
+      return;
+    }
+    if (newPwd !== confirmPwd) {
+      setPwdError('كلمتا المرور الجديدتان غير متطابقتين.');
+      return;
+    }
+
+    const { auth } = await import('../../lib/firebase');
+    const user = auth.currentUser;
+    if (!user) {
+      setPwdError('يجب تسجيل الدخول أولاً لتغيير كلمة المرور.');
+      return;
+    }
+
+    setPwdLoading(true);
+    try {
+      const email = user.email || `${student.phone}@student.youssefbarakat.com`;
+      const cred = EmailAuthProvider.credential(email, currentPwd);
+      await reauthenticateWithCredential(user, cred);
+      await updatePassword(user, newPwd);
+
+      setStoredAdminPassword(student.id, newPwd, student.phone);
+      markPasswordResetDone(student.id);
+      if (student.phone) markPasswordResetDone(student.phone);
+
+      showToast('تم تغيير كلمة المرور بنجاح!', 'success');
+      setEditingPwd(false);
+      setCurrentPwd('');
+      setNewPwd('');
+      setConfirmPwd('');
+    } catch (err: unknown) {
+      const code = typeof err === 'object' && err !== null && 'code' in err ? String((err as { code: unknown }).code) : '';
+      if (code === 'auth/wrong-password' || code === 'auth/invalid-credential') {
+        setPwdError('كلمة المرور الحالية غير صحيحة. تأكد من كتابتها بشكل سليم.');
+      } else if (code === 'auth/too-many-requests') {
+        setPwdError('محاولات كثيرة مؤقتاً لحماية الحساب. يرجى الانتظار دقيقة ثم إعادة المحاولة.');
+      } else {
+        setPwdError('تعذر تحديث كلمة المرور. تأكد من اتصالك بالإنترنت وحاول مجدداً.');
+      }
+    } finally {
+      setPwdLoading(false);
+    }
   };
 
   const handleSaveName = async (e: React.FormEvent) => {
@@ -222,6 +290,21 @@ export default function ProfilePage() {
                   <Pencil className="h-3 w-3" />
                   <span>تعديل الاسم</span>
                 </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPwdError('');
+                    setCurrentPwd('');
+                    setNewPwd('');
+                    setConfirmPwd('');
+                    setEditingPwd(true);
+                  }}
+                  className="inline-flex items-center gap-1 rounded-lg px-2 py-0.5 text-xs text-sky-400 hover:text-sky-300 hover:bg-sky-500/10 transition-colors border border-sky-500/20"
+                  title="تغيير كلمة المرور"
+                >
+                  <KeyRound className="h-3 w-3" />
+                  <span>تغيير كلمة المرور</span>
+                </button>
               </div>
               <p className="text-xs text-slate-400">كود الطالب: <span className="font-mono text-gold-400">{student.studentCode}</span></p>
             </div>
@@ -329,6 +412,88 @@ export default function ProfilePage() {
               loading={savingName}
             >
               حفظ التعديل
+            </Button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* نافذة تغيير كلمة المرور */}
+      <Modal
+        open={editingPwd}
+        onClose={() => setEditingPwd(false)}
+        title="تغيير كلمة المرور"
+      >
+        <form onSubmit={handleSavePassword} className="space-y-4 pt-1">
+          <p className="text-xs text-slate-400 leading-relaxed">
+            اكتب كلمة مرورك الحالية لتأكيد هويتك، ثم اختر كلمة المرور الجديدة لحسابك.
+          </p>
+
+          {pwdError && <FormAlert type="error">{pwdError}</FormAlert>}
+
+          <Input
+            label="كلمة المرور الحالية"
+            type={showCurrentPwd ? 'text' : 'password'}
+            dir="ltr"
+            autoComplete="current-password"
+            value={currentPwd}
+            onChange={(e) => setCurrentPwd(e.target.value)}
+            rightElement={
+              <button
+                type="button"
+                tabIndex={-1}
+                aria-label={showCurrentPwd ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'}
+                className="text-slate-400 hover:text-white transition-colors"
+                onClick={() => setShowCurrentPwd(!showCurrentPwd)}
+              >
+                {showCurrentPwd ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            }
+          />
+
+          <Input
+            label="كلمة المرور الجديدة (8 أحرف أو أرقام على الأقل)"
+            type={showNewPwd ? 'text' : 'password'}
+            dir="ltr"
+            autoComplete="new-password"
+            value={newPwd}
+            onChange={(e) => setNewPwd(e.target.value)}
+            rightElement={
+              <button
+                type="button"
+                tabIndex={-1}
+                aria-label={showNewPwd ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'}
+                className="text-slate-400 hover:text-white transition-colors"
+                onClick={() => setShowNewPwd(!showNewPwd)}
+              >
+                {showNewPwd ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            }
+          />
+
+          <Input
+            label="تأكيد كلمة المرور الجديدة"
+            type="password"
+            dir="ltr"
+            autoComplete="new-password"
+            value={confirmPwd}
+            onChange={(e) => setConfirmPwd(e.target.value)}
+          />
+
+          <div className="flex items-center justify-end gap-3 pt-2">
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => setEditingPwd(false)}
+              disabled={pwdLoading}
+            >
+              إلغاء
+            </Button>
+            <Button
+              type="submit"
+              variant="primary"
+              loading={pwdLoading}
+            >
+              حفظ كلمة المرور الجديدة
             </Button>
           </div>
         </form>
