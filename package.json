@@ -4,6 +4,7 @@
   "description": "منصة يوسف بركات التعليمية",
   "scripts": {
     "build": "cd v2-app && npm run build",
+    "reset:pwd": "node tools/reset-student-password.mjs",
     "deploy": "node -e \"console.error('نشر القديمة مقفول'); process.exit(1)\"",
     "deploy:pages": "node -e \"console.error('نشر القديمة مقفول'); process.exit(1)\"",
     "deploy:legacy": "node -e \"console.error('نشر القديمة مقفول'); process.exit(1)\"",

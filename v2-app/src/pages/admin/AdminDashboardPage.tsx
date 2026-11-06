@@ -133,7 +133,7 @@ export default function AdminDashboardPage() {
       if (updatedInFirebase) {
         showToast(`تم تفعيل وتحديث كلمة المرور للطالب (${req.studentPhone}) بنجاح في فايربيز!`, 'success');
       } else {
-        showToast(`تم اعتماد الطلب للطالب (${req.studentPhone}) بنجاح`, 'success');
+        showToast(`تم تسجيل الاعتماد، لكن الباسورد القديم للطالب (${req.studentPhone}) كان خاصاً. لتفعيله فوراً شغّل أداة التصفير.`, 'info');
       }
     } finally {
       setApprovingId(null);
