@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import CoursePrice from '../../components/course/CoursePrice';
 import LectureStationBadges from '../../components/course/LectureStationBadges';
+import CourseTocSidebar from '../../components/course/CourseTocSidebar';
 import ProtectedVideoPlayer from '../../components/course/ProtectedVideoPlayer';
 import { Badge, Button, Card, EmptyState, Spinner, Tabs, buttonClasses, useToast } from '../../components/ui';
 import { cn } from '../../components/ui/cn';
@@ -868,6 +869,37 @@ export default function CourseDetailsPage() {
               </p>
             </div>
           </Card>
+
+          {/* فهرس الكورس الجانبي */}
+          <CourseTocSidebar
+            courseId={course.id}
+            courseTitle={course.title}
+            sections={course.sections}
+            lectures={course.content.lectures}
+            homeworks={visibleHomeworks}
+            exams={visibleExams}
+            effectiveWatch={effectiveWatch}
+            canAccess={canAccess}
+            isAdmin={isAdmin}
+            student={student}
+            contentRules={contentRules}
+            onPlayLecture={(lec) =>
+              setActiveItem({
+                id: lec.id,
+                title: lec.title,
+                videoUrl: lec.youtubeUrl,
+                type: 'video',
+                assessmentKind: null,
+                pdfUrl: lec.pdfUrl,
+                duration: lec.duration || '',
+                archived: false,
+                availableFrom: lec.availableFrom ?? null,
+                availableUntil: lec.availableUntil ?? null,
+                children: [],
+                raw: lec.raw || {},
+              })
+            }
+          />
         </aside>
       </div>
     </div>
