@@ -16,6 +16,7 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 import CoursePrice from '../../components/course/CoursePrice';
+import LectureStationBadges from '../../components/course/LectureStationBadges';
 import ProtectedVideoPlayer from '../../components/course/ProtectedVideoPlayer';
 import { Badge, Button, Card, EmptyState, Spinner, Tabs, buttonClasses, useToast } from '../../components/ui';
 import { cn } from '../../components/ui/cn';
@@ -472,6 +473,13 @@ export default function CourseDetailsPage() {
                                 </span>
                                 <div>
                                   <h4 className="font-bold text-white">{lec.title}</h4>
+                                  {/* station badges */}
+                                  <LectureStationBadges
+                                    lecture={lec}
+                                    watchPct={watchPct}
+                                    canAccess={canAccess}
+                                    isLectureLocked={lectureLock.locked}
+                                  />
                                   <div className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-slate-400">
                                     {lec.duration && <span>المدة: {lec.duration}</span>}
                                     {lec.openAt && (
