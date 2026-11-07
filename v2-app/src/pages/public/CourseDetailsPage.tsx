@@ -16,6 +16,8 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 import CoursePrice from '../../components/course/CoursePrice';
+import LectureStationBadges from '../../components/course/LectureStationBadges';
+import CourseTocSidebar from '../../components/course/CourseTocSidebar';
 import ProtectedVideoPlayer from '../../components/course/ProtectedVideoPlayer';
 import { Badge, Button, Card, EmptyState, Spinner, Tabs, buttonClasses, useToast } from '../../components/ui';
 import { cn } from '../../components/ui/cn';
@@ -472,6 +474,13 @@ export default function CourseDetailsPage() {
                                 </span>
                                 <div>
                                   <h4 className="font-bold text-white">{lec.title}</h4>
+                                  {/* station badges */}
+                                  <LectureStationBadges
+                                    lecture={lec}
+                                    watchPct={watchPct}
+                                    canAccess={canAccess}
+                                    isLectureLocked={lectureLock.locked}
+                                  />
                                   <div className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-slate-400">
                                     {lec.duration && <span>المدة: {lec.duration}</span>}
                                     {lec.openAt && (
@@ -860,6 +869,37 @@ export default function CourseDetailsPage() {
               </p>
             </div>
           </Card>
+
+          {/* فهرس الكورس الجانبي */}
+          <CourseTocSidebar
+            courseId={course.id}
+            courseTitle={course.title}
+            sections={course.sections}
+            lectures={course.content.lectures}
+            homeworks={visibleHomeworks}
+            exams={visibleExams}
+            effectiveWatch={effectiveWatch}
+            canAccess={canAccess}
+            isAdmin={isAdmin}
+            student={student}
+            contentRules={contentRules}
+            onPlayLecture={(lec) =>
+              setActiveItem({
+                id: lec.id,
+                title: lec.title,
+                videoUrl: lec.youtubeUrl,
+                type: 'video',
+                assessmentKind: null,
+                pdfUrl: lec.pdfUrl,
+                duration: lec.duration || '',
+                archived: false,
+                availableFrom: lec.availableFrom ?? null,
+                availableUntil: lec.availableUntil ?? null,
+                children: [],
+                raw: lec.raw || {},
+              })
+            }
+          />
         </aside>
       </div>
     </div>
