@@ -37,6 +37,8 @@ import type { NormalizedLecture, NormalizedAssessment } from '../../lib/courseNo
 import { checkLectureLock, checkInLectureItemLock } from '../../lib/contentRules';
 import type { ContentRulesSettings } from '../../lib/contentRules';
 import type { CourseSection } from '../../lib/courseNormalize';
+import type { GrantAccessStatus } from '../../lib/subscriptions';
+import { checkGrantItemLock } from '../../lib/subscriptions';
 
 // ─── types ───────────────────────────────────────────────────────────────────
 
@@ -60,6 +62,7 @@ interface CourseTocSidebarProps {
   contentRules: ContentRulesSettings;
   /** لو true: يملأ عرض الصفحة بدل الشريط الجانبي */
   fullWidth?: boolean;
+  grantStatus?: GrantAccessStatus;
   onPlayLecture?: (lec: NormalizedLecture) => void;
 }
 
@@ -172,6 +175,7 @@ export default function CourseTocSidebar({
   student,
   contentRules,
   fullWidth = false,
+  grantStatus,
   onPlayLecture,
 }: CourseTocSidebarProps) {
 
@@ -252,6 +256,9 @@ export default function CourseTocSidebar({
               now,
               isAdmin,
             );
+            const grantLock = grantStatus ? checkGrantItemLock(lec, grantStatus) : { locked: false };
+            const effectiveLectureLock = grantLock.locked ? grantLock : lectureLock;
+            const isTrialLecture = grantStatus?.plan === 'trial_lecture' && lec.id === grantStatus.targetLectureId;
             const watchPct = effectiveWatch[lec.id] ?? 0;
             const isWatched = watchPct >= 95;
             const hasVideo = Boolean(lec.youtubeUrl);
@@ -273,7 +280,7 @@ export default function CourseTocSidebar({
             return (
               <AccordionItem
                 key={lec.id}
-                label={`الدرس ${lec.order}: ${lec.title}`}
+                label={`الدرس ${lec.order}: ${lec.title}${isTrialLecture ? ' (محاضرة تجريبية مجانية)' : ''}`}
                 icon={
                   isWatched ? (
                     <CheckCircle2 className="h-4 w-4 text-emerald-400" />
@@ -294,8 +301,8 @@ export default function CourseTocSidebar({
                       label="محاضرة الشرح"
                       action={
                         canAccess ? (
-                          lectureLock.locked ? (
-                            <LockBadge message={lectureLock.message} />
+                          effectiveLectureLock.locked ? (
+                            <LockBadge message={effectiveLectureLock.message} />
                           ) : (
                             <button type="button" onClick={() => onPlayLecture?.(lec)} className={btnPlay}>
                               شاهد
@@ -326,7 +333,7 @@ export default function CourseTocSidebar({
                           icon={<FileText className="h-4 w-4 text-gold-400" />}
                           label={file.title || 'ملف الشرح'}
                           action={
-                            !fileLock.locked ? (
+                            !effectiveLectureLock.locked && !fileLock.locked ? (
                               <a href={file.url} target="_blank" rel="noopener noreferrer" className={btnDl}>
                                 تحميل
                               </a>
@@ -353,7 +360,7 @@ export default function CourseTocSidebar({
                         icon={<ClipboardList className="h-4 w-4 text-emerald-400" />}
                         label={tr.title}
                         action={
-                          !trLock.locked ? (
+                          !effectiveLectureLock.locked && !trLock.locked ? (
                             <Link to={trLink} className={btnTr}>ابدأ التدريب</Link>
                           ) : (
                             <LockBadge message={trLock.message} />
@@ -377,7 +384,7 @@ export default function CourseTocSidebar({
                         icon={<PenTool className="h-4 w-4 text-amber-400" />}
                         label={hw.title}
                         action={
-                          !hwLock.locked ? (
+                          !effectiveLectureLock.locked && !hwLock.locked ? (
                             <Link to={hwLink} className={btnHw}>حل الواجب</Link>
                           ) : (
                             <LockBadge message={hwLock.message} />

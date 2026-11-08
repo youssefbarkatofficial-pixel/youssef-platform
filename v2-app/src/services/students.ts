@@ -9,7 +9,11 @@ import {
   setDoc,
   updateDoc,
   where,
+  arrayRemove,
+  arrayUnion,
+  deleteField,
 } from 'firebase/firestore';
+import type { StudentGrant, CourseGrantType } from '../lib/subscriptions';
 import type { DocumentData } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { getAcademicYear, parseAcademicYear } from '../lib/dates';
@@ -44,6 +48,7 @@ export interface Student {
   points: number;
   archived: boolean;
   lastUpdatedAcademicYear: number | null;
+  accessGrants?: Record<string, StudentGrant>;
 }
 
 function asString(value: unknown): string {
@@ -94,6 +99,26 @@ function asTrack(value: unknown): GradeTrack | null {
 
 // قراءة متسامحة: أي حقل ناقص يأخذ قيمة افتراضية.
 // نختار الحقول المسموحة بالاسم فقط، ولا نقرأ حقل كلمة المرور القديم أبدًا.
+function asGrantMap(value: unknown): Record<string, StudentGrant> | undefined {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) return undefined;
+  const result: Record<string, StudentGrant> = {};
+  Object.entries(value as Record<string, unknown>).forEach(([k, v]) => {
+    if (typeof v === 'object' && v !== null && !Array.isArray(v)) {
+      const g = v as Record<string, unknown>;
+      result[k] = {
+        courseId: asString(g.courseId) || k,
+        type: (asString(g.type) as CourseGrantType) || 'full_term',
+        grantedAt: asNumber(g.grantedAt),
+        expiresAt: asNumber(g.expiresAt),
+        targetLectureId: g.targetLectureId ? asString(g.targetLectureId) : undefined,
+        targetLectureOrder: g.targetLectureOrder !== undefined ? asNumber(g.targetLectureOrder) : undefined,
+        startLectureOrder: g.startLectureOrder !== undefined ? asNumber(g.startLectureOrder) : undefined,
+      };
+    }
+  });
+  return Object.keys(result).length > 0 ? result : undefined;
+}
+
 function toStudent(id: string, data: DocumentData): Student {
   return {
     id,
@@ -121,6 +146,7 @@ function toStudent(id: string, data: DocumentData): Student {
     points: asNumber(data.points),
     archived: data.archived === true,
     lastUpdatedAcademicYear: parseAcademicYear(data.lastUpdatedAcademicYear),
+    accessGrants: asGrantMap(data.accessGrants),
   };
 }
 
@@ -324,4 +350,62 @@ export async function setStudentArchived(uid: string, archived: boolean): Promis
 // آخر ظهور: كتابة واحدة في الجلسة (تُستدعى من لوحة الطالب). الفشل لا يظهر للطالب.
 export async function touchLastActive(uid: string): Promise<void> {
   await updateDoc(doc(db, 'students', uid), { lastActive: new Date().toISOString() });
+}
+
+
+export async function grantStudentCourseAccess(
+  studentId: string,
+  courseId: string,
+  grantType: CourseGrantType,
+  options?: {
+    startLectureOrder?: number;
+    targetLectureId?: string;
+    targetLectureOrder?: number;
+    customDays?: number;
+  },
+): Promise<void> {
+  const studentRef = doc(db, 'students', studentId);
+  const now = Date.now();
+  let expiresAt = 0;
+
+  if (grantType === 'monthly') {
+    const days = options?.customDays || 30;
+    expiresAt = now + days * 24 * 60 * 60 * 1000;
+  } else if (grantType === 'trial_lecture') {
+    const days = options?.customDays || 7;
+    expiresAt = now + days * 24 * 60 * 60 * 1000;
+  }
+
+  const grantData: Record<string, unknown> = {
+    courseId,
+    type: grantType,
+    grantedAt: now,
+    expiresAt,
+  };
+
+  if (options?.startLectureOrder !== undefined) {
+    grantData.startLectureOrder = options.startLectureOrder;
+  }
+  if (options?.targetLectureId !== undefined) {
+    grantData.targetLectureId = options.targetLectureId;
+  }
+  if (options?.targetLectureOrder !== undefined) {
+    grantData.targetLectureOrder = options.targetLectureOrder;
+  }
+
+  await updateDoc(studentRef, {
+    courses: arrayUnion(courseId),
+    [`accessGrants.${courseId}`]: grantData,
+  });
+}
+
+export async function revokeStudentCourseAccess(
+  studentId: string,
+  courseId: string,
+): Promise<void> {
+  const studentRef = doc(db, 'students', studentId);
+  await updateDoc(studentRef, {
+    courses: arrayRemove(courseId),
+    [`accessGrants.${courseId}`]: deleteField(),
+  });
 }

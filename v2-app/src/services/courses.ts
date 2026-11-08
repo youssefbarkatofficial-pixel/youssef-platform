@@ -332,10 +332,19 @@ export function canAccessCourseContent(
   course: Course,
   student: Student | null,
   isAdmin: boolean,
+  now: number = Date.now(),
 ): boolean {
   if (isAdmin) return true;
   if (!student || student.archived) return false;
-  return course.isFree || student.courses.includes(course.id);
+  if (course.isFree) return true;
+  if (!student.courses.includes(course.id)) return false;
+
+  const grant = student.accessGrants?.[course.id];
+  if (grant && grant.expiresAt && grant.expiresAt > 0 && now >= grant.expiresAt) {
+    return false;
+  }
+
+  return true;
 }
 
 // الكورسات المتاحة للطالب (التي اشترك فيها أو الكورسات المجانية).

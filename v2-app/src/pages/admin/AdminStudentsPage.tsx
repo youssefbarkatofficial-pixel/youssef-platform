@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Archive, ArchiveRestore, Copy, Eye, EyeOff, Pencil, Search, ServerCrash } from 'lucide-react';
+import { Archive, ArchiveRestore, Copy, Eye, EyeOff, GraduationCap, Pencil, Search, ServerCrash } from 'lucide-react';
 import { Badge, Button, Card, EmptyState, Input, Select, Table, useToast } from '../../components/ui';
 import type { TableColumn } from '../../components/ui';
 import { GRADE_OPTIONS, getGradeLabel } from '../../lib/grades';
@@ -9,6 +9,8 @@ import type { Student } from '../../services/students';
 import { resolveStudentPassword, setStoredAdminPassword } from '../../lib/studentPasswords';
 import { isValidEgyptPhone, normalizePhone, phoneToEmail } from '../../lib/phone';
 import { cn } from '../../components/ui/cn';
+import { useCourses } from '../../hooks/useCourses';
+import ManageStudentSubscriptionsModal from '../../components/admin/ManageStudentSubscriptionsModal';
 
 function formatDate(ms: number | null): string {
   if (ms === null) return '-';
@@ -29,6 +31,8 @@ export default function AdminStudentsPage() {
   const [busyId, setBusyId] = useState<string | null>(null);
   const [revealedIds, setRevealedIds] = useState<Set<string>>(new Set());
   const [pwdOverrides, setPwdOverrides] = useState<Record<string, string>>({});
+  const { courses } = useCourses();
+  const [managingStudent, setManagingStudent] = useState<Student | null>(null);
 
   const getEffectivePwd = (student: Student): string | null => {
     if (pwdOverrides[student.id]) return pwdOverrides[student.id];
@@ -367,7 +371,21 @@ export default function AdminStudentsPage() {
       },
     },
     { key: 'grade', header: 'الصف', render: (student) => getGradeLabel(student.grade, student.track) },
-    { key: 'courses', header: 'الكورسات', render: (student) => student.courses.length },
+    {
+      key: 'courses',
+      header: 'الكورسات',
+      render: (student) => (
+        <button
+          type="button"
+          onClick={() => setManagingStudent(student)}
+          className="inline-flex items-center gap-1.5 rounded-lg border border-navy-700 bg-navy-800/80 px-2.5 py-1 text-xs font-bold text-gold-400 hover:border-gold-500/50 hover:bg-gold-500/10 transition-colors"
+          title="إدارة اشتراكات وكورسات الطالب"
+        >
+          <GraduationCap className="h-3.5 w-3.5" />
+          <span>{student.courses.length} كورس</span>
+        </button>
+      ),
+    },
     { key: 'createdAt', header: 'التسجيل', render: (student) => formatDate(student.createdAtMs) },
     { key: 'lastActive', header: 'آخر ظهور', render: (student) => formatDate(student.lastActiveMs) },
     {
@@ -376,6 +394,16 @@ export default function AdminStudentsPage() {
       render: (student) => (
         <div className="flex items-center gap-2">
           {student.archived && <Badge variant="danger">مجمّد</Badge>}
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => setManagingStudent(student)}
+            className="text-gold-400 hover:text-gold-300 hover:bg-gold-500/10"
+            title="إدارة اشتراكات وصلاحيات الكورسات"
+            aria-label="إدارة اشتراكات وصلاحيات الكورسات"
+          >
+            <GraduationCap className="h-4 w-4" />
+          </Button>
           <Button
             size="sm"
             variant="ghost"
@@ -439,6 +467,18 @@ export default function AdminStudentsPage() {
         rowKey={(student) => student.id}
         loading={loading}
         emptyMessage="لا يوجد طلاب مطابقون"
+      />
+      <ManageStudentSubscriptionsModal
+        open={Boolean(managingStudent)}
+        onClose={() => setManagingStudent(null)}
+        student={managingStudent}
+        courses={courses}
+        onUpdated={() => {
+          void load();
+          if (managingStudent) {
+            setManagingStudent(null);
+          }
+        }}
       />
     </div>
   );
