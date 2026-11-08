@@ -14,10 +14,14 @@ import {
   PlayCircle,
   ServerCrash,
   ShieldCheck,
+  Calendar,
+  Clock,
+  Sparkles,
 } from 'lucide-react';
 import CoursePrice from '../../components/course/CoursePrice';
 import LectureStationBadges from '../../components/course/LectureStationBadges';
 import CourseTocSidebar from '../../components/course/CourseTocSidebar';
+import { getCourseAccessStatus } from '../../lib/subscriptions';
 import ProtectedVideoPlayer from '../../components/course/ProtectedVideoPlayer';
 import { Badge, Button, Card, EmptyState, Spinner, Tabs, buttonClasses, useToast } from '../../components/ui';
 import { cn } from '../../components/ui/cn';
@@ -216,6 +220,7 @@ export default function CourseDetailsPage() {
   }, [activeItem]);
 
   const canAccess = Boolean(course && canAccessCourseContent(course, student, isAdmin));
+  const grantStatus = getCourseAccessStatus(course, student, isAdmin);
 
   useEffect(() => {
     if (!canAccess) {
@@ -431,7 +436,46 @@ export default function CourseDetailsPage() {
             />
 
             {activeTab === 'content' && (
-              <CourseTocSidebar
+              <div className="space-y-4">
+                {/* تنبيهات حالة الاشتراك */}
+                {grantStatus.plan === 'monthly' && !grantStatus.expired && (
+                  <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-sky-500/30 bg-sky-500/10 px-4 py-2.5 text-xs text-sky-200">
+                    <div className="flex items-center gap-2 font-semibold">
+                      <Calendar className="h-4 w-4 text-sky-400" />
+                      <span>اشتراك شهري نشط (متبقي {grantStatus.remainingDays} يوم)</span>
+                    </div>
+                    {grantStatus.expiresAt && (
+                      <span className="text-slate-400">ينتهي بتوقيت القاهرة: {formatCairoDateTime(grantStatus.expiresAt)}</span>
+                    )}
+                  </div>
+                )}
+
+                {grantStatus.plan === 'trial_lecture' && !grantStatus.expired && (
+                  <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-2.5 text-xs text-emerald-200">
+                    <div className="flex items-center gap-2 font-semibold">
+                      <Sparkles className="h-4 w-4 text-emerald-400" />
+                      <span>محاضرة تجريبية مجانية: الدرس #{grantStatus.targetLectureOrder} (متبقي {grantStatus.remainingDays} يوم)</span>
+                    </div>
+                    {grantStatus.expiresAt && (
+                      <span className="text-slate-400">ينتهي بتوقيت القاهرة: {formatCairoDateTime(grantStatus.expiresAt)}</span>
+                    )}
+                  </div>
+                )}
+
+                {student && student.courses.includes(course.id) && grantStatus.expired && (
+                  <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-amber-200 space-y-1">
+                    <div className="flex items-center gap-2 font-bold text-amber-300">
+                      <Clock className="h-4 w-4 text-amber-400" />
+                      <span>{grantStatus.message || 'انتهت مدة اشتراكك في هذا الكورس'}</span>
+                    </div>
+                    <p className="text-xs text-amber-200/80 leading-relaxed">
+                      جميع درجاتك ونسب مشاهداتك محفوظة بالكامل في حسابك، يمكنك الاشتراك أو تجديد الاشتراك لمتابعة باقي المحاضرات.
+                    </p>
+                  </div>
+                )}
+
+                <CourseTocSidebar
+                  grantStatus={grantStatus}
                 courseId={course.id}
                 courseTitle={course.title}
                 sections={course.sections}
@@ -461,6 +505,7 @@ export default function CourseDetailsPage() {
                   })
                 }
               />
+              </div>
             )}
 
             {activeTab === 'about' && (
