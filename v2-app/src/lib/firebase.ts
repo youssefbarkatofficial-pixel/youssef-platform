@@ -3,6 +3,7 @@ import { getAuth } from 'firebase/auth';
 import {
   getFirestore,
   initializeFirestore,
+  memoryLocalCache,
   persistentLocalCache,
   persistentMultipleTabManager,
 } from 'firebase/firestore';
@@ -33,10 +34,15 @@ function createFirestore(): Firestore {
     return initializeFirestore(app, {
       localCache: persistentLocalCache({
         tabManager: persistentMultipleTabManager(),
+        cacheSizeBytes: 100 * 1024 * 1024,
       }),
     });
   } catch {
-    return getFirestore(app);
+    try {
+      return getFirestore(app);
+    } catch {
+      return initializeFirestore(app, { localCache: memoryLocalCache() });
+    }
   }
 }
 

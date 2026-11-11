@@ -3,6 +3,9 @@ import type { ReactNode } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
 import type { User } from 'firebase/auth';
 import { auth } from '../lib/firebase';
+import { clearEntitlements, saveEntitlements } from '../lib/entitlementCache';
+import type { CourseEntitlement } from '../lib/entitlementCache';
+import { extractStudentCourseGrant } from '../lib/subscriptions';
 import { purgeExpiredOrForeignVideoCaches } from '../lib/videoCache';
 import { getAdminRole } from '../services/admins';
 import type { AdminRole } from '../services/admins';
@@ -78,6 +81,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       cleanupUserListeners();
 
       if (!user) {
+        clearEntitlements();
         requestId.current += 1;
         setFirebaseUser(null);
         setStudent(null);
@@ -93,8 +97,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       void purgeExpiredOrForeignVideoCaches(user.uid);
 
       // تحديث لحظي لملف الطالب واشتراكاته فور حدوث أي تغيير أو عودة الإنترنت دون إعادة تشغيل
-      unsubStudent = subscribeStudent(user.uid, (nextStudent) => {
+      unsubStudent = subscribeStudent(user.uid, (nextStudent, meta) => {
         if (!nextStudent) return;
+        // حفظ بوابة الصلاحيات الأوفلاين فقط عند تأكيد البيانات من السيرفر (fromCache === false)
+        if (!meta.fromCache) {
+          const entitlements: Record<string, CourseEntitlement> = {};
+          if (!nextStudent.archived) {
+            nextStudent.courses.forEach((cid) => {
+              const grant = extractStudentCourseGrant(nextStudent, cid);
+              entitlements[cid] = {
+                expiresAt: grant && grant.expiresAt > 0 ? grant.expiresAt : null,
+              };
+            });
+            Object.entries(nextStudent.accessGrants || {}).forEach(([cid, grant]) => {
+              if (!grant) return;
+              entitlements[cid] = {
+                expiresAt:
+                  grant.type === 'full_term' || !grant.expiresAt || grant.expiresAt <= 0
+                    ? null
+                    : grant.expiresAt,
+              };
+            });
+          }
+          saveEntitlements(nextStudent.id, entitlements);
+        }
         setStudent((prev) => ({
           ...nextStudent,
           plainPassword: nextStudent.plainPassword || prev?.plainPassword,

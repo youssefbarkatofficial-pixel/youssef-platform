@@ -5,6 +5,12 @@ import {
   canUseOfflineVideoCache,
   buildScopedVideoCacheKey,
 } from '../src/lib/videoCache.ts';
+import {
+  saveEntitlements,
+  clearEntitlements,
+  canAccessCourseOffline,
+  OFFLINE_GRACE_MS,
+} from '../src/lib/entitlementCache.ts';
 
 test('1. السماح بحفظ وتشغيل الفيديو المباشر (file) من الكاش فقط عند اكتمال المشاهدة وسريان الاشتراك', () => {
   const now = 1700000000000;
@@ -105,4 +111,48 @@ test('7. التحقق من تفعيل persistentLocalCache في اعدادات F
   const fbCode = readFileSync(new URL('../src/lib/firebase.ts', import.meta.url), 'utf8');
   assert.match(fbCode, /persistentLocalCache/);
   assert.match(fbCode, /persistentMultipleTabManager/);
+  assert.match(fbCode, /100 \* 1024 \* 1024/);
+});
+
+test('8. بوابة صلاحيات الأوفلاين: التحقق من المدة ومنع تلاعب تغيير ساعة الهاتف والمسح عند الخروج', () => {
+  const store = new Map();
+  const prevStorage = globalThis.localStorage;
+  globalThis.localStorage = {
+    getItem: (k) => (store.has(k) ? store.get(k) : null),
+    setItem: (k, v) => store.set(k, String(v)),
+    removeItem: (k) => store.delete(k),
+    clear: () => store.clear(),
+  };
+
+  try {
+    const t0 = Date.now();
+    saveEntitlements('stu_offline', {
+      c_perm: { expiresAt: null },
+      c_monthly: { expiresAt: t0 + 3 * 24 * 60 * 60 * 1000 },
+    });
+
+    assert.equal(canAccessCourseOffline('stu_offline', 'c_perm', t0 + 1000), true);
+    assert.equal(canAccessCourseOffline('stu_offline', 'c_monthly', t0 + 1000), true);
+    assert.equal(canAccessCourseOffline('stu_offline', 'c_other', t0 + 1000), false);
+    assert.equal(canAccessCourseOffline('other_uid', 'c_perm', t0 + 1000), false);
+
+    // بعد انتهاء الاشتراك الشهري يغلق فوراً أوفلاين
+    assert.equal(
+      canAccessCourseOffline('stu_offline', 'c_monthly', t0 + 4 * 24 * 60 * 60 * 1000),
+      false,
+    );
+
+    // تجاوز مهلة الـ 7 أيام بدون اتصال يغلق الوصول
+    assert.equal(canAccessCourseOffline('stu_offline', 'c_perm', t0 + OFFLINE_GRACE_MS + 1000), false);
+
+    // إعادة ساعة الجهاز للخلف أكثر من 5 دقائق يرفض الوصول فوراً
+    assert.equal(canAccessCourseOffline('stu_offline', 'c_perm', t0 - 10 * 60 * 1000), false);
+
+    // مسح الصلاحيات عند تسجيل الخروج
+    clearEntitlements();
+    assert.equal(canAccessCourseOffline('stu_offline', 'c_perm', t0 + 1000), false);
+  } finally {
+    if (prevStorage === undefined) delete globalThis.localStorage;
+    else globalThis.localStorage = prevStorage;
+  }
 });

@@ -1,13 +1,14 @@
-/* Youssef Barakat platform — PWA service worker (offline app-shell fallback + static asset caching).
+/* Youssef Barakat platform — PWA service worker (offline app-shell fallback + SWR asset caching).
  * Rules:
  *  - Never touch cross-origin requests. Student data and third-party APIs bypass SW directly.
  *  - Navigations: network-first (zero stale HTML when online), falls back to cached SPA shell offline so IndexedDB course cache stays browsable.
- *  - Static same-origin bundles (/assets/, /fonts/, /images/, /icons/) are cache-first.
+ *  - Static same-origin bundles (/assets/, /fonts/, /images/, /icons/) use stale-while-revalidate with bounded cache trim.
  */
 const CACHE_PREFIX = 'yb-static-';
 const CACHE = CACHE_PREFIX + 'v2';
 const OFFLINE_URL = '/offline.html';
 const APP_SHELL_KEY = '/_offline_shell_v2';
+const MAX_STATIC_ENTRIES = 250;
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -32,8 +33,8 @@ self.addEventListener('install', (event) => {
           // تجاهل لو كان التثبيت أوفلاين، سيتخزن مع أول فتح أونلاين
         }
       })
-      .then(() => self.skipWaiting())
   );
+  // No forced skipWaiting here: a new version waits until the user triggers update via SKIP_WAITING message.
 });
 
 self.addEventListener('activate', (event) => {
@@ -51,12 +52,41 @@ self.addEventListener('activate', (event) => {
   })());
 });
 
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+});
+
+async function trimStaticCache(cacheName, max) {
+  const cache = await caches.open(cacheName);
+  const keys = await cache.keys();
+  if (keys.length > max) {
+    await Promise.all(keys.slice(0, keys.length - max).map((k) => cache.delete(k)));
+  }
+}
+
+async function staleWhileRevalidate(req) {
+  const cache = await caches.open(CACHE);
+  const hit = await cache.match(req);
+  const network = fetch(req)
+    .then((res) => {
+      if (res && res.status === 200) {
+        const clone = res.clone();
+        cache.put(req, clone).then(() => trimStaticCache(CACHE, MAX_STATIC_ENTRIES));
+      }
+      return res;
+    })
+    .catch(() => undefined);
+  return hit || (await network) || Response.error();
+}
+
 self.addEventListener('fetch', (event) => {
   const req = event.request;
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) return;
-  if (url.pathname.startsWith('/__yb_offline_video__/')) return;
+  if (url.pathname.startsWith('/__') || url.pathname === '/sw.js') return;
 
   if (req.mode === 'navigate') {
     event.respondWith(
@@ -84,18 +114,7 @@ self.addEventListener('fetch', (event) => {
     url.pathname.startsWith('/images/') ||
     url.pathname.startsWith('/icons/')
   ) {
-    event.respondWith(
-      caches.match(req).then((hit) => {
-        if (hit) return hit;
-        return fetch(req).then((res) => {
-          if (res && res.status === 200) {
-            const clone = res.clone();
-            caches.open(CACHE).then((c) => c.put(req, clone));
-          }
-          return res;
-        });
-      })
-    );
+    event.respondWith(staleWhileRevalidate(req));
     return;
   }
 });

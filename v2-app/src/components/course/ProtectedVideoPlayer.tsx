@@ -60,7 +60,7 @@ interface ProtectedVideoPlayerProps {
 }
 
 type YtPlayStatus = 'unstarted' | 'playing' | 'paused' | 'buffering' | 'ended';
-const SPEED_OPTIONS = [1, 1.25, 1.5, 1.75, 2] as const;
+const SPEED_OPTIONS = [0.75, 1, 1.25, 1.5, 1.75, 2] as const;
 
 function formatPlayerTime(totalSeconds: number): string {
   if (!Number.isFinite(totalSeconds) || totalSeconds <= 0) return '00:00';
@@ -118,6 +118,8 @@ export default function ProtectedVideoPlayer({
   const lastFlushedCoverageRef = useRef<number>(0);
   const passedMilestonesRef = useRef<number[]>([]);
   const hasUnlocked95Ref = useRef(false);
+  const resumePosRef = useRef<number>(0);
+  const hasResumedRef = useRef<boolean>(false);
 
   // إشعار الصفحة الخارجية بالتغير لحظياً
   useEffect(() => {
@@ -175,6 +177,13 @@ export default function ProtectedVideoPlayer({
       setWatchState(saved);
       setCurrentTimeSec(saved.lastPosition || 0);
       setDurationSec(saved.totalDuration || 0);
+      if (
+        saved.lastPosition > 5 &&
+        saved.totalDuration > 0 &&
+        saved.lastPosition < saved.totalDuration - 10
+      ) {
+        resumePosRef.current = saved.lastPosition;
+      }
       lastFlushedCoverageRef.current = saved.coverage;
 
       WATCH_MILESTONES.forEach((m) => {
@@ -315,15 +324,25 @@ export default function ProtectedVideoPlayer({
             disablekb: 1,
             fs: 0,
             iv_load_policy: 3,
+            cc_load_policy: 0,
             playsinline: 1,
           },
           events: {
             onReady: (event: any) => {
               if (destroyed) return;
+              const ifr: HTMLIFrameElement | null = event.target.getIframe?.();
+              if (ifr) {
+                ifr.tabIndex = -1;
+                ifr.style.pointerEvents = 'none';
+              }
               const dur = event.target.getDuration();
               if (dur > 0) {
                 setDurationSec(dur);
                 setWatchState((prev) => updatePlayerStatus(prev, { totalDuration: dur }));
+              }
+              if (!hasResumedRef.current && resumePosRef.current > 5) {
+                event.target.seekTo?.(resumePosRef.current, true);
+                hasResumedRef.current = true;
               }
             },
             onStateChange: (event: any) => {
@@ -335,6 +354,13 @@ export default function ProtectedVideoPlayer({
 
               if (isPlaying) {
                 setYtStatus('playing');
+                if (!hasResumedRef.current && resumePosRef.current > 5) {
+                  const curNow = event.target.getCurrentTime?.() || 0;
+                  if (curNow < 3) {
+                    event.target.seekTo?.(resumePosRef.current, true);
+                  }
+                  hasResumedRef.current = true;
+                }
                 const dur = event.target.getDuration();
                 const cur = event.target.getCurrentTime();
                 const rate = event.target.getPlaybackRate();
@@ -614,6 +640,7 @@ export default function ProtectedVideoPlayer({
             ? 'fixed inset-0 z-50 h-screen w-screen rounded-none'
             : 'aspect-video rounded-2xl'
         }`}
+        style={{ WebkitUserSelect: 'none', WebkitTouchCallout: 'none' }}
         onContextMenu={(event) => event.preventDefault()}
         onCopy={(event) => event.preventDefault()}
         onCut={(event) => event.preventDefault()}
@@ -628,6 +655,17 @@ export default function ProtectedVideoPlayer({
             controlsList="nodownload noremoteplayback"
             disablePictureInPicture
             playsInline
+            onLoadedMetadata={() => {
+              if (
+                videoRef.current &&
+                !hasResumedRef.current &&
+                resumePosRef.current > 5 &&
+                videoRef.current.duration > resumePosRef.current + 10
+              ) {
+                videoRef.current.currentTime = resumePosRef.current;
+                hasResumedRef.current = true;
+              }
+            }}
             onPlay={() => {
               const dur = videoRef.current?.duration || 0;
               const rate = videoRef.current?.playbackRate || 1.0;

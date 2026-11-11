@@ -32,6 +32,8 @@ import ProtectedVideoPlayer from '../../components/course/ProtectedVideoPlayer';
 import { Badge, Button, Card, EmptyState, Modal, Spinner, Tabs, buttonClasses, useToast } from '../../components/ui';
 import { cn } from '../../components/ui/cn';
 import { useAuth } from '../../hooks/useAuth';
+import { useOnlineStatus } from '../../hooks/useOnlineStatus';
+import { canAccessCourseOffline } from '../../lib/entitlementCache';
 import { useCourse } from '../../hooks/useCourses';
 import { getGradeLabel } from '../../lib/grades';
 import { canAccessCourseContent } from '../../services/courses';
@@ -290,8 +292,19 @@ export default function CourseDetailsPage() {
     }
   }, [activeItem]);
 
-  const canAccess = Boolean(course && canAccessCourseContent(course, student, isAdmin));
+  const { isOnline } = useOnlineStatus();
+  const rawCanAccess = Boolean(course && canAccessCourseContent(course, student, isAdmin));
   const grantStatus = getCourseAccessStatus(course, student, isAdmin);
+  const offlineGateBlocked = Boolean(
+    !isOnline &&
+      rawCanAccess &&
+      !isAdmin &&
+      course &&
+      !course.isFree &&
+      student &&
+      !canAccessCourseOffline(student.id, course.id),
+  );
+  const canAccess = rawCanAccess && !offlineGateBlocked;
 
   // إزالة أي فيديوهات مخزنة في الكاش فور انتهاء صلاحية الاشتراك أو سحبها
   useEffect(() => {
@@ -696,6 +709,12 @@ export default function CourseDetailsPage() {
 
             {activeTab === 'content' && (
               <div className="space-y-4">
+                {offlineGateBlocked && (
+                  <div className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-4 text-sm font-semibold text-amber-200">
+                    أنت غير متصل بالإنترنت — يتطلب فتح هذا الكورس الاتصال بالإنترنت مرة واحدة للتحقق من صلاحية اشتراكك.
+                  </div>
+                )}
+
                 {/* تنبيهات حالة الاشتراك */}
                 {grantStatus.plan === 'monthly' && !grantStatus.expired && (
                   <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-sky-500/30 bg-sky-500/10 px-4 py-2.5 text-xs text-sky-200">

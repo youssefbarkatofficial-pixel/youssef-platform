@@ -216,12 +216,15 @@ export async function getStudent(uid: string): Promise<Student | null> {
 // اشتراك لحظي في مستند الطالب: يقرأ من الكاش فوراً دون إنترنت ويستقبل أي تفعيل أو إشعار أو تحديث فور عودة الشبكة.
 export function subscribeStudent(
   uid: string,
-  onUpdate: (student: Student | null) => void,
+  onUpdate: (student: Student | null, meta: { fromCache: boolean }) => void,
 ): () => void {
   return onSnapshot(
     doc(db, 'students', uid),
     (snapshot) => {
-      onUpdate(snapshot.exists() ? toStudent(snapshot.id, snapshot.data()) : null);
+      onUpdate(
+        snapshot.exists() ? toStudent(snapshot.id, snapshot.data()) : null,
+        { fromCache: snapshot.metadata.fromCache },
+      );
     },
     () => {
       // الحفاظ على آخر حالة محفوظة إذا تعذر الاتصال مؤقتاً

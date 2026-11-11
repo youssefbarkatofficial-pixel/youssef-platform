@@ -4,6 +4,7 @@ import {
   signInWithEmailAndPassword,
   signOut,
 } from 'firebase/auth';
+import { clearEntitlements } from '../lib/entitlementCache';
 import { auth } from '../lib/firebase';
 import { loginEmailCandidates, normalizePhone, phoneToEmail } from '../lib/phone';
 import { createStudentProfile } from './students';
@@ -78,6 +79,7 @@ export async function loginWithIdentifier(identifier: string, password: string):
 }
 
 export async function logout(): Promise<void> {
+  clearEntitlements();
   await signOut(auth);
 }
 
