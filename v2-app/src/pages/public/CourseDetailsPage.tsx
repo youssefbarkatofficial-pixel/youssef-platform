@@ -26,6 +26,7 @@ import CoursePrice from '../../components/course/CoursePrice';
 import LectureStationBadges from '../../components/course/LectureStationBadges';
 import CourseTocSidebar from '../../components/course/CourseTocSidebar';
 import { getCourseAccessStatus, BASE_MONTHLY_PRICE } from '../../lib/subscriptions';
+import { purgeCourseVideoCache } from '../../lib/videoCache';
 import { claimTrialLecture, claimFreeMonthlyPromo } from '../../services/students';
 import ProtectedVideoPlayer from '../../components/course/ProtectedVideoPlayer';
 import { Badge, Button, Card, EmptyState, Modal, Spinner, Tabs, buttonClasses, useToast } from '../../components/ui';
@@ -189,7 +190,7 @@ function LectureFilesSection({
 export default function CourseDetailsPage() {
   const { courseId } = useParams();
   const navigate = useNavigate();
-  const { course, loading, error, reload } = useCourse(courseId);
+  const { course, loading, error, reload } = useCourse(courseId, { live: true });
   const { firebaseUser, student, isAdmin, loading: authLoading, refresh } = useAuth();
   const { showToast } = useToast();
   const [marking, setMarking] = useState(false);
@@ -291,6 +292,13 @@ export default function CourseDetailsPage() {
 
   const canAccess = Boolean(course && canAccessCourseContent(course, student, isAdmin));
   const grantStatus = getCourseAccessStatus(course, student, isAdmin);
+
+  // إزالة أي فيديوهات مخزنة في الكاش فور انتهاء صلاحية الاشتراك أو سحبها
+  useEffect(() => {
+    if (student?.id && course?.id && (!canAccess || grantStatus.expired)) {
+      void purgeCourseVideoCache(student.id, course.id);
+    }
+  }, [student?.id, course?.id, canAccess, grantStatus.expired]);
 
   // فتح نافذة التفعيل تلقائياً عند عودة الزائر بعد التسجيل
   useEffect(() => {
@@ -649,6 +657,10 @@ export default function CourseDetailsPage() {
                 watermarkText={watermarkText}
                 itemId={activeItem.id}
                 studentId={student?.id}
+                courseId={course.id}
+                hasAccess={canAccess}
+                accessExpiresAt={grantStatus.expiresAt || 0}
+                isAdmin={isAdmin}
                 onProgressChange={(coverage) => {
                   setLocalWatch((prev) => ({
                     ...prev,

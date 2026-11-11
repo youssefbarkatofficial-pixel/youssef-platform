@@ -1,5 +1,6 @@
 import { collection, doc, getDoc, getDocs, setDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
+import { getDocOfflineFirst } from '../lib/offlineFirestore';
 import { isStudentEmail } from '../lib/phone';
 
 // المالك الأساسي للمنصة.
@@ -25,7 +26,7 @@ export async function getAdminRole(email: string | null | undefined): Promise<Ad
   if (isStudentEmail(normalized)) return null;
 
   try {
-    const snapshot = await getDoc(doc(db, 'platformAdmins', normalized));
+    const snapshot = await getDocOfflineFirst(doc(db, 'platformAdmins', normalized));
     if (!snapshot.exists()) return null;
 
     const data = snapshot.data();

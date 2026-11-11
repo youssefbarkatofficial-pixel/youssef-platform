@@ -4,6 +4,7 @@ import { AuthProvider } from './hooks/useAuth';
 import { isFirebaseConfigured } from './lib/firebase';
 import AppRoutes from './routes/AppRoutes';
 import InstallAppButton from './components/pwa/InstallAppButton';
+import OfflineSyncBanner from './components/pwa/OfflineSyncBanner';
 import PullToRefresh from './components/layout/PullToRefresh';
 
 function ConfigMissingScreen() {
@@ -28,6 +29,7 @@ export default function App() {
   return (
     <ToastProvider>
       <AuthProvider>
+        <OfflineSyncBanner />
         <AppRoutes />
         <InstallAppButton />
         <PullToRefresh />

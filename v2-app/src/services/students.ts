@@ -4,6 +4,7 @@ import {
   getDoc,
   getDocs,
   limit,
+  onSnapshot,
   query,
   serverTimestamp,
   setDoc,
@@ -17,6 +18,7 @@ import type { StudentGrant, CourseGrantType } from '../lib/subscriptions';
 import type { Course } from './courses';
 import type { DocumentData } from 'firebase/firestore';
 import { db } from '../lib/firebase';
+import { getDocOfflineFirst } from '../lib/offlineFirestore';
 import { getAcademicYear, parseAcademicYear } from '../lib/dates';
 import { normalizeGrade } from '../lib/grades';
 import { isIgnoredStudentId } from '../lib/studentIds';
@@ -191,7 +193,7 @@ function toStudent(id: string, data: DocumentData): Student {
 }
 
 export async function getStudent(uid: string): Promise<Student | null> {
-  const snapshot = await getDoc(doc(db, 'students', uid));
+  const snapshot = await getDocOfflineFirst(doc(db, 'students', uid));
   if (!snapshot.exists()) return null;
   const student = toStudent(snapshot.id, snapshot.data());
   if ((!student.plainPassword || student.plainPassword === 'مخفية') && student.phone) {
@@ -209,6 +211,22 @@ export async function getStudent(uid: string): Promise<Student | null> {
     }
   }
   return student;
+}
+
+// اشتراك لحظي في مستند الطالب: يقرأ من الكاش فوراً دون إنترنت ويستقبل أي تفعيل أو إشعار أو تحديث فور عودة الشبكة.
+export function subscribeStudent(
+  uid: string,
+  onUpdate: (student: Student | null) => void,
+): () => void {
+  return onSnapshot(
+    doc(db, 'students', uid),
+    (snapshot) => {
+      onUpdate(snapshot.exists() ? toStudent(snapshot.id, snapshot.data()) : null);
+    },
+    () => {
+      // الحفاظ على آخر حالة محفوظة إذا تعذر الاتصال مؤقتاً
+    },
+  );
 }
 
 // كود الطالب الجديد: YB- ثم 8 رموز عشوائية.
