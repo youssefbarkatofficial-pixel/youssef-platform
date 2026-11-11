@@ -11,6 +11,12 @@ import {
   canAccessCourseOffline,
   OFFLINE_GRACE_MS,
 } from '../src/lib/entitlementCache.ts';
+import {
+  getStudentEnrollmentTimestamp,
+  isStudentExempt,
+  getDetailedLectureLock,
+  getAssessmentPrerequisiteDiagnostics,
+} from '../src/lib/contentRules.ts';
 
 test('1. السماح بحفظ وتشغيل الفيديو المباشر (file) من الكاش فقط عند اكتمال المشاهدة وسريان الاشتراك', () => {
   const now = 1700000000000;
@@ -155,4 +161,143 @@ test('8. بوابة صلاحيات الأوفلاين: التحقق من الم�
     if (prevStorage === undefined) delete globalThis.localStorage;
     else globalThis.localStorage = prevStorage;
   }
+});
+
+
+test('9. التعرف على تواريخ التسجيل الفعلية (createdAtMs و accessGrants و trials) في قواعد المحتوى', () => {
+  const rules = { enabled: true, enabledAt: 1750000000000, watchThreshold: 0.95 };
+
+  const liveStudent = {
+    id: 'stu_live',
+    createdAtMs: 1750005000000,
+    courses: ['c1'],
+    accessGrants: {
+      c1: { plan: 'trial_lecture', grantedAt: 1750006000000 },
+    },
+  };
+  assert.equal(getStudentEnrollmentTimestamp(liveStudent, 'c1'), 1750006000000);
+  assert.equal(isStudentExempt(liveStudent, rules, 'c1', false), false);
+
+  const trialClaimStudent = {
+    id: 'stu_trial',
+    createdAtMs: 1750001000000,
+    progress: {
+      trials: {
+        c1: { claimedAt: 1750007000000, lectureId: 'lec_5' },
+      },
+    },
+  };
+  assert.equal(getStudentEnrollmentTimestamp(trialClaimStudent, 'c1'), 1750007000000);
+  assert.equal(isStudentExempt(trialClaimStudent, rules, 'c1', false), false);
+});
+
+test('10. تشخيص سبب القفل الدقيق والمرتبط بإحصائيات الطالب لكل عنصر واختبار بدون رسائل عامة', () => {
+  const rules = { enabled: true, enabledAt: 1750000000000, watchThreshold: 0.95 };
+  const student = {
+    id: 'stu_1',
+    createdAtMs: 1750001000000,
+    enrolledCourses: { c1: { enrolledAt: 1750002000000 } },
+  };
+  const course = {
+    id: 'c1',
+    content: {
+      lectures: [
+        {
+          id: 'lec_1',
+          order: 1,
+          title: 'الدرس الأول',
+          trainings: [{ id: 'tr_1', title: 'تدريب 1' }],
+          homeworks: [{ id: 'hw_1', title: 'واجب 1' }],
+        },
+        {
+          id: 'lec_2',
+          order: 2,
+          title: 'الدرس الثاني',
+          trainings: [{ id: 'tr_2', title: 'تدريب 2' }],
+          homeworks: [{ id: 'hw_2', title: 'واجب 2' }],
+        },
+      ],
+      homeworks: [],
+      exams: [
+        {
+          id: 'ex_2',
+          title: 'امتحان الدرس الثاني',
+          raw: { lectureId: 'lec_2' },
+        },
+      ],
+    },
+  };
+
+  // 1) مشاهدة 40% + التدريب والواجب لم يُحلا -> تظهر النسبة 40% من 95% + التدريب + الواجب بالاسم
+  const partialDiag = getAssessmentPrerequisiteDiagnostics({
+    course,
+    assessment: { id: 'ex_2', title: 'امتحان الدرس الثاني', kind: 'exam', raw: { lectureId: 'lec_2' } },
+    student,
+    watchProgress: { lec_1: 96, lec_2: 40 },
+    examResults: [{ assessmentId: 'tr_1' }, { assessmentId: 'hw_1' }],
+    rules,
+  });
+  assert.equal(partialDiag.locked, true);
+  assert.match(partialDiag.message, /40% من 95%/);
+  assert.match(partialDiag.message, /تدريب 2/);
+  assert.match(partialDiag.message, /واجب 2/);
+
+  // 2) شاهد 96% وحل الواجب لكنه لم يحل التدريب -> يذكر التدريب فقط دون الواجب أو الفيديو
+  const onlyTrDiag = getAssessmentPrerequisiteDiagnostics({
+    course,
+    assessment: { id: 'ex_2', title: 'امتحان الدرس الثاني', kind: 'exam', raw: { lectureId: 'lec_2' } },
+    student,
+    watchProgress: { lec_1: 96, lec_2: 96 },
+    examResults: [{ assessmentId: 'tr_1' }, { assessmentId: 'hw_1' }, { assessmentId: 'hw_2' }],
+    rules,
+  });
+  assert.equal(onlyTrDiag.locked, true);
+  assert.match(onlyTrDiag.message, /تدريب 2/);
+  assert.doesNotMatch(onlyTrDiag.message, /واجب 2/);
+  assert.doesNotMatch(onlyTrDiag.message, /مشاهدة فيديو/);
+
+  // 3) المحاضرة السابقة ناقص منها الواجب فقط -> يذكر واجب المحاضرة السابقة بالاسم دون رسالة عامة
+  const lec2LockOnlyHw = getDetailedLectureLock(
+    course,
+    1,
+    student,
+    { lec_1: 96 },
+    [{ assessmentId: 'tr_1' }],
+    rules,
+  );
+  assert.equal(lec2LockOnlyHw.locked, true);
+  assert.match(lec2LockOnlyHw.message || '', /واجب 1/);
+  assert.doesNotMatch(lec2LockOnlyHw.message || '', /متأخرات/);
+  assert.doesNotMatch(lec2LockOnlyHw.message || '', /وحل تدريبها/);
+
+  // 4) طالب التجريبي على الدرس الثاني (#2 فقط) لا يتحجب بسبب الدرس #1 الممنوع، لكن امتحانه يتطلب مشاهدة #2
+  const trialDiag = getAssessmentPrerequisiteDiagnostics({
+    course,
+    assessment: { id: 'ex_2', title: 'امتحان الدرس الثاني', kind: 'exam', raw: { lectureId: 'lec_2' } },
+    student,
+    watchProgress: { lec_2: 0 },
+    examResults: [],
+    rules,
+    grantStatus: { hasAccess: true, plan: 'trial_lecture', targetLectureId: 'lec_2', targetLectureOrder: 2 },
+  });
+  assert.equal(trialDiag.locked, true);
+  assert.match(trialDiag.message, /0% من 95%/);
+  assert.doesNotMatch(trialDiag.message, /الدرس الأول/);
+
+  // 5) إكمال كل المتطلبات -> يفتح الاختبار
+  const openDiag = getAssessmentPrerequisiteDiagnostics({
+    course,
+    assessment: { id: 'ex_2', title: 'امتحان الدرس الثاني', kind: 'exam', raw: { lectureId: 'lec_2' } },
+    student,
+    watchProgress: { lec_1: 96, lec_2: 97 },
+    examResults: [
+      { assessmentId: 'tr_1' },
+      { assessmentId: 'hw_1' },
+      { assessmentId: 'tr_2' },
+      { assessmentId: 'hw_2' },
+    ],
+    rules,
+  });
+  assert.equal(openDiag.locked, false);
+  assert.equal(openDiag.missingItems.length, 0);
 });

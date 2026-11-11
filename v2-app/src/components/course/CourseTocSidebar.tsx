@@ -34,11 +34,14 @@ import {
 import { Link } from 'react-router-dom';
 import { cn } from '../ui/cn';
 import type { NormalizedLecture, NormalizedAssessment } from '../../lib/courseNormalize';
-import { checkLectureLock, checkInLectureItemLock } from '../../lib/contentRules';
+import {
+  getDetailedLectureLock,
+  getDetailedInLectureItemLock,
+  getAssessmentPrerequisiteDiagnostics,
+} from '../../lib/contentRules';
 import type { ContentRulesSettings } from '../../lib/contentRules';
 import type { CourseSection } from '../../lib/courseNormalize';
 import type { GrantAccessStatus } from '../../lib/subscriptions';
-import { checkGrantItemLock } from '../../lib/subscriptions';
 
 // ─── types ───────────────────────────────────────────────────────────────────
 
@@ -58,7 +61,14 @@ interface CourseTocSidebarProps {
   effectiveWatch: Record<string, number>;
   canAccess: boolean;
   isAdmin: boolean;
-  student: { id: string; examResults?: unknown[] } | null;
+  student: {
+    id: string;
+    examResults?: unknown[];
+    createdAtMs?: number | null;
+    accessGrants?: unknown;
+    progress?: unknown;
+    watchProgress?: Record<string, number>;
+  } | null;
   contentRules: ContentRulesSettings;
   /** لو true: يملأ عرض الصفحة بدل الشريط الجانبي */
   fullWidth?: boolean;
@@ -131,9 +141,9 @@ function LockBadge({ message }: { message?: string }) {
   return (
     <span
       title={message}
-      className="flex shrink-0 items-center gap-1 rounded bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-semibold text-amber-300"
+      className="inline-flex shrink-0 items-center gap-1 rounded bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-bold text-amber-200 [html.light_&]:bg-amber-100 [html.light_&]:text-amber-950"
     >
-      <Lock className="h-2.5 w-2.5" />
+      <Lock className="h-2.5 w-2.5 text-amber-300 [html.light_&]:text-amber-800" />
       مقفول
     </span>
   );
@@ -145,18 +155,27 @@ function ContentRow({
   icon,
   label,
   action,
+  lockReason,
 }: {
   icon: React.ReactNode;
   label: string;
   action: React.ReactNode;
+  lockReason?: string;
 }) {
   return (
-    <div className="flex items-center justify-between gap-3 rounded-lg px-4 py-2 hover:bg-navy-800/40 transition-colors">
-      <div className="flex items-center gap-2 text-sm text-slate-300">
-        <span className="shrink-0">{icon}</span>
-        <span>{label}</span>
+    <div className="rounded-lg px-4 py-2 transition-colors hover:bg-navy-800/40">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-2 text-sm text-slate-300">
+          <span className="shrink-0">{icon}</span>
+          <span className="leading-snug">{label}</span>
+        </div>
+        <div className="shrink-0">{action}</div>
       </div>
-      <div className="shrink-0">{action}</div>
+      {lockReason && (
+        <p className="mt-1 ms-6 text-[11px] font-medium leading-relaxed text-amber-200 [html.light_&]:text-amber-950">
+          {lockReason}
+        </p>
+      )}
     </div>
   );
 }
@@ -205,6 +224,8 @@ export default function CourseTocSidebar({
   if (units.length === 0 && homeworks.length === 0 && exams.length === 0) return null;
 
   const now = Date.now();
+  const examResults = (student?.examResults || []) as unknown[];
+  const courseObj = { id: courseId, sections, content: { lectures, homeworks, exams } };
 
   // ── action button styles ──────────────────────────────────────────────────
   const btnPlay =
@@ -246,18 +267,18 @@ export default function CourseTocSidebar({
           level={1}
         >
           {unit.lectures.map((lec, lecIdx) => {
-            const lectureLock = checkLectureLock(
-              { content: { lectures } } as unknown as Parameters<typeof checkLectureLock>[0],
-              lectures.indexOf(lec),
+            const lecGlobalIndex = lectures.indexOf(lec);
+            const effectiveLectureLock = getDetailedLectureLock(
+              courseObj,
+              lecGlobalIndex,
               student,
               effectiveWatch,
-              (student as any)?.examResults || [],
+              examResults,
               contentRules,
               now,
               isAdmin,
+              grantStatus,
             );
-            const grantLock = grantStatus ? checkGrantItemLock(lec, grantStatus) : { locked: false };
-            const effectiveLectureLock = grantLock.locked ? grantLock : lectureLock;
             const isTrialLecture = grantStatus?.plan === 'trial_lecture' && lec.id === grantStatus.targetLectureId;
             const watchPct = effectiveWatch[lec.id] ?? 0;
             const isWatched = watchPct >= 95;
@@ -299,17 +320,22 @@ export default function CourseTocSidebar({
                     <ContentRow
                       icon={<PlayCircle className="h-4 w-4 text-sky-400" />}
                       label="محاضرة الشرح"
+                      lockReason={
+                        canAccess && effectiveLectureLock.locked
+                          ? (effectiveLectureLock.detailedMessage || effectiveLectureLock.message)
+                          : undefined
+                      }
                       action={
                         canAccess ? (
                           effectiveLectureLock.locked ? (
-                            <LockBadge message={effectiveLectureLock.message} />
+                            <LockBadge message={effectiveLectureLock.detailedMessage || effectiveLectureLock.message} />
                           ) : (
                             <button type="button" onClick={() => onPlayLecture?.(lec)} className={btnPlay}>
                               شاهد
                             </button>
                           )
                         ) : (
-                          <Lock className="h-3.5 w-3.5 text-slate-500" />
+                          <LockBadge message="يلزم الاشتراك لمشاهدة الشرح" />
                         )
                       }
                     />
@@ -325,20 +351,35 @@ export default function CourseTocSidebar({
                           : [];
                     return files.map((file) => {
                       const fileLock = canAccess
-                        ? checkInLectureItemLock(lec, file, 'file', student, effectiveWatch, contentRules, courseId, now, isAdmin)
-                        : { locked: true, message: 'يلزم الاشتراك' };
+                        ? getDetailedInLectureItemLock(
+                            courseObj,
+                            lecGlobalIndex,
+                            lec,
+                            file,
+                            'file',
+                            student,
+                            effectiveWatch,
+                            examResults,
+                            contentRules,
+                            now,
+                            isAdmin,
+                            grantStatus,
+                          )
+                        : { locked: true, message: 'يلزم الاشتراك للوصول إلى هذا الملف' };
+                      const reasonMsg = fileLock.detailedMessage || fileLock.message;
                       return (
                         <ContentRow
                           key={file.id}
                           icon={<FileText className="h-4 w-4 text-gold-400" />}
                           label={file.title || 'ملف الشرح'}
+                          lockReason={canAccess && fileLock.locked ? reasonMsg : undefined}
                           action={
-                            !effectiveLectureLock.locked && !fileLock.locked ? (
+                            canAccess && !fileLock.locked ? (
                               <a href={file.url} target="_blank" rel="noopener noreferrer" className={btnDl}>
                                 تحميل
                               </a>
                             ) : (
-                              <LockBadge message={fileLock.message} />
+                              <LockBadge message={reasonMsg} />
                             )
                           }
                         />
@@ -349,8 +390,22 @@ export default function CourseTocSidebar({
                   {/* التدريبات */}
                   {hasTrainings && lec.trainings.map((tr) => {
                     const trLock = canAccess
-                      ? checkInLectureItemLock(lec, tr, 'training', student, effectiveWatch, contentRules, courseId, now, isAdmin)
-                      : { locked: true, message: 'يلزم الاشتراك' };
+                      ? getDetailedInLectureItemLock(
+                          courseObj,
+                          lecGlobalIndex,
+                          lec,
+                          tr,
+                          'training',
+                          student,
+                          effectiveWatch,
+                          examResults,
+                          contentRules,
+                          now,
+                          isAdmin,
+                          grantStatus,
+                        )
+                      : { locked: true, message: 'يلزم الاشتراك لبدء التدريب' };
+                    const reasonMsg = trLock.detailedMessage || trLock.message;
                     const trLink = isAdmin
                       ? `/admin/preview/assessment/${encodeURIComponent(courseId)}/${encodeURIComponent(tr.id)}`
                       : `/student/assessment/${encodeURIComponent(courseId)}/${encodeURIComponent(tr.id)}`;
@@ -359,11 +414,12 @@ export default function CourseTocSidebar({
                         key={tr.id}
                         icon={<ClipboardList className="h-4 w-4 text-emerald-400" />}
                         label={tr.title}
+                        lockReason={canAccess && trLock.locked ? reasonMsg : undefined}
                         action={
-                          !effectiveLectureLock.locked && !trLock.locked ? (
+                          canAccess && !trLock.locked ? (
                             <Link to={trLink} className={btnTr}>ابدأ التدريب</Link>
                           ) : (
-                            <LockBadge message={trLock.message} />
+                            <LockBadge message={reasonMsg} />
                           )
                         }
                       />
@@ -373,8 +429,22 @@ export default function CourseTocSidebar({
                   {/* الواجبات المرتبطة */}
                   {hasHomeworks && lec.homeworks!.map((hw) => {
                     const hwLock = canAccess
-                      ? checkInLectureItemLock(lec, hw, 'homework', student, effectiveWatch, contentRules, courseId, now, isAdmin)
-                      : { locked: true, message: 'يلزم الاشتراك' };
+                      ? getDetailedInLectureItemLock(
+                          courseObj,
+                          lecGlobalIndex,
+                          lec,
+                          hw,
+                          'homework',
+                          student,
+                          effectiveWatch,
+                          examResults,
+                          contentRules,
+                          now,
+                          isAdmin,
+                          grantStatus,
+                        )
+                      : { locked: true, message: 'يلزم الاشتراك لحل الواجب' };
+                    const reasonMsg = hwLock.detailedMessage || hwLock.message;
                     const hwLink = isAdmin
                       ? `/admin/preview/assessment/${encodeURIComponent(courseId)}/${encodeURIComponent(hw.id)}`
                       : `/student/assessment/${encodeURIComponent(courseId)}/${encodeURIComponent(hw.id)}`;
@@ -383,11 +453,12 @@ export default function CourseTocSidebar({
                         key={hw.id}
                         icon={<PenTool className="h-4 w-4 text-amber-400" />}
                         label={hw.title}
+                        lockReason={canAccess && hwLock.locked ? reasonMsg : undefined}
                         action={
-                          !effectiveLectureLock.locked && !hwLock.locked ? (
+                          canAccess && !hwLock.locked ? (
                             <Link to={hwLink} className={btnHw}>حل الواجب</Link>
                           ) : (
-                            <LockBadge message={hwLock.message} />
+                            <LockBadge message={reasonMsg} />
                           )
                         }
                       />
@@ -418,17 +489,40 @@ export default function CourseTocSidebar({
               const hwLink = isAdmin
                 ? `/admin/preview/assessment/${encodeURIComponent(courseId)}/${encodeURIComponent(hw.id)}`
                 : `/student/assessment/${encodeURIComponent(courseId)}/${encodeURIComponent(hw.id)}`;
-              const isLocked = !isAdmin && typeof hw.openAt === 'number' && hw.openAt > now;
+              const diag = canAccess
+                ? getAssessmentPrerequisiteDiagnostics({
+                    course: courseObj,
+                    assessment: {
+                      id: hw.id,
+                      title: hw.title,
+                      kind: 'homework',
+                      openAt: hw.openAt,
+                      availableFrom: hw.availableFrom,
+                      availableUntil: hw.availableUntil,
+                      lockedUntilTrainingId:
+                        typeof hw.raw?.lockedUntilTrainingId === 'string' ? hw.raw.lockedUntilTrainingId : undefined,
+                      raw: hw.raw,
+                    },
+                    student,
+                    watchProgress: effectiveWatch,
+                    examResults,
+                    rules: contentRules,
+                    serverTime: now,
+                    isAdminOrOwner: isAdmin,
+                    grantStatus,
+                  })
+                : { locked: true, message: 'يلزم الاشتراك لحل الواجب', missingItems: [] };
               return (
                 <ContentRow
                   key={hw.id}
                   icon={<PenTool className="h-4 w-4 text-amber-400" />}
                   label={hw.title}
+                  lockReason={canAccess && diag.locked ? diag.message : undefined}
                   action={
-                    canAccess && !isLocked ? (
+                    canAccess && !diag.locked ? (
                       <Link to={hwLink} className={btnHw}>حل الواجب</Link>
                     ) : (
-                      <Lock className="h-3.5 w-3.5 text-slate-500" />
+                      <LockBadge message={diag.message} />
                     )
                   }
                 />
@@ -452,17 +546,40 @@ export default function CourseTocSidebar({
               const exLink = isAdmin
                 ? `/admin/preview/assessment/${encodeURIComponent(courseId)}/${encodeURIComponent(ex.id)}`
                 : `/student/assessment/${encodeURIComponent(courseId)}/${encodeURIComponent(ex.id)}`;
-              const isLocked = !isAdmin && typeof ex.openAt === 'number' && ex.openAt > now;
+              const diag = canAccess
+                ? getAssessmentPrerequisiteDiagnostics({
+                    course: courseObj,
+                    assessment: {
+                      id: ex.id,
+                      title: ex.title,
+                      kind: 'exam',
+                      openAt: ex.openAt,
+                      availableFrom: ex.availableFrom,
+                      availableUntil: ex.availableUntil,
+                      lockedUntilTrainingId:
+                        typeof ex.raw?.lockedUntilTrainingId === 'string' ? ex.raw.lockedUntilTrainingId : undefined,
+                      raw: ex.raw,
+                    },
+                    student,
+                    watchProgress: effectiveWatch,
+                    examResults,
+                    rules: contentRules,
+                    serverTime: now,
+                    isAdminOrOwner: isAdmin,
+                    grantStatus,
+                  })
+                : { locked: true, message: 'يلزم الاشتراك لبدء الامتحان', missingItems: [] };
               return (
                 <ContentRow
                   key={ex.id}
                   icon={<Award className="h-4 w-4 text-sky-400" />}
                   label={ex.title}
+                  lockReason={canAccess && diag.locked ? diag.message : undefined}
                   action={
-                    canAccess && !isLocked ? (
+                    canAccess && !diag.locked ? (
                       <Link to={exLink} className={btnEx}>ابدأ الامتحان</Link>
                     ) : (
-                      <Lock className="h-3.5 w-3.5 text-slate-500" />
+                      <LockBadge message={diag.message} />
                     )
                   }
                 />

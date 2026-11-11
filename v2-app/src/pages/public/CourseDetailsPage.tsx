@@ -97,13 +97,14 @@ function LectureFilesSection({
     );
 
     if (lock.locked) {
+      const detailedLockMsg = lock.detailedMessage || lock.message || 'المذكرة مقفولة';
       return (
         <span
-          className="flex items-center gap-1.5 rounded-lg border border-navy-800 bg-navy-950/70 px-2.5 py-1 text-xs text-amber-300"
-          title={lock.message}
+          className="flex items-center gap-1.5 rounded-lg border border-amber-500/30 bg-navy-950/70 px-2.5 py-1 text-xs font-medium text-amber-200 [html.light_&]:border-amber-700/40 [html.light_&]:bg-amber-50 [html.light_&]:text-amber-950"
+          title={detailedLockMsg}
         >
-          <Lock className="h-3.5 w-3.5 text-amber-400" />
-          <span>{lock.message || 'المذكرة مقفولة'}</span>
+          <Lock className="h-3.5 w-3.5 shrink-0 text-amber-300 [html.light_&]:text-amber-800" />
+          <span>{detailedLockMsg}</span>
         </span>
       );
     }
@@ -153,16 +154,23 @@ function LectureFilesSection({
             );
 
             if (lock.locked) {
+              const detailedLockMsg = lock.detailedMessage || lock.message || 'مقفول';
               return (
                 <div
                   key={file.id}
-                  className="flex items-center justify-between gap-2 rounded-lg bg-navy-950/60 px-2.5 py-2 text-xs text-slate-400"
+                  title={detailedLockMsg}
+                  className="space-y-1 rounded-lg bg-navy-950/60 px-2.5 py-2 text-xs text-slate-300"
                 >
-                  <span className="truncate">{file.title || 'ملف المحاضرة'}</span>
-                  <span className="flex items-center gap-1 text-[11px] text-amber-300 shrink-0">
-                    <Lock className="h-3 w-3 text-amber-400" />
-                    مقفول
-                  </span>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="truncate">{file.title || 'ملف المحاضرة'}</span>
+                    <span className="flex shrink-0 items-center gap-1 text-[11px] font-bold text-amber-200 [html.light_&]:text-amber-950">
+                      <Lock className="h-3 w-3 text-amber-300 [html.light_&]:text-amber-800" />
+                      مقفول
+                    </span>
+                  </div>
+                  <p className="text-[11px] leading-snug text-amber-200 [html.light_&]:text-amber-950">
+                    {detailedLockMsg}
+                  </p>
                 </div>
               );
             }

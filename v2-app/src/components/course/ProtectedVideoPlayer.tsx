@@ -735,12 +735,12 @@ export default function ProtectedVideoPlayer({
               <div id={containerId} className="h-full w-full border-0" />
             </div>
 
-            {/* درع حماية علوي يخفي شريط العنوان وزر الشير ويمنع لمسه */}
+            {/* درع حماية علوي دائم يخفي شريط العنوان وزر الشير ويمنع لمسه طوال التشغيل */}
             <div
-              className={`pointer-events-none absolute inset-x-0 top-0 z-10 flex items-center justify-between px-4 py-2.5 transition-opacity duration-500 ${
+              className={`pointer-events-none absolute inset-x-0 top-0 z-10 flex min-h-[48px] items-center justify-between px-4 py-2.5 transition-opacity duration-300 ${
                 maskTopFlash || ytStatus !== 'playing'
-                  ? 'bg-gradient-to-b from-black via-black/90 to-transparent opacity-100'
-                  : 'bg-gradient-to-b from-black/80 via-black/30 to-transparent opacity-80'
+                  ? 'bg-gradient-to-b from-black via-black/95 to-black/75 opacity-100'
+                  : 'bg-gradient-to-b from-black via-black/95 to-transparent opacity-100'
               }`}
             >
               <span className="truncate text-xs font-bold text-white/90">{title}</span>
@@ -798,7 +798,7 @@ export default function ProtectedVideoPlayer({
             {/* شريط التحكم المخصص أسفل الفيديو (بدون أي زر شير أو روابط خارجية) */}
             <div
               dir="ltr"
-              className="absolute inset-x-0 bottom-0 z-20 flex flex-wrap items-center gap-2 bg-gradient-to-t from-black/95 via-black/85 to-transparent px-3 pb-2.5 pt-6 text-white"
+              className="absolute inset-x-0 bottom-0 z-20 flex flex-wrap items-center gap-2 bg-gradient-to-t from-black via-black/95 to-transparent px-3 pb-2.5 pt-7 text-white"
             >
               <button
                 type="button"
