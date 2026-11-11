@@ -14,6 +14,7 @@ import {
   deleteField,
 } from 'firebase/firestore';
 import type { StudentGrant, CourseGrantType } from '../lib/subscriptions';
+import type { Course } from './courses';
 import type { DocumentData } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { getAcademicYear, parseAcademicYear } from '../lib/dates';
@@ -99,23 +100,62 @@ function asTrack(value: unknown): GradeTrack | null {
 
 // قراءة متسامحة: أي حقل ناقص يأخذ قيمة افتراضية.
 // نختار الحقول المسموحة بالاسم فقط، ولا نقرأ حقل كلمة المرور القديم أبدًا.
-function asGrantMap(value: unknown): Record<string, StudentGrant> | undefined {
-  if (typeof value !== 'object' || value === null || Array.isArray(value)) return undefined;
+function asGrantMap(value: unknown, progressValue?: unknown): Record<string, StudentGrant> | undefined {
   const result: Record<string, StudentGrant> = {};
-  Object.entries(value as Record<string, unknown>).forEach(([k, v]) => {
-    if (typeof v === 'object' && v !== null && !Array.isArray(v)) {
-      const g = v as Record<string, unknown>;
-      result[k] = {
-        courseId: asString(g.courseId) || k,
-        type: (asString(g.type) as CourseGrantType) || 'full_term',
-        grantedAt: asNumber(g.grantedAt),
-        expiresAt: asNumber(g.expiresAt),
-        targetLectureId: g.targetLectureId ? asString(g.targetLectureId) : undefined,
-        targetLectureOrder: g.targetLectureOrder !== undefined ? asNumber(g.targetLectureOrder) : undefined,
-        startLectureOrder: g.startLectureOrder !== undefined ? asNumber(g.startLectureOrder) : undefined,
-      };
+  if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+    Object.entries(value as Record<string, unknown>).forEach(([k, v]) => {
+      if (typeof v === 'object' && v !== null && !Array.isArray(v)) {
+        const g = v as Record<string, unknown>;
+        result[k] = {
+          courseId: asString(g.courseId) || k,
+          type: (asString(g.type) as CourseGrantType) || 'full_term',
+          grantedAt: asNumber(g.grantedAt),
+          expiresAt: asNumber(g.expiresAt),
+          targetLectureId: g.targetLectureId ? asString(g.targetLectureId) : undefined,
+          targetLectureOrder: g.targetLectureOrder !== undefined ? asNumber(g.targetLectureOrder) : undefined,
+          startLectureOrder: g.startLectureOrder !== undefined ? asNumber(g.startLectureOrder) : undefined,
+          isSelfClaimed: false,
+        };
+      }
+    });
+  }
+
+  // دمج الاشتراكات الشهرية والمحاضرات التجريبية المسجلة ذاتياً في progress
+  if (typeof progressValue === 'object' && progressValue !== null && !Array.isArray(progressValue)) {
+    const p = progressValue as Record<string, unknown>;
+    if (typeof p.monthlyPromos === 'object' && p.monthlyPromos !== null) {
+      Object.entries(p.monthlyPromos as Record<string, unknown>).forEach(([k, v]) => {
+        if (!result[k] && typeof v === 'object' && v !== null) {
+          const item = v as Record<string, unknown>;
+          result[k] = {
+            courseId: asString(item.courseId) || k,
+            type: 'monthly',
+            grantedAt: asNumber(item.claimedAt || item.grantedAt),
+            expiresAt: asNumber(item.expiresAt),
+            startLectureOrder: item.startLectureOrder !== undefined ? asNumber(item.startLectureOrder) : 1,
+            isSelfClaimed: true,
+          };
+        }
+      });
     }
-  });
+    if (typeof p.trials === 'object' && p.trials !== null) {
+      Object.entries(p.trials as Record<string, unknown>).forEach(([k, v]) => {
+        if (!result[k] && typeof v === 'object' && v !== null) {
+          const item = v as Record<string, unknown>;
+          result[k] = {
+            courseId: asString(item.courseId) || k,
+            type: 'trial_lecture',
+            grantedAt: asNumber(item.claimedAt || item.grantedAt),
+            expiresAt: asNumber(item.expiresAt),
+            targetLectureId: item.targetLectureId ? asString(item.targetLectureId) : undefined,
+            targetLectureOrder: item.targetLectureOrder !== undefined ? asNumber(item.targetLectureOrder) : undefined,
+            isSelfClaimed: true,
+          };
+        }
+      });
+    }
+  }
+
   return Object.keys(result).length > 0 ? result : undefined;
 }
 
@@ -146,7 +186,7 @@ function toStudent(id: string, data: DocumentData): Student {
     points: asNumber(data.points),
     archived: data.archived === true,
     lastUpdatedAcademicYear: parseAcademicYear(data.lastUpdatedAcademicYear),
-    accessGrants: asGrantMap(data.accessGrants),
+    accessGrants: asGrantMap(data.accessGrants, data.progress),
   };
 }
 
@@ -407,5 +447,80 @@ export async function revokeStudentCourseAccess(
   await updateDoc(studentRef, {
     courses: arrayRemove(courseId),
     [`accessGrants.${courseId}`]: deleteField(),
+    [`progress.trials.${courseId}`]: deleteField(),
+    [`progress.monthlyPromos.${courseId}`]: deleteField(),
   });
+}
+
+/**
+ * تفعيل المحاضرة التجريبية المجانية لمرة واحدة بواسطة الطالب نفسه
+ * متاح آخر محاضرة بجميع مشتملاتها ولمدة 7 أيام كحد أقصى (وأقلها 6 أيام)
+ */
+export async function claimTrialLecture(
+  studentId: string,
+  course: Course,
+): Promise<{ success: boolean; message: string }> {
+  const lectures = course.content?.lectures || [];
+  if (lectures.length === 0) {
+    return { success: false, message: 'لا توجد محاضرات منشورة في هذا الكورس حالياً.' };
+  }
+
+  // فرز المحاضرات لأخذ أحدث محاضرة
+  const latestLecture = [...lectures].sort((a, b) => b.order - a.order)[0];
+  const now = Date.now();
+  const expiresAt = now + 7 * 24 * 60 * 60 * 1000; // 7 أيام كحد أقصى
+
+  const trialData = {
+    courseId: course.id,
+    type: 'trial_lecture',
+    claimedAt: now,
+    expiresAt,
+    targetLectureId: latestLecture.id,
+    targetLectureOrder: latestLecture.order,
+  };
+
+  const studentRef = doc(db, 'students', studentId);
+  await updateDoc(studentRef, {
+    [`progress.trials.${course.id}`]: trialData,
+    lastActiveMs: Date.now(),
+  });
+
+  return {
+    success: true,
+    message: `تم تفعيل المحاضرة التجريبية (#${latestLecture.order}: ${latestLecture.title}) لمدة 7 أيام بنجاح!`,
+  };
+}
+
+/**
+ * تفعيل العرض المجاني للاشتراك الشهري (30 يوماً تنازلياً) لمرة واحدة بواسطة الطالب نفسه
+ * يفتح من آخر محاضرة متاحة وما يستجد طوال الـ 30 يوماً
+ */
+export async function claimFreeMonthlyPromo(
+  studentId: string,
+  course: Course,
+): Promise<{ success: boolean; message: string }> {
+  const lectures = course.content?.lectures || [];
+  const latestLecture = lectures.length > 0 ? [...lectures].sort((a, b) => b.order - a.order)[0] : undefined;
+  const now = Date.now();
+  const expiresAt = now + 30 * 24 * 60 * 60 * 1000; // 30 يوماً
+
+  const promoData = {
+    courseId: course.id,
+    type: 'monthly',
+    claimedAt: now,
+    expiresAt,
+    startLectureOrder: latestLecture ? latestLecture.order : 1,
+    claimedPromo: true,
+  };
+
+  const studentRef = doc(db, 'students', studentId);
+  await updateDoc(studentRef, {
+    [`progress.monthlyPromos.${course.id}`]: promoData,
+    lastActiveMs: Date.now(),
+  });
+
+  return {
+    success: true,
+    message: 'تم تفعيل الاشتراك الشهري المجاني (30 يوماً) بنجاح!',
+  };
 }

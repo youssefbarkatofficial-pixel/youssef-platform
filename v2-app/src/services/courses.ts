@@ -1,3 +1,4 @@
+import { getCourseAccessStatus } from '../lib/subscriptions';
 import {
   deleteField,
   runTransaction,
@@ -337,14 +338,8 @@ export function canAccessCourseContent(
   if (isAdmin) return true;
   if (!student || student.archived) return false;
   if (course.isFree) return true;
-  if (!student.courses.includes(course.id)) return false;
 
-  const grant = student.accessGrants?.[course.id];
-  if (grant && grant.expiresAt && grant.expiresAt > 0 && now >= grant.expiresAt) {
-    return false;
-  }
-
-  return true;
+  return getCourseAccessStatus(course, student, isAdmin, now).hasAccess;
 }
 
 // الكورسات المتاحة للطالب (التي اشترك فيها أو الكورسات المجانية).

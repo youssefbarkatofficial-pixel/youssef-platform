@@ -28,6 +28,7 @@ export default function AdminStudentsPage() {
   const [search, setSearch] = useState('');
   const [grade, setGrade] = useState('');
   const [parentStatus, setParentStatus] = useState<'all' | 'valid' | 'missing'>('all');
+  const [subscriptionFilter, setSubscriptionFilter] = useState<string>('all');
   const [busyId, setBusyId] = useState<string | null>(null);
   const [revealedIds, setRevealedIds] = useState<Set<string>>(new Set());
   const [pwdOverrides, setPwdOverrides] = useState<Record<string, string>>({});
@@ -192,6 +193,48 @@ export default function AdminStudentsPage() {
     };
   }, [students]);
 
+  const subscriptionStats = useMemo(() => {
+    const now = Date.now();
+    let fullTermCount = 0;
+    let monthlyActiveCount = 0;
+    let monthlyTotalCount = 0;
+    let trialActiveCount = 0;
+    let trialTotalCount = 0;
+
+    students.forEach((s) => {
+      const grants = s.accessGrants || {};
+      let hasFull = s.courses.some((cid) => !grants[cid] || grants[cid].type === 'full_term');
+      let hasMonthlyActive = false;
+      let hasMonthlyAny = false;
+      let hasTrialActive = false;
+      let hasTrialAny = false;
+
+      Object.values(grants).forEach((g) => {
+        if (g.type === 'monthly') {
+          hasMonthlyAny = true;
+          if (!g.expiresAt || g.expiresAt > now) hasMonthlyActive = true;
+        } else if (g.type === 'trial_lecture') {
+          hasTrialAny = true;
+          if (!g.expiresAt || g.expiresAt > now) hasTrialActive = true;
+        }
+      });
+
+      if (hasFull) fullTermCount++;
+      if (hasMonthlyActive) monthlyActiveCount++;
+      if (hasMonthlyAny) monthlyTotalCount++;
+      if (hasTrialActive) trialActiveCount++;
+      if (hasTrialAny) trialTotalCount++;
+    });
+
+    return {
+      fullTermCount,
+      monthlyActiveCount,
+      monthlyTotalCount,
+      trialActiveCount,
+      trialTotalCount,
+    };
+  }, [students]);
+
   const visible = useMemo(() => {
     const term = search.trim().toLowerCase();
     return students
@@ -218,8 +261,29 @@ export default function AdminStudentsPage() {
           student.email.toLowerCase().includes(term)
         );
       })
+      .filter((student) => {
+        if (subscriptionFilter === 'all') return true;
+        const grants = student.accessGrants || {};
+        const now = Date.now();
+        const hasMonthlyActive = Object.values(grants).some(
+          (g) => g.type === 'monthly' && (!g.expiresAt || g.expiresAt > now),
+        );
+        const hasMonthlyAny = Object.values(grants).some((g) => g.type === 'monthly');
+        const hasTrialActive = Object.values(grants).some(
+          (g) => g.type === 'trial_lecture' && (!g.expiresAt || g.expiresAt > now),
+        );
+        const hasTrialAny = Object.values(grants).some((g) => g.type === 'trial_lecture');
+        const hasFullTerm = student.courses.some((cid) => !grants[cid] || grants[cid].type === 'full_term');
+
+        if (subscriptionFilter === 'full_term') return hasFullTerm;
+        if (subscriptionFilter === 'monthly_active') return hasMonthlyActive;
+        if (subscriptionFilter === 'monthly_all') return hasMonthlyAny;
+        if (subscriptionFilter === 'trial_active') return hasTrialActive;
+        if (subscriptionFilter === 'trial_all') return hasTrialAny;
+        return true;
+      })
       .sort((a, b) => (b.createdAtMs ?? 0) - (a.createdAtMs ?? 0));
-  }, [students, search, grade, parentStatus]);
+  }, [students, search, grade, parentStatus, subscriptionFilter]);
 
   const toggleArchive = async (student: Student) => {
     const next = !student.archived;
@@ -373,18 +437,47 @@ export default function AdminStudentsPage() {
     { key: 'grade', header: 'الصف', render: (student) => getGradeLabel(student.grade, student.track) },
     {
       key: 'courses',
-      header: 'الكورسات',
-      render: (student) => (
-        <button
-          type="button"
-          onClick={() => setManagingStudent(student)}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-navy-700 bg-navy-800/80 px-2.5 py-1 text-xs font-bold text-gold-400 hover:border-gold-500/50 hover:bg-gold-500/10 transition-colors"
-          title="إدارة اشتراكات وكورسات الطالب"
-        >
-          <GraduationCap className="h-3.5 w-3.5" />
-          <span>{student.courses.length} كورس</span>
-        </button>
-      ),
+      header: 'الكورسات والاشتراك',
+      render: (student) => {
+        const grants = student.accessGrants || {};
+        const now = Date.now();
+        const hasMonthly = Object.values(grants).some((g) => g.type === 'monthly');
+        const hasMonthlyActive = Object.values(grants).some(
+          (g) => g.type === 'monthly' && (!g.expiresAt || g.expiresAt > now),
+        );
+        const hasTrial = Object.values(grants).some((g) => g.type === 'trial_lecture');
+        const hasTrialActive = Object.values(grants).some(
+          (g) => g.type === 'trial_lecture' && (!g.expiresAt || g.expiresAt > now),
+        );
+        const hasFullTerm = student.courses.some((cid) => !grants[cid] || grants[cid].type === 'full_term');
+
+        return (
+          <div className="flex flex-col gap-1 items-start min-w-[7.5rem]">
+            <button
+              type="button"
+              onClick={() => setManagingStudent(student)}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-navy-700 bg-navy-800/80 px-2 py-0.5 text-xs font-bold text-gold-400 hover:border-gold-500/50 hover:bg-gold-500/10 transition-colors"
+              title="إدارة اشتراكات وصلاحيات الطالب"
+            >
+              <GraduationCap className="h-3.5 w-3.5" />
+              <span>{student.courses.length} كورس</span>
+            </button>
+            <div className="flex flex-wrap gap-1">
+              {hasFullTerm && <Badge variant="gold">ترم كامل</Badge>}
+              {hasMonthly && (
+                <Badge variant={hasMonthlyActive ? 'info' : 'neutral'}>
+                  {hasMonthlyActive ? 'شهري نشط' : 'شهري منتهي'}
+                </Badge>
+              )}
+              {hasTrial && (
+                <Badge variant={hasTrialActive ? 'success' : 'neutral'}>
+                  {hasTrialActive ? 'تجربة مجانية' : 'تجربة منتهية'}
+                </Badge>
+              )}
+            </div>
+          </div>
+        );
+      },
     },
     { key: 'createdAt', header: 'التسجيل', render: (student) => formatDate(student.createdAtMs) },
     { key: 'lastActive', header: 'آخر ظهور', render: (student) => formatDate(student.lastActiveMs) },
@@ -442,7 +535,55 @@ export default function AdminStudentsPage() {
         </div>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2">
+      {/* إحصائيات سريعة لأنواع الاشتراكات */}
+      <div className="flex flex-wrap items-center gap-2 text-xs">
+        <button
+          type="button"
+          onClick={() => setSubscriptionFilter('all')}
+          className={`rounded-lg border px-3 py-1.5 font-bold transition-colors ${
+            subscriptionFilter === 'all'
+              ? 'border-gold-500 bg-gold-500/15 text-gold-300'
+              : 'border-navy-800 bg-navy-900/60 text-slate-400 hover:text-white'
+          }`}
+        >
+          الكل ({students.length})
+        </button>
+        <button
+          type="button"
+          onClick={() => setSubscriptionFilter('full_term')}
+          className={`rounded-lg border px-3 py-1.5 font-bold transition-colors ${
+            subscriptionFilter === 'full_term'
+              ? 'border-amber-500 bg-amber-500/15 text-amber-300'
+              : 'border-navy-800 bg-navy-900/60 text-slate-400 hover:text-white'
+          }`}
+        >
+          مشتركو الترم ({subscriptionStats.fullTermCount})
+        </button>
+        <button
+          type="button"
+          onClick={() => setSubscriptionFilter('monthly_active')}
+          className={`rounded-lg border px-3 py-1.5 font-bold transition-colors ${
+            subscriptionFilter === 'monthly_active'
+              ? 'border-sky-500 bg-sky-500/15 text-sky-300'
+              : 'border-navy-800 bg-navy-900/60 text-slate-400 hover:text-white'
+          }`}
+        >
+          اشتراك شهري ({subscriptionStats.monthlyActiveCount} نشط / {subscriptionStats.monthlyTotalCount})
+        </button>
+        <button
+          type="button"
+          onClick={() => setSubscriptionFilter('trial_active')}
+          className={`rounded-lg border px-3 py-1.5 font-bold transition-colors ${
+            subscriptionFilter === 'trial_active'
+              ? 'border-emerald-500 bg-emerald-500/15 text-emerald-300'
+              : 'border-navy-800 bg-navy-900/60 text-slate-400 hover:text-white'
+          }`}
+        >
+          محاضرة مجانية ({subscriptionStats.trialActiveCount} نشطة / {subscriptionStats.trialTotalCount})
+        </button>
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-3">
         <div className="relative">
           <Search className="pointer-events-none absolute end-3 top-[2.35rem] h-4 w-4 text-slate-500" />
           <Input
@@ -458,6 +599,19 @@ export default function AdminStudentsPage() {
           options={GRADE_OPTIONS}
           placeholder="كل الصفوف"
           onChange={(event) => setGrade(event.target.value)}
+        />
+        <Select
+          label="نوع الاشتراك"
+          value={subscriptionFilter}
+          options={[
+            { value: 'all', label: 'كل الاشتراكات' },
+            { value: 'full_term', label: 'مشتركو الترم كامل' },
+            { value: 'monthly_active', label: 'الاشتراك الشهري (نشط)' },
+            { value: 'monthly_all', label: 'الاشتراك الشهري (الكل)' },
+            { value: 'trial_active', label: 'المحاضرة المجانية (نشطة)' },
+            { value: 'trial_all', label: 'المحاضرة المجانية (الكل)' },
+          ]}
+          onChange={(event) => setSubscriptionFilter(event.target.value)}
         />
       </div>
 

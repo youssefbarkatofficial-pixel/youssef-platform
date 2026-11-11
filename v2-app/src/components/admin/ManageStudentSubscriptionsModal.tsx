@@ -43,7 +43,9 @@ export default function ManageStudentSubscriptionsModal({
 
   if (!student) return null;
 
-  const enrolledCourseIds = student.courses || [];
+  const enrolledCourseIds = Array.from(
+    new Set([...(student.courses || []), ...Object.keys(student.accessGrants || {})]),
+  );
   const selectedCourse = courses.find((c) => c.id === selectedCourseId);
 
   // حساب معلومات آخر محاضرة للكورس المحدد
