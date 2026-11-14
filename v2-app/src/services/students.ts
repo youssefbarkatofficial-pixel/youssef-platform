@@ -15,6 +15,8 @@ import {
   deleteField,
 } from 'firebase/firestore';
 import type { StudentGrant, CourseGrantType } from '../lib/subscriptions';
+import { findStudentMissingPromoCourses } from '../lib/subscriptions';
+export { findStudentMissingPromoCourses };
 import type { Course } from './courses';
 import type { DocumentData } from 'firebase/firestore';
 import { db } from '../lib/firebase';
@@ -471,6 +473,33 @@ export async function revokeStudentCourseAccess(
     [`progress.trials.${courseId}`]: deleteField(),
     [`progress.monthlyPromos.${courseId}`]: deleteField(),
   });
+}
+
+/**
+ * مزامنة تلقائية لكورسات المنح والعروض الترويجية:
+ * تضمن إدراج معرفات الكورسات النشطة (من progress.trials و progress.monthlyPromos و accessGrants)
+ * داخل مصفوفة courses في مستند الطالب، لتتوافق تماماً مع قواعد أمان الخادم في قراءة الأسئلة وتسليم الامتحانات.
+ */
+export async function autoSyncStudentPromoCourses(students: Student[]): Promise<number> {
+  let synced = 0;
+  for (const s of students) {
+    if (!s || !s.id || s.archived) continue;
+    const missingCourses = findStudentMissingPromoCourses(s);
+
+    if (missingCourses.length > 0) {
+      try {
+        const studentRef = doc(db, 'students', s.id);
+        await updateDoc(studentRef, {
+          courses: arrayUnion(...missingCourses),
+        });
+        s.courses = Array.from(new Set([...(s.courses || []), ...missingCourses]));
+        synced += 1;
+      } catch (err) {
+        console.warn(`Could not auto-sync courses for student ${s.id}:`, err);
+      }
+    }
+  }
+  return synced;
 }
 
 /**

@@ -7,6 +7,7 @@ import {
   checkGrantItemLock,
   calculateMonthlyRenewal,
   BASE_MONTHLY_PRICE,
+  findStudentMissingPromoCourses,
 } from '../src/lib/subscriptions.ts';
 
 const mockCourse = {
@@ -293,4 +294,36 @@ test('10. اشتراك شهري مسجل ذاتياً منتهي الصلاحي�
   assert.equal(status.expired, true);
   assert.equal(status.canRenewMonthly, false);
   assert.equal(status.renewalStage, 'expired_forced_term');
+});
+
+test('11. فحص الكورسات المفقودة من courses للطلاب ذوي المنح والعروض الترويجية لمزامنتها', () => {
+  const studentWithMissingCourses = {
+    id: 'stu_fatima_test',
+    courses: [],
+    progress: {
+      monthlyPromos: {
+        c_geo_3sec: { courseId: 'c_geo_3sec', type: 'monthly' },
+      },
+      trials: {
+        c_history_prep: { courseId: 'c_history_prep', type: 'trial_lecture' },
+      },
+    },
+    accessGrants: {
+      c_revision: { courseId: 'c_revision', type: 'full_term' },
+    },
+  };
+
+  const missing = findStudentMissingPromoCourses(studentWithMissingCourses);
+  assert.equal(missing.length, 3);
+  assert.ok(missing.includes('c_geo_3sec'));
+  assert.ok(missing.includes('c_history_prep'));
+  assert.ok(missing.includes('c_revision'));
+
+  // إذا كانت الكورسات مدرجة بالفعل في courses -> القائمة فارغة
+  const syncedStudent = {
+    ...studentWithMissingCourses,
+    courses: ['c_geo_3sec', 'c_history_prep', 'c_revision'],
+  };
+  const missingSynced = findStudentMissingPromoCourses(syncedStudent);
+  assert.equal(missingSynced.length, 0);
 });

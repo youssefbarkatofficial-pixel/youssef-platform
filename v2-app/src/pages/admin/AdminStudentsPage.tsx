@@ -4,7 +4,7 @@ import { Archive, ArchiveRestore, Copy, Eye, EyeOff, GraduationCap, Pencil, Sear
 import { Badge, Button, Card, EmptyState, Input, Select, Table, useToast } from '../../components/ui';
 import type { TableColumn } from '../../components/ui';
 import { GRADE_OPTIONS, getGradeLabel } from '../../lib/grades';
-import { listStudents, setStudentArchived, updateStudentProfile } from '../../services/students';
+import { listStudents, setStudentArchived, updateStudentProfile, autoSyncStudentPromoCourses } from '../../services/students';
 import type { Student } from '../../services/students';
 import { resolveStudentPassword, setStoredAdminPassword } from '../../lib/studentPasswords';
 import { isValidEgyptPhone, normalizePhone, phoneToEmail } from '../../lib/phone';
@@ -160,6 +160,7 @@ export default function AdminStudentsPage() {
       const result = await listStudents();
       setStudents(result.students);
       setTruncated(result.truncated);
+      void autoSyncStudentPromoCourses(result.students);
     } catch {
       setFailed(true);
     } finally {
