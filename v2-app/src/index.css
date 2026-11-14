@@ -208,14 +208,25 @@ html.light {
   }
 }
 
+@keyframes heroFloatVertical {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
 @keyframes heroRingBreathe {
   0%, 100% {
     transform: translate(-50%, -50%) scale(1);
-    opacity: 0.65;
+    opacity: 0.75;
+    filter: drop-shadow(0 0 25px rgba(212, 166, 79, 0.35));
   }
   50% {
-    transform: translate(-50%, -50%) scale(1.05);
-    opacity: 0.95;
+    transform: translate(-50%, -50%) scale(1.06);
+    opacity: 1;
+    filter: drop-shadow(0 0 50px rgba(212, 166, 79, 0.60));
   }
 }
 
@@ -225,6 +236,105 @@ html.light {
   }
   100% {
     transform: rotate(360deg);
+  }
+}
+
+@keyframes slowRotateCompassReverse {
+  0% {
+    transform: rotate(360deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes goldLiquidSheen {
+  0% {
+    transform: translateX(-150%) skewX(-20deg);
+  }
+  30%, 100% {
+    transform: translateX(250%) skewX(-20deg);
+  }
+}
+
+@keyframes ambientParticleFloat {
+  0%, 100% {
+    transform: translateY(0) translateX(0) scale(1);
+    opacity: 0.35;
+  }
+  50% {
+    transform: translateY(-22px) translateX(12px) scale(1.15);
+    opacity: 0.85;
+  }
+}
+
+@keyframes luxuryGlowPulse {
+  0%, 100% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.04);
+  }
+}
+
+.gold-liquid-sheen {
+  position: relative;
+  overflow: hidden;
+}
+
+.gold-liquid-sheen::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.32), transparent);
+  transform: translateX(-150%) skewX(-20deg);
+  animation: goldLiquidSheen 6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gold-liquid-sheen::after {
+    animation: none !important;
+    display: none !important;
+  }
+}
+
+@keyframes moltenGoldFlow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.molten-gold-text {
+  background: linear-gradient(
+    90deg,
+    #c49746 0%,
+    #f3d082 25%,
+    #ffffff 50%,
+    #d4a64f 75%,
+    #b88a3a 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: moltenGoldFlow 6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .molten-gold-text {
+    animation: none !important;
   }
 }
 
@@ -318,11 +428,11 @@ html.light [class*="border-navy-800/"] {
 
 /* Hero Portrait Responsive Sizing (1080p and 768p full circle visibility) */
 .hero-portrait-frame {
-  --hero-size: clamp(315px, 82vw, 360px);
+  --hero-size: clamp(325px, 84vw, 375px);
 }
 @media (min-width: 768px) {
   .hero-portrait-frame {
-    --hero-size: clamp(340px, min(38vw, calc((100vh - 160px) * 0.72)), 520px);
+    --hero-size: clamp(350px, min(40vw, calc((100vh - 150px) * 0.76)), 520px);
   }
 }
 

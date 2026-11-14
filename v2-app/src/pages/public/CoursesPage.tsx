@@ -1,7 +1,7 @@
 import { useSearchParams } from 'react-router-dom';
 import { BookOpen, ServerCrash } from 'lucide-react';
 import CourseCard from '../../components/course/CourseCard';
-import { Button, Card, EmptyState, Spinner, Tabs } from '../../components/ui';
+import { Button, Card, EmptyState, Reveal, Spinner, Tabs } from '../../components/ui';
 import { useCourses } from '../../hooks/useCourses';
 import { GRADES, isGradeCode } from '../../lib/grades';
 
@@ -58,10 +58,15 @@ export default function CoursesPage() {
   } else {
     content = (
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 items-stretch">
-        {visible.map((course) => (
-          <div key={course.id} className="h-full flex flex-col">
+        {visible.map((course, idx) => (
+          <Reveal
+            key={course.id}
+            direction="up"
+            delay={Math.min(idx * 75, 450)}
+            className="h-full flex flex-col"
+          >
             <CourseCard course={course} />
-          </div>
+          </Reveal>
         ))}
       </div>
     );
@@ -69,10 +74,14 @@ export default function CoursesPage() {
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-10">
-      <h1 className="text-3xl font-extrabold text-white">الكورسات</h1>
-      <p className="mt-2 text-slate-400">اختر صفك الدراسي وتصفح الكورسات المتاحة.</p>
+      <Reveal direction="up">
+        <h1 className="text-3xl font-extrabold text-theme-text">الكورسات</h1>
+        <p className="mt-2 text-theme-text-muted">اختر صفك الدراسي وتصفح الكورسات المتاحة.</p>
+      </Reveal>
 
-      <Tabs tabs={TABS} value={selected} onChange={handleChange} className="mt-6" />
+      <div className="mt-6">
+        <Tabs tabs={TABS} value={selected} onChange={handleChange} />
+      </div>
 
       <div className="mt-6">{content}</div>
     </div>

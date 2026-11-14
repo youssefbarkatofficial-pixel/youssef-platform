@@ -100,8 +100,8 @@ export default function HeroPortrait({
     (e: React.MouseEvent<HTMLButtonElement>) => {
       if (reducedMotion || !containerRef.current) return;
       const rect = containerRef.current.getBoundingClientRect();
-      const x = ((e.clientX - rect.left) / rect.width - 0.5) * 14; // -7px to +7px
-      const y = ((e.clientY - rect.top) / rect.height - 0.5) * 10; // -5px to +5px
+      const x = ((e.clientX - rect.left) / rect.width - 0.5) * 24; // -12px to +12px
+      const y = ((e.clientY - rect.top) / rect.height - 0.5) * 18; // -9px to +9px
       setMouseOffset({ x, y });
     },
     [reducedMotion],
@@ -169,32 +169,32 @@ export default function HeroPortrait({
           } as React.CSSProperties
         }
       >
-        {/* Layer 1: Ambient Decorative Glow Ring (Centered with Circle) */}
+        {/* Layer 1: Ambient Royal Gold Aura Ring (Centered with Circle, zero text intrusion) */}
         <div
           aria-hidden="true"
           className="pointer-events-none absolute left-1/2 top-1/2 rounded-full transition-all duration-700 ease-out"
           style={{
-            width: 'calc(var(--hero-size) * 0.90)',
-            height: 'calc(var(--hero-size) * 0.90)',
+            width: 'calc(var(--hero-size) * 0.96)',
+            height: 'calc(var(--hero-size) * 0.96)',
             background:
-              'radial-gradient(circle, var(--brand-gold-subtle, rgba(212,166,79,0.25)) 0%, transparent 72%)',
+              'radial-gradient(circle, rgba(212,166,79,0.30) 0%, rgba(212,166,79,0.12) 50%, transparent 72%)',
             boxShadow: isActive
-              ? '0 0 80px var(--brand-gold, #d4a64f), inset 0 0 40px var(--brand-gold, #d4a64f)'
-              : '0 0 45px var(--brand-gold-subtle, rgba(212,166,79,0.3))',
-            transform: `translate(-50%, -50%) scale(${isActive ? 1.05 : 1})`,
-            opacity: isActive ? 0.95 : 0.75,
-            animation: reducedMotion ? 'none' : 'heroRingBreathe 5s ease-in-out infinite',
+              ? '0 0 90px var(--brand-gold, #d4a64f), 0 0 45px rgba(212,166,79,0.5), inset 0 0 40px var(--brand-gold, #d4a64f)'
+              : '0 0 60px rgba(212,166,79,0.4), 0 0 25px rgba(212,166,79,0.25)',
+            transform: `translate(-50%, -50%) scale(${isActive ? 1.06 : 1})`,
+            opacity: isActive ? 1 : 0.85,
+            animation: reducedMotion ? 'none' : 'heroRingBreathe 4.5s ease-in-out infinite',
           }}
         />
 
-        {/* Layer 2: Circular Background (Centered vertically in container to align with text center) */}
+        {/* Layer 2: Circular Background with Crisp Double Gold Edge */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute left-1/2 top-1/2 overflow-hidden rounded-full shadow-2xl transition-transform duration-500"
+          className="pointer-events-none absolute left-1/2 top-1/2 overflow-hidden rounded-full shadow-2xl transition-transform duration-500 border-2 border-theme-gold/50 ring-1 ring-theme-gold/20"
           style={{
-            width: 'calc(var(--hero-size) * 0.88)',
-            height: 'calc(var(--hero-size) * 0.88)',
-            transform: `translate(-50%, -50%) scale(${isActive && !reducedMotion ? 0.92 : 1})`,
+            width: 'calc(var(--hero-size) * 0.90)',
+            height: 'calc(var(--hero-size) * 0.90)',
+            transform: `translate(calc(-50% + ${mouseOffset.x * 0.3}px), calc(-50% + ${mouseOffset.y * 0.3}px)) scale(${isActive && !reducedMotion ? 0.94 : 1})`,
             transitionTimingFunction: 'cubic-bezier(0.2, 0.8, 0.2, 1)',
           }}
         >
@@ -222,45 +222,51 @@ export default function HeroPortrait({
           ) : null}
         </div>
 
-        {/* Layer 3: Single Cutout Portrait (Anchored to circle bottom, head extends above circle top) */}
+        {/* Layer 3: Single Cutout Portrait (Mathematical 40% bottom arc alignment, vertical float) */}
         <div
           aria-hidden="true"
           className="pointer-events-none absolute left-1/2 select-none transition-transform duration-500"
           style={{
-            width: 'calc(var(--hero-size) * 0.88)',
-            height: 'calc(var(--hero-size) * 1.10)',
-            bottom: 'calc(50% - var(--hero-size) * 0.44)',
+            width: 'calc(var(--hero-size) * 0.90)',
+            height: 'calc(var(--hero-size) * 1.125)',
+            bottom: 'calc(50% - var(--hero-size) * 0.45)',
             transformOrigin: 'bottom center',
             transform: `translateX(calc(-50% + ${mouseOffset.x}px)) translateY(${
-              isActive && !reducedMotion ? '-12px' : '0px'
-            }) scale(${isActive && !reducedMotion ? 1.08 : 1})`,
+              isActive && !reducedMotion ? '-14px' : '0px'
+            }) scale(${isActive && !reducedMotion ? 1.06 : 1})`,
             transitionTimingFunction: 'cubic-bezier(0.2, 0.8, 0.2, 1)',
             clipPath: 'url(#heroPopoutClip)',
             WebkitClipPath: 'url(#heroPopoutClip)',
-            animation: reducedMotion ? 'none' : 'heroFloat 6s ease-in-out infinite',
           }}
         >
-          {!meLoaded && (
-            <div
-              className={`h-full w-full rounded-full bg-theme-gold/10 animate-pulse transition-opacity ${
-                reducedMotion ? 'duration-0' : 'duration-500'
-              }`}
-            />
-          )}
-          {activeMeUrl ? (
-            <img
-              src={activeMeUrl}
-              onLoad={() => setMeLoaded(true)}
-              onError={() => setMeLoaded(false)}
-              alt="الأستاذ يوسف بركات"
-              loading="eager"
-              fetchPriority="high"
-              decoding="async"
-              className={`h-full w-full object-contain object-bottom drop-shadow-2xl transition-opacity ${
-                reducedMotion ? 'duration-0' : 'duration-500'
-              } ${meLoaded ? 'opacity-100' : 'opacity-0'}`}
-            />
-          ) : null}
+          <div
+            className="h-full w-full"
+            style={{
+              animation: reducedMotion ? 'none' : 'heroFloatVertical 5s ease-in-out infinite',
+            }}
+          >
+            {!meLoaded && (
+              <div
+                className={`h-full w-full rounded-full bg-theme-gold/10 animate-pulse transition-opacity ${
+                  reducedMotion ? 'duration-0' : 'duration-500'
+                }`}
+              />
+            )}
+            {activeMeUrl ? (
+              <img
+                src={activeMeUrl}
+                onLoad={() => setMeLoaded(true)}
+                onError={() => setMeLoaded(false)}
+                alt="الأستاذ يوسف بركات"
+                loading="eager"
+                fetchPriority="high"
+                decoding="async"
+                className={`h-full w-full object-contain object-bottom drop-shadow-2xl transition-opacity ${
+                  reducedMotion ? 'duration-0' : 'duration-500'
+                } ${meLoaded ? 'opacity-100' : 'opacity-0'}`}
+              />
+            ) : null}
+          </div>
         </div>
       </button>
 
