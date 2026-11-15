@@ -248,6 +248,25 @@ html.light {
   }
 }
 
+/* Safe-centered orbital ring keyframes: preserve translate(-50%,-50%) inside keyframe */
+@keyframes slowRotateCompassContained {
+  0% {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  100% {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+@keyframes slowRotateCompassContainedReverse {
+  0% {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+  100% {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+}
+
 @keyframes goldLiquidSheen {
   0% {
     transform: translateX(-150%) skewX(-20deg);

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 
 interface Particle {
   id: number;
@@ -30,6 +30,8 @@ const PARTICLES: Particle[] = [
 
 export default function AmbientLuxuryBackdrop() {
   const [reducedMotion, setReducedMotion] = useState(false);
+  const [mouseOffset, setMouseOffset] = useState({ x: 0, y: 0 });
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -40,8 +42,26 @@ export default function AmbientLuxuryBackdrop() {
     return () => media.removeEventListener('change', listener);
   }, []);
 
+  const handleMouseMove = useCallback(
+    (e: MouseEvent) => {
+      if (reducedMotion || !containerRef.current) return;
+      const rect = containerRef.current.getBoundingClientRect();
+      const x = ((e.clientX - rect.left) / rect.width - 0.5) * 20;
+      const y = ((e.clientY - rect.top) / rect.height - 0.5) * 14;
+      setMouseOffset({ x, y });
+    },
+    [reducedMotion],
+  );
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    window.addEventListener('mousemove', handleMouseMove as EventListener);
+    return () => window.removeEventListener('mousemove', handleMouseMove as EventListener);
+  }, [handleMouseMove]);
+
   return (
     <div
+      ref={containerRef}
       className="pointer-events-none absolute inset-0 select-none overflow-hidden"
       aria-hidden="true"
     >
@@ -58,7 +78,97 @@ export default function AmbientLuxuryBackdrop() {
         }}
       />
 
-      {/* 3. Floating Golden Stardust Particles (Embers) */}
+      {/* 3. Astrolabe — left/start side (portrait side, away from text in RTL), desktop only */}
+      <div
+        className="absolute hidden md:block"
+        style={{
+          left: '-3rem',
+          top: '50%',
+          width: '340px',
+          height: '340px',
+          transform: `translate(${mouseOffset.x * 0.4}px, calc(-50% + ${mouseOffset.y * 0.4}px))`,
+          transition: reducedMotion ? 'none' : 'transform 0.9s cubic-bezier(0.2, 0.8, 0.2, 1)',
+          opacity: 0.08,
+          pointerEvents: 'none',
+        }}
+      >
+        <svg
+          viewBox="0 0 340 340"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          aria-hidden="true"
+          style={{ width: '100%', height: '100%' }}
+        >
+          {/* Outer fixed ring */}
+          <circle cx="170" cy="170" r="165" stroke="#d4a64f" strokeWidth="1.5" strokeDasharray="8 5" />
+          <circle cx="170" cy="170" r="158" stroke="#d4a64f" strokeWidth="0.5" opacity="0.5" />
+
+          {/* Rotating outer rete */}
+          <g
+            style={{
+              transformOrigin: '170px 170px',
+              animation: reducedMotion ? 'none' : 'slowRotateCompass 80s linear infinite',
+            }}
+          >
+            <circle cx="170" cy="170" r="140" stroke="#d4a64f" strokeWidth="1" strokeDasharray="4 6" />
+            <circle cx="170" cy="170" r="128" stroke="#d4a64f" strokeWidth="0.4" opacity="0.6" />
+            {/* Degree tick marks on outer rete */}
+            {Array.from({ length: 24 }).map((_, i) => {
+              const angle = (i * 15 * Math.PI) / 180;
+              const r1 = 128;
+              const r2 = i % 6 === 0 ? 140 : i % 2 === 0 ? 136 : 132;
+              return (
+                <line
+                  key={i}
+                  x1={170 + r1 * Math.cos(angle)}
+                  y1={170 + r1 * Math.sin(angle)}
+                  x2={170 + r2 * Math.cos(angle)}
+                  y2={170 + r2 * Math.sin(angle)}
+                  stroke="#d4a64f"
+                  strokeWidth={i % 6 === 0 ? 1.2 : 0.6}
+                />
+              );
+            })}
+          </g>
+
+          {/* Counter-rotating inner rings */}
+          <g
+            style={{
+              transformOrigin: '170px 170px',
+              animation: reducedMotion ? 'none' : 'slowRotateCompassReverse 105s linear infinite',
+            }}
+          >
+            <circle cx="170" cy="170" r="108" stroke="#d4a64f" strokeWidth="1" strokeDasharray="6 8" />
+            <circle cx="170" cy="170" r="92" stroke="#d4a64f" strokeWidth="0.5" opacity="0.5" />
+            {/* Inner tick marks */}
+            {Array.from({ length: 12 }).map((_, i) => {
+              const angle = (i * 30 * Math.PI) / 180;
+              const r1 = 92;
+              const r2 = i % 3 === 0 ? 108 : 100;
+              return (
+                <line
+                  key={i}
+                  x1={170 + r1 * Math.cos(angle)}
+                  y1={170 + r1 * Math.sin(angle)}
+                  x2={170 + r2 * Math.cos(angle)}
+                  y2={170 + r2 * Math.sin(angle)}
+                  stroke="#d4a64f"
+                  strokeWidth={i % 3 === 0 ? 1 : 0.5}
+                />
+              );
+            })}
+            {/* Cardinal cross hairs */}
+            <line x1="170" y1="80" x2="170" y2="260" stroke="#d4a64f" strokeWidth="0.4" opacity="0.4" />
+            <line x1="80" y1="170" x2="260" y2="170" stroke="#d4a64f" strokeWidth="0.4" opacity="0.4" />
+          </g>
+
+          {/* Fixed center hub */}
+          <circle cx="170" cy="170" r="12" stroke="#d4a64f" strokeWidth="1" fill="none" />
+          <circle cx="170" cy="170" r="4" fill="#d4a64f" opacity="0.7" />
+        </svg>
+      </div>
+
+      {/* 4. Floating Golden Stardust Particles (Embers) */}
       {!reducedMotion &&
         PARTICLES.map((p) => (
           <span
