@@ -232,6 +232,8 @@ export default function HeroPortrait({
             className="h-full w-full"
             style={{
               animation: reducedMotion ? 'none' : 'heroFloatVertical 5s ease-in-out infinite',
+              maskImage: 'linear-gradient(to bottom, black 85%, transparent 100%)',
+              WebkitMaskImage: 'linear-gradient(to bottom, black 85%, transparent 100%)',
             }}
           >
             {!meLoaded && (
