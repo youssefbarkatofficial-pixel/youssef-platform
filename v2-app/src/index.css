@@ -447,11 +447,11 @@ html.light [class*="border-navy-800/"] {
 
 /* Hero Portrait Responsive Sizing (1080p and 768p full circle visibility) */
 .hero-portrait-frame {
-  --hero-size: clamp(325px, 84vw, 375px);
+  --hero-size: clamp(300px, 80vw, 360px);
 }
 @media (min-width: 768px) {
   .hero-portrait-frame {
-    --hero-size: clamp(350px, min(40vw, calc((100vh - 150px) * 0.76)), 520px);
+    --hero-size: clamp(320px, min(36vw, calc((100vh - 160px) * 0.70)), 480px);
   }
 }
 

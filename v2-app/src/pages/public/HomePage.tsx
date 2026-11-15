@@ -320,7 +320,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen overflow-x-hidden">
       {/* 1. Hero Section (Available Height = 100dvh - Ticker & Header on Desktop, Vertically Centered) */}
-      <section className="relative overflow-hidden py-8 md:py-0 md:min-h-[calc(100dvh-6.5rem)] md:flex md:items-center">
+      <section className="relative overflow-x-clip py-8 md:py-0 md:min-h-[calc(100dvh-6.5rem)] md:flex md:items-center">
         {/* Ambient Luxury Background Elements & Stardust */}
         <AmbientLuxuryBackdrop />
 

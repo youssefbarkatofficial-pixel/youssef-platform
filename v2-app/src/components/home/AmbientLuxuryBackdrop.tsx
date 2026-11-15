@@ -78,18 +78,17 @@ export default function AmbientLuxuryBackdrop() {
         }}
       />
 
-      {/* 3. Astrolabe — left/start side (portrait side, away from text in RTL), desktop only */}
+      {/* 3. Celestial Astrolabe Watermark — positioned in hero background behind text, desktop only */}
       <div
-        className="absolute hidden md:block"
+        className="pointer-events-none absolute hidden md:block"
         style={{
-          left: '-3rem',
+          insetInlineStart: 'clamp(2rem, 8vw, 14rem)',
           top: '50%',
-          width: '340px',
-          height: '340px',
-          transform: `translate(${mouseOffset.x * 0.4}px, calc(-50% + ${mouseOffset.y * 0.4}px))`,
+          width: '480px',
+          height: '480px',
+          transform: `translate(${mouseOffset.x * 0.2}px, calc(-50% + ${mouseOffset.y * 0.2}px))`,
           transition: reducedMotion ? 'none' : 'transform 0.9s cubic-bezier(0.2, 0.8, 0.2, 1)',
-          opacity: 0.14,
-          pointerEvents: 'none',
+          opacity: 0.08,
         }}
       >
         <svg
