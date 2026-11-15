@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { getCourse, listCourses } from '../services/courses';
+import { getCourse, invalidateCoursesCache, listCourses, subscribeCourse } from '../services/courses';
 import type { Course } from '../services/courses';
 
 export function useCourses() {
@@ -21,15 +21,26 @@ export function useCourses() {
 
   useEffect(() => {
     void load();
+
+    if (typeof window === 'undefined') return;
+    const handleOnline = () => {
+      invalidateCoursesCache();
+      void load();
+    };
+    window.addEventListener('online', handleOnline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+    };
   }, [load]);
 
   return { courses, loading, error, reload: load };
 }
 
-export function useCourse(courseId: string | undefined) {
+export function useCourse(courseId: string | undefined, options?: { live?: boolean }) {
   const [course, setCourse] = useState<Course | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const live = options?.live === true;
 
   const load = useCallback(async () => {
     if (!courseId) {
@@ -51,7 +62,32 @@ export function useCourse(courseId: string | undefined) {
 
   useEffect(() => {
     void load();
-  }, [load]);
+
+    if (!courseId) return;
+
+    let unsubCourse: (() => void) | null = null;
+    if (live) {
+      unsubCourse = subscribeCourse(courseId, (nextCourse) => {
+        setCourse(nextCourse);
+        setError(false);
+        setLoading(false);
+      });
+    }
+
+    const handleOnline = () => {
+      void load();
+    };
+    if (typeof window !== 'undefined') {
+      window.addEventListener('online', handleOnline);
+    }
+
+    return () => {
+      unsubCourse?.();
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('online', handleOnline);
+      }
+    };
+  }, [courseId, live, load]);
 
   return { course, loading, error, reload: load };
 }

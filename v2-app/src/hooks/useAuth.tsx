@@ -3,10 +3,16 @@ import type { ReactNode } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
 import type { User } from 'firebase/auth';
 import { auth } from '../lib/firebase';
+import { clearEntitlements, saveEntitlements } from '../lib/entitlementCache';
+import type { CourseEntitlement } from '../lib/entitlementCache';
+import { extractStudentCourseGrant } from '../lib/subscriptions';
+import { purgeExpiredOrForeignVideoCaches } from '../lib/videoCache';
 import { getAdminRole } from '../services/admins';
 import type { AdminRole } from '../services/admins';
-import { getStudent } from '../services/students';
+import { invalidateCoursesCache } from '../services/courses';
+import { getStudent, subscribeStudent } from '../services/students';
 import type { Student } from '../services/students';
+import { flushPendingWatchQueue } from '../services/watchProgress';
 
 interface AuthContextValue {
   firebaseUser: User | null;
@@ -57,8 +63,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    let unsubStudent: (() => void) | null = null;
+    let removeOnlineListener: (() => void) | null = null;
+
+    const cleanupUserListeners = () => {
+      if (unsubStudent) {
+        unsubStudent();
+        unsubStudent = null;
+      }
+      if (removeOnlineListener) {
+        removeOnlineListener();
+        removeOnlineListener = null;
+      }
+    };
+
+    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+      cleanupUserListeners();
+
       if (!user) {
+        clearEntitlements();
         requestId.current += 1;
         setFirebaseUser(null);
         setStudent(null);
@@ -71,9 +94,57 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setFirebaseUser(user);
       setLoading(true);
       void loadProfile(user);
+      void purgeExpiredOrForeignVideoCaches(user.uid);
+
+      // تحديث لحظي لملف الطالب واشتراكاته فور حدوث أي تغيير أو عودة الإنترنت دون إعادة تشغيل
+      unsubStudent = subscribeStudent(user.uid, (nextStudent, meta) => {
+        if (!nextStudent) return;
+        // حفظ بوابة الصلاحيات الأوفلاين فقط عند تأكيد البيانات من السيرفر (fromCache === false)
+        if (!meta.fromCache) {
+          const entitlements: Record<string, CourseEntitlement> = {};
+          if (!nextStudent.archived) {
+            nextStudent.courses.forEach((cid) => {
+              const grant = extractStudentCourseGrant(nextStudent, cid);
+              entitlements[cid] = {
+                expiresAt: grant && grant.expiresAt > 0 ? grant.expiresAt : null,
+              };
+            });
+            Object.entries(nextStudent.accessGrants || {}).forEach(([cid, grant]) => {
+              if (!grant) return;
+              entitlements[cid] = {
+                expiresAt:
+                  grant.type === 'full_term' || !grant.expiresAt || grant.expiresAt <= 0
+                    ? null
+                    : grant.expiresAt,
+              };
+            });
+          }
+          saveEntitlements(nextStudent.id, entitlements);
+        }
+        setStudent((prev) => ({
+          ...nextStudent,
+          plainPassword: nextStudent.plainPassword || prev?.plainPassword,
+        }));
+        setProfileError(false);
+        setLoading(false);
+        void purgeExpiredOrForeignVideoCaches(user.uid);
+      });
+
+      const handleOnline = () => {
+        invalidateCoursesCache();
+        void flushPendingWatchQueue(user.uid);
+        void loadProfile(user);
+      };
+      if (typeof window !== 'undefined') {
+        window.addEventListener('online', handleOnline);
+        removeOnlineListener = () => window.removeEventListener('online', handleOnline);
+      }
     });
 
-    return unsubscribe;
+    return () => {
+      cleanupUserListeners();
+      unsubscribeAuth();
+    };
   }, [loadProfile]);
 
   const refresh = useCallback(async () => {

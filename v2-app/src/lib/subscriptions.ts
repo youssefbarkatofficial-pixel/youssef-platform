@@ -331,3 +331,39 @@ export function checkGrantItemLock(
 
   return { locked: false };
 }
+
+/**
+ * فحص وتحديد أي كورس حصل عليه الطالب عبر منحة أو تفعيل تجريبي/شهري
+ * ولم يُدرج بعد في حقل courses الرسمي لمستند الطالب
+ */
+export function findStudentMissingPromoCourses(student: {
+  courses?: string[];
+  accessGrants?: Record<string, unknown>;
+  progress?: unknown;
+}): string[] {
+  if (!student) return [];
+  const currentCourses = new Set(student.courses || []);
+  const missing: string[] = [];
+
+  if (student.accessGrants && typeof student.accessGrants === 'object') {
+    Object.keys(student.accessGrants).forEach((cId) => {
+      if (!currentCourses.has(cId) && !missing.includes(cId)) missing.push(cId);
+    });
+  }
+
+  if (student.progress && typeof student.progress === 'object') {
+    const p = student.progress as Record<string, unknown>;
+    if (p.trials && typeof p.trials === 'object') {
+      Object.keys(p.trials as Record<string, unknown>).forEach((cId) => {
+        if (!currentCourses.has(cId) && !missing.includes(cId)) missing.push(cId);
+      });
+    }
+    if (p.monthlyPromos && typeof p.monthlyPromos === 'object') {
+      Object.keys(p.monthlyPromos as Record<string, unknown>).forEach((cId) => {
+        if (!currentCourses.has(cId) && !missing.includes(cId)) missing.push(cId);
+      });
+    }
+  }
+
+  return missing;
+}

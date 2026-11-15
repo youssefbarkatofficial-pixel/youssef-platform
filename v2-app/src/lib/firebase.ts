@@ -1,6 +1,13 @@
 import { getApp, getApps, initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import {
+  getFirestore,
+  initializeFirestore,
+  memoryLocalCache,
+  persistentLocalCache,
+  persistentMultipleTabManager,
+} from 'firebase/firestore';
+import type { Firestore } from 'firebase/firestore';
 
 // المشروع على خطة Spark المجانية: Authentication وFirestore فقط (بدون Storage وبدون Functions).
 // كل القيم تأتي من ملف .env فقط (متغيرات VITE_FIREBASE_*).
@@ -22,6 +29,23 @@ const firebaseConfig = {
 
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 
+function createFirestore(): Firestore {
+  try {
+    return initializeFirestore(app, {
+      localCache: persistentLocalCache({
+        tabManager: persistentMultipleTabManager(),
+        cacheSizeBytes: 100 * 1024 * 1024,
+      }),
+    });
+  } catch {
+    try {
+      return getFirestore(app);
+    } catch {
+      return initializeFirestore(app, { localCache: memoryLocalCache() });
+    }
+  }
+}
+
 export const auth = getAuth(app);
-export const db = getFirestore(app);
+export const db = createFirestore();
 export default app;

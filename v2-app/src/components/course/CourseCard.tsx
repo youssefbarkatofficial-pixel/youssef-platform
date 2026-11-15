@@ -24,21 +24,23 @@ export default function CourseCard({
   const gradeLabel = course.grade ? getGradeLabel(course.grade) : course.rawGrade;
 
   return (
-    <Card padded={false} hoverable className="flex h-full flex-col overflow-hidden">
-      <div className="relative aspect-video w-full bg-theme-surface-hover/80">
+    <Card padded={false} hoverable className="group flex h-full flex-col overflow-hidden">
+      <div className="relative aspect-video w-full bg-theme-surface-hover/80 overflow-hidden">
         {course.image && !imageFailed ? (
           <img
             src={course.image}
             alt={course.title}
             loading="lazy"
             onError={() => setImageFailed(true)}
-            className="h-full w-full object-cover"
+            className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
           />
         ) : (
-          <div className="grid h-full w-full place-items-center text-theme-gold/60">
+          <div className="grid h-full w-full place-items-center text-theme-gold/60 transition-transform duration-500 group-hover:scale-110">
             <BookOpen className="h-12 w-12" />
           </div>
         )}
+        {/* Subtle gradient vignette on thumbnail */}
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-theme-surface/80 via-transparent to-transparent opacity-60 group-hover:opacity-30 transition-opacity duration-300" />
       </div>
 
       <div className="flex flex-1 flex-col gap-3 p-5">
@@ -48,7 +50,7 @@ export default function CourseCard({
           </div>
         )}
 
-        <h3 className="line-clamp-2 text-lg font-bold leading-snug text-theme-text">
+        <h3 className="line-clamp-2 text-lg font-bold leading-snug text-theme-text group-hover:text-theme-gold transition-colors duration-200">
           {course.title || 'كورس بدون عنوان'}
         </h3>
 
@@ -59,7 +61,11 @@ export default function CourseCard({
         <div className="mt-auto pt-3">
           <Link
             to={`/courses/${course.id}`}
-            className={buttonClasses({ variant: 'primary', fullWidth: true })}
+            className={buttonClasses({
+              variant: 'primary',
+              fullWidth: true,
+              className: 'gold-liquid-sheen shadow-sm group-hover:shadow-glow transition-all duration-300',
+            })}
           >
             {actionLabel}
           </Link>

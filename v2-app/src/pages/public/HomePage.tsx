@@ -23,6 +23,7 @@ import CourseCard from '../../components/course/CourseCard';
 import { useAuth } from '../../hooks/useAuth';
 import { useCourses } from '../../hooks/useCourses';
 import HeroPortrait from '../../components/home/HeroPortrait';
+import AmbientLuxuryBackdrop from '../../components/home/AmbientLuxuryBackdrop';
 import type { PlatformMediaSettings } from '../../services/settings';
 import { convertEasternToWesternDigits } from '../../lib/arabicNormalize';
 
@@ -223,10 +224,18 @@ function StatCounterItem({
   return (
     <div
       ref={itemRef}
-      className={`group relative overflow-hidden flex items-center gap-4 rounded-3xl bg-theme-surface/85 p-6 shadow-soft backdrop-blur-md motion-safe:transition-all motion-safe:duration-500 motion-reduce:transform-none motion-reduce:transition-none motion-safe:hover:-translate-y-1.5 motion-safe:hover:shadow-glow ${
+      className={`group relative overflow-hidden flex items-center gap-4 rounded-3xl bg-theme-surface/85 p-6 shadow-soft backdrop-blur-md border motion-safe:transition-all motion-safe:duration-500 motion-reduce:transform-none motion-reduce:transition-none motion-safe:hover:-translate-y-1.5 motion-safe:hover:shadow-glow ${
+        isFinished ? 'border-theme-gold/30 shadow-[0_0_20px_rgba(212,166,79,0.18)]' : 'border-theme-border/40'
+      } ${
         hasEntered ? 'opacity-100 translate-y-0' : 'opacity-90 translate-y-2'
       }`}
     >
+      {/* Top subtle specular reflection line (Haute Glass finish) */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent dark:via-white/10"
+      />
+
       {/* Touch 4: Micro sheen / shimmer across card (works on mobile entrance + desktop hover) */}
       <div
         aria-hidden="true"
@@ -246,7 +255,7 @@ function StatCounterItem({
         {/* Touch 3: Counter number glow transition on finish */}
         <p
           className={`text-2xl md:text-3xl font-extrabold motion-safe:transition-colors motion-safe:duration-500 font-num ${
-            isFinished ? 'text-theme-gold' : 'text-theme-text'
+            isFinished ? 'text-theme-gold drop-shadow-[0_0_14px_rgba(212,166,79,0.4)]' : 'text-theme-text'
           }`}
         >
           {displayVal}
@@ -312,36 +321,17 @@ export default function HomePage() {
     <div className="min-h-screen overflow-x-hidden">
       {/* 1. Hero Section (Available Height = 100dvh - Ticker & Header on Desktop, Vertically Centered) */}
       <section className="relative overflow-hidden py-8 md:py-0 md:min-h-[calc(100dvh-6.5rem)] md:flex md:items-center">
-        {/* Ambient Glowing Background Elements */}
-        <div className="pointer-events-none absolute inset-0 select-none overflow-hidden" aria-hidden="true">
-          <div className="absolute -top-32 end-0 h-[450px] w-[450px] rounded-full bg-theme-gold/15 blur-3xl transition-colors" />
-          <div className="absolute start-0 top-36 h-[400px] w-[400px] rounded-full bg-theme-accent/10 blur-3xl transition-colors" />
-
-          {/* Rotating Subtle Astrolabe Watermark */}
-          <div className="pointer-events-none absolute -start-10 top-1/2 hidden h-[460px] w-[460px] -translate-y-1/2 overflow-hidden opacity-[0.04] md:block">
-            <svg
-              className="h-full w-full text-theme-gold"
-              viewBox="0 0 200 200"
-              fill="none"
-              stroke="currentColor"
-              style={{ animation: 'slowRotateCompass 60s linear infinite' }}
-            >
-              <circle cx="100" cy="100" r="90" strokeWidth="1" strokeDasharray="3 4" />
-              <circle cx="100" cy="100" r="70" strokeWidth="0.8" />
-              <circle cx="100" cy="100" r="50" strokeWidth="1.2" strokeDasharray="2 3" />
-              <line x1="100" y1="5" x2="100" y2="195" strokeWidth="0.8" />
-              <line x1="5" y1="100" x2="195" y2="100" strokeWidth="0.8" />
-              <line x1="33" y1="33" x2="167" y2="167" strokeWidth="0.5" strokeDasharray="4 4" />
-              <line x1="167" y1="33" x2="33" y2="167" strokeWidth="0.5" strokeDasharray="4 4" />
-            </svg>
-          </div>
-        </div>
+        {/* Ambient Luxury Background Elements & Stardust */}
+        <AmbientLuxuryBackdrop />
 
         <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-4 md:grid-cols-2 w-full my-auto">
           {/* Hero Content Left */}
           <Reveal direction="up" className="text-center md:text-start my-auto">
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-theme-surface/90 px-4 py-1.5 shadow-soft backdrop-blur-md">
-              <span className="h-2 w-2 rounded-full bg-theme-gold animate-pulse" />
+            <div className="mb-6 inline-flex items-center gap-2.5 rounded-full bg-theme-surface/90 px-4 py-1.5 shadow-soft backdrop-blur-md border border-theme-gold/30 shadow-[0_0_20px_rgba(212,166,79,0.18)]">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-theme-gold opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-theme-gold" />
+              </span>
               <span className="text-xs font-extrabold text-theme-gold">
                 منصة الدراسات الاجتماعية الأولى في مصر
               </span>
@@ -349,7 +339,7 @@ export default function HomePage() {
 
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight text-theme-text">
               تعلّم التاريخ والجغرافيا
-              <span className="block mt-2 font-black leading-[1.38] inline-block py-1.5 [box-decoration-break:clone] [-webkit-box-decoration-break:clone] bg-clip-text text-transparent bg-gradient-to-r from-[#d4a64f] via-[#f3d082] to-[#b88a3a] dark:from-theme-gold dark:via-amber-300 dark:to-amber-500">
+              <span className="block mt-2 font-black leading-[1.38] inline-block py-1.5 [box-decoration-break:clone] [-webkit-box-decoration-break:clone] molten-gold-text">
                 مع يوسف بركات
               </span>
             </h1>
@@ -361,7 +351,11 @@ export default function HomePage() {
             <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4 md:justify-start">
               <Link
                 to={ctaTo}
-                className={buttonClasses({ variant: 'primary', size: 'lg', className: 'w-full sm:w-auto text-center' })}
+                className={buttonClasses({
+                  variant: 'primary',
+                  size: 'lg',
+                  className: 'w-full sm:w-auto text-center gold-liquid-sheen shadow-glow hover:shadow-[0_0_35px_rgba(212,166,79,0.45)] group',
+                })}
               >
                 <span>{ctaLabel}</span>
                 <ArrowLeft className="h-5 w-5 transition-transform duration-200 group-hover:-translate-x-1" />

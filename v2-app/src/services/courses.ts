@@ -7,6 +7,7 @@ import {
   getDoc,
   getDocs,
   limit,
+  onSnapshot,
   query,
   serverTimestamp,
   setDoc,
@@ -14,6 +15,7 @@ import {
 } from 'firebase/firestore';
 import type { DocumentData } from 'firebase/firestore';
 import { db } from '../lib/firebase';
+import { getDocOfflineFirst, getDocsOfflineFirst } from '../lib/offlineFirestore';
 import { normalizeGrade } from '../lib/grades';
 import type { GradeCode } from '../lib/grades';
 import type { AssessmentKind } from '../lib/grading';
@@ -292,7 +294,7 @@ export async function listCourses(): Promise<Course[]> {
     return coursesCache.data;
   }
 
-  const snapshot = await getDocs(query(collection(db, 'courses'), limit(MAX_COURSES)));
+  const snapshot = await getDocsOfflineFirst(query(collection(db, 'courses'), limit(MAX_COURSES)));
   const data = snapshot.docs
     .map((item) => parseCourse(item.id, item.data()))
     .sort(compareCourses);
@@ -303,9 +305,26 @@ export async function listCourses(): Promise<Course[]> {
 
 // قراءة كورس واحد دائمًا طازجة (قراءة واحدة)، لأن صفحات الأدمن تبني عليها كتابات.
 export async function getCourse(courseId: string): Promise<Course | null> {
-  const snapshot = await getDoc(doc(db, 'courses', courseId));
+  const snapshot = await getDocOfflineFirst(doc(db, 'courses', courseId));
   if (!snapshot.exists()) return null;
   return parseCourse(snapshot.id, snapshot.data());
+}
+
+// اشتراك لحظي لكورس واحد: يعرض الكاش فوراً عند انقطاع النت ويحدّث المحتوى لحظياً عند عودة الاتصال.
+export function subscribeCourse(
+  courseId: string,
+  onUpdate: (course: Course | null) => void,
+  onError?: () => void,
+): () => void {
+  return onSnapshot(
+    doc(db, 'courses', courseId),
+    (snapshot) => {
+      onUpdate(snapshot.exists() ? parseCourse(snapshot.id, snapshot.data()) : null);
+    },
+    () => {
+      onError?.();
+    },
+  );
 }
 
 // ---------- السعر والصلاحيات والعرض ----------

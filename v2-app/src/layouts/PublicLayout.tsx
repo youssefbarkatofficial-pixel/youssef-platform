@@ -4,6 +4,7 @@ import TopTicker from '../components/layout/TopTicker';
 import PublicHeader from '../components/layout/PublicHeader';
 import Footer from '../components/layout/Footer';
 import BousalaChatDrawer from '../components/student/BousalaChatDrawer';
+import ScrollProgressBar from '../components/ui/ScrollProgressBar';
 import { getPlatformMediaSettings } from '../services/settings';
 import type { PlatformMediaSettings } from '../services/settings';
 
@@ -35,6 +36,7 @@ export default function PublicLayout() {
 
   return (
     <div className="flex min-h-screen flex-col">
+      <ScrollProgressBar />
       <TopTicker quotes={media?.tickerQuotes} />
       <PublicHeader logoUrl={media?.logoUrl} />
       <main className="flex-1 animate-in fade-in duration-300">

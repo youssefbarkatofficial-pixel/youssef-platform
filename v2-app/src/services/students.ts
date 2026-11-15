@@ -4,6 +4,7 @@ import {
   getDoc,
   getDocs,
   limit,
+  onSnapshot,
   query,
   serverTimestamp,
   setDoc,
@@ -14,9 +15,12 @@ import {
   deleteField,
 } from 'firebase/firestore';
 import type { StudentGrant, CourseGrantType } from '../lib/subscriptions';
+import { findStudentMissingPromoCourses } from '../lib/subscriptions';
+export { findStudentMissingPromoCourses };
 import type { Course } from './courses';
 import type { DocumentData } from 'firebase/firestore';
 import { db } from '../lib/firebase';
+import { getDocOfflineFirst } from '../lib/offlineFirestore';
 import { getAcademicYear, parseAcademicYear } from '../lib/dates';
 import { normalizeGrade } from '../lib/grades';
 import { isIgnoredStudentId } from '../lib/studentIds';
@@ -191,7 +195,7 @@ function toStudent(id: string, data: DocumentData): Student {
 }
 
 export async function getStudent(uid: string): Promise<Student | null> {
-  const snapshot = await getDoc(doc(db, 'students', uid));
+  const snapshot = await getDocOfflineFirst(doc(db, 'students', uid));
   if (!snapshot.exists()) return null;
   const student = toStudent(snapshot.id, snapshot.data());
   if ((!student.plainPassword || student.plainPassword === 'مخفية') && student.phone) {
@@ -209,6 +213,25 @@ export async function getStudent(uid: string): Promise<Student | null> {
     }
   }
   return student;
+}
+
+// اشتراك لحظي في مستند الطالب: يقرأ من الكاش فوراً دون إنترنت ويستقبل أي تفعيل أو إشعار أو تحديث فور عودة الشبكة.
+export function subscribeStudent(
+  uid: string,
+  onUpdate: (student: Student | null, meta: { fromCache: boolean }) => void,
+): () => void {
+  return onSnapshot(
+    doc(db, 'students', uid),
+    (snapshot) => {
+      onUpdate(
+        snapshot.exists() ? toStudent(snapshot.id, snapshot.data()) : null,
+        { fromCache: snapshot.metadata.fromCache },
+      );
+    },
+    () => {
+      // الحفاظ على آخر حالة محفوظة إذا تعذر الاتصال مؤقتاً
+    },
+  );
 }
 
 // كود الطالب الجديد: YB- ثم 8 رموز عشوائية.
@@ -450,6 +473,33 @@ export async function revokeStudentCourseAccess(
     [`progress.trials.${courseId}`]: deleteField(),
     [`progress.monthlyPromos.${courseId}`]: deleteField(),
   });
+}
+
+/**
+ * مزامنة تلقائية لكورسات المنح والعروض الترويجية:
+ * تضمن إدراج معرفات الكورسات النشطة (من progress.trials و progress.monthlyPromos و accessGrants)
+ * داخل مصفوفة courses في مستند الطالب، لتتوافق تماماً مع قواعد أمان الخادم في قراءة الأسئلة وتسليم الامتحانات.
+ */
+export async function autoSyncStudentPromoCourses(students: Student[]): Promise<number> {
+  let synced = 0;
+  for (const s of students) {
+    if (!s || !s.id || s.archived) continue;
+    const missingCourses = findStudentMissingPromoCourses(s);
+
+    if (missingCourses.length > 0) {
+      try {
+        const studentRef = doc(db, 'students', s.id);
+        await updateDoc(studentRef, {
+          courses: arrayUnion(...missingCourses),
+        });
+        s.courses = Array.from(new Set([...(s.courses || []), ...missingCourses]));
+        synced += 1;
+      } catch (err) {
+        console.warn(`Could not auto-sync courses for student ${s.id}:`, err);
+      }
+    }
+  }
+  return synced;
 }
 
 /**

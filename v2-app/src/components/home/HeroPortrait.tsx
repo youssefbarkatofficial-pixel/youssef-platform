@@ -100,8 +100,8 @@ export default function HeroPortrait({
     (e: React.MouseEvent<HTMLButtonElement>) => {
       if (reducedMotion || !containerRef.current) return;
       const rect = containerRef.current.getBoundingClientRect();
-      const x = ((e.clientX - rect.left) / rect.width - 0.5) * 14; // -7px to +7px
-      const y = ((e.clientY - rect.top) / rect.height - 0.5) * 10; // -5px to +5px
+      const x = ((e.clientX - rect.left) / rect.width - 0.5) * 24; // -12px to +12px
+      const y = ((e.clientY - rect.top) / rect.height - 0.5) * 18; // -9px to +9px
       setMouseOffset({ x, y });
     },
     [reducedMotion],
@@ -138,15 +138,6 @@ export default function HeroPortrait({
 
   return (
     <>
-      {/* SVG ClipPath Definition: Top half open rectangle, bottom half smooth circular arc matching circle curvature */}
-      <svg width="0" height="0" className="absolute pointer-events-none" aria-hidden="true">
-        <defs>
-          <clipPath id="heroPopoutClip" clipPathUnits="objectBoundingBox">
-            <path d="M 0 0 L 1 0 L 1 0.60 A 0.5 0.40 0 0 1 0 0.60 Z" />
-          </clipPath>
-        </defs>
-      </svg>
-
       <button
         ref={containerRef}
         type="button"
@@ -165,36 +156,35 @@ export default function HeroPortrait({
         style={
           {
             width: 'var(--hero-size)',
-            height: 'calc(var(--hero-size) * 1.34)',
+            height: 'calc(var(--hero-size) * 1.38)',
           } as React.CSSProperties
         }
       >
-        {/* Layer 1: Ambient Decorative Glow Ring (Centered with Circle) */}
+        {/* Layer 1: Ambient Royal Gold Aura (soft pulsing glow — zero border rings) */}
         <div
           aria-hidden="true"
           className="pointer-events-none absolute left-1/2 top-1/2 rounded-full transition-all duration-700 ease-out"
           style={{
-            width: 'calc(var(--hero-size) * 0.90)',
-            height: 'calc(var(--hero-size) * 0.90)',
-            background:
-              'radial-gradient(circle, var(--brand-gold-subtle, rgba(212,166,79,0.25)) 0%, transparent 72%)',
+            width: 'calc(var(--hero-size) * 1.06)',
+            height: 'calc(var(--hero-size) * 1.06)',
+            background: 'radial-gradient(circle, rgba(212,166,79,0.24) 0%, rgba(212,166,79,0.08) 55%, transparent 75%)',
             boxShadow: isActive
-              ? '0 0 80px var(--brand-gold, #d4a64f), inset 0 0 40px var(--brand-gold, #d4a64f)'
-              : '0 0 45px var(--brand-gold-subtle, rgba(212,166,79,0.3))',
+              ? '0 0 90px var(--brand-gold, #d4a64f), 0 0 50px rgba(212,166,79,0.55)'
+              : '0 0 65px rgba(212,166,79,0.35), 0 0 25px rgba(212,166,79,0.18)',
             transform: `translate(-50%, -50%) scale(${isActive ? 1.05 : 1})`,
-            opacity: isActive ? 0.95 : 0.75,
-            animation: reducedMotion ? 'none' : 'heroRingBreathe 5s ease-in-out infinite',
+            opacity: isActive ? 1 : 0.85,
+            animation: reducedMotion ? 'none' : 'heroRingBreathe 4.5s ease-in-out infinite',
           }}
         />
 
-        {/* Layer 2: Circular Background (Centered vertically in container to align with text center) */}
+        {/* Layer 2: Circular Background — NO border ring, soft shadow */}
         <div
           aria-hidden="true"
           className="pointer-events-none absolute left-1/2 top-1/2 overflow-hidden rounded-full shadow-2xl transition-transform duration-500"
           style={{
-            width: 'calc(var(--hero-size) * 0.88)',
-            height: 'calc(var(--hero-size) * 0.88)',
-            transform: `translate(-50%, -50%) scale(${isActive && !reducedMotion ? 0.92 : 1})`,
+            width: 'calc(var(--hero-size) * 0.94)',
+            height: 'calc(var(--hero-size) * 0.94)',
+            transform: `translate(calc(-50% + ${mouseOffset.x * 0.3}px), calc(-50% + ${mouseOffset.y * 0.3}px)) scale(${isActive && !reducedMotion ? 0.97 : 1})`,
             transitionTimingFunction: 'cubic-bezier(0.2, 0.8, 0.2, 1)',
           }}
         >
@@ -222,45 +212,52 @@ export default function HeroPortrait({
           ) : null}
         </div>
 
-        {/* Layer 3: Single Cutout Portrait (Anchored to circle bottom, head extends above circle top) */}
+        {/* Layer 3: Cutout Portrait — perfectly centered over circle, teacher fills circle edge-to-edge, head overflows freely */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute left-1/2 select-none transition-transform duration-500"
+          className="pointer-events-none absolute left-1/2 select-none"
           style={{
-            width: 'calc(var(--hero-size) * 0.88)',
-            height: 'calc(var(--hero-size) * 1.10)',
-            bottom: 'calc(50% - var(--hero-size) * 0.44)',
-            transformOrigin: 'bottom center',
+            width: 'calc(var(--hero-size) * 1.06)',
+            height: 'calc(var(--hero-size) * 1.36)',
+            bottom: 'calc(50% - var(--hero-size) * 0.47)',
             transform: `translateX(calc(-50% + ${mouseOffset.x}px)) translateY(${
-              isActive && !reducedMotion ? '-12px' : '0px'
-            }) scale(${isActive && !reducedMotion ? 1.08 : 1})`,
-            transitionTimingFunction: 'cubic-bezier(0.2, 0.8, 0.2, 1)',
-            clipPath: 'url(#heroPopoutClip)',
-            WebkitClipPath: 'url(#heroPopoutClip)',
-            animation: reducedMotion ? 'none' : 'heroFloat 6s ease-in-out infinite',
+              isActive && !reducedMotion ? '-10px' : '0px'
+            }) scale(${isActive && !reducedMotion ? 1.03 : 1})`,
+            transformOrigin: 'bottom center',
+            transition: 'transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1)',
           }}
         >
-          {!meLoaded && (
-            <div
-              className={`h-full w-full rounded-full bg-theme-gold/10 animate-pulse transition-opacity ${
-                reducedMotion ? 'duration-0' : 'duration-500'
-              }`}
-            />
-          )}
-          {activeMeUrl ? (
-            <img
-              src={activeMeUrl}
-              onLoad={() => setMeLoaded(true)}
-              onError={() => setMeLoaded(false)}
-              alt="الأستاذ يوسف بركات"
-              loading="eager"
-              fetchPriority="high"
-              decoding="async"
-              className={`h-full w-full object-contain object-bottom drop-shadow-2xl transition-opacity ${
-                reducedMotion ? 'duration-0' : 'duration-500'
-              } ${meLoaded ? 'opacity-100' : 'opacity-0'}`}
-            />
-          ) : null}
+          {/* Inner floating container: isolated translateY float so it never overrides outer translateX(-50%) */}
+          <div
+            className="h-full w-full"
+            style={{
+              animation: reducedMotion ? 'none' : 'heroFloatVertical 5s ease-in-out infinite',
+              maskImage: 'linear-gradient(to bottom, black 85%, transparent 100%)',
+              WebkitMaskImage: 'linear-gradient(to bottom, black 85%, transparent 100%)',
+            }}
+          >
+            {!meLoaded && (
+              <div
+                className={`h-full w-full bg-transparent transition-opacity ${
+                  reducedMotion ? 'duration-0' : 'duration-500'
+                }`}
+              />
+            )}
+            {activeMeUrl ? (
+              <img
+                src={activeMeUrl}
+                onLoad={() => setMeLoaded(true)}
+                onError={() => setMeLoaded(false)}
+                alt="الأستاذ يوسف بركات"
+                loading="eager"
+                fetchPriority="high"
+                decoding="async"
+                className={`h-full w-full object-contain object-bottom drop-shadow-2xl transition-opacity ${
+                  reducedMotion ? 'duration-0' : 'duration-500'
+                } ${meLoaded ? 'opacity-100' : 'opacity-0'}`}
+              />
+            ) : null}
+          </div>
         </div>
       </button>
 

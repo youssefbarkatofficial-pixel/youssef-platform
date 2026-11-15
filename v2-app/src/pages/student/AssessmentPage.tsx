@@ -42,18 +42,29 @@ import {
 } from '../../services/assessments';
 import type { LoadedQuestions, SubmissionRecord } from '../../services/assessments';
 import { canAccessCourseContent, getVisibleSections } from '../../services/courses';
+import { getContentRules } from '../../services/contentRules';
+import { getAllLocalWatchProgress } from '../../services/watchProgress';
+import { getCourseAccessStatus } from '../../lib/subscriptions';
+import {
+  DEFAULT_CONTENT_RULES,
+  formatMissingRequirementText,
+  getAssessmentPrerequisiteDiagnostics,
+} from '../../lib/contentRules';
+import type { ContentRulesSettings } from '../../lib/contentRules';
 
 type Stage = 'intro' | 'taking' | 'grading' | 'result';
 
 interface QuestionsState {
   loading: boolean;
   error: boolean;
+  permissionDenied?: boolean;
   data: LoadedQuestions | null;
 }
 
 interface SubmissionsState {
   loading: boolean;
   error: boolean;
+  permissionDenied?: boolean;
   data: SubmissionRecord[] | null;
 }
 
@@ -71,20 +82,41 @@ export default function AssessmentPage() {
   const { course, loading, error, reload } = useCourse(courseId);
 
   const [stage, setStage] = useState<Stage>('intro');
+  const [contentRules, setContentRules] = useState<ContentRulesSettings>(DEFAULT_CONTENT_RULES);
+  const [rulesLoaded, setRulesLoaded] = useState(false);
   const [questionsState, setQuestionsState] = useState<QuestionsState>({
     loading: true,
     error: false,
+    permissionDenied: false,
     data: null,
   });
   const [questionsReload, setQuestionsReload] = useState(0);
   const [submissionsState, setSubmissionsState] = useState<SubmissionsState>({
     loading: false,
     error: false,
+    permissionDenied: false,
     data: null,
   });
   const [submissionsReload, setSubmissionsReload] = useState(0);
   const [result, setResult] = useState<AttemptResult | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    getContentRules()
+      .then((loadedRules) => {
+        if (active) {
+          setContentRules(loadedRules);
+          setRulesLoaded(true);
+        }
+      })
+      .catch(() => {
+        if (active) setRulesLoaded(true);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const uid = firebaseUser?.uid ?? '';
   const sections = course ? getVisibleSections(course.sections, { includeHidden: isAdmin }) : [];
@@ -95,54 +127,123 @@ export default function AssessmentPage() {
   const newStyle = assessment ? isNewStyleAssessment(assessment) : false;
 
   const now = Date.now();
-  const openAtMs = typeof (item as any)?.openAt === 'number' 
-    ? (item as any).openAt 
+  const openAtMs = typeof (item as any)?.openAt === 'number'
+    ? (item as any).openAt
     : (typeof (assessment as any)?.raw?.openAt === 'number' ? (assessment as any).raw.openAt : null);
-  const closeAtMs = typeof (item as any)?.closeAt === 'number' 
-    ? (item as any).closeAt 
+  const closeAtMs = typeof (item as any)?.closeAt === 'number'
+    ? (item as any).closeAt
     : (typeof (assessment as any)?.raw?.closeAt === 'number' ? (assessment as any).raw.closeAt : null);
 
   const isLockedOpenAt = !isAdmin && typeof openAtMs === 'number' && openAtMs > now;
   const isLockedCloseAt = !isAdmin && typeof closeAtMs === 'number' && closeAtMs > 0 && closeAtMs < now;
 
+  const parsedResults = parseExamResults(student?.examResults);
+  const localWatch = student?.id ? getAllLocalWatchProgress(student.id) : {};
+  const effectiveWatch = { ...(student?.watchProgress || {}), ...localWatch };
+  const grantStatus = course ? getCourseAccessStatus(course, student, isAdmin) : undefined;
+
+  const prereqDiag =
+    course && assessment && rulesLoaded
+      ? getAssessmentPrerequisiteDiagnostics({
+          course,
+          assessment: {
+            id: assessment.id,
+            title: assessment.title,
+            kind: assessment.kind,
+            lockedUntilTrainingId: assessment.lockedUntilTrainingId,
+            availableFrom: assessment.availableFrom,
+            availableUntil: assessment.availableUntil,
+            openAt: openAtMs,
+            closeAt: closeAtMs,
+            raw: (item as any)?.raw ?? (assessment as any)?.raw,
+          },
+          student,
+          watchProgress: effectiveWatch,
+          examResults: parsedResults,
+          rules: contentRules,
+          serverTime: now,
+          isAdminOrOwner: isAdmin,
+          grantStatus,
+        })
+      : { locked: false, message: '', missingItems: [] };
+
+  const isFirebasePermissionDenied = (err: unknown): boolean => {
+    const code =
+      typeof err === 'object' && err !== null && 'code' in err
+        ? String((err as { code?: unknown }).code)
+        : '';
+    return (
+      code.includes('permission-denied') ||
+      (err instanceof Error && err.message.toLowerCase().includes('insufficient permissions'))
+    );
+  };
+
   useEffect(() => {
-    if (!assessment || !canAccess || isLockedOpenAt || isLockedCloseAt) return;
+    if (!assessment || !canAccess || !rulesLoaded || isLockedOpenAt || isLockedCloseAt || prereqDiag.locked) {
+      return;
+    }
 
     let active = true;
-    setQuestionsState({ loading: true, error: false, data: null });
+    setQuestionsState({ loading: true, error: false, permissionDenied: false, data: null });
 
     loadQuestions(assessment, isAdmin)
       .then((data) => {
-        if (active) setQuestionsState({ loading: false, error: false, data });
+        if (active) setQuestionsState({ loading: false, error: false, permissionDenied: false, data });
       })
-      .catch(() => {
-        if (active) setQuestionsState({ loading: false, error: true, data: null });
+      .catch((err) => {
+        if (active) {
+          setQuestionsState({
+            loading: false,
+            error: true,
+            permissionDenied: isFirebasePermissionDenied(err),
+            data: null,
+          });
+        }
       });
 
     return () => {
       active = false;
     };
-  }, [assessmentId, canAccess, isAdmin, questionsReload]);
+  }, [assessmentId, canAccess, rulesLoaded, isLockedOpenAt, isLockedCloseAt, prereqDiag.locked, isAdmin, questionsReload]);
 
   // تسليمات الامتحانات الجديدة (حتى 3 قراءات) لمعرفة المحاولات المستخدمة وأي تصحيح لم يكتمل.
   useEffect(() => {
-    if (!assessment || !canAccess || !newStyle || isAdmin || !uid) return;
+    if (
+      !assessment ||
+      !canAccess ||
+      !rulesLoaded ||
+      !newStyle ||
+      isAdmin ||
+      !uid ||
+      isLockedOpenAt ||
+      isLockedCloseAt ||
+      prereqDiag.locked
+    ) {
+      return;
+    }
 
     let active = true;
-    setSubmissionsState({ loading: true, error: false, data: null });
+    setSubmissionsState({ loading: true, error: false, permissionDenied: false, data: null });
 
     loadSubmissions(uid, assessment.id)
       .then((data) => {
-        if (active) setSubmissionsState({ loading: false, error: false, data });
+        if (active) setSubmissionsState({ loading: false, error: false, permissionDenied: false, data });
       })
-      .catch(() => {
-        if (active) setSubmissionsState({ loading: false, error: true, data: null });
+      .catch((err) => {
+        if (active) {
+          setSubmissionsState({
+            loading: false,
+            error: true,
+            permissionDenied: isFirebasePermissionDenied(err),
+            data: null,
+          });
+        }
       });
 
     return () => {
       active = false;
     };
-  }, [assessmentId, canAccess, newStyle, isAdmin, uid, submissionsReload]);
+  }, [assessmentId, canAccess, rulesLoaded, newStyle, isAdmin, uid, isLockedOpenAt, isLockedCloseAt, prereqDiag.locked, submissionsReload]);
 
   if (loading) {
     return (
@@ -243,7 +344,7 @@ export default function AssessmentPage() {
     );
   }
 
-  const results = parseExamResults(student?.examResults);
+  const results = parsedResults;
   const submissions = submissionsState.data;
   const legacyAttempts = getAttemptsFor(results, assessment);
 
@@ -458,11 +559,64 @@ export default function AssessmentPage() {
   } else {
     let startArea;
 
-    if (access.state !== 'open') {
+    if (!rulesLoaded) {
       startArea = (
-        <div className="flex items-start gap-2.5 rounded-xl border border-gold-500/30 bg-gold-500/10 px-3.5 py-3 text-sm text-gold-200">
-          <Lock className="mt-0.5 h-5 w-5 shrink-0" />
-          {access.message}
+        <div className="flex justify-center text-gold-400">
+          <Spinner />
+        </div>
+      );
+    } else if (prereqDiag.locked) {
+      startArea = (
+        <div
+          data-no-motion="true"
+          className="no-motion space-y-3 rounded-xl border border-amber-500/35 bg-amber-500/10 px-4 py-3.5 text-sm text-amber-100 [html.light_&]:border-amber-700/40 [html.light_&]:bg-amber-50 [html.light_&]:text-amber-950"
+        >
+          <div className="flex items-start gap-2.5 font-bold">
+            <Lock className="mt-0.5 h-5 w-5 shrink-0 text-amber-300 [html.light_&]:text-amber-800" />
+            <span>لا يمكنك فتح {kindLabel} حاليًا — أكمل المتطلبات التالية أولًا:</span>
+          </div>
+          {prereqDiag.missingItems.length > 0 ? (
+            <ul className="space-y-2 ps-7 text-xs leading-relaxed">
+              {prereqDiag.missingItems.map((req) => {
+                const reqLink =
+                  req.kind === 'training' || req.kind === 'homework' || req.kind === 'lockedTraining'
+                    ? `/student/assessment/${encodeURIComponent(course.id)}/${encodeURIComponent(req.id)}`
+                    : null;
+                return (
+                  <li key={`${req.kind}:${req.id}`} className="flex flex-wrap items-center justify-between gap-2">
+                    <span>• {formatMissingRequirementText(req)}</span>
+                    {reqLink ? (
+                      <Link
+                        to={reqLink}
+                        className="rounded-lg bg-amber-500/20 px-2.5 py-1 text-[11px] font-bold text-amber-200 underline-offset-2 hover:underline [html.light_&]:bg-amber-200 [html.light_&]:text-amber-950"
+                      >
+                        الانتقال للحل
+                      </Link>
+                    ) : req.kind === 'watch' ? (
+                      <Link
+                        to={`/courses/${encodeURIComponent(course.id)}`}
+                        className="rounded-lg bg-amber-500/20 px-2.5 py-1 text-[11px] font-bold text-amber-200 underline-offset-2 hover:underline [html.light_&]:bg-amber-200 [html.light_&]:text-amber-950"
+                      >
+                        مشاهدة المحاضرة
+                      </Link>
+                    ) : null}
+                  </li>
+                );
+              })}
+            </ul>
+          ) : (
+            <p className="ps-7 text-xs leading-relaxed">{prereqDiag.message}</p>
+          )}
+        </div>
+      );
+    } else if (access.state !== 'open') {
+      startArea = (
+        <div
+          data-no-motion="true"
+          className="no-motion flex items-start gap-2.5 rounded-xl border border-gold-500/30 bg-gold-500/10 px-3.5 py-3 text-sm text-gold-200 [html.light_&]:border-amber-700/40 [html.light_&]:bg-amber-50 [html.light_&]:text-amber-950"
+        >
+          <Lock className="mt-0.5 h-5 w-5 shrink-0 text-gold-300 [html.light_&]:text-amber-800" />
+          <span>{access.message}</span>
         </div>
       );
     } else if (questionsState.loading || (newStyle && !isAdmin && submissionsState.loading)) {
@@ -472,18 +626,41 @@ export default function AssessmentPage() {
         </div>
       );
     } else if (questionsState.error || (newStyle && !isAdmin && submissionsState.error)) {
+      const isPermDenied = Boolean(questionsState.permissionDenied || submissionsState.permissionDenied);
+      const isTemporaryGrant =
+        grantStatus?.plan === 'trial_lecture' ||
+        (Boolean(grantStatus?.isSelfClaimed) && !student?.courses.includes(course.id));
       startArea = (
-        <div className="space-y-3 text-center">
-          <p className="text-sm text-slate-400">تعذر تحميل بيانات الاختبار.</p>
-          <Button
-            variant="secondary"
-            onClick={() => {
-              setQuestionsReload((value) => value + 1);
-              setSubmissionsReload((value) => value + 1);
-            }}
-          >
-            إعادة المحاولة
-          </Button>
+        <div
+          data-no-motion="true"
+          className="no-motion space-y-3 rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-3.5 text-center [html.light_&]:border-rose-700/30 [html.light_&]:bg-rose-50"
+        >
+          <p className="text-sm font-bold text-rose-200 [html.light_&]:text-rose-950">
+            {isPermDenied
+              ? 'تعذر فتح أسئلة الاختبار بسبب قيود صلاحيات الخادم (Permission Denied).'
+              : 'تعذر تحميل بيانات الاختبار.'}
+          </p>
+          {isPermDenied && (
+            <p className="text-xs leading-relaxed text-slate-300 [html.light_&]:text-slate-800">
+              {isTemporaryGrant
+                ? 'تم فتح الكورس لك عبر الاشتراك التجريبي/الشهري الذاتي بينما تتطلب قواعد أمان قاعدة البيانات حاليًا إدراج الكورس في الاشتراك الرسمي لقراءة أسئلة الاختبار.'
+                : 'يرجى إعادة تسجيل الدخول أو مراجعة الإدارة لتأكيد تفعيل اشتراك الكورس على حسابك.'}
+            </p>
+          )}
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            <Button
+              variant="secondary"
+              onClick={() => {
+                setQuestionsReload((value) => value + 1);
+                setSubmissionsReload((value) => value + 1);
+              }}
+            >
+              إعادة المحاولة
+            </Button>
+            <Link to={`/courses/${course.id}`} className={buttonClasses({ variant: 'ghost' })}>
+              العودة للكورس
+            </Link>
+          </div>
         </div>
       );
     } else if (pendingSubmission) {
@@ -523,7 +700,13 @@ export default function AssessmentPage() {
             <div className="rounded-xl bg-navy-950/60 p-3">
               <dt className="text-slate-500">عدد الأسئلة</dt>
               <dd className="mt-1 font-bold text-white">
-                {questionsState.loading ? '...' : questions.length}
+                {prereqDiag.locked || access.state !== 'open'
+                  ? 'مقفول'
+                  : !rulesLoaded || questionsState.loading
+                    ? '…'
+                    : questionsState.error
+                      ? '—'
+                      : questions.length}
               </dd>
             </div>
             <div className="rounded-xl bg-navy-950/60 p-3">

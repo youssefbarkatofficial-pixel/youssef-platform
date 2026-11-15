@@ -26,11 +26,14 @@ import CoursePrice from '../../components/course/CoursePrice';
 import LectureStationBadges from '../../components/course/LectureStationBadges';
 import CourseTocSidebar from '../../components/course/CourseTocSidebar';
 import { getCourseAccessStatus, BASE_MONTHLY_PRICE } from '../../lib/subscriptions';
+import { purgeCourseVideoCache } from '../../lib/videoCache';
 import { claimTrialLecture, claimFreeMonthlyPromo } from '../../services/students';
 import ProtectedVideoPlayer from '../../components/course/ProtectedVideoPlayer';
 import { Badge, Button, Card, EmptyState, Modal, Spinner, Tabs, buttonClasses, useToast } from '../../components/ui';
 import { cn } from '../../components/ui/cn';
 import { useAuth } from '../../hooks/useAuth';
+import { useOnlineStatus } from '../../hooks/useOnlineStatus';
+import { canAccessCourseOffline } from '../../lib/entitlementCache';
 import { useCourse } from '../../hooks/useCourses';
 import { getGradeLabel } from '../../lib/grades';
 import { canAccessCourseContent } from '../../services/courses';
@@ -94,13 +97,14 @@ function LectureFilesSection({
     );
 
     if (lock.locked) {
+      const detailedLockMsg = lock.detailedMessage || lock.message || 'المذكرة مقفولة';
       return (
         <span
-          className="flex items-center gap-1.5 rounded-lg border border-navy-800 bg-navy-950/70 px-2.5 py-1 text-xs text-amber-300"
-          title={lock.message}
+          className="flex items-center gap-1.5 rounded-lg border border-amber-500/30 bg-navy-950/70 px-2.5 py-1 text-xs font-medium text-amber-200 [html.light_&]:border-amber-700/40 [html.light_&]:bg-amber-50 [html.light_&]:text-amber-950"
+          title={detailedLockMsg}
         >
-          <Lock className="h-3.5 w-3.5 text-amber-400" />
-          <span>{lock.message || 'المذكرة مقفولة'}</span>
+          <Lock className="h-3.5 w-3.5 shrink-0 text-amber-300 [html.light_&]:text-amber-800" />
+          <span>{detailedLockMsg}</span>
         </span>
       );
     }
@@ -150,16 +154,23 @@ function LectureFilesSection({
             );
 
             if (lock.locked) {
+              const detailedLockMsg = lock.detailedMessage || lock.message || 'مقفول';
               return (
                 <div
                   key={file.id}
-                  className="flex items-center justify-between gap-2 rounded-lg bg-navy-950/60 px-2.5 py-2 text-xs text-slate-400"
+                  title={detailedLockMsg}
+                  className="space-y-1 rounded-lg bg-navy-950/60 px-2.5 py-2 text-xs text-slate-300"
                 >
-                  <span className="truncate">{file.title || 'ملف المحاضرة'}</span>
-                  <span className="flex items-center gap-1 text-[11px] text-amber-300 shrink-0">
-                    <Lock className="h-3 w-3 text-amber-400" />
-                    مقفول
-                  </span>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="truncate">{file.title || 'ملف المحاضرة'}</span>
+                    <span className="flex shrink-0 items-center gap-1 text-[11px] font-bold text-amber-200 [html.light_&]:text-amber-950">
+                      <Lock className="h-3 w-3 text-amber-300 [html.light_&]:text-amber-800" />
+                      مقفول
+                    </span>
+                  </div>
+                  <p className="text-[11px] leading-snug text-amber-200 [html.light_&]:text-amber-950">
+                    {detailedLockMsg}
+                  </p>
                 </div>
               );
             }
@@ -189,7 +200,7 @@ function LectureFilesSection({
 export default function CourseDetailsPage() {
   const { courseId } = useParams();
   const navigate = useNavigate();
-  const { course, loading, error, reload } = useCourse(courseId);
+  const { course, loading, error, reload } = useCourse(courseId, { live: true });
   const { firebaseUser, student, isAdmin, loading: authLoading, refresh } = useAuth();
   const { showToast } = useToast();
   const [marking, setMarking] = useState(false);
@@ -289,8 +300,26 @@ export default function CourseDetailsPage() {
     }
   }, [activeItem]);
 
-  const canAccess = Boolean(course && canAccessCourseContent(course, student, isAdmin));
+  const { isOnline } = useOnlineStatus();
+  const rawCanAccess = Boolean(course && canAccessCourseContent(course, student, isAdmin));
   const grantStatus = getCourseAccessStatus(course, student, isAdmin);
+  const offlineGateBlocked = Boolean(
+    !isOnline &&
+      rawCanAccess &&
+      !isAdmin &&
+      course &&
+      !course.isFree &&
+      student &&
+      !canAccessCourseOffline(student.id, course.id),
+  );
+  const canAccess = rawCanAccess && !offlineGateBlocked;
+
+  // إزالة أي فيديوهات مخزنة في الكاش فور انتهاء صلاحية الاشتراك أو سحبها
+  useEffect(() => {
+    if (student?.id && course?.id && (!canAccess || grantStatus.expired)) {
+      void purgeCourseVideoCache(student.id, course.id);
+    }
+  }, [student?.id, course?.id, canAccess, grantStatus.expired]);
 
   // فتح نافذة التفعيل تلقائياً عند عودة الزائر بعد التسجيل
   useEffect(() => {
@@ -649,6 +678,10 @@ export default function CourseDetailsPage() {
                 watermarkText={watermarkText}
                 itemId={activeItem.id}
                 studentId={student?.id}
+                courseId={course.id}
+                hasAccess={canAccess}
+                accessExpiresAt={grantStatus.expiresAt || 0}
+                isAdmin={isAdmin}
                 onProgressChange={(coverage) => {
                   setLocalWatch((prev) => ({
                     ...prev,
@@ -684,6 +717,12 @@ export default function CourseDetailsPage() {
 
             {activeTab === 'content' && (
               <div className="space-y-4">
+                {offlineGateBlocked && (
+                  <div className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-4 text-sm font-semibold text-amber-200">
+                    أنت غير متصل بالإنترنت — يتطلب فتح هذا الكورس الاتصال بالإنترنت مرة واحدة للتحقق من صلاحية اشتراكك.
+                  </div>
+                )}
+
                 {/* تنبيهات حالة الاشتراك */}
                 {grantStatus.plan === 'monthly' && !grantStatus.expired && (
                   <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-sky-500/30 bg-sky-500/10 px-4 py-2.5 text-xs text-sky-200">
