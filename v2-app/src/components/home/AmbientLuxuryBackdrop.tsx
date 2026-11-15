@@ -88,7 +88,7 @@ export default function AmbientLuxuryBackdrop() {
           height: '340px',
           transform: `translate(${mouseOffset.x * 0.4}px, calc(-50% + ${mouseOffset.y * 0.4}px))`,
           transition: reducedMotion ? 'none' : 'transform 0.9s cubic-bezier(0.2, 0.8, 0.2, 1)',
-          opacity: 0.08,
+          opacity: 0.14,
           pointerEvents: 'none',
         }}
       >

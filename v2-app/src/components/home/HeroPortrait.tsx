@@ -138,15 +138,6 @@ export default function HeroPortrait({
 
   return (
     <>
-      {/* SVG ClipPath Definition: Top half open rectangle, bottom half smooth circular arc matching circle curvature */}
-      <svg width="0" height="0" className="absolute pointer-events-none" aria-hidden="true">
-        <defs>
-          <clipPath id="heroPopoutClip" clipPathUnits="objectBoundingBox">
-            <path d="M 0 0 L 1 0 L 1 0.60 A 0.5 0.40 0 0 1 0 0.60 Z" />
-          </clipPath>
-        </defs>
-      </svg>
-
       <button
         ref={containerRef}
         type="button"
@@ -165,57 +156,35 @@ export default function HeroPortrait({
         style={
           {
             width: 'var(--hero-size)',
-            height: 'calc(var(--hero-size) * 1.34)',
+            height: 'calc(var(--hero-size) * 1.38)',
           } as React.CSSProperties
         }
       >
-        {/* Layer 1: Ambient Royal Gold Aura (pulsing glow — no visible ring border) */}
+        {/* Layer 1: Ambient Royal Gold Aura (soft pulsing glow — zero border rings) */}
         <div
           aria-hidden="true"
           className="pointer-events-none absolute left-1/2 top-1/2 rounded-full transition-all duration-700 ease-out"
           style={{
-            width: 'calc(var(--hero-size) * 1.08)',
-            height: 'calc(var(--hero-size) * 1.08)',
-            background: 'radial-gradient(circle, rgba(212,166,79,0.22) 0%, rgba(212,166,79,0.08) 55%, transparent 75%)',
+            width: 'calc(var(--hero-size) * 1.06)',
+            height: 'calc(var(--hero-size) * 1.06)',
+            background: 'radial-gradient(circle, rgba(212,166,79,0.24) 0%, rgba(212,166,79,0.08) 55%, transparent 75%)',
             boxShadow: isActive
-              ? '0 0 100px var(--brand-gold, #d4a64f), 0 0 55px rgba(212,166,79,0.55)'
-              : '0 0 70px rgba(212,166,79,0.38), 0 0 30px rgba(212,166,79,0.22)',
-            transform: `translate(-50%, -50%) scale(${isActive ? 1.06 : 1})`,
+              ? '0 0 90px var(--brand-gold, #d4a64f), 0 0 50px rgba(212,166,79,0.55)'
+              : '0 0 65px rgba(212,166,79,0.35), 0 0 25px rgba(212,166,79,0.18)',
+            transform: `translate(-50%, -50%) scale(${isActive ? 1.05 : 1})`,
             opacity: isActive ? 1 : 0.85,
             animation: reducedMotion ? 'none' : 'heroRingBreathe 4.5s ease-in-out infinite',
           }}
         />
 
-        {/* Layer 1b: Rotating celestial orbital rings — contained within button, never overflow to text */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute left-1/2 top-1/2 rounded-full border border-dashed border-theme-gold/25"
-          style={{
-            width: 'calc(var(--hero-size) * 1.0)',
-            height: 'calc(var(--hero-size) * 1.0)',
-            transform: 'translate(-50%, -50%)',
-            animation: reducedMotion ? 'none' : 'slowRotateCompassContained 50s linear infinite',
-          }}
-        />
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute left-1/2 top-1/2 rounded-full border border-theme-gold/12"
-          style={{
-            width: 'calc(var(--hero-size) * 1.1)',
-            height: 'calc(var(--hero-size) * 1.1)',
-            transform: 'translate(-50%, -50%)',
-            animation: reducedMotion ? 'none' : 'slowRotateCompassContainedReverse 70s linear infinite',
-          }}
-        />
-
-        {/* Layer 2: Circular Background — NO border, portrait fills it completely */}
+        {/* Layer 2: Circular Background — NO border ring, soft shadow */}
         <div
           aria-hidden="true"
           className="pointer-events-none absolute left-1/2 top-1/2 overflow-hidden rounded-full shadow-2xl transition-transform duration-500"
           style={{
-            width: 'calc(var(--hero-size) * 0.92)',
-            height: 'calc(var(--hero-size) * 0.92)',
-            transform: `translate(calc(-50% + ${mouseOffset.x * 0.3}px), calc(-50% + ${mouseOffset.y * 0.3}px)) scale(${isActive && !reducedMotion ? 0.96 : 1})`,
+            width: 'calc(var(--hero-size) * 0.94)',
+            height: 'calc(var(--hero-size) * 0.94)',
+            transform: `translate(calc(-50% + ${mouseOffset.x * 0.3}px), calc(-50% + ${mouseOffset.y * 0.3}px)) scale(${isActive && !reducedMotion ? 0.97 : 1})`,
             transitionTimingFunction: 'cubic-bezier(0.2, 0.8, 0.2, 1)',
           }}
         >
@@ -243,43 +212,50 @@ export default function HeroPortrait({
           ) : null}
         </div>
 
-        {/* Layer 3: Cutout Portrait — head overflows freely above circle, NO clipPath, bottom anchored */}
+        {/* Layer 3: Cutout Portrait — perfectly centered over circle, teacher fills circle edge-to-edge, head overflows freely */}
         <div
           aria-hidden="true"
           className="pointer-events-none absolute left-1/2 select-none"
           style={{
-            width: 'calc(var(--hero-size) * 0.92)',
-            height: 'calc(var(--hero-size) * 1.30)',
-            bottom: 'calc(50% - var(--hero-size) * 0.46)',
+            width: 'calc(var(--hero-size) * 1.06)',
+            height: 'calc(var(--hero-size) * 1.36)',
+            bottom: 'calc(50% - var(--hero-size) * 0.47)',
             transform: `translateX(calc(-50% + ${mouseOffset.x}px)) translateY(${
-              isActive && !reducedMotion ? '-12px' : '0px'
-            }) scale(${isActive && !reducedMotion ? 1.04 : 1})`,
+              isActive && !reducedMotion ? '-10px' : '0px'
+            }) scale(${isActive && !reducedMotion ? 1.03 : 1})`,
             transformOrigin: 'bottom center',
             transition: 'transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1)',
-            animation: reducedMotion ? 'none' : 'heroFloatVertical 5s ease-in-out infinite',
           }}
         >
-          {!meLoaded && (
-            <div
-              className={`h-full w-full bg-transparent transition-opacity ${
-                reducedMotion ? 'duration-0' : 'duration-500'
-              }`}
-            />
-          )}
-          {activeMeUrl ? (
-            <img
-              src={activeMeUrl}
-              onLoad={() => setMeLoaded(true)}
-              onError={() => setMeLoaded(false)}
-              alt="الأستاذ يوسف بركات"
-              loading="eager"
-              fetchPriority="high"
-              decoding="async"
-              className={`h-full w-full object-contain object-bottom drop-shadow-2xl transition-opacity ${
-                reducedMotion ? 'duration-0' : 'duration-500'
-              } ${meLoaded ? 'opacity-100' : 'opacity-0'}`}
-            />
-          ) : null}
+          {/* Inner floating container: isolated translateY float so it never overrides outer translateX(-50%) */}
+          <div
+            className="h-full w-full"
+            style={{
+              animation: reducedMotion ? 'none' : 'heroFloatVertical 5s ease-in-out infinite',
+            }}
+          >
+            {!meLoaded && (
+              <div
+                className={`h-full w-full bg-transparent transition-opacity ${
+                  reducedMotion ? 'duration-0' : 'duration-500'
+                }`}
+              />
+            )}
+            {activeMeUrl ? (
+              <img
+                src={activeMeUrl}
+                onLoad={() => setMeLoaded(true)}
+                onError={() => setMeLoaded(false)}
+                alt="الأستاذ يوسف بركات"
+                loading="eager"
+                fetchPriority="high"
+                decoding="async"
+                className={`h-full w-full object-contain object-bottom drop-shadow-2xl transition-opacity ${
+                  reducedMotion ? 'duration-0' : 'duration-500'
+                } ${meLoaded ? 'opacity-100' : 'opacity-0'}`}
+              />
+            ) : null}
+          </div>
         </div>
       </button>
 
