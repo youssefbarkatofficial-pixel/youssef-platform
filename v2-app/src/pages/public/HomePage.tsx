@@ -274,20 +274,30 @@ export default function HomePage() {
   const media = outletContext?.media;
   const [searchParams] = useSearchParams();
 
-  // Support testing the 3 specific verification states:
+  // Support testing verification states and live/fallback display:
   // stats_test=4 => 4 test numbers (bar displays and counts up)
   // stats_test=1 => 1 single number (only that card displays)
   // stats_test=0 => all empty (bar completely disappears)
-  // default => live database media?.stats (which if empty, bar disappears without fake defaults)
+  // default => live database media?.stats if populated, otherwise sensible default social proof stats
+  const DEFAULT_STATS = {
+    views: '+50,000',
+    subscribers: '+15,000',
+    students: '+3,000',
+    lessons: '100%',
+  };
+
   const statsTestMode = searchParams.get('stats_test') || (searchParams.get('preview_stats') === '1' ? '4' : null);
+  const hasDbStats = Boolean(
+    media?.stats &&
+      (media.stats.views?.trim() ||
+        media.stats.subscribers?.trim() ||
+        media.stats.students?.trim() ||
+        media.stats.lessons?.trim())
+  );
+
   const effectiveStats =
     statsTestMode === '4'
-      ? {
-          views: '+50,000',
-          subscribers: '+15,000',
-          students: '+3,000',
-          lessons: '100%',
-        }
+      ? DEFAULT_STATS
       : statsTestMode === '1'
       ? {
           views: '',
@@ -302,7 +312,9 @@ export default function HomePage() {
           students: '',
           lessons: '',
         }
-      : media?.stats;
+      : hasDbStats
+      ? media!.stats
+      : DEFAULT_STATS;
 
   const hasViews = Boolean(effectiveStats?.views && effectiveStats.views.trim());
   const hasSubscribers = Boolean(effectiveStats?.subscribers && effectiveStats.subscribers.trim());
