@@ -33,7 +33,7 @@ export default function PublicHeader({ logoUrl }: PublicHeaderProps) {
   };
 
   return (
-    <header className="sticky top-0 z-40 bg-theme-surface/85 backdrop-blur-md shadow-soft transition-colors">
+    <header className="sticky top-0 z-40 bg-theme-surface/85 backdrop-blur-md shadow-soft transition-colors duration-200">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
         <Brand logoUrl={logoUrl} />
 
@@ -46,7 +46,7 @@ export default function PublicHeader({ logoUrl }: PublicHeaderProps) {
               end={link.end}
               className={({ isActive }) =>
                 cn(
-                  'rounded-full px-4 py-1.5 text-sm font-bold transition-all',
+                  'rounded-full px-4 py-1.5 text-sm font-bold transition-[transform,background-color,color] duration-200 ease-out active:scale-[0.97] focus:outline-none focus-visible:ring-2 focus-visible:ring-theme-border-focus',
                   isActive
                     ? 'bg-theme-gold/15 text-theme-gold'
                     : 'text-theme-text-secondary hover:bg-theme-surface-hover hover:text-theme-text',
@@ -67,9 +67,9 @@ export default function PublicHeader({ logoUrl }: PublicHeaderProps) {
             onClick={toggleMode}
             title={mode === 'dark' ? 'التحويل إلى الوضع النهاري' : 'التحويل إلى الوضع الليلي'}
             aria-label={mode === 'dark' ? 'الوضع النهاري' : 'الوضع الليلي'}
-            className="grid h-9 w-9 place-items-center rounded-full bg-theme-surface-hover/80 text-theme-text-secondary transition-all hover:bg-theme-gold/20 hover:text-theme-gold active:scale-95"
+            className="grid h-9 w-9 place-items-center rounded-full bg-theme-surface-hover/80 text-theme-text-secondary transition-[transform,background-color,color] duration-200 ease-out hover:bg-theme-gold/20 hover:text-theme-gold active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-theme-border-focus"
           >
-            {mode === 'dark' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4 text-amber-500" />}
+            {mode === 'dark' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4 text-amber-600" />}
           </button>
 
           {/* Desktop Auth Buttons */}
@@ -102,7 +102,7 @@ export default function PublicHeader({ logoUrl }: PublicHeaderProps) {
                   </Link>
                   <Link
                     to="/student"
-                    className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-theme-gold via-amber-400 to-theme-gold px-4 py-1.5 text-xs font-black text-navy-950 shadow-md shadow-theme-gold/25 transition-all hover:scale-105 active:scale-95"
+                    className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-theme-gold via-amber-400 to-theme-gold px-4 py-1.5 text-xs font-black text-navy-950 shadow-md shadow-theme-gold/25 transition-[transform,box-shadow] duration-200 ease-out hover:scale-105 active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-theme-border-focus focus-visible:ring-offset-2 focus-visible:ring-offset-theme-base"
                   >
                     <span>لوحتي</span>
                     <span className="h-1.5 w-1.5 rounded-full bg-navy-950 animate-pulse" />
@@ -133,7 +133,7 @@ export default function PublicHeader({ logoUrl }: PublicHeaderProps) {
             type="button"
             onClick={() => setOpen((value) => !value)}
             aria-label={open ? 'إغلاق القائمة' : 'فتح القائمة'}
-            className="grid h-9 w-9 place-items-center rounded-full bg-theme-surface-hover/80 text-theme-text md:hidden"
+            className="grid h-9 w-9 place-items-center rounded-full bg-theme-surface-hover/80 text-theme-text transition-transform duration-150 active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-theme-border-focus md:hidden"
           >
             {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
@@ -152,7 +152,7 @@ export default function PublicHeader({ logoUrl }: PublicHeaderProps) {
                 onClick={() => setOpen(false)}
                 className={({ isActive }) =>
                   cn(
-                    'rounded-xl px-3 py-2.5 font-bold transition-all',
+                    'rounded-xl px-3 py-2.5 font-bold transition-[transform,background-color,color] duration-200 active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-theme-border-focus',
                     isActive
                       ? 'bg-theme-gold/15 text-theme-gold'
                       : 'text-theme-text-secondary hover:bg-theme-surface-hover hover:text-theme-text',
@@ -168,7 +168,7 @@ export default function PublicHeader({ logoUrl }: PublicHeaderProps) {
           {loading ? (
             <div className="h-10 w-full" aria-hidden="true" />
           ) : firebaseUser ? (
-            <div className="flex flex-col gap-2 pt-2 border-t border-white/5">
+            <div className="flex flex-col gap-2 pt-2 border-t border-theme-border/30">
               {isAdmin ? (
                 <>
                   <Link
@@ -219,7 +219,7 @@ export default function PublicHeader({ logoUrl }: PublicHeaderProps) {
               )}
             </div>
           ) : (
-            <div className="flex flex-col gap-2 pt-2 border-t border-white/5">
+            <div className="flex flex-col gap-2 pt-2 border-t border-theme-border/30">
               <Link
                 to="/login"
                 onClick={() => setOpen(false)}

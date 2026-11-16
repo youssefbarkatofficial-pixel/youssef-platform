@@ -24,6 +24,11 @@ interface DashboardShellProps {
 export default function DashboardShell({ items, areaLabel }: DashboardShellProps) {
   const [open, setOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
+  const location = useLocation();
+  const isNoMotionRoute =
+    location.pathname.includes('/assessment/') ||
+    location.pathname.startsWith('/student/exams') ||
+    location.pathname.startsWith('/student/revision');
 
   const handleLogout = async () => {
     setLoggingOut(true);
@@ -35,7 +40,7 @@ export default function DashboardShell({ items, areaLabel }: DashboardShellProps
   };
 
   return (
-    <div className="min-h-screen md:flex bg-theme-base text-theme-text transition-colors">
+    <div className="min-h-screen md:flex bg-theme-base text-theme-text transition-colors duration-200">
       {open && (
         <div
           className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm md:hidden animate-in fade-in"
@@ -47,7 +52,7 @@ export default function DashboardShell({ items, areaLabel }: DashboardShellProps
       {/* Sidebar with dedicated high-contrast tokens (AAA >= 7:1) */}
       <aside
         className={cn(
-          'fixed inset-y-0 start-0 z-50 flex w-72 flex-col border-e border-theme-border/15 transition-all duration-300 shadow-xl',
+          'fixed inset-y-0 start-0 z-50 flex w-72 flex-col border-e border-theme-border/15 transition-transform duration-300 ease-out shadow-xl',
           'bg-[var(--sidebar-bg)] text-[var(--sidebar-text)]',
           'md:sticky md:top-0 md:z-auto md:h-screen md:shrink-0 md:translate-x-0',
           open ? 'translate-x-0' : 'translate-x-full',
@@ -62,7 +67,7 @@ export default function DashboardShell({ items, areaLabel }: DashboardShellProps
               type="button"
               onClick={() => setOpen(false)}
               aria-label="إغلاق القائمة"
-              className="rounded-lg p-2 text-theme-text-muted hover:bg-theme-surface-hover hover:text-theme-text md:hidden"
+              className="rounded-lg p-2 text-theme-text-muted transition-colors duration-150 hover:bg-theme-surface-hover hover:text-theme-text focus:outline-none focus-visible:ring-2 focus-visible:ring-theme-border-focus md:hidden"
             >
               <X className="h-5 w-5" />
             </button>
@@ -82,7 +87,7 @@ export default function DashboardShell({ items, areaLabel }: DashboardShellProps
               onClick={() => setOpen(false)}
               className={({ isActive }) =>
                 cn(
-                  'flex items-center gap-3 rounded-2xl px-3.5 py-2.5 text-sm font-bold transition-all',
+                  'flex items-center gap-3 rounded-2xl px-3.5 py-2.5 text-sm font-bold transition-[transform,background-color,color] duration-200 ease-out active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-theme-border-focus',
                   isActive
                     ? 'bg-[var(--sidebar-active-bg)] text-[var(--sidebar-active-text)] shadow-sm'
                     : 'text-[var(--sidebar-text-muted)] hover:bg-theme-surface-hover hover:text-[var(--sidebar-text)]',
@@ -103,7 +108,7 @@ export default function DashboardShell({ items, areaLabel }: DashboardShellProps
         <div className="space-y-1.5 border-t border-theme-border/15 p-3">
           <Link
             to="/"
-            className="flex items-center gap-3 rounded-2xl px-3.5 py-2.5 text-sm font-bold text-[var(--sidebar-text-muted)] transition-colors hover:bg-theme-surface-hover hover:text-[var(--sidebar-text)]"
+            className="flex items-center gap-3 rounded-2xl px-3.5 py-2.5 text-sm font-bold text-[var(--sidebar-text-muted)] transition-[transform,background-color,color] duration-200 active:scale-[0.98] hover:bg-theme-surface-hover hover:text-[var(--sidebar-text)] focus:outline-none focus-visible:ring-2 focus-visible:ring-theme-border-focus"
           >
             <Home className="h-5 w-5 text-[var(--sidebar-icon)]" />
             <span>العودة للرئيسية</span>
@@ -112,9 +117,9 @@ export default function DashboardShell({ items, areaLabel }: DashboardShellProps
             type="button"
             onClick={handleLogout}
             disabled={loggingOut}
-            className="flex w-full items-center gap-3 rounded-2xl px-3.5 py-2.5 text-sm font-bold text-red-400 transition-colors hover:bg-red-500/10 disabled:opacity-60"
+            className="flex w-full items-center gap-3 rounded-2xl px-3.5 py-2.5 text-sm font-bold text-rose-400 [html.light_&]:text-rose-700 transition-[transform,background-color] duration-200 active:scale-[0.98] hover:bg-rose-500/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 disabled:opacity-60"
           >
-            <LogOut className="h-5 w-5 text-red-400" />
+            <LogOut className="h-5 w-5 text-rose-400 [html.light_&]:text-rose-700" />
             <span>تسجيل الخروج</span>
           </button>
         </div>
@@ -131,7 +136,7 @@ export default function DashboardShell({ items, areaLabel }: DashboardShellProps
               type="button"
               onClick={() => setOpen(true)}
               aria-label="فتح القائمة"
-              className="rounded-lg p-2 text-theme-text hover:bg-theme-surface-hover"
+              className="rounded-lg p-2 text-theme-text transition-transform duration-150 active:scale-95 hover:bg-theme-surface-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-theme-border-focus"
             >
               <Menu className="h-6 w-6" />
             </button>
@@ -139,7 +144,7 @@ export default function DashboardShell({ items, areaLabel }: DashboardShellProps
         </header>
 
         <main className="min-w-0 flex-1 p-4 md:p-8">
-          {location.pathname.includes('/assessment/') ? (
+          {isNoMotionRoute ? (
             <Outlet />
           ) : (
             <div className="animate-in fade-in duration-300">
