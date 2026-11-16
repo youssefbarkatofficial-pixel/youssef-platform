@@ -140,11 +140,20 @@ function StatCounterItem({
   iconColorClass: string;
   iconBgClass: string;
 }) {
-  const [displayVal, setDisplayVal] = useState<string>(rawVal || '');
+  const parsed = useMemo(() => parseStatNumber(rawVal || ''), [rawVal]);
+
+  // Start with 0 so the user visibly sees the count-up from 0 to the target number
+  const [displayVal, setDisplayVal] = useState<string>(() => {
+    if (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      return rawVal || '';
+    }
+    const p = parseStatNumber(rawVal || '');
+    return p ? `${p.prefix}0${p.suffix}` : rawVal || '';
+  });
+
   const [isFinished, setIsFinished] = useState(false);
   const [hasEntered, setHasEntered] = useState(false);
   const itemRef = useRef<HTMLDivElement>(null);
-  const parsed = useMemo(() => parseStatNumber(rawVal || ''), [rawVal]);
 
   useEffect(() => {
     if (!rawVal || !rawVal.trim()) return;
@@ -173,7 +182,7 @@ function StatCounterItem({
       if (started) return;
       started = true;
       setHasEntered(true);
-      const duration = 1600; // ms
+      const duration = 2000; // 2 seconds for a clear, engaging roll up from 0 to target
       const startTime = performance.now();
       const targetNum = parsed.num;
 
@@ -196,6 +205,13 @@ function StatCounterItem({
       animationFrameId = requestAnimationFrame(step);
     };
 
+    if (typeof IntersectionObserver === 'undefined') {
+      startAnimation();
+      return () => {
+        cancelAnimationFrame(animationFrameId);
+      };
+    }
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -203,18 +219,15 @@ function StatCounterItem({
           observer.disconnect();
         }
       },
-      { threshold: 0.15 },
+      { threshold: 0.15, rootMargin: '0px 0px -20px 0px' },
     );
 
     if (itemRef.current) {
       observer.observe(itemRef.current);
     }
 
-    const timer = setTimeout(startAnimation, 300);
-
     return () => {
       cancelAnimationFrame(animationFrameId);
-      clearTimeout(timer);
       observer.disconnect();
     };
   }, [rawVal, parsed]);
@@ -224,7 +237,7 @@ function StatCounterItem({
   return (
     <div
       ref={itemRef}
-      className={`group relative overflow-hidden flex items-center gap-4 rounded-3xl bg-theme-surface/85 p-6 shadow-soft backdrop-blur-md border motion-safe:transition-all motion-safe:duration-500 motion-reduce:transform-none motion-reduce:transition-none motion-safe:hover:-translate-y-1.5 motion-safe:hover:shadow-glow ${
+      className={`group relative overflow-hidden flex items-center gap-3.5 rounded-3xl bg-theme-surface/85 px-4 py-4 md:px-5 md:py-4.5 shadow-soft backdrop-blur-md border motion-safe:transition-all motion-safe:duration-500 motion-reduce:transform-none motion-reduce:transition-none motion-safe:hover:-translate-y-1.5 motion-safe:hover:shadow-glow h-full min-h-[5.25rem] ${
         isFinished ? 'border-theme-gold/30 shadow-[0_0_20px_rgba(212,166,79,0.18)]' : 'border-theme-border/40'
       } ${
         hasEntered ? 'opacity-100 translate-y-0' : 'opacity-90 translate-y-2'
@@ -246,22 +259,24 @@ function StatCounterItem({
 
       {/* Touch 1: Ambient soft pulse & hover rotation on icon container */}
       <div
-        className={`grid h-14 w-14 shrink-0 place-items-center rounded-2xl ${iconBgClass} ${iconColorClass} shadow-soft motion-safe:transition-transform motion-safe:duration-300 motion-reduce:transform-none motion-safe:group-hover:scale-110`}
+        className={`grid h-12 w-12 sm:h-13 sm:w-13 md:h-14 md:w-14 shrink-0 place-items-center rounded-2xl ${iconBgClass} ${iconColorClass} shadow-soft motion-safe:transition-transform motion-safe:duration-300 motion-reduce:transform-none motion-safe:group-hover:scale-110`}
       >
-        <Icon className="h-7 w-7 motion-safe:transition-transform motion-safe:duration-300 motion-reduce:transform-none motion-safe:group-hover:rotate-3" />
+        <Icon className="h-6 w-6 sm:h-6.5 sm:w-6.5 md:h-7 md:w-7 motion-safe:transition-transform motion-safe:duration-300 motion-reduce:transform-none motion-safe:group-hover:rotate-3" />
       </div>
 
-      <div className="relative">
-        {/* Touch 3: Counter number glow transition on finish */}
+      <div className="relative min-w-0 flex-1 overflow-hidden">
+        {/* Touch 3: Counter number glow transition on finish - strictly single line */}
         <p
-          className={`text-2xl md:text-3xl font-extrabold motion-safe:transition-colors motion-safe:duration-500 font-num ${
+          className={`text-xl sm:text-2xl lg:text-3xl font-extrabold whitespace-nowrap leading-none tracking-tight motion-safe:transition-colors motion-safe:duration-500 font-num ${
             isFinished ? 'text-theme-gold drop-shadow-[0_0_14px_rgba(212,166,79,0.4)]' : 'text-theme-text'
           }`}
         >
           {displayVal}
         </p>
-        {/* Touch 2: Crisp secondary label with clean hierarchy */}
-        <p className="text-xs md:text-sm font-semibold text-theme-text-muted mt-0.5">{label}</p>
+        {/* Touch 2: Crisp secondary label with clean hierarchy - strictly single line, no wrapping */}
+        <p className="text-xs sm:text-xs md:text-sm font-bold text-theme-text-muted mt-1.5 whitespace-nowrap overflow-hidden text-ellipsis leading-normal">
+          {label}
+        </p>
       </div>
     </div>
   );
@@ -280,9 +295,9 @@ export default function HomePage() {
   // stats_test=0 => all empty (bar completely disappears)
   // default => live database media?.stats if populated, otherwise sensible default social proof stats
   const DEFAULT_STATS = {
-    views: '+50,000',
-    subscribers: '+15,000',
-    students: '+3,000',
+    views: '+100,000',
+    subscribers: '+2,250',
+    students: '+1,160',
     lessons: '100%',
   };
 
@@ -302,7 +317,7 @@ export default function HomePage() {
       ? {
           views: '',
           subscribers: '',
-          students: '+3,000',
+          students: '+1,160',
           lessons: '',
         }
       : statsTestMode === '0'
@@ -398,7 +413,7 @@ export default function HomePage() {
         <section data-testid="stats-bar-section" className="mx-auto max-w-6xl px-4 py-6 md:py-10">
           <Reveal direction="up">
             <div
-              className={`grid gap-4 ${
+              className={`grid gap-4 items-stretch ${
                 statsCount >= 4
                   ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4'
                   : statsCount === 3
@@ -438,7 +453,7 @@ export default function HomePage() {
               {hasLessons && (
                 <StatCounterItem
                   rawVal={effectiveStats?.lessons}
-                  label="حصة تدريبية وتأسيسية متكاملة"
+                  label="تفوق مش مجرد نجاح"
                   icon={CheckCircle2}
                   iconColorClass="text-emerald-400"
                   iconBgClass="bg-emerald-500/15"

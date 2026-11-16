@@ -522,54 +522,71 @@ function PlatformMediaSettingsCard() {
 
       {/* 5. أرقام شريط المنصة (الإحصائيات الحية) */}
       <div className="space-y-4 rounded-2xl bg-navy-950/40 p-4 border border-navy-800/60">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <div>
             <label className="text-sm font-bold text-slate-200 flex items-center gap-2">
               <TrendingUp className="h-4 w-4 text-gold-400" />
               5. أرقام شريط المنصة (الإحصائيات الحية)
             </label>
             <p className="text-xs text-slate-400 mt-0.5">
-              أربعة أرقام يدخلها أ. يوسف. أي حقل فارغ يتم إخفاؤه تلقائياً من الصفحة الرئيسية بدون أرقام وهمية.
+              أربعة أرقام يدخلها أ. يوسف وتظهر مباشرة في شريط الصفحة الرئيسية مع حركة العداد التفاعلي.
             </p>
           </div>
-          <button
-            type="button"
-            onClick={() => setStats({ views: '', subscribers: '', students: '', lessons: '' })}
-            className="text-xs text-gold-400 hover:underline flex items-center gap-1"
-          >
-            <RotateCcw className="h-3 w-3" />
-            تفريغ الحقول (إخفاء الشريط)
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() =>
+                setStats({
+                  views: '+100,000',
+                  subscribers: '+2,250',
+                  students: '+1,160',
+                  lessons: '100%',
+                })
+              }
+              className="text-xs text-gold-400 hover:underline flex items-center gap-1"
+            >
+              <Sparkles className="h-3 w-3" />
+              تعبئة بالأرقام المعتمدة
+            </button>
+            <button
+              type="button"
+              onClick={() => setStats({ views: '', subscribers: '', students: '', lessons: '' })}
+              className="text-xs text-slate-400 hover:text-slate-200 hover:underline flex items-center gap-1"
+            >
+              <RotateCcw className="h-3 w-3" />
+              تفريغ الحقول (إخفاء الشريط)
+            </button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Input
             label="عدد المشاهدات (يوتيوب)"
-            placeholder="مثال: +50,000 أو 50000"
+            placeholder="مثال: +100,000"
             value={stats.views || ''}
             onChange={(e) => setStats({ ...stats, views: e.target.value })}
             hint="اتركه فارغاً لإخفاء بطاقة المشاهدات"
           />
           <Input
             label="عدد المشتركين (منصات التواصل)"
-            placeholder="مثال: +12,000"
+            placeholder="مثال: +2,250"
             value={stats.subscribers || ''}
             onChange={(e) => setStats({ ...stats, subscribers: e.target.value })}
             hint="اتركه فارغاً لإخفاء بطاقة المشتركين"
           />
           <Input
             label="عدد الطلاب المتفوقين"
-            placeholder="مثال: +3,000"
+            placeholder="مثال: +1,160"
             value={stats.students || ''}
             onChange={(e) => setStats({ ...stats, students: e.target.value })}
             hint="اتركه فارغاً لإخفاء بطاقة الطلاب"
           />
           <Input
-            label="عدد الدروس والحصص / نسبة التغطية"
-            placeholder="مثال: +250 أو 100%"
+            label="نسبة التميز (تفوق مش مجرد نجاح)"
+            placeholder="مثال: 100%"
             value={stats.lessons || ''}
             onChange={(e) => setStats({ ...stats, lessons: e.target.value })}
-            hint="اتركه فارغاً لإخفاء بطاقة الدروس"
+            hint="اتركه فارغاً لإخفاء بطاقة التفوق"
           />
         </div>
       </div>
