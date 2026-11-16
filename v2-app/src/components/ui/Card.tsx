@@ -20,18 +20,21 @@ export default function Card({
   return (
     <div
       className={cn(
-        'relative overflow-hidden rounded-card bg-theme-surface text-theme-text shadow-soft border border-theme-border/50 transition-all duration-300 ease-out',
+        'group/card relative overflow-hidden rounded-card bg-theme-surface text-theme-text shadow-soft border border-theme-border/60 transition-[transform,box-shadow,border-color] duration-300 ease-out',
         padded && 'p-5 md:p-6',
         hoverable &&
-          'hover:-translate-y-1 hover:shadow-glow hover:border-theme-gold/40',
+          'hover:-translate-y-1 hover:shadow-glow hover:border-theme-gold/45',
         className,
       )}
       {...rest}
     >
-      {/* Top subtle specular reflection line (Haute Glass Finish) */}
+      {/* Top subtle specular reflection line (Compass Gold Hairline Signature) */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent dark:via-white/10"
+        className={cn(
+          'pointer-events-none absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent dark:via-white/10 transition-opacity duration-300',
+          hoverable && 'group-hover/card:via-theme-gold/40',
+        )}
       />
       {children}
     </div>

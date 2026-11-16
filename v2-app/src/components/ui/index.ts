@@ -20,3 +20,4 @@ export { default as StatCard } from './StatCard';
 export { default as ThemeSwitcher } from './ThemeSwitcher';
 export type { ThemeMode } from './ThemeSwitcher';
 export { default as Reveal } from './Reveal';
+export { default as Skeleton, CourseCardSkeleton, ListRowSkeleton } from './Skeleton';

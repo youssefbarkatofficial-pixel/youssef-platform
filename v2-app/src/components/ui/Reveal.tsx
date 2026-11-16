@@ -21,8 +21,11 @@ export default function Reveal({
   const ref = useRef<HTMLDivElement>(null);
   const location = useLocation();
 
-  // Strict Exception: ZERO motion in exam/assessment/homework pages for student focus
-  const isAssessmentRoute = location.pathname.startsWith('/student/assessment');
+  // Strict Exception: ZERO motion in exam/assessment/homework/practice pages for student focus
+  const isNoMotionRoute =
+    location.pathname.startsWith('/student/assessment') ||
+    location.pathname.startsWith('/student/exams') ||
+    location.pathname.startsWith('/student/revision');
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -34,7 +37,7 @@ export default function Reveal({
   }, []);
 
   useEffect(() => {
-    if (isAssessmentRoute || reducedMotion) {
+    if (isNoMotionRoute || reducedMotion) {
       setIsVisible(true);
       return;
     }
@@ -51,23 +54,23 @@ export default function Reveal({
             observer.unobserve(element);
           }
         },
-        { threshold: 0.1, rootMargin: '0px 0px -40px 0px' },
+        { threshold: 0.1, rootMargin: '0px 0px -32px 0px' },
       );
       observer.observe(element);
       return () => observer.disconnect();
     } else {
       setIsVisible(true);
     }
-  }, [isAssessmentRoute, reducedMotion]);
+  }, [isNoMotionRoute, reducedMotion]);
 
-  if (isAssessmentRoute || reducedMotion) {
+  if (isNoMotionRoute || reducedMotion) {
     return <div className={className}>{children}</div>;
   }
 
   const getTransform = () => {
     if (isVisible) return 'translate3d(0, 0, 0)';
-    if (direction === 'up') return 'translate3d(0, 24px, 0)';
-    if (direction === 'down') return 'translate3d(0, -24px, 0)';
+    if (direction === 'up') return 'translate3d(0, 16px, 0)';
+    if (direction === 'down') return 'translate3d(0, -16px, 0)';
     return 'none';
   };
 
@@ -79,8 +82,8 @@ export default function Reveal({
         opacity: isVisible ? 1 : 0,
         transform: getTransform(),
         transitionProperty: 'opacity, transform',
-        transitionDuration: '650ms',
-        transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)',
+        transitionDuration: '350ms',
+        transitionTimingFunction: 'cubic-bezier(0.22, 1, 0.36, 1)',
         transitionDelay: `${delay}ms`,
         willChange: isVisible ? 'auto' : 'opacity, transform',
       }}

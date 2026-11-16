@@ -8,13 +8,13 @@ export type ButtonSize = 'sm' | 'md' | 'lg';
 
 const variants: Record<ButtonVariant, string> = {
   primary:
-    'bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:from-amber-400 hover:to-amber-300 text-navy-950 font-extrabold shadow-soft active:scale-[0.98]',
+    'bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:from-amber-400 hover:to-amber-300 text-navy-950 font-extrabold shadow-soft hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.97]',
   secondary:
-    'bg-theme-surface/80 hover:bg-theme-surface-hover text-theme-text active:scale-[0.98] shadow-sm',
+    'bg-theme-surface/80 hover:bg-theme-surface-hover text-theme-text border border-theme-border/60 hover:border-theme-gold/40 active:scale-[0.97] shadow-sm',
   ghost:
-    'bg-transparent text-theme-text-secondary hover:bg-theme-surface-hover hover:text-theme-text active:scale-[0.98]',
+    'bg-transparent text-theme-text-secondary hover:bg-theme-surface-hover hover:text-theme-text active:scale-[0.97]',
   danger:
-    'bg-rose-600 text-white hover:bg-rose-500 active:scale-[0.98] shadow-sm',
+    'bg-rose-600 text-white hover:bg-rose-500 active:scale-[0.97] shadow-sm',
 };
 
 const sizes: Record<ButtonSize, string> = {
@@ -38,9 +38,9 @@ export function buttonClasses({
   className,
 }: ButtonClassOptions = {}): string {
   return cn(
-    'inline-flex items-center justify-center gap-2 rounded-btn font-bold transition-all duration-200 select-none',
+    'inline-flex items-center justify-center gap-2 rounded-btn font-bold transition-[transform,opacity,background-color,border-color,box-shadow] duration-200 ease-out select-none',
     'focus:outline-none focus-visible:ring-2 focus-visible:ring-theme-border-focus focus-visible:ring-offset-2 focus-visible:ring-offset-theme-base',
-    'disabled:cursor-not-allowed disabled:opacity-60 disabled:active:scale-100',
+    'disabled:cursor-not-allowed disabled:opacity-60 disabled:active:scale-100 disabled:hover:translate-y-0',
     variants[variant],
     sizes[size],
     fullWidth && 'w-full',

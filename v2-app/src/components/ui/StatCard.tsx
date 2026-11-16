@@ -14,7 +14,7 @@ export default function StatCard({ label, value, hint, icon: Icon, className }: 
   return (
     <div
       className={cn(
-        'rounded-card bg-theme-surface p-3.5 sm:p-5 shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:shadow-glow flex h-full flex-col justify-between min-w-0 overflow-hidden',
+        'rounded-card border border-theme-border/60 bg-theme-surface p-3.5 sm:p-5 shadow-soft transition-[transform,box-shadow,border-color] duration-300 ease-out hover:-translate-y-0.5 hover:shadow-glow hover:border-theme-gold/40 flex h-full flex-col justify-between min-w-0 overflow-hidden',
         className,
       )}
     >
