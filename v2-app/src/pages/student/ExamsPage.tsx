@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ClipboardList, Lock, ServerCrash } from 'lucide-react';
-import { Badge, Button, Card, EmptyState, Spinner, Tabs, buttonClasses } from '../../components/ui';
+import { Badge, Button, Card, EmptyState, ListRowSkeleton, Tabs, buttonClasses } from '../../components/ui';
 import { useAuth } from '../../hooks/useAuth';
 import { useCourses } from '../../hooks/useCourses';
 import { KIND_LABELS, MAX_ATTEMPTS } from '../../lib/grading';
@@ -57,8 +57,10 @@ export default function ExamsPage() {
   let content;
   if (loading) {
     content = (
-      <div className="grid min-h-[40vh] place-items-center text-gold-400">
-        <Spinner size="lg" />
+      <div className="space-y-4">
+        <ListRowSkeleton />
+        <ListRowSkeleton />
+        <ListRowSkeleton />
       </div>
     );
   } else if (error) {
@@ -121,20 +123,20 @@ export default function ExamsPage() {
                     <Badge variant="gold">{KIND_LABELS[assessment.kind]}</Badge>
                     <Badge variant="neutral">{entry.sectionTitle}</Badge>
                   </div>
-                  <h2 className="text-lg font-bold text-white">{assessment.title}</h2>
-                  <p className="text-sm text-slate-400">{course.title}</p>
+                  <h2 className="text-lg font-bold text-theme-text">{assessment.title}</h2>
+                  <p className="text-sm text-theme-text-muted">{course.title}</p>
                 </div>
                 <div className="flex flex-col items-end gap-2">
                   <Badge variant={status.variant}>{status.label}</Badge>
                   {status.official && (
-                    <span dir="ltr" className="text-xl font-extrabold text-gold-400">
+                    <span dir="ltr" className="text-xl font-extrabold text-theme-gold">
                       {status.official.effectivePercent}%
                     </span>
                   )}
                 </div>
               </div>
 
-              <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm text-slate-400">
+              <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm text-theme-text-muted">
                 {assessment.availableFrom !== null && (
                   <span>يبدأ: {formatDateTime(assessment.availableFrom)}</span>
                 )}
@@ -148,7 +150,7 @@ export default function ExamsPage() {
               </div>
 
               {access.state !== 'open' && (
-                <p className="flex items-start gap-2 text-sm text-gold-300">
+                <p className="flex items-start gap-2 text-sm text-theme-gold">
                   <Lock className="mt-0.5 h-4 w-4 shrink-0" />
                   {access.message}
                 </p>
@@ -171,9 +173,9 @@ export default function ExamsPage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-4xl">
-      <h1 className="text-2xl font-extrabold text-white">الامتحانات والواجبات</h1>
-      <p className="mt-1.5 text-sm text-slate-400">
+    <div data-no-motion="true" className="no-motion mx-auto w-full max-w-4xl">
+      <h1 className="text-2xl font-extrabold text-theme-text">الامتحانات والواجبات</h1>
+      <p className="mt-1.5 text-sm text-theme-text-muted">
         امتحانات وتدريبات وواجبات الكورسات التي اشتركت فيها وحالة كل واحد منها.
       </p>
 

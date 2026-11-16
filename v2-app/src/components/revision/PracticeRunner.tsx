@@ -33,7 +33,7 @@ export default function PracticeRunner({ plan, getQuestion, onAnswer, onFinish }
 
   if (questions.length === 0) {
     return (
-      <p className="rounded-3xl bg-theme-surface p-6 text-theme-text shadow-soft">
+      <p data-no-motion="true" className="no-motion rounded-card border border-theme-border/60 bg-theme-surface p-6 text-theme-text shadow-soft">
         الأسئلة المختارة غير متاحة حاليًا. جرّب مرة أخرى بعد قليل.
       </p>
     );
@@ -41,7 +41,7 @@ export default function PracticeRunner({ plan, getQuestion, onAnswer, onFinish }
 
   if (done) {
     return (
-      <div className="rounded-3xl bg-theme-surface p-6 text-center shadow-soft">
+      <div data-no-motion="true" className="no-motion rounded-card border border-theme-border/60 bg-theme-surface p-6 text-center shadow-soft">
         <h2 className="text-lg font-bold text-theme-text">انتهت جلسة المراجعة</h2>
         <p className="mt-2 font-num text-3xl font-extrabold text-theme-gold">
           {correct} / {questions.length}
@@ -84,12 +84,12 @@ export default function PracticeRunner({ plan, getQuestion, onAnswer, onFinish }
   };
 
   return (
-    <div className="rounded-3xl bg-theme-surface p-6 shadow-soft">
-      <p className="text-sm text-theme-text/70">
+    <div data-no-motion="true" className="no-motion rounded-card border border-theme-border/60 bg-theme-surface p-6 shadow-soft">
+      <p className="text-sm text-theme-text-muted">
         سؤال {idx + 1} من {questions.length}
       </p>
       {missing > 0 && (
-        <p className="mt-1 text-xs text-theme-text/60">تعذّر تحميل {missing} سؤالًا من الجلسة.</p>
+        <p className="mt-1 text-xs text-theme-text-muted">تعذّر تحميل {missing} سؤالًا من الجلسة.</p>
       )}
       <h2 className="mt-3 text-lg font-bold leading-relaxed text-theme-text">{q.text}</h2>
 
@@ -103,12 +103,12 @@ export default function PracticeRunner({ plan, getQuestion, onAnswer, onFinish }
               type="button"
               onClick={() => choose(i)}
               disabled={answered}
-              className={`min-h-[44px] w-full rounded-2xl border px-4 py-3 text-start text-theme-text ${
+              className={`min-h-[44px] w-full rounded-2xl border px-4 py-3 text-start text-theme-text focus:outline-none focus-visible:ring-2 focus-visible:ring-theme-border-focus ${
                 isRight
-                  ? 'border-emerald-500 bg-emerald-500/10'
+                  ? 'border-emerald-500 bg-emerald-500/15'
                   : isWrong
-                    ? 'border-rose-400 bg-rose-400/10'
-                    : 'border-black/10'
+                    ? 'border-rose-500 bg-rose-500/15'
+                    : 'border-theme-border hover:border-theme-gold/50'
               }`}
             >
               {opt}
@@ -117,7 +117,7 @@ export default function PracticeRunner({ plan, getQuestion, onAnswer, onFinish }
         })}
       </div>
 
-      <div aria-live="polite" className="mt-4 text-sm text-theme-text/80">
+      <div aria-live="polite" className="mt-4 text-sm text-theme-text-secondary">
         {answered && (
           <>
             <p className="font-bold">{chosen === q.correctIndex ? 'إجابة صحيحة' : 'إجابة غير صحيحة'}</p>
@@ -131,7 +131,7 @@ export default function PracticeRunner({ plan, getQuestion, onAnswer, onFinish }
           <button
             type="button"
             onClick={() => next(false)}
-            className="min-h-[44px] rounded-2xl bg-theme-gold px-6 font-bold text-black"
+            className="min-h-[44px] rounded-btn bg-theme-gold px-6 font-bold text-navy-950 [html.light_&]:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-theme-border-focus"
           >
             {idx + 1 >= questions.length ? 'إنهاء' : 'السؤال التالي'}
           </button>
@@ -139,7 +139,7 @@ export default function PracticeRunner({ plan, getQuestion, onAnswer, onFinish }
           <button
             type="button"
             onClick={() => next(true)}
-            className="min-h-[44px] rounded-2xl border border-black/10 px-6 text-theme-text"
+            className="min-h-[44px] rounded-btn border border-theme-border px-6 text-theme-text focus:outline-none focus-visible:ring-2 focus-visible:ring-theme-border-focus"
           >
             تخطّي
           </button>

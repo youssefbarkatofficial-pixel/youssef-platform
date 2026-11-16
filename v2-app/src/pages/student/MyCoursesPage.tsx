@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { BookOpen, ServerCrash } from 'lucide-react';
 import CourseCard from '../../components/course/CourseCard';
-import { Button, Card, EmptyState, ProgressBar, Spinner, buttonClasses } from '../../components/ui';
+import { Button, Card, CourseCardSkeleton, EmptyState, ProgressBar, buttonClasses } from '../../components/ui';
 import { useAuth } from '../../hooks/useAuth';
 import { useCourses } from '../../hooks/useCourses';
 
@@ -38,8 +38,10 @@ export default function MyCoursesPage() {
   let content;
   if (loading) {
     content = (
-      <div className="grid min-h-[40vh] place-items-center text-gold-400">
-        <Spinner size="lg" />
+      <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+        <CourseCardSkeleton />
+        <CourseCardSkeleton />
+        <CourseCardSkeleton />
       </div>
     );
   } else if (error) {
@@ -88,8 +90,8 @@ export default function MyCoursesPage() {
 
   return (
     <div className="mx-auto w-full max-w-6xl">
-      <h1 className="text-2xl font-extrabold text-white">كورساتي</h1>
-      <p className="mt-1.5 text-sm text-slate-400">الكورسات التي اشتركت فيها ونسبة تقدمك.</p>
+      <h1 className="text-2xl font-extrabold text-theme-text">كورساتي</h1>
+      <p className="mt-1.5 text-sm text-theme-text-muted">الكورسات التي اشتركت فيها ونسبة تقدمك.</p>
       <div className="mt-6">{content}</div>
     </div>
   );
