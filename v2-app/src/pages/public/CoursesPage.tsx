@@ -1,7 +1,7 @@
 import { useSearchParams } from 'react-router-dom';
 import { BookOpen, ServerCrash } from 'lucide-react';
 import CourseCard from '../../components/course/CourseCard';
-import { Button, Card, EmptyState, Reveal, Spinner, Tabs } from '../../components/ui';
+import { Button, Card, CourseCardSkeleton, EmptyState, Reveal, Tabs } from '../../components/ui';
 import { useCourses } from '../../hooks/useCourses';
 import { GRADES, isGradeCode } from '../../lib/grades';
 
@@ -26,8 +26,13 @@ export default function CoursesPage() {
   let content;
   if (loading) {
     content = (
-      <div className="grid min-h-[40vh] place-items-center text-gold-400">
-        <Spinner size="lg" />
+      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 items-stretch">
+        <CourseCardSkeleton />
+        <CourseCardSkeleton />
+        <CourseCardSkeleton />
+        <CourseCardSkeleton />
+        <CourseCardSkeleton />
+        <CourseCardSkeleton />
       </div>
     );
   } else if (error) {
