@@ -26,6 +26,7 @@ import {
   checkInLectureItemLock,
   formatCairoDateTime,
   DEFAULT_CONTENT_RULES,
+  computeEffectiveWatch,
 } from '../../lib/contentRules';
 import { parseExamResults } from '../../services/assessments';
 import { getCairoWeekBoundaries } from '../../lib/radar';
@@ -61,7 +62,7 @@ export default function StatsPage() {
     if (!activeCourse || !student) return [];
 
     const lectures = activeCourse.content?.lectures || [];
-    const watchProgress = student.watchProgress || {};
+    const watchProgress = computeEffectiveWatch(student, {}, activeCourse.id);
     const rules = DEFAULT_CONTENT_RULES; // or platform rules
 
     return lectures.map((lec, idx) => {

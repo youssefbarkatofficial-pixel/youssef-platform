@@ -238,7 +238,8 @@ test('10. تشخيص سبب القفل الدقيق والمرتبط بإحصا�
     rules,
   });
   assert.equal(partialDiag.locked, true);
-  assert.match(partialDiag.message, /40% من 95%/);
+  assert.match(partialDiag.message, /40% فقط/);
+  assert.doesNotMatch(partialDiag.message, /95%/);
   assert.match(partialDiag.message, /تدريب 2/);
   assert.match(partialDiag.message, /واجب 2/);
 
@@ -281,7 +282,8 @@ test('10. تشخيص سبب القفل الدقيق والمرتبط بإحصا�
     grantStatus: { hasAccess: true, plan: 'trial_lecture', targetLectureId: 'lec_2', targetLectureOrder: 2 },
   });
   assert.equal(trialDiag.locked, true);
-  assert.match(trialDiag.message, /0% من 95%/);
+  assert.match(trialDiag.message, /0% فقط/);
+  assert.doesNotMatch(trialDiag.message, /95%/);
   assert.doesNotMatch(trialDiag.message, /الدرس الأول/);
 
   // 5) إكمال كل المتطلبات -> يفتح الاختبار

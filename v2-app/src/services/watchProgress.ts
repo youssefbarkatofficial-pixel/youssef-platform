@@ -62,16 +62,45 @@ export function saveLocalWatchState(studentId: string, state: WatchState): void 
 
   try {
     const key = `${LOCAL_STATE_PREFIX}${studentId}_${state.itemId}`;
+    const existingRaw = storage.getItem(key);
+    let effectiveCoverage = state.coverage;
+    let effectiveCompleted = Boolean(state.completed);
+    let effectiveIntervals = state.intervals;
+    let effectiveCovered = state.coveredSeconds;
+
+    if (existingRaw) {
+      try {
+        const prev = JSON.parse(existingRaw);
+        if (prev && typeof prev === 'object') {
+          if (prev.completed === true) effectiveCompleted = true;
+          if (typeof prev.coverage === 'number' && prev.coverage > effectiveCoverage) {
+            effectiveCoverage = prev.coverage;
+          }
+          if (Array.isArray(prev.intervals) && prev.intervals.length > 0) {
+            effectiveIntervals = mergeIntervals([...prev.intervals, ...(state.intervals || [])]);
+            if (state.totalDuration > 0) {
+              effectiveCovered = calculateCoveredSeconds(effectiveIntervals, state.totalDuration);
+              effectiveCoverage = Math.max(effectiveCoverage, Math.min(1.0, effectiveCovered / state.totalDuration));
+            }
+          }
+        }
+      } catch {}
+    }
+
+    if (effectiveCoverage >= WATCH_THRESHOLD) {
+      effectiveCompleted = true;
+    }
+
     storage.setItem(
       key,
       JSON.stringify({
         itemId: state.itemId,
         totalDuration: state.totalDuration,
-        intervals: state.intervals,
-        coveredSeconds: state.coveredSeconds,
-        coverage: state.coverage,
+        intervals: effectiveIntervals,
+        coveredSeconds: effectiveCovered,
+        coverage: effectiveCoverage,
         lastPosition: state.lastPosition,
-        completed: state.completed,
+        completed: effectiveCompleted,
         updatedAt: Date.now(),
       }),
     );
@@ -194,17 +223,36 @@ export async function getStoredWatchProgress(studentId: string, itemId: string):
       if (typeof data.coverage === 'number') {
         remoteState.coverage = data.coverage;
       }
-    } else {
-      // fallback: قراءة من حقل watchProgress في مستند الطالب الرئيسي
+    }
+
+    // فحص مستند الطالب للتأكد من المشاهدة التاريخية أو السابقة (completedItems أو progress.done أو watchProgress)
+    try {
       const studentSnap = await getDoc(doc(db, 'students', studentId));
       if (studentSnap.exists()) {
         const studentData = studentSnap.data();
         const legacyVal = studentData.watchProgress?.[itemId];
-        if (typeof legacyVal === 'number' && legacyVal > 0) {
+        const isHistoricalCompleted =
+          (Array.isArray(studentData.completedItems) && studentData.completedItems.includes(itemId)) ||
+          (studentData.progress &&
+            typeof studentData.progress === 'object' &&
+            Object.values(studentData.progress).some(
+              (c: any) => c && Array.isArray(c.done) && c.done.includes(itemId)
+            )) ||
+          (typeof legacyVal === 'number' && legacyVal >= 95);
+
+        if (isHistoricalCompleted) {
+          if (!remoteState) {
+            remoteState = createWatchState(itemId, 100, [{ start: 0, end: 100 }]);
+          }
+          remoteState.completed = true;
+          remoteState.coverage = Math.max(remoteState.coverage, 1.0);
+        } else if (!remoteState && typeof legacyVal === 'number' && legacyVal > 0) {
           remoteState = createWatchState(itemId, 100, [{ start: 0, end: Math.min(100, legacyVal) }]);
           remoteState.completed = legacyVal >= 95;
         }
       }
+    } catch (docErr) {
+      console.warn('Could not read student doc for legacy watch progress:', docErr);
     }
 
     // 3. دمج الفترات وحساب النتيجة المشتركة (الاتحاد الرياضي للأجهزة المتعددة والمحلي)
@@ -226,19 +274,28 @@ async function writeToFirestore(
   state: WatchState,
   meta?: { maxPlaybackRate?: number; seekCount?: number }
 ): Promise<void> {
-  const merged = mergeIntervals(state.intervals);
+  const local = getLocalWatchState(studentId, state.itemId);
+  const combinedIntervals = [...(state.intervals || []), ...(local?.intervals || [])];
+  const merged = mergeIntervals(combinedIntervals);
   const covered = calculateCoveredSeconds(merged, state.totalDuration);
   const coverage = Math.min(1.0, state.totalDuration > 0 ? covered / state.totalDuration : 0);
-  const completed = coverage >= WATCH_THRESHOLD;
+  const isCompleted = Boolean(
+    state.completed ||
+      local?.completed ||
+      coverage >= WATCH_THRESHOLD ||
+      (local?.coverage !== undefined && local.coverage >= WATCH_THRESHOLD)
+  );
+
+  const finalCoverage = isCompleted ? 1.0 : Math.max(coverage, local?.coverage || 0);
 
   const payload: Record<string, unknown> = {
     itemId: state.itemId,
-    coveredSeconds: covered,
+    coveredSeconds: isCompleted && state.totalDuration > 0 ? state.totalDuration : covered,
     totalDuration: state.totalDuration,
-    coverage: Math.round(coverage * 1000) / 1000,
+    coverage: Math.round(finalCoverage * 1000) / 1000,
     intervals: merged.map((iv) => ({ start: iv.start, end: iv.end })),
     lastPosition: state.lastPosition,
-    completed,
+    completed: isCompleted,
     updatedAt: serverTimestamp(),
   };
 
@@ -261,8 +318,11 @@ async function writeToFirestore(
     }
   }
 
+  const currentLocalPct = local ? Math.round((local.coverage || 0) * 100) : 0;
+  const pctToWrite = isCompleted ? 100 : Math.max(Math.round(coverage * 100), currentLocalPct);
+
   const studentDocPayload: Record<string, unknown> = {
-    [`watchProgress.${state.itemId}`]: Math.round(coverage * 100),
+    [`watchProgress.${state.itemId}`]: pctToWrite,
     updatedAt: serverTimestamp(),
   };
 

@@ -49,6 +49,7 @@ import {
   DEFAULT_CONTENT_RULES,
   formatMissingRequirementText,
   getAssessmentPrerequisiteDiagnostics,
+  computeEffectiveWatch,
 } from '../../lib/contentRules';
 import type { ContentRulesSettings } from '../../lib/contentRules';
 
@@ -139,7 +140,7 @@ export default function AssessmentPage() {
 
   const parsedResults = parseExamResults(student?.examResults);
   const localWatch = student?.id ? getAllLocalWatchProgress(student.id) : {};
-  const effectiveWatch = { ...(student?.watchProgress || {}), ...localWatch };
+  const effectiveWatch = computeEffectiveWatch(student, localWatch, course?.id);
   const grantStatus = course ? getCourseAccessStatus(course, student, isAdmin) : undefined;
 
   const prereqDiag =

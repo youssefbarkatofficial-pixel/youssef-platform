@@ -173,13 +173,85 @@ export function getRequiredWatchPercent(threshold: number = WATCH_THRESHOLD): nu
 }
 
 /**
+ * حساب خريطة المشاهدة الفعلية للطالب بدمج السحابي مع المحلي بدون أي تراجع،
+ * وضمان اعتبار أي محاضرة ضمن completedItems أو progress[courseId].done مكتملة 100%.
+ */
+export function computeEffectiveWatch(
+  student: any,
+  localWatch: Record<string, number> = {},
+  courseId?: string
+): Record<string, number> {
+  const merged: Record<string, number> = {};
+
+  // 1. قراءة نسب المشاهدة المسجلة سحابياً في مستند الطالب
+  const serverWatch =
+    student?.watchProgress && typeof student.watchProgress === 'object'
+      ? student.watchProgress
+      : {};
+  for (const [k, v] of Object.entries(serverWatch)) {
+    if (typeof v === 'number' && Number.isFinite(v)) {
+      const pct = v > 0 && v < 1 ? v * 100 : v;
+      merged[k] = Math.max(0, Math.min(100, Math.round(pct)));
+    }
+  }
+
+  // 2. دمج التقدم المحلي بالأخذ بالقيمة الأكبر دائمًا (لا يمكن للتقدم المحلي أن يُنقص التقدم السحابي)
+  if (localWatch && typeof localWatch === 'object') {
+    for (const [k, v] of Object.entries(localWatch)) {
+      if (typeof v === 'number' && Number.isFinite(v)) {
+        const rounded = Math.max(0, Math.min(100, Math.round(v)));
+        merged[k] = Math.max(merged[k] ?? 0, rounded);
+      }
+    }
+  }
+
+  // 3. أي عنصر في completedItems يعد مكتملاً بنسبة 100% تاريخياً
+  if (Array.isArray(student?.completedItems)) {
+    for (const id of student.completedItems) {
+      if (typeof id === 'string' && id) {
+        merged[id] = 100;
+      }
+    }
+  }
+
+  // 4. أي عنصر في progress[courseId].done أو عبر كل الكورسات يعد مكتملاً 100%
+  const studentProgress =
+    student?.progress && typeof student.progress === 'object' ? student.progress : {};
+  if (courseId && studentProgress[courseId]?.done && Array.isArray(studentProgress[courseId].done)) {
+    for (const id of studentProgress[courseId].done) {
+      if (typeof id === 'string' && id) {
+        merged[id] = 100;
+      }
+    }
+  }
+  for (const cKey of Object.keys(studentProgress)) {
+    const entry = studentProgress[cKey];
+    if (entry && Array.isArray(entry.done)) {
+      for (const id of entry.done) {
+        if (typeof id === 'string' && id) {
+          merged[id] = 100;
+        }
+      }
+    }
+  }
+
+  return merged;
+}
+
+/**
  * استخراج نسبة مشاهدة المحاضرة الحالية كعدد صحيح بين 0 و 100
  */
 export function getLectureWatchPercent(
   lectureId: string,
-  watchProgress: Record<string, any> = {}
+  watchProgress: Record<string, any> = {},
+  completedItems?: string[] | null,
+  courseProgressDone?: string[] | null
 ): number {
-  if (!lectureId || !watchProgress) return 0;
+  if (!lectureId) return 0;
+  if (Array.isArray(completedItems) && completedItems.includes(lectureId)) return 100;
+  if (Array.isArray(courseProgressDone) && courseProgressDone.includes(lectureId)) return 100;
+
+  if (!watchProgress) return 0;
   const p = watchProgress[lectureId];
   if (p === undefined || p === null) return 0;
 
@@ -207,8 +279,8 @@ export function formatMissingRequirementText(item: MissingRequirement): string {
   const lecLabel = item.lectureTitle ? ` (${item.lectureTitle})` : '';
   if (item.kind === 'watch') {
     const cur = typeof item.currentPercent === 'number' ? item.currentPercent : 0;
-    const req = typeof item.requiredPercent === 'number' ? item.requiredPercent : 95;
-    return `مشاهدة فيديو «${item.title}» (مشاهدتك الحالية ${cur}% من ${req}%)`;
+    const titlePart = item.title ? `«${item.title}»` : 'المحاضرة';
+    return `مشاهدة فيديو ${titlePart} (أنت شاهدت ${cur}% فقط من المحاضرة، يجب مشاهدة المحاضرة كاملة حتى يُفتح لك هذا المحتوى)`;
   }
   if (item.kind === 'training') {
     return `حل تدريب «${item.title}»${lecLabel}`;
@@ -261,9 +333,15 @@ function isLectureBlockedByGrant(lecture: any, grantStatus?: GrantAccessLike): b
 export function isLectureWatchCompleted(
   lectureId: string,
   watchProgress: Record<string, any> = {},
-  threshold: number = WATCH_THRESHOLD
+  threshold: number = WATCH_THRESHOLD,
+  completedItems?: string[] | null,
+  courseProgressDone?: string[] | null
 ): boolean {
-  if (!lectureId || !watchProgress) return false;
+  if (!lectureId) return false;
+  if (Array.isArray(completedItems) && completedItems.includes(lectureId)) return true;
+  if (Array.isArray(courseProgressDone) && courseProgressDone.includes(lectureId)) return true;
+
+  if (!watchProgress) return false;
   const p = watchProgress[lectureId];
   if (p === undefined || p === null) return false;
 
@@ -346,7 +424,17 @@ export function checkLectureLock(
 
   const missingItems: MissingRequirement[] = [];
   const reqPct = getRequiredWatchPercent(rules?.watchThreshold);
-  const prevWatchDone = isLectureWatchCompleted(prevLecture.id, watchProgress, rules.watchThreshold);
+  const courseDoneList =
+    course?.id && student?.progress?.[course.id]?.done && Array.isArray(student.progress[course.id].done)
+      ? (student.progress[course.id].done as string[])
+      : undefined;
+  const prevWatchDone = isLectureWatchCompleted(
+    prevLecture.id,
+    watchProgress,
+    rules.watchThreshold,
+    student?.completedItems,
+    courseDoneList
+  );
   if (!prevWatchDone) {
     missingItems.push({
       kind: 'watch',
@@ -354,7 +442,12 @@ export function checkLectureLock(
       title: prevLecture.title || `المحاضرة ${prevLecture.order || lectureIndex}`,
       lectureId: prevLecture.id,
       lectureTitle: prevLecture.title,
-      currentPercent: getLectureWatchPercent(prevLecture.id, watchProgress),
+      currentPercent: getLectureWatchPercent(
+        prevLecture.id,
+        watchProgress,
+        student?.completedItems,
+        courseDoneList
+      ),
       requiredPercent: reqPct,
     });
   }
@@ -512,18 +605,32 @@ export function checkInLectureItemLock(
     return { locked: false };
   }
 
-  // اشتراط مشاهدة الفيديو ≥95%
-  const watchDone = isLectureWatchCompleted(lecture?.id, watchProgress, rules.watchThreshold);
+  // اشتراط مشاهدة الفيديو ≥95% (بدون ذكر النسبة صراحة للطالب)
+  const courseDoneList =
+    courseId && student?.progress?.[courseId]?.done && Array.isArray(student.progress[courseId].done)
+      ? (student.progress[courseId].done as string[])
+      : undefined;
+  const watchDone = isLectureWatchCompleted(
+    lecture?.id,
+    watchProgress,
+    rules.watchThreshold,
+    student?.completedItems,
+    courseDoneList
+  );
   if (!watchDone) {
     const label = itemType === 'file' ? 'لتحميل الملف' : itemType === 'training' ? 'لبدء التدريب' : 'لبدء الواجب';
-    const currentPercent = getLectureWatchPercent(lecture?.id, watchProgress);
-    const requiredPercent = getRequiredWatchPercent(rules?.watchThreshold);
+    const currentPercent = getLectureWatchPercent(
+      lecture?.id,
+      watchProgress,
+      student?.completedItems,
+      courseDoneList
+    );
     const lecTitle = lecture?.title || 'فيديو المحاضرة';
     return {
       locked: true,
       reason: 'watch',
-      message: `شاهد 95% من فيديو المحاضرة أولًا ${label}`,
-      detailedMessage: `متبقي: مشاهدة فيديو «${lecTitle}» (مشاهدتك الحالية ${currentPercent}% من ${requiredPercent}%) ${label}`,
+      message: `أنت شاهدت ${currentPercent}% فقط من المحاضرة، يجب مشاهدة المحاضرة كاملة ${label}`,
+      detailedMessage: `متبقي: مشاهدة فيديو «${lecTitle}» (أنت شاهدت ${currentPercent}% فقط من المحاضرة، يجب مشاهدة المحاضرة كاملة حتى يُفتح لك هذا المحتوى)`,
       missingItems: [
         {
           kind: 'watch',
@@ -532,7 +639,6 @@ export function checkInLectureItemLock(
           lectureId: lecture?.id,
           lectureTitle: lecture?.title,
           currentPercent,
-          requiredPercent,
         },
       ],
     };
@@ -822,7 +928,17 @@ export function getAssessmentPrerequisiteDiagnostics(
     }
 
     // شرط مشاهدة فيديو المحاضرة المرتبطة بنسبة >= 95%
-    const watchDone = isLectureWatchCompleted(linkedLecture.id, watchProgress, rules.watchThreshold);
+    const courseDoneList =
+      course?.id && student?.progress?.[course.id]?.done && Array.isArray(student.progress[course.id].done)
+        ? (student.progress[course.id].done as string[])
+        : undefined;
+    const watchDone = isLectureWatchCompleted(
+      linkedLecture.id,
+      watchProgress,
+      rules.watchThreshold,
+      student?.completedItems,
+      courseDoneList
+    );
     if (!watchDone) {
       missingItems.push({
         kind: 'watch',
@@ -830,8 +946,12 @@ export function getAssessmentPrerequisiteDiagnostics(
         title: linkedLecture.title || 'فيديو المحاضرة',
         lectureId: linkedLecture.id,
         lectureTitle: linkedLecture.title,
-        currentPercent: getLectureWatchPercent(linkedLecture.id, watchProgress),
-        requiredPercent: getRequiredWatchPercent(rules.watchThreshold),
+        currentPercent: getLectureWatchPercent(
+          linkedLecture.id,
+          watchProgress,
+          student?.completedItems,
+          courseDoneList
+        ),
       });
     }
 

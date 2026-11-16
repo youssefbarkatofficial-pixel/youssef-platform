@@ -1,5 +1,5 @@
 import { recordDownloadClick, getAllLocalWatchProgress } from '../../services/watchProgress';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useSearchParams } from 'react-router-dom';
@@ -45,6 +45,7 @@ import {
   checkInLectureItemLock,
   formatCairoDateTime,
   DEFAULT_CONTENT_RULES,
+  computeEffectiveWatch,
 } from '../../lib/contentRules';
 import type { ContentRulesSettings } from '../../lib/contentRules';
 import type { LectureFile } from '../../lib/courseNormalize';
@@ -228,7 +229,10 @@ export default function CourseDetailsPage() {
     });
   }, []);
 
-  const effectiveWatch = { ...(student?.watchProgress || {}), ...localWatch };
+  const effectiveWatch = useMemo(
+    () => computeEffectiveWatch(student, localWatch, course?.id),
+    [student, localWatch, course?.id]
+  );
 
   // التحقق من المطالبات السابقة للمحاضرة المجانية والشهري
   const progressObj = student?.progress as Record<string, unknown> | undefined;

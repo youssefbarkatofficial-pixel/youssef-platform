@@ -288,7 +288,7 @@ export function processPlaybackTick(
       newState.intervals = updatedIntervals;
       newState.coveredSeconds = covered;
       newState.coverage = coverage;
-      newState.completed = coverage >= threshold;
+      newState.completed = Boolean(state.completed || coverage >= threshold);
     }
   }
 
@@ -319,7 +319,7 @@ export function updatePlayerStatus(
     next.totalDuration = Math.max(0, Math.floor(updates.totalDuration));
     next.coveredSeconds = calculateCoveredSeconds(next.intervals, next.totalDuration);
     next.coverage = next.totalDuration > 0 ? Math.min(1.0, next.coveredSeconds / next.totalDuration) : 0;
-    next.completed = next.totalDuration > 0 && next.coverage >= threshold;
+    next.completed = Boolean(state.completed || (next.totalDuration > 0 && next.coverage >= threshold));
   }
 
   if (typeof updates.currentTime === 'number') {
