@@ -237,7 +237,7 @@ function StatCounterItem({
   return (
     <div
       ref={itemRef}
-      className={`group relative overflow-hidden flex items-center gap-3.5 rounded-3xl bg-theme-surface/85 px-4 py-4 md:px-5 md:py-4.5 shadow-soft backdrop-blur-md border motion-safe:transition-all motion-safe:duration-500 motion-reduce:transform-none motion-reduce:transition-none motion-safe:hover:-translate-y-1.5 motion-safe:hover:shadow-glow h-full min-h-[5.25rem] ${
+      className={`group relative overflow-hidden flex items-center gap-3 rounded-3xl bg-theme-surface/85 px-3.5 py-3.5 md:px-4 md:py-4 shadow-soft backdrop-blur-md border motion-safe:transition-all motion-safe:duration-500 motion-reduce:transform-none motion-reduce:transition-none motion-safe:hover:-translate-y-1.5 motion-safe:hover:shadow-glow h-full min-h-[5rem] ${
         isFinished ? 'border-theme-gold/30 shadow-[0_0_20px_rgba(212,166,79,0.18)]' : 'border-theme-border/40'
       } ${
         hasEntered ? 'opacity-100 translate-y-0' : 'opacity-90 translate-y-2'
@@ -259,22 +259,22 @@ function StatCounterItem({
 
       {/* Touch 1: Ambient soft pulse & hover rotation on icon container */}
       <div
-        className={`grid h-12 w-12 sm:h-13 sm:w-13 md:h-14 md:w-14 shrink-0 place-items-center rounded-2xl ${iconBgClass} ${iconColorClass} shadow-soft motion-safe:transition-transform motion-safe:duration-300 motion-reduce:transform-none motion-safe:group-hover:scale-110`}
+        className={`grid h-11 w-11 sm:h-12 sm:w-12 shrink-0 place-items-center rounded-2xl ${iconBgClass} ${iconColorClass} shadow-soft motion-safe:transition-transform motion-safe:duration-300 motion-reduce:transform-none motion-safe:group-hover:scale-110`}
       >
-        <Icon className="h-6 w-6 sm:h-6.5 sm:w-6.5 md:h-7 md:w-7 motion-safe:transition-transform motion-safe:duration-300 motion-reduce:transform-none motion-safe:group-hover:rotate-3" />
+        <Icon className="h-5.5 w-5.5 sm:h-6 sm:w-6 motion-safe:transition-transform motion-safe:duration-300 motion-reduce:transform-none motion-safe:group-hover:rotate-3" />
       </div>
 
       <div className="relative min-w-0 flex-1 overflow-hidden">
         {/* Touch 3: Counter number glow transition on finish - strictly single line */}
         <p
-          className={`text-xl sm:text-2xl lg:text-3xl font-extrabold whitespace-nowrap leading-none tracking-tight motion-safe:transition-colors motion-safe:duration-500 font-num ${
+          className={`text-xl sm:text-2xl lg:text-[1.75rem] font-extrabold whitespace-nowrap leading-none tracking-tight motion-safe:transition-colors motion-safe:duration-500 font-num ${
             isFinished ? 'text-theme-gold drop-shadow-[0_0_14px_rgba(212,166,79,0.4)]' : 'text-theme-text'
           }`}
         >
           {displayVal}
         </p>
         {/* Touch 2: Crisp secondary label with clean hierarchy - strictly single line, no wrapping */}
-        <p className="text-xs sm:text-xs md:text-sm font-bold text-theme-text-muted mt-1.5 whitespace-nowrap overflow-hidden text-ellipsis leading-normal">
+        <p className="text-xs sm:text-[13px] md:text-xs lg:text-[13px] font-bold text-theme-text-muted mt-1.5 whitespace-nowrap overflow-hidden text-ellipsis leading-normal">
           {label}
         </p>
       </div>
